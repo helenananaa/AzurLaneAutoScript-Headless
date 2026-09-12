@@ -1,0 +1,35 @@
+{
+  "schema": "alas-headless.main-task-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-09-09T13:09:00.187637Z",
+  "finished_at": "2026-09-09T13:11:40.232257Z",
+  "task": "Main",
+  "stage": "10-2",
+  "serial": "emulator-5580",
+  "run_count_requested": 1,
+  "execution_status": "incomplete",
+  "error": "SystemExit: 1",
+  "preparations": [
+    {
+      "generation": 97814,
+      "mode": "prep",
+      "use_2x_book": false,
+      "book_selected": false,
+      "book_count": 564
+    }
+  ],
+  "completed_sorties": [],
+  "auto_menu_observations": [],
+  "continuation_receipts": [],
+  "submarine_observations": [],
+  "submarine_calls": [],
+  "combat_admissions": [],
+  "hp_observations": [],
+  "withdrawal_receipts": [],
+  "repair_inspections": [],
+  "repair_use_samples": [],
+  "precombat_probes": [],
+  "scout_inspections": [],
+  "submarine_moves": [],
+  "submarine_strategy": []
+}

@@ -375,6 +375,12 @@ class SessionCombatPorts:
     def campaign_combat_committed(self) -> bool:
         return self.open().campaign_combat_committed()
 
+    def campaign_movement_completed(self) -> bool:
+        return self.open().campaign_movement_completed()
+
+    def finish_campaign_movement(self, battle_count: int):
+        return self.open().finish_campaign_movement(battle_count)
+
     def campaign_combat_active(self) -> bool:
         return self.open().campaign_combat_active()
 
@@ -427,6 +433,10 @@ class SessionCombatPorts:
     def click_daily_precombat_start(self) -> ActionReceipt:
         self.refresh_tactical_input_frame()
         adapter = self.open()
+        if getattr(self, '_meta_assist_active', False):
+            if not adapter._meta_assist_active:
+                adapter.begin_meta_assist()
+            return adapter.click_meta_precombat_start()
         if self._meta_beacon_active:
             if not adapter.meta_beacon_active():
                 adapter.begin_meta_beacon()

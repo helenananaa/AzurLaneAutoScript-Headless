@@ -28,7 +28,7 @@ class OpsiAdapterPorts:
 
     def _operation_siren_allows_passive_probe(self) -> bool:
         now = time.monotonic()
-        if self._meta_beacon_active:
+        if self._meta_beacon_active or self._meta_assist_active:
             return True
         if self._operation_siren_combat_active:
             return True

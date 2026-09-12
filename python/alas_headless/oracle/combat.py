@@ -15,6 +15,15 @@ from .contracts import (
 )
 from .errors import SemanticGateClosed
 
+DAILY_KIND_BY_SPRITE = {
+    'shangchuanhuwei_zi': 'escort_mission',
+    'haiyutujin_zi': 'advance_mission',
+    'zhanshouxingdong_zi': 'fierce_assault',
+    'zhanshuzuanyan_zi': 'tactical_training',
+    'pojiaozuozhan_zi': 'supply_line_disruption',
+    'bingzhuangDesc': 'module_development',
+}
+
 
 @dataclass(frozen=True)
 class SubmarineCallState:
@@ -473,18 +482,34 @@ class CombatOracle:
         )
         if len(titles) != 1:
             raise SemanticGateClosed("centered daily identity is absent or ambiguous")
-        kinds = {
-            "shangchuanhuwei_zi": "escort_mission",
-            "haiyutujin_zi": "advance_mission",
-            "zhanshouxingdong_zi": "fierce_assault",
-            "zhanshuzuanyan_zi": "tactical_training",
-            "pojiaozuozhan_zi": "supply_line_disruption",
-            "bingzhuangDesc": "module_development",
-        }
         try:
-            return kinds[titles[0].sprite]
+            return DAILY_KIND_BY_SPRITE[titles[0].sprite]
         except KeyError as exc:
             raise SemanticGateClosed("centered daily identity is not reviewed") from exc
+
+    def daily_remaining_for_kind(self, kind: str) -> int:
+        """Read a challenge after the native carousel reorders on completion."""
+        if kind not in DAILY_KIND_BY_SPRITE.values() or not self.daily_page_visible():
+            raise SemanticGateClosed('daily challenge page or kind is unavailable')
+        ui = self.read_ui_state()
+        if ui.image_truncated:
+            raise SemanticGateClosed('daily challenge identity snapshot is truncated')
+        prefix = 'UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/'
+        titles = [i for i in ui.images if i.path.startswith(prefix)
+                  and i.path.endswith('/icon/card/title') and i.active_in_hierarchy
+                  and i.active_and_enabled and not i.truncated
+                  and DAILY_KIND_BY_SPRITE.get(i.sprite) == kind]
+        if len(titles) != 1:
+            raise SemanticGateClosed('daily challenge identity is absent or ambiguous')
+        path = titles[0].path[:-len('/icon/card/title')] + '/count'
+        counts = [t for t in ui.texts if t.path == path and t.active_in_hierarchy
+                  and t.active_and_enabled and not t.truncated]
+        if len(counts) != 1:
+            raise SemanticGateClosed('daily challenge remaining count is ambiguous')
+        match = re.fullmatch(r'([0-4])/([0-4])', counts[0].text.strip())
+        if match is None or int(match[1]) > int(match[2]):
+            raise SemanticGateClosed('daily challenge remaining count is malformed')
+        return int(match[1])
 
     def daily_current_remain(self) -> int:
         """Return the remaining count from the centered card's exact text."""
@@ -685,6 +710,12 @@ class CombatOracle:
         if len(matches) != 1:
             raise SemanticGateClosed("daily run choice is absent or ambiguous")
         target = matches[0]
+        semantic_id = 'daily/run/' + choice
+        if (target.raycast_top is False or (choice == 'skip' and target.raycast_top is not True)
+                or self._blocking_rules(state, semantic_id)):
+            raise SemanticGateClosed('daily run choice is obscured or not top-raycast actionable')
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed immediately before daily input')
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
         return ActionReceipt(
             semantic_id="daily/run/{0}".format(choice),

@@ -1214,10 +1214,9 @@ class CampaignPreparationOracle:
         """Return the exact normal/hard state on a shared event-stage detail."""
 
         preparation = self.campaign_map_preparation_state(stage_code)
-        if (re.fullmatch(r"[1-9][0-9]*-[1-9][0-9]*", stage_code)
-                and "LevelStageInfoView(Clone)/panel/" in preparation.proceed_button.path):
+        if "LevelStageInfoView(Clone)/panel/" in preparation.proceed_button.path:
             # The chapter-page button names its destination, not the active
-            # difficulty. Normal stages have no event-detail mode switch.
+            # difficulty. Main and archive stages share this native detail.
             destination = self.campaign_mode_switch_state()
             return "normal" if destination == "hard" else "hard"
         if "LevelInfoSPUI(Clone)/panel/" not in preparation.proceed_button.path:

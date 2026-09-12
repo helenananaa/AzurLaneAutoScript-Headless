@@ -1,0 +1,21 @@
+{
+  "passed": false,
+  "reason": "Empty move reached C2 but committed combat observer masked IN_MAP; original wait loop was stopped",
+  "observed_generation": 467707,
+  "fleets": [
+    {
+      "marker": "cell_fleet_waerpalaisuo",
+      "node": "A3",
+      "ammo": 5,
+      "ammo_capacity": 5
+    },
+    {
+      "marker": "cell_fleet_benningdun",
+      "node": "C2",
+      "ammo": 5,
+      "ammo_capacity": 5
+    }
+  ],
+  "combat": 0,
+  "qualified_as_continuous_run": false
+}

@@ -9,6 +9,7 @@ import dataclasses
 import json
 import os
 import sys
+import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -57,6 +58,26 @@ def _book_consumption_complete(preparations, menus, count):
         and type(before["book_count"]) is int and type(after["book_count"]) is int
         and before["book_count"] - after["book_count"] == 1
         for before, after in zip(preparations, menus)))
+
+
+def _map_ui_objects(state):
+    """Diagnostic object IDs: the UI may rebuild while gameplay progress persists."""
+    cells = {b.path.rsplit('/quads/', 1)[1]: b.raw['instance_id']
+             for b in state.buttons if '/LevelGrid/DragLayer/plane/quads/' in b.path
+             and isinstance(b.raw.get('instance_id'), int) and b.raw['instance_id'] != 0}
+    return dict(pid=state.snapshot['pid'], cells=cells)
+
+
+def _midmap_retirement_complete(retirements, battles):
+    for index, item in enumerate(retirements, 1):
+        generation = item.get('sortie_generation_before')
+        if (item.get('completed_battles_before', 0) > 0 and generation is not None
+                and item.get('sortie_generation_after') == generation
+                and item.get('receipt', {}).get('retired_count', 0) > 0
+                and any(b.get('retirement_transactions_before', 0) >= index
+                        and b.get('sortie_generation') == generation for b in battles)):
+            return True
+    return False
 
 
 def _configure(
@@ -152,12 +173,23 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
         submarine_distance=getattr(args, 'submarine_distance', None),
     )
     payload["Alas"]["Emulator"]["Serial"] = args.serial
+    payload[args.task]['HpControl']['UseLowHpRetreat'] = getattr(args, 'use_low_hp_retreat', False)
+    payload[args.task]['HpControl']['LowHpRetreatThreshold'] = getattr(args, 'low_hp_retreat_threshold', 0.3)
+    if (getattr(args, 'use_emergency_repair', False) or getattr(args, 'verify_repair_use', False)
+            or getattr(args, 'require_natural_repair', False)):
+        # Pinned ALAS calls emergency repair from its balance_hp preparation branch.
+        payload[args.task]['HpControl']['UseEmergencyRepair'] = True
+        payload[args.task]['HpControl']['UseHpBalance'] = True
+    if getattr(args, 'verify_repair_use', False):
+        payload[args.task]['HpControl']['RepairUseSingleThreshold'] = 1.0
+        payload[args.task]['HpControl']['RepairUseMultiThreshold'] = 1.0
     config_name = f"_codex_main_live_{args.task.lower()}_{uuid.uuid4().hex}"
     config_path = alas_root / "config" / f"{config_name}.json"
     config_path.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
 
+    retirement_journal = args.output.resolve().with_suffix(".retirement.json") if args.output else None
     prior_cwd = Path.cwd()
     prior_env = {
         name: os.environ.get(name)
@@ -192,6 +224,9 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
 
     instance = None
     strategy_range_restore = None
+    repair_inspection_restore = None
+    hp_retreat_restore = None
+    combat_execute_restore = None
     login_recovery_performed = False
     started_at = _utc_now()
     try:
@@ -216,6 +251,68 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
         instance.config.init_task(args.task)
         semantic_session = instance.device.semantic_adapter
         startup_oracle = semantic_session.open().oracle
+        startup_recoveries = []
+        original_precombat_back = semantic_session.click_campaign_precombat_back
+        def record_startup_precombat_back():
+            receipt = original_precombat_back()
+            startup_recoveries.append(dataclasses.asdict(receipt))
+            return receipt
+        semantic_session.click_campaign_precombat_back = record_startup_precombat_back
+        latest_map_ui_objects = _map_ui_objects(startup_oracle.read_state())
+        retirement_receipts = []
+        completed_battles = []
+        low_hp_decisions = []
+        original_retire = startup_oracle.retire_ships_one_click
+        def record_retire(*positional, **keywords):
+            context = semantic_session.open()._campaign_context
+            before = startup_oracle.retirement_selection_state()
+            item = dict(completed_battles_before=len(completed_battles),
+                selection_before=dataclasses.asdict(before),
+                map_ui_objects_before=latest_map_ui_objects,
+                sortie_generation_before=(context.sortie_receipt.generation if context and context.sortie_receipt else None),
+                map_before=dataclasses.asdict(context.map_state) if context and context.map_state else None)
+            def journal():
+                if retirement_journal:
+                    retirement_journal.parent.mkdir(parents=True, exist_ok=True)
+                    retirement_journal.write_text(json.dumps(item, ensure_ascii=False, indent=2), encoding='utf-8')
+            journal()
+            try:
+                receipt = original_retire(*positional, **keywords)
+            except BaseException as exc:
+                item['error'] = repr(exc)
+                journal()
+                raise
+            context = semantic_session.open()._campaign_context
+            item.update(receipt=dataclasses.asdict(receipt),
+                sortie_generation_after=(context.sortie_receipt.generation if context and context.sortie_receipt else None))
+            retirement_receipts.append(item)
+            journal()
+            return receipt
+        startup_oracle.retire_ships_one_click = record_retire
+        from module.combat.hp_balancer import HPBalancer
+        from module.combat.combat import Combat
+        original_retreat = HPBalancer.hp_retreat_triggered
+        hp_retreat_restore = HPBalancer, original_retreat
+        def record_low_hp(host):
+            triggered = original_retreat(host)
+            if host.config.HpControl_UseLowHpRetreat:
+                low_hp_decisions.append(dict(triggered=bool(triggered),
+                    threshold=host.config.HpControl_LowHpRetreatThreshold,
+                    hp=[float(x) for x in host.hp], present=[bool(x) for x in host.hp_has_ship],
+                    battle_count=host.battle_count))
+            return triggered
+        HPBalancer.hp_retreat_triggered = record_low_hp
+        original_execute = Combat.combat_execute
+        combat_execute_restore = Combat, original_execute
+        def record_execute(host, *positional, **keywords):
+            value = original_execute(host, *positional, **keywords)
+            context = semantic_session.open()._campaign_context
+            completed_battles.append(dict(battle_count=host.battle_count,
+                map_ui_objects=latest_map_ui_objects,
+                sortie_generation=(context.sortie_receipt.generation if context and context.sortie_receipt else None),
+                retirement_transactions_before=len(retirement_receipts), finished_at=_utc_now()))
+            return value
+        Combat.combat_execute = record_execute
         completed_sorties = []
         preparations = []
         observed_adapter = semantic_session.open()
@@ -227,13 +324,18 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             if context is not None:
                 submarine_moves.extend(copy.deepcopy(context.submarine_move_history))
                 submarine_strategy.extend(dataclasses.asdict(r) for r in context.submarine_strategy_receipts)
+                for receipt in (context.withdrawal_open_receipt, context.withdrawal_confirm_receipt):
+                    if receipt is not None:
+                        withdrawal_receipts.append(dataclasses.asdict(receipt))
             return original_end_campaign()
         observed_adapter.end_campaign_pre_sortie = record_campaign_end
         combat_admissions = []
         original_combat_admission = observed_adapter.authorize_campaign_combat
         def record_combat_admission(decision, state):
+            nonlocal latest_map_ui_objects
             admission = original_combat_admission(decision, state)
             if admission is not None:
+                latest_map_ui_objects = _map_ui_objects(startup_oracle.read_state())
                 combat_admissions.append(dict(generation=state.generation, battle_count=decision.battle_count,
                     target=decision.target_node, expected=decision.expected,
                     submarine=dataclasses.asdict(state.submarine) if state.submarine else None,
@@ -241,6 +343,156 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
                     submarine_destination=decision.submarine_destination_node))
             return admission
         observed_adapter.authorize_campaign_combat = record_combat_admission
+        hp_observations = []
+        withdrawal_receipts = []
+        repair_inspections = []
+        scout_inspections = []
+        repair_use_samples = []
+        precombat_probes = []
+        repair_probe_deadline = None
+        original_repair_postcondition = observed_adapter.campaign_repair_postcondition
+        def record_repair_postcondition():
+            result = original_repair_postcondition()
+            if result == 'complete':
+                repair_use_samples[:] = json.loads(json.dumps(
+                    observed_adapter._campaign_context.repair_history, default=dataclasses.asdict))
+                if getattr(args, 'verify_repair_use', False) or getattr(args, 'require_natural_repair', False):
+                    # End this disposable experiment after one proven use.
+                    instance.config.override(HpControl_UseEmergencyRepair=False)
+            return result
+        observed_adapter.campaign_repair_postcondition = record_repair_postcondition
+        if (getattr(args, 'inspect_repair', False) or getattr(args, 'verify_scout_exchanges', False)
+                or getattr(args, 'verify_repair_use', False)
+                or getattr(args, 'precombat_probe', None)
+                or getattr(args, 'max_probe_battles', 0)
+                or getattr(args, 'require_natural_repair', False)
+                or getattr(args, 'require_midmap_retirement', False)):
+            from module.combat.combat import Combat
+            original_battle_preparation = Combat.handle_battle_preparation
+            repair_inspection_restore = Combat, original_battle_preparation
+            def inspect_repair_before_start(host):
+                nonlocal repair_probe_deadline
+                if getattr(args, 'require_natural_repair', False) and repair_use_samples:
+                    from campaign_scout_live_probe import withdraw_from_precombat
+                    withdraw_from_precombat(host, observed_adapter)
+                if getattr(args, 'require_natural_repair', False):
+                    state = observed_adapter._fresh_input_oracle().campaign_emergency_repair_state()
+                    if state is not None and state['count'] == 0:
+                        repair_inspections.append(dict(reason='no-repair-stock',
+                            count=0, generation=state['generation']))
+                        from campaign_scout_live_probe import withdraw_from_precombat
+                        withdraw_from_precombat(host, observed_adapter)
+                if (getattr(args, 'require_midmap_retirement', False)
+                        and _midmap_retirement_complete(retirement_receipts, completed_battles)
+                        and observed_adapter._fresh_input_oracle().campaign_emergency_repair_state() is not None):
+                    from campaign_scout_live_probe import withdraw_from_precombat
+                    withdraw_from_precombat(host, observed_adapter)
+                if (getattr(args, 'max_probe_battles', 0)
+                        and len(completed_battles) >= args.max_probe_battles):
+                    if observed_adapter._fresh_input_oracle().campaign_emergency_repair_state() is not None:
+                        from campaign_scout_live_probe import withdraw_from_precombat
+                        withdraw_from_precombat(host, observed_adapter)
+                if getattr(args, 'precombat_probe', None) and not precombat_probes:
+                    oracle = observed_adapter._fresh_input_oracle()
+                    if oracle.campaign_emergency_repair_state() is not None:
+                        precombat_probes.append(dict(state=dataclasses.asdict(oracle.read_state()),
+                            ui=dataclasses.asdict(oracle.read_ui_state()),
+                            admission=dataclasses.asdict(observed_adapter._campaign_context.combat_admission),
+                            hp_control=observed_adapter.campaign_hp_control_snapshot(host.fleet_current_index),
+                            prepared_fleets=(dataclasses.asdict(observed_adapter._campaign_context.prepared_fleet_state)
+                                if observed_adapter._campaign_context.prepared_fleet_state is not None else None)))
+                        if args.precombat_probe == 'withdraw':
+                            from campaign_scout_live_probe import withdraw_from_precombat
+                            withdraw_from_precombat(host, observed_adapter)
+                        raise RuntimeError('qualification paused at precombat before battle input')
+                if getattr(args, 'verify_repair_use', False):
+                    from campaign_scout_live_probe import withdraw_from_precombat
+                    oracle = observed_adapter._fresh_input_oracle()
+                    state = oracle.campaign_emergency_repair_state()
+                    if state is not None:
+                        if not repair_inspections:
+                            repair_inspections.append(dict(count=state['count'],
+                                generation=state['generation'],
+                                ui=dataclasses.asdict(oracle.read_ui_state())))
+                        # One completed battle is sufficient to test available
+                        # damage; do not spend more battles seeking a trigger.
+                        if repair_use_samples:
+                            withdraw_from_precombat(host, observed_adapter)
+                        if host.battle_count >= 1:
+                            # A new immutable frame may still describe the
+                            # closing map/entry animation. Give original ALAS
+                            # preparation iterations time to observe the port;
+                            # never start a second battle in this experiment.
+                            if repair_probe_deadline is None:
+                                repair_probe_deadline = time.monotonic() + 15
+                                repair_inspections.append(dict(phase='post-battle-wait',
+                                    count=state['count'], generation=state['generation'],
+                                    hp=list(host.hp), enabled=host.config.HpControl_UseEmergencyRepair,
+                                    single_threshold=host.config.HpControl_RepairUseSingleThreshold,
+                                    multi_threshold=host.config.HpControl_RepairUseMultiThreshold))
+                            if time.monotonic() < repair_probe_deadline:
+                                return True
+                            withdraw_from_precombat(host, observed_adapter)
+                        if state['count'] == 0:
+                            withdraw_from_precombat(host, observed_adapter)
+                if getattr(args, 'verify_scout_exchanges', False) and not scout_inspections:
+                    from campaign_scout_live_probe import exercise_scouts, withdraw_from_precombat
+                    host.device.screenshot()
+                    if observed_adapter._fresh_input_oracle().campaign_emergency_repair_state() is not None:
+                        sample = {}
+                        scout_inspections.append(sample)
+                        exercise_scouts(host, observed_adapter, sample)
+                        if getattr(args, 'scout_probe_only', False):
+                            withdraw_from_precombat(host, observed_adapter)
+                        return True
+                if getattr(args, 'inspect_repair', False) and not repair_inspections:
+                    host.device.screenshot()
+                    state = observed_adapter._fresh_input_oracle().campaign_emergency_repair_state()
+                    if state is not None:
+                        sample = dict(count=state['count'], generation=state['generation'])
+                        repair_inspections.append(sample)
+                        receipt = observed_adapter._fresh_input_oracle().click_campaign_emergency_repair('open')
+                        sample['open'] = dataclasses.asdict(receipt)
+                        deadline = time.monotonic() + 10
+                        while time.monotonic() < deadline:
+                            host.device.screenshot()
+                            oracle = observed_adapter._frame_or_live_observation_oracle()
+                            sample['panel_buttons'] = dataclasses.asdict(oracle.read_state())
+                            sample['panel_ui'] = dataclasses.asdict(oracle.read_ui_state())
+                            panel = oracle.campaign_emergency_repair_panel()
+                            if panel is not None:
+                                sample['panel_count'] = panel['count']
+                                sample['description'] = panel['description']
+                                break
+                            time.sleep(0.2)
+                        else:
+                            raise TimeoutError('repair details did not appear')
+                        sample['cancel'] = dataclasses.asdict(observed_adapter._fresh_input_oracle().click_campaign_emergency_repair('cancel'))
+                        deadline = time.monotonic() + 10
+                        while time.monotonic() < deadline:
+                            host.device.screenshot()
+                            oracle = observed_adapter._frame_or_live_observation_oracle()
+                            if oracle.campaign_emergency_repair_panel() is None:
+                                after = oracle.campaign_emergency_repair_state()
+                                if after is None or after['count'] != sample['count']:
+                                    raise AssertionError('repair inspection changed inventory or page')
+                                sample['cancel_post_generation'] = after['generation']
+                                return True
+                            time.sleep(0.2)
+                        raise TimeoutError('repair cancellation did not restore preparation')
+                return original_battle_preparation(host)
+            Combat.handle_battle_preparation = inspect_repair_before_start
+        original_hp_snapshot = observed_adapter.campaign_hp_control_snapshot
+        def record_hp_snapshot(fleet_index):
+            value = original_hp_snapshot(fleet_index)
+            sample = dict(fleet_index=fleet_index, vitals=value)
+            hp_observations.append(sample)
+            if getattr(args, 'precombat_probe', None):
+                sample['precombat'] = observed_adapter._frame_or_live_observation_oracle().campaign_emergency_repair_state() is not None
+                if not sample['precombat']:
+                    sample['levels'] = observed_adapter.campaign_fleet_levels()
+            return value
+        observed_adapter.campaign_hp_control_snapshot = record_hp_snapshot
         submarine_calls = []
         original_submarine_call = startup_oracle.click_campaign_submarine_call
         def record_submarine_call(*positional, **keywords):
@@ -375,9 +627,11 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
         }
         if (
             startup_oracle.enabled("login/enter")
+            or startup_oracle.enabled("overlay/login-data-expired/confirm")
             or startup_oracle.login_update_download_available()
             or startup_oracle.login_update_in_progress()
             or startup_oracle.login_update_restart_prompt_available()
+            or startup_oracle.enabled('overlay/bulletin/close')
         ):
             from module.handler.login import LoginHandler
 
@@ -390,10 +644,19 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
                 task=args.task, stage=args.stage, serial=args.serial,
                 run_count_requested=args.run_count, execution_status='incomplete',
                 error=type(exc).__name__ + ': ' + str(exc),
+                startup_recoveries=startup_recoveries,
+                hp_control_config=payload[args.task]['HpControl'],
                 preparations=preparations, completed_sorties=completed_sorties,
                 auto_menu_observations=auto_menus, continuation_receipts=go_receipts,
                 submarine_observations=submarine_observations, submarine_calls=submarine_calls,
                 combat_admissions=combat_admissions,
+                hp_observations=hp_observations, withdrawal_receipts=withdrawal_receipts,
+                repair_inspections=repair_inspections,
+                repair_use_samples=repair_use_samples,
+                precombat_probes=precombat_probes,
+                retirement_receipts=retirement_receipts, completed_battles=completed_battles,
+                low_hp_decisions=low_hp_decisions,
+                scout_inspections=scout_inspections,
                 submarine_moves=submarine_moves, submarine_strategy=submarine_strategy)
         post = _load_json(config_path)
         task_post = post[args.task]
@@ -402,6 +665,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
         state = adapter.oracle.read_state()
         completion = session.last_campaign_auto_search_completion()
         final_surface = {
+            "campaign_stage": _surface_visible(adapter.oracle.campaign_page_is_normal),
             "main_page": _surface_visible(adapter.oracle.main_page_visible),
             "campaign_map": _surface_visible(adapter.oracle.campaign_is_in_map),
             "campaign_entry": _surface_visible(
@@ -411,6 +675,21 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
         run_count = task_post["StopCondition"]["RunCount"]
         enabled = task_post["Scheduler"]["Enable"]
         passed = bool(run_result) and run_count == 0 and enabled is False
+        if getattr(args, 'precombat_probe', None) == 'withdraw':
+            passed = passed and len(precombat_probes) == 1
+        if getattr(args, 'verify_repair_use', False):
+            passed = passed and len(repair_use_samples) == 1
+        if getattr(args, 'require_natural_repair', False):
+            passed = passed and len(repair_use_samples) == 1
+        if getattr(args, 'verify_scout_exchanges', False):
+            passed = passed and len(scout_inspections) == 1 and scout_inspections[0].get('passed', False)
+        if getattr(args, 'inspect_repair', False):
+            passed = passed and len(repair_inspections) == 1 and 'cancel_post_generation' in repair_inspections[0]
+        if getattr(args, 'require_midmap_retirement', False):
+            passed = passed and _midmap_retirement_complete(retirement_receipts, completed_battles)
+        if getattr(args, 'require_low_hp_retreat', False):
+            passed = (passed and any(d['triggered'] for d in low_hp_decisions)
+                and len(withdrawal_receipts) == 2 and final_surface['campaign_stage'])
         if args.use_auto_search:
             passed = passed and len(completed_sorties) == getattr(args, "run_count", 1)
         if getattr(args, 'require_auto_continue', False):
@@ -443,6 +722,18 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             "submarine_observations": submarine_observations,
             "submarine_calls": submarine_calls,
             "combat_admissions": combat_admissions,
+            "startup_recoveries": startup_recoveries,
+            "hp_control_config": payload[args.task]['HpControl'],
+            "hp_observations": hp_observations,
+            "repair_inspections": repair_inspections,
+            "repair_use_samples": repair_use_samples,
+            "precombat_probes": precombat_probes,
+            "retirement_receipts": retirement_receipts,
+            "completed_battles": completed_battles,
+            "low_hp_decisions": low_hp_decisions,
+            "scout_inspections": scout_inspections,
+            "withdrawal_receipts": withdrawal_receipts,
+            "hp_configuration": payload[args.task]['HpControl'],
             "submarine_moves": submarine_moves,
             "submarine_strategy": submarine_strategy,
             "observe_submarine_range": getattr(args, 'observe_submarine_range', False),
@@ -485,6 +776,12 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             "raw_input_fallback_used": False,
         }
     finally:
+        if hp_retreat_restore is not None:
+            hp_retreat_restore[0].hp_retreat_triggered = hp_retreat_restore[1]
+        if combat_execute_restore is not None:
+            combat_execute_restore[0].combat_execute = combat_execute_restore[1]
+        if repair_inspection_restore is not None:
+            repair_inspection_restore[0].handle_battle_preparation = repair_inspection_restore[1]
         if strategy_range_restore is not None:
             strategy_range_restore[0].handle_strategy = strategy_range_restore[1]
         if instance is not None:
@@ -511,6 +808,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--task", required=True, choices=TASKS)
     parser.add_argument("--stage", default="1-1")
     parser.add_argument("--run-count", type=int, default=1)
+    parser.add_argument('--use-low-hp-retreat', action='store_true')
+    parser.add_argument('--require-low-hp-retreat', action='store_true')
+    parser.add_argument('--low-hp-retreat-threshold', type=float, default=0.3)
+    parser.add_argument('--use-emergency-repair', action='store_true')
+    parser.add_argument('--require-natural-repair', action='store_true', help='Keep configured repair thresholds and withdraw after one proven repair')
+    parser.add_argument('--require-midmap-retirement', action='store_true', help='Require retirement after combat and a completed combat in the same sortie afterward')
+    parser.add_argument('--max-probe-battles', type=int, default=0, help='Bounded qualification cutoff; zero leaves original task limit')
+    parser.add_argument('--precombat-probe', choices=('pause', 'withdraw'), help='Capture original combat admission and pause or withdraw without battle')
+    parser.add_argument('--verify-repair-use', action='store_true', help='One real battle at most, one repair at threshold 1.0, then withdraw')
+    parser.add_argument('--inspect-repair', action='store_true', help='Open and cancel repair details once; never uses stock')
+    parser.add_argument('--verify-scout-exchanges', action='store_true')
+    parser.add_argument('--scout-probe-only', action='store_true', help='Restore scout order and withdraw before starting battle')
     parser.add_argument("--use-auto-search", action="store_true")
     parser.add_argument("--use-2x-book", action="store_true")
     parser.add_argument("--require-auto-continue", action="store_true",
@@ -544,6 +853,10 @@ def parse_args() -> argparse.Namespace:
     args = parser.parse_args()
     if args.run_count < 1:
         parser.error("run-count must be positive")
+    if args.require_natural_repair and args.verify_repair_use:
+        parser.error('natural repair cannot be combined with the threshold-1.0 probe')
+    if args.max_probe_battles < 0:
+        parser.error("max-probe-battles must be nonnegative")
     if args.combat_budget < 0 or args.viewport_swipe_budget < 0:
         parser.error("budgets must be non-negative")
     return args

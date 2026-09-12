@@ -1,0 +1,38 @@
+{
+  "schema": "alas-headless.war-archives-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-09-11T09:21:26.533844Z",
+  "finished_at": "2026-09-11T09:26:49.897954Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "war_archives_20190321_en",
+  "stage": "A1",
+  "mode": "normal",
+  "resumed_map_before": false,
+  "navigation": [
+    {
+      "event": "war_archives_20190321_en",
+      "category": "ex",
+      "semantic_id": "archive/campaign/war_archives_20190321_en",
+      "generation": 454723,
+      "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item/bg/icon"
+    }
+  ],
+  "entry_confirmations": [
+    {
+      "semantic_id": "archive/entry/confirm",
+      "generation": 456132,
+      "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)"
+    }
+  ],
+  "data_key_observations": [
+    {
+      "current": 300,
+      "total": 300
+    }
+  ],
+  "error": "SystemExit: 1",
+  "movement_proofs": [],
+  "traceback": "Traceback (most recent call last):\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\alas.py\", line 74, in run\n    self.__getattribute__(command)()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\alas.py\", line 273, in war_archives\n    CampaignWarArchives(config=self.config, device=self.device).run(\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\war_archives\\war_archives.py\", line 57, in run\n    super().run(name, folder, mode, total)\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\campaign\\run.py\", line 452, in run\n    return self._run(name, folder=folder, mode=mode, total=total)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\campaign\\run.py\", line 572, in _run\n    self.campaign.run()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\campaign\\campaign_base.py\", line 267, in run\n    self.execute_a_battle()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\campaign\\campaign_base.py\", line 198, in execute_a_battle\n    result = self.battle_function()\n             ^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\base\\decorator.py\", line 70, in wrapper\n    return record['func'](self, *args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\campaign\\campaign_base.py\", line 175, in battle_function\n    result = func()\n             ^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\campaign\\war_archives_20190321_en\\a1.py\", line 73, in battle_0\n    if self.fleet_2_push_forward():\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\map\\map.py\", line 617, in fleet_2_push_forward\n    self.fleet_2.goto(grids[0])\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\map\\fleet.py\", line 538, in goto\n    self._goto(node, expected=expected if node == nodes[-1] else '')\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\map\\fleet.py\", line 289, in _goto\n    self.device.click(grid)\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\device\\control.py\", line 57, in click\n    receipt = semantic_adapter.click(button)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\python\\alas_headless\\adapter\\semantic\\session_dispatch.py\", line 303, in click\n    return self.open().click_campaign_combat_grid(button)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\python\\alas_headless\\adapter\\semantic\\campaign_map.py\", line 1196, in click_campaign_combat_grid\n    target = self.oracle.campaign_map_cell_input(\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\python\\alas_headless\\oracle\\campaign_navigation.py\", line 523, in campaign_map_cell_input\n    raise SemanticGateClosed(\nalas_headless.oracle.errors.SemanticGateClosed: campaign enemy-covered input lacks one exact enemy\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\scripts\\python\\run_alas_war_archives_live_validation.py\", line 171, in run\n    session.finish_campaign_movement = record_movement\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\alas.py\", line 144, in run\n    exit(1)\n  File \"<frozen _sitebuiltins>\", line 26, in __call__\nSystemExit: 1\n",
+  "raw_input_fallback_used": false
+}

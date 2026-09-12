@@ -1,0 +1,5 @@
+{
+  "chapter_observed": true,
+  "passed": false,
+  "error": "AlasSemanticUnmapped('ALAS virtual resource has no active semantic flow: DOCK_CHECK')"
+}

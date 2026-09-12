@@ -503,6 +503,15 @@ class SessionTasksPorts:
         self._meta_beacon_active = True
         self.open().begin_meta_beacon()
 
+    def begin_meta_assist(self) -> None:
+        self._meta_assist_active = True
+        self.open().begin_meta_assist()
+
+    def end_meta_assist(self) -> None:
+        self._meta_assist_active = False
+        if self.adapter is not None:
+            self.adapter.end_meta_assist()
+
     def end_meta_beacon(self) -> None:
         self._meta_beacon_active = False
         if self.adapter is not None:
@@ -600,6 +609,18 @@ class SessionTasksPorts:
 
     def campaign_fleet_hp(self) -> Tuple[float, ...]:
         return self.open().campaign_fleet_hp()
+
+    def campaign_hp_control_snapshot(self, fleet_index: int):
+        return self.open().campaign_hp_control_snapshot(fleet_index)
+
+    def wait_campaign_repair_ready(self):
+        return self.open().wait_campaign_repair_ready()
+
+    def campaign_repair_postcondition(self):
+        return self.open().campaign_repair_postcondition()
+
+    def change_campaign_scout_position(self, source_slot, destination_slot):
+        return self.open().change_campaign_scout_position(source_slot, destination_slot)
 
     def campaign_fleet_levels(self) -> Tuple[int, ...]:
         return self.open().campaign_fleet_levels()
@@ -871,6 +892,26 @@ class SessionTasksPorts:
 
     def campaign_dock_full_visible(self) -> bool:
         return self.open().campaign_dock_full_visible()
+
+    def campaign_precombat_visible(self) -> bool:
+        adapter = self.open()
+        adapter._require_campaign_context()
+        return adapter._frame_or_live_observation_oracle().campaign_precombat_visible()
+
+    def click_campaign_precombat_back(self) -> ActionReceipt:
+        adapter = self.open()
+        context = adapter._require_campaign_context()
+        oracle = adapter._fresh_input_oracle()
+        # Optional recovery evidence must not prevent full-fleet back navigation.
+        # A failed correlation leaves the existing six-slot requirement intact.
+        try:
+            index, identity = oracle.campaign_precombat_fleet_identity()
+        except SemanticGateClosed:
+            index, identity = None, None
+        receipt = oracle.click_campaign_precombat_back()
+        context.inherited_fleet_identity = identity
+        context.inherited_fleet_index = index
+        return receipt
 
     def click_campaign_dock_full_choice(self, choice: str) -> ActionReceipt:
         return self.open().click_campaign_dock_full_choice(choice)

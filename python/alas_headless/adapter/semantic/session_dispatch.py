@@ -109,6 +109,13 @@ class SessionDispatchPorts:
             return False
         if adapter._campaign_context is not None and name in ("MAP_AMBUSH_EVADE", "MAP_AMBUSH_ATTACK"):
             return adapter.appear(button)
+        if adapter._campaign_context is not None and name in (
+            "EMERGENCY_REPAIR_AVAILABLE", "EMERGENCY_REPAIR_CONFIRM"
+        ):
+            # After one battle the broad combat observer still owns defensive
+            # queries. The repair panel is a Campaign preparation surface;
+            # its exact typed port must own these two probes instead.
+            return adapter.appear(button)
         if (
             name == "GET_SHIP"
             and adapter._campaign_context is not None
@@ -202,6 +209,15 @@ class SessionDispatchPorts:
                     self._combat_result_observation = (name, time.monotonic())
                 return visible
             except SemanticGateClosed as exc:
+                if (str(exc) == 'combat Unity selector path is ambiguous'
+                        and adapter._campaign_context is not None):
+                    # The live combat reader may observe a newly mounted dock
+                    # modal after the current screenshot. Refresh that boundary
+                    # before asking its dedicated parser to own the popup.
+                    self.refresh_frame()
+                    if adapter._frame_or_live_observation_oracle().campaign_dock_full_visible(
+                            adapter._campaign_context.resolved_stage_code or adapter._campaign_context.stage_code):
+                        return name in ('RETIRE_APPEAR_1', 'RETIRE_APPEAR_3')
                 if (
                     str(exc)
                     == "combat observer blocker is active: network_down"
@@ -481,6 +497,11 @@ class SessionDispatchPorts:
             return self.open().oracle.click("exercise/page/back")
         if (name == 'AUTO_SEARCH_MENU_EXIT' and self.adapter is not None
                 and self.adapter._campaign_context is not None):
+            self.refresh_frame()
+            return self.open().click(button)
+        if (name in ('EMERGENCY_REPAIR_AVAILABLE', 'EMERGENCY_REPAIR_CONFIRM',
+                     'RETIRE_APPEAR_1', 'RETIRE_APPEAR_2', 'RETIRE_APPEAR_3')
+                and self.adapter is not None and self.adapter._campaign_context is not None):
             self.refresh_frame()
             return self.open().click(button)
         if (

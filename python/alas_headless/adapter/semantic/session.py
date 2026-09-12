@@ -360,6 +360,7 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
         # ownership lease on the session so rebuilding the Oracle/adapter does
         # not silently turn an own-beacon confirmation into an assist action.
         self._meta_beacon_active = False
+        self._meta_assist_active = False
         self._combat_manifest: Optional[AlasCombatObserverManifest] = None
         self._combat_last_generation = 0
         self._combat_automation_source: Optional[str] = None
@@ -376,6 +377,7 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
         if self._frame_clock is not None:
             self._frame_clock.release_frame()
         self._meta_beacon_active = False
+        self._meta_assist_active = False
         self._opsi_sample_use = None
         self._combat_automation_source = None
         self._combat_result_observation = None
@@ -585,6 +587,8 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
             )
             if self._meta_beacon_active:
                 self.adapter.begin_meta_beacon()
+            if self._meta_assist_active:
+                self.adapter.begin_meta_assist()
             if self.trace is not None:
                 self.trace.emit(
                     "semantic.session.open",

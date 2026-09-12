@@ -154,6 +154,7 @@ class ObservationAdapterPorts:
         # Discover only atomic mapped anchors first. A failure in an absent
         # shop, guild or combat parser must not break another page's exit.
         readers = (
+            ("daily/page/back", lambda: oracle.daily_page_visible()),
             ("raid/page/home", lambda: oracle.raid_page_visible(event="raid_20260827")),
             ("guild/page/back", lambda: oracle.guild_page_visible()),
             ("os/page/back", lambda: oracle.operation_siren_page_visible()),

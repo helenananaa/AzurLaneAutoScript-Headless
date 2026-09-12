@@ -8,6 +8,22 @@ from pathlib import Path
 from scripts.python.run_alas_main_task_live_validation import _configure
 from scripts.python.run_alas_main_task_live_validation import _book_consumption_complete
 from scripts.python import run_alas_main_task_live_validation as live_runner
+
+
+def test_midmap_retirement_requires_combat_on_both_sides_in_the_same_sortie():
+    item = dict(completed_battles_before=1, sortie_generation_before=50,
+        sortie_generation_after=50, receipt={'retired_count': 10})
+    battle = dict(retirement_transactions_before=1, sortie_generation=50)
+    assert live_runner._midmap_retirement_complete([item], [battle])
+    for changed in (
+        dict(item, completed_battles_before=0),
+        dict(item, sortie_generation_after=60),
+        dict(item, sortie_generation_before=None),
+        dict(item, receipt={'retired_count': 0}),
+    ):
+        assert not live_runner._midmap_retirement_complete([changed], [battle])
+    assert not live_runner._midmap_retirement_complete([item], [])
+    assert not live_runner._midmap_retirement_complete([item], [dict(battle, sortie_generation=60)])
 from scripts.python import verify_campaign_formations_live as formation_runner
 from alas_headless import SemanticGateClosed
 from alas_headless import AlasSemanticAdapter
@@ -131,3 +147,31 @@ def test_withdrawal_wait_retries_only_pre_input_readiness_failures(monkeypatch):
     with pytest.raises(SemanticGateClosed, match="uncertain"):
         formation_runner.confirm_withdrawal_when_ready(SimpleNamespace(confirm_campaign_withdrawal_if_present=uncertain))
     assert uncertain.call_count == 1
+
+def test_natural_repair_probe_stops_without_stock_but_allows_available_stock(monkeypatch):
+    import ast
+    import sys
+    from pathlib import Path
+    from types import SimpleNamespace
+    source = Path('scripts/python/run_alas_main_task_live_validation.py')
+    tree = ast.parse(source.read_text(encoding='utf-8-sig'))
+    node = next(n for n in ast.walk(tree) if isinstance(n, ast.If)
+                and ast.unparse(n.test) == "getattr(args, 'require_natural_repair', False)"
+                and 'no-repair-stock' in ast.unparse(n))
+    code = compile(ast.fix_missing_locations(ast.Module(body=[node], type_ignores=[])), str(source), 'exec')
+    class Withdrawn(Exception): pass
+    def withdraw(*args): raise Withdrawn()
+    monkeypatch.setitem(sys.modules, 'campaign_scout_live_probe', SimpleNamespace(withdraw_from_precombat=withdraw))
+    for enabled, stock in ((True, 0), (True, 3), (False, 0), (True, None)):
+        inspections = []
+        state = None if stock is None else dict(count=stock, generation=25)
+        oracle = SimpleNamespace(campaign_emergency_repair_state=lambda: state)
+        scope = dict(args=SimpleNamespace(require_natural_repair=enabled),
+            observed_adapter=SimpleNamespace(_fresh_input_oracle=lambda: oracle),
+            host=object(), repair_inspections=inspections)
+        if enabled and stock == 0:
+            with pytest.raises(Withdrawn): exec(code, scope)
+            assert inspections[0]['reason'] == 'no-repair-stock'
+        else:
+            exec(code, scope)
+            assert inspections == []

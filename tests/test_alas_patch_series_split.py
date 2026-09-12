@@ -363,6 +363,8 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
         self.assertEqual(set(core), CORE_PATHS)
         self.assertEqual(set(lifecycle), LIFECYCLE_PATHS)
         expected_tasks = set().union(*FLOW_PATHS.values(), *OVERRIDE_PATHS.values())
+        # The later 0570 Campaign extension adds the original submarine port.
+        expected_tasks.add("module/combat/submarine.py")
         self.assertEqual(set(tasks), expected_tasks)
         self.assertFalse(set(core) & set(lifecycle))
         self.assertFalse(set(core) & set(tasks))

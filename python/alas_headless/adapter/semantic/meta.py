@@ -17,6 +17,14 @@ from .resources import REWARD_RESOURCE_FIELDS
 class MetaAdapterPorts:
     """Meta ports on the shared adapter context."""
 
+    def begin_meta_assist(self) -> None:
+        self._package_gate()
+        self._meta_assist_active = True
+
+    def end_meta_assist(self) -> None:
+        self._meta_assist_active = False
+        self._operation_siren_combat_active = False
+
     def begin_meta_beacon(self) -> None:
         """Own one complete META beacon task until its explicit finally block."""
 
@@ -72,6 +80,8 @@ class MetaAdapterPorts:
 
     def click_meta_precombat_start(self) -> ActionReceipt:
         self._package_gate()
+        if self._meta_assist_active and not self._action_ledger.allowed('meta.assist'):
+            raise SemanticGateClosed('META assist requires remaining sortie budget')
         if not self.oracle.meta_precombat_fleet_ready():
             raise SemanticGateClosed(
                 "META precombat requires non-empty main and vanguard fleets"
@@ -85,6 +95,16 @@ class MetaAdapterPorts:
         return self.oracle.click_daily_precombat_back()
 
     def _appear_meta(self, name, semantic_id):
+        if name == 'BEACON_MY':
+            try:
+                self.oracle.meta_assist_state()
+                return True
+            except SemanticGateClosed:
+                return False
+        if semantic_id == 'meta/current/list' and getattr(self.oracle, 'meta_dossier_assist_visible', lambda: False)():
+            return True
+        if semantic_id == 'meta/dossier/list':
+            return self.oracle.meta_dossier_detail_visible()
         if semantic_id == "reward/meta/enter":
             return self.oracle.meta_entrance_available()
         if name in REWARD_RESOURCE_FIELDS:

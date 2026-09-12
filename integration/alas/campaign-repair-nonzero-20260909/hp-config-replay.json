@@ -1,0 +1,158 @@
+{
+  "schema": "alas-headless.hp-control-config-replay/v1",
+  "passed": true,
+  "field_count": 8,
+  "panel_count": 11,
+  "panels": [
+    "Main",
+    "Main2",
+    "Main3",
+    "Event",
+    "Event2",
+    "WarArchives",
+    "EventA",
+    "EventB",
+    "EventC",
+    "EventD",
+    "EventSp"
+  ],
+  "accepted_boundary_cases": [
+    "hp_balance_threshold:0.0",
+    "hp_balance_threshold:0.2",
+    "hp_balance_threshold:1.0",
+    "repair_use_single_threshold:0.0",
+    "repair_use_single_threshold:0.3",
+    "repair_use_single_threshold:1.0",
+    "repair_use_multi_threshold:0.0",
+    "repair_use_multi_threshold:0.6",
+    "repair_use_multi_threshold:1.0",
+    "low_hp_retreat_threshold:0.0",
+    "low_hp_retreat_threshold:0.3",
+    "low_hp_retreat_threshold:1.0",
+    "hp_balance_weight:1,1,1",
+    "hp_balance_weight:1000， 500， 250",
+    "hp_balance_weight:10,2,30"
+  ],
+  "admitted_configuration_features": [
+    "use_hp_balance",
+    "use_emergency_repair",
+    "use_low_hp_retreat"
+  ],
+  "remaining_live_boundary": "fresh-sortie repair run, natural default thresholds and sparse fleets",
+  "invalid_case_count": 9,
+  "original_decisions": {
+    "weighted_hp": [
+      0.9,
+      0.8,
+      0.7,
+      0.9,
+      0.4,
+      0.175
+    ],
+    "scout_order_cases": [
+      {
+        "threshold": 0.2,
+        "hp": [
+          0.9,
+          0.8,
+          0.7
+        ],
+        "order": [
+          0,
+          2,
+          1
+        ]
+      },
+      {
+        "threshold": 0.05,
+        "hp": [
+          0.95,
+          0.8,
+          0.65
+        ],
+        "order": [
+          0,
+          2,
+          1
+        ]
+      },
+      {
+        "threshold": 0.2,
+        "hp": [
+          0.7,
+          1.0,
+          0.0
+        ],
+        "order": [
+          1,
+          0,
+          2
+        ]
+      },
+      {
+        "threshold": 0.2,
+        "hp": [
+          0.8,
+          0.0,
+          0.0
+        ],
+        "order": [
+          0,
+          1,
+          2
+        ]
+      },
+      {
+        "threshold": 0.2,
+        "hp": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "order": [
+          0,
+          1,
+          2
+        ]
+      }
+    ],
+    "retreat_cases": [
+      {
+        "enabled": false,
+        "hp": [
+          0.1,
+          0.9
+        ],
+        "triggered": false
+      },
+      {
+        "enabled": true,
+        "hp": [
+          0.3,
+          0.9
+        ],
+        "triggered": false
+      },
+      {
+        "enabled": true,
+        "hp": [
+          0.29,
+          0.9
+        ],
+        "triggered": true
+      }
+    ],
+    "emergency_repair_final_input_boundaries": 2,
+    "semantic_repair_stabilization": [
+      "typed-ready"
+    ],
+    "semantic_scout_drag_delegated": true
+  },
+  "mutation_budget": 0,
+  "android_input_injected": false,
+  "source_sha256": {
+    "args": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+    "hp_balancer": "ece7c2f12d71c220d2f8b7f52b80fa8721d225ac4f3d0ec14b2075bca680d61f",
+    "combat": "898cd7acb8957d8f5d6511d276f6b5d154f1f35fbe9b92d562455b5108d563d0"
+  }
+}

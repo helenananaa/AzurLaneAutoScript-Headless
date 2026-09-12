@@ -16499,3 +16499,303 @@ index a1fa10f..369fb91 100644
              else:
                  self.in_sight(location, sight=self._walk_sight)
                  self.focus_to_grid_center()
+diff --git a/module/handler/info_handler.py b/module/handler/info_handler.py
+--- a/module/handler/info_handler.py
++++ b/module/handler/info_handler.py
+@@ -105,6 +105,12 @@
+     _popup_offset = (3, 30)
+ 
+     def handle_popup_confirm(self, name='', offset=None, interval=2):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and name == 'WITHDRAW':
++            if semantic_adapter.appear('CAMPAIGN_WITHDRAW_CONFIRM'):
++                semantic_adapter.click('CAMPAIGN_WITHDRAW_CONFIRM')
++                return True
++            return False
+         if offset is None:
+             offset = self._popup_offset
+         if self.appear(POPUP_CANCEL, offset=offset) \
+diff --git a/module/combat/hp_balancer.py b/module/combat/hp_balancer.py
+--- a/module/combat/hp_balancer.py
++++ b/module/combat/hp_balancer.py
+@@ -94,15 +94,30 @@
+ 
+         from alas_headless import current_semantic_session
+         semantic_session = current_semantic_session()
++        typed_presence = None
+         if semantic_session is not None:
+-            hp = list(semantic_session.campaign_fleet_hp())
++            if (self.config.HpControl_UseLowHpRetreat or self.config.HpControl_UseEmergencyRepair
++                    or self.config.HpControl_UseHpBalance):
++                # combat_status may return after a live map probe while the last
++                # screenshot still belongs to settlement. Refresh before HP.
++                self.device.screenshot()
++                vitals = semantic_session.campaign_hp_control_snapshot(self.fleet_current_index)
++            else:
++                vitals = None
++            if vitals is not None:
++                hp, typed_presence = vitals
++                hp = list(hp)
++            else:
++                hp = list(semantic_session.campaign_fleet_hp())
+         else:
+             hp = [self._calculate_hp(button.area) for button in self._hp_grid().buttons]
+         weight = to_list(weight)
+         scout = np.array(hp[3:]) * np.array(weight) / np.max(weight)
+ 
+         self.hp = hp[:3] + scout.tolist()
+-        if self.fleet_current_index not in self._hp_has_ship:
++        if typed_presence is not None:
++            self.hp_has_ship = list(typed_presence)
++        elif self.fleet_current_index not in self._hp_has_ship:
+             self.hp_has_ship = [bool(hp > 0.3) for hp in self.hp]
+ 
+         logger.attr('HP', ' '.join(
+@@ -127,6 +142,9 @@
+             p1 (int): Origin position [0, 2].
+             p2 (int): Target position [0, 2].
+         """
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            from alas_headless import AlasSemanticUnmapped
++            raise AlasSemanticUnmapped('Campaign HP balance needs a typed scout-position drag')
+         logger.info('scout_position_change (%s, %s)' % (p1, p2))
+         self.device.drag(p1=SCOUT_POSITION[p1], p2=SCOUT_POSITION[p2], segments=3)
+ 
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -366,6 +366,13 @@
+     def handle_emergency_repair_use(self):
+         if not self.config.HpControl_UseEmergencyRepair:
+             return False
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            postcondition = semantic_adapter.campaign_repair_postcondition()
++            if postcondition == 'pending':
++                return True
++            if postcondition == 'complete':
++                self.hp_get()
+ 
+         if self.appear_then_click(EMERGENCY_REPAIR_CONFIRM, offset=True, interval=3):
+             return True
+@@ -375,10 +382,13 @@
+             # After a short animation, everything shows as usual.
+             # Using fleet power number as a stable checker.
+             # First wait for it to be non-zero, then wait for it to be stable.
+-            self.wait_until_disappear(MAIN_FLEET_POWER_ZERO, offset=(20, 20))
+-            stable_checker = Button(
+-                area=MAIN_FLEET_POWER_ZERO.area, color=(), button=MAIN_FLEET_POWER_ZERO.button, name='STABLE_CHECKER')
+-            self.wait_until_stable(stable_checker)
++            if semantic_adapter is not None:
++                semantic_adapter.wait_campaign_repair_ready()
++            else:
++                self.wait_until_disappear(MAIN_FLEET_POWER_ZERO, offset=(20, 20))
++                stable_checker = Button(
++                    area=MAIN_FLEET_POWER_ZERO.area, color=(), button=MAIN_FLEET_POWER_ZERO.button, name='STABLE_CHECKER')
++                self.wait_until_stable(stable_checker)
+             if not self.appear(EMERGENCY_REPAIR_AVAILABLE):
+                 return False
+ 
+diff --git a/module/combat/hp_balancer.py b/module/combat/hp_balancer.py
+--- a/module/combat/hp_balancer.py
++++ b/module/combat/hp_balancer.py
+@@ -142,9 +142,9 @@
+             p1 (int): Origin position [0, 2].
+             p2 (int): Target position [0, 2].
+         """
+-        if getattr(self.device, 'semantic_adapter', None) is not None:
+-            from alas_headless import AlasSemanticUnmapped
+-            raise AlasSemanticUnmapped('Campaign HP balance needs a typed scout-position drag')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.change_campaign_scout_position(p1, p2)
+         logger.info('scout_position_change (%s, %s)' % (p1, p2))
+         self.device.drag(p1=SCOUT_POSITION[p1], p2=SCOUT_POSITION[p2], segments=3)
+ 
+@@ -185,8 +185,7 @@
+ 
+         return order
+ 
+-    @Config.when(DEVICE_CONTROL_METHOD='minitouch')
+-    def _gen_exchange_step(self, target):
++    def _gen_exchange_step_drag(self, target):
+         """
+         Minitouch swiping is more like human, when it drag the first ship to the third ship,
+         [0, 1, 2] becomes [1, 2, 0], while in adb/uiautomator2, it becomes [2, 1, 0].
+@@ -217,12 +216,21 @@
+             # Target is the same as origin. Do nothing
+             pass
+ 
++    @Config.when(DEVICE_CONTROL_METHOD='minitouch')
++    def _gen_exchange_step(self, target):
++        yield from self._gen_exchange_step_drag(target)
++
+     @Config.when(DEVICE_CONTROL_METHOD=None)
+     def _gen_exchange_step(self, target):
+         """
+         Args:
+             target (list[int]): Such as [2, 0, 1].
+         """
++        from alas_headless import current_semantic_session
++        if current_semantic_session() is not None:
++            yield from self._gen_exchange_step_drag(target)
++            return
++
+         diff = np.array(target) - np.array((0, 1, 2))
+         count = np.count_nonzero(diff)
+         if count == 3:
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -496,6 +496,25 @@
+                     'Recovered NetworkDown before campaign startup surface check')
+                 self.device.screenshot()
+                 self.campaign.device.image = self.device.image
++            if semantic_adapter is not None and semantic_adapter.campaign_dock_full_visible():
++                for _ in self.campaign.loop(timeout=30):
++                    if self.campaign._semantic_campaign_retirement_recovery():
++                        break
++                else:
++                    raise ScriptEnd('Inherited dock-full recovery did not complete')
++                self.device.screenshot()
++                self.campaign.device.image = self.device.image
++            if semantic_adapter is not None and semantic_adapter.campaign_precombat_visible():
++                semantic_adapter.click_campaign_precombat_back()
++                for _ in self.campaign.loop(timeout=30):
++                    self.device.screenshot()
++                    self.campaign.device.image = self.device.image
++                    if self.campaign.is_in_map():
++                        break
++                else:
++                    raise ScriptEnd('Inherited precombat recovery did not reach map')
++                logger.info('Recovered inherited precombat to campaign map')
++
+             if self.campaign.is_in_map():
+                 if semantic_adapter is not None:
+                     semantic_map_resume = True
+diff --git a/module/map/fleet.py b/module/map/fleet.py
+--- a/module/map/fleet.py
++++ b/module/map/fleet.py
+@@ -94,6 +94,9 @@
+                 return self.config.Fleet_Fleet1Step
+ 
+     def fleet_ensure(self, index):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and semantic_adapter.campaign_movement_completed():
++            self.semantic_prepare_a_battle(initial_fleet_index=index)
+         if self.fleet_set(index=index):
+             self.camera = self.fleet_current
+             self.update()
+@@ -332,6 +335,10 @@
+                         fleet_index=self.fleet_show_index,
+                         submarine_mode=self._submarine_mode(expected)
+                     )
++                    if semantic_adapter is not None:
++                        # Combat's typed result reader may advance beyond the last
++                        # screenshot frame. Materialize the map before HP reads.
++                        self.device.screenshot()
+                     if (
+                         semantic_adapter is not None
+                         and expected == 'combat_boss'
+@@ -507,6 +514,9 @@
+             step_optimize (bool): True to walk in fleet step
+             turning_optimize (bool): True to optimize route to reduce ambushes
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and semantic_adapter.campaign_movement_completed():
++            self.semantic_prepare_a_battle()
+         location = location_ensure(location)
+         if step_optimize is None:
+             step_optimize = self.config.MAP_HAS_FLEET_STEP
+@@ -539,6 +549,9 @@
+                         self._goto(node_, expected=expected if node == nodes[-1] else '')
+         else:
+             self._goto(location, expected=expected)
++
++        if semantic_adapter is not None:
++            semantic_adapter.finish_campaign_movement(self.battle_count)
+ 
+     def find_path_initial(self):
+         """
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -515,9 +515,13 @@
+                     raise ScriptEnd('Inherited precombat recovery did not reach map')
+                 logger.info('Recovered inherited precombat to campaign map')
+ 
++            if semantic_adapter is not None:
++                self.campaign.semantic_resume_fleet_index = None
+             if self.campaign.is_in_map():
+                 if semantic_adapter is not None:
+                     semantic_map_resume = True
++                    resume_state = self.campaign.semantic_campaign_map_state()
++                    self.campaign.semantic_resume_fleet_index = resume_state.displayed_fleet_index
+                     logger.info('Already in semantic campaign map, resuming ALAS.')
+                 if not semantic_map_resume:
+                     logger.info('Already in map, retreating.')
+diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
+--- a/module/campaign/campaign_base.py
++++ b/module/campaign/campaign_base.py
+@@ -29,7 +29,7 @@
+             )),
+         )
+ 
+-    def semantic_prepare_a_battle(self):
++    def semantic_prepare_a_battle(self, initial_fleet_index=None):
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is None:
+             return
+@@ -72,7 +72,8 @@
+                 f'battle={self.battle_count}, target={boss_enemies[0].node}'
+             )
+         projection_map = self.map
+-        decision = preview_alas_campaign_decision(self, projection)
++        decision = preview_alas_campaign_decision(
++            self, projection, initial_fleet_index=initial_fleet_index)
+         admission = semantic_adapter.authorize_campaign_combat(
+             decision, state
+         )
+diff --git a/module/os_ash/meta.py b/module/os_ash/meta.py
+--- a/module/os_ash/meta.py
++++ b/module/os_ash/meta.py
+@@ -54,8 +54,12 @@
+ class Meta(UI, MapEventHandler):
+ 
+     def digit_ocr_point_and_check(self, button: Button, check_number: int):
+-        point_ocr = MetaDigitCounter(button, letter=(235, 235, 235), threshold=160, name='POINT_OCR')
+-        point, _, _ = point_ocr.ocr(self.device.image)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and getattr(button, 'name', None) == 'BEACON_REMAIN':
++            point = semantic_adapter.meta_assist_state().remaining_attempts
++        else:
++            point_ocr = MetaDigitCounter(button, letter=(235, 235, 235), threshold=160, name='POINT_OCR')
++            point, _, _ = point_ocr.ocr(self.device.image)
+         if point >= check_number:
+             return True
+         return False
+@@ -715,10 +719,17 @@
+         return self._attack_meta(skip_first_screenshot=False)
+ 
+     def run(self):
+-        self.ui_ensure(page_reward)
+-
+-        if self._begin_meta_assist():
+-            MetaReward(self.config, self.device).run()
+-            self.config.task_delay(server_update=True)
+-        else:
+-            self.config.task_delay(minute=(10, 20))
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.begin_meta_assist()
++        try:
++            self.ui_ensure(page_reward)
++
++            if self._begin_meta_assist():
++                MetaReward(self.config, self.device).run()
++                self.config.task_delay(server_update=True)
++            else:
++                self.config.task_delay(minute=(10, 20))
++        finally:
++            if semantic_adapter is not None:
++                semantic_adapter.end_meta_assist()

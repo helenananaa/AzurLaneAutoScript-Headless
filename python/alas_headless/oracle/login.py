@@ -106,7 +106,12 @@ class LoginOracle:
                 button.active_in_hierarchy
                 and button.active_and_enabled
                 and button.interactable
-                and button.raycast_top is None
+                # Older observer builds could not classify DialogPanel
+                # raycast ownership and reported ``None``.  Current builds
+                # positively prove the affirmative button is topmost with
+                # ``True``.  Preserve the historical unknown-but-reviewed
+                # shape while rejecting an explicitly obscured button.
+                and button.raycast_top is not False
                 and button.point is not None
                 and button.bounds is not None
                 and button.bounds.contains(button.point)

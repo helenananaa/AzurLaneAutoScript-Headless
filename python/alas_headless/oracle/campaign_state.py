@@ -13,9 +13,10 @@ from .contracts import (
     TextState,
 )
 from .errors import SemanticGateClosed, SemanticTargetMissing
+from .campaign_health import CampaignHealthOracle
 
 
-class CampaignStateOracle:
+class CampaignStateOracle(CampaignHealthOracle):
     """Campaign state operations sharing the oracle frame and input boundary."""
 
     def campaign_menu_is_entry(self) -> bool:
@@ -363,26 +364,18 @@ class CampaignStateOracle:
         """Return the exact destination exposed by the normal/hard switch."""
 
         state = self.read_state()
-        archive = self.war_archives_campaign_page_visible()
-        controls = {
-            "hard": (
-                "btn_act_elite" if archive else "btn_elite",
-                "LevelMainScene(Clone)/main/left_chapter/buttons/"
-                + ("btn_act_elite" if archive else "btn_elite"),
-            ),
-            "normal": (
-                "btn_act_normal" if archive else "btn_normal",
-                "LevelMainScene(Clone)/main/left_chapter/buttons/"
-                + ("btn_act_normal" if archive else "btn_normal"),
-            ),
-        }
+        # Both chapter families expose the destination in the native control.
+        # Reading that control remains valid under its stage-detail overlay;
+        # clicking it still requires the separate unobscured page contract.
+        controls = {'hard': ('btn_elite', 'btn_act_elite'),
+                    'normal': ('btn_normal', 'btn_act_normal')}
         observed = []
-        for destination, (name, suffix) in controls.items():
+        for destination, names in controls.items():
             matches = tuple(
                 button
                 for button in state.buttons
-                if button.name == name
-                and button.path.endswith(suffix)
+                if button.name in names
+                and button.path.endswith('LevelMainScene(Clone)/main/left_chapter/buttons/' + button.name)
                 and button.active_in_hierarchy
                 and button.active_and_enabled
                 and button.bounds is not None
@@ -1058,6 +1051,22 @@ class CampaignStateOracle:
             path=target.path,
         )
 
+    def campaign_precombat_visible(self) -> bool:
+        """Observe the Campaign preparation page without depending on repair stock."""
+        state = self.read_state()
+        roots = (
+            "OverlayCamera/Overlay/UIMain/ChapterPreCombatUI(Clone)",
+            "LevelCamera/Canvas/LevelOrigin/ChapterPreCombatUI(Clone)",
+        )
+        starts = [b for b in state.buttons
+                  if b.path in {root + '/adapt/right/start' for root in roots}
+                  and b.active_in_hierarchy and b.active_and_enabled]
+        if not starts:
+            return False
+        if len(starts) != 1:
+            raise SemanticGateClosed('campaign precombat identity is ambiguous')
+        return True
+
     def click_campaign_precombat_back(self) -> ActionReceipt:
         """Cancel the exact campaign formation page during safe recovery."""
 
@@ -1073,6 +1082,7 @@ class CampaignStateOracle:
             and button.active_in_hierarchy
             and button.active_and_enabled
             and button.interactable
+            and button.raycast_top is True
             and button.point is not None
             and button.bounds is not None
             and button.bounds.contains(button.point)
@@ -1105,6 +1115,11 @@ class CampaignStateOracle:
             )
         assert target.point is not None
         assert target.bounds is not None
+        if abs(button_state.generation - ui_state.generation) > 2:
+            raise SemanticGateClosed('campaign precombat back frames are incoherent')
+        if (self._blocking_rules(button_state, 'campaign/precombat/back')
+                or self._foreground_component() != self.fingerprint.component):
+            raise SemanticGateClosed('campaign precombat back is blocked')
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
         return ActionReceipt(
             semantic_id="campaign/precombat/back",
@@ -1117,6 +1132,10 @@ class CampaignStateOracle:
     def campaign_map_displayed_fleet_index(self) -> int:
         buttons = self.read_state()
         state = self.read_ui_state()
+        return self._campaign_displayed_fleet_index_from_states(buttons, state)
+
+    @staticmethod
+    def _campaign_displayed_fleet_index_from_states(buttons, state) -> int:
         if not buttons.generation <= state.generation <= buttons.generation+2:
             raise SemanticGateClosed('campaign fleet index frame is incoherent')
         stage_roots = tuple(
@@ -1245,6 +1264,60 @@ class CampaignStateOracle:
             raise SemanticGateClosed("foreground changed immediately before input")
         self._tap(int(round(point.x)), int(round(point.y)))
         return True
+
+    def campaign_withdraw_control(self, *, confirm: bool = False):
+        """Observe the exact map retreat or its own confirmation, without input."""
+        state = self.read_state()
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('campaign withdrawal frames are incoherent')
+        if confirm:
+            root = 'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/'
+            texts = [t for t in ui.texts if t.path == root + 'msg_panel/content'
+                     and t.active_in_hierarchy and t.active_and_enabled]
+            if not texts:
+                return None
+            if len(texts) != 1 or texts[0].truncated:
+                raise SemanticGateClosed('campaign withdrawal content is ambiguous')
+            if '真的要' not in texts[0].text or '撤退' not in texts[0].text:
+                return None
+            path = root + 'button_container/custom_button_1(Clone)'
+        else:
+            if not self.campaign_is_in_map():
+                return None
+            paths = [b.path for b in state.buttons if b.path.endswith(
+                '/LevelStageView(Clone)/bottom_stage/Normal/retreat_button')
+                and b.active_in_hierarchy and b.active_and_enabled]
+            if len(paths) != 1:
+                raise SemanticGateClosed('campaign withdrawal control is ambiguous')
+            path = paths[0]
+        targets = [b for b in state.buttons if b.path == path
+                   and b.active_in_hierarchy and b.active_and_enabled]
+        if len(targets) != 1:
+            raise SemanticGateClosed('campaign withdrawal control is ambiguous')
+        target = targets[0]
+        if (not target.interactable or target.raycast_top is not True
+                or target.bounds is None or target.point is None
+                or not target.bounds.contains(target.point)):
+            return None
+        return target, max(state.generation, ui.generation)
+
+    def click_campaign_withdraw(self, *, confirm: bool = False) -> ActionReceipt:
+        control = self.campaign_withdraw_control(confirm=confirm)
+        if control is None:
+            raise SemanticGateClosed('campaign withdrawal target is not actionable')
+        target, generation = control
+        semantic_id = 'campaign/map/withdraw/' + ('confirm' if confirm else 'open')
+        state = self.read_state()
+        if abs(state.generation - generation) > 2:
+            raise SemanticGateClosed('campaign withdrawal input frame changed')
+        if (self._blocking_rules(state, semantic_id)
+                or self._foreground_component() != self.fingerprint.component):
+            raise SemanticGateClosed('campaign withdrawal input is blocked')
+        point = target.point
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(semantic_id=semantic_id, generation=generation,
+                             point=point, bounds=target.bounds, path=target.path)
 
     def open_campaign_withdraw_confirmation(self) -> bool:
         """Open, but do not confirm, the exact active campaign withdrawal."""
@@ -1397,7 +1470,7 @@ class CampaignStateOracle:
             item
             for item in state.images
             if suffix in item.path
-            and item.path.endswith("/blood/fillarea/green")
+            and item.path.endswith(("/blood/fillarea/green", "/blood/fillarea/red"))
             and item.active_in_hierarchy
             and item.active_and_enabled
             and not item.truncated
@@ -1421,6 +1494,100 @@ class CampaignStateOracle:
             for item in ordered
         )
         return values
+
+    def _campaign_vitals_slots(self, fleet_index: int, *, precombat=False, expected_occupied=None,
+                               expected_identity=None):
+        """Pair each occupied portrait with its surface's actual HP encoding."""
+        before = self.read_state()
+        if precombat:
+            from .campaign_health import PRECOMBAT
+            if self.campaign_emergency_repair_state() is None:
+                raise SemanticGateClosed('campaign HP precombat is unavailable')
+            prefix = PRECOMBAT + 'adapt/middle/fleet/'
+            axis = 'left'
+        else:
+            self.campaign_map_entry_state()
+            if self.campaign_map_displayed_fleet_index() != fleet_index:
+                raise SemanticGateClosed('campaign HP belongs to another displayed fleet')
+            prefix = '/LevelStageView(Clone)/left_stage/fleet/'
+            axis = 'top'
+        ui = self.read_ui_state()
+        if not before.generation <= ui.generation <= before.generation + 2:
+            raise SemanticGateClosed('campaign HP-control frames are incoherent')
+        count = 6 if expected_occupied is None else expected_occupied
+        if type(count) is not int or not 2 <= count <= 6:
+            raise SemanticGateClosed('campaign occupied ship count is invalid')
+        def collect(endings):
+            items = [i for i in ui.images if prefix in i.path and i.path.endswith(endings)
+                     and i.active_in_hierarchy and i.active_and_enabled]
+            if len(items) != count or any(i.truncated or not i.sprite or i.bounds is None for i in items):
+                raise SemanticGateClosed('campaign HP-control occupied slots are incomplete')
+            return sorted(items, key=lambda i: (0 if '/main/' in i.path else 1,
+                                                getattr(i.bounds, axis)))
+        portraits = collect('/icon_bg/icon')
+        bars = collect(('/blood/fillarea/green', '/blood/fillarea/red'))
+        if expected_identity is not None:
+            identity = tuple(tuple(sorted(i.sprite for i in portraits if '/' + group + '/' in i.path))
+                             for group in ('main', 'vanguard'))
+            if identity != expected_identity:
+                raise SemanticGateClosed('campaign inherited fleet identity changed')
+        slots = []
+        for group in ('main', 'vanguard'):
+            ships = [i for i in portraits if '/' + group + '/' in i.path]
+            health = [i for i in bars if '/' + group + '/' in i.path]
+            if not 1 <= len(ships) <= 3 or len(ships) != len(health):
+                raise SemanticGateClosed('campaign HP-control group membership is incomplete')
+            for items in (ships, health):
+                positions = [getattr(i.bounds, axis) for i in items]
+                if any(a >= b for a, b in zip(positions, positions[1:])):
+                    raise SemanticGateClosed('campaign HP-control slot identity is ambiguous')
+            for portrait, bar in zip(ships, health):
+                if (not portrait.bounds.top < bar.bounds.top < portrait.bounds.bottom
+                        or not portrait.bounds.left < bar.bounds.left < portrait.bounds.right
+                        or not 0.0 <= bar.fill_amount <= 1.0):
+                    raise SemanticGateClosed('campaign HP-control portrait and HP slot disagree')
+                slots.append((portrait, bar))
+            slots.extend([None] * (3 - len(ships)))
+        if sum(slot is not None for slot in slots) != count:
+            raise SemanticGateClosed('campaign HP-control group identity is unknown')
+        return slots, ui
+
+    def campaign_hp_control_snapshot(self, fleet_index: int, *, precombat=False, expected_occupied=None,
+                                     expected_identity=None):
+        slots, _ = self._campaign_vitals_slots(fleet_index, precombat=precombat,
+                                              expected_occupied=expected_occupied, expected_identity=expected_identity)
+        # The map's fillAmount is an unused prefab value; precombat drives it.
+        hp = tuple(0.0 if slot is None else (slot[1].fill_amount if precombat else
+            min(1.0, max(0.0, (slot[1].bounds.right - slot[1].bounds.left) / 66.333)))
+            for slot in slots)
+        return hp, tuple(slot is not None for slot in slots)
+
+    def campaign_sparse_fleet_levels(self, fleet_index: int, *, expected_occupied: int,
+                                     expected_identity=None):
+        slots, ui = self._campaign_vitals_slots(fleet_index, expected_occupied=expected_occupied,
+                                               expected_identity=expected_identity)
+        values = []
+        used = set()
+        for slot in slots:
+            if slot is None:
+                values.append(0)
+                continue
+            portrait, _ = slot
+            root = portrait.path.rsplit('/icon_bg/icon', 1)[0]
+            matches = [(index, t) for index, t in enumerate(ui.texts)
+                       if t.path == root + '/icon_bg/lv/Text'
+                       and t.active_in_hierarchy and t.active_and_enabled
+                       and t.bounds is not None and not t.truncated
+                       and portrait.bounds.top <= (t.bounds.top + t.bounds.bottom) / 2 < portrait.bounds.bottom
+                       and portrait.bounds.left <= (t.bounds.left + t.bounds.right) / 2 < portrait.bounds.right]
+            if len(matches) != 1 or matches[0][0] in used:
+                raise SemanticGateClosed('campaign sparse fleet levels are incomplete or ambiguous')
+            index, text = matches[0]
+            if re.fullmatch(r'(?:[1-9]|[1-9][0-9]|1[01][0-9]|12[0-5])', text.text.strip()) is None:
+                raise SemanticGateClosed('campaign fleet level is outside the pinned range')
+            used.add(index)
+            values.append(int(text.text.strip()))
+        return tuple(values)
 
     def campaign_fleet_levels(self) -> Tuple[int, ...]:
         """Read the six visible campaign levels in ALAS slot order."""

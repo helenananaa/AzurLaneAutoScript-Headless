@@ -1,0 +1,242 @@
+{
+  "schema": "alas-headless.natural-hp-dock-assessment/v1",
+  "passed": true,
+  "scope": "inherited real dock-full prompt above sortie preparation, original retirement then new sortie/two battles and natural 0.3 HP retreat",
+  "retirement": {
+    "retired_count": 95,
+    "capacity_before": 930,
+    "capacity_after": 835,
+    "capacity_total": 930,
+    "settings": {
+      "generation": 147739,
+      "unique_ship_protection": true,
+      "priority": [
+        "R",
+        "SR",
+        "N"
+      ],
+      "full_star_policy": "keep_none",
+      "no_full_star_policy": "keep_needed"
+    },
+    "rewards": [
+      [
+        "物资",
+        1600
+      ],
+      [
+        "荣誉勋章",
+        47
+      ]
+    ],
+    "rarity_warning_confirmed": true,
+    "equipment_preserved": true,
+    "actions": [
+      {
+        "semantic_id": "retirement/settings/open",
+        "generation": 147722,
+        "point": {
+          "x": 35.53,
+          "y": 519.948
+        },
+        "bounds": {
+          "left": 7.872,
+          "top": 488.958,
+          "right": 63.188,
+          "bottom": 550.938
+        },
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/setting",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/settings/close",
+        "generation": 147742,
+        "point": {
+          "x": 1001.277,
+          "y": 110.867
+        },
+        "bounds": {
+          "left": 964.554,
+          "top": 85.2,
+          "right": 1038.0,
+          "bottom": 136.533
+        },
+        "path": "OverlayCamera/Overlay/UIMain/DockyardQuickSelectSettingUI(Clone)/window/top/btnBack",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/one-click",
+        "generation": 147750,
+        "point": {
+          "x": 725.0,
+          "y": 673.333
+        },
+        "bounds": {
+          "left": 634.03,
+          "top": 639.678,
+          "right": 815.97,
+          "bottom": 706.989
+        },
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/select_panel/quick_select",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/ships/confirm",
+        "generation": 147760,
+        "point": {
+          "x": 1014.0,
+          "y": 649.067
+        },
+        "bounds": {
+          "left": 923.0,
+          "top": 615.4,
+          "right": 1105.0,
+          "bottom": 682.733
+        },
+        "path": "OverlayCamera/Overlay/UIMain/DestoryInfoUI(Clone)/frame/confirm_button",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/rarity-warning/confirm",
+        "generation": 147769,
+        "point": {
+          "x": 793.333,
+          "y": 549.933
+        },
+        "bounds": {
+          "left": 702.333,
+          "top": 516.267,
+          "right": 884.333,
+          "bottom": 583.6
+        },
+        "path": "OverlayCamera/Overlay/UIMain/DestoryConfirmWindow(Clone)/window/confirm_btn",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/reward/close",
+        "generation": 147782,
+        "point": {
+          "x": 640.0,
+          "y": 482.067
+        },
+        "bounds": {
+          "left": 564.667,
+          "top": 465.4,
+          "right": 715.333,
+          "bottom": 498.733
+        },
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/equipment/deselect-all",
+        "generation": 147794,
+        "point": {
+          "x": 200.333,
+          "y": 601.333
+        },
+        "bounds": {
+          "left": 143.667,
+          "top": 584.667,
+          "right": 257.0,
+          "bottom": 618.0
+        },
+        "path": "OverlayCamera/Overlay/UIMain/ResolveEquipmentUI(Clone)/main/options/ALL",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/equipment/cancel-disassembly",
+        "generation": 147803,
+        "point": {
+          "x": 844.267,
+          "y": 605.867
+        },
+        "bounds": {
+          "left": 753.267,
+          "top": 572.2,
+          "right": 935.267,
+          "bottom": 639.533
+        },
+        "path": "OverlayCamera/Overlay/UIMain/ResolveEquipmentUI(Clone)/main/cancel_btn",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/equipment/preserve/confirm",
+        "generation": 147809,
+        "point": {
+          "x": 790.0,
+          "y": 515.0
+        },
+        "bounds": {
+          "left": 699.0,
+          "top": 481.333,
+          "right": 881.0,
+          "bottom": 548.667
+        },
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+        "policy_sha256": null,
+        "capability_id": null
+      }
+    ],
+    "policy_sha256": null,
+    "capability_id": null
+  },
+  "low_hp_trigger": {
+    "triggered": true,
+    "threshold": 0.3,
+    "hp": [
+      0.21889557233955945,
+      0.6031085583344639,
+      0.7470037537877074,
+      0.45790179850150003,
+      0.7003000015075453,
+      0.8196071337041895
+    ],
+    "present": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "battle_count": 2
+  },
+  "completed_battles": [
+    {
+      "battle_count": 0,
+      "retirement_transactions_before": 1,
+      "finished_at": "2026-09-09T14:22:27.468734Z"
+    },
+    {
+      "battle_count": 1,
+      "retirement_transactions_before": 1,
+      "finished_at": "2026-09-09T14:25:43.962311Z"
+    }
+  ],
+  "oil_before": 13498,
+  "oil_after": 13424,
+  "oil_consumed": 74,
+  "final_dock_capacity": "836/930",
+  "tests_passed": 120,
+  "remaining": [
+    "mid-map battle-drop dock-full and same-map continuation",
+    "other fleet/stage combinations",
+    "natural default emergency repair triggering"
+  ],
+  "source_sha256": {
+    "python/alas_headless/oracle/blockers.py": "ecbaff59fd9c1c9e05816997d7c5d29d1da50f01898f2f9b2fa278fda5f53128",
+    "integration/alas/series/0630-campaign-inherited-dock-full.patch": "12b8ad0e91da8682302793d8e370785d67e3c56da0747333af67b64866dded80",
+    "integration/alas/series/series.json": "31988ec144110411ffc9e0c5b89f0d249544775c7e376de3aa71356d28e43d81",
+    "integration/alas/0001-semantic-oracle-hooks.patch": "cce9604b402f6b0c16080de1def6389b3b3c3ce7b7f9117406340be759d9f13f",
+    "scripts/python/run_alas_main_task_live_validation.py": "a666c82108e1cdfab5682d226bf1fd80d5ca88c58bd786be0d8931422d34f67f"
+  },
+  "validation_note": "119 passed in full scope; generated matrix refreshed, all 8 matrix tests passed on targeted rerun; 120 unique tests passing"
+}

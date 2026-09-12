@@ -168,6 +168,54 @@ System UI or other non-game surfaces may have different behavior. A visible or
 black framebuffer alone is not evidence that the semantic runtime is healthy
 or broken.
 
+## Emulator DNS and TUN troubleshooting
+
+If the game reports `最新版本获取失败（请检查网络连接情况）` or login/update
+stalls while the observer remains healthy, check guest DNS before repeatedly
+clicking retry or rebuilding/reinstalling anything. Windows TUN/proxy software
+can expose a virtual DNS resolver that the emulator's automatically selected
+DNS path cannot use. Treat this as a possible cause, not a proven diagnosis
+from TUN being enabled alone.
+
+- First wait for `adb -s <discovered-serial> shell getprop sys.boot_completed`
+  to return `1`; DNS failures during Android startup are not conclusive.
+- Compare Windows `Resolve-DnsName <relevant-hostname>` with guest resolution,
+  for example `adb -s <discovered-serial> shell ping -c 1 -W 2 <relevant-hostname>`.
+  `unknown host` indicates a resolution failure; a hostname resolving to an IP
+  followed by lost ICMP packets does not establish that DNS or HTTPS is broken.
+- Inspect `Get-DnsClientServerAddress -AddressFamily IPv4`, guest
+  `dumpsys connectivity`, `ip route show table all`, and proxy/private-DNS
+  settings as needed. Android may keep the default route in a policy table;
+  an empty default route in the main table alone does not prove disconnection.
+- If host resolution works but guest resolution fails, test a currently
+  reachable resolver explicitly with
+  `Resolve-DnsName <relevant-hostname> -Server <resolver-IP> -DnsOnly`.
+  Prefer a verified resolver appropriate to the current network and intended
+  DNS/privacy routing; do not hardcode an old LAN address or silently bypass
+  an explicitly required proxy-only route.
+- A localized recovery is to restart only the task-owned AVD with its existing
+  launch arguments plus `-dns-server <verified-resolver-IP>`. Confirm no other
+  task is actively using that instance before restarting it. Preserve the AVD,
+  userdata, image, renderer and other launch settings. This is a launch-time
+  override, not a permanent fix for future launches.
+- Do not disable the system TUN/proxy, change system-wide DNS, reset userdata,
+  reinstall the game, or switch away from ANGLE NULL as the default DNS fix.
+  If the resolver override does not help, inspect guest connectivity and the
+  actual failure instead of assuming another DNS address will solve it.
+- After recovery, recheck guest resolution and actual game login/update, launch
+  the game with `-force-gfx-st`, and verify package/foreground/PID, advancing
+  coherent semantic frames and the intended usable page. DNS success alone is
+  not evidence that the game is ready for development.
+
+Observed on 2026-09-09: Windows `xray_tun` advertised DNS `172.18.0.1`, while
+WLAN advertised `192.168.5.1`. The emulator's default DNS path failed to resolve
+names. After verifying the LAN resolver, restarting the same AVD with
+`-dns-server 192.168.5.1` restored resolution; subsequent game startup/login
+recovery reached the main page with fresh semantic state while TUN remained
+enabled. These addresses are historical examples, not defaults or allowlists;
+the result supports a DNS-path compatibility issue, not proof that all TUN
+configurations break emulator networking.
+
 ## Fail-closed semantic boundary
 
 - Do not fall back to screenshots, OCR pixels, template matching, old asset

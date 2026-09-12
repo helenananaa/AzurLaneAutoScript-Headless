@@ -396,6 +396,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "/DailyLevelUI(Clone)/",
         (
             "daily/page/back",
+            "daily/run/normal",
+            "daily/run/skip",
             "daily/next",
             "daily/prev",
             "daily/stage/1",
@@ -421,6 +423,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "campaign/map-preparation/mode/hard",
             "campaign/map-preparation/proceed",
             "campaign/map-preparation/cancel",
+            "campaign/dock-full/organize",
+            "campaign/dock-full/enhance",
         ),
     ),
     BlockerRule(
@@ -446,6 +450,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "campaign/2x-book/cancel",
             "campaign/2x-book/warning-dismiss",
             "campaign/fleet-preparation/cancel",
+            "campaign/dock-full/organize",
+            "campaign/dock-full/enhance",
             *_CAMPAIGN_FLEET_INPUT_TARGETS,
         ),
     ),
@@ -733,6 +739,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         (
             "retirement/equipment/preserve/confirm",
             "campaign/map/submarine/oil/confirm",
+            "campaign/map/withdraw/confirm",
             "campaign/map/submarine/oil/cancel",
             "campaign/2x-book/confirm",
             "campaign/2x-book/cancel",

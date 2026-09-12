@@ -29,6 +29,7 @@ class AlasCampaignFleetPlan:
     pickup_routes: Tuple[AlasCampaignRoutePlan, ...]
     recommended_enemy_node: Optional[str]
     recommended_pickup_node: Optional[str]
+    empty_routes: Tuple[AlasCampaignRoutePlan, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -547,6 +548,11 @@ def synchronize_alas_campaign_map(
                     ),
                     recommended_enemy_node=_recommended(enemy_routes),
                     recommended_pickup_node=_recommended(pickup_routes),
+                    empty_routes=tuple(route for cell in state.cells
+                        if cell.node not in set(enemy_nodes + pickup_nodes + fleet_nodes)
+                        and (state.submarine is None or cell.node != state.submarine.node)
+                        for route in (_route_plan(campaign.map, cell.node, 'move',
+                            columns=state.columns, rows=state.rows),) if route is not None),
                 )
             )
 

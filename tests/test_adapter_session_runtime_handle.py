@@ -481,7 +481,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
             oracle=oracle,
             _frame_or_live_observation_oracle=lambda: oracle,
             campaign_combat_committed=lambda: True,
-            _campaign_context=SimpleNamespace(passive_transition_until=0.0),
+            _campaign_context=SimpleNamespace(passive_transition_until=0.0, submarine_move_confirm=None),
             _login_flow=SimpleNamespace(active=False),
             _mail_context=None,
             _minigame_context=None,

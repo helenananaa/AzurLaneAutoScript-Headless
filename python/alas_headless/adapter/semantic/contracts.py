@@ -324,8 +324,19 @@ class CampaignAutoSearchEvidenceBundle:
 @dataclass
 class _CampaignFlowContext:
     stage_code: str
+    withdrawal_open_receipt: Optional[ActionReceipt] = None
+    withdrawal_confirm_receipt: Optional[ActionReceipt] = None
+    repair_open_receipt: Optional[ActionReceipt] = None
+    repair_use_receipt: Optional[ActionReceipt] = None
+    repair_count_before: Optional[int] = None
+    repair_hp_before: Optional[Tuple[float, ...]] = None
+    repair_post_deadline: float = 0.0
+    repair_history: List[Any] = field(default_factory=list)
+    scout_drag_pending: Optional[Any] = None
+    scout_swap_history: List[Any] = field(default_factory=list)
     mode: str = "normal"
     menu_entry_receipt: Optional[ActionReceipt] = None
+    archive_menu_entry_receipt: Optional[ActionReceipt] = None
     entry_receipt: Optional[ActionReceipt] = None
     map_preparation_receipt: Optional[ActionReceipt] = None
     auto_search_toggle_receipt: Optional[ActionReceipt] = None
@@ -341,6 +352,8 @@ class _CampaignFlowContext:
     proof: Optional[CampaignPreSortieProof] = None
     initial_fleet_state: Optional[CampaignFleetSelectionState] = None
     prepared_fleet_state: Optional[CampaignFleetSelectionState] = None
+    inherited_fleet_identity: Optional[Tuple[Tuple[str, ...], Tuple[str, ...]]] = None
+    inherited_fleet_index: Optional[int] = None
     requested_fleets: Optional[Tuple[int, int, int]] = None
     required_fleet_mutations: int = 0
     expected_fleet_mutations: Tuple[str, ...] = ()

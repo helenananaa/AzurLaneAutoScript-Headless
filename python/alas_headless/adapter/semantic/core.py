@@ -308,6 +308,8 @@ class CoreAdapterPorts:
         self._operation_siren_combat_fleet: Optional[int] = None
         self._operation_siren_defeated_fleets: set[int] = set()
         self._meta_beacon_active = False
+        self._meta_assist_active = False
+        self._main_more_entry_receipt = None
         self._operation_siren_pending_order: Optional[str] = None
         self._exercise_pending = False
         self._exercise_execution_active = False

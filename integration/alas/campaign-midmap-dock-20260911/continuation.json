@@ -1,0 +1,151 @@
+{
+  "schema": "alas-headless.main-task-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-09-11T02:38:29.647419Z",
+  "finished_at": "2026-09-11T02:40:37.187392Z",
+  "task": "Main",
+  "stage": "10-2",
+  "serial": "emulator-5580",
+  "run_count_requested": 1,
+  "execution_status": "incomplete",
+  "error": "SystemExit: 1",
+  "preparations": [],
+  "completed_sorties": [],
+  "auto_menu_observations": [],
+  "continuation_receipts": [],
+  "submarine_observations": [],
+  "submarine_calls": [],
+  "combat_admissions": [
+    {
+      "generation": 31530,
+      "battle_count": 0,
+      "target": "C6",
+      "expected": "combat",
+      "submarine": null,
+      "hunting_nodes": null,
+      "submarine_destination": null
+    }
+  ],
+  "hp_observations": [
+    {
+      "fleet_index": 1,
+      "vitals": [
+        [
+          1.0,
+          1.0,
+          1.0,
+          0.9619043311775437,
+          1.0,
+          0.988602957803808
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "fleet_index": 1,
+      "vitals": [
+        [
+          1.0,
+          1.0,
+          1.0,
+          0.950808798034161,
+          1.0,
+          0.9890099950251005
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    }
+  ],
+  "withdrawal_receipts": [],
+  "repair_inspections": [],
+  "repair_use_samples": [],
+  "precombat_probes": [],
+  "retirement_receipts": [],
+  "completed_battles": [
+    {
+      "battle_count": 0,
+      "native_map": {
+        "pid": 1953,
+        "cells": {
+          "chapter_cell_quad_7_8": -181850,
+          "chapter_cell_quad_7_7": -181818,
+          "chapter_cell_quad_7_5": -181772,
+          "chapter_cell_quad_7_4": -181740,
+          "chapter_cell_quad_7_3": -181708,
+          "chapter_cell_quad_7_2": -181676,
+          "chapter_cell_quad_7_1": -181644,
+          "chapter_cell_quad_6_8": -181612,
+          "chapter_cell_quad_6_7": -181580,
+          "chapter_cell_quad_6_5": -181534,
+          "chapter_cell_quad_6_4": -181502,
+          "chapter_cell_quad_6_1": -181442,
+          "chapter_cell_quad_5_7": -181396,
+          "chapter_cell_quad_5_6": -181364,
+          "chapter_cell_quad_5_5": -181332,
+          "chapter_cell_quad_5_2": -181272,
+          "chapter_cell_quad_5_1": -181240,
+          "chapter_cell_quad_4_7": -181194,
+          "chapter_cell_quad_4_6": -181162,
+          "chapter_cell_quad_4_5": -181130,
+          "chapter_cell_quad_4_2": -181070,
+          "chapter_cell_quad_4_1": -181038,
+          "chapter_cell_quad_3_8": -181006,
+          "chapter_cell_quad_3_7": -180974,
+          "chapter_cell_quad_3_5": -180928,
+          "chapter_cell_quad_3_4": -180896,
+          "chapter_cell_quad_3_1": -180836,
+          "chapter_cell_quad_2_8": -180804,
+          "chapter_cell_quad_2_7": -180772,
+          "chapter_cell_quad_2_5": -180726,
+          "chapter_cell_quad_2_4": -180694,
+          "chapter_cell_quad_2_3": -180662,
+          "chapter_cell_quad_2_2": -180630,
+          "chapter_cell_quad_2_1": -180598
+        }
+      },
+      "sortie_generation": null,
+      "retirement_transactions_before": 0,
+      "finished_at": "2026-09-11T02:40:20.210578Z"
+    }
+  ],
+  "low_hp_decisions": [
+    {
+      "triggered": false,
+      "threshold": 0.3,
+      "hp": [
+        1.0,
+        1.0,
+        1.0,
+        0.9619043311775437,
+        1.0,
+        0.988602957803808
+      ],
+      "present": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "battle_count": 0
+    }
+  ],
+  "scout_inspections": [],
+  "submarine_moves": [],
+  "submarine_strategy": []
+}

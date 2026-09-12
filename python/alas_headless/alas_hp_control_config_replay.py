@@ -91,6 +91,9 @@ def _verify_original_decisions(hp_balancer: type[Any], combat: type[Any]) -> dic
         # the patched semantic method still receives its typed-session stub
         # below.
         SERVER="cn",
+        HpControl_UseLowHpRetreat=False,
+        HpControl_UseEmergencyRepair=False,
+        HpControl_UseHpBalance=False,
     )
     weighted.fleet_current_index = 1
     weighted._hp = {}
@@ -165,11 +168,41 @@ def _verify_original_decisions(hp_balancer: type[Any], combat: type[Any]) -> dic
     )
     if combat.handle_emergency_repair_use(fake) is not True or len(repair_clicks) != 1:
         raise AssertionError("original emergency-repair decision drifted")
+    semantic_repair_calls = []
+    semantic_drag_delegated = None
+    if 'campaign_repair_postcondition' in combat.handle_emergency_repair_use.__code__.co_names:
+        fake.device.semantic_adapter = SimpleNamespace(
+            campaign_repair_postcondition=lambda: None,
+            wait_campaign_repair_ready=lambda: semantic_repair_calls.append('typed-ready'),
+        )
+        def reject_pixels(*args, **kwargs):
+            raise AssertionError('semantic repair reached pixel stabilization')
+        fake.wait_until_disappear = fake.wait_until_stable = reject_pixels
+        if combat.handle_emergency_repair_use(fake) is not True or semantic_repair_calls != ['typed-ready']:
+            raise AssertionError('original repair did not use typed stabilization')
+        raw_drags, typed_drags = [], []
+        drag_host = SimpleNamespace(device=SimpleNamespace(
+            semantic_adapter=SimpleNamespace(change_campaign_scout_position=
+                lambda p1, p2: typed_drags.append((p1, p2))),
+            drag=lambda **kwargs: raw_drags.append(kwargs)))
+        hp_balancer._scout_position_change(drag_host, 0, 1)
+        semantic_drag_delegated = typed_drags == [(0, 1)] and not raw_drags
+        if not semantic_drag_delegated:
+            raise AssertionError('scout drag bypassed the typed boundary')
+        from itertools import permutations
+        for target in permutations(range(3)):
+            order = list(range(3))
+            for source, destination in hp_balancer._gen_exchange_step_drag(None, target):
+                order.insert(destination, order.pop(source))
+            if order != list(target):
+                raise AssertionError('original insertion planner drifted')
     return {
         "weighted_hp": weighted_hp,
         "scout_order_cases": order_cases,
         "retreat_cases": retreat_cases,
         "emergency_repair_final_input_boundaries": len(repair_clicks),
+        "semantic_repair_stabilization": semantic_repair_calls,
+        "semantic_scout_drag_delegated": semantic_drag_delegated,
     }
 
 
@@ -193,7 +226,7 @@ def verify_hp_control_config(alas_root: Path) -> dict[str, Any]:
             validate_alas_hp_control_config(**config)
             accepted_cases.append(f"{field}:{value}")
 
-    refused_features = []
+    admitted_features = []
     for field in (
         "use_hp_balance",
         "use_emergency_repair",
@@ -201,12 +234,8 @@ def verify_hp_control_config(alas_root: Path) -> dict[str, Any]:
     ):
         config = _defaults()
         config[field] = True
-        try:
-            validate_alas_hp_control_config(**config)
-        except SemanticGateClosed as exc:
-            refused_features.append({"field": field, "reason": str(exc)})
-        else:
-            raise AssertionError("unqualified HP-control feature was admitted")
+        validate_alas_hp_control_config(**config)
+        admitted_features.append(field)
 
     invalid_cases = 0
     for field, value in (
@@ -236,7 +265,8 @@ def verify_hp_control_config(alas_root: Path) -> dict[str, Any]:
         "panel_count": len(panels),
         "panels": list(panels),
         "accepted_boundary_cases": accepted_cases,
-        "refused_features": refused_features,
+        "admitted_configuration_features": admitted_features,
+        "remaining_live_boundary": "natural default emergency repair, mid-map dock-full continuation and other sparse configurations",
         "invalid_case_count": invalid_cases,
         "original_decisions": decisions,
         "mutation_budget": 0,

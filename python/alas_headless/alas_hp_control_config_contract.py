@@ -67,7 +67,7 @@ def validate_alas_hp_control_config(
     repair_use_multi_threshold: object,
     low_hp_retreat_threshold: object,
 ) -> AlasHpControlConfigSnapshot:
-    """Validate all values, then refuse branches lacking final semantic input."""
+    """Validate values; unsupported input branches fail at their owning port."""
 
     snapshot = AlasHpControlConfigSnapshot(
         use_hp_balance=_boolean("HpControl_UseHpBalance", use_hp_balance),
@@ -91,16 +91,4 @@ def validate_alas_hp_control_config(
             "HpControl_LowHpRetreatThreshold", low_hp_retreat_threshold
         ),
     )
-    if snapshot.use_hp_balance:
-        raise SemanticGateClosed(
-            "HP balance requires an unqualified scout-position drag"
-        )
-    if snapshot.use_emergency_repair:
-        raise SemanticGateClosed(
-            "emergency repair requires unqualified combat template input"
-        )
-    if snapshot.use_low_hp_retreat:
-        raise SemanticGateClosed(
-            "low-HP retreat reaches an unqualified campaign withdrawal loop"
-        )
     return snapshot

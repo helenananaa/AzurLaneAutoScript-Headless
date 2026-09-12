@@ -1,0 +1,29 @@
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -496,6 +496,25 @@
+                     'Recovered NetworkDown before campaign startup surface check')
+                 self.device.screenshot()
+                 self.campaign.device.image = self.device.image
++            if semantic_adapter is not None and semantic_adapter.campaign_dock_full_visible():
++                for _ in self.campaign.loop(timeout=30):
++                    if self.campaign._semantic_campaign_retirement_recovery():
++                        break
++                else:
++                    raise ScriptEnd('Inherited dock-full recovery did not complete')
++                self.device.screenshot()
++                self.campaign.device.image = self.device.image
++            if semantic_adapter is not None and semantic_adapter.campaign_precombat_visible():
++                semantic_adapter.click_campaign_precombat_back()
++                for _ in self.campaign.loop(timeout=30):
++                    self.device.screenshot()
++                    self.campaign.device.image = self.device.image
++                    if self.campaign.is_in_map():
++                        break
++                else:
++                    raise ScriptEnd('Inherited precombat recovery did not reach map')
++                logger.info('Recovered inherited precombat to campaign map')
++
+             if self.campaign.is_in_map():
+                 if semantic_adapter is not None:
+                     semantic_map_resume = True

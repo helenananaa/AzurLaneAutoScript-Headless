@@ -1,0 +1,17 @@
+{
+  "semantic_id": "overlay/network-reconnect/confirm",
+  "generation": 495409,
+  "point": {
+    "x": 790.0,
+    "y": 515.0
+  },
+  "bounds": {
+    "left": 699.0,
+    "top": 481.333,
+    "right": 881.0,
+    "bottom": 548.667
+  },
+  "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+  "policy_sha256": null,
+  "capability_id": null
+}

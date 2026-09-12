@@ -13,7 +13,7 @@ import threading
 from contextlib import contextmanager
 from dataclasses import dataclass
 from types import MethodType
-from typing import Any, Dict, Iterable, Iterator, Tuple
+from typing import Any, Dict, Iterable, Iterator, Optional, Tuple
 
 from .alas_map_sync import AlasCampaignMapProjection, AlasCampaignRoutePlan
 from .semantic_oracle import SemanticGateClosed
@@ -199,6 +199,9 @@ def _matching_route(
     elif target_node in projection.pickup_nodes:
         kind = "ammo"
         routes = fleet.pickup_routes
+    elif any(route.target_node == target_node for route in fleet.empty_routes):
+        kind = 'move'
+        routes = fleet.empty_routes
     else:
         raise SemanticGateClosed(
             "ALAS decision target is outside semantic enemy/pickup input"
@@ -273,6 +276,8 @@ def _reject_emotion_sleep(emotion: Any) -> Iterator[None]:
 def preview_alas_campaign_decision(
     campaign: Any,
     projection: AlasCampaignMapProjection,
+    *,
+    initial_fleet_index: Optional[int] = None,
 ) -> AlasCampaignDecisionPreview:
     """Run ALAS's original battle branch until its first exact goto boundary.
 
@@ -456,6 +461,8 @@ def preview_alas_campaign_decision(
         sandbox.goto = capture_goto
         sandbox._goto = capture_goto
         sandbox.fleet_ensure = MethodType(preview_fleet_ensure, sandbox)
+        if initial_fleet_index is not None:
+            preview_fleet_ensure(sandbox, initial_fleet_index)
         with _reject_emotion_sleep(emotion):
             try:
                 sandbox.battle_function()

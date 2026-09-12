@@ -43,6 +43,16 @@ class Clock:
 
 
 class LoginOracle:
+    def read_state(self):
+        from types import SimpleNamespace
+        return SimpleNamespace(generation=7, buttons=())
+
+    def observation_target_present(self, semantic_id):
+        return self.frame.exists.get(semantic_id, False)
+
+    def main_page_visible(self):
+        return bool(self.frame.enabled.get('main/battle') or self.frame.enabled.get('main/formation'))
+
     def __init__(self, frame):
         self.frame = frame
         self.events = []

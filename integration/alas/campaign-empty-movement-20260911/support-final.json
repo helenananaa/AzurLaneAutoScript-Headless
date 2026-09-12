@@ -1,0 +1,31 @@
+{
+  "configuration_source": {
+    "config_sha256": {
+      "config/template.json": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
+      "module/config/argument/args.json": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+      "module/config/argument/task.yaml": "19e6464aaa1e92913ba9f31de590096a09b101638969c41e14c70dd1a4eb6c5a"
+    },
+    "field_count": 278,
+    "panel_count": 60,
+    "panel_field_instance_count": 1217
+  },
+  "configuration_source_verified": true,
+  "counts": {
+    "field_count": 278,
+    "panel_count": 60,
+    "panel_field_instance_count": 1217
+  },
+  "field_classes": {
+    "complete": 55,
+    "declared_only": 0,
+    "live_partial": 147,
+    "offline_only": 61,
+    "unsupported": 15
+  },
+  "patch_series": {
+    "combined_sha256": "3ece5992c4f49a429fb777c810a109fc04d43afbdba1e95ab65452196e8b2299",
+    "manifest_sha256": "0d7d9aa369c61ce75888d19dd50a8dd2c2edf077f69c73fac532f347009b4469",
+    "member_count": 111
+  },
+  "schema": "alas-headless.support-matrix-verification/v1"
+}

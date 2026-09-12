@@ -298,6 +298,26 @@ class AlasCampaignCameraViewTests(unittest.TestCase):
         )
         self.assertEqual(before.predict_swipe(edge_after), (0, 0))
 
+    def test_predict_swipe_resumed_combat_requires_fighting_enemy_and_ammo(self):
+        enemy = CampaignMapEnemyState(row=3, column=3, node="C3",
+            object_id=1001, sprite="enemyicon", scale=1, genre="Main",
+            level=2, fighting=True)
+        fleet = CampaignMapFleetState("fleet", "C3", 4, 5)
+        before_state = replace(make_state(generation=10), fleets=(fleet,), enemies=(enemy,))
+        after_state = replace(before_state, generation=12,
+            fleets=(replace(fleet, ammo=3),), enemies=())
+        def view(state):
+            return build_alas_campaign_camera_view(state, screen_center=(350., 300.))
+        self.assertEqual(view(before_state).predict_swipe(view(after_state)), (0, 0))
+        for invalid_before, invalid_after in (
+            (replace(before_state, enemies=(replace(enemy, fighting=False),)), after_state),
+            (before_state, replace(after_state, fleets=(fleet,))),
+            (before_state, replace(after_state, fleets=(replace(fleet, ammo=2),))),
+            (replace(before_state, enemies=(replace(enemy, node="D4", row=4, column=4),)), after_state),
+        ):
+            with self.assertRaises(SemanticGateClosed):
+                view(invalid_before).predict_swipe(view(invalid_after))
+
     def test_predict_swipe_allows_submarine_ammo_not_identity_change(self):
         sub = CampaignMapFleetState('submarine','C3',6,6)
         before = build_alas_campaign_camera_view(replace(make_state(generation=10),submarine=sub),screen_center=(350.,300.))

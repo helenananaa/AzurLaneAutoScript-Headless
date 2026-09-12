@@ -19,6 +19,17 @@ from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_login_does_not_finish_on_the_main_underlay_below_bulletin(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_login()
+        oracle.main_page_visible_value = True
+        oracle.enabled_values['overlay/bulletin/close'] = True
+        self.assertFalse(adapter.appear(NamedButton('MAIN_GOTO_CAMPAIGN_WHITE')))
+        self.assertTrue(adapter.appear(NamedButton('LOGIN_ANNOUNCE')))
+        oracle.enabled_values['overlay/bulletin/close'] = False
+        self.assertTrue(adapter.appear(NamedButton('MAIN_GOTO_CAMPAIGN_WHITE')))
+        self.assertEqual(oracle.click_calls, [])
+
     def test_original_login_handler_uses_exact_semantic_entry_context(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.enabled_values["login/enter"] = True

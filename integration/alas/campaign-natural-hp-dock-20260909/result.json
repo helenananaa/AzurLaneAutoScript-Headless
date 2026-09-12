@@ -1,0 +1,11 @@
+{
+  "schema": "alas-headless.main-task-live-validation/v1",
+  "passed": false,
+  "finished_at": "2026-09-09T14:03:34.273402Z",
+  "task": "Main",
+  "stage": "10-2",
+  "serial": "emulator-5580",
+  "run_count_requested": 1,
+  "error": "SemanticGateClosed: game activity is not top-resumed",
+  "execution_status": "incomplete"
+}

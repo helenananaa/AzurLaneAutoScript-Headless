@@ -167,6 +167,7 @@ DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
     "META_MAIN_BEACON_ENTRANCE": "meta/current/open",
     "META_MAIN_DOSSIER_ENTRANCE": "meta/dossier/open",
     "BEACON_LIST": "meta/current/list",
+    "DOSSIER_LIST": "meta/dossier/list",
     "META_BEGIN_ENTRANCE": "meta/current/create",
     "ASH_START": "meta/assist/start",
     "HELP_ENTER": "meta/current/help",
@@ -468,6 +469,10 @@ EVENT_CAMPAIGN_ASIDE_RESOURCES: Mapping[str, str] = {
 
 CAMPAIGN_VIRTUAL_RESOURCES = frozenset(
     {
+        "WITHDRAW",
+        "CAMPAIGN_WITHDRAW_CONFIRM",
+        "EMERGENCY_REPAIR_AVAILABLE",
+        "EMERGENCY_REPAIR_CONFIRM",
         "MAP_AMBUSH_EVADE",
         "MAP_AMBUSH_ATTACK",
         "FLEET_LOCKED",
@@ -505,6 +510,10 @@ CAMPAIGN_VIRTUAL_RESOURCES = frozenset(
 
 CAMPAIGN_CLICK_RESOURCES = frozenset(
     {
+        "EMERGENCY_REPAIR_AVAILABLE",
+        "EMERGENCY_REPAIR_CONFIRM",
+        "WITHDRAW",
+        "CAMPAIGN_WITHDRAW_CONFIRM",
         'POPUP_CONFIRM_SUBMARINE_MOVE', 'POPUP_CANCEL_SUBMARINE_MOVE',
         'POPUP_CONFIRM_CAMPAIGN_MAP',
         "MAP_AMBUSH_EVADE",

@@ -1,0 +1,20 @@
+{
+  "schema": "alas-headless.campaign-precombat-recovery-assessment/v1",
+  "passed": true,
+  "scenario": "Fresh original Main resumes an inherited precombat, wins the same-cell combat and withdraws",
+  "stage": "10-2",
+  "fleet1": 2,
+  "fleet2": 1,
+  "startup_back_count": 1,
+  "battles": 1,
+  "new_sorties_during_resume": 0,
+  "run_count_after": 0,
+  "scheduler_enabled_after": false,
+  "final_chapter": true,
+  "limits": [
+    "Mid-map full-dock uninterrupted flow remains unqualified",
+    "Sparse cross-process fleet cardinality recovery remains unqualified"
+  ],
+  "pause_probe_expected_failure": true,
+  "first_entry_transition_failed": true
+}

@@ -35,6 +35,7 @@ from .contracts import (
     _CampaignFlowContext,
 )
 from .dispatch_result import UNHANDLED
+from .campaign_health import CampaignHealthAdapterPorts
 from .resources import (
     CAMPAIGN_AUTO_SEARCH_ON_RESOURCES,
     CAMPAIGN_AUTO_SEARCH_RESOURCES,
@@ -45,7 +46,7 @@ from .resources import (
 )
 
 
-class CampaignAdapterPorts:
+class CampaignAdapterPorts(CampaignHealthAdapterPorts):
     """Campaign ports on the shared adapter context."""
 
     def war_archives_campaign_visible(self) -> bool:
@@ -1240,6 +1241,18 @@ class CampaignAdapterPorts:
         return UNHANDLED
 
     def _appear_campaign(self, name):
+        if self._campaign_context is not None and name in ('EMERGENCY_REPAIR_AVAILABLE', 'EMERGENCY_REPAIR_CONFIRM'):
+            return self.campaign_repair_appear(name)
+        if self._campaign_context is not None and name in ('WITHDRAW', 'CAMPAIGN_WITHDRAW_CONFIRM'):
+            context = self._campaign_context
+            confirm = name == 'CAMPAIGN_WITHDRAW_CONFIRM'
+            if context.withdrawal_confirm_receipt is not None:
+                return False
+            if confirm and context.withdrawal_open_receipt is None:
+                return False
+            if not confirm and context.withdrawal_open_receipt is not None:
+                return False
+            return self.oracle.campaign_withdraw_control(confirm=confirm) is not None
         if (name == 'SP_CHECK' and self._campaign_context is not None
                 and re.fullmatch(r'[1-9][0-9]*-[1-9][0-9]*', self._campaign_context.stage_code)):
             if self.oracle.campaign_is_in_map() or self.oracle.campaign_page_is_normal():
@@ -1503,6 +1516,22 @@ class CampaignAdapterPorts:
         return UNHANDLED
 
     def _click_campaign_strategy(self, name):
+        if name in ('EMERGENCY_REPAIR_AVAILABLE', 'EMERGENCY_REPAIR_CONFIRM'):
+            return self.click_campaign_repair(name)
+        if name in ('WITHDRAW', 'CAMPAIGN_WITHDRAW_CONFIRM'):
+            context = self._require_campaign_context()
+            confirm = name == 'CAMPAIGN_WITHDRAW_CONFIRM'
+            if (context.withdrawal_confirm_receipt is not None
+                    or (confirm and context.withdrawal_open_receipt is None)
+                    or (not confirm and context.withdrawal_open_receipt is not None)):
+                raise SemanticGateClosed('campaign withdrawal input already submitted or unowned')
+            receipt = self._fresh_input_oracle().click_campaign_withdraw(confirm=confirm)
+            if confirm:
+                context.withdrawal_confirm_receipt = receipt
+            else:
+                context.withdrawal_open_receipt = receipt
+            context.passive_transition_until = time.monotonic() + 15.0
+            return receipt
         if self._campaign_context is not None and name == 'SUBMARINE_MOVE_ENTER':
             context = self._campaign_context
             if not self._campaign_submarine_deployed() or (context.sortie_proof is None and context.combat_admission is None):

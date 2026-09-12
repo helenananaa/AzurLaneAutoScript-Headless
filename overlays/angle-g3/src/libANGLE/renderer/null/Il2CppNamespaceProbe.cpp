@@ -331,7 +331,15 @@ bool IsCampaignPreparationSwitch(std::string_view name, std::string_view path) {
   return false;
 }
 
+bool IsCampaignScoutControl(std::string_view path) {
+  return path.find("ChapterPreCombatUI(Clone)/adapt/middle/HeroContainer/info/") !=
+             std::string_view::npos && EndsWith(path, "_root/mouseChild");
+}
+
 bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
+  if (name == "mouseChild" && IsCampaignScoutControl(path)) {
+    return true;
+  }
   if (IsRetirementControl(path) || IsSubmarineCallControl(path) ||
       IsCampaignStrategyDetailsControl(path) || IsCampaignDeploymentControl(path)) return true;
   if ((name == "dodge_button" || name == "fight_button") &&
@@ -600,6 +608,17 @@ bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
                "adapt/right/start")) {
     return true;
   }
+  if ((name == "strategy" &&
+       EndsWith(path, "ChapterPreCombatUI(Clone)/adapt/middle/strategy")) ||
+      ((name == "use_button" || name == "cancel_button") &&
+       (EndsWith(path, "OverlayCamera/Overlay/UIMain/strategy_info/window/panel/actions/use_button") ||
+        EndsWith(path, "OverlayCamera/Overlay/UIMain/strategy_info/window/panel/actions/cancel_button")))) {
+    return true;
+  }
+  if (name == "back_btn" &&
+      EndsWith(path, "ChapterPreCombatUI(Clone)/adapt/top/back_btn")) {
+    return true;
+  }
   if ((name == "start_button" &&
        EndsWith(path, "LevelStageInfoView(Clone)/panel/start_button")) ||
       (name == "btnBack" &&
@@ -655,6 +674,19 @@ bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
   if (name == "info" &&
       path.find("DailyLevelUI(Clone)/desc_panel/main_mask/main/scrollview/"
                 "content/stagetpl(Clone)/info") != std::string_view::npos) {
+    return true;
+  }
+  if ((name == "challenge" || name == "once" || name == "mult") &&
+      EndsWith(path, "Overlay/UIMain/selected/stagetpl/quickly/bg/" +
+                         std::string(name))) {
+    return true;
+  }
+  if (name == "list_btn" &&
+      EndsWith(path, "WorldBossUI(Clone)/pages/ArchivesWorldBossDetailUI(Clone)/list_btn")) {
+    return true;
+  }
+  if (name == "current_list_btn" &&
+      EndsWith(path, "WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/current_list_btn")) {
     return true;
   }
   if (name == "back" &&
@@ -1820,6 +1852,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
           IsCampaignPreparationSwitch(objectName, path) ||
           IsRetirementControl(path) || IsSubmarineCallControl(path) ||
           IsCampaignStrategyDetailsControl(path) || IsCampaignDeploymentControl(path) ||
+          IsCampaignScoutControl(path) ||
           ((objectName == "dodge_button" || objectName == "fight_button") &&
            EndsWith(path, "LevelAmbushView(Clone)/window/" + objectName))) {
         const float visibleLeft = std::max(0.0f, record.screenLeft);
@@ -1858,6 +1891,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
           topRaycastMatches(transform, Vector2{record.screenX, record.screenY},
                             &raycastEvaluated);
       const bool needsReviewedPointSearch =
+          IsCampaignScoutControl(path) ||
           path.find("CourtYardUI(Clone)/main/") != std::string_view::npos ||
           path.find("BackYardFeedUI(Clone)/") != std::string_view::npos ||
           path.find("TechnologyUI(Clone)/main/base_page/") !=

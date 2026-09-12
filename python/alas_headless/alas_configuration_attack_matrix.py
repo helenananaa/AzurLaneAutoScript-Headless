@@ -524,8 +524,8 @@ def _invalid_cases() -> int:
             ("campaign-switch", "fleet", "hp-control"),
         ),
         (
-            "submarine-active-fleet",
-            lambda values: values["submarine"].update(fleet=1),
+            "submarine-invalid-fleet",
+            lambda values: values["submarine"].update(fleet=3),
             ("campaign-switch", "fleet", "hp-control", "submarine"),
         ),
     )
@@ -588,7 +588,7 @@ def _seeded_sequences() -> int:
         elif offset % 4 == 2:
             invalid["hp"]["low_hp_retreat_threshold"] = float("nan")
         else:
-            invalid["submarine"]["fleet"] = 1
+            invalid["submarine"]["fleet"] = 3
         before = copy.deepcopy(invalid)
         refused = _PreflightRecorder()
         try:

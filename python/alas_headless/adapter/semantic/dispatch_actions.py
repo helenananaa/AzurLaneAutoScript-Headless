@@ -8,6 +8,7 @@ from ...semantic_oracle import (
     MissionDisposition,
     ResearchProjectStatus,
     SemanticGateClosed,
+    SemanticTargetMissing,
 )
 from .contracts import AlasSemanticUnmapped
 from .dispatch_result import UNHANDLED
@@ -186,6 +187,19 @@ class DispatchActionsPorts:
             )
         return UNHANDLED
 
+    def _main_battle_destination_visible(self):
+        receipt = self._main_battle_transition_receipt
+        if receipt is None or self.oracle.read_state().generation <= receipt.generation:
+            return False
+        for probe in (self.oracle.campaign_menu_is_entry,
+                      self.oracle.campaign_page_is_normal, self.oracle.campaign_is_in_map):
+            try:
+                if probe():
+                    return True
+            except (SemanticGateClosed, SemanticTargetMissing):
+                continue
+        return False
+
     def _click_main(self, name, semantic_id):
         if (
             semantic_id == "reward/page/back"
@@ -231,6 +245,8 @@ class DispatchActionsPorts:
                 return self._record_mission_transition(
                     self.oracle.click_operation_siren_back()
                 )
+            if target == 'daily/page/back':
+                return self._record_mission_transition(self.oracle.click_daily_control(target))
             if target == "meta/home":
                 return self._record_mission_transition(self.oracle.click_meta_home())
             if target == "raid/page/home":
@@ -340,15 +356,26 @@ class DispatchActionsPorts:
                         self._operation_siren_combat_active = True
                     return receipt
                 if name == "POPUP_CONFIRM":
-                    return self._dispatch_mutation(
+                    receipt = self._dispatch_mutation(
                         "meta.assist",
                         lambda: self.oracle.click_meta_assist_sortie(True),
                     )
+                    self._operation_siren_combat_active = True
+                    return receipt
                 return self.oracle.click_meta_assist_sortie(False)
         return UNHANDLED
 
     def _click_mapped(self, name, semantic_id):
         if semantic_id is not None:
+            if semantic_id == 'meta/current/list' and getattr(self.oracle, 'meta_dossier_assist_visible', lambda: False)():
+                return self.oracle.click_meta_dossier_current()
+            if semantic_id == 'meta/dossier/list':
+                return self.oracle.click_meta_dossier_list()
+            if (semantic_id == 'main/more' and self._main_more_entry_receipt is not None
+                    and self.oracle.observation_target_present('reward/page/back')
+                    and self.oracle.enabled('reward/page/back')
+                    and self.oracle.read_state().generation > self._main_more_entry_receipt.generation):
+                return self._main_more_entry_receipt
             if semantic_id == "campaign-menu/exercise":
                 return self.oracle.click_campaign_exercise_entrance()
             if semantic_id == "campaign-menu/archive":
@@ -360,7 +387,15 @@ class DispatchActionsPorts:
                             time.monotonic() + 60.0
                         )
                         return receipt
-                return self.oracle.click_campaign_archive_entrance()
+                context = self._campaign_context
+                previous = context.archive_menu_entry_receipt if context is not None else None
+                if (previous is not None and self.oracle.war_archives_page_visible()
+                        and self.oracle.read_state().generation > previous.generation):
+                    return previous
+                receipt = self.oracle.click_campaign_archive_entrance()
+                if context is not None:
+                    context.archive_menu_entry_receipt = receipt
+                return receipt
             if semantic_id == "campaign-menu/os":
                 if (
                     self._operation_siren_entry_receipt is not None
@@ -612,11 +647,11 @@ class DispatchActionsPorts:
                 semantic_id == "main/battle"
                 and self._main_battle_transition_receipt is not None
                 and time.monotonic() <= self._main_battle_transition_until
-                and self.oracle.campaign_menu_is_entry()
+                and self._main_battle_destination_visible()
             ):
                 # ui_goto can still classify the fading main underlay after
                 # the first exact battle-menu click has already mounted the
-                # CampaignMenu owner.  Reuse that proven receipt so the
+                # CampaignMenu, chapter or retained map. Reuse that receipt so the
                 # original ALAS loop can observe its destination; never issue
                 # the same underlay click through the new top raycast.
                 return self._main_battle_transition_receipt
@@ -640,7 +675,19 @@ class DispatchActionsPorts:
             elif semantic_id == "os/order/back":
                 receipt = self.oracle.click_operation_siren_order_back()
             else:
-                receipt = self.oracle.click(semantic_id)
+                before_input = getattr(self.oracle, 'input_dispatch_count', 0)
+                try:
+                    receipt = self.oracle.click(semantic_id)
+                except SemanticTargetMissing:
+                    if (semantic_id == 'main/battle'
+                            and self._main_battle_transition_receipt is not None
+                            and time.monotonic() <= self._main_battle_transition_until
+                            and getattr(self.oracle, 'input_dispatch_count', 0) == before_input
+                            and self._main_battle_destination_visible()):
+                        return self._main_battle_transition_receipt
+                    raise
+            if semantic_id == 'main/more':
+                self._main_more_entry_receipt = receipt
             if semantic_id == "main/battle":
                 self._main_battle_transition_receipt = receipt
                 self._main_battle_transition_until = time.monotonic() + 20.0

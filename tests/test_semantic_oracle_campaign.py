@@ -21,6 +21,21 @@ from tests.semantic_support.oracle_cases import (
 
 
 class CampaignDockFullTests(CampaignDockFullTestsSupport, unittest.TestCase):
+    def test_dock_full_modal_owns_organize_above_preparation_underlays(self):
+        for root in ('LevelStageInfoView(Clone)', 'LevelFleetSelectView(Clone)'):
+            with self.subTest(root=root):
+                backend = self._backend()
+                backend.buttons['buttons'].append(make_button('start_button',
+                    'OverlayCamera/Overlay/UIMain/' + root + '/panel/start_button'))
+                backend.buttons['button_count'] += 1
+                oracle = make_oracle(backend)
+                self.assertTrue(oracle.campaign_dock_full_visible('10-2'))
+                with self.assertRaises(SemanticGateClosed):
+                    oracle.click_campaign_dock_full_choice('10-2', 'expand')
+                self.assertEqual(backend.taps, [])
+                oracle.click_campaign_dock_full_choice('10-2', 'organize')
+                self.assertEqual(len(backend.taps), 1)
+
     def test_shared_dock_full_without_historical_stage_title(self):
         backend = self._backend()
         backend.ui["texts"] = [t for t in backend.ui["texts"] if not t["path"].endswith("title_index")]

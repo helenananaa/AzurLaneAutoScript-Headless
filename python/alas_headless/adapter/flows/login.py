@@ -266,7 +266,9 @@ class LoginFlow:
             # Main-page skins do not guarantee that either legacy navigation
             # button is currently enabled. The exact root identity is the
             # stable login-completion contract for both ALAS aliases.
-            return self._reader().main_page_visible()
+            reader = self._reader()
+            return (reader.main_page_visible()
+                    and not reader.enabled("overlay/bulletin/close"))
         if resource == "LOGIN_CHECK":
             return self._entry_observer()
         return self._reader().enabled(target)

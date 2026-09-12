@@ -1425,6 +1425,20 @@ class CampaignPreparationAdapterPorts:
         )
         return context.proof
 
+    def _campaign_vitals_kwargs(self, fleet_index):
+        context = self._require_campaign_context()
+        prepared = context.prepared_fleet_state
+        if prepared is None:
+            identity = context.inherited_fleet_identity
+            if identity is not None and context.inherited_fleet_index == fleet_index:
+                return {'expected_occupied': sum(map(len, identity)), 'expected_identity': identity}
+            return {}
+        rows = [row for row in prepared.rows if row.row_key == f'fleet{fleet_index}']
+        if len(rows) != 1:
+            raise SemanticGateClosed('campaign HP prepared fleet identity is ambiguous')
+        count = len(rows[0].ship_levels)
+        return {'expected_occupied': count} if count < 6 else {}
+
     def campaign_fleet_hp(self) -> Tuple[float, ...]:
         self._package_gate()
         operation_siren_map = self.oracle.operation_siren_page_visible()
@@ -1461,10 +1475,35 @@ class CampaignPreparationAdapterPorts:
                         except SemanticGateClosed:
                             raise exc
                     time.sleep(0.25)
-        self._require_campaign_context()
+        context = self._require_campaign_context()
+        if context.prepared_fleet_state is not None or context.inherited_fleet_identity is not None:
+            oracle = self._frame_or_live_observation_oracle()
+            index = oracle.campaign_map_displayed_fleet_index()
+            kwargs = self._campaign_vitals_kwargs(index)
+            if kwargs:
+                return oracle.campaign_hp_control_snapshot(index, **kwargs)[0]
         return self.oracle.campaign_fleet_hp()
+
+    def campaign_hp_control_snapshot(self, fleet_index: int):
+        self._package_gate()
+        if self._campaign_context is None:
+            return None
+        oracle = self._frame_or_live_observation_oracle()
+        precombat = oracle.campaign_emergency_repair_state() is not None
+        if precombat:
+            admission = self._campaign_context.combat_admission
+            if admission is None or admission.fleet_index != fleet_index:
+                raise SemanticGateClosed('campaign precombat HP has no matching fleet admission')
+        return oracle.campaign_hp_control_snapshot(fleet_index, precombat=precombat,
+            **self._campaign_vitals_kwargs(fleet_index))
 
     def campaign_fleet_levels(self) -> Tuple[int, ...]:
         self._package_gate()
-        self._require_campaign_context()
+        context = self._require_campaign_context()
+        if context.prepared_fleet_state is not None or context.inherited_fleet_identity is not None:
+            oracle = self._frame_or_live_observation_oracle()
+            index = oracle.campaign_map_displayed_fleet_index()
+            kwargs = self._campaign_vitals_kwargs(index)
+            if kwargs:
+                return oracle.campaign_sparse_fleet_levels(index, **kwargs)
         return self.oracle.campaign_fleet_levels()

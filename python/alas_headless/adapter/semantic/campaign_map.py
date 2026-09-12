@@ -232,13 +232,21 @@ class CampaignMapAdapterPorts:
 
         context = self._require_campaign_context()
         if context.combat_receipt is None:
-            if context.combat_admission is not None:
+            if context.combat_admission is None:
+                return None
+            if (context.combat_route_receipts or context.submarine_move_entry is not None
+                    or battle_count_after != context.combat_admission.battle_count):
                 raise SemanticGateClosed(
-                    "previous campaign combat admission was not committed"
+                    "previous campaign route has unclosed input or progress"
                 )
-            return None
-        proof = self.confirm_campaign_combat(battle_count_after)
+            # ALAS may switch back after an empty move, then start its next
+            # battle iteration. Superseding an unused grid authorization is
+            # safe; a partially executed route must still be closed first.
+            proof = None
+        else:
+            proof = self.confirm_campaign_combat(battle_count_after)
         context.combat_admission = None
+        context.map_fleet_switch_receipts.clear()
         context.combat_route_receipts.clear()
         context.viewport_swipe_required = False
         context.viewport_swipe_intent = None
@@ -250,6 +258,19 @@ class CampaignMapAdapterPorts:
         context.combat_receipt = None
         context.combat_proof = None
         return proof
+
+    def campaign_movement_completed(self) -> bool:
+        context = self._campaign_context
+        return bool(context is not None and context.combat_admission is not None
+                    and context.combat_admission.target_kind == 'move'
+                    and context.combat_proof is not None)
+
+    def finish_campaign_movement(self, battle_count: int):
+        """Check the original goto's arrival; ALAS owns all further decisions."""
+        context = self._campaign_context
+        if context is None or context.combat_admission is None or context.combat_admission.target_kind != 'move':
+            return None
+        return self.confirm_campaign_combat(battle_count)
 
     @staticmethod
     def _campaign_swipe_pair(value: Any, label: str) -> Tuple[float, float]:
@@ -638,7 +659,7 @@ class CampaignMapAdapterPorts:
         prove_alas_campaign_combat_transition(
             admission,
             state,
-            battle_count_after=admission.battle_count + 1,
+            battle_count_after=admission.battle_count + (admission.target_kind != 'move'),
             input_path=context.combat_receipt.path,
         )
         fleets = tuple(
@@ -743,7 +764,7 @@ class CampaignMapAdapterPorts:
                     prove_alas_campaign_combat_transition(
                         admission,
                         state,
-                        battle_count_after=admission.battle_count + 1,
+                        battle_count_after=admission.battle_count + (admission.target_kind != 'move'),
                         input_path=context.combat_receipt.path,
                     )
                     post_combat_state = True
@@ -835,7 +856,7 @@ class CampaignMapAdapterPorts:
         if route_index >= len(admission.input_nodes):
             raise SemanticGateClosed("campaign target recheck has no remaining input")
         target_node = admission.input_nodes[route_index]
-        allow_enemy_coverage = target_node == admission.target_node
+        allow_enemy_coverage = admission.target_kind == 'enemy' and target_node == admission.target_node
         expected_path = next(
             cell.button_path for cell in state.cells if cell.node == target_node
         )
@@ -918,7 +939,7 @@ class CampaignMapAdapterPorts:
             prove_alas_campaign_combat_transition(
                 admission,
                 state,
-                battle_count_after=admission.battle_count + 1,
+                battle_count_after=admission.battle_count + (admission.target_kind != 'move'),
                 input_path=receipt.path,
             )
         except SemanticGateClosed:
@@ -1098,7 +1119,7 @@ class CampaignMapAdapterPorts:
                 target = self.oracle.campaign_map_cell_input(
                     post_state,
                     node,
-                    allow_expected_enemy_coverage=True,
+                    allow_expected_enemy_coverage=admission.target_kind == 'enemy',
                 )
                 assert target.point is not None and target.bounds is not None
                 receipt = self._dispatch_mutation(
@@ -1106,7 +1127,7 @@ class CampaignMapAdapterPorts:
                     lambda: self.oracle.click_campaign_map_cell(
                         post_state,
                         node,
-                        allow_expected_enemy_coverage=True,
+                        allow_expected_enemy_coverage=admission.target_kind == 'enemy',
                     ),
                 )
                 if (
@@ -1128,7 +1149,7 @@ class CampaignMapAdapterPorts:
                 prove_alas_campaign_combat_transition(
                     admission,
                     post_state,
-                    battle_count_after=admission.battle_count + 1,
+                    battle_count_after=admission.battle_count + (admission.target_kind != 'move'),
                     input_path=context.combat_receipt.path,
                 )
             except SemanticGateClosed as exc:
@@ -1164,7 +1185,7 @@ class CampaignMapAdapterPorts:
         self._validate_campaign_combat_route_state(
             context, state, for_next_input=True
         )
-        allow_enemy_coverage = node == admission.target_node
+        allow_enemy_coverage = admission.target_kind == 'enemy' and node == admission.target_node
         if context.viewport_swipe_required:
             # The admitted frame can observe the destination under a passing
             # fleet animation even though ALAS reaches its click several
@@ -1230,7 +1251,9 @@ class CampaignMapAdapterPorts:
         # original Combat flow. Keep their receipts separate: an ambush must
         # never count as defeating the planned map target.
         return context is not None and (
-            context.combat_receipt is not None or context.ambush_receipt is not None
+            (context.combat_receipt is not None
+             and (context.combat_admission is None or context.combat_admission.target_kind == 'enemy'))
+            or context.ambush_receipt is not None
         )
 
     def campaign_combat_active(self) -> bool:
@@ -1293,6 +1316,8 @@ class CampaignMapAdapterPorts:
         self._package_gate()
         context = self._require_campaign_context()
         if context.combat_proof is not None:
+            if battle_count_after != context.combat_proof.battle_count_after:
+                raise SemanticGateClosed('campaign completed proof battle count changed')
             return context.combat_proof
         if (
             context.combat_admission is None

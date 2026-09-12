@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "reason": "Withdraw after successful movement but incomplete original return-fleet handoff",
+  "battles": 0,
+  "oil_before": 9309,
+  "campaign_end": "In stage.",
+  "chapter": true,
+  "oil_after": 9309,
+  "keys": [
+    290,
+    300
+  ]
+}

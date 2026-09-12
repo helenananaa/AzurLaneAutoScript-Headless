@@ -534,6 +534,31 @@
       "order": 107,
       "path": "integration/alas/series/0602-submarine-deployment-camera.patch",
       "sha256": "92c0cf1fe3b879179993f25441976237988c1868e3ecb6380ee4bf40e6f7f00f"
+    },
+    {
+      "order": 108,
+      "path": "integration/alas/series/0610-campaign-hp-control.patch",
+      "sha256": "072b07ad4d2e2018aee45001b6ca58f85ae460e5e87bf41b6226fbdc81f104ca"
+    },
+    {
+      "order": 109,
+      "path": "integration/alas/series/0620-campaign-scout-exchange.patch",
+      "sha256": "5009fe9eb3dd89d7834b523a34cc1f0b0e0c81e954a293792cf1f61eb4c5898b"
+    },
+    {
+      "order": 110,
+      "path": "integration/alas/series/0630-campaign-inherited-dock-full.patch",
+      "sha256": "909a37f0cee43d321311dda259e0763f682dd9e7b8b5821c5c3ed9aa51822c83"
+    },
+    {
+      "order": 111,
+      "path": "integration/alas/series/0640-campaign-empty-movement.patch",
+      "sha256": "6ffcbe96f374fc4750825533f69ccc7f83bea916bc7eb520aa4ec297f0332538"
+    },
+    {
+      "order": 112,
+      "path": "integration/alas/series/0650-meta-assist-task-owner.patch",
+      "sha256": "4d17a675590056a3c0b2d1f19c69cc9bf4031f1056e9e98d086432aca8818efd"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

@@ -1,0 +1,109 @@
+{
+  "passed": true,
+  "steps": [
+    {
+      "generation": 13234,
+      "before": [
+        "gelunbiya",
+        "sebao",
+        "yanusi_7"
+      ],
+      "source_slot": 0,
+      "destination_slot": 2,
+      "source_path": "OverlayCamera/Overlay/UIMain/ChapterPreCombatUI(Clone)/adapt/middle/HeroContainer/info/gelunbiya_root/mouseChild",
+      "destination_path": "OverlayCamera/Overlay/UIMain/ChapterPreCombatUI(Clone)/adapt/middle/HeroContainer/info/yanusi_7_root/mouseChild",
+      "start": [
+        387.333,
+        419.333
+      ],
+      "end": [
+        803.2,
+        324.467
+      ],
+      "duration_ms": 600
+    }
+  ],
+  "before": {
+    "generation": 13228,
+    "ships": [
+      "gelunbiya",
+      "sebao",
+      "yanusi_7"
+    ]
+  },
+  "restored": {
+    "generation": 13255,
+    "ships": [
+      "sebao",
+      "yanusi_7",
+      "gelunbiya"
+    ]
+  },
+  "precombat_back": {
+    "semantic_id": "campaign/precombat/back",
+    "generation": 13260,
+    "point": {
+      "x": 57.667,
+      "y": 54.0
+    },
+    "bounds": {
+      "left": 0.644,
+      "top": -3.023,
+      "right": 114.69,
+      "bottom": 111.023
+    },
+    "path": "OverlayCamera/Overlay/UIMain/ChapterPreCombatUI(Clone)/adapt/top/back_btn",
+    "policy_sha256": null,
+    "capability_id": null
+  },
+  "map": {
+    "generation": 13307,
+    "root_path": "LevelCamera/Canvas/UIMain/LevelGrid",
+    "button_paths": [
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/op1/retreat",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_2_1",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_2_2",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_2_3",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_2_4",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_2_5",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_2_7",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_2_8",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_3_1",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_3_4",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_3_5",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_3_7",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_3_8",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_1",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_2",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_5",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_6",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_7",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_5_1",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_5_2",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_5_5",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_5_6",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_5_7",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_6_1",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_6_4",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_6_5",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_6_7",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_6_8",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_7_1",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_7_2",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_7_3",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_7_4",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_7_5",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_7_7",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_7_8",
+      "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/bottom_stage/Normal/retreat_button",
+      "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/top_stage/back_button"
+    ],
+    "image_paths": [
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/op1/retreat/retreat",
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/display/mask/sea",
+      "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/bottom_stage/Normal/retreat_button",
+      "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/top_stage/back_button/mask/Image"
+    ]
+  },
+  "oil": 13512
+}

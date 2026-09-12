@@ -1,0 +1,26 @@
+{
+  "schema": "alas-headless.interrupted-qualification/v1",
+  "passed": false,
+  "reason": "Live repair stock is zero and main portraits exclude the previously requested repair ship",
+  "battles_started": 3,
+  "battles_completed_before_interruption": 2,
+  "third_battle_victory_observed": true,
+  "repair_stock_observed": 0,
+  "main_portraits": [
+    "qiye_younv",
+    "chicheng",
+    "changmen"
+  ],
+  "notes": [
+    "No natural-threshold repair qualification",
+    "Scout probe records were in the interrupted process and are not promoted",
+    "Original single-owner battle cleanup stalled; existing orphan-result recovery used instead"
+  ],
+  "cleanup_passed": true,
+  "final_chapter": true,
+  "oil_before": 9667,
+  "oil_after": 9561,
+  "oil_consumed": 106,
+  "battles_completed": 3,
+  "repair_count_consumed": 0
+}

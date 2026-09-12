@@ -1,0 +1,12 @@
+{
+  "passed": false,
+  "before": {
+    "remaining_attempts": 0,
+    "attempt_capacity": 3,
+    "selected_level": 13,
+    "selected_hp": 1229000,
+    "candidate_count": 8,
+    "selected_candidate_index": 6
+  },
+  "owner_released": true
+}

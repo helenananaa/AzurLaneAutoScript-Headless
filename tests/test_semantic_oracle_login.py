@@ -108,6 +108,38 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         backend.ui["texts"][0]["text"] = "是否购买资源？"
         self.assertFalse(oracle.enabled("login/update/download"))
 
+    def test_login_update_download_accepts_top_raycast_and_rejects_obscured(self):
+        dialog = "root/Overlay/UIMain/DialogPanel/dialog/"
+        backend = FakeBackend(
+            [
+                make_button("exit_button", dialog + "exit_button", raycast_top=None),
+                make_button(
+                    "action_button", dialog + "action_button", raycast_top=True
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "本次更新需要下载215.6MB的文件，是否继续更新？",
+                    dialog + "content/Text",
+                )
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.login_update_download_available())
+        self.assertEqual(
+            oracle.click("login/update/download").semantic_id,
+            "login/update/download",
+        )
+
+        backend.buttons["buttons"][1]["raycast_top"] = False
+        self.assertFalse(oracle.login_update_download_available())
+        backend.buttons["buttons"][1]["raycast_top"] = True
+        backend.buttons["buttons"][0]["raycast_top"] = False
+        self.assertFalse(oracle.login_update_download_available())
+
     def test_login_update_download_accepts_reviewed_maintenance_variants(self):
         dialog = "root/Overlay/UIMain/DialogPanel/dialog/"
         backend = FakeBackend(

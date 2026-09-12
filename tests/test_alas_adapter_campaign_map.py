@@ -27,6 +27,39 @@ from unittest.mock import Mock
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_repair_panel_after_combat_uses_campaign_observation(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_campaign_pre_sortie("10-2")
+        adapter.campaign_combat_committed = lambda: True
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session.refresh_frame = lambda: None
+        session._live_combat_visible = lambda: self.fail(
+            "repair panel must not be hidden by the combat resource set")
+        for visible in (True, False):
+            adapter.campaign_repair_appear = Mock(return_value=visible)
+            for name in ("EMERGENCY_REPAIR_AVAILABLE", "EMERGENCY_REPAIR_CONFIRM"):
+                self.assertEqual(session.appear(NamedButton(name)), visible)
+                adapter.campaign_repair_appear.assert_called_with(name)
+        oracle.enabled_values["overlay/network-reconnect/confirm"] = True
+        self.assertFalse(session.appear(NamedButton("EMERGENCY_REPAIR_CONFIRM")))
+
+    def test_repair_confirmation_action_after_combat_uses_owned_campaign_port(self):
+        adapter, _, _ = self.make_adapter()
+        adapter.begin_campaign_pre_sortie("10-2")
+        adapter.campaign_combat_committed = lambda: True
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session.refresh_frame = lambda: None
+        session._live_combat_click = lambda *_: self.fail("repair is not a generic combat action")
+        adapter.click = Mock(return_value="owned-repair-receipt")
+        for name in ("EMERGENCY_REPAIR_AVAILABLE", "EMERGENCY_REPAIR_CONFIRM"):
+            button = NamedButton(name)
+            self.assertEqual(session.click(button), "owned-repair-receipt")
+            adapter.click.assert_called_with(button)
+
     def test_campaign_combat_prioritizes_exact_network_reconnect_popup(self):
         adapter, oracle, _ = self.make_adapter()
         adapter.begin_campaign_pre_sortie("12-4")

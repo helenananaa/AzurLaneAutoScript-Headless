@@ -198,6 +198,10 @@ def install_import_stubs(
 
 
 class ReplayOracle:
+    def read_state(self):
+        # Login fixtures contain no active Campaign map controls.
+        return types.SimpleNamespace(generation=7, buttons=())
+
     def __init__(self, scenario: str) -> None:
         self.scenario = scenario
         self.events: list[tuple[str, str]] = []

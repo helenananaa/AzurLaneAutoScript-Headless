@@ -363,7 +363,13 @@ class AlasSemanticCampaignView:
                 for marker in before_fleets
                 if marker != current_marker
             )
-            and before_fleet.node != after_fleet.node
+            # A resumed precombat already places the fleet on the enemy cell.
+            # Only its explicit fighting marker permits a stationary victory.
+            and (
+                before_fleet.node != after_fleet.node
+                or (len(removed_enemies) == 1
+                    and next(iter(removed_enemies)).fighting)
+            )
             and after_fleet.ammo == max(0, before_fleet.ammo - 1)
             and after_fleet.ammo_capacity == before_fleet.ammo_capacity
             and len(removed_enemies) == 1

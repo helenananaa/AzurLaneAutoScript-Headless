@@ -1,0 +1,6 @@
+{
+  "passed": false,
+  "reason": "Empty route completed; next preview must start from the original pending fleet-1 switch",
+  "completed_move": "A5 -> C1 -> C2",
+  "combat": 0
+}

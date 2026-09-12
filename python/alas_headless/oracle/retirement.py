@@ -738,6 +738,18 @@ class RetirementOracle:
             all_checked=all_checked,
         )
 
+    def _wait_retirement_equipment_clear(self, equipment, generation, deadline):
+        """Observe delayed deselection without issuing a second toggle input."""
+        while self._monotonic() < deadline:
+            cleared = self._retirement_equipment_state()
+            if cleared.item_quantities != equipment.item_quantities:
+                raise SemanticGateClosed('equipment inventory changed during deselection')
+            if (cleared.generation > generation and not cleared.selected_slots
+                    and not cleared.all_checked):
+                return
+            self._sleep(0.2)
+        raise SemanticGateClosed('equipment selection did not clear')
+
     def retire_ships_one_click(
         self,
         keep_limit_break: bool,
@@ -926,10 +938,8 @@ class RetirementOracle:
                             identity_text="全部",
                         )
                     )
-                    self._sleep(0.2)
-                    cleared = self._retirement_equipment_state()
-                    if cleared.selected_slots or cleared.all_checked:
-                        raise SemanticGateClosed("equipment selection did not clear")
+                    self._wait_retirement_equipment_clear(
+                        equipment, actions[-1].generation, completion_deadline)
                     continue
                 actions.append(
                     self._click_retirement_button(

@@ -1,0 +1,563 @@
+{
+  "generation": 467707,
+  "stage_code": "a1",
+  "rows": 5,
+  "columns": 8,
+  "cells": [
+    {
+      "row": 1,
+      "column": 1,
+      "node": "A1",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_2_1",
+      "point": {
+        "x": 640.0,
+        "y": 396.427
+      },
+      "bounds": {
+        "left": 568.887,
+        "top": 347.795,
+        "right": 711.113,
+        "bottom": 447.701
+      }
+    },
+    {
+      "row": 1,
+      "column": 2,
+      "node": "B1",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_2_2",
+      "point": {
+        "x": 784.005,
+        "y": 396.427
+      },
+      "bounds": {
+        "left": 712.846,
+        "top": 347.795,
+        "right": 859.028,
+        "bottom": 447.701
+      }
+    },
+    {
+      "row": 1,
+      "column": 3,
+      "node": "C1",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_2_3",
+      "point": {
+        "x": 928.01,
+        "y": 396.427
+      },
+      "bounds": {
+        "left": 853.143,
+        "top": 347.795,
+        "right": 1006.943,
+        "bottom": 447.701
+      }
+    },
+    {
+      "row": 2,
+      "column": 1,
+      "node": "A2",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_3_1",
+      "point": {
+        "x": 640.0,
+        "y": 506.298
+      },
+      "bounds": {
+        "left": 564.631,
+        "top": 451.923,
+        "right": 715.369,
+        "bottom": 563.802
+      }
+    },
+    {
+      "row": 2,
+      "column": 3,
+      "node": "C2",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_3_3",
+      "point": {
+        "x": 944.766,
+        "y": 506.298
+      },
+      "bounds": {
+        "left": 865.206,
+        "top": 451.923,
+        "right": 1028.906,
+        "bottom": 563.802
+      }
+    },
+    {
+      "row": 2,
+      "column": 4,
+      "node": "D2",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_3_4",
+      "point": {
+        "x": 1097.15,
+        "y": 506.298
+      },
+      "bounds": {
+        "left": 1013.443,
+        "top": 451.923,
+        "right": 1185.674,
+        "bottom": 563.802
+      }
+    },
+    {
+      "row": 2,
+      "column": 5,
+      "node": "E2",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_3_5",
+      "point": {
+        "x": 1249.533,
+        "y": 506.298
+      },
+      "bounds": {
+        "left": 1161.679,
+        "top": 451.923,
+        "right": 1342.442,
+        "bottom": 563.802
+      }
+    },
+    {
+      "row": 2,
+      "column": 6,
+      "node": "F2",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_3_6",
+      "point": {
+        "x": 1401.916,
+        "y": 506.298
+      },
+      "bounds": {
+        "left": 1309.916,
+        "top": 451.923,
+        "right": 1499.21,
+        "bottom": 563.802
+      }
+    },
+    {
+      "row": 2,
+      "column": 7,
+      "node": "G2",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_3_7",
+      "point": {
+        "x": 1554.299,
+        "y": 506.298
+      },
+      "bounds": {
+        "left": 1458.153,
+        "top": 451.923,
+        "right": 1655.978,
+        "bottom": 563.802
+      }
+    },
+    {
+      "row": 3,
+      "column": 1,
+      "node": "A3",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_1",
+      "point": {
+        "x": 640.0,
+        "y": 629.743
+      },
+      "bounds": {
+        "left": 559.832,
+        "top": 568.545,
+        "right": 720.168,
+        "bottom": 694.686
+      }
+    },
+    {
+      "row": 3,
+      "column": 2,
+      "node": "B3",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_2",
+      "point": {
+        "x": 801.796,
+        "y": 629.743
+      },
+      "bounds": {
+        "left": 721.587,
+        "top": 568.545,
+        "right": 886.916,
+        "bottom": 694.686
+      }
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "node": "C3",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_3",
+      "point": {
+        "x": 963.593,
+        "y": 629.743
+      },
+      "bounds": {
+        "left": 878.716,
+        "top": 568.545,
+        "right": 1053.665,
+        "bottom": 694.686
+      }
+    },
+    {
+      "row": 3,
+      "column": 4,
+      "node": "D3",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_4",
+      "point": {
+        "x": 1125.389,
+        "y": 629.743
+      },
+      "bounds": {
+        "left": 1035.846,
+        "top": 568.545,
+        "right": 1220.414,
+        "bottom": 694.686
+      }
+    },
+    {
+      "row": 3,
+      "column": 5,
+      "node": "E3",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_5",
+      "point": {
+        "x": 1287.186,
+        "y": 629.743
+      },
+      "bounds": {
+        "left": 1192.976,
+        "top": 568.545,
+        "right": 1387.163,
+        "bottom": 694.686
+      }
+    },
+    {
+      "row": 3,
+      "column": 7,
+      "node": "G3",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_7",
+      "point": {
+        "x": 1610.779,
+        "y": 629.743
+      },
+      "bounds": {
+        "left": 1507.236,
+        "top": 568.545,
+        "right": 1720.66,
+        "bottom": 694.686
+      }
+    },
+    {
+      "row": 3,
+      "column": 8,
+      "node": "H3",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_8",
+      "point": {
+        "x": 1772.575,
+        "y": 629.743
+      },
+      "bounds": {
+        "left": 1664.366,
+        "top": 568.545,
+        "right": 1887.409,
+        "bottom": 694.686
+      }
+    },
+    {
+      "row": 4,
+      "column": 1,
+      "node": "A4",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_5_1",
+      "point": {
+        "x": 640.0,
+        "y": 769.443
+      },
+      "bounds": {
+        "left": 554.381,
+        "top": 700.053,
+        "right": 725.619,
+        "bottom": 843.368
+      }
+    },
+    {
+      "row": 4,
+      "column": 2,
+      "node": "B4",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_5_2",
+      "point": {
+        "x": 812.449,
+        "y": 769.443
+      },
+      "bounds": {
+        "left": 726.794,
+        "top": 700.053,
+        "right": 903.705,
+        "bottom": 843.368
+      }
+    },
+    {
+      "row": 4,
+      "column": 4,
+      "node": "D4",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_5_4",
+      "point": {
+        "x": 1157.348,
+        "y": 769.443
+      },
+      "bounds": {
+        "left": 1061.109,
+        "top": 700.053,
+        "right": 1259.878,
+        "bottom": 843.368
+      }
+    },
+    {
+      "row": 4,
+      "column": 5,
+      "node": "E4",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_5_5",
+      "point": {
+        "x": 1329.797,
+        "y": 769.443
+      },
+      "bounds": {
+        "left": 1228.267,
+        "top": 700.053,
+        "right": 1437.964,
+        "bottom": 843.368
+      }
+    },
+    {
+      "row": 4,
+      "column": 7,
+      "node": "G4",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_5_7",
+      "point": {
+        "x": 1674.695,
+        "y": 769.443
+      },
+      "bounds": {
+        "left": 1562.583,
+        "top": 700.053,
+        "right": 1794.137,
+        "bottom": 843.368
+      }
+    },
+    {
+      "row": 4,
+      "column": 8,
+      "node": "H4",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_5_8",
+      "point": {
+        "x": 1847.144,
+        "y": 769.443
+      },
+      "bounds": {
+        "left": 1729.741,
+        "top": 700.053,
+        "right": 1972.224,
+        "bottom": 843.368
+      }
+    },
+    {
+      "row": 5,
+      "column": 1,
+      "node": "A5",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_6_1",
+      "point": {
+        "x": 640.0,
+        "y": 928.835
+      },
+      "bounds": {
+        "left": 548.135,
+        "top": 849.492,
+        "right": 731.865,
+        "bottom": 1013.745
+      }
+    },
+    {
+      "row": 5,
+      "column": 2,
+      "node": "B5",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_6_2",
+      "point": {
+        "x": 824.604,
+        "y": 928.835
+      },
+      "bounds": {
+        "left": 732.71,
+        "top": 849.492,
+        "right": 922.943,
+        "bottom": 1013.745
+      }
+    },
+    {
+      "row": 5,
+      "column": 4,
+      "node": "D5",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_6_4",
+      "point": {
+        "x": 1193.811,
+        "y": 928.835
+      },
+      "bounds": {
+        "left": 1089.818,
+        "top": 849.492,
+        "right": 1305.1,
+        "bottom": 1013.745
+      }
+    },
+    {
+      "row": 5,
+      "column": 5,
+      "node": "E5",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_6_5",
+      "point": {
+        "x": 1378.415,
+        "y": 928.835
+      },
+      "bounds": {
+        "left": 1268.371,
+        "top": 849.492,
+        "right": 1496.179,
+        "bottom": 1013.745
+      }
+    },
+    {
+      "row": 5,
+      "column": 6,
+      "node": "F5",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_6_6",
+      "point": {
+        "x": 1563.019,
+        "y": 928.835
+      },
+      "bounds": {
+        "left": 1446.924,
+        "top": 849.492,
+        "right": 1687.257,
+        "bottom": 1013.745
+      }
+    },
+    {
+      "row": 5,
+      "column": 7,
+      "node": "G5",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_6_7",
+      "point": {
+        "x": 1747.623,
+        "y": 928.835
+      },
+      "bounds": {
+        "left": 1625.478,
+        "top": 849.492,
+        "right": 1878.335,
+        "bottom": 1013.745
+      }
+    },
+    {
+      "row": 5,
+      "column": 8,
+      "node": "H5",
+      "button_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_6_8",
+      "point": {
+        "x": 1932.227,
+        "y": 928.835
+      },
+      "bounds": {
+        "left": 1804.031,
+        "top": 849.492,
+        "right": 2069.414,
+        "bottom": 1013.745
+      }
+    }
+  ],
+  "land_nodes": [
+    "D1",
+    "E1",
+    "F1",
+    "G1",
+    "H1",
+    "B2",
+    "H2",
+    "F3",
+    "C4",
+    "F4",
+    "C5"
+  ],
+  "fleets": [
+    {
+      "marker": "cell_fleet_waerpalaisuo",
+      "node": "A3",
+      "ammo": 5,
+      "ammo_capacity": 5
+    },
+    {
+      "marker": "cell_fleet_benningdun",
+      "node": "C2",
+      "ammo": 5,
+      "ammo_capacity": 5
+    }
+  ],
+  "enemies": [
+    {
+      "row": 2,
+      "column": 4,
+      "node": "D2",
+      "object_id": 1030004,
+      "sprite": "zl1",
+      "scale": 1,
+      "genre": "Main",
+      "level": 50,
+      "fighting": false,
+      "is_siren": false
+    },
+    {
+      "row": 2,
+      "column": 7,
+      "node": "G2",
+      "object_id": 1030002,
+      "sprite": "qz1",
+      "scale": 1,
+      "genre": "Light",
+      "level": 50,
+      "fighting": false,
+      "is_siren": false
+    },
+    {
+      "row": 3,
+      "column": 3,
+      "node": "C3",
+      "object_id": 1030002,
+      "sprite": "qz1",
+      "scale": 1,
+      "genre": "Light",
+      "level": 50,
+      "fighting": false,
+      "is_siren": false
+    },
+    {
+      "row": 5,
+      "column": 5,
+      "node": "E5",
+      "object_id": 1030004,
+      "sprite": "zl1",
+      "scale": 1,
+      "genre": "Main",
+      "level": 50,
+      "fighting": false,
+      "is_siren": false
+    }
+  ],
+  "pickups": [],
+  "displayed_fleet_index": 2,
+  "current_fleet_marker": "cell_fleet_benningdun",
+  "current_fleet_roster_sprites": [
+    "benningdun",
+    "dengken",
+    "gelunbiya",
+    "guanghui_younv",
+    "sebao",
+    "yanusi_7"
+  ],
+  "submarine": null,
+  "submarine_hunting_nodes": null,
+  "submarine_destination_node": null
+}

@@ -597,7 +597,7 @@ class TargetsOracle:
         buttons = self._matches(state, "overlay/network-reconnect/confirm")
         return bool(
             len(content) == 1
-            and content[0].text.strip() == "船坞已满，请前往整理或扩展"
+            and content[0].text.strip() in {"船坞已满，请前往整理或扩展", "船坞已满，请先进行整理"}
             and len(buttons) == 3
             and sorted("".join(label.text.split()) for label in labels)
             == sorted(("整理", "拓展", "强化"))

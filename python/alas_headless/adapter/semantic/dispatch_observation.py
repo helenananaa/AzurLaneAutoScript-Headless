@@ -45,7 +45,33 @@ class DispatchObservationPorts:
             or name in UI_PAGE_CHECK_RESOURCES
             else self.oracle
         )
+        if (self._campaign_context is None and name in (
+                'MAP_PREPARATION', 'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION',
+                'AUTO_SEARCH_MENU_EXIT', 'AUTO_SEARCH_REWARD', 'WITHDRAW')
+                and (observation_oracle.main_page_visible() or observation_oracle.campaign_menu_is_entry())):
+            state = observation_oracle.read_state()
+            blockers = observation_oracle._blocking_rules(state, 'ui/absence-probe')
+            if not any(rule.blocker_id != 'campaign-menu' for rule in blockers):
+                # UI.ui_additional scans these Campaign resources without a
+                # Campaign task. An unobscured navigation page proves their
+                # absence; ignore only that navigation page's own blocker,
+                # while actual overlays keep their owned handling below.
+                return False
+        if (not self._login_flow.active and name in ('GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'GET_SHIP')
+                and self._mission_context is None
+                and (observation_oracle.main_page_visible() or observation_oracle.campaign_menu_is_entry())
+                and (name != 'GET_SHIP' or not observation_oracle.observation_target_present('reward/new-ship/continue'))
+                and self._award_close_target() is None):
+            # ui_goto probes generic rewards on main and the campaign menu.
+            # Their absence is not a missing Mission capability. This does
+            # not authorize claiming an unowned popup.
+            return False
         if name in UI_PAGE_CHECK_RESOURCES:
+            buttons = getattr(observation_oracle.read_state(), 'buttons', ())
+            if any(b.active_in_hierarchy and b.active_and_enabled and b.path.endswith(
+                    '/LevelGrid/DragLayer/op1/retreat') for b in buttons):
+                if observation_oracle.campaign_is_in_map():
+                    return name == 'IN_MAP'
             if observation_oracle.observation_target_present('reward/campaign-total/exit'):
                 # The retained result owns the screen. Optional chapter/page
                 # checks (e.g. commission notice) are absent, not malformed.
@@ -63,6 +89,16 @@ class DispatchObservationPorts:
                 )
             ):
                 return False
+            if (observation_oracle.observation_target_present('archive/page/back')
+                    and observation_oracle.war_archives_page_visible()):
+                return name == 'WAR_ARCHIVES_CHECK'
+            if (observation_oracle.campaign_menu_is_entry()
+                    and not any(rule.blocker_id != 'campaign-menu' for rule in
+                        observation_oracle._blocking_rules(observation_oracle.read_state(), 'ui/absence-probe'))
+                    and not observation_oracle.enabled('overlay/bulletin/close')):
+                # The entrance owns page enumeration even when its chapter
+                # back button has unmounted after returning from a stage.
+                return name == 'CAMPAIGN_MENU_CHECK'
         if name == "POPUP_CONFIRM":
             reset_oracle = self._frame_or_live_observation_oracle()
             if reset_oracle.observation_surface_present(ObservationSurface.RESET_SHOP):
@@ -101,7 +137,17 @@ class DispatchObservationPorts:
                 return False
         if (
             not self._login_flow.active
+            and name in ('MAIN_GOTO_FLEET', 'MAIN_GOTO_CAMPAIGN_WHITE')
+            and observation_oracle.exists('campaign-menu/page/back')
+        ):
+            # LevelMainScene can coexist with the departing main hierarchy.
+            # Hide only the departing main aliases; original Main/Event/Archive
+            # page readers retain ownership of the destination classification.
+            return False
+        if (
+            not self._login_flow.active
             and name in UI_PAGE_CHECK_RESOURCES
+            and not observation_oracle.exists('campaign-menu/page/back')
             and not observation_oracle.enabled("overlay/network-reconnect/confirm")
             and not observation_oracle.enabled("overlay/bulletin/close")
             and observation_oracle.main_page_visible()
@@ -680,6 +726,11 @@ class DispatchObservationPorts:
         return UNHANDLED
 
     def _appear_pages(self, name):
+        if name == "EVENT_LIST_CHECK":
+            # Page enumeration also probes this while returning through the
+            # campaign menu. Absence of the exact ActivityMainUI back control
+            # is a negative observation, not a missing task-flow capability.
+            return self.oracle.enabled("event-list/page/back")
         if name in PAGE_VIRTUAL_RESOURCES:
             if name == "BATTLE_PASS_CHECK":
                 return (self.oracle.observation_target_present("battle-pass/home")

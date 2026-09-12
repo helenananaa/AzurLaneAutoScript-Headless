@@ -417,7 +417,10 @@
         "integration/alas/series/0480-current-raid-runtime.patch",
         "integration/alas/current-raid-easy-live-validation-receipt-20260827-r10.json",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "docs/campaign-empty-movement-20260911.zh-CN.md",
+        "integration/alas/campaign-empty-movement-20260911/assessment.json",
+        "tests/test_campaign_empty_movement.py"
       ],
       "group_code": "P",
       "metadata": "type=select; display=default/hide",
@@ -462,7 +465,10 @@
         "integration/alas/event-shared-entry-equivalence-20260822.json",
         "integration/alas/series/0420-event-shared-entry-runtime.patch",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "docs/campaign-empty-movement-20260911.zh-CN.md",
+        "integration/alas/campaign-empty-movement-20260911/assessment.json",
+        "tests/test_campaign_empty_movement.py"
       ],
       "group_code": "P",
       "metadata": "type=select; display=default/hide",
@@ -507,7 +513,13 @@
         "integration/alas/event-shared-entry-equivalence-20260822.json",
         "integration/alas/series/0420-event-shared-entry-runtime.patch",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/campaign-reentry-20260909/resume.json",
+        "integration/alas/campaign-reentry-20260909/assessment.json",
+        "docs/campaign-reentry-20260909.zh-CN.md",
+        "docs/campaign-empty-movement-20260911.zh-CN.md",
+        "integration/alas/campaign-empty-movement-20260911/assessment.json",
+        "tests/test_campaign_empty_movement.py"
       ],
       "group_code": "P",
       "metadata": "type=input; display=default/hide",
@@ -1370,7 +1382,11 @@
         "integration/alas/series/0080-current-task-flow-ports.patch",
         "scripts/python/run_alas_daily_live_validation.py",
         "integration/alas/daily-tactical2-fleet2-fierce1-fleet1-live-validation-receipt.json",
-        "docs/status.md"
+        "docs/status.md",
+        "tests/test_daily_quick_boundary.py",
+        "scripts/python/run_alas_daily_quick_live_validation.py",
+        "integration/alas/daily-quick-20260911/live-r1.json",
+        "docs/daily-meta-boundaries-20260911.zh-CN.md"
       ],
       "group_code": "L",
       "metadata": "type=checkbox; display=default",
@@ -2962,7 +2978,20 @@
         "python/alas_headless/alas_fleet_config_contract.py",
         "python/alas_headless/alas_fleet_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/campaign-reentry-20260909/resume.json",
+        "integration/alas/campaign-reentry-20260909/assessment.json",
+        "docs/campaign-reentry-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-repair-20260911/assessment.json",
+        "integration/alas/campaign-sparse-repair-20260911/result-r3.json",
+        "integration/alas/campaign-sparse-repair-20260911/controlled-repair.json",
+        "docs/campaign-sparse-repair-20260911.zh-CN.md",
+        "docs/campaign-sparse-resume-20260911.zh-CN.md",
+        "integration/alas/campaign-sparse-resume-20260911/assessment.json",
+        "tests/test_campaign_sparse_resume.py"
       ],
       "group_code": "P",
       "metadata": "type=select; display=default",
@@ -3107,7 +3136,17 @@
         "python/alas_headless/alas_fleet_config_contract.py",
         "python/alas_headless/alas_fleet_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/campaign-reentry-20260909/resume.json",
+        "integration/alas/campaign-reentry-20260909/assessment.json",
+        "docs/campaign-reentry-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-repair-20260911/assessment.json",
+        "integration/alas/campaign-sparse-repair-20260911/result-r3.json",
+        "integration/alas/campaign-sparse-repair-20260911/controlled-repair.json",
+        "docs/campaign-sparse-repair-20260911.zh-CN.md"
       ],
       "group_code": "P",
       "metadata": "type=select; display=default",
@@ -3253,7 +3292,10 @@
         "python/alas_headless/alas_fleet_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
         "docs/status.md",
-        "docs/campaign-preparation-20260906.zh-CN.md"
+        "docs/campaign-preparation-20260906.zh-CN.md",
+        "docs/campaign-empty-movement-20260911.zh-CN.md",
+        "integration/alas/campaign-empty-movement-20260911/assessment.json",
+        "tests/test_campaign_empty_movement.py"
       ],
       "group_code": "P",
       "metadata": "type=select; display=default/display",
@@ -4374,7 +4416,21 @@
         "python/alas_headless/alas_hp_control_config_contract.py",
         "python/alas_headless/alas_hp_control_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/series/0620-campaign-scout-exchange.patch",
+        "integration/alas/campaign-scout-20260909/scout-live-r2.json",
+        "integration/alas/campaign-scout-20260909/hp-config-replay.json",
+        "docs/campaign-scout-20260909.zh-CN.md",
+        "tests/test_campaign_sparse_vitals.py",
+        "integration/alas/campaign-hp-followthrough-20260909/assessment.json",
+        "docs/campaign-hp-followthrough-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-repair-20260911/assessment.json",
+        "integration/alas/campaign-sparse-repair-20260911/result-r3.json",
+        "integration/alas/campaign-sparse-repair-20260911/controlled-repair.json",
+        "docs/campaign-sparse-repair-20260911.zh-CN.md"
       ],
       "group_code": "P",
       "metadata": "type=input; display=default",
@@ -4409,7 +4465,21 @@
         "python/alas_headless/alas_hp_control_config_contract.py",
         "python/alas_headless/alas_hp_control_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/series/0620-campaign-scout-exchange.patch",
+        "integration/alas/campaign-scout-20260909/scout-live-r2.json",
+        "integration/alas/campaign-scout-20260909/hp-config-replay.json",
+        "docs/campaign-scout-20260909.zh-CN.md",
+        "tests/test_campaign_sparse_vitals.py",
+        "integration/alas/campaign-hp-followthrough-20260909/assessment.json",
+        "docs/campaign-hp-followthrough-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-repair-20260911/assessment.json",
+        "integration/alas/campaign-sparse-repair-20260911/result-r3.json",
+        "integration/alas/campaign-sparse-repair-20260911/controlled-repair.json",
+        "docs/campaign-sparse-repair-20260911.zh-CN.md"
       ],
       "group_code": "P",
       "metadata": "type=input; display=default",
@@ -4433,9 +4503,9 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
-        "live": "missing",
+        "live": "partial",
         "observation": "partial",
         "offline": "complete"
       },
@@ -4444,7 +4514,28 @@
         "python/alas_headless/alas_hp_control_config_contract.py",
         "python/alas_headless/alas_hp_control_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/series/0610-campaign-hp-control.patch",
+        "python/alas_headless/oracle/campaign_health.py",
+        "python/alas_headless/adapter/semantic/campaign_health.py",
+        "tests/test_campaign_hp_control_ports.py",
+        "tests/test_campaign_emergency_repair.py",
+        "integration/alas/campaign-hp-control-20260909/main-live.json",
+        "integration/alas/campaign-hp-control-20260909/hp-config-replay.json",
+        "docs/campaign-hp-control-20260909.zh-CN.md",
+        "tests/test_campaign_sparse_vitals.py",
+        "integration/alas/campaign-hp-followthrough-20260909/assessment.json",
+        "docs/campaign-hp-followthrough-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/series/0630-campaign-inherited-dock-full.patch",
+        "integration/alas/campaign-natural-hp-dock-20260909/result-r3.json",
+        "integration/alas/campaign-natural-hp-dock-20260909/assessment.json",
+        "docs/campaign-natural-hp-dock-20260909.zh-CN.md",
+        "docs/campaign-sparse-resume-20260911.zh-CN.md",
+        "integration/alas/campaign-sparse-resume-20260911/assessment.json",
+        "tests/test_campaign_sparse_resume.py"
       ],
       "group_code": "P",
       "metadata": "type=input; display=default",
@@ -4462,16 +4553,16 @@
         "EventSp"
       ],
       "path": "HpControl.LowHpRetreatThreshold",
-      "status_label": "🧪 离线路径",
+      "status_label": "◐ 实机当前值",
       "support": "supported",
       "values": "input/default: 0.3"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "missing",
-        "observation": "missing",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
@@ -4479,7 +4570,30 @@
         "python/alas_headless/alas_hp_control_config_contract.py",
         "python/alas_headless/alas_hp_control_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/series/0610-campaign-hp-control.patch",
+        "python/alas_headless/oracle/campaign_health.py",
+        "python/alas_headless/adapter/semantic/campaign_health.py",
+        "tests/test_campaign_hp_control_ports.py",
+        "tests/test_campaign_emergency_repair.py",
+        "integration/alas/campaign-hp-control-20260909/main-live.json",
+        "integration/alas/campaign-hp-control-20260909/hp-config-replay.json",
+        "docs/campaign-hp-control-20260909.zh-CN.md",
+        "integration/alas/campaign-repair-nonzero-20260909/repair-live-r8.json",
+        "integration/alas/campaign-repair-nonzero-20260909/assessment.json",
+        "docs/campaign-repair-nonzero-20260909.zh-CN.md",
+        "tests/test_alas_adapter_campaign_map.py",
+        "tests/test_campaign_sparse_vitals.py",
+        "integration/alas/campaign-hp-followthrough-20260909/assessment.json",
+        "docs/campaign-hp-followthrough-20260909.zh-CN.md",
+        "integration/alas/campaign-hp-followthrough-20260909/repair-fresh.json",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-repair-20260911/assessment.json",
+        "integration/alas/campaign-sparse-repair-20260911/result-r3.json",
+        "integration/alas/campaign-sparse-repair-20260911/controlled-repair.json",
+        "docs/campaign-sparse-repair-20260911.zh-CN.md"
       ],
       "group_code": "P",
       "metadata": "type=input; display=default",
@@ -4503,10 +4617,10 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "missing",
-        "observation": "missing",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
@@ -4514,7 +4628,30 @@
         "python/alas_headless/alas_hp_control_config_contract.py",
         "python/alas_headless/alas_hp_control_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/series/0610-campaign-hp-control.patch",
+        "python/alas_headless/oracle/campaign_health.py",
+        "python/alas_headless/adapter/semantic/campaign_health.py",
+        "tests/test_campaign_hp_control_ports.py",
+        "tests/test_campaign_emergency_repair.py",
+        "integration/alas/campaign-hp-control-20260909/main-live.json",
+        "integration/alas/campaign-hp-control-20260909/hp-config-replay.json",
+        "docs/campaign-hp-control-20260909.zh-CN.md",
+        "integration/alas/campaign-repair-nonzero-20260909/repair-live-r8.json",
+        "integration/alas/campaign-repair-nonzero-20260909/assessment.json",
+        "docs/campaign-repair-nonzero-20260909.zh-CN.md",
+        "tests/test_alas_adapter_campaign_map.py",
+        "tests/test_campaign_sparse_vitals.py",
+        "integration/alas/campaign-hp-followthrough-20260909/assessment.json",
+        "docs/campaign-hp-followthrough-20260909.zh-CN.md",
+        "integration/alas/campaign-hp-followthrough-20260909/repair-fresh.json",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-repair-20260911/assessment.json",
+        "integration/alas/campaign-sparse-repair-20260911/result-r3.json",
+        "integration/alas/campaign-sparse-repair-20260911/controlled-repair.json",
+        "docs/campaign-sparse-repair-20260911.zh-CN.md"
       ],
       "group_code": "P",
       "metadata": "type=input; display=default",
@@ -4538,7 +4675,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -4549,7 +4686,30 @@
         "python/alas_headless/alas_hp_control_config_contract.py",
         "python/alas_headless/alas_hp_control_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/series/0610-campaign-hp-control.patch",
+        "python/alas_headless/oracle/campaign_health.py",
+        "python/alas_headless/adapter/semantic/campaign_health.py",
+        "tests/test_campaign_hp_control_ports.py",
+        "tests/test_campaign_emergency_repair.py",
+        "integration/alas/campaign-hp-control-20260909/main-live.json",
+        "integration/alas/campaign-hp-control-20260909/hp-config-replay.json",
+        "docs/campaign-hp-control-20260909.zh-CN.md",
+        "integration/alas/campaign-repair-nonzero-20260909/repair-live-r8.json",
+        "integration/alas/campaign-repair-nonzero-20260909/assessment.json",
+        "docs/campaign-repair-nonzero-20260909.zh-CN.md",
+        "tests/test_alas_adapter_campaign_map.py",
+        "tests/test_campaign_sparse_vitals.py",
+        "integration/alas/campaign-hp-followthrough-20260909/assessment.json",
+        "docs/campaign-hp-followthrough-20260909.zh-CN.md",
+        "integration/alas/campaign-hp-followthrough-20260909/repair-fresh.json",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-repair-20260911/assessment.json",
+        "integration/alas/campaign-sparse-repair-20260911/result-r3.json",
+        "integration/alas/campaign-sparse-repair-20260911/controlled-repair.json",
+        "docs/campaign-sparse-repair-20260911.zh-CN.md"
       ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
@@ -4584,7 +4744,29 @@
         "python/alas_headless/alas_hp_control_config_contract.py",
         "python/alas_headless/alas_hp_control_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/series/0610-campaign-hp-control.patch",
+        "python/alas_headless/oracle/campaign_health.py",
+        "python/alas_headless/adapter/semantic/campaign_health.py",
+        "tests/test_campaign_hp_control_ports.py",
+        "tests/test_campaign_emergency_repair.py",
+        "integration/alas/campaign-hp-control-20260909/main-live.json",
+        "integration/alas/campaign-hp-control-20260909/hp-config-replay.json",
+        "docs/campaign-hp-control-20260909.zh-CN.md",
+        "integration/alas/series/0620-campaign-scout-exchange.patch",
+        "integration/alas/campaign-scout-20260909/scout-live-r2.json",
+        "integration/alas/campaign-scout-20260909/hp-config-replay.json",
+        "docs/campaign-scout-20260909.zh-CN.md",
+        "tests/test_campaign_sparse_vitals.py",
+        "integration/alas/campaign-hp-followthrough-20260909/assessment.json",
+        "docs/campaign-hp-followthrough-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-repair-20260911/assessment.json",
+        "integration/alas/campaign-sparse-repair-20260911/result-r3.json",
+        "integration/alas/campaign-sparse-repair-20260911/controlled-repair.json",
+        "docs/campaign-sparse-repair-20260911.zh-CN.md"
       ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
@@ -4608,7 +4790,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -4619,7 +4801,28 @@
         "python/alas_headless/alas_hp_control_config_contract.py",
         "python/alas_headless/alas_hp_control_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/series/0610-campaign-hp-control.patch",
+        "python/alas_headless/oracle/campaign_health.py",
+        "python/alas_headless/adapter/semantic/campaign_health.py",
+        "tests/test_campaign_hp_control_ports.py",
+        "tests/test_campaign_emergency_repair.py",
+        "integration/alas/campaign-hp-control-20260909/main-live.json",
+        "integration/alas/campaign-hp-control-20260909/hp-config-replay.json",
+        "docs/campaign-hp-control-20260909.zh-CN.md",
+        "tests/test_campaign_sparse_vitals.py",
+        "integration/alas/campaign-hp-followthrough-20260909/assessment.json",
+        "docs/campaign-hp-followthrough-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/series/0630-campaign-inherited-dock-full.patch",
+        "integration/alas/campaign-natural-hp-dock-20260909/result-r3.json",
+        "integration/alas/campaign-natural-hp-dock-20260909/assessment.json",
+        "docs/campaign-natural-hp-dock-20260909.zh-CN.md",
+        "docs/campaign-sparse-resume-20260911.zh-CN.md",
+        "integration/alas/campaign-sparse-resume-20260911/assessment.json",
+        "tests/test_campaign_sparse_resume.py"
       ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
@@ -5333,7 +5536,14 @@
         "tests/test_semantic_oracle.py",
         "tests/test_alas_adapter.py",
         "tests/test_alas_integration_patch.py",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/series/0630-campaign-inherited-dock-full.patch",
+        "integration/alas/campaign-natural-hp-dock-20260909/result-r3.json",
+        "integration/alas/campaign-natural-hp-dock-20260909/assessment.json",
+        "docs/campaign-natural-hp-dock-20260909.zh-CN.md",
+        "docs/campaign-midmap-recovery-20260911.zh-CN.md",
+        "integration/alas/campaign-midmap-continuous-20260911/assessment.json",
+        "tests/test_retirement_equipment_transition.py"
       ],
       "group_code": "P",
       "metadata": "type=select; display=default",
@@ -5389,7 +5599,12 @@
         "integration/alas/series/0390-meta-assist-tier-runtime.patch",
         "scripts/python/run_alas_opsi_ash_assist_tier_live_validation.py",
         "integration/alas/opsi-ash-assist-tier-live-20260822.json",
-        "docs/status.md"
+        "docs/status.md",
+        "tests/test_meta_assist_owner.py",
+        "tests/test_meta_dossier_navigation.py",
+        "integration/alas/series/0650-meta-assist-task-owner.patch",
+        "integration/alas/meta-assist-20260911/zero-attempt-live-r2.json",
+        "docs/daily-meta-boundaries-20260911.zh-CN.md"
       ],
       "group_code": "B",
       "metadata": "type=input; display=default",
@@ -6857,7 +7072,14 @@
         "python/alas_headless/alas_retirement_config_replay.py",
         "integration/alas/series/0120-retirement-flow-ports.patch",
         "integration/alas/series/0130-enhancement-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/series/0630-campaign-inherited-dock-full.patch",
+        "integration/alas/campaign-natural-hp-dock-20260909/result-r3.json",
+        "integration/alas/campaign-natural-hp-dock-20260909/assessment.json",
+        "docs/campaign-natural-hp-dock-20260909.zh-CN.md",
+        "docs/campaign-midmap-recovery-20260911.zh-CN.md",
+        "integration/alas/campaign-midmap-continuous-20260911/assessment.json",
+        "tests/test_retirement_equipment_transition.py"
       ],
       "group_code": "P",
       "metadata": "type=select; display=default",
@@ -8353,7 +8575,7 @@
         "Daily"
       ],
       "name": "Daily",
-      "note": "原 Daily 状态机已实机闭环 Tactical Training 第二关/舰队 2 与 Fierce Assault 第一关/舰队 1；新版展开层的普通、单次快速和批量快速控件已 typed 区分，普通模式实机通过，UseDailySkip=true 的批量快速动作仅完成有界实现而未实耗验收；其余星期类型、难度和舰队仍未完整覆盖",
+      "note": "原 Daily 状态机已实机闭环 Tactical Training 第二关/舰队 2 与 Fierce Assault 第一关/舰队 1；新版展开层的普通、单次快速和批量快速控件已 typed 区分，普通模式实机通过，UseDailySkip=true 的批量快速动作仅完成有界实现而未实耗验收；其余星期类型、难度和舰队仍未完整覆盖 2026-09-11 补齐快速挑战命中检查、按挑战身份读次数及返回主页；当天未触发快速消耗，仍未实机验收该分支。",
       "status": "L"
     },
     {
@@ -8560,7 +8782,7 @@
         "OldRetire"
       ],
       "name": "General",
-      "note": "三种 `RetireMode` 已离线分类，旧退役在 Headless 页面事件前拒绝；官方一键退役和 `keep_limit_break` 已实机闭环；强化三项详细配置、ALAS 正式任务入口、语义筛选/选舰导航、官方推荐、真实强化、容量差及装备入仓已闭环；完整 `favourite` 破坏性任务和自然无素材分支未额外消耗舰船复测，`do_not_keep` 仅设置级验证，旧退役仍缺任务级语义事务",
+      "note": "三种 `RetireMode` 已离线分类，旧退役在 Headless 页面事件前拒绝；官方一键退役和 `keep_limit_break` 已实机闭环；强化三项详细配置、ALAS 正式任务入口、语义筛选/选舰导航、官方推荐、真实强化、容量差及装备入仓已闭环；完整 `favourite` 破坏性任务和自然无素材分支未额外消耗舰船复测，`do_not_keep` 仅设置级验证，旧退役仍缺任务级语义事务；2026-09-11 晚间929/930自然战中满仓后，修复新弹窗旧帧分类和装备取消全选过早检查；实际退役72艘、115件装备保留、原Main同图续战一场并撤退通过。触发、退役和续战分属不同进程，完整连续链仍未资格化。见 docs/campaign-midmap-recovery-20260911.zh-CN.md。",
       "status": "P"
     },
     {
@@ -8606,7 +8828,7 @@
         "Storage"
       ],
       "name": "Main",
-      "note": "三实例 9 组、54 字段（合计 162 个面板字段实例）已证明除 Scheduler.Command 外结构和默认值完全等价；六个 StopCondition 字段共 60 个合法类与 45 个非法类在任何导航前统一严校。普通主线 1-1 至 16-4 共 64 图已在 Main/Main2/Main3 原始路由离线回放并在任何输入前 fail-closed；Main 已在真实 API 32 x86_64 AVD 上完成 normal 1-1 的手动地图闭环，以及 normal 12-4 的官方自律寻敌闭环。12-4 使用舰队 1/2、禁用潜艇，精确设置一队道中/二队 Boss，出击后由游戏官方承担全部地图和战斗，ALAS 的 combat/viewport 预算均为 0；官方 AutoBtn checked、总奖励页、RunCount 归零、Scheduler 关闭及无 raw fallback 均有实机证明，凭证见 integration/alas/main-12-4-auto-search-live-validation-receipt.json。反向的一队 Boss/二队道中走同一类型化路径并有确定性测试；12-4 之外的自动寻敌、舰队锁定、潜艇、其他舰队编号、困难/活动图未提升",
+      "note": "三实例 9 组、54 字段（合计 162 个面板字段实例）已证明除 Scheduler.Command 外结构和默认值完全等价；六个 StopCondition 字段共 60 个合法类与 45 个非法类在任何导航前统一严校。普通主线 1-1 至 16-4 共 64 图已在 Main/Main2/Main3 原始路由离线回放并在任何输入前 fail-closed；Main 已在真实 API 32 x86_64 AVD 上完成 normal 1-1 的手动地图闭环，以及 normal 12-4 的官方自律寻敌闭环。12-4 使用舰队 1/2、禁用潜艇，精确设置一队道中/二队 Boss，出击后由游戏官方承担全部地图和战斗，ALAS 的 combat/viewport 预算均为 0；官方 AutoBtn checked、总奖励页、RunCount 归零、Scheduler 关闭及无 raw fallback 均有实机证明，凭证见 integration/alas/main-12-4-auto-search-live-validation-receipt.json。反向的一队 Boss/二队道中走同一类型化路径并有确定性测试；12-4 之外的自动寻敌、舰队锁定、潜艇、其他舰队编号、困难/活动图未提升；2026-09-09 补充：第六舰队 10-2 取消战前页后，原 Main 对同格行动中敌人重新入场并撤退已实机通过，零战斗；仅提升该恢复子路径，见 docs/campaign-reentry-20260909.zh-CN.md。；2026-09-09：真实出击准备页满仓经原一键退役恢复后，完成两场战斗并自然触发默认0.3低血撤退；本次退役95艘、装备保留，战中满仓同图续战仍未验证，详见 docs/campaign-natural-hp-dock-20260909.zh-CN.md。；2026-09-11：真实战中满仓完成分段退役77艘、同图进度保留及后续一战，最终撤回章节页；中间重启验证进程，相机修复后尚未实机重跑，不提升为单次连续成功。见 docs/campaign-midmap-dock-20260911.zh-CN.md。；2026-09-11：新进程继承战前层已由原 Main 自动退回同图、完成同格B6一战、原撤退并使RunCount归零；同格战后相机修复已实机通过，满仓连续链与非满编跨进程仍不外推。见 docs/campaign-precombat-recovery-20260911.zh-CN.md。；2026-09-11：第六舰队2主力+2先锋的换位/恢复、四场战斗和独立1.0阈值真实维修3→2均已实证并正常撤退；默认0.3/0.6维修阈值未触发，其他空槽组合及非满编跨进程仍未资格化。见 docs/campaign-sparse-repair-20260911.zh-CN.md。；2026-09-11：非满编继承战前页在新进程内完成同图一战和原撤退，四舰HP/空槽、RunCount归零与调度关闭通过；通过原生hero和地图头像交叉重建编成，不外推仅地图恢复及其他编成。见 docs/campaign-sparse-resume-20260911.zh-CN.md。；2026-09-11 晚间929/930自然战中满仓后，修复新弹窗旧帧分类和装备取消全选过早检查；实际退役72艘、115件装备保留、原Main同图续战一场并撤退通过。触发、退役和续战分属不同进程，完整连续链仍未资格化。见 docs/campaign-midmap-recovery-20260911.zh-CN.md。",
       "status": "L"
     },
     {
@@ -8684,7 +8906,7 @@
         "OpsiAshAssist"
       ],
       "name": "OpsiAshAssist",
-      "note": "Tier 已以 typed 候选身份和 stale-state gate 完成整数等价类及五次轮换实机闭环；助战次数 3/3 未变且未出击。面板仍缺无目标、舰队不可用、出击、战斗和领奖主链",
+      "note": "Tier 已以 typed 候选身份和 stale-state gate 完成整数等价类及五次轮换实机闭环；助战次数 3/3 未变且未出击。面板仍缺无目标、舰队不可用、出击、战斗和领奖主链 2026-09-11 实机补齐旧档案到当前列表导航及原生 0/3 helper 判断；任务上下文与 typed 次数已接通，完整战斗及 MetaReward 仍未验收。",
       "status": "B"
     },
     {
@@ -8921,7 +9143,7 @@
         "EnemyPriority"
       ],
       "name": "WarArchives",
-      "note": "常驻档案入口、分类、45 个当前 CN 客户端可识别档案卡、字母关卡、普通/困难切换、档案钥匙计数与精确 5-key 入场确认均已 typed 化。原 WarArchives 在冬冠 A1 完成 4 场普通战和 Boss、奖励结算并回到档案关卡页，钥匙 295→290，凭证见 integration/alas/war-archives-live-validation-receipt-20260826-r18.json。红染 A1 因原图脚本要求舰队前移到空格 C2，仍在现有敌人/拾取格输入边界局部拒绝；war_archives_20230525_cn、war_archives_20230803_cn、war_archives_20240725_cn 在当前固定 CN 游戏表中不存在并按任务局部不可用，其余档案仅有共享路径离线覆盖，尚未逐档案实机闭环",
+      "note": "常驻档案入口、分类、45 个当前 CN 客户端可识别档案卡、字母关卡、普通/困难切换、档案钥匙计数与精确 5-key 入场确认均已 typed 化。原 WarArchives 在冬冠 A1 完成 4 场普通战和 Boss、奖励结算并回到档案关卡页，钥匙 295→290，凭证见 integration/alas/war-archives-live-validation-receipt-20260826-r18.json。2026-09-11 红染 A1 已由原 WarArchives 从入口完成二队经 C1 移动到空格 C2、切回一队、C3 一战、新帧血量读取与原撤退，RunCount 归零且调度关闭；仅提升该有界路径，完整 Boss 清图仍未验证，见 docs/campaign-empty-movement-20260911.zh-CN.md；war_archives_20230525_cn、war_archives_20230803_cn、war_archives_20240725_cn 在当前固定 CN 游戏表中不存在并按任务局部不可用，其余档案仅有共享路径离线覆盖，尚未逐档案实机闭环",
       "status": "L"
     }
   ],
@@ -8956,10 +9178,15 @@
         "integration/alas/series/0390-meta-assist-tier-runtime.patch",
         "scripts/python/run_alas_opsi_ash_assist_tier_live_validation.py",
         "integration/alas/opsi-ash-assist-tier-live-20260822.json",
-        "docs/status.md"
+        "docs/status.md",
+        "tests/test_meta_assist_owner.py",
+        "tests/test_meta_dossier_navigation.py",
+        "integration/alas/series/0650-meta-assist-task-owner.patch",
+        "integration/alas/meta-assist-20260911/zero-attempt-live-r2.json",
+        "docs/daily-meta-boundaries-20260911.zh-CN.md"
       ],
       "field": "OpsiAshAssist.Tier",
-      "note": "Exact integer thresholds preserve the original comparison, up to five beacon rotations, and current-beacon fallback through typed candidate identity and stale-state gates. Live -1, 0, and 15 emitted no input; 16 selected five exact candidates without changing 3/3 attempts or starting a sortie. Malformed values fail before observation or input, and no undeclared level range is invented."
+      "note": "Exact integer thresholds preserve the original comparison, up to five beacon rotations, and current-beacon fallback through typed candidate identity and stale-state gates. Live -1, 0, and 15 emitted no input; 16 selected five exact candidates without changing 3/3 attempts or starting a sortie. Malformed values fail before observation or input, and no undeclared level range is invented. On 2026-09-11 archive-to-current navigation and the original zero-attempt helper passed at 0/3 with owner cleanup. This does not qualify full assist combat, run scheduling, or MetaReward."
     },
     {
       "dimensions": {
@@ -9198,10 +9425,24 @@
       "evidence": [
         "tests/test_alas_hp_control_config.py",
         "python/alas_headless/alas_hp_control_config_replay.py",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/series/0620-campaign-scout-exchange.patch",
+        "integration/alas/campaign-scout-20260909/scout-live-r2.json",
+        "integration/alas/campaign-scout-20260909/hp-config-replay.json",
+        "docs/campaign-scout-20260909.zh-CN.md",
+        "tests/test_campaign_sparse_vitals.py",
+        "integration/alas/campaign-hp-followthrough-20260909/assessment.json",
+        "docs/campaign-hp-followthrough-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-repair-20260911/assessment.json",
+        "integration/alas/campaign-sparse-repair-20260911/result-r3.json",
+        "integration/alas/campaign-sparse-repair-20260911/controlled-repair.json",
+        "docs/campaign-sparse-repair-20260911.zh-CN.md"
       ],
       "field": "HpControl.HpBalanceThreshold",
-      "note": "Zero, default, one, invalid, and original scout-order decision classes are covered; enabling HP balance remains refused before navigation."
+      "note": "Original HPBalancer insertion and restoration have controlled live evidence with three scouts (weights 100,500,1000) and two scouts (100,1000,100). The 2026-09-11 10-2 fleet1=6, fleet2=1 run used 2 main + 2 vanguard, restored both order and cached HP under normal weights, then completed four battles and withdrawal. Other sparse combinations, natural swap triggers and cross-process cardinality recovery remain unqualified."
     },
     {
       "dimensions": {
@@ -9210,58 +9451,169 @@
       "evidence": [
         "tests/test_alas_hp_control_config.py",
         "python/alas_headless/alas_hp_control_config_replay.py",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/series/0620-campaign-scout-exchange.patch",
+        "integration/alas/campaign-scout-20260909/scout-live-r2.json",
+        "integration/alas/campaign-scout-20260909/hp-config-replay.json",
+        "docs/campaign-scout-20260909.zh-CN.md",
+        "tests/test_campaign_sparse_vitals.py",
+        "integration/alas/campaign-hp-followthrough-20260909/assessment.json",
+        "docs/campaign-hp-followthrough-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-repair-20260911/assessment.json",
+        "integration/alas/campaign-sparse-repair-20260911/result-r3.json",
+        "integration/alas/campaign-sparse-repair-20260911/controlled-repair.json",
+        "docs/campaign-sparse-repair-20260911.zh-CN.md"
       ],
       "field": "HpControl.HpBalanceWeight",
-      "note": "Exactly three positive integer weights, including the original Chinese-comma normalization, are replayed; malformed weights fail closed."
+      "note": "Original HPBalancer insertion and restoration have controlled live evidence with three scouts (weights 100,500,1000) and two scouts (100,1000,100). The 2026-09-11 10-2 fleet1=6, fleet2=1 run used 2 main + 2 vanguard, restored both order and cached HP under normal weights, then completed four battles and withdrawal. Other sparse combinations, natural swap triggers and cross-process cardinality recovery remain unqualified."
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_hp_control_config.py",
         "python/alas_headless/alas_hp_control_config_replay.py",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/series/0610-campaign-hp-control.patch",
+        "python/alas_headless/oracle/campaign_health.py",
+        "python/alas_headless/adapter/semantic/campaign_health.py",
+        "tests/test_campaign_hp_control_ports.py",
+        "tests/test_campaign_emergency_repair.py",
+        "integration/alas/campaign-hp-control-20260909/main-live.json",
+        "integration/alas/campaign-hp-control-20260909/hp-config-replay.json",
+        "docs/campaign-hp-control-20260909.zh-CN.md",
+        "tests/test_campaign_sparse_vitals.py",
+        "integration/alas/campaign-hp-followthrough-20260909/assessment.json",
+        "docs/campaign-hp-followthrough-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/series/0630-campaign-inherited-dock-full.patch",
+        "integration/alas/campaign-natural-hp-dock-20260909/result-r3.json",
+        "integration/alas/campaign-natural-hp-dock-20260909/assessment.json",
+        "docs/campaign-natural-hp-dock-20260909.zh-CN.md"
       ],
       "field": "HpControl.LowHpRetreatThreshold",
-      "note": "Normalized ratio boundaries and the original strict less-than trigger are replayed without entering the unqualified withdrawal loop."
+      "note": "Original Main with fleet 6 on 10-2 naturally triggered enabled low-HP retreat at the default 0.3 threshold after two battles (minimum HP 21.89%); prior one-click retirement recovered a real full dock above sortie preparation. Budget cutoff was not reached. Other stage/fleet combinations and natural emergency-repair defaults remain unqualified."
     },
     {
       "dimensions": {
+        "action": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_hp_control_config.py",
         "python/alas_headless/alas_hp_control_config_replay.py",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/series/0610-campaign-hp-control.patch",
+        "python/alas_headless/oracle/campaign_health.py",
+        "python/alas_headless/adapter/semantic/campaign_health.py",
+        "tests/test_campaign_hp_control_ports.py",
+        "tests/test_campaign_emergency_repair.py",
+        "integration/alas/campaign-hp-control-20260909/main-live.json",
+        "integration/alas/campaign-hp-control-20260909/hp-config-replay.json",
+        "docs/campaign-hp-control-20260909.zh-CN.md",
+        "integration/alas/campaign-repair-nonzero-20260909/repair-live-r8.json",
+        "integration/alas/campaign-repair-nonzero-20260909/assessment.json",
+        "docs/campaign-repair-nonzero-20260909.zh-CN.md",
+        "tests/test_alas_adapter_campaign_map.py",
+        "tests/test_campaign_sparse_vitals.py",
+        "integration/alas/campaign-hp-followthrough-20260909/assessment.json",
+        "docs/campaign-hp-followthrough-20260909.zh-CN.md",
+        "integration/alas/campaign-hp-followthrough-20260909/repair-fresh.json",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-repair-20260911/assessment.json",
+        "integration/alas/campaign-sparse-repair-20260911/result-r3.json",
+        "integration/alas/campaign-sparse-repair-20260911/controlled-repair.json",
+        "docs/campaign-sparse-repair-20260911.zh-CN.md"
       ],
       "field": "HpControl.RepairUseMultiThreshold",
-      "note": "Normalized ratio boundaries and original emergency-repair decision reach the recorded final-input boundary with no device input."
+      "note": "Original Main has controlled live repair evidence for full and 2+2 fleets on 10-2. On 2026-09-11 a fresh sparse fleet6 run completed one battle, repair stock 3 to 2 with four occupied HP slots restored, and withdrawal at temporary repair thresholds 1.0. A separate four-battle run retained default thresholds 0.3/0.6 but did not trigger repair; natural defaults, other sparse combinations and sparse cross-process recovery remain unqualified."
     },
     {
       "dimensions": {
+        "action": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_hp_control_config.py",
         "python/alas_headless/alas_hp_control_config_replay.py",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/series/0610-campaign-hp-control.patch",
+        "python/alas_headless/oracle/campaign_health.py",
+        "python/alas_headless/adapter/semantic/campaign_health.py",
+        "tests/test_campaign_hp_control_ports.py",
+        "tests/test_campaign_emergency_repair.py",
+        "integration/alas/campaign-hp-control-20260909/main-live.json",
+        "integration/alas/campaign-hp-control-20260909/hp-config-replay.json",
+        "docs/campaign-hp-control-20260909.zh-CN.md",
+        "integration/alas/campaign-repair-nonzero-20260909/repair-live-r8.json",
+        "integration/alas/campaign-repair-nonzero-20260909/assessment.json",
+        "docs/campaign-repair-nonzero-20260909.zh-CN.md",
+        "tests/test_alas_adapter_campaign_map.py",
+        "tests/test_campaign_sparse_vitals.py",
+        "integration/alas/campaign-hp-followthrough-20260909/assessment.json",
+        "docs/campaign-hp-followthrough-20260909.zh-CN.md",
+        "integration/alas/campaign-hp-followthrough-20260909/repair-fresh.json",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-repair-20260911/assessment.json",
+        "integration/alas/campaign-sparse-repair-20260911/result-r3.json",
+        "integration/alas/campaign-sparse-repair-20260911/controlled-repair.json",
+        "docs/campaign-sparse-repair-20260911.zh-CN.md"
       ],
       "field": "HpControl.RepairUseSingleThreshold",
-      "note": "Normalized ratio boundaries and the original minimum-HP repair branch are replayed; out-of-range and non-finite values fail closed."
+      "note": "Original Main has controlled live repair evidence for full and 2+2 fleets on 10-2. On 2026-09-11 a fresh sparse fleet6 run completed one battle, repair stock 3 to 2 with four occupied HP slots restored, and withdrawal at temporary repair thresholds 1.0. A separate four-battle run retained default thresholds 0.3/0.6 but did not trigger repair; natural defaults, other sparse combinations and sparse cross-process recovery remain unqualified."
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_hp_control_config.py",
         "python/alas_headless/alas_hp_control_config_replay.py",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/series/0610-campaign-hp-control.patch",
+        "python/alas_headless/oracle/campaign_health.py",
+        "python/alas_headless/adapter/semantic/campaign_health.py",
+        "tests/test_campaign_hp_control_ports.py",
+        "tests/test_campaign_emergency_repair.py",
+        "integration/alas/campaign-hp-control-20260909/main-live.json",
+        "integration/alas/campaign-hp-control-20260909/hp-config-replay.json",
+        "docs/campaign-hp-control-20260909.zh-CN.md",
+        "integration/alas/campaign-repair-nonzero-20260909/repair-live-r8.json",
+        "integration/alas/campaign-repair-nonzero-20260909/assessment.json",
+        "docs/campaign-repair-nonzero-20260909.zh-CN.md",
+        "tests/test_alas_adapter_campaign_map.py",
+        "tests/test_campaign_sparse_vitals.py",
+        "integration/alas/campaign-hp-followthrough-20260909/assessment.json",
+        "docs/campaign-hp-followthrough-20260909.zh-CN.md",
+        "integration/alas/campaign-hp-followthrough-20260909/repair-fresh.json",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-repair-20260911/assessment.json",
+        "integration/alas/campaign-sparse-repair-20260911/result-r3.json",
+        "integration/alas/campaign-sparse-repair-20260911/controlled-repair.json",
+        "docs/campaign-sparse-repair-20260911.zh-CN.md"
       ],
       "field": "HpControl.UseEmergencyRepair",
-      "note": "False is admitted; true is classified but refused because the pinned branch still depends on unqualified combat templates and input."
+      "note": "Original Main has controlled live repair evidence for full and 2+2 fleets on 10-2. On 2026-09-11 a fresh sparse fleet6 run completed one battle, repair stock 3 to 2 with four occupied HP slots restored, and withdrawal at temporary repair thresholds 1.0. A separate four-battle run retained default thresholds 0.3/0.6 but did not trigger repair; natural defaults, other sparse combinations and sparse cross-process recovery remain unqualified."
     },
     {
       "dimensions": {
@@ -9270,22 +9622,65 @@
       "evidence": [
         "tests/test_alas_hp_control_config.py",
         "python/alas_headless/alas_hp_control_config_replay.py",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/series/0610-campaign-hp-control.patch",
+        "python/alas_headless/oracle/campaign_health.py",
+        "python/alas_headless/adapter/semantic/campaign_health.py",
+        "tests/test_campaign_hp_control_ports.py",
+        "tests/test_campaign_emergency_repair.py",
+        "integration/alas/campaign-hp-control-20260909/main-live.json",
+        "integration/alas/campaign-hp-control-20260909/hp-config-replay.json",
+        "docs/campaign-hp-control-20260909.zh-CN.md",
+        "integration/alas/series/0620-campaign-scout-exchange.patch",
+        "integration/alas/campaign-scout-20260909/scout-live-r2.json",
+        "integration/alas/campaign-scout-20260909/hp-config-replay.json",
+        "docs/campaign-scout-20260909.zh-CN.md",
+        "tests/test_campaign_sparse_vitals.py",
+        "integration/alas/campaign-hp-followthrough-20260909/assessment.json",
+        "docs/campaign-hp-followthrough-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-repair-20260911/assessment.json",
+        "integration/alas/campaign-sparse-repair-20260911/result-r3.json",
+        "integration/alas/campaign-sparse-repair-20260911/controlled-repair.json",
+        "docs/campaign-sparse-repair-20260911.zh-CN.md"
       ],
       "field": "HpControl.UseHpBalance",
-      "note": "False is admitted; true is classified but refused because the final scout-position action is still a coordinate drag."
+      "note": "Original HPBalancer insertion and restoration have controlled live evidence with three scouts (weights 100,500,1000) and two scouts (100,1000,100). The 2026-09-11 10-2 fleet1=6, fleet2=1 run used 2 main + 2 vanguard, restored both order and cached HP under normal weights, then completed four battles and withdrawal. Other sparse combinations, natural swap triggers and cross-process cardinality recovery remain unqualified."
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_hp_control_config.py",
         "python/alas_headless/alas_hp_control_config_replay.py",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/series/0610-campaign-hp-control.patch",
+        "python/alas_headless/oracle/campaign_health.py",
+        "python/alas_headless/adapter/semantic/campaign_health.py",
+        "tests/test_campaign_hp_control_ports.py",
+        "tests/test_campaign_emergency_repair.py",
+        "integration/alas/campaign-hp-control-20260909/main-live.json",
+        "integration/alas/campaign-hp-control-20260909/hp-config-replay.json",
+        "docs/campaign-hp-control-20260909.zh-CN.md",
+        "tests/test_campaign_sparse_vitals.py",
+        "integration/alas/campaign-hp-followthrough-20260909/assessment.json",
+        "docs/campaign-hp-followthrough-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/series/0630-campaign-inherited-dock-full.patch",
+        "integration/alas/campaign-natural-hp-dock-20260909/result-r3.json",
+        "integration/alas/campaign-natural-hp-dock-20260909/assessment.json",
+        "docs/campaign-natural-hp-dock-20260909.zh-CN.md"
       ],
       "field": "HpControl.UseLowHpRetreat",
-      "note": "False is admitted; true and its threshold behavior are classified but refused before the unqualified campaign withdrawal loop."
+      "note": "Original Main with fleet 6 on 10-2 naturally triggered enabled low-HP retreat at the default 0.3 threshold after two battles (minimum HP 21.89%); prior one-click retirement recovered a real full dock above sortie preparation. Budget cutoff was not reached. Other stage/fleet combinations and natural emergency-repair defaults remain unqualified."
     },
     {
       "dimensions": {
@@ -9346,10 +9741,17 @@
       "evidence": [
         "tests/test_alas_fleet_config.py",
         "python/alas_headless/alas_fleet_config_replay.py",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-repair-20260911/assessment.json",
+        "integration/alas/campaign-sparse-repair-20260911/result-r3.json",
+        "integration/alas/campaign-sparse-repair-20260911/controlled-repair.json",
+        "docs/campaign-sparse-repair-20260911.zh-CN.md"
       ],
       "field": "Fleet.Fleet1",
-      "note": "All six configured indices pass the typed selection preflight; malformed and boolean values fail before navigation."
+      "note": "All six configured indices pass typed preflight. Controlled 10-2 fleet1=6 (2 main + 2 vanguard), fleet2=1 now has map/precombat HP, empty slots, levels, two-scout exchange/restoration, four battles and a separate threshold-1.0 repair/withdrawal run. This does not qualify sparse fleet2 combat, other slot combinations, sparse cross-process recovery or natural repair defaults."
     },
     {
       "dimensions": {
@@ -9396,10 +9798,17 @@
       "evidence": [
         "tests/test_alas_fleet_config.py",
         "python/alas_headless/alas_fleet_config_replay.py",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/campaign-sparse-live-20260909/result-r4.json",
+        "integration/alas/campaign-sparse-live-20260909/assessment.json",
+        "docs/campaign-sparse-live-20260909.zh-CN.md",
+        "integration/alas/campaign-sparse-repair-20260911/assessment.json",
+        "integration/alas/campaign-sparse-repair-20260911/result-r3.json",
+        "integration/alas/campaign-sparse-repair-20260911/controlled-repair.json",
+        "docs/campaign-sparse-repair-20260911.zh-CN.md"
       ],
       "field": "Fleet.Fleet2",
-      "note": "Disabled zero and all six configured indices pass typed preflight; out-of-range values fail before navigation."
+      "note": "Disabled zero and all six configured indices pass typed preflight. Controlled 10-2 fleet1=6 (2 main + 2 vanguard), fleet2=1 now has map/precombat HP, empty slots, levels, two-scout exchange/restoration, four battles and a separate threshold-1.0 repair/withdrawal run. This does not qualify sparse fleet2 combat, other slot combinations, sparse cross-process recovery or natural repair defaults."
     },
     {
       "dimensions": {
@@ -9514,7 +9923,11 @@
         "tests/test_alas_integration_patch.py",
         "docs/status.md",
         "integration/alas/campaign-retirement-full-handler-20260907-r3.json",
-        "docs/campaign-reentry-retirement-20260907.zh-CN.md"
+        "docs/campaign-reentry-retirement-20260907.zh-CN.md",
+        "integration/alas/series/0630-campaign-inherited-dock-full.patch",
+        "integration/alas/campaign-natural-hp-dock-20260909/result-r3.json",
+        "integration/alas/campaign-natural-hp-dock-20260909/assessment.json",
+        "docs/campaign-natural-hp-dock-20260909.zh-CN.md"
       ],
       "field": "OneClickRetire.KeepLimitBreak",
       "note": "Both settings share an exact typed toggle contract; only keep_limit_break has destructive live evidence. The latest original handler passed an 8-ship transaction with unique protection, keep_needed, equipment preservation and return. Earlier overflow and premature-completion failures remain retained separately; see docs/campaign-reentry-retirement-20260907.zh-CN.md."
@@ -9534,7 +9947,11 @@
         "integration/alas/series/0130-enhancement-flow-ports.patch",
         "docs/status.md",
         "integration/alas/campaign-retirement-full-handler-20260907-r3.json",
-        "docs/campaign-reentry-retirement-20260907.zh-CN.md"
+        "docs/campaign-reentry-retirement-20260907.zh-CN.md",
+        "integration/alas/series/0630-campaign-inherited-dock-full.patch",
+        "integration/alas/campaign-natural-hp-dock-20260909/result-r3.json",
+        "integration/alas/campaign-natural-hp-dock-20260909/assessment.json",
+        "docs/campaign-natural-hp-dock-20260909.zh-CN.md"
       ],
       "field": "Retirement.RetireMode",
       "note": "Pinned modes preserve original amount and dispatch offline; semantic old_retire remains unsupported. The original one-click retirement handler passed a full 8-ship transaction, delayed award/equipment preservation and return to the build predecessor in integration/alas/campaign-retirement-full-handler-20260907-r3.json. Overflow counts keep exact deltas; natural Campaign dock-full trigger plus map resume is not claimed from that sample. See docs/campaign-reentry-retirement-20260907.zh-CN.md."
@@ -10427,10 +10844,14 @@
         "integration/alas/series/0080-current-task-flow-ports.patch",
         "scripts/python/run_alas_daily_live_validation.py",
         "integration/alas/daily-tactical2-fleet2-fierce1-fleet1-live-validation-receipt.json",
-        "docs/status.md"
+        "docs/status.md",
+        "tests/test_daily_quick_boundary.py",
+        "scripts/python/run_alas_daily_quick_live_validation.py",
+        "integration/alas/daily-quick-20260911/live-r1.json",
+        "docs/daily-meta-boundaries-20260911.zh-CN.md"
       ],
       "field": "Daily.UseDailySkip",
-      "note": "Both booleans execute the original choice and the Supply Line disabled-skip bypass; true is live-qualified only for the current account's proven no-fast-skip fallback into official auto combat. The fast-skip-available surface and false remain without live closure."
+      "note": "Both booleans execute the original choice and the Supply Line disabled-skip bypass; true is live-qualified only for the current account's proven no-fast-skip fallback into official auto combat. The fast-skip-available surface and false remain without live closure. On 2026-09-11 quick input gained explicit top-hit checks and challenge-identity counters; the original task skipped a closed challenge with zero transactions, so real quick consumption remains unqualified."
     },
     {
       "dimensions": {
@@ -11968,9 +12389,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "a06c4f2f1ac8dadce2669aeb9a509cfaff873dae637f339965be24b718da770b",
-      "manifest_sha256": "361a07cbd1a7f7f57de6405860af078eb602a035b1c683d0297ab6301dd8febd",
-      "member_count": 107
+      "combined_sha256": "3ccc4fe1fa4dc70c7c268ef3aa3e6bdfb2385b3a99b3e0e2d0cd46ea749e1be2",
+      "manifest_sha256": "a7808472679a9e14a571b1daed3b823b0cc7f0b63895392f2df2bda32f4f5f85",
+      "member_count": 112
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

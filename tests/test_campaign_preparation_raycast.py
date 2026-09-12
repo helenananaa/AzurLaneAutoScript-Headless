@@ -8,6 +8,34 @@ import tempfile
 import pytest
 
 
+def test_native_repair_raycast_keeps_other_strategy_panels_out():
+    compiler = shutil.which('clang++') or shutil.which('g++')
+    if compiler is None:
+        pytest.skip('C++ compiler unavailable')
+    root = pathlib.Path(__file__).resolve().parents[1]
+    source = (root / 'overlays/angle-g3/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp').read_text(encoding='utf-8')
+    helpers = 'bool EndsWith' + source.split('bool EndsWith', 1)[1].split('bool ShouldEvaluateToggleTopRaycast', 1)[0]
+    program = '#include <string_view>\n#include <string>\n#include <array>\n#include <algorithm>\n#include <cassert>\n' + helpers + '''
+int main() {
+    assert(ShouldEvaluateTopRaycast("mouseChild", "OverlayCamera/Overlay/UIMain/ChapterPreCombatUI(Clone)/adapt/middle/HeroContainer/info/sebao_root/mouseChild"));
+    assert(!ShouldEvaluateTopRaycast("mouseChild", "OtherUI(Clone)/adapt/middle/HeroContainer/info/sebao_root/mouseChild"));
+    assert(ShouldEvaluateTopRaycast("strategy", "OverlayCamera/Overlay/UIMain/ChapterPreCombatUI(Clone)/adapt/middle/strategy"));
+    assert(ShouldEvaluateTopRaycast("back_btn", "OverlayCamera/Overlay/UIMain/ChapterPreCombatUI(Clone)/adapt/top/back_btn"));
+    assert(!ShouldEvaluateTopRaycast("back_btn", "OtherUI(Clone)/adapt/top/back_btn"));
+    assert(ShouldEvaluateTopRaycast("use_button", "OverlayCamera/Overlay/UIMain/strategy_info/window/panel/actions/use_button"));
+    assert(ShouldEvaluateTopRaycast("cancel_button", "OverlayCamera/Overlay/UIMain/strategy_info/window/panel/actions/cancel_button"));
+    assert(!ShouldEvaluateTopRaycast("strategy", "OtherUI(Clone)/adapt/middle/strategy"));
+    assert(!ShouldEvaluateTopRaycast("use_button", "OtherUI(Clone)/strategy_info/window/panel/actions/use_button"));
+}
+'''
+    with tempfile.TemporaryDirectory(prefix='alas-repair-raycast-') as directory:
+        cpp = pathlib.Path(directory) / 'selector.cpp'
+        exe = pathlib.Path(directory) / 'selector.exe'
+        cpp.write_text(program, encoding='utf-8')
+        subprocess.run([compiler, '-std=c++17', str(cpp), '-o', str(exe)], check=True, capture_output=True)
+        subprocess.run([str(exe)], check=True, capture_output=True)
+
+
 def test_native_retirement_selector_is_scoped_to_real_controls():
     compiler = shutil.which("clang++") or shutil.which("g++")
     if compiler is None:

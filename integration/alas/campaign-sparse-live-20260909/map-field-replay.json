@@ -1,0 +1,31 @@
+{
+  "source": "map-inspect.json",
+  "kind": "offline-field-replay-of-live-capture",
+  "vitals": [
+    [
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      0.0
+    ],
+    [
+      true,
+      true,
+      false,
+      true,
+      true,
+      false
+    ]
+  ],
+  "levels": [
+    120,
+    119,
+    0,
+    123,
+    118,
+    0
+  ],
+  "passed": true
+}

@@ -1,0 +1,17 @@
+{
+  "schema": "alas-headless.campaign-midmap-dock-assessment/v1",
+  "qualification": "segmented-live-recovery",
+  "uninterrupted_main_passed": false,
+  "battles_completed": 2,
+  "retirement_transactions": 1,
+  "ships_retired": 77,
+  "equipment_preserved": true,
+  "same_map_progress_preserved": true,
+  "map_identity_evidence": "Same package PID, enemy cells/sprites including cleared cell, fleet ammo; UI instance IDs rebuilt and are not identity evidence.",
+  "oil_before": 9783,
+  "oil_after": 9709,
+  "oil_consumed": 74,
+  "final_chapter": true,
+  "camera_repair": "17 focused camera tests and 164 combined tests pass; no fresh live post-combat rerun after repair",
+  "remaining": "One uninterrupted Main run through mid-map dock-full retirement and continued combat remains unqualified."
+}

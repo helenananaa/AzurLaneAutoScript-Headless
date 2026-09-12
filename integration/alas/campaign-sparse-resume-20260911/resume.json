@@ -1,0 +1,340 @@
+{
+  "schema": "alas-headless.main-task-live-validation/v1",
+  "passed": true,
+  "started_at": "2026-09-11T08:57:14.863482Z",
+  "finished_at": "2026-09-11T09:00:50.131050Z",
+  "task": "Main",
+  "stage": "10-2",
+  "event": "campaign_main",
+  "mode": "normal",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "scheduler_command": "Main",
+  "run_result": true,
+  "run_count_before": 1,
+  "run_count_after": 0,
+  "scheduler_enabled_after": false,
+  "use_auto_search": false,
+  "use_2x_book": false,
+  "auto_menu_observations": [],
+  "completed_sorties": [],
+  "continuation_receipts": [],
+  "submarine_observations": [],
+  "submarine_calls": [],
+  "combat_admissions": [
+    {
+      "generation": 429193,
+      "battle_count": 0,
+      "target": "B6",
+      "expected": "combat",
+      "submarine": null,
+      "hunting_nodes": null,
+      "submarine_destination": null
+    },
+    {
+      "generation": 430376,
+      "battle_count": 1,
+      "target": "F4",
+      "expected": "combat",
+      "submarine": null,
+      "hunting_nodes": null,
+      "submarine_destination": null
+    }
+  ],
+  "startup_recoveries": [
+    {
+      "semantic_id": "campaign/precombat/back",
+      "generation": 428728,
+      "point": {
+        "x": 57.667,
+        "y": 54.0
+      },
+      "bounds": {
+        "left": 0.644,
+        "top": -3.023,
+        "right": 114.69,
+        "bottom": 111.023
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ChapterPreCombatUI(Clone)/adapt/top/back_btn",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "hp_control_config": {
+    "UseHpBalance": false,
+    "UseEmergencyRepair": false,
+    "UseLowHpRetreat": true,
+    "HpBalanceThreshold": 0.2,
+    "HpBalanceWeight": "1000, 1000, 1000",
+    "RepairUseSingleThreshold": 0.3,
+    "RepairUseMultiThreshold": 0.6,
+    "LowHpRetreatThreshold": 0.3
+  },
+  "hp_observations": [
+    {
+      "fleet_index": 1,
+      "vitals": [
+        [
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0
+        ],
+        [
+          true,
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "fleet_index": 1,
+      "vitals": [
+        [
+          0.8679993366800839,
+          1.0,
+          0.0,
+          0.8749038939894171,
+          0.9774018964919422,
+          0.0
+        ],
+        [
+          true,
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    }
+  ],
+  "repair_inspections": [],
+  "repair_use_samples": [],
+  "precombat_probes": [],
+  "retirement_receipts": [],
+  "completed_battles": [
+    {
+      "battle_count": 0,
+      "map_ui_objects": {
+        "pid": 1953,
+        "cells": {
+          "chapter_cell_quad_2_1": -964510,
+          "chapter_cell_quad_2_2": -964478,
+          "chapter_cell_quad_2_3": -964432,
+          "chapter_cell_quad_2_4": -964400,
+          "chapter_cell_quad_2_5": -964368,
+          "chapter_cell_quad_2_7": -964336,
+          "chapter_cell_quad_2_8": -964304,
+          "chapter_cell_quad_3_1": -964272,
+          "chapter_cell_quad_3_4": -964240,
+          "chapter_cell_quad_3_5": -964194,
+          "chapter_cell_quad_3_7": -964162,
+          "chapter_cell_quad_3_8": -964102,
+          "chapter_cell_quad_4_1": -964056,
+          "chapter_cell_quad_4_2": -964024,
+          "chapter_cell_quad_4_5": -963992,
+          "chapter_cell_quad_4_6": -963932,
+          "chapter_cell_quad_4_7": -963900,
+          "chapter_cell_quad_5_1": -963854,
+          "chapter_cell_quad_5_2": -963822,
+          "chapter_cell_quad_5_5": -963790,
+          "chapter_cell_quad_5_6": -963730,
+          "chapter_cell_quad_5_7": -963698,
+          "chapter_cell_quad_6_1": -963666,
+          "chapter_cell_quad_6_4": -963634,
+          "chapter_cell_quad_6_5": -963588,
+          "chapter_cell_quad_6_7": -963556,
+          "chapter_cell_quad_6_8": -963496,
+          "chapter_cell_quad_7_1": -963464,
+          "chapter_cell_quad_7_2": -963432,
+          "chapter_cell_quad_7_3": -963386,
+          "chapter_cell_quad_7_4": -963354,
+          "chapter_cell_quad_7_5": -963322,
+          "chapter_cell_quad_7_7": -963290,
+          "chapter_cell_quad_7_8": -963258
+        }
+      },
+      "sortie_generation": null,
+      "retirement_transactions_before": 0,
+      "finished_at": "2026-09-11T08:59:06.840383Z"
+    }
+  ],
+  "low_hp_decisions": [
+    {
+      "triggered": false,
+      "threshold": 0.3,
+      "hp": [
+        1.0,
+        1.0,
+        0.0,
+        1.0,
+        1.0,
+        0.0
+      ],
+      "present": [
+        true,
+        true,
+        false,
+        true,
+        true,
+        false
+      ],
+      "battle_count": 0
+    },
+    {
+      "triggered": false,
+      "threshold": 0.3,
+      "hp": [
+        0.8679993366800839,
+        1.0,
+        0.0,
+        0.8749038939894171,
+        0.9774018964919422,
+        0.0
+      ],
+      "present": [
+        true,
+        true,
+        false,
+        true,
+        true,
+        false
+      ],
+      "battle_count": 1
+    },
+    {
+      "triggered": false,
+      "threshold": 0.3,
+      "hp": [
+        0.8679993366800839,
+        1.0,
+        0.0,
+        0.8749038939894171,
+        0.9774018964919422,
+        0.0
+      ],
+      "present": [
+        true,
+        true,
+        false,
+        true,
+        true,
+        false
+      ],
+      "battle_count": 1
+    },
+    {
+      "triggered": false,
+      "threshold": 0.3,
+      "hp": [
+        0.8679993366800839,
+        1.0,
+        0.0,
+        0.8749038939894171,
+        0.9774018964919422,
+        0.0
+      ],
+      "present": [
+        true,
+        true,
+        false,
+        true,
+        true,
+        false
+      ],
+      "battle_count": 1
+    }
+  ],
+  "scout_inspections": [],
+  "withdrawal_receipts": [
+    {
+      "semantic_id": "campaign/map/withdraw/open",
+      "generation": 431553,
+      "point": {
+        "x": 834.667,
+        "y": 682.667
+      },
+      "bounds": {
+        "left": 733.0,
+        "top": 644.333,
+        "right": 936.333,
+        "bottom": 721.0
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/bottom_stage/Normal/retreat_button",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "campaign/map/withdraw/confirm",
+      "generation": 431622,
+      "point": {
+        "x": 790.0,
+        "y": 515.0
+      },
+      "bounds": {
+        "left": 699.0,
+        "top": 481.333,
+        "right": 881.0,
+        "bottom": 548.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "hp_configuration": {
+    "UseHpBalance": false,
+    "UseEmergencyRepair": false,
+    "UseLowHpRetreat": true,
+    "HpBalanceThreshold": 0.2,
+    "HpBalanceWeight": "1000, 1000, 1000",
+    "RepairUseSingleThreshold": 0.3,
+    "RepairUseMultiThreshold": 0.6,
+    "LowHpRetreatThreshold": 0.3
+  },
+  "submarine_moves": [],
+  "submarine_strategy": [],
+  "observe_submarine_range": false,
+  "submarine_configuration": {
+    "Fleet": 0,
+    "Mode": "do_not_use",
+    "AutoSearchMode": "sub_standby",
+    "DistanceToBoss": "2_grid_to_boss"
+  },
+  "preparations": [],
+  "auto_book_checks": [],
+  "fleet_order": "fleet1_mob_fleet2_boss",
+  "auto_search_completion": null,
+  "login_recovery_performed": false,
+  "starting_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "campaign_entry": false,
+    "generation": 428602
+  },
+  "budgets": {
+    "stage_entry": 1,
+    "fleet_mutation": 8,
+    "sortie": 1,
+    "combat": 4,
+    "viewport_swipe": 4
+  },
+  "observer": {
+    "generation": 431927,
+    "scene_handle": -76,
+    "button_count": 22
+  },
+  "final_surface": {
+    "campaign_stage": true,
+    "main_page": false,
+    "campaign_map": false,
+    "campaign_entry": false
+  },
+  "raw_input_fallback_used": false
+}

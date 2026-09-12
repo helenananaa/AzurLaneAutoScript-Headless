@@ -405,6 +405,13 @@ class CampaignNavigationOracle:
         observed = self.read_state()
         if observed.generation < state.generation:
             raise SemanticGateClosed("campaign map-cell input snapshot is stale")
+        if require_unblocked and any(
+            button.active_in_hierarchy and button.active_and_enabled
+            and ('/ChapterPreCombatUI(Clone)/' in button.path
+                 or '/CombatUIStandard(Clone)/' in button.path)
+            for button in observed.buttons
+        ):
+            raise SemanticGateClosed('campaign map-cell input is blocked by preparation or combat')
         buttons = tuple(
             button for button in observed.buttons if button.path == cell.button_path
         )
@@ -505,17 +512,26 @@ class CampaignNavigationOracle:
         # centre of its cell.  Permit that one covered quad only after the
         # caller has already admitted the exact combat node.  This does not
         # weaken ordinary map-cell input: the node must still contain exactly
-        # one non-fighting enemy, the quad identity/geometry must be exact,
+        # one enemy, the quad identity/geometry must be exact,
         # and all campaign blockers remain fail-closed.
         enemies = tuple(
             enemy
             for enemy in state.enemies
-            if enemy.node == node and not enemy.fighting
+            if enemy.node == node
         )
         if len(enemies) != 1:
             raise SemanticGateClosed(
                 "campaign enemy-covered input lacks one exact enemy"
             )
+        if enemies[0].fighting:
+            # "行动中" survives cancelling ChapterPreCombatUI. It is not
+            # evidence that CombatUI is currently running. Re-entry is owned
+            # only by the uniquely selected fleet already on that enemy cell;
+            # other moving/busy enemies remain unavailable for covered input.
+            occupants = tuple(fleet for fleet in state.fleets if fleet.node == node)
+            if (len(occupants) != 1
+                    or occupants[0].marker != state.current_fleet_marker):
+                raise SemanticGateClosed('campaign busy enemy is not owned by the selected fleet')
         return self._campaign_map_cell_target(
             state,
             node,

@@ -48,6 +48,8 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     SemanticTarget("main/mail", "mail", "frame/top/btns/mail"),
     SemanticTarget("main/shop", "shop", "frame/bottom/frame/shop"),
     SemanticTarget("main/dock", "dock", "frame/bottom/frame/dock"),
+    SemanticTarget("meta/dossier/list", "list_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossDetailUI(Clone)/list_btn"),
+    SemanticTarget("meta/dossier/current", "current_list_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/current_list_btn"),
     SemanticTarget("main/task", "task", "frame/bottom/frame/task"),
     SemanticTarget("main/build", "build", "frame/bottom/frame/build"),
     SemanticTarget("main/guild", "guild", "frame/bottom/frame/guild"),

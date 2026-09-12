@@ -1,0 +1,3061 @@
+{
+  "state": {
+    "generation": 4820,
+    "scene_handle": -76,
+    "snapshot": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 24729,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "abi": "x86_64",
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "snapshot_schema": 1,
+      "snapshot_struct_size": 104,
+      "generation": 4820,
+      "scene_generation": 2,
+      "semantic_generation": 2,
+      "snapshot_monotonic_ns": 5683755432400,
+      "response_monotonic_ns": 5683802380300,
+      "age_ms": 46,
+      "observer_tid": 24759,
+      "assembly_count": 129,
+      "semantic_code": 1,
+      "width": 1280,
+      "height": 720,
+      "flags": 15,
+      "observer_attached": false,
+      "main_thread": true,
+      "button_count": 133,
+      "active_button_count": 6,
+      "interactable_button_count": 133,
+      "scene_handle": -76,
+      "ui_stage": 100,
+      "ui_method_mask": 15
+    },
+    "buttons_snapshot": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "semantic_schema": "alas-headless.buttons/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 24729,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "schema": 1,
+      "struct_size": 340008,
+      "generation": 4820,
+      "snapshot_monotonic_ns": 5683755432400,
+      "response_monotonic_ns": 5683802399300,
+      "age_ms": 46,
+      "button_count": 6,
+      "truncated": false,
+      "error_count": 0,
+      "buttons": [
+        {
+          "name": "help",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/help",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -38026,
+          "world_position": {
+            "x": 11.447,
+            "y": 7.172,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -38.5,
+            "y": -38.5,
+            "width": 77.0,
+            "height": 77.0
+          },
+          "screen_point": {
+            "x": 1155.113,
+            "y": 682.737
+          },
+          "adb_point": {
+            "x": 1155.113,
+            "y": 37.263
+          },
+          "screen_bounds": {
+            "left": 1129.446,
+            "bottom": 657.071,
+            "right": 1180.779,
+            "top": 708.404
+          },
+          "adb_bounds": {
+            "left": 1129.446,
+            "top": 11.596,
+            "right": 1180.779,
+            "bottom": 62.929
+          }
+        },
+        {
+          "name": "current_list_btn",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/current_list_btn",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -38018,
+          "world_position": {
+            "x": -6.324,
+            "y": -7.123,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -173.5,
+            "y": -68.5,
+            "width": 347.0,
+            "height": 137.0
+          },
+          "screen_point": {
+            "x": 355.404,
+            "y": 39.447
+          },
+          "adb_point": {
+            "x": 355.404,
+            "y": 680.553
+          },
+          "screen_bounds": {
+            "left": 239.768,
+            "bottom": -6.208,
+            "right": 471.04,
+            "top": 85.101
+          },
+          "adb_bounds": {
+            "left": 239.768,
+            "top": 634.899,
+            "right": 471.04,
+            "bottom": 726.208
+          }
+        },
+        {
+          "name": "detail_btn",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/detail_btn",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -38002,
+          "world_position": {
+            "x": -11.519,
+            "y": -7.123,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -173.5,
+            "y": -68.0,
+            "width": 347.0,
+            "height": 136.0
+          },
+          "screen_point": {
+            "x": 121.667,
+            "y": 39.447
+          },
+          "adb_point": {
+            "x": 121.667,
+            "y": 680.553
+          },
+          "screen_bounds": {
+            "left": 6.0,
+            "bottom": -5.887,
+            "right": 237.333,
+            "top": 84.78
+          },
+          "adb_bounds": {
+            "left": 6.0,
+            "top": 635.22,
+            "right": 237.333,
+            "bottom": 725.887
+          }
+        },
+        {
+          "name": "refresh_btn",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/refresh_btn",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -37868,
+          "world_position": {
+            "x": -0.156,
+            "y": 7.377,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -31.0,
+            "y": -28.5,
+            "width": 62.0,
+            "height": 57.0
+          },
+          "screen_point": {
+            "x": 632.976,
+            "y": 691.966
+          },
+          "adb_point": {
+            "x": 632.976,
+            "y": 28.034
+          },
+          "screen_bounds": {
+            "left": 612.303,
+            "bottom": 672.96,
+            "right": 653.65,
+            "top": 710.972
+          },
+          "adb_bounds": {
+            "left": 612.303,
+            "top": 9.028,
+            "right": 653.65,
+            "bottom": 47.04
+          }
+        },
+        {
+          "name": "back_btn",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/back_btn",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -36586,
+          "world_position": {
+            "x": -13.236,
+            "y": 7.187,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -45.5,
+            "y": -45.5,
+            "width": 91.0,
+            "height": 91.0
+          },
+          "screen_point": {
+            "x": 44.4,
+            "y": 683.4
+          },
+          "adb_point": {
+            "x": 44.4,
+            "y": 36.6
+          },
+          "screen_bounds": {
+            "left": 14.066,
+            "bottom": 653.067,
+            "right": 74.733,
+            "top": 713.733
+          },
+          "adb_bounds": {
+            "left": 14.066,
+            "top": 6.267,
+            "right": 74.733,
+            "bottom": 66.933
+          }
+        },
+        {
+          "name": "option",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/option",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -36594,
+          "world_position": {
+            "x": 13.074,
+            "y": 7.139,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -46.0,
+            "y": -53.5,
+            "width": 92.0,
+            "height": 107.0
+          },
+          "screen_point": {
+            "x": 1228.333,
+            "y": 681.267
+          },
+          "adb_point": {
+            "x": 1228.333,
+            "y": 38.733
+          },
+          "screen_bounds": {
+            "left": 1197.667,
+            "bottom": 645.6,
+            "right": 1259.0,
+            "top": 716.933
+          },
+          "adb_bounds": {
+            "left": 1197.667,
+            "top": 3.067,
+            "right": 1259.0,
+            "bottom": 74.4
+          }
+        }
+      ]
+    },
+    "buttons": [
+      {
+        "name": "help",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/help",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1155.113,
+          "y": 37.263
+        },
+        "bounds": {
+          "left": 1129.446,
+          "top": 11.596,
+          "right": 1180.779,
+          "bottom": 62.929
+        },
+        "raw": {
+          "name": "help",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/help",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -38026,
+          "world_position": {
+            "x": 11.447,
+            "y": 7.172,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -38.5,
+            "y": -38.5,
+            "width": 77.0,
+            "height": 77.0
+          },
+          "screen_point": {
+            "x": 1155.113,
+            "y": 682.737
+          },
+          "adb_point": {
+            "x": 1155.113,
+            "y": 37.263
+          },
+          "screen_bounds": {
+            "left": 1129.446,
+            "bottom": 657.071,
+            "right": 1180.779,
+            "top": 708.404
+          },
+          "adb_bounds": {
+            "left": 1129.446,
+            "top": 11.596,
+            "right": 1180.779,
+            "bottom": 62.929
+          }
+        }
+      },
+      {
+        "name": "current_list_btn",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/current_list_btn",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 355.404,
+          "y": 680.553
+        },
+        "bounds": {
+          "left": 239.768,
+          "top": 634.899,
+          "right": 471.04,
+          "bottom": 726.208
+        },
+        "raw": {
+          "name": "current_list_btn",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/current_list_btn",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -38018,
+          "world_position": {
+            "x": -6.324,
+            "y": -7.123,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -173.5,
+            "y": -68.5,
+            "width": 347.0,
+            "height": 137.0
+          },
+          "screen_point": {
+            "x": 355.404,
+            "y": 39.447
+          },
+          "adb_point": {
+            "x": 355.404,
+            "y": 680.553
+          },
+          "screen_bounds": {
+            "left": 239.768,
+            "bottom": -6.208,
+            "right": 471.04,
+            "top": 85.101
+          },
+          "adb_bounds": {
+            "left": 239.768,
+            "top": 634.899,
+            "right": 471.04,
+            "bottom": 726.208
+          }
+        }
+      },
+      {
+        "name": "detail_btn",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/detail_btn",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 121.667,
+          "y": 680.553
+        },
+        "bounds": {
+          "left": 6.0,
+          "top": 635.22,
+          "right": 237.333,
+          "bottom": 725.887
+        },
+        "raw": {
+          "name": "detail_btn",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/detail_btn",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -38002,
+          "world_position": {
+            "x": -11.519,
+            "y": -7.123,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -173.5,
+            "y": -68.0,
+            "width": 347.0,
+            "height": 136.0
+          },
+          "screen_point": {
+            "x": 121.667,
+            "y": 39.447
+          },
+          "adb_point": {
+            "x": 121.667,
+            "y": 680.553
+          },
+          "screen_bounds": {
+            "left": 6.0,
+            "bottom": -5.887,
+            "right": 237.333,
+            "top": 84.78
+          },
+          "adb_bounds": {
+            "left": 6.0,
+            "top": 635.22,
+            "right": 237.333,
+            "bottom": 725.887
+          }
+        }
+      },
+      {
+        "name": "refresh_btn",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/refresh_btn",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 632.976,
+          "y": 28.034
+        },
+        "bounds": {
+          "left": 612.303,
+          "top": 9.028,
+          "right": 653.65,
+          "bottom": 47.04
+        },
+        "raw": {
+          "name": "refresh_btn",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/refresh_btn",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -37868,
+          "world_position": {
+            "x": -0.156,
+            "y": 7.377,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -31.0,
+            "y": -28.5,
+            "width": 62.0,
+            "height": 57.0
+          },
+          "screen_point": {
+            "x": 632.976,
+            "y": 691.966
+          },
+          "adb_point": {
+            "x": 632.976,
+            "y": 28.034
+          },
+          "screen_bounds": {
+            "left": 612.303,
+            "bottom": 672.96,
+            "right": 653.65,
+            "top": 710.972
+          },
+          "adb_bounds": {
+            "left": 612.303,
+            "top": 9.028,
+            "right": 653.65,
+            "bottom": 47.04
+          }
+        }
+      },
+      {
+        "name": "back_btn",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/back_btn",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 44.4,
+          "y": 36.6
+        },
+        "bounds": {
+          "left": 14.066,
+          "top": 6.267,
+          "right": 74.733,
+          "bottom": 66.933
+        },
+        "raw": {
+          "name": "back_btn",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/back_btn",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -36586,
+          "world_position": {
+            "x": -13.236,
+            "y": 7.187,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -45.5,
+            "y": -45.5,
+            "width": 91.0,
+            "height": 91.0
+          },
+          "screen_point": {
+            "x": 44.4,
+            "y": 683.4
+          },
+          "adb_point": {
+            "x": 44.4,
+            "y": 36.6
+          },
+          "screen_bounds": {
+            "left": 14.066,
+            "bottom": 653.067,
+            "right": 74.733,
+            "top": 713.733
+          },
+          "adb_bounds": {
+            "left": 14.066,
+            "top": 6.267,
+            "right": 74.733,
+            "bottom": 66.933
+          }
+        }
+      },
+      {
+        "name": "option",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/option",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1228.333,
+          "y": 38.733
+        },
+        "bounds": {
+          "left": 1197.667,
+          "top": 3.067,
+          "right": 1259.0,
+          "bottom": 74.4
+        },
+        "raw": {
+          "name": "option",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/option",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -36594,
+          "world_position": {
+            "x": 13.074,
+            "y": 7.139,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -46.0,
+            "y": -53.5,
+            "width": 92.0,
+            "height": 107.0
+          },
+          "screen_point": {
+            "x": 1228.333,
+            "y": 681.267
+          },
+          "adb_point": {
+            "x": 1228.333,
+            "y": 38.733
+          },
+          "screen_bounds": {
+            "left": 1197.667,
+            "bottom": 645.6,
+            "right": 1259.0,
+            "top": 716.933
+          },
+          "adb_bounds": {
+            "left": 1197.667,
+            "top": 3.067,
+            "right": 1259.0,
+            "bottom": 74.4
+          }
+        }
+      }
+    ]
+  },
+  "ui": {
+    "generation": 4822,
+    "method_mask": 15,
+    "skipped_count": 0,
+    "image_truncated": false,
+    "snapshot": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "semantic_schema": "alas-headless.ui/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 24729,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "schema": 1,
+      "struct_size": 1533000,
+      "generation": 4822,
+      "snapshot_monotonic_ns": 5683857074000,
+      "response_monotonic_ns": 5683887159600,
+      "age_ms": 30,
+      "method_mask": 15,
+      "toggle_count": 2,
+      "text_count": 2,
+      "image_count": 29,
+      "toggle_truncated": false,
+      "text_truncated": false,
+      "image_truncated": false,
+      "error_count": 0,
+      "skipped_count": 0,
+      "image_source_count": 1122,
+      "image_source_capacity": 16384,
+      "toggles": [
+        {
+          "kind": "toggle",
+          "name": "guild",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/guild",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "checked": true,
+          "raycast_top": null,
+          "adb_point": {
+            "x": 495.559,
+            "y": 28.034
+          },
+          "adb_bounds": {
+            "left": 405.565,
+            "top": 8.368,
+            "right": 585.552,
+            "bottom": 47.699
+          }
+        },
+        {
+          "kind": "toggle",
+          "name": "friend",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/friend",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "checked": true,
+          "raycast_top": null,
+          "adb_point": {
+            "x": 302.201,
+            "y": 28.034
+          },
+          "adb_bounds": {
+            "left": 212.208,
+            "top": 8.368,
+            "right": 392.194,
+            "bottom": 47.699
+          }
+        }
+      ],
+      "texts": [
+        {
+          "kind": "ugui-text",
+          "name": "tip",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/tip",
+          "text": "支援档案信标作战无奖励，不消耗次数",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 700.835,
+            "top": 21.609,
+            "right": 1108.615,
+            "bottom": 57.603
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "FpsPanel",
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 573.333,
+            "top": 0.0,
+            "right": 706.667,
+            "bottom": 34.667
+          }
+        }
+      ],
+      "images": [
+        {
+          "kind": "image",
+          "name": "empty",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/8/empty",
+          "sprite": "item_04",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 22.533,
+            "top": 562.761,
+            "right": 417.044,
+            "bottom": 645.395
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "empty",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/7/empty",
+          "sprite": "item_04",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 48.618,
+            "top": 482.48,
+            "right": 443.129,
+            "bottom": 565.115
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "empty",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/6/empty",
+          "sprite": "item_04",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 74.702,
+            "top": 402.2,
+            "right": 469.214,
+            "bottom": 484.834
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "empty",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/5/empty",
+          "sprite": "item_04",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 100.787,
+            "top": 321.919,
+            "right": 495.298,
+            "bottom": 404.553
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "empty",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/4/empty",
+          "sprite": "item_04",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 126.872,
+            "top": 241.638,
+            "right": 521.383,
+            "bottom": 324.272
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "empty",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/3/empty",
+          "sprite": "item_04",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 152.957,
+            "top": 161.357,
+            "right": 547.468,
+            "bottom": 243.991
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "empty",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/2/empty",
+          "sprite": "item_04",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 179.042,
+            "top": 81.077,
+            "right": 573.553,
+            "bottom": 163.711
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "empty",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/1/empty",
+          "sprite": "item_04",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 205.126,
+            "top": 0.796,
+            "right": 599.638,
+            "bottom": 83.43
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "help",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/help",
+          "sprite": "help",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1129.446,
+            "top": 11.596,
+            "right": 1180.779,
+            "bottom": 62.929
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "current_list_btn",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/current_list_btn",
+          "sprite": "butten02",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 239.768,
+            "top": 634.899,
+            "right": 471.04,
+            "bottom": 726.208
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "detail_btn",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/detail_btn",
+          "sprite": "archives_detail_btn",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 6.0,
+            "top": 635.22,
+            "right": 237.333,
+            "bottom": 725.887
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "title",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/title",
+          "sprite": "title_archive_list",
+          "flags": 431,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 67.557,
+            "top": 4.93,
+            "right": 206.89,
+            "bottom": 76.263
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "frame",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/frame",
+          "sprite": "world_boss_frame",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 0.18,
+            "top": 561.928,
+            "right": 1559.673,
+            "bottom": 728.541
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "refresh_btn",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/refresh_btn",
+          "sprite": "refresh_btn_icon",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 612.303,
+            "top": 9.028,
+            "right": 653.65,
+            "bottom": 47.04
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "sel",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/guild/sel",
+          "sprite": "guild_sel",
+          "flags": 431,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 434.497,
+            "top": 6.369,
+            "right": 551.821,
+            "bottom": 49.699
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "unsel",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/guild/unsel",
+          "sprite": "guild_unsel",
+          "flags": 431,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 444.563,
+            "top": 16.035,
+            "right": 546.555,
+            "bottom": 40.033
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "img",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/line2/img",
+          "sprite": "line",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 394.881,
+            "top": 17.037,
+            "right": 402.879,
+            "bottom": 39.031
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "sel",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/friend/sel",
+          "sprite": "friend_sel",
+          "flags": 431,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 251.405,
+            "top": 6.035,
+            "right": 347.398,
+            "bottom": 50.032
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "unsel",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/friend/unsel",
+          "sprite": "friend_unsel",
+          "flags": 431,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 261.537,
+            "top": 16.701,
+            "right": 342.865,
+            "bottom": 39.366
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "bg",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/bg",
+          "sprite": "refresh_bg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.578
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 594.438,
+            "top": -3.298,
+            "right": 673.115,
+            "bottom": 59.377
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "bg1",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/bg1",
+          "sprite": "filter_bg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 212.157,
+            "top": -3.304,
+            "right": 604.939,
+            "bottom": 57.44
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "bg",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg",
+          "sprite": "slider_bg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -10.264,
+            "top": -116.163,
+            "right": 623.029,
+            "bottom": 847.107
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "option",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/option",
+          "sprite": "option",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1197.667,
+            "top": 3.067,
+            "right": 1259.0,
+            "bottom": 74.4
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "back_btn",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/back_btn",
+          "sprite": "back_butten",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 14.066,
+            "top": 6.267,
+            "right": 74.733,
+            "bottom": 66.933
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "bg",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/bg",
+          "sprite": "world_boss_enable",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.277,
+            "top": -0.314,
+            "right": 1280.277,
+            "bottom": 720.314
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "top",
+          "path": "OverlayCamera/Adpter/top/top",
+          "sprite": "mask1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": -140.667,
+            "right": 1280.0,
+            "bottom": 0.0
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "left",
+          "path": "OverlayCamera/Adpter/left/left",
+          "sprite": "mask",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -140.667,
+            "top": 0.0,
+            "right": -0.0,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "bottom",
+          "path": "OverlayCamera/Adpter/bottom/bottom",
+          "sprite": "mask1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 720.0,
+            "right": 1280.0,
+            "bottom": 860.667
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "right",
+          "path": "OverlayCamera/Adpter/right/right",
+          "sprite": "mask",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1280.0,
+            "top": 0.0,
+            "right": 1420.667,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        }
+      ]
+    },
+    "toggles": [
+      {
+        "name": "guild",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/guild",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": true,
+        "raycast_top": null,
+        "point": {
+          "x": 495.559,
+          "y": 28.034
+        },
+        "bounds": {
+          "left": 405.565,
+          "top": 8.368,
+          "right": 585.552,
+          "bottom": 47.699
+        },
+        "raw": {
+          "kind": "toggle",
+          "name": "guild",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/guild",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "checked": true,
+          "raycast_top": null,
+          "adb_point": {
+            "x": 495.559,
+            "y": 28.034
+          },
+          "adb_bounds": {
+            "left": 405.565,
+            "top": 8.368,
+            "right": 585.552,
+            "bottom": 47.699
+          }
+        }
+      },
+      {
+        "name": "friend",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/friend",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": true,
+        "raycast_top": null,
+        "point": {
+          "x": 302.201,
+          "y": 28.034
+        },
+        "bounds": {
+          "left": 212.208,
+          "top": 8.368,
+          "right": 392.194,
+          "bottom": 47.699
+        },
+        "raw": {
+          "kind": "toggle",
+          "name": "friend",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/friend",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "checked": true,
+          "raycast_top": null,
+          "adb_point": {
+            "x": 302.201,
+            "y": 28.034
+          },
+          "adb_bounds": {
+            "left": 212.208,
+            "top": 8.368,
+            "right": 392.194,
+            "bottom": 47.699
+          }
+        }
+      }
+    ],
+    "texts": [
+      {
+        "kind": "ugui-text",
+        "name": "tip",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/tip",
+        "text": "支援档案信标作战无奖励，不消耗次数",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 700.835,
+          "top": 21.609,
+          "right": 1108.615,
+          "bottom": 57.603
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "tip",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/tip",
+          "text": "支援档案信标作战无奖励，不消耗次数",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 700.835,
+            "top": 21.609,
+            "right": 1108.615,
+            "bottom": 57.603
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "FpsPanel",
+        "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+        "text": "",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 573.333,
+          "top": 0.0,
+          "right": 706.667,
+          "bottom": 34.667
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "FpsPanel",
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 573.333,
+            "top": 0.0,
+            "right": 706.667,
+            "bottom": 34.667
+          }
+        }
+      }
+    ],
+    "images": [
+      {
+        "name": "empty",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/8/empty",
+        "sprite": "item_04",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 22.533,
+          "top": 562.761,
+          "right": 417.044,
+          "bottom": 645.395
+        },
+        "raw": {
+          "kind": "image",
+          "name": "empty",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/8/empty",
+          "sprite": "item_04",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 22.533,
+            "top": 562.761,
+            "right": 417.044,
+            "bottom": 645.395
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "empty",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/7/empty",
+        "sprite": "item_04",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 48.618,
+          "top": 482.48,
+          "right": 443.129,
+          "bottom": 565.115
+        },
+        "raw": {
+          "kind": "image",
+          "name": "empty",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/7/empty",
+          "sprite": "item_04",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 48.618,
+            "top": 482.48,
+            "right": 443.129,
+            "bottom": 565.115
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "empty",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/6/empty",
+        "sprite": "item_04",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 74.702,
+          "top": 402.2,
+          "right": 469.214,
+          "bottom": 484.834
+        },
+        "raw": {
+          "kind": "image",
+          "name": "empty",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/6/empty",
+          "sprite": "item_04",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 74.702,
+            "top": 402.2,
+            "right": 469.214,
+            "bottom": 484.834
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "empty",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/5/empty",
+        "sprite": "item_04",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 100.787,
+          "top": 321.919,
+          "right": 495.298,
+          "bottom": 404.553
+        },
+        "raw": {
+          "kind": "image",
+          "name": "empty",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/5/empty",
+          "sprite": "item_04",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 100.787,
+            "top": 321.919,
+            "right": 495.298,
+            "bottom": 404.553
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "empty",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/4/empty",
+        "sprite": "item_04",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 126.872,
+          "top": 241.638,
+          "right": 521.383,
+          "bottom": 324.272
+        },
+        "raw": {
+          "kind": "image",
+          "name": "empty",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/4/empty",
+          "sprite": "item_04",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 126.872,
+            "top": 241.638,
+            "right": 521.383,
+            "bottom": 324.272
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "empty",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/3/empty",
+        "sprite": "item_04",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 152.957,
+          "top": 161.357,
+          "right": 547.468,
+          "bottom": 243.991
+        },
+        "raw": {
+          "kind": "image",
+          "name": "empty",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/3/empty",
+          "sprite": "item_04",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 152.957,
+            "top": 161.357,
+            "right": 547.468,
+            "bottom": 243.991
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "empty",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/2/empty",
+        "sprite": "item_04",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 179.042,
+          "top": 81.077,
+          "right": 573.553,
+          "bottom": 163.711
+        },
+        "raw": {
+          "kind": "image",
+          "name": "empty",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/2/empty",
+          "sprite": "item_04",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 179.042,
+            "top": 81.077,
+            "right": 573.553,
+            "bottom": 163.711
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "empty",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/1/empty",
+        "sprite": "item_04",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 205.126,
+          "top": 0.796,
+          "right": 599.638,
+          "bottom": 83.43
+        },
+        "raw": {
+          "kind": "image",
+          "name": "empty",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/1/empty",
+          "sprite": "item_04",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 205.126,
+            "top": 0.796,
+            "right": 599.638,
+            "bottom": 83.43
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "help",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/help",
+        "sprite": "help",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 1129.446,
+          "top": 11.596,
+          "right": 1180.779,
+          "bottom": 62.929
+        },
+        "raw": {
+          "kind": "image",
+          "name": "help",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/help",
+          "sprite": "help",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1129.446,
+            "top": 11.596,
+            "right": 1180.779,
+            "bottom": 62.929
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "current_list_btn",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/current_list_btn",
+        "sprite": "butten02",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 239.768,
+          "top": 634.899,
+          "right": 471.04,
+          "bottom": 726.208
+        },
+        "raw": {
+          "kind": "image",
+          "name": "current_list_btn",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/current_list_btn",
+          "sprite": "butten02",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 239.768,
+            "top": 634.899,
+            "right": 471.04,
+            "bottom": 726.208
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "detail_btn",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/detail_btn",
+        "sprite": "archives_detail_btn",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 6.0,
+          "top": 635.22,
+          "right": 237.333,
+          "bottom": 725.887
+        },
+        "raw": {
+          "kind": "image",
+          "name": "detail_btn",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/detail_btn",
+          "sprite": "archives_detail_btn",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 6.0,
+            "top": 635.22,
+            "right": 237.333,
+            "bottom": 725.887
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "title",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/title",
+        "sprite": "title_archive_list",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 67.557,
+          "top": 4.93,
+          "right": 206.89,
+          "bottom": 76.263
+        },
+        "raw": {
+          "kind": "image",
+          "name": "title",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/title",
+          "sprite": "title_archive_list",
+          "flags": 431,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 67.557,
+            "top": 4.93,
+            "right": 206.89,
+            "bottom": 76.263
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/frame",
+        "sprite": "world_boss_frame",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 0.18,
+          "top": 561.928,
+          "right": 1559.673,
+          "bottom": 728.541
+        },
+        "raw": {
+          "kind": "image",
+          "name": "frame",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/frame",
+          "sprite": "world_boss_frame",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 0.18,
+            "top": 561.928,
+            "right": 1559.673,
+            "bottom": 728.541
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "refresh_btn",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/refresh_btn",
+        "sprite": "refresh_btn_icon",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 612.303,
+          "top": 9.028,
+          "right": 653.65,
+          "bottom": 47.04
+        },
+        "raw": {
+          "kind": "image",
+          "name": "refresh_btn",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/refresh_btn",
+          "sprite": "refresh_btn_icon",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 612.303,
+            "top": 9.028,
+            "right": 653.65,
+            "bottom": 47.04
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "sel",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/guild/sel",
+        "sprite": "guild_sel",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 434.497,
+          "top": 6.369,
+          "right": 551.821,
+          "bottom": 49.699
+        },
+        "raw": {
+          "kind": "image",
+          "name": "sel",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/guild/sel",
+          "sprite": "guild_sel",
+          "flags": 431,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 434.497,
+            "top": 6.369,
+            "right": 551.821,
+            "bottom": 49.699
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "unsel",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/guild/unsel",
+        "sprite": "guild_unsel",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 444.563,
+          "top": 16.035,
+          "right": 546.555,
+          "bottom": 40.033
+        },
+        "raw": {
+          "kind": "image",
+          "name": "unsel",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/guild/unsel",
+          "sprite": "guild_unsel",
+          "flags": 431,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 444.563,
+            "top": 16.035,
+            "right": 546.555,
+            "bottom": 40.033
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "img",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/line2/img",
+        "sprite": "line",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 394.881,
+          "top": 17.037,
+          "right": 402.879,
+          "bottom": 39.031
+        },
+        "raw": {
+          "kind": "image",
+          "name": "img",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/line2/img",
+          "sprite": "line",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 394.881,
+            "top": 17.037,
+            "right": 402.879,
+            "bottom": 39.031
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "sel",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/friend/sel",
+        "sprite": "friend_sel",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 251.405,
+          "top": 6.035,
+          "right": 347.398,
+          "bottom": 50.032
+        },
+        "raw": {
+          "kind": "image",
+          "name": "sel",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/friend/sel",
+          "sprite": "friend_sel",
+          "flags": 431,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 251.405,
+            "top": 6.035,
+            "right": 347.398,
+            "bottom": 50.032
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "unsel",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/friend/unsel",
+        "sprite": "friend_unsel",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 261.537,
+          "top": 16.701,
+          "right": 342.865,
+          "bottom": 39.366
+        },
+        "raw": {
+          "kind": "image",
+          "name": "unsel",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/friend/unsel",
+          "sprite": "friend_unsel",
+          "flags": 431,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 261.537,
+            "top": 16.701,
+            "right": 342.865,
+            "bottom": 39.366
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/bg",
+        "sprite": "refresh_bg",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          0.578
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 594.438,
+          "top": -3.298,
+          "right": 673.115,
+          "bottom": 59.377
+        },
+        "raw": {
+          "kind": "image",
+          "name": "bg",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/bg",
+          "sprite": "refresh_bg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.578
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 594.438,
+            "top": -3.298,
+            "right": 673.115,
+            "bottom": 59.377
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "bg1",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/bg1",
+        "sprite": "filter_bg",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 212.157,
+          "top": -3.304,
+          "right": 604.939,
+          "bottom": 57.44
+        },
+        "raw": {
+          "kind": "image",
+          "name": "bg1",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/bg1",
+          "sprite": "filter_bg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 212.157,
+            "top": -3.304,
+            "right": 604.939,
+            "bottom": 57.44
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg",
+        "sprite": "slider_bg",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -10.264,
+          "top": -116.163,
+          "right": 623.029,
+          "bottom": 847.107
+        },
+        "raw": {
+          "kind": "image",
+          "name": "bg",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/list_panel/mask/bg",
+          "sprite": "slider_bg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -10.264,
+            "top": -116.163,
+            "right": 623.029,
+            "bottom": 847.107
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "option",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/option",
+        "sprite": "option",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 1197.667,
+          "top": 3.067,
+          "right": 1259.0,
+          "bottom": 74.4
+        },
+        "raw": {
+          "kind": "image",
+          "name": "option",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/option",
+          "sprite": "option",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1197.667,
+            "top": 3.067,
+            "right": 1259.0,
+            "bottom": 74.4
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "back_btn",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/back_btn",
+        "sprite": "back_butten",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 14.066,
+          "top": 6.267,
+          "right": 74.733,
+          "bottom": 66.933
+        },
+        "raw": {
+          "kind": "image",
+          "name": "back_btn",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/back_btn",
+          "sprite": "back_butten",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 14.066,
+            "top": 6.267,
+            "right": 74.733,
+            "bottom": 66.933
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/bg",
+        "sprite": "world_boss_enable",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -0.277,
+          "top": -0.314,
+          "right": 1280.277,
+          "bottom": 720.314
+        },
+        "raw": {
+          "kind": "image",
+          "name": "bg",
+          "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/bg",
+          "sprite": "world_boss_enable",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.277,
+            "top": -0.314,
+            "right": 1280.277,
+            "bottom": 720.314
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "top",
+        "path": "OverlayCamera/Adpter/top/top",
+        "sprite": "mask1",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -0.0,
+          "top": -140.667,
+          "right": 1280.0,
+          "bottom": 0.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "top",
+          "path": "OverlayCamera/Adpter/top/top",
+          "sprite": "mask1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": -140.667,
+            "right": 1280.0,
+            "bottom": 0.0
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "left",
+        "path": "OverlayCamera/Adpter/left/left",
+        "sprite": "mask",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -140.667,
+          "top": 0.0,
+          "right": -0.0,
+          "bottom": 720.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "left",
+          "path": "OverlayCamera/Adpter/left/left",
+          "sprite": "mask",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -140.667,
+            "top": 0.0,
+            "right": -0.0,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "bottom",
+        "path": "OverlayCamera/Adpter/bottom/bottom",
+        "sprite": "mask1",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -0.0,
+          "top": 720.0,
+          "right": 1280.0,
+          "bottom": 860.667
+        },
+        "raw": {
+          "kind": "image",
+          "name": "bottom",
+          "path": "OverlayCamera/Adpter/bottom/bottom",
+          "sprite": "mask1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 720.0,
+            "right": 1280.0,
+            "bottom": 860.667
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "right",
+        "path": "OverlayCamera/Adpter/right/right",
+        "sprite": "mask",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 1280.0,
+          "top": 0.0,
+          "right": 1420.667,
+          "bottom": 720.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "right",
+          "path": "OverlayCamera/Adpter/right/right",
+          "sprite": "mask",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1280.0,
+            "top": 0.0,
+            "right": 1420.667,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        }
+      }
+    ],
+    "image_source_count": 1122,
+    "image_source_capacity": 16384
+  }
+}

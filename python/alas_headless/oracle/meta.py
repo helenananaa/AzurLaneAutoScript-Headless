@@ -18,6 +18,73 @@ from .errors import SemanticGateClosed
 class MetaOracle:
     """Meta operations sharing the oracle frame and input boundary."""
 
+    def meta_dossier_detail_visible(self) -> bool:
+        state = self.read_state()
+        targets = [b for b in self._matches(state, 'meta/dossier/list')
+                   if b.active_in_hierarchy and b.active_and_enabled]
+        if not targets:
+            return False
+        if len(targets) != 1:
+            raise SemanticGateClosed('META dossier list identity is ambiguous')
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('META dossier frames are incoherent')
+        root = targets[0].path.rsplit('/', 1)[0]
+        hp = [t for t in ui.texts if t.path == root + '/hp/Text'
+              and t.active_in_hierarchy and t.active_and_enabled and not t.truncated]
+        if len(hp) != 1:
+            raise SemanticGateClosed('META dossier HP identity is incomplete')
+        match = re.fullmatch(r'([0-9]+)/([1-9][0-9]*)', re.sub(r'<[^>]*>', '', hp[0].text).strip())
+        if match is None or int(match[1]) > int(match[2]):
+            raise SemanticGateClosed('META dossier HP is malformed')
+        return True
+
+    def click_meta_dossier_list(self) -> ActionReceipt:
+        if not self.meta_dossier_detail_visible():
+            raise SemanticGateClosed('META dossier page is absent')
+        state = self.read_state()
+        target = self._unique(state, 'meta/dossier/list')
+        if (not target.active_in_hierarchy or not target.active_and_enabled
+                or not target.interactable or target.raycast_top is not True
+                or target.point is None or target.bounds is None
+                or not target.bounds.contains(target.point)
+                or self._blocking_rules(state, 'meta/dossier/list')):
+            raise SemanticGateClosed('META dossier list target is not actionable')
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed before META dossier input')
+        self._tap(round(target.point.x), round(target.point.y))
+        return ActionReceipt(semantic_id='meta/dossier/list', generation=state.generation,
+            path=target.path, point=target.point, bounds=target.bounds)
+
+    def meta_dossier_assist_visible(self) -> bool:
+        state = self.read_state()
+        targets = [b for b in self._matches(state, 'meta/dossier/current')
+                   if b.active_in_hierarchy and b.active_and_enabled]
+        if not targets:
+            return False
+        if len(targets) != 1:
+            raise SemanticGateClosed('META dossier assist list is ambiguous')
+        root = targets[0].path.rsplit('/', 1)[0]
+        return sum(b.path == root + '/list_panel/frame/filter/refresh_btn'
+                   and b.active_in_hierarchy and b.active_and_enabled for b in state.buttons) == 1
+
+    def click_meta_dossier_current(self) -> ActionReceipt:
+        if not self.meta_dossier_assist_visible():
+            raise SemanticGateClosed('META dossier assist page is unavailable')
+        state = self.read_state()
+        target = self._unique(state, 'meta/dossier/current')
+        if (not target.active_in_hierarchy or not target.active_and_enabled
+                or not target.interactable or target.raycast_top is not True
+                or target.point is None or target.bounds is None
+                or not target.bounds.contains(target.point)
+                or self._blocking_rules(state, 'meta/dossier/current')):
+            raise SemanticGateClosed('META current list target is not actionable')
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed before META list input')
+        self._tap(round(target.point.x), round(target.point.y))
+        return ActionReceipt(semantic_id='meta/dossier/current', generation=state.generation,
+            path=target.path, point=target.point, bounds=target.bounds)
+
     def meta_entrance_available(self) -> bool:
         """Admit the exact META link card on the reward summary page."""
 
@@ -432,14 +499,12 @@ class MetaOracle:
             if candidate_pattern.fullmatch(button.path) is not None
             and button.active_in_hierarchy
             and button.active_and_enabled
-            and button.interactable
             and button.point is not None
             and button.bounds is not None
         )
         if not (
             start.active_in_hierarchy
             and start.active_and_enabled
-            and start.interactable
             and start.point is not None
             and start.bounds is not None
             and candidates
