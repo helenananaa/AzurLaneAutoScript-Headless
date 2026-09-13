@@ -267,7 +267,7 @@ def built_in_backend_profiles() -> Mapping[BackendKind, RuntimeBackendProfile]:
         BackendKind.MACOS_HVF: RuntimeBackendProfile(
             BackendKind.MACOS_HVF,
             "macos-hvf-arm64-default-v1",
-            RuntimeCapabilities(True, False, False, False, False, True),
+            RuntimeCapabilities(True, False, False, False, True, True),
             required_host_features=("apple-silicon", "hypervisor.framework", "adb"),
             backend_options={"storage_model": "sdk-avd-plus-userdata"},
         ),

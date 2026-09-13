@@ -12,6 +12,7 @@ from .runtime_backend_adb import (
     ExternalAdbConfig,
     RuntimeBackendError,
     RuntimeBackendNotReady,
+    RuntimeAwaitingUserLogin,
     RuntimeIdentityMismatch,
 )
 from .runtime_backend_deferred import DeferredRuntimeBackend
@@ -290,6 +291,7 @@ __all__ = [
     "RedroidRuntimeConfig",
     "RuntimeBackendError",
     "RuntimeBackendNotReady",
+    "RuntimeAwaitingUserLogin",
     "RuntimeIdentityMismatch",
     "backend_from_config",
     "probe_linux_kvm",

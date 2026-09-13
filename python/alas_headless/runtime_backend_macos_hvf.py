@@ -17,6 +17,7 @@ from .runtime_backend import BackendKind, RuntimeProbeResult, built_in_backend_p
 from .runtime_backend_adb import (
     AdbAttachedBackend,
     RuntimeBackendNotReady,
+    RuntimeAwaitingUserLogin,
     RuntimeIdentityMismatch,
     _PACKAGE_PATTERN,
     _validate_adb_identity,
@@ -24,6 +25,7 @@ from .runtime_backend_adb import (
 )
 from .runtime_command import RuntimeCommandExecutor, RuntimeCommandSpec, RuntimeOwnedProcess
 from .runtime_trace import RuntimeTraceRecorder
+from .oracle.transport import AdbObserverBridge
 
 
 @dataclass(frozen=True)
@@ -150,6 +152,29 @@ class MacosHvfBackend(AdbAttachedBackend):
     @property
     def avd_config_path(self) -> Path:
         return self.config.avd_home / (self.config.avd_name + ".avd") / "config.ini"
+
+    def _check_foreground_wait(self, component: str) -> None:
+        # This is a diagnostic for the reviewed CN native login surface, not
+        # permission to observe or interact through the Unity input boundary.
+        if self.package == "com.bilibili.azurlane" and component == (
+            "com.bilibili.azurlane/com.gsc.phone_login.PhoneLoginActivity"
+        ):
+            raise RuntimeAwaitingUserLogin()
+
+    def collect_host_metrics(self, instance: Mapping[str, Any]) -> Mapping[str, Any]:
+        from .macos_hvf_metrics import collect_metrics
+
+        process = self._owned_processes.get(str(instance.get("instance_id", "")))
+        return collect_metrics(self.executor, process.pid if process else None)
+
+    def _check_observer_wait(self) -> None:
+        pid = self._adb("game-pid", ("shell", "pidof", self.package), timeout_seconds=5.0)
+        if not pid.succeeded or not pid.stdout.strip().isdigit():
+            return
+        activity = self._adb("game-foreground", ("shell", "dumpsys", "activity", "activities"), timeout_seconds=5.0)
+        match = AdbObserverBridge._FOREGROUND_PATTERN.search(activity.stdout) if activity.succeeded else None
+        if match is not None:
+            self._check_foreground_wait(match.group(1))
 
     def _require_arm64_avd(self) -> Mapping[str, str]:
         try:

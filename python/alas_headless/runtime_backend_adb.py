@@ -51,6 +51,13 @@ class RuntimeBackendNotReady(RuntimeBackendError):
     pass
 
 
+class RuntimeAwaitingUserLogin(RuntimeBackendError):
+    """User action is required; restarting the runtime cannot supply credentials."""
+
+    def __init__(self) -> None:
+        super().__init__("awaiting-user-login")
+
+
 class RuntimeIdentityMismatch(RuntimeBackendError):
     pass
 
@@ -465,9 +472,17 @@ class AdbAttachedBackend(RuntimeBackend):
                     "pid": int(pid_result.stdout.strip()),
                     "component": self.component,
                 }
+            if match is not None:
+                self._check_foreground_wait(match.group(1))
             return None
 
         return self._wait_for(timeout_seconds, ready, "game-ready-timeout")
+
+    def _check_foreground_wait(self, component: str) -> None:
+        """Backend-specific diagnostics; never admits a non-game foreground."""
+
+    def _check_observer_wait(self) -> None:
+        """Optional backend diagnostic while waiting for the Unity publisher."""
 
     def wait_game_ready(
         self, instance: Mapping[str, Any], timeout_seconds: float
@@ -506,6 +521,7 @@ class AdbAttachedBackend(RuntimeBackend):
     def wait_observer_ready(
         self, instance: Mapping[str, Any], timeout_seconds: float
     ) -> Mapping[str, Any]:
+        self._check_observer_wait()
         instance_id = str(instance.get("instance_id", ""))
         if not instance_id:
             raise RuntimeBackendNotReady("runtime-instance-id-missing")
@@ -532,6 +548,7 @@ class AdbAttachedBackend(RuntimeBackend):
         expected_revision = self._runtime_lock.document["angle"]["revision"]
 
         def ready() -> Optional[Mapping[str, Any]]:
+            self._check_observer_wait()
             try:
                 snapshot, buttons, atomic = request_observer_state(bridge.request)
             except Exception:

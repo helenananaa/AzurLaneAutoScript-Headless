@@ -48,6 +48,76 @@ class ScriptedExecutor:
 
 
 class MacosHvfBackendTests(unittest.TestCase):
+    def test_login_transition_during_observer_wait_closes_bridge(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock
+        from alas_headless.runtime_backend_adb import RuntimeAwaitingUserLogin
+        with tempfile.TemporaryDirectory() as temporary:
+            config = self.make_config(Path(temporary), launch_game=False)
+            executor = ScriptedExecutor({"game-pid": (0, "1234", "")})
+            bridge = Mock()
+            backend = MacosHvfBackend(config, executor, bridge_factory=lambda *args, **kwargs: bridge)
+            backend._runtime_lock = SimpleNamespace(document={"angle": {"revision": "test"}})
+            executor.values["game-foreground"] = (0, "mResumedActivity: ActivityRecord{abc u0 " + COMPONENT + " t1}", "")
+
+            def enter_login():
+                executor.values["game-foreground"] = (0, "mResumedActivity: ActivityRecord{abc u0 " + PACKAGE + "/com.gsc.phone_login.PhoneLoginActivity t1}", "")
+
+            bridge.open.side_effect = enter_login
+            with self.assertRaises(RuntimeAwaitingUserLogin):
+                backend.wait_observer_ready({"instance_id": "test"}, 0.1)
+            bridge.close.assert_called_once()
+            bridge.request.assert_not_called()
+            self.assertNotIn("test", backend._bridges)
+
+    def test_native_login_is_user_action_not_unity_ready(self):
+        from alas_headless.runtime_backend_adb import RuntimeAwaitingUserLogin, RuntimeBackendNotReady
+        with tempfile.TemporaryDirectory() as temporary:
+            config = self.make_config(Path(temporary), launch_game=False)
+            executor = ScriptedExecutor({
+                "game-pid": (0, "1234", ""),
+                "game-foreground": (0, "mResumedActivity: ActivityRecord{abc u0 " + PACKAGE + "/com.gsc.phone_login.PhoneLoginActivity t1}", ""),
+            })
+            backend = MacosHvfBackend(config, executor)
+            with self.assertRaises(RuntimeAwaitingUserLogin):
+                backend.wait_game_ready({}, 0.02)
+            with self.assertRaises(RuntimeAwaitingUserLogin):
+                backend.wait_observer_ready({"instance_id": "test"}, 0.02)
+            executor.values["game-foreground"] = (0, "mResumedActivity: ActivityRecord{abc u0 " + COMPONENT + " t1}", "")
+            self.assertEqual(backend.wait_game_ready({}, 0.02)["pid"], 1234)
+            executor.values["game-foreground"] = (0, "mResumedActivity: ActivityRecord{abc u0 other.package/com.gsc.phone_login.PhoneLoginActivity t1}", "")
+            with self.assertRaisesRegex(RuntimeBackendNotReady, "game-ready-timeout"):
+                backend.wait_game_ready({}, 0.02)
+            self.assertFalse(any(call.mutating for call in executor.calls))
+
+    def test_metrics_only_include_owned_process_tree_and_missing_is_not_zero(self):
+        from alas_headless.macos_hvf_metrics import collect_metrics, parse_processes
+        values = parse_processes("100 1 20.5 1024\n101 100 15 512\n999 1 90 9999\n", 100)
+        self.assertEqual(values["process_count"], 2)
+        self.assertEqual(values["cpu_percent_ps"], 35.5)
+        self.assertEqual(values["rss_bytes_sum"], 1536 * 1024)
+        with self.assertRaises(ValueError):
+            parse_processes("100 1 nan 1024", 100)
+        result = collect_metrics(ScriptedExecutor(), None)
+        self.assertIsNone(result["host_swap_used_bytes"])
+        self.assertIsNone(result["emulator"])
+        self.assertIn("emulator", result["errors"])
+
+    def test_metrics_parse_macos_page_size_swap_units_and_command_failure(self):
+        from alas_headless.macos_hvf_metrics import collect_metrics
+        executor = ScriptedExecutor({
+            "macos-hvf-metrics-host_memory_bytes": (0, "17179869184\n", ""),
+            "macos-hvf-metrics-host_swap_used_bytes": (0, "total = 1024.00M used = 1.50G free = 0.00M", ""),
+            "macos-hvf-metrics-host_vm": (0, "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free: 123.\n", ""),
+            "macos-hvf-metrics-emulator": (1, "", "failed"),
+        })
+        result = collect_metrics(executor, 123)
+        self.assertEqual(result["host_swap_used_bytes"], 1610612736)
+        self.assertEqual(result["host_vm"]["page_size_bytes"], 16384)
+        self.assertEqual(result["host_vm"]["counters_pages"]["Pages free"], 123)
+        self.assertIsNone(result["emulator"])
+        self.assertFalse(any(call.mutating for call in executor.calls))
+
     def make_config(self, root: Path, **overrides):
         sdk = root / "Library/Android/sdk"
         emulator = sdk / "emulator/emulator"
