@@ -1,0 +1,150 @@
+{
+  "artifacts": {
+    "ramdisk.img": {
+      "bytes": 2111997,
+      "sha256": "14aec7a93304d8eb0df9151291c61cd5bb004a1478850a44eee35c7a9cdf8ab5"
+    },
+    "system.img": {
+      "bytes": 1353711616,
+      "sha256": "e89b4bd0c697624844c625951019725a732e8356f3b249534a7f6b2f6778472d"
+    },
+    "vendor.img": {
+      "bytes": 104857600,
+      "sha256": "9df3e0ab7d286b250246ad566915c71eb6705db88a8926969d099e9ae12793f9"
+    }
+  },
+  "backend": "kvm",
+  "build_target": "emu_img_zip",
+  "domain_sha256": "fa6a8940ecb89b3de9c79004fdb16298ccfc7987a80f85d5af9cc91556be8388",
+  "end_epoch": 1788828588,
+  "free_bytes_after": 763567955968,
+  "free_bytes_before": 763594514432,
+  "host": "DESKTOP-K6P66JD",
+  "jobs": 32,
+  "lunch": "alas_kvm_x86_64-trunk_staging-userdebug",
+  "outcome": "pass",
+  "output_residency": "backend-owned",
+  "package_policy": {
+    "forbidden_modules_present": [],
+    "inventory_sha256": "542dac005f3e632cf6a8c074c9e9ba04ceed5181bfe4e0331410a36e3d48013a",
+    "missing_required_modules": [],
+    "module_count": 685,
+    "outcome": "pass",
+    "removed_modules": [
+      "AccessibilityMenu",
+      "BackupRestoreConfirmation",
+      "BasicDreams",
+      "BookmarkProvider",
+      "Browser2",
+      "BuiltInPrintService",
+      "Calendar",
+      "CalendarProvider",
+      "Camera2",
+      "CameraExtensionsProxy",
+      "CompanionDeviceManager",
+      "Contacts",
+      "CtsShimPrebuilt",
+      "CtsShimPrivPrebuilt",
+      "DeskClock",
+      "DeviceAsWebcam",
+      "Dialer",
+      "DynamicSystemInstallationService",
+      "E2eeContactKeysProvider",
+      "EasterEgg",
+      "EmergencyInfo",
+      "Gallery2",
+      "ImsServiceEntitlement",
+      "LiveWallpapersPicker",
+      "ManagedProvisioning",
+      "MtpService",
+      "Music",
+      "MusicFX",
+      "NotoSerifCJK-Regular.ttc",
+      "PartnerBookmarksProvider",
+      "PhotoTable",
+      "PrintRecommendationService",
+      "PrintSpooler",
+      "Provision",
+      "QuickSearchBox",
+      "SecureElement",
+      "SoundPicker",
+      "Stk",
+      "Tag",
+      "ThemePicker",
+      "Traceur",
+      "WallpaperCropper",
+      "WallpaperPicker",
+      "messaging",
+      "vr"
+    ],
+    "required_modules": [
+      "CarrierConfig",
+      "ContactsProvider",
+      "DocumentsUI",
+      "DownloadProvider",
+      "ExternalStorageProvider",
+      "GoldfishSkinConfig",
+      "IntentResolver",
+      "KeyChain",
+      "LatinIME",
+      "Launcher3QuickStep",
+      "NotoColorEmoji.ttf",
+      "NotoSansCJK-Regular.ttc",
+      "NotoSansSymbols-Regular-Subsetted.ttf",
+      "PackageInstaller",
+      "Roboto-Regular.ttf",
+      "SdkSetup",
+      "Settings",
+      "SettingsIntelligence",
+      "StorageManager",
+      "SystemUI",
+      "com.android.conscrypt",
+      "com.android.i18n",
+      "com.android.media",
+      "com.android.mediaprovider",
+      "com.android.permission",
+      "com.android.resolv",
+      "com.android.wifi",
+      "webview"
+    ],
+    "schema": "alas-headless.kvm-package-policy/v1"
+  },
+  "peer_domain_sha256": "d851112397bcdade3621101d712c246dc6373a2442cce7f2a1d49f0079d4c147",
+  "product_out": "/srv/android-build/kvm/out/x86_64/target/product/emu64x/emulator/x86_64",
+  "profile_sha256": "1b65be5d6783981125b5906e7ac463189814d85313a548ed95a8f8b2d6a35990",
+  "project_patches": [
+    {
+      "commit_message": "ALAS: make ProtoLog generation reproducible",
+      "path": "integration/runtime/aosp-patches/0001-protolog-deterministic-generation-hash.patch",
+      "project": "frameworks/base",
+      "sha256": "56452119114c2677513cf78b0b8d80df4b4170b2cc2c8de2212118d59ae499e7"
+    },
+    {
+      "commit_message": "ALAS: make images reproducible and trim KVM-only packages",
+      "path": "integration/runtime/aosp-patches/0002-build-image-source-date-epoch.patch",
+      "project": "build/make",
+      "sha256": "f3948168b733bfbf1f284caa931707dd398c1e706b03b528db255f4fe831bff9"
+    },
+    {
+      "commit_message": "ALAS: add the first-stage headless KVM product",
+      "path": "integration/runtime/kvm-shader-candidate-20260908/goldfish.patch",
+      "project": "device/generic/goldfish",
+      "sha256": "b0733be774c0efba7a6249967d038440ed96b70e4739274b7c179ca5e2eb0763"
+    },
+    {
+      "commit_message": "ALAS: strip the unused x86 WebView payload",
+      "path": "integration/runtime/aosp-patches/0004-webview-x86_64-only-prebuilt.patch",
+      "project": "external/chromium-webview",
+      "sha256": "6894d8c0565936fe06b677d84e5cc42498c59062b27a0e68a905c2eeddb127d8"
+    },
+    {
+      "commit_message": "ALAS: retain only required KVM language fonts",
+      "path": "integration/runtime/aosp-patches/0005-kvm-language-font-whitelist.patch",
+      "project": "external/noto-fonts",
+      "sha256": "b2e762814c8fa50bd66ef5f3ef97e0745a6ebd506b49be36c930592bdbcaf492"
+    }
+  ],
+  "schema": "alas-headless.kvm-image-build/v2",
+  "source_lock_sha256": "5a21c9144a930b9d8b10e279b3d164c9a8b8fa3696b8f2fe3a8be7b6bd985e7a",
+  "start_epoch": 1788828411
+}

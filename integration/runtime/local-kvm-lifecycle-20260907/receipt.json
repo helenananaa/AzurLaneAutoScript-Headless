@@ -1,0 +1,87 @@
+{
+  "schema": "alas-headless.local-kvm-lifecycle-validation/v1",
+  "created_epoch": 1788780287.2469337,
+  "release": "kvm-r75-x86_64-local-20260907-r1",
+  "avd": "alas-kvm-local-r5",
+  "scope": "local WSL, retained image/userdata, no account login or ALAS task support promotion",
+  "graceful_daily_cycles": 2,
+  "first_exit": {
+    "returncode": 0,
+    "time": 1788779196.7807584
+  },
+  "final_exit": {
+    "returncode": 0,
+    "time": 1788779586.0085752
+  },
+  "windows_stop": {
+    "command": "manage-kvm-wsl-local-dev.ps1 -Action Stop",
+    "duration_seconds": 9.8230217,
+    "result": {
+      "state": "stopped",
+      "unit": "alas-kvm-dev-alas-kvm-local-r5.service",
+      "exit_code": 0,
+      "userdata": "retained"
+    }
+  },
+  "final_state": {
+    "unit": "alas-kvm-dev-alas-kvm-local-r5.service",
+    "avd": "alas-kvm-local-r5",
+    "release": "kvm-r75-x86_64-local-20260907-r1",
+    "running": false,
+    "service": {
+      "MainPID": "0",
+      "Result": "success",
+      "ExecMainStatus": "0",
+      "LoadState": "not-found",
+      "ActiveState": "inactive",
+      "SubState": "dead"
+    },
+    "state": "stopped"
+  },
+  "listeners_released": true,
+  "grpc_loopback_ports": [
+    "39503",
+    "35917"
+  ],
+  "grpc_auth": "built-in JWT; automatic ephemeral port; no user token setup",
+  "userdata_sentinel": "alas-kvm-local-r5 persistence 20260907",
+  "resources": "29867448\t/sdcard/Android/data/com.bilibili.azurlane/files",
+  "account_input": 0,
+  "accounts": 0,
+  "native_login_state": "login-required",
+  "tests": {
+    "windows": "50 passed, 2 platform skips",
+    "wsl": "52 passed"
+  },
+  "evidence_root": "/srv/android-build/kvm/evidence/local-lifecycle-20260907-r1",
+  "files": {
+    "daily-ui.json": {
+      "size": 16519,
+      "sha256": "a312cd3435b6fd2624c7e3566df901e4f6bf3bf8c2b0465fd48ad3201d590792"
+    },
+    "windows-stop.json": {
+      "size": 237,
+      "sha256": "d916e52c1ada651c61d1aef91adbab140cd69133c9dab87869d07dde68d7ba1f"
+    },
+    "daily-manager-journal.log": {
+      "size": 27120,
+      "sha256": "b03ff961f18c521ff6ef9e9e9631dd07dccdce4521d3e4084f67ba777553d7e1"
+    },
+    "daily-manager-final-journal.log": {
+      "size": 28967,
+      "sha256": "86f13abaac612994fb28eb73886ff5026ed1256265839240623de209b840ca65"
+    },
+    "console-stop.log": {
+      "size": 2187,
+      "sha256": "937d17391a1b62daa0ea3fcb671b998fa06ce7868fe15f70a719bfbe6bcc2ee3"
+    },
+    "live-before-stop.json": {
+      "size": 2530,
+      "sha256": "d6d20f2ca1db76be750d56eb021113976b880bc8baaa43aed392cd431144a65c"
+    },
+    "final-exit.json": {
+      "size": 51,
+      "sha256": "9aa520a7ad697a413b237462d9d81febe6c349bd27c04d653b49070a328be7f2"
+    }
+  }
+}

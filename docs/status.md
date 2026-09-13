@@ -2,6 +2,143 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-09-08 — independent on-demand shader cold-boot candidate
+
+- J32 incremental build completed in 2m52s and published a separate verified
+  `kvm-r75-x86_64-shader-ondemand-20260908-r1` release. The property is in the
+  system image; no post-boot injection or SELinux relaxation is used.
+- Original / first candidate / repeated candidate / rollback ready times were
+  71.84 / 80.50 / 55.67 / 57.40 seconds. All four reached fresh semantic state
+  and stopped normally. Priming is removed, but stable end-to-end speedup is
+  not established. Original release remains selected; candidate is retained.
+- Relevant tests: 78 passed, 2 skipped. Build/patch, publication and rollback
+  checks passed. Zero accounts/input, userdata retained. The instance is stopped.
+  See the [cold-boot candidate report](kvm-shader-cold-candidate-20260908.zh-CN.md).
+
+## 2026-09-08 — SurfaceFlinger on-demand shader experiment
+
+- A nonpersistent true/false/true property experiment on one running VM measured
+  framework restart at 36.068 / 6.099 / 15.266 seconds. This is not cold boot.
+- With priming off, first game readiness and subsequent native login passed;
+  restored priming also passed game readiness. The first enabled trial timed
+  out at the observer boundary and remains a failed observation.
+- Subsequent game readiness was 17.414 seconds for the candidate and 11.937
+  seconds after restoration; first-use cost is not yet resolved. Default
+  startup and images are unchanged. Priming was restored and Stop passed.
+  See the [experiment report](kvm-shader-prime-experiment-20260908.zh-CN.md).
+
+## 2026-09-08 — local KVM framework startup hotspot
+
+- Boot logs identified SurfaceFlinger shader priming (about 12.6 seconds) and
+  a 7.5-second display-service wait. The headless launcher now skips Android
+  boot animation using the existing emulator option; display and game routing
+  remain unchanged.
+- A single paired observation measured ready at 33.641 / 29.546 seconds. The
+  display-service wait fell to 10 ms, but shader priming still took 12.3 seconds
+  and remained on the boot completion path. No stable speedup claim is made.
+- Android/network readiness, game cold launch with advancing semantic state,
+  zero accounts and normal Stop passed. Windows focused tests: 56 passed,
+  2 skipped; WSL script tests: 2 passed; shell syntax passed. The instance is
+  stopped. See the [framework startup report](kvm-framework-startup-20260908.zh-CN.md).
+
+## 2026-09-08 — local KVM startup wait optimization
+
+- Windows service-start polling now requests service-only status, avoiding
+  premature guest queries. Full readiness and ordinary Status remain intact.
+- Android readiness reports framework and network subphase timings. One local
+  startup pair measured 42.263 / 39.443 seconds at the Windows entrypoint;
+  this is not a statistically established speedup or Android image improvement.
+- Windows focused tests: 56 passed, 2 skipped; WSL: 58 passed. Android-only
+  boot, game cold launch with fresh semantic state, native login boundary,
+  zero accounts, and normal Stop passed. The instance is stopped with userdata
+  retained. See the [startup wait report](kvm-startup-waits-20260908.zh-CN.md).
+
+## 2026-09-07 — local KVM connection recovery
+
+- Status now distinguishes a failed service from a normal stopped instance,
+  and missing ADB transport from Android boot-in-progress. Failed startup
+  exposes the service result, exit status and log location.
+- Added Reconnect and connection-only repair for repeated Start. Existing
+  backend polling stops promptly when its owning service has exited; no game
+  restart or second ALAS workflow is introduced.
+- Three controlled connection-loss paths recovered with the same emulator PID,
+  game PID, boot ID and userdata marker, with zero accounts/input. A deliberately
+  mismatched profile was rejected by the existing image check in about 10 seconds;
+  the final failure-cleanup test left no instance listeners. Normal Stop passed.
+- Windows focused tests: 55 passed, 2 skipped; WSL: 57 passed. See the
+  [connection recovery report](kvm-connection-recovery-20260907.zh-CN.md).
+
+## 2026-09-07 — KVM command startup optimization
+
+- Deferred the package's public facade until an export is requested, preserving
+  all 503 explicit exports and 352 star exports. Focused runtime imports no
+  longer initialize the full ALAS facade. Windows path conversion now uses one
+  WSL call with separate argv values.
+- In two stopped-instance samples per variant with WSL kept running, Status
+  median fell from 5.154 to 2.599 seconds. This is a small local command-latency
+  comparison, not a claim about faster Android or ALAS workload execution.
+- Startup now reports ADB, Android/network, game-launch and surface wait times.
+  Android idle and native SDK login memory/CPU were observed separately after
+  regression finished; the 3072 MiB guest default remains unchanged.
+- Full Windows regression: 2215 passed, 8 skipped. WSL focused regression:
+  17 passed. Live Android-only start, game launch, status and normal stop passed
+  without account input. See the [startup report](kvm-startup-optimization-20260907.zh-CN.md).
+
+## 2026-09-07 — local KVM lifecycle follow-up
+
+- Added the Windows `manage-kvm-wsl-local-dev.ps1` Start/Status/Stop/RestartGame
+  entrypoint, using the existing KVM backend for game cold launch and retaining
+  the existing release and userdata. Repeated Start does not relaunch a running
+  instance. Native SDK login is reported separately from fresh Unity state.
+- Corrected console stop dispatch to a verified `emulator-<console_port>` target,
+  with guest sync and checked results. Abnormal executor exit is no longer
+  silently accepted as a normal stop.
+- Explicit authenticated ephemeral gRPC initialization fixes the measured
+  Emulator 34.2.7 teardown failure on this candidate. The endpoint was observed
+  on loopback. ADB starts outside the emulator cgroup and is closed only when
+  no other devices use it.
+- Two daily-entrypoint start/stop cycles exited normally with code 0. Resources,
+  the userdata marker and zero accounts survived. The final test instance is
+  stopped, with its listeners released. This supersedes the earlier normal-stop
+  blocker for this launch/stop path, without rewriting its failure evidence.
+- See the [lifecycle report](kvm-local-lifecycle-20260907.zh-CN.md).
+
+## 2026-09-07
+
+### Local KVM build published and exercised without account login
+
+- Published the retained successful local J32 build as
+  `kvm-r75-x86_64-local-20260907-r1`; no rebuild or source sync was needed.
+  The separate new `alas-kvm-local-r5` AVD booted API 34 with enforcing SELinux
+  and a valid 48G ext4 userdata base. The original r4 AVD remains retained.
+- Publication now elevates only a read-only peer-domain inspection when the
+  separate build account cannot traverse the peer roots. Runtime publication,
+  userdata, APK archives and evidence remain owned by `alas-kvm-build`.
+- Missing image config templates are rejected before userdata creation.
+  Linux execution tests cover missing/malformed templates and preserving
+  existing userdata.
+- The first Android immersive tutorial blocked Unity focus even though the
+  observer socket existed. KVM cold launch now confirms this system tutorial.
+  With the retained KVM adaptive driver, the local candidate produced coherent
+  advancing typed frames with main-thread flags 15 and no pixel fallback.
+- Original KVM backend game and Android restart paths preserved the userdata
+  marker and installed packages. A retained-image rollback booted Android with
+  the same userdata; switching back to the local release restored fresh typed
+  state. This is not a complete semantic qualification of the older image.
+- Normal Emulator shutdown remains open: service stop ended in the emulator's
+  forced termination and guest poweroff ended in a core-dump. Do not promote
+  these results to graceful shutdown or production readiness.
+- The displayed 28.3GB resource update completed with zero failures in the
+  retained samples. A subsequent cold restart retained the resources and
+  returned to an empty native `PhoneLoginActivity`, with Android `Accounts: 0`
+  and no account input. Unity generation pauses behind the native SDK login
+  activity; this is not `LoginUI2` or post-login task qualification. The test
+  instance is stopped and retained. Re-running provisioning while stopped
+  preserved both userdata files' inode, size and modification time.
+- Account login and post-login ALAS tasks are deferred until an account is
+  available. See the [local KVM guide](local-wsl-kvm-dev.zh-CN.md) and retained
+  evidence under `/srv/android-build/kvm/evidence/local-runtime-20260907-r1`.
+
 ## 2026-09-02
 
 ### Classified task failures are contained at the original ALAS run boundary

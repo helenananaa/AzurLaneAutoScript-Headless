@@ -53,6 +53,21 @@ class KvmImageSourceLockTests(unittest.TestCase):
         with self.assertRaisesRegex(KvmImageSourceLockError, "target differs"):
             KvmImageSourceLock.from_mapping(value)
 
+    def test_separate_candidate_patch_retains_digest_contract(self) -> None:
+        value = copy.deepcopy(self.value)
+        value['project_patches'][0]['path'] = 'integration/runtime/candidate/base.patch'
+        KvmImageSourceLock.from_mapping(value)
+        value['project_patches'][0]['sha256'] = 'not-a-digest'
+        with self.assertRaisesRegex(KvmImageSourceLockError, 'digest'):
+            KvmImageSourceLock.from_mapping(value)
+
+    def test_candidate_patch_cannot_escape_runtime_directory(self) -> None:
+        for path in ('/tmp/a.patch', 'integration/runtime/../../a.patch', 'C:\\tmp\\a.patch'):
+            value = copy.deepcopy(self.value)
+            value['project_patches'][0]['path'] = path
+            with self.assertRaisesRegex(KvmImageSourceLockError, 'path'):
+                KvmImageSourceLock.from_mapping(value)
+
 
 if __name__ == "__main__":
     unittest.main()

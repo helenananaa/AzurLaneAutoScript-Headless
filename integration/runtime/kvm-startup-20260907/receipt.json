@@ -1,0 +1,161 @@
+{
+  "schema": "alas-headless.kvm-startup-observation/v1",
+  "scope": "local WSL, no account input, no post-login performance qualification",
+  "status_latency": {
+    "before_seconds": [
+      5.5215354,
+      4.7871863
+    ],
+    "after_seconds": [
+      2.77476,
+      2.4236429
+    ],
+    "before_median": 5.15436085,
+    "after_median": 2.59920145,
+    "reduction_percent": 49.57276904662196,
+    "conditions": "same stopped AVD; WSL kept alive; batched path conversion in both variants"
+  },
+  "android_start": {
+    "elapsed_seconds": 61.6134229,
+    "result": {
+      "unit": "alas-kvm-dev-alas-kvm-local-r5.service",
+      "avd": "alas-kvm-local-r5",
+      "release": "kvm-r75-x86_64-local-20260907-r1",
+      "running": true,
+      "service": {
+        "MainPID": "678",
+        "Result": "success",
+        "ExecMainStatus": "0",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "state": "android-ready",
+      "devices": "List of devices attached\n127.0.0.1:5589         device product:alas_kvm_x86_64 model:alas_kvm_x86_64 device:emu64x transport_id:2\nemulator-5588          device product:alas_kvm_x86_64 model:alas_kvm_x86_64 device:emu64x transport_id:1",
+      "serial": "127.0.0.1:5589",
+      "android_ready": true,
+      "foreground": "com.android.launcher3/.uioverrides.QuickstepLauncher",
+      "observer": "game-not-foreground",
+      "timings_seconds": {
+        "adb_seconds": 26.150412502996915,
+        "android_seconds": 25.08671481800411,
+        "game_launch_seconds": 1.5700061339884996e-07,
+        "surface_seconds": 0.16390150399820413,
+        "total_seconds": 51.41551197100489
+      }
+    }
+  },
+  "game_start": {
+    "elapsed_seconds": 21.9349782,
+    "result": {
+      "unit": "alas-kvm-dev-alas-kvm-local-r5.service",
+      "avd": "alas-kvm-local-r5",
+      "release": "kvm-r75-x86_64-local-20260907-r1",
+      "running": true,
+      "service": {
+        "MainPID": "678",
+        "Result": "success",
+        "ExecMainStatus": "0",
+        "LoadState": "loaded",
+        "ActiveState": "active",
+        "SubState": "running"
+      },
+      "state": "semantic-ready",
+      "devices": "List of devices attached\n127.0.0.1:5589         device product:alas_kvm_x86_64 model:alas_kvm_x86_64 device:emu64x transport_id:2\nemulator-5588          device product:alas_kvm_x86_64 model:alas_kvm_x86_64 device:emu64x transport_id:1",
+      "serial": "127.0.0.1:5589",
+      "android_ready": true,
+      "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+      "game_pid": 1889,
+      "generation": 1,
+      "age_ms": 854,
+      "timings_seconds": {
+        "adb_seconds": 0.007515511999372393,
+        "android_seconds": 0.13211537100141868,
+        "game_launch_seconds": 3.1735472319996916,
+        "surface_seconds": 16.140736672998173,
+        "total_seconds": 19.459763228005613
+      }
+    }
+  },
+  "stop": {
+    "elapsed_seconds": 6.2736806,
+    "result": {
+      "state": "stopped",
+      "unit": "alas-kvm-dev-alas-kvm-local-r5.service",
+      "exit_code": 0,
+      "userdata": "retained"
+    }
+  },
+  "resource_observations": [
+    {
+      "scene": "android-idle",
+      "host_cpu_cores": 0.1074489253298917,
+      "rss_kib": 2555472,
+      "sample_seconds": 20.009506781003438
+    },
+    {
+      "scene": "sdk-login",
+      "host_cpu_cores": 0.7136675653696063,
+      "rss_kib": 4024020,
+      "sample_seconds": 20.009316231997218
+    }
+  ],
+  "default_guest_ram_mib": 3072,
+  "public_exports": {
+    "explicit": 503,
+    "star": 352,
+    "identity_test": "pass"
+  },
+  "tests": {
+    "windows_full": "2215 passed, 8 skipped",
+    "wsl_focused": "17 passed"
+  },
+  "final_state": "stopped; no instance listeners; AVD and resources retained",
+  "evidence_root": "/srv/android-build/kvm/evidence/startup-optimization-20260907-r1",
+  "files": {
+    "android-start-timings.json": {
+      "bytes": 1148,
+      "sha256": "10ef681925894d580bfb82fd80dce0bbed693b560f89f35e6642282d473b80bb"
+    },
+    "baseline-status.json": {
+      "bytes": 310,
+      "sha256": "9056b28d68c771e81f955ca47a17a32e233845a1dd723ed6fee9fa92605c0723"
+    },
+    "optimized-stop-timings.json": {
+      "bytes": 188,
+      "sha256": "a346aae3e5c863146469e0d15c23ddb066ab866e64b1e201f461885b52dc8d23"
+    },
+    "importtime-after.log": {
+      "bytes": 11856,
+      "sha256": "7daf67ecd245b03c7c9929363bed39b139fe4873a43d165712604c979056c769"
+    },
+    "sdk-login.json": {
+      "bytes": 3635,
+      "sha256": "16d4c51bf884fca55cd960eda1b0d56d5d79c3535c52d9a2b853410432bdff26"
+    },
+    "game-start-timings.json": {
+      "bytes": 1176,
+      "sha256": "5e41c751b5a6cbdc4c8c61889c942b209659d553b11098e3da5e46a40b9ab893"
+    },
+    "startup-before-lazy.json": {
+      "bytes": 33,
+      "sha256": "1a96a134e7e55f26cb4c59ab1f2994b635c0e0f2a9aa9b836c2eac40b6144dfb"
+    },
+    "android-idle.json": {
+      "bytes": 3614,
+      "sha256": "f077d15020f02b4513b31310bac8177a7be21630b5090723b293d440be6919f7"
+    },
+    "startup-after-lazy.json": {
+      "bytes": 31,
+      "sha256": "5a7088faf2515c43873605da9b22602bdf6859e2904e07dadccae084da7b2947"
+    },
+    "importtime.log": {
+      "bytes": 32477,
+      "sha256": "bdf01b401161ee756b20961aa77ffbcad0edccc04f589a93ca7a4587d05f01a8"
+    },
+    "optimized-status.json": {
+      "bytes": 722,
+      "sha256": "d732ee0cbd97585b4dd7f5d077544ce292c744d442adc57cde0850bd0c7cf73e"
+    }
+  }
+}

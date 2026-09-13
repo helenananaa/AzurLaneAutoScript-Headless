@@ -1,0 +1,322 @@
+{
+  "schema": "alas-headless.local-kvm-runtime-validation/v1",
+  "created_at_utc": "2026-09-07T03:46:39.284818+00:00",
+  "scope": "local WSL x86_64 KVM; no account login or ALAS task promotion",
+  "release_id": "kvm-r75-x86_64-local-20260907-r1",
+  "avd": "alas-kvm-local-r5",
+  "build_run": "kvm-local-full-j32-20260906-r1",
+  "source_lock_sha256": "9e8c563be2dcc193771b6d52ecf9cd8a197b975879ab120fb4fb80020872b2be",
+  "profile_sha256": "c707a415808d7d0e04b0ca54b100f1f9c2675bbc03a11b35ac509c932e090d07",
+  "images": {
+    "ramdisk.img": {
+      "bytes": 2111997,
+      "sha256": "14aec7a93304d8eb0df9151291c61cd5bb004a1478850a44eee35c7a9cdf8ab5"
+    },
+    "system.img": {
+      "bytes": 1353711616,
+      "sha256": "2a72575360aab50fcff7cba867f8a7555a253da861c7f175242f7a4823b1419b"
+    },
+    "vendor.img": {
+      "bytes": 104857600,
+      "sha256": "9df3e0ab7d286b250246ad566915c71eb6705db88a8926969d099e9ae12793f9"
+    }
+  },
+  "angle_apk_sha256": "04281ef4afa52427192680e498dd1ba0ffdbb278a1b6029a21b7a1026fd8306b",
+  "game_apk_sha256": "e6d3ef4baac2509cc97a289b91bfd5f9d0dcd7ad8994880a192298983208699f",
+  "observations": {
+    "android_boot": "pass",
+    "api_level": 34,
+    "selinux": "Enforcing",
+    "fresh_userdata": "pass",
+    "userdata_raw_bytes": 51539607552,
+    "existing_avd_reprovision": "pass; raw and qcow2 inode, size and mtime unchanged while stopped",
+    "external_apk_install": "pass",
+    "angle_apk_replacement": "pass",
+    "game_version_upgrade": "not tested; no newer game APK installed",
+    "privacy_agreement": "one DOM click, returned to MainActivity",
+    "observer_on_local_release": "pass; coherent main-thread state, flags 15, advancing generation",
+    "game_backend_recovery": "pass",
+    "android_backend_recovery": "pass with observed ADB offline and changed boot ID",
+    "rollback_to_retained_image": "Android boot, installed packages and userdata marker passed; semantic completion not qualified",
+    "return_to_local_image": "pass with fresh typed state",
+    "normal_emulator_shutdown": "not passed; service stop self-kill, guest poweroff core-dump",
+    "resource_download": "completed; displayed initial total 28.3GB; retained through game cold restart",
+    "login_boundary": "empty native PhoneLoginActivity; not a LoginUI2 or post-login qualification",
+    "sdk_foreground_observer": "Unity generation pauses while native login activity is foreground; no stale-frame input",
+    "account_login": "not performed",
+    "post_login_alas": "not tested",
+    "clean_rebuild_reproducibility": "not claimed"
+  },
+  "actions": {
+    "privacy_dom_clicks": 1,
+    "resource_selection_semantic_clicks": 3,
+    "download_resume_semantic_clicks": 1,
+    "account_input": 0,
+    "pixel_fallback": 0
+  },
+  "validation": {
+    "windows": "134 passed, 5 platform skips",
+    "wsl_platform_coverage": "19 passed; all five Windows platform skips covered",
+    "publisher_mapping_proxy_regression": "3 passed"
+  },
+  "evidence_root": "/srv/android-build/kvm/evidence/local-runtime-20260907-r1",
+  "userdata_backup": "/srv/android-build/kvm/archive/images/avd-snapshots/local-r5-before-release-rollback-20260907",
+  "final_login_boundary": {
+    "foreground": "topResumedActivity=ActivityRecord{4e3d3a6 u0 com.bilibili.azurlane/com.gsc.phone_login.PhoneLoginActivity t20}",
+    "accounts": 0,
+    "phone_field": "empty placeholder",
+    "account_input": 0,
+    "angle_apk_sha256": "04281ef4afa52427192680e498dd1ba0ffdbb278a1b6029a21b7a1026fd8306b",
+    "game_pid": "2647",
+    "resources_du_kib": 29867448,
+    "userdata_sentinel": "alas-kvm-local-r5 persistence 20260907"
+  },
+  "final_runtime_state": "stopped; AVD, full resources and release retained",
+  "download_observation_samples": 89,
+  "evidence_files": {
+    "after-android-recovery-observer.json": {
+      "bytes": 72569,
+      "sha256": "2f4aee7909b73b890089c6b4efe0660d9e3c59568b36b9d27d4650f7041e9e46"
+    },
+    "after-game-recovery-observer.json": {
+      "bytes": 72558,
+      "sha256": "f9f4299b26f97d2b640b35e8204094c10644b23ab24fc0be8be8ba9ecef80b8b"
+    },
+    "agreement-accept.json": {
+      "bytes": 153,
+      "sha256": "ec18e31b04f78049f24265b0c80db5f2c71487a1779bbb1c45e9eb759b21d2eb"
+    },
+    "agreement-inspect.json": {
+      "bytes": 1549,
+      "sha256": "547585dbeb365fe9adbc71ea3d10db536f29a6013adb4d85a4479179f8b198e4"
+    },
+    "android-backend-recovery.json": {
+      "bytes": 65257,
+      "sha256": "3d0a9142a4e6148a425bfcb5d1e5c7adb78e59fed5bad63e20f7f7f4d16d48bf"
+    },
+    "boot-settled.json": {
+      "bytes": 24770,
+      "sha256": "7b1dec2297b9b162b7366631840fdd0d3558a6be362b772f88a3edec8556d852"
+    },
+    "detailed-observer.json": {
+      "bytes": 1754,
+      "sha256": "e012c547176b43db095a60b1e0551cf3d4d61c85f5691d4b04f9c9515687daf5"
+    },
+    "domain-preflight.json": {
+      "bytes": 2003,
+      "sha256": "712f2d132f37a9ab1c3d3924d31ee6d155d96d0b42ad4442225238599ed97b32"
+    },
+    "download-confirm-pid1735.json": {
+      "bytes": 24584,
+      "sha256": "88501c1260925219242323f9006db73ffb4c3b483528cd455621f265441bcf05"
+    },
+    "download-confirm.json": {
+      "bytes": 54074,
+      "sha256": "668263f862c4ba12888ec28f26e7f318bef3998f0da8a267a0e6e5e79cb04b82"
+    },
+    "download-start-observer.json": {
+      "bytes": 167337,
+      "sha256": "c1fc69236d142bcac6f195502850ad63e1db95853f4379fc81d4619ecde68766"
+    },
+    "download-watch.jsonl": {
+      "bytes": 31166,
+      "sha256": "4a47ec073aa8b260a374e3c5fb0faf791f204053756d1281851588473485d03c"
+    },
+    "downloading-observer.json": {
+      "bytes": 255579,
+      "sha256": "cb5e18597456177f8d9d109e155b805cd1298a4d6776720a2046d4d989f784f5"
+    },
+    "encoded-unity-game.log": {
+      "bytes": 45240,
+      "sha256": "4ed99672ecffb325cd05cef310079a2f5d9825173ad6f736779f8115abe2f2f0"
+    },
+    "encoded-unity-launch.txt": {
+      "bytes": 226,
+      "sha256": "d9fafbef5e435e230e7228694d0ccfafa90a50f7622b2ad06acb7907d9142ffa"
+    },
+    "encoded-unity-observer.json": {
+      "bytes": 269,
+      "sha256": "33c7d3c5bf578e541c0dbf269169b92f10ae729d7a933d5c4bf18874629033cc"
+    },
+    "external-install.json": {
+      "bytes": 310,
+      "sha256": "d65ea4cc480fd7c7bc9e78eca2594b31cc73fe3ba56b18f5e9eb2cdf8113f23b"
+    },
+    "final-login-boundary.json": {
+      "bytes": 418,
+      "sha256": "f82866d5373d336e571842ab6246001a7808e4353972b40203c0e381e622ce57"
+    },
+    "final-service-state.txt": {
+      "bytes": 43,
+      "sha256": "6ec2fc054ab83d711f5b3fadd20ed36bdc54bd48210b3add7b04446883b268a3"
+    },
+    "final-stop.log": {
+      "bytes": 2734,
+      "sha256": "ef29a9e1ee088ebf304c69de31ddd269b6e48ea7bf156e94baa4aa7fd789deea"
+    },
+    "first-boot.json": {
+      "bytes": 9475,
+      "sha256": "ebd713241951a36cdfb8d6c7a72956e5a6fa576631ea2cb63044bb432f0b205b"
+    },
+    "first-stop.log": {
+      "bytes": 2678,
+      "sha256": "9ef9515ca82d5972e0d79de6e4c78aab59ce0387315b17ffdec3bbf18633a659"
+    },
+    "game-backend-recovery.json": {
+      "bytes": 37164,
+      "sha256": "1fb077f5776694a27b3619b0c3151b03e9fe927a06dee0c5164f6f8834f9c0c6"
+    },
+    "game-initial.json": {
+      "bytes": 33069,
+      "sha256": "be2092acdf0d733346fcf23cfb91e4127088a5ac830b012ce8818b95886c45e5"
+    },
+    "game-maps.txt": {
+      "bytes": 279462,
+      "sha256": "90f9cab6a347615dae0d6bd60d8f9721f84e717aa32e712726955470ef88bb0a"
+    },
+    "guest-poweroff-stop.log": {
+      "bytes": 3500,
+      "sha256": "265226b3532ad2aded5c8de8ed936f562346ad530c8c5cd4b8753131e6f121f8"
+    },
+    "immersive-confirmed-launch.txt": {
+      "bytes": 226,
+      "sha256": "720fd86869b140e87882c9850f0f90fbc17c1d0922b26e5639834767e0f27e19"
+    },
+    "immersive-confirmed-observer.json": {
+      "bytes": 14949,
+      "sha256": "7201b2cbb4d7ca7439e4e69a3a32a427cc5e6f8ca94623d5be17cb89019eda9d"
+    },
+    "initial-launch.txt": {
+      "bytes": 226,
+      "sha256": "880f3c478642c0e40d3b23b6b35c2084bedeeed3495953e79d70c37fe141785a"
+    },
+    "initial-observer.json": {
+      "bytes": 269,
+      "sha256": "33c7d3c5bf578e541c0dbf269169b92f10ae729d7a933d5c4bf18874629033cc"
+    },
+    "kvm-driver-game.log": {
+      "bytes": 50480,
+      "sha256": "6ab953522c6cdf20a98b41a53323b6dfeedd5f06fbb072c69f09ea0a809535bc"
+    },
+    "kvm-driver-launch.txt": {
+      "bytes": 226,
+      "sha256": "5a6bb21fe6bca436105e565538a6713b6c2873d1e13a5a8d7127c7a1f97185cb"
+    },
+    "kvm-driver-observer.json": {
+      "bytes": 269,
+      "sha256": "33c7d3c5bf578e541c0dbf269169b92f10ae729d7a933d5c4bf18874629033cc"
+    },
+    "kvm-r75-x86_64-local-20260907-r1-backend-recovery.json": {
+      "bytes": 45079,
+      "sha256": "f1be403ea5e84512fe0b280df55879cc8e0eacc6233237e1fa6a61055cc7b54e"
+    },
+    "kvm-r75-x86_64-remote-import-r1-backend-recovery.json": {
+      "bytes": 79110,
+      "sha256": "4c1e7b2ab49bbabbc4fc004e164bd51578e34e1d86b2550a9c7cbf154b9b5f3d"
+    },
+    "kvm-ready-observer.json": {
+      "bytes": 269,
+      "sha256": "33c7d3c5bf578e541c0dbf269169b92f10ae729d7a933d5c4bf18874629033cc"
+    },
+    "other-resource-confirm.json": {
+      "bytes": 84858,
+      "sha256": "16cd85cf4fd9cbf2df32fbfc75acae168cb2206fd465593267360e495289def2"
+    },
+    "phone-final.xml": {
+      "bytes": 9702,
+      "sha256": "73a898f36bc545f2354526952ff1d258ffdc7f941eda85ab85e9d53f0c8dbfab"
+    },
+    "phone-login.json": {
+      "bytes": 33910,
+      "sha256": "bd7ba34fad8ad3ed1a3b088757f3bc50c7c46b6395afdc008415db4803c32e1a"
+    },
+    "phone-login.xml": {
+      "bytes": 9702,
+      "sha256": "73a898f36bc545f2354526952ff1d258ffdc7f941eda85ab85e9d53f0c8dbfab"
+    },
+    "post-agreement-game.log": {
+      "bytes": 70822,
+      "sha256": "39a0bec78d1014a31b228d37bc03fee170d0b4a733d5ccc478c2a2c1fb28820c"
+    },
+    "post-agreement-observer.json": {
+      "bytes": 269,
+      "sha256": "33c7d3c5bf578e541c0dbf269169b92f10ae729d7a933d5c4bf18874629033cc"
+    },
+    "post-agreement.json": {
+      "bytes": 29724,
+      "sha256": "ecc6efb2f1af0862143231bd350b651e8ed68790d9900d925c22ede3d50ea70b"
+    },
+    "post-consent-recovery-launch.txt": {
+      "bytes": 226,
+      "sha256": "2db909793bc17097dc6b6152325693930bd0938c59c9c0ffd2022c23ed94471f"
+    },
+    "post-consent-recovery-observer.json": {
+      "bytes": 269,
+      "sha256": "33c7d3c5bf578e541c0dbf269169b92f10ae729d7a933d5c4bf18874629033cc"
+    },
+    "post-download-restart.json": {
+      "bytes": 30286,
+      "sha256": "ec2c534cd319c5d98e02bdf8892500d686f015e7e9b4ae562a2e262d22a6adb4"
+    },
+    "provision-idempotence.json": {
+      "bytes": 649,
+      "sha256": "9432604fe5553e6f64f4601551cc4bae82558d5a24c673e30cffee821d0865a9"
+    },
+    "provision.log": {
+      "bytes": 1077,
+      "sha256": "44a3aef445cc922ecaa494d61393784e2b30c73da3421c6fbfac7b0895d0b49e"
+    },
+    "recovery-game.log": {
+      "bytes": 50704,
+      "sha256": "b05270b10919fe378e53783f65052a8b0dbdecebfd4c523931927da235f1876b"
+    },
+    "resource-confirm.json": {
+      "bytes": 64268,
+      "sha256": "eb2c3d8690760bf456c65b1ae574d7d0f726cfa01fb6fd0c354212507c53fd13"
+    },
+    "resource-page-observer.json": {
+      "bytes": 189226,
+      "sha256": "a941170c61b5ee17573d60a26fa4536f2e3092bf808e11cdcf6ef76ea7c3d394"
+    },
+    "resources-backend-recovery.json": {
+      "bytes": 7217,
+      "sha256": "712de459bd2306f3f38f52aeb4bded59550624ae3e1ab174654e72a3bb2aea57"
+    },
+    "restored-local-observer.json": {
+      "bytes": 72560,
+      "sha256": "ee46ac2eb9abe014682f76ddb82d4d383c49978a187b1a3d770aa3c8bcea1ef3"
+    },
+    "resumed-transfer-observer.json": {
+      "bytes": 33469,
+      "sha256": "1a712397511be8f4adf408a51aea2af37f6e248ebd43cef3b937fcca8c421423"
+    },
+    "rollback-boot.json": {
+      "bytes": 33955,
+      "sha256": "f71f62e4d1caca35d5a0c9f3420895ed61f05a2e29fbcd5f1643332c1eb0eb09"
+    },
+    "rollback-release.json": {
+      "bytes": 454,
+      "sha256": "944afc92f01b91653177f61241b8719067fddc1dabb5a428ec7b6120a906c293"
+    },
+    "rollback-semantic-observer.json": {
+      "bytes": 7478,
+      "sha256": "88690b3efb5d955a8b1b7185850e076b2e179f341593c3e948251899f55ab4de"
+    },
+    "root-observe-observer.json": {
+      "bytes": 1736,
+      "sha256": "75481dc117c13050ff124680b80bc0f93bc9d073f6616111486f636887be808e"
+    },
+    "switch-release.json": {
+      "bytes": 453,
+      "sha256": "fd742e0982fd5c86872e7265d1f9f87249b9d9c73e3b389bbdbcd5b099f27b9d"
+    },
+    "transfer-progress-observer.json": {
+      "bytes": 128069,
+      "sha256": "e295e5a9d247c9a54c1d49dc4ee3d8c3f7c4feb3a4c7d00578e110175ebecded"
+    },
+    "userdata-sentinel.txt": {
+      "bytes": 39,
+      "sha256": "5978931cfccb1e5812a9a6db3a806886c31a26681f6f5840bf78f4806a8304d9"
+    }
+  }
+}

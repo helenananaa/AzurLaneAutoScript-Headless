@@ -1,0 +1,200 @@
+{
+  "schema": "alas-headless.kvm-shader-cold-experiment/v1",
+  "scope": "account-free-cold-start-and-rollback",
+  "runs": {
+    "baseline": {
+      "ready": {
+        "unit": "alas-kvm-dev-alas-kvm-local-r5.service",
+        "avd": "alas-kvm-local-r5",
+        "release": "kvm-r75-x86_64-local-20260907-r1",
+        "running": true,
+        "service": {
+          "MainPID": "31304",
+          "Result": "success",
+          "ExecMainStatus": "0",
+          "LoadState": "loaded",
+          "ActiveState": "active",
+          "SubState": "running"
+        },
+        "state": "semantic-ready",
+        "devices": "List of devices attached\n127.0.0.1:5589         device product:alas_kvm_x86_64 model:alas_kvm_x86_64 device:emu64x transport_id:2\nemulator-5588          device product:alas_kvm_x86_64 model:alas_kvm_x86_64 device:emu64x transport_id:1",
+        "serial": "127.0.0.1:5589",
+        "android_ready": true,
+        "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+        "game_pid": 1800,
+        "generation": 1,
+        "age_ms": 1179,
+        "timings_seconds": {
+          "adb_seconds": 22.255835465999553,
+          "android_seconds": 22.394192949999706,
+          "android_framework_seconds": 18.83167796500038,
+          "android_network_seconds": 3.562498871000571,
+          "game_launch_seconds": 3.8263840419995176,
+          "surface_seconds": 23.35613917200044,
+          "total_seconds": 71.84364796500086
+        }
+      },
+      "windows_wall_seconds": 83.4438486,
+      "stop": {
+        "state": "stopped",
+        "unit": "alas-kvm-dev-alas-kvm-local-r5.service",
+        "exit_code": 0,
+        "userdata": "retained"
+      }
+    },
+    "candidate": {
+      "ready": {
+        "unit": "alas-kvm-dev-alas-kvm-local-r5.service",
+        "avd": "alas-kvm-local-r5",
+        "release": "kvm-r75-x86_64-shader-ondemand-20260908-r1",
+        "running": true,
+        "service": {
+          "MainPID": "32608",
+          "Result": "success",
+          "ExecMainStatus": "0",
+          "LoadState": "loaded",
+          "ActiveState": "active",
+          "SubState": "running"
+        },
+        "state": "semantic-ready",
+        "devices": "List of devices attached\n127.0.0.1:5589         device product:alas_kvm_x86_64 model:alas_kvm_x86_64 device:emu64x transport_id:2\nemulator-5588          device product:alas_kvm_x86_64 model:alas_kvm_x86_64 device:emu64x transport_id:1",
+        "serial": "127.0.0.1:5589",
+        "android_ready": true,
+        "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+        "game_pid": 1823,
+        "generation": 1,
+        "age_ms": 682,
+        "timings_seconds": {
+          "adb_seconds": 33.31982562600024,
+          "android_seconds": 19.44506037699921,
+          "android_framework_seconds": 14.359982875000242,
+          "android_network_seconds": 5.085060293999959,
+          "game_launch_seconds": 4.432206238000617,
+          "surface_seconds": 23.294570815000043,
+          "total_seconds": 80.5023057440003
+        }
+      },
+      "windows_wall_seconds": 92.5606649,
+      "stop": {
+        "state": "stopped",
+        "unit": "alas-kvm-dev-alas-kvm-local-r5.service",
+        "exit_code": 0,
+        "userdata": "retained"
+      }
+    },
+    "candidate-repeat": {
+      "ready": {
+        "unit": "alas-kvm-dev-alas-kvm-local-r5.service",
+        "avd": "alas-kvm-local-r5",
+        "release": "kvm-r75-x86_64-shader-ondemand-20260908-r1",
+        "running": true,
+        "service": {
+          "MainPID": "33916",
+          "Result": "success",
+          "ExecMainStatus": "0",
+          "LoadState": "loaded",
+          "ActiveState": "active",
+          "SubState": "running"
+        },
+        "state": "semantic-ready",
+        "devices": "List of devices attached\n127.0.0.1:5589         device product:alas_kvm_x86_64 model:alas_kvm_x86_64 device:emu64x transport_id:2\nemulator-5588          device product:alas_kvm_x86_64 model:alas_kvm_x86_64 device:emu64x transport_id:1",
+        "serial": "127.0.0.1:5589",
+        "android_ready": true,
+        "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+        "game_pid": 1770,
+        "generation": 1,
+        "age_ms": 294,
+        "timings_seconds": {
+          "adb_seconds": 22.33967667900015,
+          "android_seconds": 17.837161621000632,
+          "android_framework_seconds": 13.178679657999965,
+          "android_network_seconds": 4.658407218999855,
+          "game_launch_seconds": 3.448662357000103,
+          "surface_seconds": 12.027489930999764,
+          "total_seconds": 55.67079711399947
+        }
+      },
+      "windows_wall_seconds": 70.4459228,
+      "stop": {
+        "state": "stopped",
+        "unit": "alas-kvm-dev-alas-kvm-local-r5.service",
+        "exit_code": 0,
+        "userdata": "retained"
+      }
+    },
+    "rollback": {
+      "ready": {
+        "unit": "alas-kvm-dev-alas-kvm-local-r5.service",
+        "avd": "alas-kvm-local-r5",
+        "release": "kvm-r75-x86_64-local-20260907-r1",
+        "running": true,
+        "service": {
+          "MainPID": "34836",
+          "Result": "success",
+          "ExecMainStatus": "0",
+          "LoadState": "loaded",
+          "ActiveState": "active",
+          "SubState": "running"
+        },
+        "state": "semantic-ready",
+        "devices": "List of devices attached\n127.0.0.1:5589         device product:alas_kvm_x86_64 model:alas_kvm_x86_64 device:emu64x transport_id:2\nemulator-5588          device product:alas_kvm_x86_64 model:alas_kvm_x86_64 device:emu64x transport_id:1",
+        "serial": "127.0.0.1:5589",
+        "android_ready": true,
+        "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+        "game_pid": 1816,
+        "generation": 1,
+        "age_ms": 1200,
+        "timings_seconds": {
+          "adb_seconds": 18.158455736999713,
+          "android_seconds": 19.215838803000224,
+          "android_framework_seconds": 15.586705977000747,
+          "android_network_seconds": 3.629110636000405,
+          "game_launch_seconds": 3.3163425459997597,
+          "surface_seconds": 16.70000313700075,
+          "total_seconds": 57.39730158400016
+        }
+      },
+      "windows_wall_seconds": 67.8174382,
+      "stop": {
+        "state": "stopped",
+        "unit": "alas-kvm-dev-alas-kvm-local-r5.service",
+        "exit_code": 0,
+        "userdata": "retained"
+      }
+    }
+  },
+  "artifact_sha256": {
+    "accounts.txt": "5054ab0386faf090a44ee61c9e92079a737457992ecfc25dec9dc82461cbf6e9",
+    "baseline-sf.log": "6e77a6d5848aafb5aec63f7ddd22cb052e4629383f99fe21216c5f4c1a96a658",
+    "baseline-start.txt": "752ffa4f6afa84e87f2660c13da0de96c2a682180e110e27496280c75dabf69d",
+    "baseline-stop.txt": "93cc78fd696972265dd38892a1f67f145bc8c1e35d4e0659de0b869a7127d27c",
+    "baseline-wall.txt": "dc1dee47f33b1950ab562b9c1d3cac9b8d923f1a6e2c5257b7b056d6d6ea9142",
+    "candidate-logcat.txt": "2162ee52e359d07a322be434244437238a619a5758b8046e51dd3f17ad35da3a",
+    "candidate-property.txt": "75dbba8fd110adbe0bda707bcbfe667247f5a2d590c5380781abcde1ac20062d",
+    "candidate-repeat-sf.log": "e16d3fdccb645558212f7c485b58204b8aa4f7bf0112cfc129bdc79d5b35fdb9",
+    "candidate-repeat-start.txt": "be9287c6f0d5bbb875bbd918adec3eaf57416dd6f3f91aa92f8a28ef9ad543fc",
+    "candidate-repeat-stop.txt": "93cc78fd696972265dd38892a1f67f145bc8c1e35d4e0659de0b869a7127d27c",
+    "candidate-repeat-wall.txt": "59fb00e9e0547f04a2b3de57c7a9118d2725899ff761f3e87a47340085928709",
+    "candidate-start.txt": "ac93f6ce258a3f6fb3086f4c427f0319a8ca3fcf1d6cc3d23e748663a326b5ca",
+    "candidate-status.txt": "f49ffa69f86a3661841f9cf90f563aaa8dfcc77a7f7601dc1832ffeeea9cffd5",
+    "candidate-stop.txt": "93cc78fd696972265dd38892a1f67f145bc8c1e35d4e0659de0b869a7127d27c",
+    "candidate-wall.txt": "82ff1f6cb85168c5b32b3e29c2ac40324e9208876a36ea7b9d5ef1051fe3a7ef",
+    "final-accounts.txt": "5054ab0386faf090a44ee61c9e92079a737457992ecfc25dec9dc82461cbf6e9",
+    "prepare_candidate.py": "cf667cca8ccafa127240c9235cc33f702037118375cd6e6851cc5c523380c413",
+    "rollback-sf.log": "2f303e2cd4972a4d80bc8b126de5d2627898c34f1fba7bcddd54911eda78eeda",
+    "rollback-start.txt": "a7338be25faa3c05065adb6b1366851775086b2a5ed8a21c90134ee56e6bd167",
+    "rollback-stop.txt": "93cc78fd696972265dd38892a1f67f145bc8c1e35d4e0659de0b869a7127d27c",
+    "rollback-wall.txt": "f67730b5e001c4db1e7186f11ecd66ebed4c6a10a3a249c87eb26c2ea2597497",
+    "rollback.txt": "4447050cd9dd91b5afa2a424e319fa1dcf437d93e0ff918fe9455e1348ee0319",
+    "switch.txt": "15f1f42accbdd20d63792791f376e790ded381a36ed1bd0fba455d9514b80cb9"
+  },
+  "tests": {
+    "windows_passed": 78,
+    "windows_skipped": 2
+  },
+  "selection": "original-release-retained-as-default",
+  "conclusion": "candidate-functional-no-established-end-to-end-speedup",
+  "accounts": 0,
+  "account_input": 0,
+  "userdata": "retained"
+}

@@ -101,12 +101,57 @@ if [[ -e "$avd_dir" ]] && [[ -n "$(find "$avd_dir" -mindepth 1 -maxdepth 1 -prin
     exit 1
 fi
 
-mkdir -p "$avd_dir"
 template="$image_root/config.ini"
-if [[ ! -f "$template" ]]; then
+[[ -f "$template" ]] || {
     echo "KVM image config template is unavailable: $template" >&2
     exit 1
-fi
+}
+grep -q '^image\.sysdir\.1=' "$template" || {
+    echo "KVM image config has no image.sysdir.1 field" >&2
+    exit 1
+}
+
+mkfs_ext4="$release_root/emulator/bin64/mkfs.ext4"
+e2fsck="$release_root/emulator/bin64/e2fsck"
+mke2fs_config="$repo_root/integration/runtime/kvm-userdata-mke2fs.conf"
+for tool in "$mkfs_ext4" "$e2fsck"; do
+    [[ -x "$tool" ]] || {
+        echo "required KVM userdata tool is unavailable: $tool" >&2
+        exit 1
+    }
+done
+[[ -f "$mke2fs_config" && ! -L "$mke2fs_config" ]] || {
+    echo "KVM userdata filesystem config is unavailable: $mke2fs_config" >&2
+    exit 1
+}
+command -v truncate >/dev/null 2>&1 || {
+    echo "truncate is required to provision KVM userdata" >&2
+    exit 1
+}
+
+mkdir -p "$avd_home"
+userdata_stage="$avd_home/.${avd_name}.userdata-qemu.img.staging.$$"
+[[ ! -e "$userdata_stage" ]] || {
+    echo "KVM userdata staging path already exists: $userdata_stage" >&2
+    exit 1
+}
+cleanup_userdata_stage() {
+    rm -f -- "$userdata_stage"
+}
+trap cleanup_userdata_stage EXIT
+truncate -s "$data_partition_size" "$userdata_stage"
+MKE2FS_CONFIG="$mke2fs_config" \
+    "$mkfs_ext4" -F -t ext4 -I 512 -L data -m 0 "$userdata_stage"
+"$e2fsck" -fn "$userdata_stage"
+chmod 0600 "$userdata_stage"
+
+mkdir -p "$avd_dir"
+userdata="$avd_dir/userdata-qemu.img"
+[[ ! -e "$userdata" ]] || {
+    echo "refusing to replace existing KVM userdata: $userdata" >&2
+    exit 1
+}
+mv "$userdata_stage" "$userdata"
 
 render_config "$template" "$config.tmp"
 grep -Fqx "$expected_sysdir" "$config.tmp" || {
@@ -122,4 +167,5 @@ fi
 
 printf 'avd.ini.encoding=UTF-8\npath=%s\ntarget=android-34\n' "$avd_dir" > "$descriptor.tmp"
 mv "$descriptor.tmp" "$descriptor"
+trap - EXIT
 echo "$config"

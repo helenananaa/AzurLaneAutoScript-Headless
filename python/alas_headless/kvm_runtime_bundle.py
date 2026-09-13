@@ -369,6 +369,29 @@ def require_publish_output(inputs: RuntimeBundleInputs) -> Mapping[str, Any]:
             backend="kvm",
             for_build=False,
         )
+    except PermissionError:
+        # Separate build accounts cannot traverse the peer's private roots.
+        # Elevate only the read-only inspection, never the publisher/copy.
+        check = """
+import json, sys
+from alas_headless.android_build_domain import AndroidBuildDomain
+from alas_headless.android_build_domain_migration import require_output_buildable
+documents = json.load(sys.stdin)
+domain = AndroidBuildDomain.from_mapping(documents[0], expected_backend='kvm')
+peer = AndroidBuildDomain.from_mapping(documents[1], expected_backend='redroid')
+print(json.dumps(require_output_buildable(domain, peer, backend='kvm', for_build=False)))
+"""
+        result = subprocess.run(
+            ["sudo", "-n", "env", f"PYTHONPATH={Path(__file__).resolve().parents[1]}",
+             sys.executable, "-c", check],
+            input=json.dumps([dict(inputs.domain.document), dict(inputs.peer_domain.document)]),
+            text=True, capture_output=True, check=False, timeout=60,
+        )
+        if result.returncode:
+            raise KvmRuntimeBundleError(
+                f"read-only output ownership inspection failed: {result.stderr.strip()}"
+            )
+        return json.loads(result.stdout)
     except AndroidBuildDomainMigrationError as exc:
         raise KvmRuntimeBundleError(
             f"build output ownership check failed: {exc}"
