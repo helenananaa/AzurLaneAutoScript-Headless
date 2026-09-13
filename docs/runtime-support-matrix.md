@@ -11,6 +11,12 @@ Redroid 后端只读预检证据已补充至 **2026-08-25**。
 
 ## 状态定义
 
+2026-09-07 本地补充：Windows/WSL2 Docker Project 已接入共享 Redroid backend，
+通过登录前冷启动、游戏/容器重启恢复，并通过独立 overlay 上的受控镜像回滚演练。
+这不更新下面原生 Linux 服务器格的资格，也不表示历史 FBE 镜像可回退或 ALAS
+任务已通过。见[本地生命周期](redroid-wsl-runtime-20260907.zh-CN.md)和
+[受控回滚报告](redroid-wsl-rollback-20260907.zh-CN.md)。
+
 | 标记 | 含义 |
 | --- | --- |
 | 主线可执行 | qualify_runtime.py 的 execute 模式有主线后端实现，并具有真实环境生命周期证据。 |

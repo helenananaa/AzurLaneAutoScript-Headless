@@ -1,12 +1,14 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('Start', 'Stop', 'Status')]
+    [ValidateSet('Start', 'Stop', 'Status', 'Config')]
     [string]$Action = 'Status',
 
     [ValidateSet('Project', 'Stock', 'Api31')]
     [string]$Profile = 'Project',
 
-    [string]$Distro = 'Ubuntu-22.04'
+    [string]$Distro = 'Ubuntu-22.04',
+
+    [string]$ProjectArtifactDirectory
 )
 
 $ErrorActionPreference = 'Stop'
@@ -44,9 +46,46 @@ $dockerConfig = "$linuxHome/.config/alas-redroid/docker"
 $profileEnvironment = @()
 $adbPort = 5555
 if ($Profile -eq 'Project') {
-    $projectOciWindows = Join-Path $repoRoot 'artifacts\transfer-cache\20260830-redroid-no-storage-overlay-r1\redroid-x86_64.oci.tar.zst'
-    if (-not (Test-Path -LiteralPath $projectOciWindows)) {
-        throw "Pinned project OCI archive is missing: $projectOciWindows"
+    if ([string]::IsNullOrWhiteSpace($ProjectArtifactDirectory)) {
+        $workspaceParent = Split-Path -Parent $repoRoot
+        $ProjectArtifactDirectory = Join-Path $workspaceParent 'AzurLaneAutoScript-Headless-localdata\redroid-x86_64-candidates\current'
+    }
+    $projectArtifactDirectoryItem = Get-Item -LiteralPath $ProjectArtifactDirectory -ErrorAction SilentlyContinue
+    if ($null -eq $projectArtifactDirectoryItem -or -not $projectArtifactDirectoryItem.PSIsContainer) {
+        throw "Project artifact directory is missing: $ProjectArtifactDirectory"
+    }
+    $projectArtifactDirectoryResolved = $projectArtifactDirectoryItem.FullName
+    $projectIdentityPath = Join-Path $projectArtifactDirectoryResolved 'redroid-x86_64.oci-build.json'
+    $projectOciWindows = Join-Path $projectArtifactDirectoryResolved 'redroid-x86_64.oci.tar'
+    if (-not (Test-Path -LiteralPath $projectIdentityPath -PathType Leaf)) {
+        throw "Project OCI identity is missing: $projectIdentityPath"
+    }
+    if (-not (Test-Path -LiteralPath $projectOciWindows -PathType Leaf)) {
+        throw "Project OCI archive is missing: $projectOciWindows"
+    }
+    try {
+        $projectIdentity = Get-Content -LiteralPath $projectIdentityPath -Raw | ConvertFrom-Json
+    } catch {
+        throw "Project OCI identity is malformed: $projectIdentityPath"
+    }
+    if ($projectIdentity.schema -ne 'alas-headless.redroid-oci-build/v1' -or
+        $projectIdentity.abi -ne 'x86_64' -or
+        $projectIdentity.architecture -ne 'amd64' -or
+        $projectIdentity.game_delivery -ne 'external-install' -or
+        $projectIdentity.game_artifact_included -ne $false) {
+        throw "Project OCI identity does not describe an x86_64 external-install candidate"
+    }
+    $projectOciSha256 = [string]$projectIdentity.archive.sha256
+    $projectManifestDigest = [string]$projectIdentity.manifest_digest
+    if ($projectOciSha256 -notmatch '^[0-9a-f]{64}$') {
+        throw 'Project OCI archive identity has an invalid SHA-256'
+    }
+    if ($projectManifestDigest -notmatch '^sha256:[0-9a-f]{64}$') {
+        throw 'Project OCI identity has an invalid manifest digest'
+    }
+    $projectOciItem = Get-Item -LiteralPath $projectOciWindows
+    if ([int64]$projectIdentity.archive.bytes -ne $projectOciItem.Length) {
+        throw 'Project OCI archive size does not match its identity'
     }
     $projectOciForWslPath = $projectOciWindows.Replace('\', '/')
     $projectOciOutput = & wsl.exe -d $Distro -- wslpath -a -u $projectOciForWslPath
@@ -55,12 +94,13 @@ if ($Profile -eq 'Project') {
     }
     $projectOci = ($projectOciOutput | Out-String).Trim()
     $profileEnvironment = @(
-        'ALAS_REDROID_LOCAL_CONTAINER=alas-redroid-wsl-projectdev',
-        'ALAS_REDROID_LOCAL_IMAGE=sha256:881be994eb02237524b070bd15638eaef5cdbc15108355d4137aa9e141854eac',
-        'ALAS_REDROID_LOCAL_DATA_NAME=projectdev-data',
+        'ALAS_REDROID_LOCAL_CONTAINER=alas-redroid-wsl-projectlocal',
+        "ALAS_REDROID_LOCAL_IMAGE=$projectManifestDigest",
+        'ALAS_REDROID_LOCAL_DATA_NAME=projectlocal-data',
         'ALAS_REDROID_LOCAL_ADB_PORT=5556',
-        "ALAS_REDROID_LOCAL_OCI_ZST=$projectOci",
-        'ALAS_REDROID_LOCAL_OCI_ZST_SHA256=15b15270e06583e7f8b460abd0a23cbbb04ddd9f488a7efe355722d79677c51f'
+        'ALAS_REDROID_LOCAL_CONFIRM_IMMERSIVE=1',
+        "ALAS_REDROID_LOCAL_OCI_TAR=$projectOci",
+        "ALAS_REDROID_LOCAL_OCI_TAR_SHA256=$projectOciSha256"
     )
     $adbPort = 5556
 } elseif ($Profile -eq 'Api31') {
@@ -100,8 +140,11 @@ function Start-KeepAlive {
     }
     $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
     $startInfo.FileName = (Get-Command wsl.exe).Source
-    $startInfo.UseShellExecute = $false
+    $startInfo.UseShellExecute = $true
+    $startInfo.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden
     $startInfo.CreateNoWindow = $true
+    # Do not inherit a runtime executor's capture pipes: sleep infinity would
+    # keep them open after this manager exits and make Start appear to hang.
     $startInfo.Arguments = "-d $Distro -- bash -lc `"exec -a alas-redroid-wsl-keepalive sleep infinity`""
     $process = [System.Diagnostics.Process]::Start($startInfo)
     if ($null -eq $process) {
@@ -124,8 +167,8 @@ function Stop-KeepAlive {
 }
 
 function Test-ManagedContainerRunning {
-    foreach ($name in @('alas-redroid-wsl-localdev', 'alas-redroid-wsl-projectdev', 'alas-redroid-wsl-api31')) {
-        $running = & wsl.exe -d $Distro -- docker --config $dockerConfig container inspect --format '{{.State.Running}}' $name 2>$null
+    foreach ($name in @('alas-redroid-wsl-localdev', 'alas-redroid-wsl-projectdev', 'alas-redroid-wsl-projectlocal', 'alas-redroid-wsl-api31')) {
+        $running = & wsl.exe -d $Distro -- docker --host unix:///var/run/docker.sock --config $dockerConfig container inspect --format '{{.State.Running}}' $name 2>$null
         if ($LASTEXITCODE -eq 0 -and ($running | Out-String).Trim() -eq 'true') {
             return $true
         }
@@ -134,6 +177,25 @@ function Test-ManagedContainerRunning {
 }
 
 switch ($Action) {
+    'Config' {
+        if ($Profile -ne 'Project') { throw 'Runtime config export currently supports Project only' }
+        [ordered]@{
+            schema = 'alas-headless.runtime-config/v1'
+            backend = 'redroid'
+            container_engine = 'wsl-docker'
+            serial = "127.0.0.1:$adbPort"
+            package = 'com.bilibili.azurlane'
+            component = 'com.bilibili.azurlane/com.manjuu.azurlane.MainActivity'
+            host_class = 'windows-wsl2-x86_64-redroid'
+            container_id = 'alas-redroid-wsl-projectlocal'
+            image_manifest_digest = $projectManifestDigest
+            userdata_path = "$linuxHome/.local/share/alas-redroid/projectlocal-data"
+            manager_script = $PSCommandPath
+            project_artifact_directory = $projectArtifactDirectoryResolved
+            distro = $Distro
+            adb = (Get-Command adb -ErrorAction Stop).Source
+        } | ConvertTo-Json -Depth 4
+    }
     'Start' {
         Start-KeepAlive
         Initialize-BinderFs

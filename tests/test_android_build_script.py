@@ -381,6 +381,36 @@ class AndroidBuildScriptTests(unittest.TestCase):
         self.assertIn("kDriverRevision", script)
         self.assertIn("angle_source_revision", script)
         self.assertIn("topResumedActivity=|mResumedActivity:", script)
+        self.assertIn("[string]$OutputRoot = ''", script)
+        self.assertIn("$OutputRoot = Join-Path $repoRoot 'evidence'", script)
+        self.assertIn("[switch]$AllowSdkActivityReentry", script)
+        self.assertIn("com\\.gsc\\.announcement\\.AnnouncementActivity", script)
+        self.assertIn("mLastPausedActivity:.*com\\.gsc\\.announcement", script)
+        self.assertIn("[Math]::Min(20, $StartupTimeoutSeconds)", script)
+        self.assertIn("android.intent.category.HOME", script)
+        self.assertIn("'--es', 'unity', $UnityCommandLine", script)
+        self.assertIn("$reenteredPid -ne \"$targetPid\"", script)
+        self.assertIn("sdk_activity_reentry = $sdkActivityReentry", script)
+        self.assertIn("refusing SDK Activity re-entry", script)
+        self.assertIn("if ($AllowFailure) { $ErrorActionPreference = 'Continue' }", script)
+        self.assertIn("semantic buttons did not become fresh and actionable", script)
+        self.assertIn("$requestedPathCount -eq 1", script)
+
+    def test_webview_agreement_uses_unique_dom_target_and_pid_postcondition(self) -> None:
+        script = (
+            Path(__file__).resolve().parents[1]
+            / "scripts"
+            / "windows"
+            / "accept-game-webview-agreement.ps1"
+        ).read_text(encoding="utf-8")
+        self.assertIn("webview_devtools_remote_$gamePid", script)
+        self.assertIn("title -ceq $ExpectedTitle", script)
+        self.assertIn("$sdkAgreementTitle = 'sdk' + [char]0x534f + [char]0x8bae", script)
+        self.assertIn("webview_agreement_cdp.py", script)
+        self.assertIn("--expected-title $ExpectedTitle --click", script)
+        self.assertIn("$postPid -ne \"$gamePid\"", script)
+        self.assertIn("Fatal signal|FATAL EXCEPTION|destroyed mutex|Abort message", script)
+        self.assertNotIn("shell', 'input', 'tap'", script)
 
 
 if __name__ == "__main__":

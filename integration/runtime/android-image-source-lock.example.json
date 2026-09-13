@@ -132,6 +132,18 @@
       "path": "integration/runtime/aosp-patches/0008-redroid-x86_64-noto-font-whitelist.patch",
       "sha256": "d7317a6baa085e3f16cd3693400f52a5643020bedffa0914f9a69687a169d49b",
       "commit_message": "ALAS: retain required x86_64 Redroid Noto fonts"
+    },
+    {
+      "project": "build/make",
+      "path": "integration/runtime/aosp-patches/0009-redroid-x86_64-remove-bluetooth-midi.patch",
+      "sha256": "63753f0794f75efc8ef222cb6e20f21c1899b45677f8524da5011c293a2736d8",
+      "commit_message": "ALAS: remove unused x86_64 Redroid Bluetooth MIDI app"
+    },
+    {
+      "project": "device/redroid",
+      "path": "integration/runtime/aosp-patches/0010-redroid-x86_64-remove-bluetooth-hardware.patch",
+      "sha256": "41739ac78094cddfae61c255d3ff5d4c08378bd2d8b47c37bfff4639de85dca0",
+      "commit_message": "ALAS: remove x86_64 Redroid simulated Bluetooth hardware"
     }
   ],
   "products": [

@@ -39,6 +39,23 @@ Redroid runtime debugging, source synchronization, and Android image builds.
 The validated local Redroid workflow is documented in
 `docs/local-wsl-redroid-dev.zh-CN.md`.
 
+The local Project runtime uses the common `redroid` backend with
+`container_engine: wsl-docker`. Export its configuration with the Windows
+manager's `Config` action; keep container operations in that manager and
+game/ADB/observer recovery in the shared runtime lifecycle. Do not introduce
+another ALAS task or login state machine in the WSL host adapter. A native SDK
+empty login page is an account-input boundary, never Unity observer readiness.
+Preserve Android's existing userdata-root mode on repeated Start; Android init
+owns `/data` permissions. Launch the WSL keepalive detached and hidden so it
+cannot hold a caller's captured output streams open.
+
+Local image rollback rehearsals use a stopped Project userdata directory as
+the read-only lower layer of temporary overlay mounts. Stop and remove the
+trial container, then unmount its overlays, before restarting Project. Never
+restore a trial by deleting or overwriting Project userdata. Keep controlled
+fixture rollback evidence separate from real release-version compatibility;
+retired FBE/block-device images are not compatible host-directory candidates.
+
 The local machine now has the 64 GB memory upgrade installed, but the full
 Android build environment is not qualified by the hardware installation alone.
 Before a full AOSP sync or image build, re-run the documented host preflight

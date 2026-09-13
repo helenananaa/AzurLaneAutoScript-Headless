@@ -36,6 +36,8 @@ REQUIRED_MODULES = frozenset({
 })
 
 REMOVED_MODULES = frozenset({
+    "BluetoothMidiService",
+    "android.hardware.bluetooth@1.1-service.sim",
     "BasicDreams",
     "BookmarkProvider",
     "Browser2",

@@ -30,8 +30,9 @@ param(
     [string]$DismissOverlayPathSuffix = '',
     [ValidateRange(5, 120)][int]$ProbePageTimeoutSeconds = 30,
     [switch]$AllowRunningProcessRestart,
+    [switch]$AllowSdkActivityReentry,
     [switch]$KeepGameRunningAfterPass,
-    [string]$OutputRoot = (Join-Path (Resolve-Path (Join-Path $PSScriptRoot '..\..')) 'evidence')
+    [string]$OutputRoot = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -64,6 +65,9 @@ if ([string]::IsNullOrWhiteSpace($DismissOverlayName) -xor
 }
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
+if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
+    $OutputRoot = Join-Path $repoRoot 'evidence'
+}
 $angleSourceRevision = (Get-Content -LiteralPath (Join-Path $repoRoot 'ANGLE_REVISION') -Raw).Trim()
 $observerServer = Join-Path $repoRoot `
     'overlays\angle-g3\src\libANGLE\renderer\null\ObserverServer.cpp'
@@ -81,8 +85,15 @@ New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 
 function Invoke-Adb {
     param([Parameter(Mandatory = $true)][string[]]$Arguments, [switch]$AllowFailure)
-    $lines = @(& $adb @Arguments 2>&1)
-    $exitCode = $LASTEXITCODE
+    $previousErrorActionPreference = $ErrorActionPreference
+    if ($AllowFailure) { $ErrorActionPreference = 'Continue' }
+    try {
+        $lines = @(& $adb @Arguments 2>&1)
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
     $text = ($lines | ForEach-Object { $_.ToString() }) -join [Environment]::NewLine
     if (-not $AllowFailure -and $exitCode -ne 0) {
         throw "adb $($Arguments -join ' ') failed ($exitCode): $text"
@@ -193,6 +204,7 @@ $settingsChanged = $false
 $forwardPort = $null
 $targetPid = $null
 $script:lastObserverResponse = $null
+$sdkActivityReentry = $null
 $runPassed = $false
 
 try {
@@ -269,17 +281,112 @@ try {
     $socketName = "alas.g3.$targetPid"
     $forwardPort = [int](Invoke-Adb -Arguments @('-s', $Serial, 'forward', 'tcp:0',
         "localabstract:$socketName")).Trim()
-    $first = Wait-ObserverSnapshot -Port $forwardPort -TimeoutSeconds $StartupTimeoutSeconds `
-        -Predicate {
+    try {
+        $initialObserverTimeout = if ($AllowSdkActivityReentry) {
+            [Math]::Min(20, $StartupTimeoutSeconds)
+        }
+        else { $StartupTimeoutSeconds }
+        $first = Wait-ObserverSnapshot -Port $forwardPort `
+            -TimeoutSeconds $initialObserverTimeout -Predicate {
+                param($snapshot)
+                $snapshot.status -eq 'ok' -and $snapshot.flags -eq 15 -and
+                $snapshot.main_thread -and $snapshot.age_ms -le $MaxFreshnessMs
+            }
+        $second = Wait-ObserverSnapshot -Port $forwardPort -TimeoutSeconds 20 -Predicate {
+            param($snapshot)
+            $snapshot.status -eq 'ok' -and
+            [uint64]$snapshot.generation -gt [uint64]$first.generation -and
+            $snapshot.age_ms -le $MaxFreshnessMs
+        }
+    }
+    catch {
+        if (-not $AllowSdkActivityReentry) { throw }
+        $blockedObserver = $script:lastObserverResponse
+        $blockedStatus = [string]$blockedObserver.status
+        $blockedIsExpected = $blockedStatus -eq 'unavailable' -or
+            ($blockedStatus -eq 'ok' -and
+             [uint64]$blockedObserver.generation -le 1 -and
+             [int64]$blockedObserver.age_ms -gt $MaxFreshnessMs)
+        $foregroundBeforeReentry = Get-ForegroundComponent
+        $pidBeforeReentry = (Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'pidof',
+            $GamePackage) -AllowFailure).Trim()
+        $launchLog = Invoke-Adb -Arguments @('-s', $Serial, 'logcat', '-d')
+        $activityBeforeReentry = Invoke-Adb -Arguments @('-s', $Serial, 'shell',
+            'dumpsys', 'activity', 'activities')
+        $lastPausedAnnouncementObserved = $activityBeforeReentry -match
+            'mLastPausedActivity:.*com\.gsc\.announcement\.AnnouncementActivity'
+        $announcementObserved = $launchLog -match
+            'com\.gsc\.announcement\.AnnouncementActivity' -and
+            $lastPausedAnnouncementObserved
+        if (-not $blockedIsExpected -or $foregroundBeforeReentry -ne $component -or
+            $pidBeforeReentry -ne "$targetPid" -or -not $announcementObserved -or
+            $launchLog -match 'Fatal signal|FATAL EXCEPTION|destroyed mutex|Abort message') {
+            throw 'refusing SDK Activity re-entry because its fail-closed preconditions are not met'
+        }
+
+        $homeResolution = Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'cmd', 'package',
+            'resolve-activity', '--brief', '-a', 'android.intent.action.MAIN', '-c',
+            'android.intent.category.HOME')
+        $homeComponent = @($homeResolution -split "`r?`n" | Where-Object {
+            $_ -match '^[A-Za-z0-9._]+/[A-Za-z0-9._$]+$'
+        }) | Select-Object -Last 1
+        if ([string]::IsNullOrWhiteSpace($homeComponent)) {
+            throw 'HOME activity could not be resolved uniquely for SDK Activity re-entry'
+        }
+        $homeStartedAt = [DateTimeOffset]::UtcNow
+        $homeStart = Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'am', 'start', '-W',
+            '-a', 'android.intent.action.MAIN', '-c', 'android.intent.category.HOME')
+        $homeDeadline = [DateTimeOffset]::UtcNow.AddSeconds(10)
+        do {
+            Start-Sleep -Milliseconds 250
+            $homeForeground = Get-ForegroundComponent
+            if ($homeForeground -eq $homeComponent) { break }
+        } while ([DateTimeOffset]::UtcNow -lt $homeDeadline)
+        if ($homeForeground -ne $homeComponent) {
+            throw 'HOME activity did not become foreground during SDK Activity re-entry'
+        }
+
+        $gameReenteredAt = [DateTimeOffset]::UtcNow
+        $gameReentry = Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'am', 'start', '-W',
+            '--es', 'unity', $UnityCommandLine, '-n', $component)
+        $gameDeadline = [DateTimeOffset]::UtcNow.AddSeconds(10)
+        do {
+            Start-Sleep -Milliseconds 250
+            $reenteredForeground = Get-ForegroundComponent
+            $reenteredPid = (Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'pidof',
+                $GamePackage) -AllowFailure).Trim()
+            if ($reenteredForeground -eq $component -and $reenteredPid -eq "$targetPid") {
+                break
+            }
+        } while ([DateTimeOffset]::UtcNow -lt $gameDeadline)
+        if ($reenteredForeground -ne $component -or $reenteredPid -ne "$targetPid") {
+            throw 'SDK Activity re-entry did not restore MainActivity with the same game PID'
+        }
+
+        $first = Wait-ObserverSnapshot -Port $forwardPort -TimeoutSeconds 30 -Predicate {
             param($snapshot)
             $snapshot.status -eq 'ok' -and $snapshot.flags -eq 15 -and
             $snapshot.main_thread -and $snapshot.age_ms -le $MaxFreshnessMs
         }
-    $second = Wait-ObserverSnapshot -Port $forwardPort -TimeoutSeconds 20 -Predicate {
-        param($snapshot)
-        $snapshot.status -eq 'ok' -and
-        [uint64]$snapshot.generation -gt [uint64]$first.generation -and
-        $snapshot.age_ms -le $MaxFreshnessMs
+        $second = Wait-ObserverSnapshot -Port $forwardPort -TimeoutSeconds 20 -Predicate {
+            param($snapshot)
+            $snapshot.status -eq 'ok' -and
+            [uint64]$snapshot.generation -gt [uint64]$first.generation -and
+            $snapshot.age_ms -le $MaxFreshnessMs
+        }
+        $sdkActivityReentry = [ordered]@{
+            blocked_observer = $blockedObserver
+            foreground_before = $foregroundBeforeReentry
+            announcement_pause_observed = $announcementObserved
+            last_paused_announcement_observed = $lastPausedAnnouncementObserved
+            home_component = $homeComponent
+            home_started_at_utc = $homeStartedAt.ToString('o')
+            home_start = $homeStart
+            game_reentered_at_utc = $gameReenteredAt.ToString('o')
+            game_reentry = $gameReentry
+            pid_preserved = $reenteredPid -eq "$targetPid"
+            recovered_generation = [uint64]$first.generation
+        }
     }
     $badRequest = Invoke-ObserverRequest -Port $forwardPort `
         -Request "CALL il2cpp_runtime_invoke`n"
@@ -360,20 +467,57 @@ try {
         }
         else { $null }
     }
-    $semanticButtons = Invoke-ObserverRequest -Port $forwardPort -Request "GET /v1/buttons`n"
+    $semanticButtons = $null
+    $actionableSemanticButtons = @()
+    $semanticButtonsReady = $false
+    $buttonsDeadline = [DateTimeOffset]::UtcNow.AddSeconds(
+        [Math]::Min(30, $SemanticClickTimeoutSeconds))
+    do {
+        $candidateButtons = Invoke-ObserverRequest -Port $forwardPort `
+            -Request "GET /v1/buttons`n"
+        $script:lastObserverResponse = $candidateButtons
+        $candidateActionableButtons = @($candidateButtons.buttons | Where-Object {
+            $_.active_in_hierarchy -and $_.active_and_enabled -and $_.interactable -and
+            $_.raycast_top -eq $true -and
+            -not [string]::IsNullOrWhiteSpace($_.name) -and
+            -not [string]::IsNullOrWhiteSpace($_.path) -and $_.adb_point -and
+            $_.adb_bounds -and $_.adb_bounds.left -lt $_.adb_bounds.right -and
+            $_.adb_bounds.top -lt $_.adb_bounds.bottom -and
+            $_.adb_point.x -ge $_.adb_bounds.left -and
+            $_.adb_point.x -le $_.adb_bounds.right -and
+            $_.adb_point.y -ge $_.adb_bounds.top -and
+            $_.adb_point.y -le $_.adb_bounds.bottom -and
+            $_.adb_point.x -ge 0 -and $_.adb_point.x -lt 1280 -and
+            $_.adb_point.y -ge 0 -and $_.adb_point.y -lt 720
+        })
+        $healthyButtons = $candidateButtons.status -eq 'ok' -and
+            $candidateButtons.age_ms -le $MaxFreshnessMs -and
+            -not $candidateButtons.truncated -and $candidateButtons.error_count -eq 0
+        $requestedPathCount = if ([string]::IsNullOrWhiteSpace($SemanticClickPath)) {
+            0
+        }
+        else {
+            @($candidateActionableButtons | Where-Object {
+                $_.path -ceq $SemanticClickPath
+            }).Count
+        }
+        $semanticButtonsReady = $healthyButtons -and (
+            (-not [string]::IsNullOrWhiteSpace($SemanticClickPath) -and
+             $requestedPathCount -eq 1) -or
+            ([string]::IsNullOrWhiteSpace($SemanticClickPath) -and
+             (-not $RequireSemanticButtons -or $candidateActionableButtons.Count -ge 1))
+        )
+        if ($semanticButtonsReady) {
+            $semanticButtons = $candidateButtons
+            $actionableSemanticButtons = $candidateActionableButtons
+            break
+        }
+        Start-Sleep -Milliseconds 500
+    } while ([DateTimeOffset]::UtcNow -lt $buttonsDeadline)
+    if (-not $semanticButtonsReady) {
+        throw 'semantic buttons did not become fresh and actionable within the bounded wait'
+    }
     Write-JsonFile -Path (Join-Path $outputDirectory 'buttons.json') -Value $semanticButtons
-    $actionableSemanticButtons = @($semanticButtons.buttons | Where-Object {
-        $_.active_in_hierarchy -and $_.active_and_enabled -and $_.interactable -and
-        $_.raycast_top -eq $true -and
-        -not [string]::IsNullOrWhiteSpace($_.name) -and
-        -not [string]::IsNullOrWhiteSpace($_.path) -and $_.adb_point -and
-        $_.adb_bounds -and $_.adb_bounds.left -lt $_.adb_bounds.right -and
-        $_.adb_bounds.top -lt $_.adb_bounds.bottom -and
-        $_.adb_point.x -ge $_.adb_bounds.left -and $_.adb_point.x -le $_.adb_bounds.right -and
-        $_.adb_point.y -ge $_.adb_bounds.top -and $_.adb_point.y -le $_.adb_bounds.bottom -and
-        $_.adb_point.x -ge 0 -and $_.adb_point.x -lt 1280 -and
-        $_.adb_point.y -ge 0 -and $_.adb_point.y -lt 720
-    })
     $foregroundComponent = Get-ForegroundComponent
     $foreground = if ($foregroundComponent -match '^([^/]+)/') { $Matches[1] } else { $null }
     $semanticClick = $null
@@ -834,6 +978,7 @@ try {
         actionable_semantic_button_count = $actionableSemanticButtons.Count
         semantic_click = $semanticClick
         page_loop = $pageLoop
+        sdk_activity_reentry = $sdkActivityReentry
         bad_request_response = $badRequest
         failures = $failures
         passed = $failures.Count -eq 0
@@ -877,6 +1022,7 @@ catch {
         foreground = $failureForeground
         foreground_component = $failureForegroundComponent
         last_observer_response = $script:lastObserverResponse
+        sdk_activity_reentry = $sdkActivityReentry
         failure = $caught.Exception.Message
         passed = $false
     }

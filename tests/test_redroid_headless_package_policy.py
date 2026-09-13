@@ -53,6 +53,17 @@ class RedroidHeadlessPackagePolicyTests(unittest.TestCase):
                 result["forbidden_modules_present"], ["Camera2", "PrintSpooler"]
             )
 
+    def test_bluetooth_hardware_is_removed_but_api_apex_is_allowed(self) -> None:
+        with TemporaryDirectory() as raw:
+            modules = set(MODULE.REQUIRED_MODULES) | {"com.android.btservices"}
+            self.assertEqual(
+                MODULE.verify(self.write_inventory(Path(raw), modules))["outcome"], "pass"
+            )
+            for removed in ("BluetoothMidiService", "android.hardware.bluetooth@1.1-service.sim"):
+                result = MODULE.verify(self.write_inventory(Path(raw), modules | {removed}))
+                self.assertEqual(result["outcome"], "fail")
+                self.assertEqual(result["forbidden_modules_present"], [removed])
+
 
 if __name__ == "__main__":
     unittest.main()

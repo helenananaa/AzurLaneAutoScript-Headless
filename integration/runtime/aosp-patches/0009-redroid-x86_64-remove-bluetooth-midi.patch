@@ -1,0 +1,11 @@
+diff --git a/target/product/handheld_system.mk b/target/product/handheld_system.mk
+--- a/target/product/handheld_system.mk
++++ b/target/product/handheld_system.mk
+@@ -35,6 +35,6 @@ PRODUCT_PACKAGES += \
+     $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,BasicDreams) \
+     BlockedNumberProvider \
+-    BluetoothMidiService \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,BluetoothMidiService) \
+     $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,BookmarkProvider) \
+     $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,BuiltInPrintService) \
+     $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,CalendarProvider) \

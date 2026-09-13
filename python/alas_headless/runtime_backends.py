@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from dataclasses import fields, MISSING
 from typing import Any, Mapping, Optional
 
 from .runtime_backend import BackendKind, RuntimeBackend
@@ -17,6 +18,7 @@ from .runtime_backend_adb import (
 from .runtime_backend_deferred import DeferredRuntimeBackend
 from .runtime_backend_kvm import KvmBackend, KvmRuntimeConfig, probe_linux_kvm
 from .runtime_backend_redroid import RedroidBackend, RedroidRuntimeConfig
+from .runtime_backend_redroid_wsl import WslRedroidBackend, WslRedroidRuntimeConfig
 from .runtime_command import RuntimeCommandExecutor
 from .runtime_trace import RuntimeTraceRecorder
 
@@ -144,6 +146,14 @@ def backend_from_config(
         return KvmBackend(config, executor, trace=trace, **kwargs)
 
     if kind == BackendKind.REDROID:
+        if value.get("container_engine") == "wsl-docker":
+            config_fields = fields(WslRedroidRuntimeConfig)
+            allowed = {item.name for item in config_fields} | {"schema", "backend", "container_engine"}
+            required = {item.name for item in config_fields if item.default is MISSING}
+            if required - set(value) or set(value) - allowed:
+                raise ValueError("WSL Redroid config fields differ")
+            config = WslRedroidRuntimeConfig(**{item.name: value[item.name] for item in config_fields if item.name in value})
+            return WslRedroidBackend(config, executor, trace=trace, **kwargs)
         required = common_required | {
             "container_id",
             "image_reference",
@@ -232,6 +242,8 @@ __all__ = [
     "KvmRuntimeConfig",
     "RedroidBackend",
     "RedroidRuntimeConfig",
+    "WslRedroidBackend",
+    "WslRedroidRuntimeConfig",
     "RuntimeBackendError",
     "RuntimeBackendNotReady",
     "RuntimeIdentityMismatch",

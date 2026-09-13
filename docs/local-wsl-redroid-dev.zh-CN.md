@@ -10,7 +10,7 @@ x86 Redroid 镜像，并从 Windows 通过 ADB 访问它。
 
 ## 1. 已验证结果
 
-2026-08-31 的本机验证结果：
+2026-08-31 至 2026-09-07 的本机验证结果：
 
 - Windows 11 + WSL2，Ubuntu 22.04；
 - 自定义内核 `6.18.33.2-microsoft-standard-WSL2-alas-redroid+`；
@@ -26,18 +26,53 @@ x86 Redroid 镜像，并从 Windows 通过 ADB 访问它。
   coherent 的 typed `LoginUI2(Clone)`；
 - 已停在空手机号登录页，`Accounts: 0`，没有输入或提交账户信息；
 - `Api31` 容器 Stop→Start 后游戏、observer、公共资源和登录前状态均保留。
+- 本地 WSL 构建域完成当前 source lock 的 x86_64 AOSP/Redroid 构建，生成的
+  `system.img`、`vendor.img` 与远端最终优化构建逐字节一致；
+- 本地构建 OCI `0b84bf53...459936` 已由独立 `Project` 容器启动到
+  `sys.boot_completed=1`，API 34、x86_64、fingerprint、EGL/Pastel 哈希均匹配；
+- 新的 `projectlocal-data` 经 Stop→Start 后保留无敏感内容的 `/data` 标记，且
+  `Accounts: 0`；
+- 9.7.10 x86_64 游戏已外部安装到这份独立 userdata。首次隐私页通过 DevTools/CDP
+  验证标题、唯一可见且启用的“同意/拒绝”DOM，只调用一次 `.agree.click()`，同一
+  游戏 PID 返回 MainActivity，60 秒内没有 fatal 或 destroyed-mutex；
+- 协议后直接冷启动会短暂打开并销毁 `AnnouncementActivity`，并可能让 Unity 停在
+  `OnApplicationPause`。G4 的显式 `-AllowSdkActivityReentry` 分支在确认精确 Activity
+  历史、同一 PID、stale/unavailable observer 且无 fatal 后，执行一次 HOME→MainActivity
+  生命周期 re-entry；恢复后 20 秒内 19/19 sample 新鲜，generation 从 `3` 前进到 `92`，
+  typed 资源选择页出现唯一 raycast-top Confirm。没有点击资源选项。
+- 基础资源页进一步确认 `Max=true`、`Min=false`。首次 Confirm 无后置的根因不是
+  Unity mapping，而是 SystemUI `ImmersiveModeConfirmation` 持有 InputDispatcher focus；
+  将 secure `immersive_mode_confirmations` 设为 `confirmed` 后，focused window 精确返回
+  MainActivity，基础资源 Confirm、六项附加资源 Confirm 和下载 action 均取得递增
+  generation 与预期后置状态；
+- 本地保留的 `9.7.328` 资源基底以停止容器、独立 external-files 目录、Android
+  `10067:1078` owner/mode 的方式导入。源为 90,503 文件 / 30,226,737,560 字节；导入后
+  目标为 90,507 文件 / 30,226,761,687 字节，未复制 `/data/user/0` 或账号数据；
+- 当前资源选择弹窗精确声明 `25.8GB`，下载报告 81,985 文件、失败 0，日志出现
+  `BGDownload all task end:0`，最终版本为 `9.7.356`。资源目录变为 172,451 文件 /
+  57,846,200,783 字节；
+- Project 容器 Stop→Start 后 OCI digest、APK、资源和 `9.7.356` 版本均保留。随后带
+  `-force-gfx-st` 冷启动和一次受控 re-entry，以新 PID 到达 PhoneLoginActivity；唯一
+  手机号输入为空、“下一步”存在且 disabled，`Accounts: 0`，没有输入或提交账号。
+- 在独立 Project guest 上还执行了可回滚的 Announcement component A/B：root 模式下
+  精确禁用该 component 后，冷启动出现 `DownloadTool:OnResume` 且 observer 自然持续
+  前进，但 90 秒内“正在检查更新...”仍未结束，因此该变更不足以解决资源流程，已恢复
+  component `default` 状态并执行 `adb unroot`。
 
 当前仓库提供三个相互隔离的 profile：
 
 | Profile | 用途 | ADB | `/data` |
 |---|---|---|---|
-| `Project` | 本项目自维护 x86 镜像，默认选择 | `127.0.0.1:5556` | `projectdev-data` |
+| `Project` | 本项目自维护 x86 镜像，默认选择 | `127.0.0.1:5556` | `projectlocal-data` |
 | `Stock` | 官方 Android 14 x86_64-only 宿主冒烟 | `127.0.0.1:5555` | `localdev-data` |
 | `Api31` | 官方 Android 12/API 31 游戏与登录前链路基线 | `127.0.0.1:5557` | `api31-game-data` |
 
 三个 profile 都只把 ADB 发布到 loopback，不会监听局域网或公网。当前本地游戏链路
-优先使用 `Api31`；`Project` 仍用于项目 Android 14 镜像的构建、启动和 observer 开发，
-其全新 userdata 上的 SDK 首次启动 Activity 会暂停 Unity，尚不能替代 `Api31` 的登录前基线。
+保留 `Api31` 作为已知良好对照；`Project` 已在项目 Android 14 镜像、独立 userdata 上
+通过首次协议、G4、完整资源更新、Stop→Start 持久化和空手机号登录边界。它仍未通过账号
+登录、ALAS workload、rollback 或 soak，因此不能把登录前结果推广为完整 ALAS 支持。
+统一 backend 的登录前启动、游戏/容器重启和 cleanup 已在本日后续验证通过，见第 15 节。
+禁用 SystemUI 的可回滚 A/B 无效且已恢复，不是启动条件。
 
 ## 2. 为什么不能只下载几个模块
 
@@ -305,19 +340,22 @@ powershell -ExecutionPolicy Bypass -File scripts/windows/manage-redroid-wsl-loca
 
 1. 启动隐藏的 WSL keepalive；
 2. 通过 WSL root 入口挂载 BinderFS，不要求配置全局免密 sudo；
-3. 校验项目 OCI 压缩包 SHA-256 和导入后的 image ID；
-4. 创建独立的 `projectdev-data`；
+3. 从 OCI identity 校验候选 ABI、external-install 合同、大小、SHA-256 和 manifest digest；
+4. 直接导入本地构建 OCI，并创建独立的 `projectlocal-data`；
 5. 只把 ADB 发布到 `127.0.0.1:5556`；
 6. 等待 `sys.boot_completed=1`，超时或容器退出时明确失败。
 
-项目 profile 依赖仓库中的留存制品：
+项目 profile 默认从所有 sibling worktree 之外的统一本地候选目录读取制品：
 
 ```text
-artifacts/transfer-cache/20260830-redroid-no-storage-overlay-r1/redroid-x86_64.oci.tar.zst
+H:\program\AzurLaneAutoScript-Headless-localdata\redroid-x86_64-candidates\current\
+  redroid-x86_64.oci.tar
+  redroid-x86_64.oci-build.json
 ```
 
-若该制品没有随仓库/制品包保留，启动器会 fail closed。此时可以先使用 Stock profile
-验证宿主，但不能把 stock 结果冒充项目镜像结果。
+候选目录也可以通过 `-ProjectArtifactDirectory <绝对路径>` 显式指定。启动器不扫描或
+猜测“最新”文件；目录、identity 或 OCI 缺失时会 fail closed。此时可以先使用 Stock
+profile 验证宿主，但不能把 stock 结果冒充项目镜像结果。
 
 ## 9. Windows ADB 验证
 
@@ -369,6 +407,63 @@ adb -s 127.0.0.1:5556 shell ls -l /data/local/tmp/alas-wsl-persistence-marker
 ```
 
 标记仍存在才说明宿主目录持久化通过。不要用容器仍在运行或历史日志代替重启验证。
+
+## 10.1 全新游戏隐私页的 DOM 边界
+
+Project 全新 userdata 第一次启动固定游戏时会进入 `AgreementWebActivity`。先按 G4
+合同安装 observer ANGLE，并始终用 `-force-gfx-st` 冷启动游戏；黑 framebuffer 不用于
+判断或输入。确认前台 Activity 后执行：
+
+```powershell
+powershell -ExecutionPolicy Bypass `
+  -File scripts/windows/accept-game-webview-agreement.ps1 `
+  -Serial 127.0.0.1:5556
+```
+
+脚本通过 WebView DevTools/CDP，要求标题、`.agree`、`.disagree`、中英文案、可见矩形、
+enabled 状态、包、Activity、PID 和 socket 全部精确匹配。它只点击一次唯一 `.agree`，
+随后要求同一 PID 返回 MainActivity，并观察 fatal/destroyed-mutex。缺少 Python
+`websocket-client` 时明确失败；不会回退到 framebuffer 或坐标。
+
+协议成功不代表 G4 自动成功。当前 Android 14 候选可显式启用一次性恢复：
+
+```powershell
+powershell -ExecutionPolicy Bypass `
+  -File scripts/windows/run-g4-game-init.ps1 `
+  -Serial 127.0.0.1:5556 `
+  -AngleApk <verified-AngleLibraries.apk> `
+  -RequireSemanticButtons `
+  -AllowSdkActivityReentry
+```
+
+该开关默认关闭。只有 Announcement Activity 历史、当前 MainActivity、同一 PID、
+stale/unavailable observer 和无 fatal 同时满足时才会切到精确 HOME Activity，再带
+`-force-gfx-st` 返回 MainActivity；随后仍须取得两次递增 generation 和完整 G4 检查。
+健康启动、其他 Activity 或其他 observer 错误不会触发这个恢复。
+
+G4 在 `-RequireSemanticButtons` 或请求语义点击时还会在既有预算内等待 fresh、唯一、
+actionable 的目标，避免 re-entry 后 observer 已恢复但 UGUI 尚未填充的合法空帧竞态。
+这不会放宽点击条件，也不会在等待中输入。
+
+本地导入旧资源基底时使用：
+
+```powershell
+powershell -ExecutionPolicy Bypass `
+  -File scripts/windows/manage-redroid-wsl-local-dev.ps1 -Action Stop -Profile Project
+wsl -d Ubuntu-22.04 -u root -- bash `
+  /mnt/h/program/AzurLaneAutoScript-Headless-redroid-x86_64/scripts/wsl/copy-local-game-resource-base.sh `
+  /mnt/h/program/AzurLaneAutoScript-Headless-localdata/game-cn-9.7.10-files/files `
+  /home/helenanana/.local/share/alas-redroid/projectlocal-data/media/0/Android/data/com.bilibili.azurlane/files
+```
+
+脚本要求 Project 容器已停止，最多八路处理互不重叠的一级目录，不执行 `--delete`，并恢复
+Android owner/mode。旧基底不是完成证据；启动后仍由游戏完成 server version、hash、split、
+下载、失败计数和最终版本验证。
+
+资源点击前还必须确认 InputDispatcher focused window 是游戏，而不只是 Activity 前台。
+Project manager 会在 Android boot 后设置并读回 `immersive_mode_confirmations=confirmed`，
+防止首次沉浸提示截获 typed-derived tap。这项状态只解决已观察到的系统 UI blocker，不放宽
+包/PID、freshness、唯一 path、raycast-top 或 postcondition 条件。
 
 ## 11. 日常管理
 
@@ -445,10 +540,11 @@ adb connect 127.0.0.1:5556
 
 不要把端口改成 `0.0.0.0` 作为排错手段。
 
-### Project OCI archive 缺失
+### Project 候选目录或 OCI 缺失
 
-恢复经过哈希验证的制品包，或临时使用 `-Profile Stock` 验证宿主。不要从
-`artifacts/incomplete-transfers` 中的未完成 OCI 冒充完整制品。
+恢复经过哈希验证的本地候选包，或用 `-ProjectArtifactDirectory` 指向另一份完整候选；
+也可临时使用 `-Profile Stock` 验证宿主。不要从 `artifacts/incomplete-transfers` 中的
+未完成 OCI 冒充完整制品，也不要依赖另一个 Git worktree 的 ignored artifact 目录。
 
 ## 13. 回滚
 
@@ -467,7 +563,7 @@ Copy-Item -LiteralPath "$env:USERPROFILE\.wslconfig.pre-redroid-<timestamp>.bak"
 wsl --shutdown
 ```
 
-不要删除 `projectdev-data` 或 `localdev-data` 来回滚内核。内核回滚和 Android userdata
+不要删除 `projectlocal-data`、旧 `projectdev-data` 或 `localdev-data` 来回滚内核。内核回滚和 Android userdata
 删除是两件不同的事。
 
 ## 14. 支持声明边界
@@ -489,3 +585,64 @@ wsl --shutdown
 
 游戏登录验证继续遵守项目边界：没有明确授权时停在空登录界面并保留
 `Accounts: 0`，不得录入账户数据。
+
+## 15. 从统一 runtime backend 使用本地 Project
+
+本地宿主配置沿用 `backend: redroid`，增加 `container_engine: wsl-docker`。
+`WslRedroidBackend` 复用现有 Redroid 的游戏冷启动、ADB、observer、重启顺序和
+清理所有权，只把 containerd 宿主操作换成本地 WSL Docker 和 Project manager。
+原 containerd 配置继续使用原路径，不需要修改 ALAS 补丁。
+
+导出当前候选对应的配置：
+
+```powershell
+& scripts/windows/manage-redroid-wsl-local-dev.ps1 -Action Config -Profile Project |
+    Set-Content -Encoding utf8 artifacts/redroid-wsl-runtime-config.json
+```
+
+配置中的 serial、容器、镜像和 userdata 来自当前 Project profile。执行前仍会核对
+Docker 的实际绑定；不会把文档示例 serial 当成当前设备。Docker 显式连接该 WSL
+发行版的 `/var/run/docker.sock`，避免环境变量或 context 把调用送到其他 daemon。
+
+登录前生命周期验证使用：
+
+```powershell
+$env:PYTHONPATH = 'python'
+python scripts/python/qualify_redroid_wsl_prelogin.py `
+    --config evidence/redroid-wsl-runtime-20260907-r1/runtime-config.json `
+    --lock evidence/redroid-wsl-runtime-20260907-r1/runtime-lock.json `
+    --output evidence/redroid-wsl-runtime-new-run --execute
+```
+
+以上 lock 对应此次本地候选与保留的资源收据；更换候选时应重新捕获身份，不能继续
+宣称旧 lock 的资格。脚本要求初始处于已确认的空手机号页，依次通过统一 backend
+验证冷启动、游戏进程重启和容器重启。每轮检查新鲜、递增且 coherent 的语义帧，
+随后只读检查原生 SDK 登录页的空输入、disabled 下一步与 `Accounts: 0`。
+`account-input-required` 不会被转换为 `observer_ready=true`，也不会提交登录。
+
+SDK 暂停恢复只针对 MainActivity、同一 PID、已观测的 Announcement 暂停历史和
+stale/unavailable observer，且该游戏 PID 没有 fatal；每次冷启动最多一次
+HOME→带 `-force-gfx-st` 的 MainActivity re-entry，再验证同 PID 和新鲜递增帧。
+无关 Activity、仍健康的 observer、fatal 或身份变化不触发该恢复。
+
+此次接入修复了两个宿主脚本问题：
+
+- 重复 `install -d -m 0700` 会改窄运行中 `/data` 的权限，使新游戏进程无法读取 APK。
+  现在仅首次创建目录时设为 0700，已有目录交给 Android init 管理。该镜像
+  `/system/etc/init/hw/init.rc` 明确使用 `system:system`、`0771`。
+- 保活子进程继承调用方输出句柄会让捕获输出的 Start 长时间不返回。现在通过
+  `UseShellExecute=true`、`WindowStyle=Hidden` 独立启动保活进程。
+
+结果见 `docs/redroid-wsl-runtime-20260907.zh-CN.md`。这些检查覆盖本地登录前生命周期，
+不代表账号登录、ALAS 任务、镜像回滚、长期 soak 或原生 Linux 已通过资格验证。
+
+## 16. 保留原数据的受控镜像回滚演练
+
+2026-09-07 已新增并实机通过 current→受控候选→current 的 overlay 演练。
+原 Project 停止后作为只读底层，临时写层只产生约 24 MiB 的采样占用；候选
+userdata 写入和镜像诊断文件在回滚后均消失。原 Project 随后恢复，临时容器、
+挂载、目录与连接均清理，资源 `9.7.356` 和空登录边界保留。
+
+完整命令、失败样本与支持范围见
+[本地镜像回滚演练](redroid-wsl-rollback-20260907.zh-CN.md)。缓存的旧 FBE 镜像
+不能用于当前 host-directory 数据；受控候选 PASS 不代表真实版本回退已资格化。

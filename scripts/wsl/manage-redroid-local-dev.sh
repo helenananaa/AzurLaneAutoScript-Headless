@@ -10,6 +10,9 @@ docker_config=${ALAS_REDROID_LOCAL_DOCKER_CONFIG:-$HOME/.config/alas-redroid/doc
 adb_port=${ALAS_REDROID_LOCAL_ADB_PORT:-5555}
 oci_zst=${ALAS_REDROID_LOCAL_OCI_ZST:-}
 oci_zst_sha256=${ALAS_REDROID_LOCAL_OCI_ZST_SHA256:-}
+oci_tar=${ALAS_REDROID_LOCAL_OCI_TAR:-}
+oci_tar_sha256=${ALAS_REDROID_LOCAL_OCI_TAR_SHA256:-}
+confirm_immersive=${ALAS_REDROID_LOCAL_CONFIRM_IMMERSIVE:-0}
 
 die() {
     printf 'redroid-local-dev: %s\n' "$*" >&2
@@ -18,9 +21,11 @@ die() {
 
 [[ $adb_port =~ ^[0-9]+$ ]] || die "ADB port must be numeric"
 ((adb_port >= 1 && adb_port <= 65535)) || die "ADB port is out of range"
+[[ $confirm_immersive == 0 || $confirm_immersive == 1 ]] || \
+    die "headless immersive confirmation switch must be 0 or 1"
 
 mkdir -p "$docker_config"
-docker_cmd=(docker --config "$docker_config")
+docker_cmd=(docker --host unix:///var/run/docker.sock --config "$docker_config")
 
 ensure_host() {
     grep -qw binder /proc/filesystems || die "binder filesystem is unavailable in the running WSL kernel"
@@ -46,19 +51,33 @@ ensure_image() {
     if "${docker_cmd[@]}" image inspect "$image" >/dev/null 2>&1; then
         return
     fi
-    if [[ -z $oci_zst ]]; then
+    if [[ -n $oci_zst && -n $oci_tar ]]; then
+        die "only one project OCI archive format may be configured"
+    fi
+    if [[ -z $oci_zst && -z $oci_tar ]]; then
         "${docker_cmd[@]}" pull "$image"
         return
     fi
-    [[ -f $oci_zst ]] || die "project OCI archive is missing: $oci_zst"
-    [[ $oci_zst_sha256 =~ ^[0-9a-f]{64}$ ]] || \
-        die "a lowercase SHA-256 is required for the compressed project OCI archive"
-    command -v zstd >/dev/null || die "zstd is required to import the project OCI archive"
-    observed_sha256=$(sha256sum "$oci_zst")
-    observed_sha256=${observed_sha256%% *}
-    [[ $observed_sha256 == "$oci_zst_sha256" ]] || \
-        die "compressed project OCI archive digest mismatch"
-    zstd -dc "$oci_zst" | "${docker_cmd[@]}" load
+    if [[ -n $oci_tar ]]; then
+        [[ -f $oci_tar ]] || die "project OCI archive is missing: $oci_tar"
+        [[ $oci_tar_sha256 =~ ^[0-9a-f]{64}$ ]] || \
+            die "a lowercase SHA-256 is required for the project OCI archive"
+        observed_sha256=$(sha256sum "$oci_tar")
+        observed_sha256=${observed_sha256%% *}
+        [[ $observed_sha256 == "$oci_tar_sha256" ]] || \
+            die "project OCI archive digest mismatch"
+        "${docker_cmd[@]}" load -i "$oci_tar"
+    else
+        [[ -f $oci_zst ]] || die "project OCI archive is missing: $oci_zst"
+        [[ $oci_zst_sha256 =~ ^[0-9a-f]{64}$ ]] || \
+            die "a lowercase SHA-256 is required for the compressed project OCI archive"
+        command -v zstd >/dev/null || die "zstd is required to import the project OCI archive"
+        observed_sha256=$(sha256sum "$oci_zst")
+        observed_sha256=${observed_sha256%% *}
+        [[ $observed_sha256 == "$oci_zst_sha256" ]] || \
+            die "compressed project OCI archive digest mismatch"
+        zstd -dc "$oci_zst" | "${docker_cmd[@]}" load
+    fi
     "${docker_cmd[@]}" image inspect "$image" >/dev/null 2>&1 || \
         die "imported OCI archive did not provide expected image $image"
 }
@@ -99,9 +118,25 @@ wait_for_boot() {
     die "Android did not complete boot within 90 seconds"
 }
 
+confirm_headless_immersive_mode() {
+    [[ $confirm_immersive == 1 ]] || return
+    "${docker_cmd[@]}" exec "$container" /system/bin/settings put secure \
+        immersive_mode_confirmations confirmed
+    local observed
+    observed=$("${docker_cmd[@]}" exec "$container" /system/bin/settings get secure \
+        immersive_mode_confirmations)
+    [[ $observed == confirmed ]] || \
+        die "headless immersive confirmation state was not applied"
+    printf 'immersive_mode_confirmations=confirmed\n'
+}
+
 start_container() {
     ensure_host
-    install -d -m 0700 "$data_root"
+    # Android init owns the mode of an existing /data mount. Reapplying 0700
+    # while Android is running prevents app UIDs from opening their APKs.
+    if [[ ! -d $data_root ]]; then
+        install -d -m 0700 "$data_root"
+    fi
     ensure_image
     if container_exists; then
         verify_existing_container
@@ -122,6 +157,7 @@ start_container() {
             androidboot.redroid_gpu_mode=guest >/dev/null
     fi
     wait_for_boot
+    confirm_headless_immersive_mode
     printf 'storage_mode=host-directory-persistent\n'
 }
 

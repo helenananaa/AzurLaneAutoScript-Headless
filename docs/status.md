@@ -2,6 +2,135 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-09-08
+
+### Bluetooth hardware removal candidate passed local prelogin A/B/A
+
+- Two x86_64-only build patches remove the simulated Bluetooth HAL, its VINTF
+  declaration and BluetoothMidiService, and mark Bluetooth/BLE unavailable.
+  Android's existing feature check skips BluetoothService. The boot-classpath
+  API APEX remains installed; this is not removal of all Bluetooth code.
+- J32 incremental build, SBOM, package/WebView/font/runtime-component checks
+  and OCI packaging passed. Candidate `86476dea...` is about 8.21 MiB smaller.
+- A real baseline -> candidate -> baseline overlay trial passed semantic
+  observer and empty-login checks. Candidate retained the trial's Bluetooth
+  ON setting but had no Bluetooth feature, manager, process or HAL init service.
+  Reinstalling the pinned ANGLE APK passed; rollback restored baseline capability.
+- Trial cleanup, userdata marker restoration and sampled original control-file
+  hashes passed. Project was restored and stopped. Its default `current` image
+  remains unchanged. Focused offline checks: 54 passed.
+- See [the build and runtime report](redroid-bluetooth-image-trim-20260908.zh-CN.md).
+  Account/ALAS workload, ARM64, native-Linux and general version-migration claims
+  remain outside this qualification.
+
+## 2026-09-06 to 2026-09-07
+
+### Controlled local image/overlay rollback rehearsal passed
+
+- A stopped Project userdata directory served as the read-only lower layer
+  for temporary baseline and candidate overlays. The shared WSL backend
+  passed typed observer/empty-login checks on current image, controlled
+  candidate, and restored current image in 46.063/44.485/50.360 seconds.
+- Image-marker presence changed false -> true -> false. The baseline userdata
+  marker survived rollback while the candidate marker disappeared; sampled
+  original control-file hashes were unchanged. Overlay upper samples were
+  about 24 MiB each, with no full public-resource copy.
+- The original Project instance was restored to empty login and all trial
+  containers, mounts, scratch directories, keepalives and ADB transports were
+  removed. Focused regression: 121 passed, 2 skipped.
+- Cached older optimized images still contain retired block/FBE fstab entries
+  and did not boot on the current host-directory storage contract. A small
+  candidate-file inspection now rejects that layout before stopping Project.
+  The passing candidate adds one diagnostic system file to the current image;
+  it is a controlled fixture, not a release-version compatibility claim.
+- See [the rollback report](redroid-wsl-rollback-20260907.zh-CN.md) and
+  `evidence/redroid-wsl-rollback-20260907-r1/verification.json`. Real-version
+  rollback, ALAS workload, soak and native-Linux support remain unqualified.
+
+### Local WSL Project now uses the shared runtime lifecycle
+
+- `container_engine: wsl-docker` selects the local Project host adapter under
+  the existing `redroid` backend. Containerd configs remain on their existing
+  implementation; ALAS task state machines and patch series are unchanged.
+- Fresh local qualification passed cold start, game-process restart and
+  container restart/ADB reconnect, each with advancing typed observer frames
+  followed by the empty native SDK login boundary. Times were 29.141, 41.719
+  and 62.156 seconds; all three ended with `Accounts: 0` and no account input.
+- Repeated Start no longer overwrites Android's `/data` mode with 0700. The
+  detached hidden WSL keepalive no longer holds the runtime executor's output
+  pipes open. Final `/data` is 0771/system:system and resources remain 9.7.356.
+- Focused validation: 104 passed, 2 skipped, plus shell/Python syntax checks.
+  The final run and device identity postcheck are retained under
+  `evidence/redroid-wsl-runtime-20260907-r1/`; see
+  [the lifecycle report](redroid-wsl-runtime-20260907.zh-CN.md).
+- This qualifies the local prelogin lifecycle only. Account login, ALAS
+  workload, image rollback, soak, multi-instance and native-Linux support
+  remain unqualified. The SDK pause recovery branch has focused tests but was
+  not triggered by the final three live cycles.
+
+### Current local x86_64 Redroid build boots with retained `/data`
+
+- The local Redroid VHDX build domain passed its WSL-specific host preflight and
+  completed the current x86_64 AOSP/Redroid source lock with exit code `0`.
+  Its system/vendor, ANGLE/Pastel, WebView, package, locale/font, SBOM and
+  provenance checks passed. The system and vendor images are byte-identical to
+  the final optimized remote build; the newer OCI identity records the current
+  local source-lock and WSL build policy.
+- The local OCI archive SHA-256 is
+  `0b84bf53ba9f0d5746d2890542a62a65b5d19e29a02040b94605d8e822459936`
+  and its manifest digest is
+  `sha256:2e6e03e3ef33c08acf91a13b1cd9cc4a6a5d33d2d579511760c85ea7bb6c8e5a`.
+  It is retained outside Git in the shared local candidate directory rather
+  than in one worktree's ignored artifact tree.
+- A new isolated `alas-redroid-wsl-projectlocal` container reached Android 14
+  `sys.boot_completed=1` on loopback ADB `127.0.0.1:5556`. The build
+  fingerprint, x86_64 ABI, Binder devices and exact EGL/Pastel hashes matched.
+  A Stop -> Start cycle retained a non-sensitive `/data/local/tmp` marker and
+  the device still reported `Accounts: 0`.
+- This closes the current local build-to-boot and basic host-directory
+  persistence path. The pinned x86_64 game was then externally installed into
+  this new userdata. Its first `AgreementWebActivity` passed a unique visible
+  DOM contract and one CDP `.agree.click()` returned to MainActivity with the
+  same PID; the 60-second postcondition window had no fatal or destroyed-mutex.
+- The next G4 cold start loaded the exact private ANGLE observer and briefly
+  emitted a structurally healthy generation `1` snapshot, but
+  `AnnouncementActivity` opened and closed while the game recorded
+  `OnApplicationPause`; generation stopped or the observer became unavailable.
+  A reversible SystemUI-disable A/B did not restore it and was rolled back.
+- An explicit, default-off G4 recovery now requires the exact Announcement
+  Activity history, current MainActivity and PID, stale/unavailable observer,
+  and no fatal marker before performing one HOME -> MainActivity lifecycle
+  re-entry. The game PID was preserved. The completed G4 run passed with 19/19
+  fresh samples over 20 seconds, generation `3` -> `92`, and a unique
+  raycast-top resource-selection Confirm target. No resource-selection input
+  was issued. Project remains unqualified for resource download, login, ALAS
+  workload, backend recovery, cleanup, rollback or soak.
+- The first resource Confirm attempts had no postcondition because Android's
+  SystemUI `ImmersiveModeConfirmation`, not the game, owned InputDispatcher
+  focus. Setting and reading back secure
+  `immersive_mode_confirmations=confirmed` returned focus to MainActivity.
+  This state is now applied only by the local Project profile before game
+  input; all typed target, freshness, PID, raycast and postcondition checks
+  remain unchanged.
+- A retained `9.7.328` account-free resource base was copied only into the
+  stopped Project instance's external files directory. Source inventory was
+  90,503 files / 30,226,737,560 bytes; the import retained Android
+  `10067:1078` ownership and did not copy `/data/user/0` or account data.
+- The validated typed sequence was PaintingPrefsPanel Confirm generation
+  `1497 -> 1503`, six checked optional-resource toggles and OtherPrefsPanel
+  Confirm `1886 -> 1892`, then the exact `25.8GB` DialogPanel action
+  `2156 -> 2165`. The download reported 81,985 files, zero failures and
+  `BGDownload all task end:0`; resource version advanced to `9.7.356` and the
+  final directory held 172,451 files / 57,846,200,783 bytes.
+- Container Stop -> Start preserved the same OCI digest, package, resources
+  and version. A subsequent `-force-gfx-st` cold start plus one bounded SDK
+  Activity re-entry reached `PhoneLoginActivity` with a new stable game PID.
+  UIAutomator found one empty phone field and one disabled Next control;
+  Android still reported `Accounts: 0`. No account input or login was
+  attempted. This promotes only the local Project resource-update and empty
+  login boundary, not ALAS workload, recovery, rollback, soak or native-Linux
+  Redroid qualification.
+
 ## 2026-09-02
 
 ### Classified task failures are contained at the original ALAS run boundary
@@ -26,10 +155,9 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 ### Local-first development supersedes the expiring build hosts
 
 - Local Windows/WSL is now the default development and Redroid runtime-debug
-  environment. The machine is awaiting a memory upgrade; full local AOSP sync
-  and image builds remain unavailable as a support claim until the documented
-  memory, physical-disk, toolchain, source-root, and output-domain preflight
-  passes.
+  environment. This was the pre-upgrade snapshot; the 2026-09-06 entry above
+  records the later successful local x86_64 preflight, build and boot. That
+  result does not qualify an arbitrary clean build or native-Linux behavior.
 - The isolated host on port 22023 remains a temporary paid build resource only
   until its scheduled 2026-09-03 expiry. It may be used before expiry for a
   named build objective after fresh host and workload preflight; after expiry it

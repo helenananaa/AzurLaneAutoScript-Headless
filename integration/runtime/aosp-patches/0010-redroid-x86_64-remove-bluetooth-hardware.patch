@@ -1,0 +1,30 @@
+diff --git a/redroid.mk b/redroid.mk
+--- a/redroid.mk
++++ b/redroid.mk
+@@ -94,8 +94,15 @@ $(call inherit-product, hardware/redroid/c2/c2.mk)
+ 
+ 
++ifneq ($(TARGET_PRODUCT),redroid_x86_64_only)
+ DEVICE_MANIFEST_FILE += device/redroid/android.hardware.bluetooth@1.1.xml
+ 
+ PRODUCT_PACKAGES += android.hardware.bluetooth@1.1-service.sim
++else
++# Keep the boot-classpath Bluetooth API, but expose no hardware. SystemServer
++# then skips BluetoothService instead of retrying a removed simulated HAL.
++PRODUCT_COPY_FILES += \
++    $(LOCAL_PATH)/redroid-headless-bluetooth.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/redroid-headless-bluetooth.xml
++endif
+ 
+ 
+ PRODUCT_SOONG_NAMESPACES += frameworks/av/services/audiopolicy/config
+diff --git a/redroid-headless-bluetooth.xml b/redroid-headless-bluetooth.xml
+new file mode 100644
+--- /dev/null
++++ b/redroid-headless-bluetooth.xml
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="utf-8"?>
++<permissions>
++    <!-- Override handheld_core_hardware without changing other products. -->
++    <unavailable-feature name="android.hardware.bluetooth" />
++    <unavailable-feature name="android.hardware.bluetooth_le" />
++</permissions>
