@@ -11,6 +11,35 @@ from .errors import SemanticGateClosed
 class ShipyardOracle:
     """Shipyard operations sharing the oracle frame and input boundary."""
 
+    def shipyard_series(self) -> int:
+        """Read the selected series from the current version-button sprite."""
+        state = self.read_state()
+        ui = self.read_ui_state()
+        if (not state.generation <= ui.generation <= state.generation + 2
+                or ui.image_truncated):
+            raise SemanticGateClosed("shipyard series snapshots are incomplete")
+        images = [image for image in ui.images
+                  if image.path.endswith('/blur_panel/adapt/bottom_panel/ships/bg/version/version_btn')
+                  and image.active_in_hierarchy and image.active_and_enabled
+                  and not image.truncated]
+        if len(images) != 1 or not self.shipyard_page_visible():
+            raise SemanticGateClosed("shipyard selected series is absent or ambiguous")
+        match = re.fullmatch(r'version_([1-9][0-9]*)', images[0].sprite)
+        if match is None:
+            raise SemanticGateClosed("shipyard selected series sprite is unknown")
+        return int(match.group(1))
+
+    def shipyard_selected_state(self) -> ShipyardState:
+        ui = self.read_ui_state()
+        toggles = sorted((t for t in ui.toggles
+            if '/bottom_panel/ships/bg/content/ship_tpl' in t.path
+            and t.active_in_hierarchy and t.active_and_enabled and t.bounds is not None),
+            key=lambda t: t.bounds.left)
+        selected = [i + 1 for i, toggle in enumerate(toggles) if toggle.checked]
+        if len(toggles) not in (5, 6) or len(selected) != 1:
+            raise SemanticGateClosed("shipyard selected ship is absent or ambiguous")
+        return self.shipyard_state(selected[0])
+
     def shipyard_page_visible(self) -> bool:
         """Prove the top-level ShipBluePrintUI page without pixel matching."""
 
@@ -106,9 +135,13 @@ class ShipyardOracle:
         level_text = exact_text(
             "blur_panel/adapt/right_panel/mod_panel/title/level_bg/Text"
         )
-        level_match = re.fullmatch(
-            r"<size=45>(\d+)</size>/<size=27>(\d+)</size>", level_text or ""
+        # Font sizes are presentation metadata; the semantic contract is a
+        # numerator and denominator. Strip only balanced numeric size tags,
+        # leaving unknown markup or malformed tags to fail the numeric parse.
+        normalized_level = re.sub(
+            r'<size=[0-9]+>([^<>]*)</size>', r'\1', level_text or ''
         )
+        level_match = re.fullmatch(r"\s*([0-9]+)\s*/\s*([0-9]+)\s*", normalized_level)
         if level_match is None:
             raise SemanticGateClosed("shipyard development level is absent")
         level, level_max = map(int, level_match.groups())
@@ -127,7 +160,23 @@ class ShipyardOracle:
         )
         if len(phase_images) != 1:
             raise SemanticGateClosed("shipyard phase identity is ambiguous")
-        phase = phase_images[0].name
+        # A fully simulated ship keeps a FATE badge in the navbar while the
+        # right-hand pane displays DEV stats. The level above belongs to that
+        # visible mod_panel; never use a navbar badge to choose ALAS' controls.
+        phase = "dev"
+        fate_stage = None
+        if phase_images[0].name == "fate":
+            stages = [image for image in ui_state.images
+                      if image.path == selected_toggle.path + '/state/fate/Image'
+                      and image.active_in_hierarchy and image.active_and_enabled
+                      and not image.truncated and belongs_to_selected(image)]
+            if len(stages) > 1:
+                raise SemanticGateClosed("shipyard fate stage is ambiguous")
+            if stages:
+                stage = re.fullmatch(r'icon_phase_([0-9]+)', stages[0].sprite)
+                if stage is None:
+                    raise SemanticGateClosed("shipyard fate stage sprite is unknown")
+                fate_stage = int(stage.group(1))
 
         status_text = exact_text(
             "ShipBluePrintUI(Clone)/main/center_panel/state_info/progress/label"
@@ -147,6 +196,7 @@ class ShipyardOracle:
             level=level,
             level_max=level_max,
             research_status=research_status,
+            fate_stage=fate_stage,
         )
 
     def click_shipyard_ship(self, index: int) -> ActionReceipt:
@@ -156,6 +206,8 @@ class ShipyardOracle:
             raise SemanticGateClosed("shipyard page identity is absent")
         state = self.read_state()
         ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed("shipyard input snapshots are not coherent")
         toggles = tuple(
             sorted(
                 (
@@ -181,11 +233,16 @@ class ShipyardOracle:
                 target.bounds,
                 target.path,
             )
-        if not target.interactable or target.raycast_top is not None:
+        if not target.actionable:
             raise SemanticGateClosed("shipyard ship toggle is not actionable")
+        semantic_id = "shipyard/ship/{0}".format(index)
+        if self._blocking_rules(state, semantic_id):
+            raise SemanticGateClosed("shipyard ship input is blocked")
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed immediately before input")
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately after shipyard input")
         return ActionReceipt(
             "shipyard/ship/{0}".format(index),
             max(state.generation, ui_state.generation),

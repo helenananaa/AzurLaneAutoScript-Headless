@@ -283,6 +283,7 @@ class ShipyardState:
     level: Optional[int]
     level_max: Optional[int]
     research_status: str
+    fate_stage: Optional[int] = None
 
     @property
     def cannot_strengthen(self) -> bool:

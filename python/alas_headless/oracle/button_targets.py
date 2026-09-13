@@ -8,6 +8,8 @@ from .contracts import SemanticTarget
 
 DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     SemanticTarget('private-quarters/home', 'home', 'SelectDorm3DUI(Clone)/Main/option/home'),
+    SemanticTarget('private-quarters/page/left', 'left', 'SelectDorm3DUI(Clone)/Main/btn_switch/left'),
+    SemanticTarget('private-quarters/page/right', 'right', 'SelectDorm3DUI(Clone)/Main/btn_switch/right'),
     SemanticTarget('private-quarters/interact', 'tpl', 'Dorm3dMainUI(Clone)/UI/watch/Role/Touch/tpl'),
     SemanticTarget('private-quarters/room/back', 'btn_back', tuple(
         f'Dorm3dMainUI(Clone)/UI/{mode}/btn_back' for mode in ('base', 'watch', 'ik'))),
@@ -1171,6 +1173,16 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     ),
     SemanticTarget(
         "research/start/cancel",
+        "custom_button_2(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
+    ),
+    SemanticTarget(
+        "research/progress/confirm",
+        "custom_button_1(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+    ),
+    SemanticTarget(
+        "research/progress/cancel",
         "custom_button_2(Clone)",
         "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
     ),

@@ -76,10 +76,6 @@ class ActionsOracle:
         delegated_academy_game_room = bool(
             semantic_id == "academy/game-room" and self.academy_page_visible()
         )
-        delegated_shipyard_series = bool(
-            semantic_id.startswith("shipyard/series/")
-            and (semantic_id != "shipyard/series/open" or self.shipyard_page_visible())
-        )
         if semantic_id in (
             "overlay/network-reconnect/cancel",
             "overlay/network-reconnect/confirm",
@@ -531,9 +527,11 @@ class ActionsOracle:
                 raise SemanticGateClosed(
                     "commission cancel prompt identity is not proven"
                 )
+        if semantic_id in ("research/progress/confirm", "research/progress/cancel") and not self._research_progress_prompt_matches(state):
+            raise SemanticGateClosed("research progress notification identity is not proven")
         if (
             semantic_id in ("research/start/cancel", "research/start/confirm")
-            and self._research_start_prompt_cost(state) is None
+            and self._research_start_prompt_costs(state) is None
         ):
             raise SemanticGateClosed("research start prompt identity is not proven")
         if semantic_id in (
@@ -575,7 +573,6 @@ class ActionsOracle:
                 and not delegated_game_room_list
                 and not delegated_game_room_home
                 and not delegated_game_room_back
-                and not delegated_shipyard_series
                 and not delegated_operation_siren_control
                 and not delegated_operation_siren_boss_start
                 and not delegated_operation_siren_help

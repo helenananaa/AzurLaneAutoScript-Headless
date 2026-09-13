@@ -63,6 +63,10 @@ class FakeRewardsOracle:
     def research_start_prompt_cost(self):
         return self.research_prompt_cost
 
+    def research_start_prompt_costs(self):
+        cost = self.research_start_prompt_cost()
+        return (cost,) if cost is not None else None
+
     def research_queue_add_available(self):
         return self.enabled_values.get("research/detail/queue", True)
 

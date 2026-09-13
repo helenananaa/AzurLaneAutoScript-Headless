@@ -16812,3 +16812,50 @@ diff --git a/module/private_quarters/status.py b/module/private_quarters/status.
 +            return semantic_adapter.private_quarters_daily_count()
          count, _, _ = OCR_DAILY_COUNT.ocr(self.device.image)
          return count
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -496,7 +496,10 @@
+                     'Recovered NetworkDown before campaign startup surface check')
+                 self.device.screenshot()
+                 self.campaign.device.image = self.device.image
+-            if semantic_adapter is not None and semantic_adapter.campaign_dock_full_visible():
++            if semantic_adapter is not None and (
++                semantic_adapter.campaign_dock_full_visible()
++                or semantic_adapter.campaign_retirement_visible()
++            ):
+                 for _ in self.campaign.loop(timeout=30):
+                     if self.campaign._semantic_campaign_retirement_recovery():
+                         break
+diff --git a/module/private_quarters/interact.py b/module/private_quarters/interact.py
+--- a/module/private_quarters/interact.py
++++ b/module/private_quarters/interact.py
+@@ -156,6 +156,10 @@
+         """
+         Callable wrapper for whether is loading or blocked by download asset popup
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (semantic_adapter is not None
++                and semantic_adapter.private_quarters_entry_destination_visible()):
++            return True
+         if self.appear(PRIVATE_QUARTERS_LOADING_CHECK, offset=(20, 20)):
+             return True
+         if self.appear(POPUP_CANCEL, offset=(20, 20)):
+diff --git a/module/device/control.py b/module/device/control.py
+--- a/module/device/control.py
++++ b/module/device/control.py
+@@ -41,9 +41,12 @@
+             button (button.Button): AzurLane Button instance.
+             control_check (bool):
+         """
++        semantic_adapter = getattr(self, 'semantic_adapter', None)
+         if control_check:
+-            self.handle_control_check(button)
+-        semantic_adapter = getattr(self, 'semantic_adapter', None)
++            control_identity = button
++            if semantic_adapter is not None and str(button) == 'PRIVATE_QUARTERS_ROOM_BACK':
++                control_identity = semantic_adapter.private_quarters_room_back_control_identity()
++            self.handle_control_check(control_identity)
+         if semantic_adapter is not None:
+             if (
+                 semantic_adapter.campaign_combat_active()

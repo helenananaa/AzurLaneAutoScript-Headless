@@ -1,11 +1,65 @@
 # Validation status
 
+2026-09-13: Shipyard level parsing now tolerates numeric font-size metadata and plain text. 79 focused/isolation tests passed; original helpers observed 11 ships across series 2 and 7, restored series 9 and returned home. No actual FATE panel was found; Shipyard stays B. See [scope](shipyard-fate-survey-20260913.zh-CN.md).
+
+2026-09-13: Login shipyard home mapping fixed. Original LoginHandler shipyard return and subsequent original navigation to main passed live; cold-start notice trigger chain was not rerun. 99 focused checks passed; five pre-existing facade call-sequence parity failures remain. See [evidence](login-shipyard-recovery-20260913.zh-CN.md).
+
+2026-09-13: Native PrivateQuarters selection, entry and three interactions executed; final exit failed the original alias-based click watchdog. Concrete control identity fix and focused replay passed; full continuous qualification stays open. See [scope](private-quarters-native-20260913.zh-CN.md). Research exhausted-reset observation also added; no reset input qualified.
+
+2026-09-13: Research multi-resource confirmation and fresh-frame complete-cost comparison passed 104 focused/shared checks and original start/queue offline contract replay. Live navigation returned to main without spending; no suitable new dual-resource card was present. Actual consumption and full-task qualification remain open. See [scope](research-dual-resource-20260913.zh-CN.md).
+
+2026-09-13: Offline original-ALAS full-dock combat, delayed equipment deselection,
+and inherited retirement recovery passed on the rebuilt 114-member patch tree.
+Live uninterrupted qualification remains open. See [offline scope and evidence](campaign-midmap-offline-20260913.zh-CN.md).
+
+2026-09-13: Natural mid-map full dock recovered in separate processes: 79 ships retired, equipment preserved, one same-map continuation battle and withdrawal passed. The uninterrupted chain remains unqualified. See [live assessment](campaign-midmap-recovery-20260913.zh-CN.md).
+
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 For the current 60-panel work queue and re-entry conditions, see the
 [adaptation task board](alas-adaptation-task-board.zh-CN.md).
 
 ## 2026-09-12
+
+Shipyard series selection now waits for actionable choices and proves the
+requested selected series. The installed x64 observer verifies exact integer
+series-control hits. Original UI passed series 9→1→9, Neptune DEV 30/30 plus
+separate fate-stage V (8 blueprints), restoration of Takahashi and main return.
+A navbar FATE badge no longer mislabels the visible DEV pane. Session recovery
+now reclassifies an exact research menu after its existing frame refresh;
+earlier failed returns remain failed. 117 focused/shared checks passed.
+Actual FATE-pane input and strengthening remain unqualified. See
+[scope and receipts](shipyard-series-20260912.zh-CN.md).
+
+Research then passed a bounded natural-completion continuation: one finished
+project claimed, G-412-MI selected by original UseCoin=only_no_project enforcement,
+1500 gold consumed, queueing and scheduling completed. Retained Research-page
+navigation no longer requires an active Research task; original UI independently
+returned to main. Final shared regression: 118 passed. Final resources:
+5040 gems, 6193 oil, 31458 gold. This does not qualify unattended long-running work.
+
+Further Research work passed the part only_05_hour enforcement fallback:
+Q-202-MI, 20 T2 general parts, queueing and original scheduling. Shipyard ship
+selection now requires actual top-raycast proof and coherent input frames;
+the installed x64 observer qualifies integer card hits. Original ShipyardUI
+read Duncan DEV 15/30 and Valparaiso DEV 10/30 (two blueprints each), restored
+the in-progress Takahashi selection and returned to main without spending.
+94 focused/shared checks passed. FATE, series switching and complete Shipyard
+consumption remain unqualified. See [scope and receipts](research-shipyard-next-20260912.zh-CN.md).
+
+Research now acknowledges a completed menu-to-lab transition from its actual
+entry receipt and fresh typed destination after the short transition grace
+expires. Two bounded original tasks passed: cube only_05_hour fell through the
+original enforce branch to one-hour H-387-MI (3 cubes), and part only_no_project
+selected Q-368-MI (20 T1 anti-aircraft parts). Both queued and returned with
+original scheduling; the first also claimed three completed projects.
+An actual Shipyard progress notification exposed a further return-to-main
+blocker. Its exact two-button ports now let original UI recovery confirm the
+notice, visit Shipyard and return to an unobscured main page; the final separate
+recovery receipt passed. Earlier interrupted/failed navigation attempts remain
+failed. 122 focused/shared checks passed; no strengthening or purchase occurred.
+Natural half-hour paths, dual-resource confirmation, reset and unattended
+cross-round operation remain unqualified. See [scope and receipts](research-continuation-20260912.zh-CN.md).
 
 Shipyard now reads the selected in-progress ship without mixing development
 levels into blueprint inventory or inventing a missing level. Takahashi/50

@@ -1,0 +1,317 @@
+{
+  "schema": "alas-headless.main-task-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-09-13T10:49:13.649123Z",
+  "finished_at": "2026-09-13T10:54:45.833860Z",
+  "task": "Main",
+  "stage": "10-2",
+  "serial": "emulator-5554",
+  "run_count_requested": 1,
+  "execution_status": "incomplete",
+  "error": "SystemExit: 1",
+  "startup_recoveries": [],
+  "hp_control_config": {
+    "UseHpBalance": false,
+    "UseEmergencyRepair": false,
+    "UseLowHpRetreat": true,
+    "HpBalanceThreshold": 0.2,
+    "HpBalanceWeight": "1000, 1000, 1000",
+    "RepairUseSingleThreshold": 0.3,
+    "RepairUseMultiThreshold": 0.6,
+    "LowHpRetreatThreshold": 0.3
+  },
+  "preparations": [
+    {
+      "generation": 13003,
+      "mode": "prep",
+      "use_2x_book": false,
+      "book_selected": null,
+      "book_count": 0
+    }
+  ],
+  "completed_sorties": [],
+  "auto_menu_observations": [],
+  "continuation_receipts": [],
+  "submarine_observations": [],
+  "submarine_calls": [],
+  "combat_admissions": [
+    {
+      "generation": 13444,
+      "battle_count": 0,
+      "target": "B6",
+      "expected": "combat",
+      "submarine": null,
+      "hunting_nodes": null,
+      "submarine_destination": null
+    },
+    {
+      "generation": 14977,
+      "battle_count": 1,
+      "target": "D6",
+      "expected": "combat",
+      "submarine": null,
+      "hunting_nodes": null,
+      "submarine_destination": null
+    },
+    {
+      "generation": 16016,
+      "battle_count": 2,
+      "target": "E5",
+      "expected": "combat",
+      "submarine": null,
+      "hunting_nodes": null,
+      "submarine_destination": null
+    }
+  ],
+  "hp_observations": [
+    {
+      "fleet_index": 1,
+      "vitals": [
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "fleet_index": 1,
+      "vitals": [
+        [
+          1.0,
+          0.9934120271961164,
+          0.9309092005487464,
+          0.9891004477409432,
+          0.9944974597862299,
+          1.0
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "fleet_index": 1,
+      "vitals": [
+        [
+          1.0,
+          0.9936080080804425,
+          0.9311051814330725,
+          0.9791054226403149,
+          0.9963969668189286,
+          0.9646028372001868
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    }
+  ],
+  "withdrawal_receipts": [],
+  "repair_inspections": [],
+  "repair_use_samples": [],
+  "precombat_probes": [],
+  "retirement_receipts": [],
+  "completed_battles": [
+    {
+      "battle_count": 0,
+      "map_ui_objects": {
+        "pid": 1948,
+        "cells": {
+          "chapter_cell_quad_2_1": -123344,
+          "chapter_cell_quad_2_2": -123312,
+          "chapter_cell_quad_2_3": -123266,
+          "chapter_cell_quad_2_4": -123234,
+          "chapter_cell_quad_2_5": -123202,
+          "chapter_cell_quad_2_7": -123170,
+          "chapter_cell_quad_2_8": -123138,
+          "chapter_cell_quad_3_1": -123106,
+          "chapter_cell_quad_3_4": -123074,
+          "chapter_cell_quad_3_5": -123028,
+          "chapter_cell_quad_3_7": -122996,
+          "chapter_cell_quad_3_8": -122936,
+          "chapter_cell_quad_4_1": -122890,
+          "chapter_cell_quad_4_2": -122858,
+          "chapter_cell_quad_4_5": -122826,
+          "chapter_cell_quad_4_6": -122766,
+          "chapter_cell_quad_4_7": -122734,
+          "chapter_cell_quad_5_1": -122688,
+          "chapter_cell_quad_5_2": -122656,
+          "chapter_cell_quad_5_5": -122624,
+          "chapter_cell_quad_5_6": -122564,
+          "chapter_cell_quad_5_7": -122532,
+          "chapter_cell_quad_6_1": -122500,
+          "chapter_cell_quad_6_4": -122468,
+          "chapter_cell_quad_6_5": -122422,
+          "chapter_cell_quad_6_7": -122390,
+          "chapter_cell_quad_6_8": -122330,
+          "chapter_cell_quad_7_1": -122298,
+          "chapter_cell_quad_7_2": -122266,
+          "chapter_cell_quad_7_3": -122220,
+          "chapter_cell_quad_7_4": -122188,
+          "chapter_cell_quad_7_5": -122156,
+          "chapter_cell_quad_7_7": -122124,
+          "chapter_cell_quad_7_8": -122092
+        }
+      },
+      "sortie_generation": 13008,
+      "retirement_transactions_before": 0,
+      "finished_at": "2026-09-13T10:52:45.762979Z"
+    },
+    {
+      "battle_count": 1,
+      "map_ui_objects": {
+        "pid": 1948,
+        "cells": {
+          "chapter_cell_quad_7_8": -207510,
+          "chapter_cell_quad_7_7": -207478,
+          "chapter_cell_quad_7_5": -207432,
+          "chapter_cell_quad_7_4": -207400,
+          "chapter_cell_quad_7_3": -207368,
+          "chapter_cell_quad_7_2": -207336,
+          "chapter_cell_quad_7_1": -207304,
+          "chapter_cell_quad_6_8": -207272,
+          "chapter_cell_quad_6_7": -207240,
+          "chapter_cell_quad_6_5": -207194,
+          "chapter_cell_quad_6_4": -207162,
+          "chapter_cell_quad_6_1": -207102,
+          "chapter_cell_quad_5_7": -207056,
+          "chapter_cell_quad_5_6": -207024,
+          "chapter_cell_quad_5_5": -206992,
+          "chapter_cell_quad_5_2": -206932,
+          "chapter_cell_quad_5_1": -206900,
+          "chapter_cell_quad_4_7": -206854,
+          "chapter_cell_quad_4_6": -206822,
+          "chapter_cell_quad_4_5": -206790,
+          "chapter_cell_quad_4_2": -206730,
+          "chapter_cell_quad_4_1": -206698,
+          "chapter_cell_quad_3_8": -206666,
+          "chapter_cell_quad_3_7": -206634,
+          "chapter_cell_quad_3_5": -206588,
+          "chapter_cell_quad_3_4": -206556,
+          "chapter_cell_quad_3_1": -206496,
+          "chapter_cell_quad_2_8": -206464,
+          "chapter_cell_quad_2_7": -206432,
+          "chapter_cell_quad_2_5": -206386,
+          "chapter_cell_quad_2_4": -206354,
+          "chapter_cell_quad_2_3": -206322,
+          "chapter_cell_quad_2_2": -206290,
+          "chapter_cell_quad_2_1": -206258
+        }
+      },
+      "sortie_generation": 13008,
+      "retirement_transactions_before": 0,
+      "finished_at": "2026-09-13T10:54:05.244026Z"
+    }
+  ],
+  "low_hp_decisions": [
+    {
+      "triggered": false,
+      "threshold": 0.3,
+      "hp": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "present": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "battle_count": 0
+    },
+    {
+      "triggered": false,
+      "threshold": 0.3,
+      "hp": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "present": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "battle_count": 0
+    },
+    {
+      "triggered": false,
+      "threshold": 0.3,
+      "hp": [
+        1.0,
+        0.9934120271961164,
+        0.9309092005487464,
+        0.9891004477409432,
+        0.9944974597862299,
+        1.0
+      ],
+      "present": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "battle_count": 1
+    },
+    {
+      "triggered": false,
+      "threshold": 0.3,
+      "hp": [
+        1.0,
+        0.9936080080804425,
+        0.9311051814330725,
+        0.9791054226403149,
+        0.9963969668189286,
+        0.9646028372001868
+      ],
+      "present": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "battle_count": 2
+    }
+  ],
+  "scout_inspections": [],
+  "submarine_moves": [],
+  "submarine_strategy": []
+}

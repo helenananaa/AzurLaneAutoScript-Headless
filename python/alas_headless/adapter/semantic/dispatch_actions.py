@@ -30,6 +30,11 @@ class DispatchActionsPorts:
     """Dispatch actions ports on the shared adapter context."""
 
     def _click_priority(self, name):
+        if (name in ("POPUP_CONFIRM", "POPUP_CANCEL")
+                and self.oracle.exists("research/progress/confirm")):
+            self._package_gate()
+            target = "research/progress/confirm" if name == "POPUP_CONFIRM" else "research/progress/cancel"
+            return self.oracle.click(target)
         if name == "RESET_FLEET_PREPARATION":
             self._package_gate()
             receipt = self.oracle.click_operation_siren_reset_fleet()
@@ -375,6 +380,27 @@ class DispatchActionsPorts:
 
     def _click_mapped(self, name, semantic_id):
         if semantic_id is not None:
+            if semantic_id == 'private-quarters/room/new-jersey':
+                receipt = self.oracle.click(semantic_id)
+                self._private_quarters_transition_until = time.monotonic() + 90.0
+                return receipt
+            if semantic_id == 'private-quarters/dialogue/continue':
+                prior = getattr(self, '_private_quarters_dialogue_receipt', None)
+                if (prior is not None
+                        and not self.oracle.observation_target_present(semantic_id)
+                        and self.oracle.private_quarters_room_visible()
+                        and self.oracle.enabled('private-quarters/room/back')
+                        and self.oracle.read_state().generation > prior.generation):
+                    return prior
+                receipt = self.oracle.click(semantic_id)
+                self._private_quarters_dialogue_receipt = receipt
+                return receipt
+            if semantic_id in ('private-quarters/page/left', 'private-quarters/page/right'):
+                return self.oracle.click_private_quarters_page(semantic_id.rsplit('/', 1)[1])
+            if semantic_id == "research-menu/research":
+                completed = self._research_entry_completed()
+                if completed is not None:
+                    return completed
             if semantic_id == 'private-quarters/room/back':
                 return self.oracle.click_private_quarters_room_back()
             if semantic_id == 'private-quarters/home':
@@ -732,6 +758,11 @@ class DispatchActionsPorts:
                 try:
                     receipt = self.oracle.click(semantic_id)
                 except SemanticTargetMissing:
+                    if (semantic_id == "research-menu/research"
+                            and getattr(self.oracle, 'input_dispatch_count', 0) == before_input):
+                        completed = self._research_entry_completed()
+                        if completed is not None:
+                            return completed
                     if (semantic_id == 'main/tech' and self._main_tech_entry_receipt is not None
                             and getattr(self.oracle, 'input_dispatch_count', 0) == before_input
                             and self.oracle.observation_target_present('research-menu/page/back')

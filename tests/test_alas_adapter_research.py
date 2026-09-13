@@ -16,6 +16,17 @@ from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_research_progress_notice_uses_original_popup_port_without_research_task(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values["research/progress/confirm"] = True
+        oracle.enabled_values["research/progress/confirm"] = True
+        for name in ("GOTO_MAIN", "GOTO_MAIN_WHITE", "RPG_HOME"):
+            self.assertFalse(adapter.appear(NamedButton(name)))
+        self.assertTrue(adapter.appear(NamedButton("POPUP_CONFIRM")))
+        self.assertTrue(adapter.appear(NamedButton("POPUP_CANCEL")))
+        self.assertEqual(adapter.click(NamedButton("POPUP_CONFIRM")).semantic_id, "research/progress/confirm")
+        self.assertIsNone(adapter._research_context)
+
     def test_main_dorm_and_research_menus_use_distinct_typed_buttons(self):
         adapter, _, _ = self.make_adapter()
 
@@ -56,6 +67,15 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
         self.assertTrue(adapter.appear(NamedButton("RESEARCH_CHECK")))
         oracle.recommendation_shop_visible.assert_not_called()
+
+    def test_retained_research_page_is_navigable_without_a_research_task(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values['research/page/back'] = True
+        oracle.research_project_values = [SimpleNamespace(slot=index) for index in range(5)]
+        self.assertIsNone(adapter._research_context)
+        self.assertFalse(adapter.appear(NamedButton('FLEET_CHECK')))
+        self.assertTrue(adapter.appear(NamedButton('RESEARCH_CHECK')))
+        self.assertEqual(oracle.click_calls, [])
 
     def test_research_page_check_rejects_selected_detail_panel(self):
         adapter, oracle, _ = self.make_adapter()
@@ -505,7 +525,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         )
         self.assertEqual(adapter._action_ledger.remaining("research.start"), 0)
 
-    def test_research_multi_resource_start_fails_before_unreviewed_prompt(self):
+    def test_research_multi_resource_start_confirms_all_costs(self):
         oracle = FakeOracle()
         oracle.research_project_values = [
             SimpleNamespace(
@@ -535,11 +555,58 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         adapter = AlasSemanticAdapter(oracle, lambda: None, research_start_budget=1)
         adapter.begin_research()
 
-        with self.assertRaisesRegex(SemanticGateClosed, "multi-resource"):
-            adapter.start_research_project_code("Q-068-UL")
+        oracle.research_start_prompt_costs = lambda: (("17033", 20), ("gold", 5000))
+        original_click = oracle.click
+        def click(semantic_id):
+            receipt = original_click(semantic_id)
+            if semantic_id == "research/start/confirm":
+                oracle.research_detail_value.is_running = True
+                oracle.research_detail_value.can_start = False
+            return receipt
+        oracle.click = click
+        self.assertTrue(adapter.start_research_project_code("Q-068-UL"))
+        self.assertEqual(oracle.click_calls, ["research/project/1", "research/detail/start", "research/start/confirm"])
+        self.assertEqual(adapter._action_ledger.remaining("research.start"), 0)
 
-        self.assertEqual(oracle.click_calls, ["research/project/1"])
+    def test_research_multi_resource_confirmation_rejects_missing_or_changed_cost(self):
+        oracle = FakeOracle()
+        oracle.research_detail_value.resource_costs = (
+            SimpleNamespace(resource_id="gold", owned=6000, required=5000),
+            SimpleNamespace(resource_id="17033", owned=30, required=20),
+        )
+        adapter = AlasSemanticAdapter(oracle, lambda: None, research_start_budget=1)
+        adapter.begin_research()
+        adapter.click(NamedButton("RESEARCH_START"))
+        for costs in ((("gold", 5000),), (("17033", 21), ("gold", 5000)),
+                      (("17033", 20), ("gold", 5001)), None):
+            with self.subTest(costs=costs):
+                oracle.research_start_prompt_costs = lambda: costs
+                self.assertFalse(adapter.appear(NamedButton("POPUP_CONFIRM")))
+                with self.assertRaisesRegex(SemanticGateClosed, "does not match"):
+                    adapter.click(NamedButton("POPUP_CONFIRM"))
+                self.assertEqual(adapter._action_ledger.remaining("research.start"), 1)
+                self.assertEqual(oracle.click_calls, ["research/detail/start"])
+        oracle.research_start_prompt_costs = lambda: (("17033", 20), ("gold", 5000))
+        self.assertTrue(adapter.appear(NamedButton("POPUP_CONFIRM")))
+        adapter.click(NamedButton("POPUP_CONFIRM"))
+        self.assertEqual(adapter._action_ledger.remaining("research.start"), 0)
+
+    def test_research_cost_change_at_input_frame_preserves_grant(self):
+        oracle = FakeOracle()
+        adapter = AlasSemanticAdapter(oracle, lambda: None, research_start_budget=1)
+        adapter.begin_research()
+        adapter.click(NamedButton("RESEARCH_START"))
+        fresh = FakeOracle()
+        fresh.research_prompt_cost = ("gold", 1501)
+        adapter._fresh_input_oracle = lambda: fresh
+        with self.assertRaisesRegex(SemanticGateClosed, "changed before"):
+            adapter.click(NamedButton("POPUP_CONFIRM"))
+        self.assertEqual(fresh.click_calls, [])
         self.assertEqual(adapter._action_ledger.remaining("research.start"), 1)
+        fresh.research_prompt_cost = ("gold", 1500)
+        adapter.click(NamedButton("POPUP_CONFIRM"))
+        self.assertEqual(fresh.click_calls, ["research/start/confirm"])
+        self.assertEqual(adapter._action_ledger.remaining("research.start"), 0)
 
     def test_research_start_budget_is_spent_only_on_matching_final_confirm(self):
         oracle = FakeOracle()
@@ -703,6 +770,45 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         adapter._research_context.passive_transition_until = time.monotonic() - 1.0
         with self.assertRaises(AlasSemanticUnmapped):
             adapter.appear(NamedButton("FLEET_CHECK"))
+
+    def test_research_entry_after_grace_requires_fresh_destination(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_research()
+        first = adapter.click(NamedButton("RESHMENU_GOTO_RESEARCH"))
+        adapter._research_context.passive_transition_until = 0
+        oracle.enabled_values["research/page/back"] = True
+        oracle.research_projects = Mock(return_value=[object()] * 5)
+        oracle.read_state = Mock(return_value=SimpleNamespace(generation=first.generation + 1))
+        self.assertIs(adapter.click(NamedButton("RESHMENU_GOTO_RESEARCH")), first)
+        self.assertEqual(oracle.click_calls, ["research-menu/research"])
+        for visible, enabled, generation in ((False, True, first.generation + 1),
+                                             (True, False, first.generation + 1),
+                                             (True, True, first.generation)):
+            oracle.research_projects.return_value = [object()] * 5 if visible else []
+            oracle.enabled_values["research/page/back"] = enabled
+            oracle.read_state.return_value.generation = generation
+            self.assertIsNone(adapter._research_entry_completed())
+        adapter.end_research()
+        self.assertIsNone(adapter._research_entry_completed())
+
+    def test_research_entry_missing_source_rechecks_destination_before_input_only(self):
+        from alas_headless.oracle.errors import SemanticTargetMissing
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_research()
+        first = adapter.click(NamedButton("RESHMENU_GOTO_RESEARCH"))
+        adapter._research_context.passive_transition_until = 0
+        adapter._research_entry_completed = Mock(side_effect=[None, first])
+        oracle.click = Mock(side_effect=SemanticTargetMissing("source disappeared"))
+        self.assertIs(adapter.click(NamedButton("RESHMENU_GOTO_RESEARCH")), first)
+        adapter._research_entry_completed = Mock(return_value=None)
+        oracle.input_dispatch_count = 0
+        def uncertain(_):
+            oracle.input_dispatch_count += 1
+            raise SemanticTargetMissing("after input")
+        oracle.click.side_effect = uncertain
+        with self.assertRaises(SemanticTargetMissing):
+            adapter.click(NamedButton("RESHMENU_GOTO_RESEARCH"))
+        adapter._research_entry_completed.assert_called_once()
 
     def test_research_goto_main_is_idempotent_during_page_transition(self):
         adapter, oracle, _ = self.make_adapter()

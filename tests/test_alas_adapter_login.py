@@ -96,6 +96,32 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertEqual(receipt.semantic_id, "event-list/page/back")
         self.assertEqual(oracle.click_calls, ["event-list/page/back"])
 
+    def test_login_shipyard_exit_requires_owned_actionable_unique_page(self):
+        for present, enabled in ((True, True), (False, True), (True, False)):
+            with self.subTest(present=present, enabled=enabled):
+                adapter, oracle, _ = self.make_adapter()
+                oracle.exists_values['shipyard/page/root'] = present
+                oracle.enabled_values['shipyard/page/back'] = enabled
+                adapter.begin_login()
+                self.assertEqual(adapter.appear(NamedButton('GOTO_MAIN')), present and enabled)
+                if present and enabled:
+                    self.assertEqual(adapter.click(NamedButton('GOTO_MAIN')).semantic_id,
+                                     'shipyard/page/back')
+                else:
+                    with self.assertRaises(SemanticGateClosed):
+                        adapter.click(NamedButton('GOTO_MAIN'))
+                    self.assertEqual(oracle.click_calls, [])
+
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_login()
+        for identity in ('shipyard/page/root', 'research/page/back'):
+            oracle.exists_values[identity] = True
+        for target in ('shipyard/page/back', 'research/page/back'):
+            oracle.enabled_values[target] = True
+        with self.assertRaisesRegex(SemanticGateClosed, 'ambiguous'):
+            adapter.click(NamedButton('GOTO_MAIN'))
+        self.assertEqual(oracle.click_calls, [])
+
     def test_login_accepts_exact_main_identity_across_main_skins(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.main_page_visible_value = True

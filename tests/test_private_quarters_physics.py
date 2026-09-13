@@ -26,6 +26,17 @@ def test_input_uses_verified_integer_physics_point_without_fake_ui_bounds():
     assert len(b.taps) == 1
 
 
+def test_native_target_presence_reads_exact_visible_collider():
+    b = backend()
+    assert make_oracle(b).private_quarters_new_jersey_visible()
+    b.ui['private_quarters_physics']['colliders'][0]['screen'] = [600,400,-1]
+    assert not make_oracle(b).private_quarters_new_jersey_visible()
+    b.ui['private_quarters_physics']['colliders'][0]['path'] = 'another-character/BodyCollider'
+    with pytest.raises(SemanticGateClosed, match='absent or ambiguous'):
+        make_oracle(b).private_quarters_new_jersey_visible()
+    assert b.taps == []
+
+
 @pytest.mark.parametrize('field,value', [('raycast_top',False),('raycast_top',None),
     ('ui_clear',False),('ui_clear',None),('nearest_id',42),('input_point',None),
     ('input_point',[600.5,400]),('screen',None),('screen',[600,400,-1])])

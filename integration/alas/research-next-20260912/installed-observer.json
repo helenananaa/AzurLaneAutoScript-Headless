@@ -1,0 +1,13 @@
+{
+  "apk": "artifacts/shipyard-hit-20260912/observer.apk",
+  "local_sha256": "201ba1ce2e1fe8dfeefb0982834a9cc1cb5c96c8b00c112cfff16700f1471589",
+  "installed_sha256": "201ba1ce2e1fe8dfeefb0982834a9cc1cb5c96c8b00c112cfff16700f1471589",
+  "serial": "emulator-5580",
+  "game_pid": 23388,
+  "observer_source_sha256": "616c50bdf3426cc87bac05d6fe5232ac8d3468d4265e3b4cd98efb097fb80e11",
+  "build_user": "helenanana",
+  "build_checkout_head": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "build_seconds": 9.27,
+  "parallelism": 32,
+  "observed_at": "2026-09-12T21:34:14.253252+08:00"
+}

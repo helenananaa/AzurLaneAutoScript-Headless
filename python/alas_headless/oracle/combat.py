@@ -258,7 +258,12 @@ class CombatOracle:
         # Operation Siren's result grade page is an EventTrigger surface, not
         # a Unity Button.  Prove that exact typed stack instead of allowing the
         # still-mounted CombatUI underneath to win the surface classification.
-        ui_state = self.read_ui_state(check_foreground=False)
+        # This fallback consumes only complete grade/continue text. Dock ship
+        # toggles may exceed their independent cap while ALAS is entering
+        # retirement; retain that flag without rejecting an unrelated probe.
+        ui_state = self.read_ui_state(
+            check_foreground=False, _preserve_partial_toggles=True
+        )
         # This is a passive probe used even on Campaign preparation. A fresh
         # UI without the result identity proves absence by itself; only a
         # positive result needs to combine that UI with state blocker proof.

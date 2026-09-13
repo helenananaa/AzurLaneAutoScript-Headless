@@ -1,5 +1,11 @@
 # ALAS 适配任务大表
 
+2026-09-13续推：船坞二期6艘、七期5艘原helper观察及往返通过；补开发等级字号兼容，79项测试通过。未找到实际FATE面板，Shipyard保持B。见[范围](shipyard-fate-survey-20260913.zh-CN.md)。
+
+2026-09-13续推：登录专用船坞返回映射已补齐，原登录处理器→原导航回主页实机通过；99项定向测试通过，5项既有调用序列对照失败保留。支持等级不变，见[范围与证据](login-shipyard-recovery-20260913.zh-CN.md)。
+
+2026-09-13 续推：新泽西原生选房、入房、三次互动已有实机证据，最终退出失败及后续恢复单独记录；P等级不变。另补Research刷新耗尽观察，Daily本日次数已用完。见 [宿舍范围](private-quarters-native-20260913.zh-CN.md)、[Research范围](research-reset-exhausted-20260913.zh-CN.md)、[Daily核对](daily-current-observation-20260913.zh-CN.md)。
+
 整理日期：2026-09-12。范围：本工作树固定 ALAS `81ccf63b4540f00241628c82a58c02c7a2bb11af` 的 **60 个面板、278 个唯一字段、1,217 个面板字段实例**。
 
 这是执行视图。支持等级以 [结构化台账](../integration/alas/support-matrix-ledger.json) 为准，字段明细见 [配置支持矩阵](alas-config-support-matrix.md)。本次核对代码、台账及近期收据，没有重跑60项任务；较早的实机结果仍是历史资格证据，不等于今天重新验证过。最近改动尚在工作树，不能归到旧的已提交证据哈希下。
@@ -20,8 +26,8 @@
 
 | 顺序 | 专题 | 下一项交付 | 条件与边界 |
 |---|---|---|---|
-| 1 | Research | 补两种未完整资源策略、重置和跨轮闭环 | 先读当前项目/队列；挑已有匹配项目，不为验证强行刷新 |
-| 2 | Shipyard | 补已造出舰船DEV/FATE与期数选择 | 可先做观察和导航；购买另行授权 |
+| 1 | Research | 补双资源实际弹窗与完整实机任务、自然半小时策略、重置和跨轮闭环 | 双资源端口与原开工/入队链已离线通过；当前无合适新卡，等自然项目 |
+| 2 | Shipyard | 补实际FATE操作面板与其他期数 | 一期/九期往返、海王星DEV与天运V分离读取已通过；购买另行授权 |
 | 3 | PrivateQuarters | 升级弹窗关闭、完整原生互动 | 代码可推进；实机需真实升级弹窗和日精力 |
 | 4 | Daily | 批量快速、领奖、返回、调度一进程通过 | 等开放且有次数；已实现导航不再反复验收 |
 | 5 | OpsiAshAssist | 实际同步奖励领取与完整任务衔接 | 真实可领取奖励；完整助战需次数 |
@@ -68,8 +74,8 @@
 | `Guild` | `L` | 普通成员报告、补给、兑换、推荐派遣 | 补新任务/行动、Boss推荐与攻击 | 对应公会页面、权限及Boss状态 |
 | `Meowfficer` | `B` | 满购买/满训练/满级安全分支；单猫领取补排 | 补非满级强化、已入住Fort、多只领取和特殊天赋 | 可见非满级目标+合格材料；Fort入住/特殊猫 |
 | `Minigame` | `F` | 固定上游抚顺挑战单票完整任务 | 保留已完成范围，不外推其他小游戏 | 无新增触发要求 |
-| `Research` | `L` | 部分资源策略、队列、卡片及不足延迟；入口闭环 | 优先补only_05_hour/only_no_project、重置和跨轮；再扩预设 | 匹配项目、可用队列/资源；先观察再选路径 |
-| `Shipyard` | `B` | 高梁研究中/50蓝图；原生不强化与重进退出 | 先补已造出舰船DEV/FATE状态和期数选择；再做购买/强化 | 对应舰船页面；购买须另行授权 |
+| `Research` | `L` | 魔方/部件策略强制分支；物资only_no_project自然完工后领取、补队列和调度；任务外返回主页 | 双资源端口/原调用链已离线通过；补真实确认、自然半小时、重置和长期跨轮 | 匹配项目、可用队列/资源；不为取样强行刷新 |
+| `Shipyard` | `B` | 九期/一期往返；海王星DEV30/30与天运V分离；恢复高梁；两艘九期DEV状态 | 补实际FATE操作面板、其他期数，再做购买/强化 | 对应舰船页面；购买须另行授权 |
 | `Tactical` | `L` | 新学员、选书过滤、经验溢出 | 补快速学习正向分支 | 快速学习活动开放 |
 | `PrivateQuarters` | `P` | 新泽西三次循环跑完；重启后0/3；整体超时 | 先补升级弹窗关闭，再做原生完整选房互动任务 | 真实好感升级弹窗；完整互动另需日精力 |
 | `ShopFrequent` | `L` | 当前过滤器读取、余额及零购买；共享单件事务 | 补General正向金币购买、刷新和其他过滤器 | 合适商品/余额及购买授权 |
@@ -130,12 +136,16 @@
 
 | 专题 | 最近证据 | 当前结论 |
 |---|---|---|
+| 科研双资源 | [记录](research-dual-resource-20260913.zh-CN.md) | 104项回归和原开工/入队离线链通过；实机导航读取并返回，无合适新卡，未消费 |
+| 船坞期数与天运标识 | [记录](shipyard-series-20260912.zh-CN.md)、[最终收据](../integration/alas/shipyard-series-20260912/live-r4.json) | 一期/九期与选船恢复通过；卡片天运V不等于当前是FATE操作面板 |
+| 船坞DEV与部件策略 | [续接记录](research-shipyard-next-20260912.zh-CN.md)、[船坞](../integration/alas/research-next-20260912/shipyard-dev-r3.json)、[部件](../integration/alas/research-next-20260912/part-half-r1.json) | 两舰DEV选船/读取/恢复通过；部件半小时策略强制分支通过，不外推半小时实卡 |
+| 科研资源策略 | [续接记录](research-continuation-20260912.zh-CN.md)、[魔方](../integration/alas/research-continuation-20260912/cube-half-r1.json)、[部件](../integration/alas/research-continuation-20260912/part-no-project-r1.json) | 两个各自同进程的有界任务通过；半小时实卡、双资源和长期跨轮仍缺 |
 | 科研船坞 | [状态记录](shipyard-state-20260912.zh-CN.md)、[实机收据](../integration/alas/shipyard-state-20260912/live-r1.json) | 两次研究中读取/不强化及重进返回通过；购买和全任务未通过 |
 | 每日导航 | [记录](daily-navigation-20260912.zh-CN.md)、[两轮收据](../integration/alas/daily-other-20260912/navigation-r3.json) | 重复入口零额外输入；不是快速领奖完整任务证据 |
 | 私密船舱 | [记录](private-quarters-physics-20260912.zh-CN.md)、[失败循环](../integration/alas/private-physics-20260912/interact-live-r5.json)、[恢复计数](../integration/alas/private-physics-20260912/recovery-count-r5.json) | 三次循环后升级弹窗超时；重启后0/3，分段结果 |
 | Daily / META | [实耗记录](daily-meta-live-20260912.zh-CN.md)、[同步页修正](meta-reward-page-20260912.zh-CN.md) | 快速实耗和支援末场已证实；完整领奖仍缺 |
 | 科研入口 | [两轮导航记录](research-navigation-20260912.zh-CN.md) | 公共入口闭环，不代表资源策略/船坞购买全部通过 |
-| 满仓恢复 | [最近分段记录](campaign-midmap-recovery-20260911.zh-CN.md) | 退役、保留装备、同图续战有证据；连续链未通过 |
+| 满仓恢复 | [离线链验证](campaign-midmap-offline-20260913.zh-CN.md)；[实机分段记录](campaign-midmap-recovery-20260913.zh-CN.md) | 三个离线场景通过；单进程实机连续链仍待自然满仓 |
 
 ## 更新规则
 

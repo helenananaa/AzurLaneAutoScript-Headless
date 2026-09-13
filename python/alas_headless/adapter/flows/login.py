@@ -319,6 +319,7 @@ class LoginFlow:
             ("build/page/start", "build/page/back"),
             ("research-menu/page/back", "research-menu/page/back"),
             ("research/page/back", "research/page/back"),
+            ("shipyard/page/root", "shipyard/page/back"),
         ):
             if reader.exists(identity) and reader.enabled(target):
                 targets.append(target)

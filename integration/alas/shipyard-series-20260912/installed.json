@@ -1,0 +1,12 @@
+{
+  "apk": "artifacts/shipyard-series-20260912/observer.apk",
+  "local_sha256": "dc4a85c5be094add97f24dec2fe78632a835cd9f42f5d742870b54ea747ca1f6",
+  "installed_sha256": "dc4a85c5be094add97f24dec2fe78632a835cd9f42f5d742870b54ea747ca1f6",
+  "serial": "emulator-5580",
+  "game_pid": 1570,
+  "build_seconds": 8.68,
+  "parallelism": 32,
+  "build_user": "helenanana",
+  "observer_source_sha256": "a9a0a0977a290020e0e703400dc7e06f15386a8260aa2a3237aba0f54fa09c23",
+  "observed_at": "2026-09-12T21:53:25.680136+08:00"
+}

@@ -538,6 +538,12 @@ class SessionTasksPorts:
     def private_quarters_daily_count(self) -> int:
         return self.open()._frame_or_live_observation_oracle().private_quarters_overview().remaining
 
+    def private_quarters_room_back_control_identity(self) -> str:
+        return self.open().oracle.private_quarters_room_back_control_identity()
+
+    def private_quarters_entry_destination_visible(self) -> bool:
+        return self.open()._frame_or_live_observation_oracle().private_quarters_entry_destination_visible()
+
     def meta_assist_state(self) -> MetaAssistState:
         return self.open().meta_assist_state()
 

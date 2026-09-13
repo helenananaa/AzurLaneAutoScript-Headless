@@ -63,6 +63,9 @@ def main():
         'daily': hashlib.sha256((alas / 'module/daily/daily.py').read_bytes()).hexdigest(),
         'runner': hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
     result['upstream_lock'] = json.loads((ROOT / 'integration/alas/upstream-lock.json').read_text(encoding='utf-8'))
+    def save():
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     instance = AzurLaneAutoScript(name)
     instance.config.init_task('Daily')
     session = instance.device.semantic_adapter
@@ -75,6 +78,7 @@ def main():
             raise AssertionError('original Daily intent differs from typed observation')
         item = dict(kind=kind, before=before, stage=stage, fleet=fleet)
         result['transactions'].append(item)
+        save()
         value = original(host, remain, stage, fleet)
         host.device.screenshot()
         item['after'] = oracle.daily_remaining_for_kind(kind)
@@ -87,10 +91,13 @@ def main():
         session.click_daily_precombat_start = reject_normal_battle
         adapter = session.open()
         result['runtime_before'] = dataclasses.asdict(adapter.oracle.fingerprint)
+        result['before_ui'] = dataclasses.asdict(adapter.oracle.read_ui_state())
+        save()
         result['task_result'] = instance.run('daily')
         result['receipts'] = [dataclasses.asdict(r) for r in adapter.daily_execution_receipts()]
         result['grant_remaining'] = adapter._action_ledger.remaining('daily.execute')
         result['scheduler_after'] = json.loads(config_path.read_text(encoding='utf-8'))['Daily']['Scheduler']
+        result['after_ui'] = dataclasses.asdict(adapter.oracle.read_ui_state())
         result['passed'] = bool(result['task_result'] is True
             and len(result['receipts']) == len(result['transactions']) == 1
             and result['receipts'][0]['semantic_id'].endswith('/quick/all')
@@ -103,8 +110,9 @@ def main():
     finally:
         Daily.daily_execute = original
         session.close()
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        config_path.unlink(missing_ok=True)
+        result['temporary_config_removed'] = not config_path.exists()
+        save()
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0 if result['passed'] else 1
 

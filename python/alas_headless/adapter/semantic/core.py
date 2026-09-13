@@ -317,6 +317,8 @@ class CoreAdapterPorts:
         self._main_tech_entry_receipt = None
         self._main_live_entry_receipt = None
         self._private_quarters_entry_receipt = None
+        self._private_quarters_dialogue_receipt = None
+        self._private_quarters_transition_until = 0.0
         self._operation_siren_pending_order: Optional[str] = None
         self._exercise_pending = False
         self._exercise_execution_active = False

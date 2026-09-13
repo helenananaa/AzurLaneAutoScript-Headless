@@ -625,7 +625,9 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             ),
             "generation": startup_state.generation,
         }
-        if (
+        # An inherited typed retirement page belongs to campaign recovery;
+        # unrelated login probes must not demand its complete ship-toggle list.
+        if not startup_oracle.retirement_selection_visible() and (
             startup_oracle.enabled("login/enter")
             or startup_oracle.enabled("overlay/login-data-expired/confirm")
             or startup_oracle.login_update_download_available()

@@ -17,6 +17,54 @@ from unittest import mock
 
 
 class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
+    def test_research_exhausted_reset_is_false_but_unknown_state_is_not(self):
+        from alas_headless.alas_adapter import AlasSemanticAdapter
+        from types import SimpleNamespace
+        page = "UICamera/Canvas/UIMain/TechnologyUI(Clone)"
+        path = page + "/main/base_page/refresh_btn"
+        backend = FakeBackend([make_button("back", page + "/blur_panel/adapt/top/back")])
+        backend.ui = make_ui([make_text("每日0点后可刷新", path + "/Text")],
+                               images=[make_image(path=path, sprite="refresh")])
+        oracle = make_oracle(backend)
+        adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+        adapter.begin_research()
+        self.assertFalse(adapter.appear(SimpleNamespace(name="RESET_AVAILABLE")))
+        for label in ("刷新", "", "更新后的未知说明"):
+            backend.ui["texts"][0]["text"] = label
+            with self.assertRaisesRegex(SemanticGateClosed, "not yet reviewed"):
+                adapter.appear(SimpleNamespace(name="RESET_AVAILABLE"))
+        backend.ui["texts"][0]["text"] = "每日0点后可刷新"
+        backend.ui["texts"].append(make_text("每日0点后可刷新", path + "/Text"))
+        backend.ui["text_count"] += 1
+        with self.assertRaisesRegex(SemanticGateClosed, "ambiguous"):
+            oracle.research_reset_available()
+        self.assertEqual(backend.taps, [])
+
+    def test_research_progress_notice_is_navigation_not_resource_confirmation(self):
+        popup = "root/Overlay/UIMain/Msgbox(Clone)/window/"
+        backend = FakeBackend([
+            make_button("custom_button_2(Clone)", popup + "button_container/custom_button_2(Clone)"),
+            make_button("custom_button_1(Clone)", popup + "button_container/custom_button_1(Clone)"),
+        ])
+        backend.ui = make_ui([
+            make_text("当前研究中的<color=#92fc63>高梁</color>有新的进展，请去开发船坞确认", popup + "msg_panel/content"),
+            make_text("取 消", popup + "button_container/custom_button_2(Clone)/pic"),
+            make_text("确 定", popup + "button_container/custom_button_1(Clone)/pic"),
+        ])
+        oracle = make_oracle(backend)
+        self.assertTrue(oracle.enabled("research/progress/confirm"))
+        self.assertTrue(oracle.enabled("research/progress/cancel"))
+        self.assertEqual(oracle.click("research/progress/confirm").semantic_id, "research/progress/confirm")
+        backend.ui["texts"][0]["text"] = "当前研究中的另一舰船有新的进展，请去开发船坞确认"
+        self.assertTrue(oracle.exists("research/progress/confirm"))
+        for text in ("开启该科研项目需要消耗 :物资x1500", "消耗钻石购买蓝图？", "当前研究中的有新的进展，请去开发船坞确认"):
+            backend.ui["texts"][0]["text"] = text
+            self.assertFalse(oracle.exists("research/progress/confirm"))
+            self.assertFalse(oracle.enabled("research/progress/confirm"))
+            self.assertFalse(oracle.enabled("research/progress/cancel"))
+            with self.assertRaises(SemanticGateClosed):
+                oracle.click("research/progress/confirm")
+
     def test_research_start_confirm_requires_exact_resource_prompt(self):
         popup = "root/Overlay/UIMain/Msgbox(Clone)/window/"
         backend = FakeBackend(
@@ -63,6 +111,33 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         self.assertIsNone(oracle.research_start_prompt_cost())
         with self.assertRaises(SemanticGateClosed):
             oracle.click("research/start/confirm")
+
+    def test_research_multi_resource_prompt_consumes_complete_cost_list(self):
+        popup = "root/Overlay/UIMain/Msgbox(Clone)/window/"
+        backend = FakeBackend([
+            make_button("custom_button_2(Clone)", popup + "button_container/custom_button_2(Clone)"),
+            make_button("custom_button_1(Clone)", popup + "button_container/custom_button_1(Clone)"),
+        ])
+        backend.ui = make_ui([
+            make_text("", popup + "msg_panel/content"),
+            make_text("取消", popup + "button_container/custom_button_2(Clone)/pic"),
+            make_text("确定", popup + "button_container/custom_button_1(Clone)/pic"),
+        ])
+        oracle = make_oracle(backend)
+        for body in ("物资x5000\n防空炮部件T3x20", "防空炮部件T3x20、物资x5000"):
+            backend.ui["texts"][0]["text"] = "开启该科研项目需要消耗 :" + body
+            self.assertEqual(oracle.research_start_prompt_costs(), (("17033", 20), ("gold", 5000)))
+            self.assertIsNone(oracle.research_start_prompt_cost())
+            self.assertTrue(oracle.enabled("research/start/confirm"))
+            oracle.click("research/start/confirm")
+        for body in ("物资x5000、钻石x20", "物资x5000、未知资源x20", "物资x5000、物资x20",
+                     "物资x5000、心智魔方x0", "物资x5000、", "物资x5000剩余20", ""):
+            with self.subTest(body=body):
+                backend.ui["texts"][0]["text"] = "开启该科研项目需要消耗 :" + body
+                self.assertIsNone(oracle.research_start_prompt_costs())
+                self.assertFalse(oracle.enabled("research/start/confirm"))
+                with self.assertRaises(SemanticGateClosed):
+                    oracle.click("research/start/confirm")
 
     def test_research_queue_confirm_requires_exact_irreversible_prompt(self):
         popup = "root/Overlay/UIMain/Msgbox(Clone)/window/"

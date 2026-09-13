@@ -1,0 +1,62 @@
+{
+  "schema": "alas-headless.midmap-offline-assessment/v1",
+  "offline_chain_passed": true,
+  "live_uninterrupted_chain_qualified": false,
+  "android_input_count": 0,
+  "game_resources_consumed": 0,
+  "scenarios": [
+    {
+      "file": "normal.json",
+      "passed": true,
+      "scenario": "full-dock",
+      "simulated_input_count": 15
+    },
+    {
+      "file": "delayed.json",
+      "passed": true,
+      "scenario": "delayed-equipment",
+      "simulated_input_count": 15
+    },
+    {
+      "file": "inherited.json",
+      "passed": true,
+      "scenario": "inherited-selection",
+      "simulated_input_count": 11
+    }
+  ],
+  "fixture_scope": "retained non-contiguous typed scenes plus explicitly synthetic contract dialogs/combat; identity and clocks rebound for replay",
+  "focused_tests": {
+    "unique_passed": 70,
+    "initial_run": "69 passed; only patch member count assertion needed 113 to 114 update",
+    "final_support_suite": "8 passed; overlaps seven initial passes",
+    "additional_baseline_failure": "campaign_map_preparation_mode_state(A1) existing assertion; reproduced using unchanged HEAD method"
+  },
+  "sha256": {
+    "normal.json": "2b2e237771d4f2528cf81759cd1ab0844b58edc5e96ecdee80bf5c98c24a7075",
+    "delayed.json": "585961761e8a72e72176da56f485e3e37c43e6e87235b942461635c77aae71f7",
+    "inherited.json": "c7ff4e8c6c60ca26ffa0e5ed5b4ddabde272c74b110c015098b296ead12407aa",
+    "patch-series.json": "69dd364526d29a4fed5f1e0c3369dbd0be8591f2e2b703f90721caca55b98404",
+    "patch-tree.json": "e261f6a06bc7a1e96e7607d1e54e4b620446a7d4fe58eba7c7bbabf7b0be4a17",
+    "runtime-sources.json": "1a582891e88d238b0520c3bce40e610cf6e5ffeb9bed069036be76c33c155487",
+    "retirement-config.json": "74d3bddb5f6ee30966b0a8a32dcf8b6206162774f562feb2956f48e6fdf9291c",
+    "main-config.json": "5c481a2930a4736960168558adddb497fd033f92a0f9b7eb58b3b21e0e2d7146",
+    "support-matrix.json": "e5a32eb68b08c388d2136508c9935380e6ba229b6dfa39dd0e30a1a9d53cc231",
+    "focused-tests.log": "6066e22fbaf5e0ee4b0fc0eb81cfb04fdfad4dbb720c5768dab60c667476dfd9",
+    "support-tests-final.log": "8a639dedc3f121c39ce0f9348eb1dc8c842b990730a49efc2a76bd7fd3cee9cc",
+    "baseline-mode-test.log": "c7fa8f5375c1df7dd5eb83f69efa325c193c8762b16c93f63d89fe722f1e41c5"
+  },
+  "source_sha256": {
+    "scripts/python/replay_alas_midmap_retirement.py": "532412fbd0bc1fca6ff1667e86c614a4da3a03f30e1a464e159ab68a758f8346",
+    "tests/semantic_support/midmap_replay.py": "2dfc8952a9d1f6cb3760d5c1e37ff2bfcf70c2b63bd3ad22563306a0d291b0bd",
+    "tests/test_midmap_retirement_probe_isolation.py": "979a38e9a4479f45b92d5807e995ba2b94f24cbd34bcacb805a5215d589d9245",
+    "python/alas_headless/oracle/login.py": "183b72c96f96da6f35ef5eefde535e8502e53cde8b440c6f18288ba48c5ee5f0",
+    "python/alas_headless/oracle/campaign_preparation.py": "b018caa13479f6f06f2b87e661c83ed4a30b3dd723a9c2a19aef1973a4fa0d89",
+    "python/alas_headless/adapter/semantic/session_dispatch.py": "89a02c4a2b82dcbd4d8a48542f76b261171aedf162884527af2e93d2265fc44d",
+    "python/alas_headless/oracle/combat.py": "639f1e0f4d1f079226dd4d5301ca69c7d772217cee0f5380de2959b79364b215",
+    "python/alas_headless/oracle/targets.py": "15e2ab7ed457ded3015882af6f5926cd78c813b0f88aac15dbdb4eaf723b6583",
+    "tests/fixtures/midmap-retirement/map.json": "7d684e9b204404f7a509ee22947f93254d62a9e30ac38ba62a54886d3434f6ed",
+    "tests/fixtures/midmap-retirement/precombat.json": "805ac7110be3dd48492e89fb45228b45ed5d2d6ec7b902481298bb7c34666f80",
+    "integration/alas/campaign-midmap-continuous-20260913/blocked-r2.json": "d32c1e64273853f827d08cfc5011ea28aa6bfe1dd6fd218939683e59d3d4b323",
+    "integration/alas/campaign-midmap-continuous-20260911/blocked-r1.json": "91127a448d061650cd66b3de297563ece4ba0f2a43cc90aae0c874ab6dbdb490"
+  }
+}

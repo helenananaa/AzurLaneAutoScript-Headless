@@ -343,7 +343,16 @@ bool IsCampaignScoutControl(std::string_view path) {
              std::string_view::npos && EndsWith(path, "_root/mouseChild");
 }
 
+bool IsShipyardSeriesControl(std::string_view name, std::string_view path) {
+  if (name == "version_btn" && EndsWith(path,
+      "blur_panel/adapt/bottom_panel/ships/bg/version/version_btn")) return true;
+  return name.size() == 9 && name.substr(0, 8) == "version_" &&
+         name[8] >= '1' && name[8] <= '9' &&
+         EndsWith(path, "version_panel/window/content/" + std::string(name));
+}
+
 bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
+  if (IsShipyardSeriesControl(name, path)) return true;
   if (name == "mouseChild" && IsCampaignScoutControl(path)) {
     return true;
   }
@@ -845,8 +854,15 @@ bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
       });
 }
 
+bool IsShipyardShipToggle(std::string_view name, std::string_view path) {
+  return (name == "ship_tpl" || name == "ship_tpl(Clone)") &&
+         EndsWith(path, "blur_panel/adapt/bottom_panel/ships/bg/content/" +
+                            std::string(name));
+}
+
 bool ShouldEvaluateToggleTopRaycast(std::string_view name,
                                     std::string_view path) {
+  if (IsShipyardShipToggle(name, path)) return true;
   if (path.find("DockyardQuickSelectSettingUI(Clone)/window/notifications/options/notify_tpl_") != std::string_view::npos) return true;
   if (name == "AutoFight" &&
       EndsWith(path,
@@ -1879,7 +1895,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
           IsCampaignPreparationSwitch(objectName, path) ||
           IsRetirementControl(path) || IsSubmarineCallControl(path) ||
           IsCampaignStrategyDetailsControl(path) || IsCampaignDeploymentControl(path) ||
-          IsCampaignScoutControl(path) ||
+          IsCampaignScoutControl(path) || IsShipyardSeriesControl(objectName, path) ||
           (EndsWith(path, "Dorm3dMainUI(Clone)/UI/base/btn_back") ||
           EndsWith(path, "Dorm3dMainUI(Clone)/UI/watch/btn_back") ||
           EndsWith(path, "Dorm3dMainUI(Clone)/UI/ik/btn_back")) ||
@@ -1900,7 +1916,8 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
           record.adbY = static_cast<float>(screenHeight) - record.screenY;
         }
       }
-      if ((EndsWith(path, "Dorm3dMainUI(Clone)/UI/base/btn_back") ||
+      if (IsShipyardSeriesControl(objectName, path) ||
+          (EndsWith(path, "Dorm3dMainUI(Clone)/UI/base/btn_back") ||
           EndsWith(path, "Dorm3dMainUI(Clone)/UI/watch/btn_back") ||
           EndsWith(path, "Dorm3dMainUI(Clone)/UI/ik/btn_back")) ||
           EndsWith(path, "DailyLevelUI(Clone)/desc_panel/main_mask/main/"
@@ -2055,6 +2072,14 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
         if (ShouldEvaluateToggleTopRaycast(toggleName, togglePath) &&
             (record.control.flags & 0x100u) != 0 &&
             (record.control.flags & 0x400u) != 0) {
+          if (IsShipyardShipToggle(toggleName, togglePath)) {
+            record.control.adbX = std::round(
+                (record.control.screenLeft + record.control.screenRight) / 2.0f);
+            record.control.adbY = std::round(static_cast<float>(screenHeight) -
+                (record.control.screenBottom + record.control.screenTop) / 2.0f);
+            record.control.screenX = record.control.adbX;
+            record.control.screenY = static_cast<float>(screenHeight) - record.control.adbY;
+          }
           if (togglePath.find("DockyardQuickSelectSettingUI(Clone)/") != std::string_view::npos) {
             record.control.screenX = (record.control.screenLeft + record.control.screenRight) / 2.0f;
             record.control.screenY = (record.control.screenBottom + record.control.screenTop) / 2.0f;

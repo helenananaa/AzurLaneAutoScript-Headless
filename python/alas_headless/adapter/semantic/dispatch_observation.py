@@ -31,6 +31,27 @@ class DispatchObservationPorts:
     """Dispatch observation ports on the shared adapter context."""
 
     def _appear_priority(self, name):
+        if name == 'POPUP_CANCEL_WHITE' and self.oracle.private_quarters_download_prompt_absent():
+            return False
+        if name == 'PRIVATE_QUARTERS_LOADING_CHECK':
+            return self.oracle.private_quarters_loading_visible()
+        if name == 'PRIVATE_QUARTERS_ROOM_TARGET_INTIMACY_MAX':
+            return self.oracle.private_quarters_intimacy_max()
+        if name in ('PRIVATE_QUARTERS_ROOM_TARGET_CHECK_1', 'PRIVATE_QUARTERS_ROOM_TARGET_CHECK_2',
+                    'PRIVATE_QUARTERS_ROOM_TARGET_CHECK_3'):
+            return self.oracle.private_quarters_new_jersey_visible()
+        if name == 'PRIVATE_QUARTERS_PAGE_LOCALE_LOFT':
+            return self.oracle.private_quarters_loft_visible()
+        if name in ("SHIPYARD_IN_DEV", "SHIPYARD_IN_FATE"):
+            if not self.oracle.shipyard_page_visible():
+                return False
+            phase = self.oracle.shipyard_selected_state().phase
+            return phase == ("dev" if name == "SHIPYARD_IN_DEV" else "fate")
+        if (name in ("GOTO_MAIN", "GOTO_MAIN_WHITE", "RPG_HOME")
+                and self.oracle.exists("research/progress/confirm")):
+            # The original unknown-page recovery probes home before its
+            # popup handler. This notice obscures those navigation controls.
+            return False
         if name == 'PRIVATE_QUARTERS_INTERACT_CHECK':
             return self.oracle.private_quarters_interact_check_visible()
         if name == 'PRIVATE_QUARTERS_INTERACT':
@@ -138,13 +159,12 @@ class DispatchObservationPorts:
             return name == "RESHMENU_CHECK"
         if (
             not self._login_flow.active
-            and self._research_context is not None
             and name in UI_PAGE_CHECK_RESOURCES
             and observation_oracle.exists("research/page/back")
         ):
-            # The owned research page is another full-screen page-sweep
-            # terminus.  Require its complete five-card typed surface for the
-            # positive marker; every earlier unrelated page probe is absent.
+            # A retained research page owns page enumeration even after the
+            # Research task has ended. Observation needs no resource grant;
+            # every project/claim input retains its own task boundary.
             if name != "RESEARCH_CHECK":
                 return False
             try:
@@ -273,6 +293,10 @@ class DispatchObservationPorts:
         return UNHANDLED
 
     def _appear_confirmation(self, name):
+        if (name in ("POPUP_CONFIRM", "POPUP_CANCEL")
+                and self.oracle.exists("research/progress/confirm")):
+            target = "research/progress/confirm" if name == "POPUP_CONFIRM" else "research/progress/cancel"
+            return self.oracle.enabled(target)
         if (
             self._campaign_context is not None
             and name in ("POPUP_CONFIRM", "POPUP_CANCEL")

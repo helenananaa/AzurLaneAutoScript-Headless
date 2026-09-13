@@ -47,6 +47,20 @@ class ResearchAdapterPorts:
     def end_research(self) -> None:
         self._research_context = None
 
+    def _research_entry_completed(self) -> Optional[ActionReceipt]:
+        """Acknowledge an actual entry after the destination replaces its source."""
+        context = self._research_context
+        receipt = context.navigation_receipts.get("research-menu/research") if context else None
+        if receipt is None:
+            return None
+        if (
+            self.oracle.enabled("research/page/back")
+            and len(self.oracle.research_projects()) == 5
+            and self.oracle.read_state().generation > receipt.generation
+        ):
+            return receipt
+        return None
+
     def _known_research_surface_exists(self) -> bool:
         return any(
             self.oracle.exists(semantic_id)
@@ -228,11 +242,7 @@ class ResearchAdapterPorts:
             (resource_id, required)
             for resource_id, _owned, required in detail_costs
         )
-        if len(expected_costs) > 1:
-            raise SemanticGateClosed(
-                "multi-resource research start confirmation is not reviewed"
-            )
-        context.pending_resource_costs = expected_costs
+        context.pending_resource_costs = tuple(sorted(expected_costs))
         if expected_costs:
             context.pending_resource_id, context.pending_resource_required = (
                 expected_costs[0]
@@ -255,13 +265,13 @@ class ResearchAdapterPorts:
             start_receipt = self.oracle.click("research/detail/start")
             context.start_receipt = start_receipt
             context.start_confirm_receipt = None
-            expected_cost = expected_costs[0]
+            expected_cost = tuple(sorted(expected_costs))
 
             deadline = time.monotonic() + 8.0
             last_prompt_error: Optional[SemanticGateClosed] = None
             while time.monotonic() < deadline:
                 try:
-                    prompt_cost = self.oracle.research_start_prompt_cost()
+                    prompt_cost = self.oracle.research_start_prompt_costs()
                 except SemanticGateClosed as exc:
                     # The message box mounts its Button and typed text in separate
                     # Unity updates. Keep the exact-cost gate, but retry this
@@ -270,10 +280,7 @@ class ResearchAdapterPorts:
                     time.sleep(0.25)
                     continue
                 if prompt_cost == expected_cost:
-                    receipt = self._dispatch_mutation(
-                        "research.start",
-                        lambda: self.oracle.click("research/start/confirm"),
-                    )
+                    receipt = self._confirm_research_start(expected_cost)
                     context.start_confirm_receipt = receipt
                     context.last_queue_state = None
                     context.last_projects = None
@@ -297,6 +304,15 @@ class ResearchAdapterPorts:
         raise SemanticGateClosed(
             "research did not enter running state after exact-cost confirmation"
         ) from last_error
+
+    def _confirm_research_start(self, expected_costs: Tuple[Tuple[str, int], ...]) -> ActionReceipt:
+        """Bind the complete cost match and input to the same fresh frame."""
+        oracle = self._fresh_input_oracle()
+        if not expected_costs or oracle.research_start_prompt_costs() != expected_costs:
+            raise SemanticGateClosed("research costs changed before confirmation input")
+        return self._dispatch_mutation(
+            "research.start", lambda: oracle.click("research/start/confirm")
+        )
 
     def validate_research_filter(self, filter_: object, value: str) -> None:
         """Fail closed on tokens that upstream's permissive parser would ignore."""
@@ -327,13 +343,23 @@ class ResearchAdapterPorts:
         if not 1 <= series <= 9:
             raise ValueError("shipyard series must be in [1, 9]")
         self.oracle.click("shipyard/series/open")
-        receipt = self.oracle.click("shipyard/series/{0}".format(series))
+        deadline = time.monotonic() + 8.0
+        target = "shipyard/series/{0}".format(series)
+        while not self.oracle.enabled(target):
+            if time.monotonic() >= deadline:
+                raise SemanticGateClosed("shipyard series choices did not become actionable")
+            time.sleep(0.25)
+        receipt = self.oracle.click(target)
         deadline = time.monotonic() + 8.0
         while time.monotonic() < deadline:
             if self._shipyard_page_visible() and not self.oracle.exists(
                 "shipyard/series/1"
             ):
-                return receipt
+                try:
+                    if self.oracle.shipyard_series() == series:
+                        return receipt
+                except SemanticGateClosed:
+                    pass
             time.sleep(0.25)
         raise SemanticGateClosed("shipyard series transition timed out")
 
@@ -527,6 +553,8 @@ class ResearchAdapterPorts:
 
     def _appear_research(self, name):
         if name in RESEARCH_VIRTUAL_RESOURCES and self._research_context is not None:
+            if name == "RESET_AVAILABLE":
+                return self.oracle.research_reset_available()
             if name == "QUEUE_CHECK":
                 try:
                     self.research_queue_state()
@@ -563,13 +591,13 @@ class ResearchAdapterPorts:
                         context.queue_confirm_receipt is None
                         and self.oracle.enabled(target)
                     )
-                cost = self.oracle.research_start_prompt_cost()
+                cost = self.oracle.research_start_prompt_costs()
                 return bool(
                     context.start_receipt is not None
                     and context.start_confirm_receipt is None
                     and self._action_ledger.allowed("research.start")
                     and cost is not None
-                    and (cost,) == context.pending_resource_costs
+                    and cost == context.pending_resource_costs
                 )
             if name == "RESEARCH_UNAVAILABLE":
                 try:
@@ -658,14 +686,10 @@ class ResearchAdapterPorts:
                     (resource_id, required)
                     for resource_id, _owned, required in detail_costs
                 )
-                if len(expected_costs) > 1:
-                    raise SemanticGateClosed(
-                        "multi-resource research start confirmation is not reviewed"
-                    )
                 receipt = self.oracle.click("research/detail/start")
                 context.start_receipt = receipt
                 context.start_confirm_receipt = None
-                context.pending_resource_costs = expected_costs
+                context.pending_resource_costs = tuple(sorted(expected_costs))
                 if expected_costs:
                     context.pending_resource_id, context.pending_resource_required = (
                         expected_costs[0]
@@ -701,15 +725,12 @@ class ResearchAdapterPorts:
                     context.start_receipt is None
                     or context.start_confirm_receipt is not None
                     or not self._action_ledger.allowed("research.start")
-                    or (self.oracle.research_start_prompt_cost(),) != expected
+                    or self.oracle.research_start_prompt_costs() != expected
                 ):
                     raise SemanticGateClosed(
                         "research start confirmation does not match the budgeted project"
                     )
-                receipt = self._dispatch_mutation(
-                    "research.start",
-                    lambda: self.oracle.click("research/start/confirm"),
-                )
+                receipt = self._confirm_research_start(expected)
                 context.start_confirm_receipt = receipt
                 context.last_queue_state = None
                 context.last_projects = None

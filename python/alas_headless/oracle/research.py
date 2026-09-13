@@ -20,6 +20,31 @@ from .errors import SemanticGateClosed
 class ResearchOracle:
     """Research operations sharing the oracle frame and input boundary."""
 
+    def research_reset_available(self) -> bool:
+        """Recognize the observed exhausted refresh state, without guessing readiness."""
+        state = self.read_state()
+        if not self.enabled("research/page/back"):
+            raise SemanticGateClosed("research reset page is absent or obscured")
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed("research reset frames are incoherent")
+        path = "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/refresh_btn"
+        labels = [t for t in ui.texts if t.path == path + "/Text"
+                  and t.active_in_hierarchy and t.active_and_enabled and not t.truncated]
+        icons = [i for i in ui.images if i.path == path and i.active_in_hierarchy
+                 and i.active_and_enabled and not i.truncated]
+        if len(labels) != 1 or len(icons) != 1 or icons[0].sprite != "refresh":
+            raise SemanticGateClosed("research reset state is absent or ambiguous")
+        if labels[0].text.strip() == "每日0点后可刷新":
+            return False
+        raise SemanticGateClosed("research reset ready state and input are not yet reviewed")
+
+    def _research_progress_prompt_matches(self, state: OracleState) -> bool:
+        parts = self._msgbox_prompt_parts(state)
+        return bool(parts and parts[1:] == ("取消", "确定") and re.fullmatch(
+            r"当前研究中的[^<>\r\n]+有新的进展，请去开发船坞确认", parts[0]
+        ))
+
     def research_projects(self) -> Tuple[ResearchProjectState, ...]:
         """Read the five visible research cards from typed Unity state."""
 
@@ -554,22 +579,22 @@ class ResearchOracle:
             raise SemanticGateClosed("research queue claim state is inconsistent")
         return ResearchQueueState(tuple(entries), claimable)
 
-    def _research_start_prompt_cost(
+    def _research_start_prompt_costs(
         self, state: OracleState
-    ) -> Optional[Tuple[str, int]]:
+    ) -> Optional[Tuple[Tuple[str, int], ...]]:
         parts = self._msgbox_prompt_parts(state)
         if parts is None:
             return None
         plain, cancel, confirm = parts
-        match = re.fullmatch(
-            r"开启该科研项目需要消耗\s*:\s*"
-            r"(物资|心智魔方|(?:通用|主炮|鱼雷|防空炮|舰载机)部件T[1-4])"
-            r"x([1-9][0-9]*)",
-            plain,
-        )
-        if match is None or cancel != "取消" or confirm != "确定":
+        prefix = re.match(r"开启该科研项目需要消耗\s*:\s*", plain)
+        if prefix is None or cancel != "取消" or confirm != "确定":
             return None
-        resource_id = {
+        item = r"(物资|心智魔方|(?:通用|主炮|鱼雷|防空炮|舰载机)部件T[1-4])x([1-9][0-9]*)"
+        body = plain[prefix.end():]
+        # Consume the whole prompt: never accept just the first recognized cost.
+        if re.fullmatch(item + r"(?:[\s,，、]+" + item + r")*", body) is None:
+            return None
+        resource_ids = {
             "物资": "gold",
             "心智魔方": "20001",
             "舰载机部件T1": "research_part_t1",
@@ -592,8 +617,16 @@ class ResearchOracle:
             "防空炮部件T2": "17032",
             "防空炮部件T3": "17033",
             "防空炮部件T4": "17034",
-        }[match.group(1)]
-        return resource_id, int(match.group(2))
+        }
+        costs = tuple((resource_ids[name], int(amount)) for name, amount in re.findall(item, body))
+        if len({resource_id for resource_id, _ in costs}) != len(costs):
+            return None
+        return tuple(sorted(costs))
+
+    def _research_start_prompt_cost(self, state: OracleState) -> Optional[Tuple[str, int]]:
+        """Legacy single-cost observation must not silently drop companion costs."""
+        costs = self._research_start_prompt_costs(state)
+        return costs[0] if costs is not None and len(costs) == 1 else None
 
     def _research_queue_prompt_matches(self, state: OracleState) -> bool:
         parts = self._msgbox_prompt_parts(state)
@@ -608,10 +641,14 @@ class ResearchOracle:
         )
 
     def research_start_prompt_cost(self) -> Optional[Tuple[str, int]]:
+        costs = self.research_start_prompt_costs()
+        return costs[0] if costs is not None and len(costs) == 1 else None
+
+    def research_start_prompt_costs(self) -> Optional[Tuple[Tuple[str, int], ...]]:
         state = self.read_state()
         target = self._matches(state, "research/start/confirm")
         if len(target) > 1:
             raise SemanticGateClosed("research start prompt is ambiguous")
         if not target or not target[0].actionable:
             return None
-        return self._research_start_prompt_cost(state)
+        return self._research_start_prompt_costs(state)

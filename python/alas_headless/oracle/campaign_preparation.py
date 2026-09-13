@@ -296,10 +296,12 @@ class CampaignPreparationOracle:
         """Return the one exact pre-sortie layer, or None before it appears."""
 
         button_state = self.read_state()
-        ui_state = self.read_ui_state(check_foreground=False)
+        ui_state = self.read_ui_state(check_foreground=False, _preserve_partial_toggles=True)
         map_roots, fleet_roots = self._campaign_preparation_roots(
             button_state, ui_state
         )
+        if (map_roots or fleet_roots) and ui_state.snapshot.get('toggle_truncated') is not False:
+            raise SemanticGateClosed("campaign preparation toggle snapshot is truncated")
         if map_roots and fleet_roots:
             raise SemanticGateClosed(
                 "campaign preparation layers are simultaneously active"

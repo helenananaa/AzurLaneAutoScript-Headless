@@ -798,6 +798,15 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                     )
                 )
                 retryable = retryable or initial_game_startup_retry
+                private_room_retry = bool(
+                    time.monotonic() <= getattr(self.adapter, '_private_quarters_transition_until', 0.0)
+                    and isinstance(exc, SemanticGateClosed)
+                    and message in ('observer snapshot is stale',
+                                    'observer endpoints are not generation-coherent',
+                                    'semantic frame mixes UI and state generations',
+                                    'typed main-thread UI probe is incomplete')
+                )
+                retryable = retryable or private_room_retry
                 if not retryable or (
                     attempt >= 2
                     and not input_generation_retry
@@ -807,6 +816,7 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                     and not extended_combat_result_retry
                     and not extended_campaign_retry
                     and not extended_operation_siren_retry
+                    and not private_room_retry
                 ):
                     raise
                 attempt += 1

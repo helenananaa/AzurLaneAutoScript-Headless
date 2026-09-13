@@ -633,7 +633,9 @@ class TargetsOracle:
         if semantic_id in ("tactical/course/cancel", "tactical/course/confirm"):
             return bool(matches and self._tactical_course_prompt_matches(state))
         if semantic_id in ("research/start/cancel", "research/start/confirm"):
-            return bool(matches and self._research_start_prompt_cost(state) is not None)
+            return bool(matches and self._research_start_prompt_costs(state) is not None)
+        if semantic_id in ("research/progress/confirm", "research/progress/cancel"):
+            return bool(matches and self._research_progress_prompt_matches(state))
         if semantic_id in ("research/queue/cancel", "research/queue/confirm"):
             return bool(matches and self._research_queue_prompt_matches(state))
         if semantic_id in ("guild/dispatch/cancel", "guild/dispatch/confirm"):
@@ -803,7 +805,7 @@ class TargetsOracle:
             return False
         if (
             semantic_id == "overlay/login-data-expired/confirm"
-            and not self._login_data_expired_prompt_matches(state)
+            and (not matches or not self._login_data_expired_prompt_matches(state))
         ):
             return False
         if len(matches) > 1:
@@ -967,9 +969,11 @@ class TargetsOracle:
             "tactical/course/confirm",
         ) and not self._tactical_course_prompt_matches(state):
             return False
+        if semantic_id in ("research/progress/confirm", "research/progress/cancel") and not self._research_progress_prompt_matches(state):
+            return False
         if (
             semantic_id in ("research/start/cancel", "research/start/confirm")
-            and self._research_start_prompt_cost(state) is None
+            and self._research_start_prompt_costs(state) is None
         ):
             return False
         if semantic_id in (

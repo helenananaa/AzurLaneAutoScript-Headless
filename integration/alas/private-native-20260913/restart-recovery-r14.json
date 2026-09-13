@@ -1,0 +1,2087 @@
+{
+  "passed": false,
+  "source_sha256": {
+    "python/alas_headless/adapter/semantic/__init__.py": "649733a0379b5a6bf1f48f2f8605524168ef8cc8f6cf35242e3c7760a7581017",
+    "python/alas_headless/adapter/semantic/adapter.py": "2a8f3859db58088395b71f8b5153294937e18321c0e620a6b815f89d3f69786f",
+    "python/alas_headless/adapter/semantic/archives.py": "74f453051ad4f85a0065a19362889ec5a12804f987dedd52ea48c6dd2bcf67ce",
+    "python/alas_headless/adapter/semantic/build.py": "e06943310a0f11c002efc457f0df4d0bfc532b603f6d33f11e82952042401934",
+    "python/alas_headless/adapter/semantic/campaign.py": "ba372cc4a2c351e2a00ee9cf6d069969462673eb46538d7308704673029365fe",
+    "python/alas_headless/adapter/semantic/campaign_health.py": "a148a0b346989b625efd7b0a1e7d1aa6c2af85c928ab2a07c998e1424587dcba",
+    "python/alas_headless/adapter/semantic/campaign_map.py": "c8c99cbf889e03bac5d930705fec79e7ad40db3e83e200edc3d925af3217f39d",
+    "python/alas_headless/adapter/semantic/campaign_preparation.py": "904633d6bbbb12d8eb61b4694a0257288e1ec63524b59329ee3f4d8a9c0078f0",
+    "python/alas_headless/adapter/semantic/commission.py": "91fe54d2b37e4b2e85eba2868be6f4ac8f248beaf8501dd46b426aa4867e31cf",
+    "python/alas_headless/adapter/semantic/contracts.py": "a07fa9b7b131442554a4011cb3c3ccf5afcef244d0c5697d22e1c4e08a13e1a9",
+    "python/alas_headless/adapter/semantic/core.py": "2143e24c022f5b2196037669855fd22b9209c0f940415a34324beeeb394d3c6c",
+    "python/alas_headless/adapter/semantic/daily.py": "8c071a33bec728dcdf137abb527dbc441c3e8722d6ca8896355e5255de0fa796",
+    "python/alas_headless/adapter/semantic/dispatch.py": "68bdb629da07f44dc20e0be8a9ad7b488df488a90e9a35337c872b0150eb2792",
+    "python/alas_headless/adapter/semantic/dispatch_actions.py": "6f8792d4f2d76f884844d88716087cdb77c5482f9f0e51b0bd442c4623f72481",
+    "python/alas_headless/adapter/semantic/dispatch_observation.py": "306c240dbe51697ff24e89a5c89ec3a1fdd60183a6ec47505a1dba59f57b385a",
+    "python/alas_headless/adapter/semantic/dispatch_result.py": "382856e91a043693d2e55357b635a774dab5a169a3ef380deba4e65751518fce",
+    "python/alas_headless/adapter/semantic/dock.py": "e7e2757a027c4d97ffe499f10d08e26b5e2c29fb2b55c9cd8fa5305d08995910",
+    "python/alas_headless/adapter/semantic/dorm.py": "5cff605ffa3ad9eb37dce9d9fdeaed6ab1c11eaf4fbb9150aa030b6af6855ffe",
+    "python/alas_headless/adapter/semantic/event.py": "d25336bfd638de2e77ba3b4bd00190d1afe9e84589252d6bf1e3b9cf52cde7f5",
+    "python/alas_headless/adapter/semantic/gems_farming.py": "c3f6df38589ee979f2d43949617d82aaf2bca6c1561fa87918d5bdee65be731f",
+    "python/alas_headless/adapter/semantic/guild.py": "fe56bd8e77c678cdaa0698100d0f48b402d58a74e4fb1bc7ebacbfc4bc6a6547",
+    "python/alas_headless/adapter/semantic/legacy.py": "f4064664c242a65b66a30c954c99493e2e508dc51088a2fde3d4adfe807a86eb",
+    "python/alas_headless/adapter/semantic/login.py": "54a7221b6873e04e86257fcf53a07e0501f725d98d50a152385a22f869e68bbd",
+    "python/alas_headless/adapter/semantic/mail.py": "4d835b384ea3737746a450e7405e9d7dd2d6b67bb57b1b48ba5730bde2602a7b",
+    "python/alas_headless/adapter/semantic/meowfficer.py": "01a3bf29926ade7eaabb71c679643b1d7fa56fe81a4588d9e498e6b253ba1ff2",
+    "python/alas_headless/adapter/semantic/meta.py": "813f068b8fd5cd33f4296765922f6c359fc9cbdb97076ab236b0ce7088c6d28e",
+    "python/alas_headless/adapter/semantic/minigame.py": "542b099e1c78f2bf5112adf7b8cd1270767b5e4c94933debe428b99cf84ca5da",
+    "python/alas_headless/adapter/semantic/mission.py": "126515c7e88e7b5b5b3b86e30fe4010bdc18367fcb75abc6087c99c0b2795865",
+    "python/alas_headless/adapter/semantic/observation.py": "6a09fff5392685d9510669438230918f3c92225094f743f2b02d0e1e45fde20c",
+    "python/alas_headless/adapter/semantic/opsi.py": "99bd0e78bc9181e0724bdaf9885413b36069a6b7fd367a4d33cf21435d271d62",
+    "python/alas_headless/adapter/semantic/opsi_shop.py": "f31e7d666b8fff1949041a4b9c3a5ab02c3d1137c55f909bf127572d550e1916",
+    "python/alas_headless/adapter/semantic/raid.py": "e04fd95232b3c09bb7654fbbe71dfda06175c2e3695e1fca8a3004c0c0581af5",
+    "python/alas_headless/adapter/semantic/research.py": "f007dc9dd535e053ed0f6d66aaba95f1f0a8cb2a24c7109cb65b99c87bc29654",
+    "python/alas_headless/adapter/semantic/resources.py": "6f97bd1acef237dfba2a35d2615b8d1625ffc9ab46286efb05fe580d5e847152",
+    "python/alas_headless/adapter/semantic/rewards.py": "46f1c4ec41677789d2346e3de2c7627518db50b524d1225eea4dcba5c1837d12",
+    "python/alas_headless/adapter/semantic/session.py": "14b89a9e4411dc354f13bfb95210d4cb8c4e9aa9b033505fb83a37da233fba80",
+    "python/alas_headless/adapter/semantic/session_combat.py": "42ad62ec2987eeb70d331445dbacb15f4c764ff85684f1d0552b1714aded77cd",
+    "python/alas_headless/adapter/semantic/session_dispatch.py": "b11361b44abda29c88ba2b56e653333f7c13dd12d997fe8334b464c57a53897b",
+    "python/alas_headless/adapter/semantic/session_opsi.py": "1494afdc7a74ab97b4f64db4a6c1f15b2b63a0ab070c8ce51ede33082e05b508",
+    "python/alas_headless/adapter/semantic/session_tasks.py": "17e84e2042c61dc3bba1d067e617a651f200fea10af0de7b285e587937d5b1d5",
+    "python/alas_headless/adapter/semantic/shop.py": "0268c62890cc033e58e77d4c67848afbf79bac5c15df4ab654d5d320880167d6",
+    "python/alas_headless/adapter/semantic/tactical.py": "ba5b6bd144f50cba3e7c581747df3661fbf5f852f7b9322ac69bed2abea64253",
+    "python/alas_headless/adapter/task_lifecycle.py": "2f653129104e2b33fbcf71dbce218216b1cbcc105cafa3c0ce369583fec0b98c",
+    "python/alas_headless/alas_adapter.py": "5767af823ed712aeeb2589b6b4aaf4a7d03b31e3d4c2ab0698d690814123b0b4",
+    "python/alas_headless/oracle/__init__.py": "649733a0379b5a6bf1f48f2f8605524168ef8cc8f6cf35242e3c7760a7581017",
+    "python/alas_headless/oracle/actions.py": "1f5c0609689e19a779854b06c10b0d6160428eeed7eddf4f2f42596dc1da6824",
+    "python/alas_headless/oracle/archives.py": "a87a308e763a243568969150f23cf351ec7fcd64cff2397b6cbd3e0769d65ee9",
+    "python/alas_headless/oracle/awaken.py": "171760aa6958733268e202aebc2a127c6df52c06cddddf84183574ae778b03ea",
+    "python/alas_headless/oracle/blockers.py": "2ddbf427b957a1d6df460453998c8ebcdc4c709b62296f3a9c24bb831b05cead",
+    "python/alas_headless/oracle/build.py": "348e4c3b42723c399c2b9c19724b15c29372bba17d5563e8041ab8c8842b9ccc",
+    "python/alas_headless/oracle/button_targets.py": "d99cb2c710202d9aca17944037290ccd3c2aa7433d3d6f7ff8bd684445ceff6c",
+    "python/alas_headless/oracle/campaign_fleet.py": "5e730d1efa42a74dd6832cb1c152d88f734dfffc00a7c1d987dea0b820326b58",
+    "python/alas_headless/oracle/campaign_health.py": "3179a5ba27a666d47487aafb68865a780c7da7eab736408eaee852dc088b1bd2",
+    "python/alas_headless/oracle/campaign_map.py": "a618a9888446298009d805a56a7472352b0d0edf731cb9ea0f93efae0ec8de81",
+    "python/alas_headless/oracle/campaign_mappings.py": "8054660b5e80734f6a9e537c51269e715f29befba56adac058fb5921422204d9",
+    "python/alas_headless/oracle/campaign_navigation.py": "70abb0bab5c1fa88cd32d933de762a2d63ffc3fbbc62f3ea5014667122b59485",
+    "python/alas_headless/oracle/campaign_preparation.py": "b018caa13479f6f06f2b87e661c83ed4a30b3dd723a9c2a19aef1973a4fa0d89",
+    "python/alas_headless/oracle/campaign_state.py": "b9487750ff8ddc931a40d1a68d9f52370c8e490fbc5a8bd9ad20b018b6111782",
+    "python/alas_headless/oracle/combat.py": "639f1e0f4d1f079226dd4d5301ca69c7d772217cee0f5380de2959b79364b215",
+    "python/alas_headless/oracle/commission.py": "522da93c10f6718abd0d5f5fb0b13af8ad711f6fb85d01b4a2858d8e9f9b338a",
+    "python/alas_headless/oracle/contracts.py": "f938ae638a76c61f384446cf9219159a9773ded2f8ad4b31d6b96715deea3fd4",
+    "python/alas_headless/oracle/core.py": "0eceb0fb1ecac226bccc64a7bfc250e2a6ccc382f36cc56f37629d5c7ca55463",
+    "python/alas_headless/oracle/dorm.py": "2a719100b7c8c3752c238fe689118a293d371076277199e27e1f153050a018d3",
+    "python/alas_headless/oracle/enhancement.py": "ff29527baea14d78bd329cf6d262f05c4ea5c651fee391d73ca53c53780e0f29",
+    "python/alas_headless/oracle/errors.py": "10fc292499647cdafb229a2e748800724b72022a49d775ea2839ec33af374021",
+    "python/alas_headless/oracle/event.py": "bd32d33740ee859dafecd62b6cc30d6a1cc4b5f4e37c7b99d74458d596753aeb",
+    "python/alas_headless/oracle/exercise.py": "e101c7731f0aed08fec0009ee9d1c8218baf0a40248516233552e1df76e9fcdf",
+    "python/alas_headless/oracle/gems_equipment.py": "8a9e4543f2a4da117f9a9ee412420e921699ca7f86f35a68a9e1d6364946969a",
+    "python/alas_headless/oracle/gems_farming.py": "f1dc3d1c7bc3de350cd24c21c52c77be4add53eb28255e3b0bc7871d9b2ccecd",
+    "python/alas_headless/oracle/guild.py": "ed7fe4315ad4d590ac6cde1e8b6d7ea326e0a2193bb0fa6539edc516140604cb",
+    "python/alas_headless/oracle/login.py": "183b72c96f96da6f35ef5eefde535e8502e53cde8b440c6f18288ba48c5ee5f0",
+    "python/alas_headless/oracle/mail.py": "a19e6a5ed778f6b1b1688f01e4d11e7c7c81d73021a8ef1d1b344482a245ff3d",
+    "python/alas_headless/oracle/meowfficer.py": "13cc430df9d982ce6adaaaf0c7e53b1ac96913e9d129fc3e277597f6829bc68a",
+    "python/alas_headless/oracle/meta.py": "3eae7bc230354a5a08fde61f272830ba72e8ac76bcdb9ef339e6aa78ca0d50a8",
+    "python/alas_headless/oracle/minigame.py": "2197a338aef67b6f3c13292551f467564f87c5bc21f55218e7802665d7afe7db",
+    "python/alas_headless/oracle/mission.py": "31e6c05a8cfd628e6507633c1afecdf654cb67c7fd0a8821c79138d24d8e36ed",
+    "python/alas_headless/oracle/opsi_globe.py": "683c7a3400daf148240e1f051640b37edb1626aef506f41ed62df5a5a851979a",
+    "python/alas_headless/oracle/opsi_mission.py": "127ba09751cd2180144976e1cf74f5bb5e11f1aa4a7dc978ad8b7f240b81a538",
+    "python/alas_headless/oracle/opsi_navigation.py": "6b100a962af17018e4d53cfc78eee969ce53e022a811fad13dcb343fd027c0f3",
+    "python/alas_headless/oracle/opsi_resources.py": "69565a46c6d1bcdbc0a7551385d6a4f2809007b6c6045e6428fa8e461c91001b",
+    "python/alas_headless/oracle/opsi_shop.py": "df906393bbd1979e6e197ac7548b658c688054fad026e721451e5cb6d48a5743",
+    "python/alas_headless/oracle/opsi_state.py": "9a79e7fb9d5ddc15ba460113549cd4b4369db1fd16828ee8aa0f63c17f51aea6",
+    "python/alas_headless/oracle/opsi_storage.py": "8058e29c4696e2a0404f04fc5331bc1ac7b967134324799361dcc5785e251445",
+    "python/alas_headless/oracle/private_quarters.py": "f8f6851a3ebf511c2a412621e257d95147b8f3e035b3109a155feeaa592b7b3e",
+    "python/alas_headless/oracle/raid.py": "550f1382843f0947049f6b2b4da417bda2eab50b4a8b6a1aa57bea0cc3345bd4",
+    "python/alas_headless/oracle/research.py": "f4881ca15857e0f0dad7612fff6f91c1bc6e4a32d4d181424d061d7a4233b14f",
+    "python/alas_headless/oracle/retirement.py": "19a5aa3ab387b3edb5fe2e07056e9800d9105dc63549497a054ad2cf4081a1d8",
+    "python/alas_headless/oracle/rewards.py": "064f202dacdcf97e0a5c72f537471f84aaf668ec1b6a3a1948693ae672388c8b",
+    "python/alas_headless/oracle/shipyard.py": "9abab91971826260d8a047a74d3a87174010748158949ed6915898251825a7fa",
+    "python/alas_headless/oracle/shop.py": "ea903177b989cf9a02b2822b49b62019f75ea62a3458ff248a8d58e27133ca31",
+    "python/alas_headless/oracle/surfaces.py": "22864bd0aa0fd84f93936cfd779d75a7ff924047d0d81741d9e1d3eae8e4f165",
+    "python/alas_headless/oracle/tactical.py": "54dc50669996fa1ac2b552c071bbde7c00b309d761c863efc637e79ebccb9a9c",
+    "python/alas_headless/oracle/targets.py": "0672ddc8627824ff3bc6b9db368916715650f8f6fe7bf6dd3303e0d646ba19ec",
+    "python/alas_headless/oracle/transport.py": "6734e3d0c5d7ade9863b52fc8ed3e7e7cc5fc9f46585076924bc8b31bcdfcf25",
+    "python/alas_headless/oracle/ui_targets.py": "66ae8b25b4c31954ba60d345b4014276395ef6442fbcf45035658b5e299c912d",
+    "python/alas_headless/semantic_oracle.py": "e459cae11bf20453fa500f102d01389bfb4ddb33c51e70b1309e7aa6053ad353"
+  },
+  "runtime": {
+    "package": "com.bilibili.azurlane",
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "width": 1280,
+    "height": 720,
+    "max_age_ms": 10000,
+    "peer_uid": 2000,
+    "expected_pid": 17906
+  },
+  "initial_ui": {
+    "generation": 3178,
+    "method_mask": 15,
+    "skipped_count": 0,
+    "image_truncated": false,
+    "snapshot": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "semantic_schema": "alas-headless.ui/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 17906,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "schema": 1,
+      "struct_size": 1769944,
+      "generation": 3178,
+      "snapshot_monotonic_ns": 8688831448800,
+      "response_monotonic_ns": 8688862964600,
+      "age_ms": 31,
+      "method_mask": 15,
+      "toggle_count": 0,
+      "text_count": 5,
+      "image_count": 23,
+      "toggle_truncated": false,
+      "text_truncated": false,
+      "image_truncated": false,
+      "error_count": 0,
+      "skipped_count": 0,
+      "image_source_count": 1082,
+      "image_source_capacity": 16384,
+      "toggles": [],
+      "texts": [
+        {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/current_server/Text",
+          "text": "点击更换",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 709.0,
+            "top": 565.267,
+            "right": 797.667,
+            "bottom": 593.4
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "server_name",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/current_server/server_name",
+          "text": "巴巴罗萨",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 552.267,
+            "top": 564.6,
+            "right": 709.0,
+            "bottom": 594.067
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "version",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/version",
+          "text": "ver 9.7.381",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 12.767,
+            "top": 537.0,
+            "right": 86.1,
+            "bottom": 554.333
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/info/Text",
+          "text": "抵制不良游戏，拒绝盗版游戏。注意自我保护，谨防受骗上当。适度游戏益脑，沉迷游戏伤身。合理安排时间，享受健康生活    \n本网络游戏适合年满18周岁以上的用户使用，为了您的健康，请合理控制游戏时间    游戏著作权人：上海蛮啾网络科技有限公司，厦门勇仕网络技术股份有限公司    \n文化部备案号：文网游备字【2016】M-RPG 8051号    审批文号：新广出审【2017】2447号    著作权登",
+          "flags": 287,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 642.733,
+            "right": 1280.0,
+            "bottom": 720.0
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "FpsPanel",
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 573.333,
+            "top": 0.0,
+            "right": 706.667,
+            "bottom": 34.667
+          }
+        }
+      ],
+      "images": [
+        {
+          "kind": "image",
+          "name": "statu_org",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/reources/statu_org",
+          "sprite": "statu_org",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 7302.0,
+            "top": 344.333,
+            "right": 7311.333,
+            "bottom": 375.667
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "statu_gray",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/reources/statu_gray",
+          "sprite": "statu_gray",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 7302.0,
+            "top": 344.333,
+            "right": 7311.333,
+            "bottom": 375.667
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "statu_green",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/reources/statu_green",
+          "sprite": "statu_green",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 7302.0,
+            "top": 344.333,
+            "right": 7311.333,
+            "bottom": 375.667
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "statu_red",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/reources/statu_red",
+          "sprite": "statu_red",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 7302.0,
+            "top": 344.333,
+            "right": 7311.333,
+            "bottom": 375.667
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "age",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/age",
+          "sprite": "age",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 82.6,
+            "top": 620.4,
+            "right": 154.6,
+            "bottom": 713.733
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "criware",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/criware",
+          "sprite": "criware",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1212.133,
+            "top": 652.167,
+            "right": 1270.533,
+            "bottom": 710.567
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "repair_button",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/btns/repair_button",
+          "sprite": "repair_btn",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1222.013,
+            "top": 16.667,
+            "right": 1263.333,
+            "bottom": 57.32
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "Licence_btn",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/btns/Licence_btn",
+          "sprite": "Licence_btn",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1054.667,
+            "top": 16.667,
+            "right": 1205.333,
+            "bottom": 57.333
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "private_btn",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/btns/private_btn",
+          "sprite": "private_btn",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 887.333,
+            "top": 16.667,
+            "right": 1038.0,
+            "bottom": 57.333
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "opBtn",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/bg_lay/buttons/opBtn",
+          "sprite": "play_icon",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 16.667,
+            "top": 491.333,
+            "right": 76.667,
+            "bottom": 552.0
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "filingBtn",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/filingBtn",
+          "sprite": "filingBtn",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 26.0,
+            "top": 661.333,
+            "right": 60.0,
+            "bottom": 700.0
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "current_server",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/current_server",
+          "sprite": "channel_button_bg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 431.667,
+            "top": 554.0,
+            "right": 848.333,
+            "bottom": 603.333
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "logo",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/logo",
+          "sprite": "logo",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 10.0,
+            "right": 226.667,
+            "bottom": 122.0
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "info",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/info",
+          "sprite": "white_dot",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.14902,
+            "green": 0.14902,
+            "blue": 0.14902,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 642.733,
+            "right": 1280.0,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "grid",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/grid",
+          "sprite": "xiexian01",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.313726
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 353.679,
+            "top": 556.337,
+            "right": 427.655,
+            "bottom": 580.996
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "hori",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/hori",
+          "sprite": "white_dot",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.313726
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 552.413,
+            "right": 1280.0,
+            "bottom": 553.747
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "press_to_login_bg",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/press_to_login/press_to_login_bg",
+          "sprite": "press-to-start",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1035.933,
+            "top": 517.733,
+            "right": 1272.6,
+            "bottom": 551.067
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "bg",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/bg",
+          "sprite": "login",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.08,
+            "top": 0.0,
+            "right": 1280.08,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "LoginUI2(Clone)",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)",
+          "sprite": "white_dot",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.0,
+            "green": 0.0,
+            "blue": 0.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 0.0,
+            "right": 1280.0,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "top",
+          "path": "OverlayCamera/Adpter/top/top",
+          "sprite": "mask1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": -140.667,
+            "right": 1280.0,
+            "bottom": 0.0
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "left",
+          "path": "OverlayCamera/Adpter/left/left",
+          "sprite": "mask",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -140.667,
+            "top": 0.0,
+            "right": -0.0,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "bottom",
+          "path": "OverlayCamera/Adpter/bottom/bottom",
+          "sprite": "mask1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 720.0,
+            "right": 1280.0,
+            "bottom": 860.667
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "right",
+          "path": "OverlayCamera/Adpter/right/right",
+          "sprite": "mask",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1280.0,
+            "top": 0.0,
+            "right": 1420.667,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        }
+      ],
+      "private_quarters_physics": {
+        "schema": "alas-headless.private-colliders/v1",
+        "status": 0,
+        "truncated": false,
+        "error_count": 0,
+        "camera_path": "",
+        "colliders": []
+      }
+    },
+    "toggles": [],
+    "texts": [
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/current_server/Text",
+        "text": "点击更换",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 709.0,
+          "top": 565.267,
+          "right": 797.667,
+          "bottom": 593.4
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/current_server/Text",
+          "text": "点击更换",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 709.0,
+            "top": 565.267,
+            "right": 797.667,
+            "bottom": 593.4
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "server_name",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/current_server/server_name",
+        "text": "巴巴罗萨",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 552.267,
+          "top": 564.6,
+          "right": 709.0,
+          "bottom": 594.067
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "server_name",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/current_server/server_name",
+          "text": "巴巴罗萨",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 552.267,
+            "top": 564.6,
+            "right": 709.0,
+            "bottom": 594.067
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "version",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/version",
+        "text": "ver 9.7.381",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 12.767,
+          "top": 537.0,
+          "right": 86.1,
+          "bottom": 554.333
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "version",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/version",
+          "text": "ver 9.7.381",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 12.767,
+            "top": 537.0,
+            "right": 86.1,
+            "bottom": 554.333
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/info/Text",
+        "text": "抵制不良游戏，拒绝盗版游戏。注意自我保护，谨防受骗上当。适度游戏益脑，沉迷游戏伤身。合理安排时间，享受健康生活    \n本网络游戏适合年满18周岁以上的用户使用，为了您的健康，请合理控制游戏时间    游戏著作权人：上海蛮啾网络科技有限公司，厦门勇仕网络技术股份有限公司    \n文化部备案号：文网游备字【2016】M-RPG 8051号    审批文号：新广出审【2017】2447号    著作权登",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": true,
+        "bounds": {
+          "left": -0.0,
+          "top": 642.733,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/info/Text",
+          "text": "抵制不良游戏，拒绝盗版游戏。注意自我保护，谨防受骗上当。适度游戏益脑，沉迷游戏伤身。合理安排时间，享受健康生活    \n本网络游戏适合年满18周岁以上的用户使用，为了您的健康，请合理控制游戏时间    游戏著作权人：上海蛮啾网络科技有限公司，厦门勇仕网络技术股份有限公司    \n文化部备案号：文网游备字【2016】M-RPG 8051号    审批文号：新广出审【2017】2447号    著作权登",
+          "flags": 287,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 642.733,
+            "right": 1280.0,
+            "bottom": 720.0
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "FpsPanel",
+        "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+        "text": "",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 573.333,
+          "top": 0.0,
+          "right": 706.667,
+          "bottom": 34.667
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "FpsPanel",
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 573.333,
+            "top": 0.0,
+            "right": 706.667,
+            "bottom": 34.667
+          }
+        }
+      }
+    ],
+    "images": [
+      {
+        "name": "statu_org",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/reources/statu_org",
+        "sprite": "statu_org",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 7302.0,
+          "top": 344.333,
+          "right": 7311.333,
+          "bottom": 375.667
+        },
+        "raw": {
+          "kind": "image",
+          "name": "statu_org",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/reources/statu_org",
+          "sprite": "statu_org",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 7302.0,
+            "top": 344.333,
+            "right": 7311.333,
+            "bottom": 375.667
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "statu_gray",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/reources/statu_gray",
+        "sprite": "statu_gray",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 7302.0,
+          "top": 344.333,
+          "right": 7311.333,
+          "bottom": 375.667
+        },
+        "raw": {
+          "kind": "image",
+          "name": "statu_gray",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/reources/statu_gray",
+          "sprite": "statu_gray",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 7302.0,
+            "top": 344.333,
+            "right": 7311.333,
+            "bottom": 375.667
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "statu_green",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/reources/statu_green",
+        "sprite": "statu_green",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 7302.0,
+          "top": 344.333,
+          "right": 7311.333,
+          "bottom": 375.667
+        },
+        "raw": {
+          "kind": "image",
+          "name": "statu_green",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/reources/statu_green",
+          "sprite": "statu_green",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 7302.0,
+            "top": 344.333,
+            "right": 7311.333,
+            "bottom": 375.667
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "statu_red",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/reources/statu_red",
+        "sprite": "statu_red",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 7302.0,
+          "top": 344.333,
+          "right": 7311.333,
+          "bottom": 375.667
+        },
+        "raw": {
+          "kind": "image",
+          "name": "statu_red",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/reources/statu_red",
+          "sprite": "statu_red",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 7302.0,
+            "top": 344.333,
+            "right": 7311.333,
+            "bottom": 375.667
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "age",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/age",
+        "sprite": "age",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 82.6,
+          "top": 620.4,
+          "right": 154.6,
+          "bottom": 713.733
+        },
+        "raw": {
+          "kind": "image",
+          "name": "age",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/age",
+          "sprite": "age",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 82.6,
+            "top": 620.4,
+            "right": 154.6,
+            "bottom": 713.733
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "criware",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/criware",
+        "sprite": "criware",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 1212.133,
+          "top": 652.167,
+          "right": 1270.533,
+          "bottom": 710.567
+        },
+        "raw": {
+          "kind": "image",
+          "name": "criware",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/criware",
+          "sprite": "criware",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1212.133,
+            "top": 652.167,
+            "right": 1270.533,
+            "bottom": 710.567
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "repair_button",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/btns/repair_button",
+        "sprite": "repair_btn",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 1222.013,
+          "top": 16.667,
+          "right": 1263.333,
+          "bottom": 57.32
+        },
+        "raw": {
+          "kind": "image",
+          "name": "repair_button",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/btns/repair_button",
+          "sprite": "repair_btn",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1222.013,
+            "top": 16.667,
+            "right": 1263.333,
+            "bottom": 57.32
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "Licence_btn",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/btns/Licence_btn",
+        "sprite": "Licence_btn",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 1054.667,
+          "top": 16.667,
+          "right": 1205.333,
+          "bottom": 57.333
+        },
+        "raw": {
+          "kind": "image",
+          "name": "Licence_btn",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/btns/Licence_btn",
+          "sprite": "Licence_btn",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1054.667,
+            "top": 16.667,
+            "right": 1205.333,
+            "bottom": 57.333
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "private_btn",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/btns/private_btn",
+        "sprite": "private_btn",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 887.333,
+          "top": 16.667,
+          "right": 1038.0,
+          "bottom": 57.333
+        },
+        "raw": {
+          "kind": "image",
+          "name": "private_btn",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/btns/private_btn",
+          "sprite": "private_btn",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 887.333,
+            "top": 16.667,
+            "right": 1038.0,
+            "bottom": 57.333
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "opBtn",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/bg_lay/buttons/opBtn",
+        "sprite": "play_icon",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 16.667,
+          "top": 491.333,
+          "right": 76.667,
+          "bottom": 552.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "opBtn",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/bg_lay/buttons/opBtn",
+          "sprite": "play_icon",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 16.667,
+            "top": 491.333,
+            "right": 76.667,
+            "bottom": 552.0
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "filingBtn",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/filingBtn",
+        "sprite": "filingBtn",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 26.0,
+          "top": 661.333,
+          "right": 60.0,
+          "bottom": 700.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "filingBtn",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/filingBtn",
+          "sprite": "filingBtn",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 26.0,
+            "top": 661.333,
+            "right": 60.0,
+            "bottom": 700.0
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "current_server",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/current_server",
+        "sprite": "channel_button_bg",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 431.667,
+          "top": 554.0,
+          "right": 848.333,
+          "bottom": 603.333
+        },
+        "raw": {
+          "kind": "image",
+          "name": "current_server",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/current_server",
+          "sprite": "channel_button_bg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 431.667,
+            "top": 554.0,
+            "right": 848.333,
+            "bottom": 603.333
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "logo",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/logo",
+        "sprite": "logo",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -0.0,
+          "top": 10.0,
+          "right": 226.667,
+          "bottom": 122.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "logo",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/logo",
+          "sprite": "logo",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 10.0,
+            "right": 226.667,
+            "bottom": 122.0
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "info",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/info",
+        "sprite": "white_dot",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          0.14902,
+          0.14902,
+          0.14902,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -0.0,
+          "top": 642.733,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "info",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/info",
+          "sprite": "white_dot",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.14902,
+            "green": 0.14902,
+            "blue": 0.14902,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 642.733,
+            "right": 1280.0,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "grid",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/grid",
+        "sprite": "xiexian01",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          0.313726
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 353.679,
+          "top": 556.337,
+          "right": 427.655,
+          "bottom": 580.996
+        },
+        "raw": {
+          "kind": "image",
+          "name": "grid",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/grid",
+          "sprite": "xiexian01",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.313726
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 353.679,
+            "top": 556.337,
+            "right": 427.655,
+            "bottom": 580.996
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "hori",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/hori",
+        "sprite": "white_dot",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          0.313726
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -0.0,
+          "top": 552.413,
+          "right": 1280.0,
+          "bottom": 553.747
+        },
+        "raw": {
+          "kind": "image",
+          "name": "hori",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/hori",
+          "sprite": "white_dot",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.313726
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 552.413,
+            "right": 1280.0,
+            "bottom": 553.747
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "press_to_login_bg",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/press_to_login/press_to_login_bg",
+        "sprite": "press-to-start",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 1035.933,
+          "top": 517.733,
+          "right": 1272.6,
+          "bottom": 551.067
+        },
+        "raw": {
+          "kind": "image",
+          "name": "press_to_login_bg",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/press_to_login/press_to_login_bg",
+          "sprite": "press-to-start",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1035.933,
+            "top": 517.733,
+            "right": 1272.6,
+            "bottom": 551.067
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/bg",
+        "sprite": "login",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -0.08,
+          "top": 0.0,
+          "right": 1280.08,
+          "bottom": 720.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "bg",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/background/bg",
+          "sprite": "login",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.08,
+            "top": 0.0,
+            "right": 1280.08,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "LoginUI2(Clone)",
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)",
+        "sprite": "white_dot",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "LoginUI2(Clone)",
+          "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)",
+          "sprite": "white_dot",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.0,
+            "green": 0.0,
+            "blue": 0.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 0.0,
+            "right": 1280.0,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "top",
+        "path": "OverlayCamera/Adpter/top/top",
+        "sprite": "mask1",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -0.0,
+          "top": -140.667,
+          "right": 1280.0,
+          "bottom": 0.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "top",
+          "path": "OverlayCamera/Adpter/top/top",
+          "sprite": "mask1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": -140.667,
+            "right": 1280.0,
+            "bottom": 0.0
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "left",
+        "path": "OverlayCamera/Adpter/left/left",
+        "sprite": "mask",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -140.667,
+          "top": 0.0,
+          "right": -0.0,
+          "bottom": 720.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "left",
+          "path": "OverlayCamera/Adpter/left/left",
+          "sprite": "mask",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -140.667,
+            "top": 0.0,
+            "right": -0.0,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "bottom",
+        "path": "OverlayCamera/Adpter/bottom/bottom",
+        "sprite": "mask1",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -0.0,
+          "top": 720.0,
+          "right": 1280.0,
+          "bottom": 860.667
+        },
+        "raw": {
+          "kind": "image",
+          "name": "bottom",
+          "path": "OverlayCamera/Adpter/bottom/bottom",
+          "sprite": "mask1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 720.0,
+            "right": 1280.0,
+            "bottom": 860.667
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "right",
+        "path": "OverlayCamera/Adpter/right/right",
+        "sprite": "mask",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 1280.0,
+          "top": 0.0,
+          "right": 1420.667,
+          "bottom": 720.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "right",
+          "path": "OverlayCamera/Adpter/right/right",
+          "sprite": "mask",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1280.0,
+            "top": 0.0,
+            "right": 1420.667,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        }
+      }
+    ],
+    "image_source_count": 1082,
+    "image_source_capacity": 16384
+  },
+  "actions": [
+    {
+      "semantic_id": "research/progress/confirm",
+      "generation": 3413,
+      "point": {
+        "x": 790.0,
+        "y": 515.0
+      },
+      "bounds": {
+        "left": 699.0,
+        "top": 481.333,
+        "right": 881.0,
+        "bottom": 548.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ]
+}

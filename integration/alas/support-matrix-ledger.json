@@ -6733,7 +6733,9 @@
         "tests/test_alas_private_quarters_config.py",
         "python/alas_headless/alas_private_quarters_config_replay.py",
         "integration/alas/series/0180-private-quarters-config-contract.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "docs/private-quarters-native-20260913.zh-CN.md",
+        "integration/alas/private-native-20260913/watchdog-replay.json"
       ],
       "group_code": "O",
       "metadata": "type=checkbox; display=default",
@@ -6757,7 +6759,9 @@
         "tests/test_alas_private_quarters_config.py",
         "python/alas_headless/alas_private_quarters_config_replay.py",
         "integration/alas/series/0180-private-quarters-config-contract.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "docs/private-quarters-native-20260913.zh-CN.md",
+        "integration/alas/private-native-20260913/watchdog-replay.json"
       ],
       "group_code": "O",
       "metadata": "type=select; display=default",
@@ -6997,7 +7001,11 @@
         "integration/alas/research-use-coin-do-not-use-current-r1-live-validation-receipt.json",
         "integration/alas/research-use-coin-only-05-hour-current-final-r1-live-validation-receipt.json",
         "integration/alas/research-use-coin-only-no-project-current-final-r1-live-validation-receipt.json",
-        "integration/alas/research-resource-policy-recovery-20260822.json"
+        "integration/alas/research-resource-policy-recovery-20260822.json",
+        "integration/alas/shipyard-series-20260912/research-coin-continuation-r1.json",
+        "docs/shipyard-series-20260912.zh-CN.md",
+        "docs/research-dual-resource-20260913.zh-CN.md",
+        "integration/alas/research-dual-resource-20260913/original-chain-final-r2.json"
       ],
       "group_code": "L",
       "metadata": "type=select; display=default",
@@ -7028,7 +7036,11 @@
         "integration/alas/research-use-cube-do-not-use-current-r1-live-validation-receipt.json",
         "integration/alas/research-use-cube-only-no-project-current-final-r1-live-validation-receipt.json",
         "integration/alas/research-allow-delay-true-no-match-current-r1-live-validation-receipt.json",
-        "integration/alas/research-resource-policy-recovery-20260822.json"
+        "integration/alas/research-resource-policy-recovery-20260822.json",
+        "integration/alas/research-continuation-20260912/cube-half-r1.json",
+        "docs/research-continuation-20260912.zh-CN.md",
+        "docs/research-dual-resource-20260913.zh-CN.md",
+        "integration/alas/research-dual-resource-20260913/original-chain-final-r2.json"
       ],
       "group_code": "L",
       "metadata": "type=select; display=default",
@@ -7056,7 +7068,13 @@
         "integration/alas/series/0402-research-six-field-runtime.patch",
         "scripts/python/run_alas_research_resource_policy_live_validation.py",
         "integration/alas/research-use-part-always-use-current-r1-live-validation-receipt.json",
-        "integration/alas/research-use-part-do-not-use-current-r1-live-validation-receipt.json"
+        "integration/alas/research-use-part-do-not-use-current-r1-live-validation-receipt.json",
+        "integration/alas/research-continuation-20260912/part-no-project-r1.json",
+        "docs/research-continuation-20260912.zh-CN.md",
+        "integration/alas/research-next-20260912/part-half-r1.json",
+        "docs/research-shipyard-next-20260912.zh-CN.md",
+        "docs/research-dual-resource-20260913.zh-CN.md",
+        "integration/alas/research-dual-resource-20260913/original-chain-final-r2.json"
       ],
       "group_code": "L",
       "metadata": "type=select; display=default",
@@ -7780,7 +7798,9 @@
         "tests/test_alas_shipyard_config.py",
         "python/alas_headless/alas_shipyard_config_replay.py",
         "integration/alas/series/0070-shipyard-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/shipyard-series-20260912/live-r4.json",
+        "docs/shipyard-series-20260912.zh-CN.md"
       ],
       "group_code": "B",
       "metadata": "type=select; display=default",
@@ -7804,7 +7824,11 @@
         "tests/test_alas_shipyard_config.py",
         "python/alas_headless/alas_shipyard_config_replay.py",
         "integration/alas/series/0070-shipyard-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/research-next-20260912/shipyard-dev-r3.json",
+        "docs/research-shipyard-next-20260912.zh-CN.md",
+        "integration/alas/shipyard-series-20260912/live-r4.json",
+        "docs/shipyard-series-20260912.zh-CN.md"
       ],
       "group_code": "B",
       "metadata": "type=select; display=default",
@@ -7900,7 +7924,9 @@
         "tests/test_alas_shipyard_config.py",
         "python/alas_headless/alas_shipyard_config_replay.py",
         "integration/alas/series/0070-shipyard-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/research-next-20260912/shipyard-dev-r3.json",
+        "docs/research-shipyard-next-20260912.zh-CN.md"
       ],
       "group_code": "B",
       "metadata": "type=select; display=default",
@@ -8792,7 +8818,7 @@
         "OldRetire"
       ],
       "name": "General",
-      "note": "三种 `RetireMode` 已离线分类，旧退役在 Headless 页面事件前拒绝；官方一键退役和 `keep_limit_break` 已实机闭环；强化三项详细配置、ALAS 正式任务入口、语义筛选/选舰导航、官方推荐、真实强化、容量差及装备入仓已闭环；完整 `favourite` 破坏性任务和自然无素材分支未额外消耗舰船复测，`do_not_keep` 仅设置级验证，旧退役仍缺任务级语义事务；2026-09-11 晚间929/930自然战中满仓后，修复新弹窗旧帧分类和装备取消全选过早检查；实际退役72艘、115件装备保留、原Main同图续战一场并撤退通过。触发、退役和续战分属不同进程，完整连续链仍未资格化。见 docs/campaign-midmap-recovery-20260911.zh-CN.md。",
+      "note": "三种 `RetireMode` 已离线分类，旧退役在 Headless 页面事件前拒绝；官方一键退役和 `keep_limit_break` 已实机闭环；强化三项详细配置、ALAS 正式任务入口、语义筛选/选舰导航、官方推荐、真实强化、容量差及装备入仓已闭环；完整 `favourite` 破坏性任务和自然无素材分支未额外消耗舰船复测，`do_not_keep` 仅设置级验证，旧退役仍缺任务级语义事务；2026-09-11 晚间929/930自然战中满仓后，修复新弹窗旧帧分类和装备取消全选过早检查；实际退役72艘、115件装备保留、原Main同图续战一场并撤退通过。触发、退役和续战分属不同进程，完整连续链仍未资格化。见 docs/campaign-midmap-recovery-20260911.zh-CN.md。；2026-09-13：929/930自然战中满仓后，通用结果探针因船坞Toggle截断停止，已修复该无关探测及缺席登录确认探测。原退役处理器独立退役79艘、装备保留；原Main同图续战一场并撤退通过。共三战242石油，完整连续链与退役页自动启动仍未资格化。见 docs/campaign-midmap-recovery-20260913.zh-CN.md。；2026-09-13离线补充：原Combat满仓到同图返回、装备取消选择延迟、原Main遗留退役页恢复三场景通过；当前114成员补丁树、配置和缺席探针已验证。该结果包含契约夹具，不提升为实机连续资格。见 docs/campaign-midmap-offline-20260913.zh-CN.md。",
       "status": "P"
     },
     {
@@ -8838,7 +8864,7 @@
         "Storage"
       ],
       "name": "Main",
-      "note": "三实例 9 组、54 字段（合计 162 个面板字段实例）已证明除 Scheduler.Command 外结构和默认值完全等价；六个 StopCondition 字段共 60 个合法类与 45 个非法类在任何导航前统一严校。普通主线 1-1 至 16-4 共 64 图已在 Main/Main2/Main3 原始路由离线回放并在任何输入前 fail-closed；Main 已在真实 API 32 x86_64 AVD 上完成 normal 1-1 的手动地图闭环，以及 normal 12-4 的官方自律寻敌闭环。12-4 使用舰队 1/2、禁用潜艇，精确设置一队道中/二队 Boss，出击后由游戏官方承担全部地图和战斗，ALAS 的 combat/viewport 预算均为 0；官方 AutoBtn checked、总奖励页、RunCount 归零、Scheduler 关闭及无 raw fallback 均有实机证明，凭证见 integration/alas/main-12-4-auto-search-live-validation-receipt.json。反向的一队 Boss/二队道中走同一类型化路径并有确定性测试；12-4 之外的自动寻敌、舰队锁定、潜艇、其他舰队编号、困难/活动图未提升；2026-09-09 补充：第六舰队 10-2 取消战前页后，原 Main 对同格行动中敌人重新入场并撤退已实机通过，零战斗；仅提升该恢复子路径，见 docs/campaign-reentry-20260909.zh-CN.md。；2026-09-09：真实出击准备页满仓经原一键退役恢复后，完成两场战斗并自然触发默认0.3低血撤退；本次退役95艘、装备保留，战中满仓同图续战仍未验证，详见 docs/campaign-natural-hp-dock-20260909.zh-CN.md。；2026-09-11：真实战中满仓完成分段退役77艘、同图进度保留及后续一战，最终撤回章节页；中间重启验证进程，相机修复后尚未实机重跑，不提升为单次连续成功。见 docs/campaign-midmap-dock-20260911.zh-CN.md。；2026-09-11：新进程继承战前层已由原 Main 自动退回同图、完成同格B6一战、原撤退并使RunCount归零；同格战后相机修复已实机通过，满仓连续链与非满编跨进程仍不外推。见 docs/campaign-precombat-recovery-20260911.zh-CN.md。；2026-09-11：第六舰队2主力+2先锋的换位/恢复、四场战斗和独立1.0阈值真实维修3→2均已实证并正常撤退；默认0.3/0.6维修阈值未触发，其他空槽组合及非满编跨进程仍未资格化。见 docs/campaign-sparse-repair-20260911.zh-CN.md。；2026-09-11：非满编继承战前页在新进程内完成同图一战和原撤退，四舰HP/空槽、RunCount归零与调度关闭通过；通过原生hero和地图头像交叉重建编成，不外推仅地图恢复及其他编成。见 docs/campaign-sparse-resume-20260911.zh-CN.md。；2026-09-11 晚间929/930自然战中满仓后，修复新弹窗旧帧分类和装备取消全选过早检查；实际退役72艘、115件装备保留、原Main同图续战一场并撤退通过。触发、退役和续战分属不同进程，完整连续链仍未资格化。见 docs/campaign-midmap-recovery-20260911.zh-CN.md。",
+      "note": "三实例 9 组、54 字段（合计 162 个面板字段实例）已证明除 Scheduler.Command 外结构和默认值完全等价；六个 StopCondition 字段共 60 个合法类与 45 个非法类在任何导航前统一严校。普通主线 1-1 至 16-4 共 64 图已在 Main/Main2/Main3 原始路由离线回放并在任何输入前 fail-closed；Main 已在真实 API 32 x86_64 AVD 上完成 normal 1-1 的手动地图闭环，以及 normal 12-4 的官方自律寻敌闭环。12-4 使用舰队 1/2、禁用潜艇，精确设置一队道中/二队 Boss，出击后由游戏官方承担全部地图和战斗，ALAS 的 combat/viewport 预算均为 0；官方 AutoBtn checked、总奖励页、RunCount 归零、Scheduler 关闭及无 raw fallback 均有实机证明，凭证见 integration/alas/main-12-4-auto-search-live-validation-receipt.json。反向的一队 Boss/二队道中走同一类型化路径并有确定性测试；12-4 之外的自动寻敌、舰队锁定、潜艇、其他舰队编号、困难/活动图未提升；2026-09-09 补充：第六舰队 10-2 取消战前页后，原 Main 对同格行动中敌人重新入场并撤退已实机通过，零战斗；仅提升该恢复子路径，见 docs/campaign-reentry-20260909.zh-CN.md。；2026-09-09：真实出击准备页满仓经原一键退役恢复后，完成两场战斗并自然触发默认0.3低血撤退；本次退役95艘、装备保留，战中满仓同图续战仍未验证，详见 docs/campaign-natural-hp-dock-20260909.zh-CN.md。；2026-09-11：真实战中满仓完成分段退役77艘、同图进度保留及后续一战，最终撤回章节页；中间重启验证进程，相机修复后尚未实机重跑，不提升为单次连续成功。见 docs/campaign-midmap-dock-20260911.zh-CN.md。；2026-09-11：新进程继承战前层已由原 Main 自动退回同图、完成同格B6一战、原撤退并使RunCount归零；同格战后相机修复已实机通过，满仓连续链与非满编跨进程仍不外推。见 docs/campaign-precombat-recovery-20260911.zh-CN.md。；2026-09-11：第六舰队2主力+2先锋的换位/恢复、四场战斗和独立1.0阈值真实维修3→2均已实证并正常撤退；默认0.3/0.6维修阈值未触发，其他空槽组合及非满编跨进程仍未资格化。见 docs/campaign-sparse-repair-20260911.zh-CN.md。；2026-09-11：非满编继承战前页在新进程内完成同图一战和原撤退，四舰HP/空槽、RunCount归零与调度关闭通过；通过原生hero和地图头像交叉重建编成，不外推仅地图恢复及其他编成。见 docs/campaign-sparse-resume-20260911.zh-CN.md。；2026-09-11 晚间929/930自然战中满仓后，修复新弹窗旧帧分类和装备取消全选过早检查；实际退役72艘、115件装备保留、原Main同图续战一场并撤退通过。触发、退役和续战分属不同进程，完整连续链仍未资格化。见 docs/campaign-midmap-recovery-20260911.zh-CN.md。；2026-09-13：929/930自然战中满仓后，通用结果探针因船坞Toggle截断停止，已修复该无关探测及缺席登录确认探测。原退役处理器独立退役79艘、装备保留；原Main同图续战一场并撤退通过。共三战242石油，完整连续链与退役页自动启动仍未资格化。见 docs/campaign-midmap-recovery-20260913.zh-CN.md。；2026-09-13离线补充：原Combat满仓到同图返回、装备取消选择延迟、原Main遗留退役页恢复三场景通过；当前114成员补丁树、配置和缺席探针已验证。该结果包含契约夹具，不提升为实机连续资格。见 docs/campaign-midmap-offline-20260913.zh-CN.md。",
       "status": "L"
     },
     {
@@ -9046,7 +9072,7 @@
         "PrivateQuarters"
       ],
       "name": "PrivateQuarters",
-      "note": "选房页、真实次数、原生全部关闭分支与次日调度已验证；新泽西物理点击、原生三次触摸及IK/watch/base返回有实机证据。好感升3级弹窗阻断最终退出，原任务超时；重启恢复后确认0/3并回主页，属于分段清空。升级弹窗自动关闭、完整TargetInteract=true、自动选角色/地点、其他角色、礼物和商店仍未资格化。见 docs/private-quarters-physics-20260912.zh-CN.md。",
+      "note": "选房页、真实次数、原生全部关闭分支与次日调度已验证；新泽西物理点击、原生三次触摸及IK/watch/base返回有实机证据。好感升3级弹窗阻断最终退出，原任务超时；重启恢复后确认0/3并回主页，属于分段清空。升级弹窗自动关闭、完整TargetInteract=true、自动选角色/地点、其他角色、礼物和商店仍未资格化。见 docs/private-quarters-physics-20260912.zh-CN.md。 2026-09-13原pq_run已完成新泽西选房入房、对话及三次互动；最后退出触发旧按钮别名循环误报。控件身份修复及离线保护回放通过，实机恢复另记，仍非单进程完整成功。见 docs/private-quarters-native-20260913.zh-CN.md。 恢复后全关闭原任务确认0/3、次日调度及主页通过（final-overview-r15），仍为分段证据。",
       "status": "P"
     },
     {
@@ -9079,7 +9105,7 @@
         "Research"
       ],
       "name": "Research",
-      "note": "三资源always_use/do_not_use、队列容量、部件映射、重名卡和真实物资不足延迟有实机证据；公共科研菜单两轮原生进出通过，重复请求未多发输入。其余资源策略、重置、26个预设及跨轮完整任务仍未闭环。见 docs/research-navigation-20260912.zh-CN.md。",
+      "note": "Original bounded tasks now pass cube only_05_hour enforcement fallback (3 cubes) and part only_no_project (20 T1 anti-aircraft parts), queueing and scheduling. Natural half-hour paths, multi-resource confirmation, reset, all presets and unattended cross-round operation remain unqualified. See docs/research-continuation-20260912.zh-CN.md. Original UI progress-notice confirmation, Shipyard navigation and unobscured main return also passed in notice-recovery-r5.json; no strengthening or purchase. Part only_05_hour enforcement fallback also passed (Q-202-MI, 20 T2 general parts); the natural half-hour branch remains unqualified. A bounded UseCoin=only_no_project natural-completion continuation passed: one finished project, G-412-MI, 1500 gold, queueing and scheduling; subsequent context-free return to main also passed. See docs/shipyard-series-20260912.zh-CN.md. Multi-resource confirmation now compares the complete cost set and rechecks a fresh input frame; original start/queue methods passed offline contract replay. No selectable dual-resource card was available in the bounded live navigation/read, which returned to main without spending. Actual multi-resource confirmation remains live-unqualified. See docs/research-dual-resource-20260913.zh-CN.md.",
       "status": "L"
     },
     {
@@ -9087,7 +9113,7 @@
         "Scheduler"
       ],
       "name": "Restart",
-      "note": "50 Scheduler 实例、15 等价类、首次启动跳过、禁包失败、冷恢复、运行中 PID 切换、登录、持久化与零 forward 遗留均已实机闭环；`AdbRestart` 属于 Alas 面板",
+      "note": "50 Scheduler 实例、15 等价类、首次启动跳过、禁包失败、冷恢复、运行中 PID 切换、登录、持久化与零 forward 遗留均已实机闭环；`AdbRestart` 属于 Alas 面板；2026-09-13补齐登录流程船坞返回映射，原LoginHandler从真实船坞返回后原导航到主页通过；未重跑冷启动科研提示完整触发链。见docs/login-shipyard-recovery-20260913.zh-CN.md。",
       "status": "F"
     },
     {
@@ -9106,7 +9132,7 @@
         "Shipyard"
       ],
       "name": "Shipyard",
-      "note": "八字段入口与LastRun/BuyAmount合法范围有离线契约；科研菜单入口已实测。当前高梁研究中、蓝图50的选中状态读取和原生不能强化helper两次通过，包含重进、退出及重复入口零输入。已修复开发等级误计为蓝图及研究中舰船强制读开发等级。其他舰船阶段、期数、购买价格/确认/结果、强化消费及完整任务仍未资格化。见 docs/shipyard-state-20260912.zh-CN.md。",
+      "note": "Original typed UI passed series 9 to 1 to 9 with exact top hits and selected-series postconditions, Neptune DEV 30/30 with separate fate-stage V (8 blueprints), restoration of Takahashi and main return. Earlier Duncan/Valparaiso DEV reads remain scoped. Navbar fate badges no longer select FATE controls on a DEV pane. Actual FATE-pane actions, other series, purchases, strengthening and full task remain unqualified. See docs/shipyard-series-20260912.zh-CN.md. 2026-09-13原helper读取二期六艘、七期五艘DEV满级并恢复九期原选船和主页通过；未找到实际FATE面板。开发等级支持无害字号变化，未知内容仍拒绝，保持B。见docs/shipyard-fate-survey-20260913.zh-CN.md。",
       "status": "B"
     },
     {
@@ -12357,10 +12383,12 @@
         "integration/alas/research-use-coin-only-05-hour-current-final-r1-live-validation-receipt.json",
         "integration/alas/research-use-coin-only-no-project-current-final-r1-live-validation-receipt.json",
         "integration/alas/research-resource-policy-recovery-20260822.json",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/shipyard-series-20260912/research-coin-continuation-r1.json",
+        "docs/shipyard-series-20260912.zh-CN.md"
       ],
       "field": "Research.UseCoin",
-      "note": "All four declared strategies are exact offline contract cases and have current live selector/action evidence. only_no_project dispatched one exact 3000-gold confirmation and was later proven waiting as D-737-MI; its original runner receipt remains failed because the post-dispatch transition read closed before queue proof, so the field remains live-partial rather than F."
+      "note": "All four strategies have offline and scoped live evidence. A new bounded original only_no_project run claimed one naturally completed project, confirmed 1500 gold for G-412-MI, queued it and scheduled successfully. Older D-737-MI transition failure remains a failed historical receipt. Broader configuration/resource combinations and unattended operation are not promoted by this bounded result."
     },
     {
       "dimensions": {
@@ -12376,10 +12404,12 @@
         "integration/alas/research-use-cube-do-not-use-current-r1-live-validation-receipt.json",
         "integration/alas/research-use-cube-only-no-project-current-final-r1-live-validation-receipt.json",
         "integration/alas/research-resource-policy-recovery-20260822.json",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/research-continuation-20260912/cube-half-r1.json",
+        "docs/research-continuation-20260912.zh-CN.md"
       ],
       "field": "Research.UseCube",
-      "note": "All four values are exact offline contract cases. Current live evidence covers always_use, do_not_use, and only_no_project; the latter confirmed 3 cubes and was later proven waiting as H-387-MI. No natural half-hour cube card was available, so only_05_hour remains live-unproven."
+      "note": "All four values have offline contracts. The 20260912 bounded original task passed only_05_hour with an empty normal filter followed by original enforce=true selecting one-hour S9 H-387-MI, an exact 3-cube start, queueing and scheduling. This proves the fallback branch, not the natural half-hour positive branch; earlier only_no_project segmented evidence remains scoped."
     },
     {
       "dimensions": {
@@ -12393,10 +12423,14 @@
         "scripts/python/run_alas_research_resource_policy_live_validation.py",
         "integration/alas/research-use-part-always-use-current-r1-live-validation-receipt.json",
         "integration/alas/research-use-part-do-not-use-current-r1-live-validation-receipt.json",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/research-continuation-20260912/part-no-project-r1.json",
+        "docs/research-continuation-20260912.zh-CN.md",
+        "integration/alas/research-next-20260912/part-half-r1.json",
+        "docs/research-shipyard-next-20260912.zh-CN.md"
       ],
       "field": "Research.UsePart",
-      "note": "All four values are exact offline contract cases, while current live evidence covers always_use and do_not_use. No qualifying part-consuming card was available for only_05_hour or only_no_project, so those action branches remain live-unproven."
+      "note": "All four values have offline contracts and bounded live evidence, including only_no_project (Q-368-MI, 20 T1 anti-aircraft parts) and only_05_hour original enforcement fallback (Q-202-MI, 20 T2 general parts). Both tasks queued and scheduled. Natural half-hour positive input and its multi-resource confirmation remain unqualified."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -12409,9 +12443,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "9f87f0710ecebbc2b3f81c52b5656681530419b749c3fa9b28da98df3d226a5c",
-      "manifest_sha256": "810f1452b9d95ae593a2407f60df849de4a27a4cb0b371e2adab2c9595720cbf",
-      "member_count": 113
+      "combined_sha256": "9259c71a73ef93c116a432d1c690f55774056d9aa52a5595895d8f25ec1c893c",
+      "manifest_sha256": "d7e84c90aaa7318158b7f3052e031601e912db7043d60afa17ddf7d53556e332",
+      "member_count": 116
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

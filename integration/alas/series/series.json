@@ -564,6 +564,21 @@
       "order": 113,
       "path": "integration/alas/series/0660-private-quarters-overview.patch",
       "sha256": "1e0eb70169612ed19a8258d55d0dd4db342b598f37c80b19f686f3528b240944"
+    },
+    {
+      "order": 114,
+      "path": "integration/alas/series/0670-campaign-inherited-retirement-selection.patch",
+      "sha256": "aa97feda73a67d7d5418dd434423342a8c16ae1df0b89f15ac09786ad4559ec8"
+    },
+    {
+      "order": 115,
+      "path": "integration/alas/series/0680-private-quarters-entry-destination.patch",
+      "sha256": "2a5fe2242cc8f6bd2c70115e5b1889a086a889f13c2ef7ff292155acfb836237"
+    },
+    {
+      "order": 116,
+      "path": "integration/alas/series/0690-private-quarters-control-identity.patch",
+      "sha256": "6c46e79fb83400572a1534a2c3cfc8f804f191ff3905211afe1238aa7f46bdbf"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

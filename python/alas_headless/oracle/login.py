@@ -78,7 +78,7 @@ class LoginOracle:
         )
 
     def _login_update_download_prompt_matches(self, state: OracleState) -> bool:
-        ui_state = self.read_ui_state()
+        ui_state = self.read_text_state()
         if (
             ui_state.generation < state.generation
             or ui_state.generation > state.generation + 2
@@ -150,7 +150,7 @@ class LoginOracle:
         agree.  Any mixed or ambiguous surface remains closed.
         """
 
-        ui_state = self.read_ui_state()
+        ui_state = self.read_text_state()
         if (
             ui_state.generation < state.generation
             or ui_state.generation > state.generation + 2
@@ -322,7 +322,7 @@ class LoginOracle:
         # LOGIN_GAME_UPDATE click branch.
         if self.login_update_download_available():
             return False
-        state = self.read_ui_state()
+        state = self.read_text_state()
         progress = tuple(
             text
             for text in state.texts

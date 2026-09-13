@@ -53,6 +53,68 @@ class PrivateQuartersPhysicsReceipt:
 
 
 class PrivateQuartersOracle:
+    def private_quarters_entry_destination_visible(self) -> bool:
+        return (self.private_quarters_room_visible()
+                or self.observation_target_present('private-quarters/dialogue/continue'))
+
+    def private_quarters_download_prompt_absent(self) -> bool:
+        state = self.read_state()
+        active = [b for b in state.buttons if b.active_in_hierarchy and b.active_and_enabled]
+        if any('Msgbox' in b.path or 'MessageBox' in b.path for b in active):
+            return False
+        return (any(b.path == 'OverlayCamera/Overlay/UIOverlay/Loading(Clone)' for b in active)
+                or self.private_quarters_page_visible() or self.private_quarters_entry_destination_visible())
+
+    def private_quarters_loading_visible(self) -> bool:
+        state = self.read_state()
+        if any(b.path == 'OverlayCamera/Overlay/UIOverlay/Loading(Clone)'
+               and b.active_in_hierarchy and b.active_and_enabled for b in state.buttons):
+            return True
+        if self.private_quarters_page_visible() or self.private_quarters_entry_destination_visible():
+            return False
+        raise SemanticGateClosed('Private Quarters loading surface is not yet identified')
+
+    def private_quarters_intimacy_max(self) -> bool:
+        if not self.private_quarters_room_visible():
+            raise SemanticGateClosed('Private Quarters room is absent')
+        ui = self.read_ui_state()
+        path = 'UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/top/favor_level/Text'
+        values = [t for t in ui.texts if t.path == path and t.active_in_hierarchy
+                  and t.active_and_enabled and not t.truncated]
+        if len(values) != 1:
+            raise SemanticGateClosed('Private Quarters intimacy progress is ambiguous')
+        match = re.fullmatch(r'([0-9]+)/([1-9][0-9]*)', re.sub(r'<[^>]*>', '', values[0].text).strip())
+        if match and int(match[1]) < int(match[2]):
+            return False
+        raise SemanticGateClosed('Private Quarters max-intimacy state is not yet reviewed')
+
+    def private_quarters_new_jersey_visible(self) -> bool:
+        physics = self.private_quarters_physics()
+        path = 'xinzexi_noshoes(Clone)/all/Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Spine1/BodyCollider'
+        targets = [c for c in physics.colliders if c.path == path]
+        if len(targets) != 1:
+            raise SemanticGateClosed('Private Quarters target collider is absent or ambiguous')
+        screen = targets[0].screen
+        return bool(screen is not None and screen[2] > 0
+                    and 0 <= screen[0] < self.fingerprint.width
+                    and 0 <= screen[1] < self.fingerprint.height)
+
+    def private_quarters_loft_visible(self) -> bool:
+        if not self.private_quarters_page_visible():
+            return False
+        state = self.read_state()
+        floors = {b.path[len(ROOT + 'Map/'):].split('/')[0] for b in state.buttons
+                  if b.path.startswith(ROOT + 'Map/floor_')
+                  and b.active_in_hierarchy and b.active_and_enabled}
+        if len(floors) != 1:
+            raise SemanticGateClosed('Private Quarters current floor is absent or ambiguous')
+        return floors == {'floor_2'}
+
+    def click_private_quarters_page(self, direction: str) -> ActionReceipt:
+        if direction not in ('left', 'right') or not self.private_quarters_page_visible():
+            raise SemanticGateClosed('Private Quarters page navigation is unavailable')
+        return self.click('private-quarters/page/' + direction)
+
     def private_quarters_interact_visible(self) -> bool:
         state = self.read_state()
         targets = [b for b in self._matches(state, 'private-quarters/interact')
@@ -197,6 +259,13 @@ class PrivateQuartersOracle:
         return any(b.active_in_hierarchy and b.active_and_enabled
                    for b in self._matches(state, 'private-quarters/room/back'))
 
+    def private_quarters_room_back_control_identity(self) -> str:
+        state = self.read_state()
+        target = self._unique(state, 'private-quarters/room/back')
+        if not target.actionable or self._blocking_rules(state, 'private-quarters/room/back'):
+            raise SemanticGateClosed('Private Quarters room back is not actionable')
+        return 'PRIVATE_QUARTERS_ROOM_BACK@' + target.path
+
     def click_private_quarters_room_back(self) -> ActionReceipt:
         state = self.read_state()
         target = self._unique(state, 'private-quarters/room/back')
@@ -212,6 +281,8 @@ class PrivateQuartersOracle:
 
     def click_private_quarters_new_jersey_dialogue(self) -> ActionReceipt:
         state = self.read_state()
+        if not self._matches(state, 'private-quarters/dialogue/continue'):
+            raise SemanticTargetMissing('Private Quarters dialogue control is absent')
         target = self._unique(state, 'private-quarters/dialogue/continue')
         ui = self.read_ui_state()
         if not state.generation <= ui.generation <= state.generation+2:

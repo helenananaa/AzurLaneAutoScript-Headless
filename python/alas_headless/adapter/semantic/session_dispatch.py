@@ -36,6 +36,7 @@ from .resources import (
     RESEARCH_CLICK_RESOURCES,
     SUPPLY_PACK_VIRTUAL_RESOURCES,
     TACTICAL_VIRTUAL_RESOURCES,
+    UI_PAGE_CHECK_RESOURCES,
 )
 
 
@@ -45,6 +46,12 @@ class SessionDispatchPorts:
     def appear(self, button: Any) -> bool:
         name = AlasSemanticAdapter._button_name(button)
         adapter = self.open()
+        if name.startswith('PRIVATE_QUARTERS_') or (
+                name == 'POPUP_CANCEL_WHITE'
+                and time.monotonic() <= getattr(adapter, '_private_quarters_transition_until', 0.0)):
+            # Room observations belong to ALAS' screenshot frame. An unrelated
+            # live network probe must not split it while Unity loads the room.
+            return adapter.appear(button)
         if name == 'GET_MISSION' and adapter._campaign_context is not None:
             oracle = adapter._frame_or_live_observation_oracle()
             if oracle._campaign_urgent_notice_matches(oracle.read_state()):
@@ -71,6 +78,13 @@ class SessionDispatchPorts:
             return True
         if name == 'BACK_ARROW' and adapter._frame_or_live_observation_oracle().retirement_selection_visible():
             return adapter._frame_or_live_observation_oracle().retirement_page_back_available()
+        if name in ('GAME_TIPS', 'GAME_TIPS3', 'GAME_TIPS4'):
+            oracle = adapter._frame_or_live_observation_oracle()
+            if oracle.retirement_selection_visible() and oracle.retirement_page_back_available():
+                # Original Retirement probes game tips before recognizing its
+                # selection. An unobscured, idle typed selection proves these
+                # absent without consulting unrelated Exercise/daily pages.
+                return False
         sample_use = getattr(self, '_opsi_sample_use', None)
         if sample_use is not None:
             adapter._package_gate()
@@ -272,6 +286,12 @@ class SessionDispatchPorts:
             # sentinel remains the only positive probe.
             self.refresh_frame()
             oracle = self.open().oracle
+            if (name in UI_PAGE_CHECK_RESOURCES
+                    and self.open()._frame_or_live_observation_oracle().exists('research-menu/page/back')):
+                # The existing refresh may have caught the completed Shipyard
+                # return. Reclassify that exact menu in the newly leased frame
+                # instead of rethrowing the old transition's unknown-page error.
+                return self.open().appear(button)
             if (oracle.observation_surface_present(ObservationSurface.BATTLE_RESULT)
                     and oracle.daily_battle_result_visible()):
                 if name == "BATTLE_STATUS_S":

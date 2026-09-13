@@ -479,6 +479,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         )
         session.adapter = SimpleNamespace(
             oracle=oracle,
+            _meta_assist_active=False,
             _frame_or_live_observation_oracle=lambda: oracle,
             campaign_combat_committed=lambda: True,
             _campaign_context=SimpleNamespace(passive_transition_until=0.0, submarine_move_confirm=None),
@@ -647,6 +648,30 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         self.assertIs(actual, expected)
         self.assertEqual(session._frame_clock.acquire.call_count, 4)
         self.assertEqual(session._combat_result_transition_until, 112.0)
+
+    def test_private_room_wait_retries_only_freshness_during_actual_entry_window(self):
+        for deadline, message, success, calls in (
+            (112.0, 'observer snapshot is stale', True, 4),
+            (90.0, 'observer snapshot is stale', False, 3),
+            (112.0, 'observer PID differs from bound package', False, 1),
+        ):
+            with self.subTest(deadline=deadline, message=message):
+                session = AlasSemanticSession(driver_revision=REVISION, runtime_handle=FakeRuntimeHandle())
+                session.adapter = SimpleNamespace(
+                    _private_quarters_transition_until=deadline,
+                    _login_flow=SimpleNamespace(snapshot=lambda: SimpleNamespace(active=False, passive_transition_until=0.0)),
+                )
+                expected = mock.Mock(generation=82, frame_id='frame-82')
+                session._frame_clock = mock.Mock(current_frame_id='frame-81')
+                session._frame_clock.acquire.side_effect = [SemanticGateClosed(message)] * 3 + [expected]
+                with mock.patch('alas_headless.alas_adapter.time.monotonic', return_value=100.0), \
+                     mock.patch('alas_headless.alas_adapter.time.sleep'):
+                    if success:
+                        self.assertIs(session.refresh_frame(), expected)
+                    else:
+                        with self.assertRaises(SemanticGateClosed):
+                            session.refresh_frame()
+                self.assertEqual(session._frame_clock.acquire.call_count, calls)
 
     def test_combat_automation_switch_is_bound_to_last_exact_state_probe(self):
         session = AlasSemanticSession(
