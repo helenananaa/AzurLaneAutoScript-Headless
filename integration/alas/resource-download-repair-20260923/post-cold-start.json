@@ -1,0 +1,25 @@
+{
+  "observed_at": 1790132371.4100337,
+  "pid": 18011,
+  "generation": 2026,
+  "age_ms": 13,
+  "status": "ok",
+  "texts": [
+    {
+      "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/current_server/Text",
+      "text": "点击更换"
+    },
+    {
+      "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/current_server/server_name",
+      "text": "巴巴罗萨"
+    },
+    {
+      "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/version",
+      "text": "ver 9.7.385"
+    }
+  ],
+  "opening": [],
+  "download_prompt_present": false,
+  "login_home_verified": false,
+  "runner_status": "Native ALAS login ended fail-closed: game activity is not top-resumed. Final foreground recheck was MainActivity; typed opening overlay remains; home not verified."
+}

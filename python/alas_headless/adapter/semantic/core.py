@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
+
 import time
 from dataclasses import replace
 from typing import Any, Callable, List, Mapping, Optional, Set, Tuple, Union
@@ -271,6 +273,8 @@ class CoreAdapterPorts:
 
     def reset_task_state(self) -> None:
         """Discard task-owned contexts and proofs, retaining grants and runtime."""
+
+        self._prepared_input_oracle = None
         self._mission_context: Optional[_MissionFlowContext] = None
         self._mail_context: Optional[_MailFlowContext] = None
         self._commission_context: Optional[_CommissionFlowContext] = None
@@ -288,6 +292,7 @@ class CoreAdapterPorts:
         self._daily_kind: Optional[str] = None
         self._daily_stage: Optional[int] = None
         self._daily_pending_receipt: Optional[ActionReceipt] = None
+        self._daily_quick_reward_closed = False
         self._daily_pending_stage_receipt: Optional[ActionReceipt] = None
         self._daily_stage_confirmed = False
         self._daily_transition_until = 0.0
@@ -295,10 +300,14 @@ class CoreAdapterPorts:
         self._network_reconnect_transition_until = 0.0
         self._main_battle_transition_receipt: Optional[ActionReceipt] = None
         self._main_battle_transition_until = 0.0
+        self._main_shop_transition_receipt: Optional[ActionReceipt] = None
+        self._main_shop_transition_until = 0.0
         self._event_story_transition_until = 0.0
         self._operation_siren_entry_transition_until = 0.0
         self._operation_siren_page_remount_until = 0.0
         self._operation_siren_entry_receipt: Optional[ActionReceipt] = None
+        self._campaign_archive_entry_receipt: Optional[ActionReceipt] = None
+        self._campaign_archive_entry_transition_until = 0.0
         self._operation_siren_globe_map_receipt: Optional[ActionReceipt] = None
         self._operation_siren_auto_search_transition_until = 0.0
         self._operation_siren_auto_search_active = False
@@ -319,6 +328,7 @@ class CoreAdapterPorts:
         self._private_quarters_entry_receipt = None
         self._private_quarters_dialogue_receipt = None
         self._private_quarters_transition_until = 0.0
+        self._private_quarters_home_transition_until = 0.0
         self._operation_siren_pending_order: Optional[str] = None
         self._exercise_pending = False
         self._exercise_execution_active = False
@@ -383,11 +393,35 @@ class CoreAdapterPorts:
         reader = provider()
         if reader is None:
             raise StaleFrameError()
+        # The retry limit belongs to the game session, while each ALAS
+        # screenshot boundary creates a new immutable observation reader.
+        reader._login_update_retry_attempted = (
+            getattr(self.oracle, "_login_update_retry_attempted", False)
+        )
         return reader
+
+    @contextmanager
+    def prepared_input_frame(self, provider: Callable[[], Any]):
+        """Offer the session's fresh frame to one nested input preparation."""
+        previous = self._prepared_input_oracle
+        self._prepared_input_oracle = provider
+        try:
+            yield
+        finally:
+            self._prepared_input_oracle = previous
 
     def _fresh_input_oracle(self) -> Any:
         """Bind a mutation's final semantic proof to one fresh ALAS frame."""
 
+        prepared = self._prepared_input_oracle
+        self._prepared_input_oracle = None
+        if prepared is not None:
+            try:
+                return prepared()
+            except StaleFrameError:
+                # A wait, input, refresh or runtime change can invalidate the
+                # offered frame. The usual acquisition owns recovery.
+                pass
         if (
             self._input_frame_refresher is not None
             and self._frame_observation_oracle is not None

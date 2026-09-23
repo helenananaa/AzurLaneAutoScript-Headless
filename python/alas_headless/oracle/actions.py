@@ -36,9 +36,17 @@ class ActionsOracle:
         if (semantic_id == "campaign/urgent-notice/confirm"
                 and not self._campaign_urgent_notice_matches(state)):
             raise SemanticGateClosed("campaign urgent notice identity is not proven")
+        login_update_ui = (
+            self.read_text_state() if semantic_id == "login/update/download" else None
+        )
+        delegated_login_retry = (
+            semantic_id == "login/update/download"
+            and self._login_update_retry_prompt_matches(state, login_update_ui)
+        )
         delegated_login_update = (
             semantic_id == "login/update/download"
-            and self._login_update_download_prompt_matches(state)
+            and (self._login_update_download_prompt_matches(state, login_update_ui)
+                 or delegated_login_retry)
         )
         delegated_login_restart = (
             semantic_id
@@ -739,6 +747,8 @@ class ActionsOracle:
             # The exact reviewed confirmation is sufficient to establish the
             # update session for the later completion/restart gate.
             self._login_update_seen = True
+        if delegated_login_retry:
+            self._login_update_retry_attempted = True
         return ActionReceipt(
             semantic_id=semantic_id,
             generation=state.generation,

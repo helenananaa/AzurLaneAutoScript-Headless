@@ -77,6 +77,58 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
 
         self.assertFalse(adapter.appear(NamedButton("IN_MAP")))
 
+    def test_quick_completion_requires_own_receipt_zero_count_and_closed_award(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.daily_page_visible_value = True
+        oracle.daily_remaining_for_kind = lambda kind: 0
+        adapter._daily_kind = "tactical_training"
+        adapter._daily_stage = 1
+        self.assertFalse(adapter.daily_quick_complete())
+
+        adapter._daily_pending_receipt = oracle.click_receipt(
+            "daily/execute/tactical_training/stage/1/quick/all", generation=10
+        )
+        oracle.enabled_values["reward/award-info/close"] = True
+        self.assertFalse(adapter.daily_quick_complete())
+        oracle.enabled_values["reward/award-info/close"] = False
+        self.assertFalse(adapter.daily_quick_complete())
+        adapter._daily_quick_reward_closed = True
+        oracle.daily_remaining_for_kind = lambda kind: 1
+        self.assertFalse(adapter.daily_quick_complete())
+        oracle.daily_remaining_for_kind = lambda kind: 0
+        oracle.state_generation = 10
+        self.assertFalse(adapter.daily_quick_complete())
+        oracle.state_generation = 11
+        self.assertTrue(adapter.daily_quick_complete())
+
+    def test_quick_award_close_is_correlated_with_pending_dispatch(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter._daily_kind = "fierce_assault"
+        adapter._daily_stage = 1
+        adapter._daily_pending_receipt = oracle.click_receipt(
+            "daily/execute/fierce_assault/stage/1/quick/all", generation=6
+        )
+        oracle.enabled_values["reward/award-info/close"] = True
+        adapter._click_daily("GET_ITEMS_1")
+        self.assertTrue(adapter._daily_quick_reward_closed)
+        self.assertEqual(oracle.click_calls, ["reward/award-info/close"])
+
+    def test_spent_quick_card_is_not_reselected_while_reward_is_pending(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter._daily_kind = "fierce_assault"
+        adapter._daily_stage = 1
+        adapter._daily_pending_receipt = oracle.click_receipt(
+            "daily/execute/fierce_assault/stage/1/quick/all", generation=7
+        )
+        oracle.state_generation = 8
+        oracle.daily_page_visible_value = True
+        oracle.daily_detail_visible_value = True
+        oracle.daily_remaining_for_kind = lambda kind: 0
+        self.assertTrue(adapter.daily_quick_consumed())
+        self.assertFalse(adapter.appear(NamedButton("DAILY_ENTER_CHECK")))
+        oracle.daily_remaining_for_kind = lambda kind: 1
+        self.assertTrue(adapter.appear(NamedButton("DAILY_ENTER_CHECK")))
+
     def test_daily_result_owner_is_disabled_during_campaign_combat(self):
         adapter, _, _ = self.make_adapter()
         adapter._daily_kind = "tactical"

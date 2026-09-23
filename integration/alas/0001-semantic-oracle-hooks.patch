@@ -16859,3 +16859,54 @@ diff --git a/module/device/control.py b/module/device/control.py
          if semantic_adapter is not None:
              if (
                  semantic_adapter.campaign_combat_active()
+diff --git a/module/daily/daily.py b/module/daily/daily.py
+--- a/module/daily/daily.py
++++ b/module/daily/daily.py
+@@ -299,6 +299,10 @@
+             else:
+                 self.device.screenshot()
+ 
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if semantic_adapter is not None and semantic_adapter.daily_quick_complete():
++                return False
++
+             if self.appear(DAILY_ENTER_CHECK, threshold=30, interval=5):
+                 self.device.click(button)
+                 continue
+diff --git a/module/daemon/benchmark.py b/module/daemon/benchmark.py
+--- a/module/daemon/benchmark.py
++++ b/module/daemon/benchmark.py
+@@ -186,13 +186,18 @@
+         """Measure a reversible main/settings transition, never a raw tap."""
+         session = self.device.semantic_adapter
+         session.refresh_frame()
+-        oracle = session.open().oracle
++        oracle = session.open()._require_frame_observation_oracle()
+         if oracle.exists('settings/back'):
+-            return oracle.click_and_wait('settings/back', 'main/settings', 3.0)
+-        if oracle.main_page_visible():
+-            return oracle.click_and_wait('main/settings', 'settings/back', 3.0)
+-        raise RequestHumanTakeover(
+-            'Semantic benchmark requires main or settings page identity'
++            target, expected = 'settings/back', 'main/settings'
++        elif oracle.main_page_visible():
++            target, expected = 'main/settings', 'settings/back'
++        else:
++            raise RequestHumanTakeover(
++                'Semantic benchmark requires main or settings page identity'
++            )
++        receipt = oracle.click(target)
++        return session.open().oracle.wait_for(
++            expected, 3.0, minimum_generation=receipt.generation
+         )
+ 
+     def semantic_ensure_main(self):
+@@ -200,7 +205,7 @@
+         session = self.device.semantic_adapter
+         for _ in range(12):
+             session.refresh_frame()
+-            oracle = session.open().oracle
++            oracle = session.open()._require_frame_observation_oracle()
+             if oracle.main_page_visible():
+                 return True
+             if oracle.exists('settings/back'):

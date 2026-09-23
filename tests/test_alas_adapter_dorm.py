@@ -27,6 +27,10 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
             with self.subTest(resource=resource):
                 adapter, oracle, _ = self.make_adapter()
                 oracle.exists_values[semantic_id] = True
+                if resource == "RESEARCH_CHECK":
+                    # Research requires the native five-card inventory, not
+                    # just a back button in an otherwise empty fake page.
+                    oracle.research_project_values = [SimpleNamespace() for _ in range(5)]
                 self.assertTrue(adapter.appear(NamedButton(resource)))
         self.assertEqual(
             adapter.semantic_id_for("DORM_GOTO_MAIN"), "dorm/page/back"
@@ -40,6 +44,10 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         )
         with self.assertRaises(AlasSemanticUnmapped):
             adapter.click(NamedButton("BUILD_CHECK"))
+
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values["research/page/back"] = True
+        self.assertFalse(adapter.appear(NamedButton("RESEARCH_CHECK")))
 
     def test_dorm_page_check_keeps_owned_page_visible_under_empty_food_modal(self):
         adapter, oracle, _ = self.make_adapter()

@@ -140,6 +140,33 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         backend.buttons["buttons"][0]["raycast_top"] = False
         self.assertFalse(oracle.login_update_download_available())
 
+    def test_login_update_failed_files_allows_one_exact_typed_retry(self):
+        dialog = "root/Overlay/UIMain/DialogPanel/dialog/"
+        backend = FakeBackend(
+            [
+                make_button("exit_button", dialog + "exit_button", raycast_top=None),
+                make_button("action_button", dialog + "action_button", raycast_top=True),
+            ]
+        )
+        backend.ui = make_ui(
+            [make_text("部分文件下载失败，是否重试？", dialog + "content/Text")]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.login_update_download_available())
+        self.assertTrue(oracle.enabled("login/update/download"))
+        self.assertEqual(oracle.click("login/update/download").path, dialog + "action_button")
+        self.assertEqual(backend.taps, [(640, 360)])
+        self.assertFalse(oracle.login_update_download_available())
+        self.assertFalse(oracle.enabled("login/update/download"))
+
+        fresh = make_oracle(backend)
+        backend.ui["texts"][0]["text"] = "是否购买资源？"
+        self.assertFalse(fresh.login_update_download_available())
+        backend.ui["texts"][0]["text"] = "部分文件下载失败，是否重试？"
+        backend.buttons["buttons"][1]["raycast_top"] = False
+        self.assertFalse(fresh.login_update_download_available())
+
     def test_login_update_download_accepts_reviewed_maintenance_variants(self):
         dialog = "root/Overlay/UIMain/DialogPanel/dialog/"
         backend = FakeBackend(

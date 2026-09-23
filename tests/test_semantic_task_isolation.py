@@ -143,7 +143,8 @@ def test_archive_overlay_wins_over_retained_campaign_entrance(monkeypatch, campa
     assert adapter.appear(NamedButton('CAMPAIGN_MENU_CHECK')) is False
 
 
-def test_archive_entry_reuses_receipt_only_after_exact_destination_appears():
+@pytest.mark.parametrize('campaign_active', [True, False])
+def test_archive_entry_reuses_receipt_only_after_exact_destination_appears(campaign_active):
     from alas_headless.adapter.semantic.contracts import _CampaignFlowContext
     from tests.semantic_support.adapter_fixtures import FakeOracle
     oracle = FakeOracle()
@@ -152,7 +153,8 @@ def test_archive_entry_reuses_receipt_only_after_exact_destination_appears():
     oracle.war_archives_page_visible = Mock(return_value=False)
     oracle.read_state = lambda: SimpleNamespace(generation=11)
     adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
-    adapter._campaign_context = _CampaignFlowContext(stage_code='a1')
+    if campaign_active:
+        adapter._campaign_context = _CampaignFlowContext(stage_code='a1')
     assert adapter._click_mapped('', 'campaign-menu/archive') is receipt
     oracle.war_archives_page_visible.return_value = True
     assert adapter._click_mapped('', 'campaign-menu/archive') is receipt

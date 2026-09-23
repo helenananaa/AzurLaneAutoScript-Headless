@@ -47,7 +47,8 @@ class DispatchObservationPorts:
                 return False
             phase = self.oracle.shipyard_selected_state().phase
             return phase == ("dev" if name == "SHIPYARD_IN_DEV" else "fate")
-        if (name in ("GOTO_MAIN", "GOTO_MAIN_WHITE", "RPG_HOME")
+        if (not self._login_flow.active
+                and name in ("GOTO_MAIN", "GOTO_MAIN_WHITE", "RPG_HOME")
                 and self.oracle.exists("research/progress/confirm")):
             # The original unknown-page recovery probes home before its
             # popup handler. This notice obscures those navigation controls.
@@ -70,7 +71,7 @@ class DispatchObservationPorts:
             or name in UI_PAGE_CHECK_RESOURCES
             else self.oracle
         )
-        if (self._campaign_context is None and name in (
+        if (not self._login_flow.active and self._campaign_context is None and name in (
                 'MAP_PREPARATION', 'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION',
                 'AUTO_SEARCH_MENU_EXIT', 'AUTO_SEARCH_REWARD', 'WITHDRAW')
                 and (observation_oracle.main_page_visible() or observation_oracle.campaign_menu_is_entry())):
@@ -91,7 +92,7 @@ class DispatchObservationPorts:
             # Their absence is not a missing Mission capability. This does
             # not authorize claiming an unowned popup.
             return False
-        if name in UI_PAGE_CHECK_RESOURCES:
+        if not self._login_flow.active and name in UI_PAGE_CHECK_RESOURCES:
             buttons = getattr(observation_oracle.read_state(), 'buttons', ())
             if any(b.active_in_hierarchy and b.active_and_enabled and b.path.endswith(
                     '/LevelGrid/DragLayer/op1/retreat') for b in buttons):
@@ -293,7 +294,8 @@ class DispatchObservationPorts:
         return UNHANDLED
 
     def _appear_confirmation(self, name):
-        if (name in ("POPUP_CONFIRM", "POPUP_CANCEL")
+        if (not self._login_flow.active
+                and name in ("POPUP_CONFIRM", "POPUP_CANCEL")
                 and self.oracle.exists("research/progress/confirm")):
             target = "research/progress/confirm" if name == "POPUP_CONFIRM" else "research/progress/cancel"
             return self.oracle.enabled(target)
@@ -612,6 +614,15 @@ class DispatchObservationPorts:
                 # during this bounded transition; clicks remain fail-closed.
                 return False
             if (
+                name in UI_PAGE_CHECK_RESOURCES
+                and time.monotonic() <= self._private_quarters_home_transition_until
+            ):
+                # A reviewed PQ home input can leave a brief gap between the
+                # private page and actionable main. ALAS may keep enumerating
+                # pixel-only pages then; no unknown input is admitted.
+                self._package_gate()
+                return False
+            if (
                 self._mission_context is None
                 and not self._login_flow.active
                 and self._mail_context is None
@@ -874,6 +885,11 @@ class DispatchObservationPorts:
             if name == "DAILY_ENTER":
                 return self.oracle.daily_current_active()
             if name == "DAILY_ENTER_CHECK":
+                if self.daily_quick_consumed():
+                    # The spent card can remain expanded until its reward
+                    # arrives. Do not reselect the stage while ALAS waits for
+                    # the exact reward close and its completion postcondition.
+                    return False
                 return bool(
                     self.oracle.daily_detail_visible()
                     and self._award_close_target() is None

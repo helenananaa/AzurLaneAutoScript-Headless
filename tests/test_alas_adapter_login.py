@@ -19,6 +19,15 @@ from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_login_retry_attempt_is_copied_to_new_observation_frame(self):
+        adapter, oracle, _ = self.make_adapter()
+        frame = Mock()
+        adapter._frame_observation_oracle = lambda: frame
+        oracle._login_update_retry_attempted = True
+
+        self.assertIs(adapter._require_frame_observation_oracle(), frame)
+        self.assertTrue(frame._login_update_retry_attempted)
+
     def test_login_does_not_finish_on_the_main_underlay_below_bulletin(self):
         adapter, oracle, _ = self.make_adapter()
         adapter.begin_login()

@@ -39,6 +39,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         session = AlasSemanticSession.__new__(AlasSemanticSession)
         session.adapter = adapter
         session.open = lambda: adapter
+        session.refresh_tactical_input_frame = Mock()
 
         state = session.meta_assist_state()
         receipt = session.click_meta_assist_next_candidate(
@@ -50,6 +51,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertEqual(receipt.semantic_id, "meta/assist/candidate/3")
         self.assertEqual(oracle.click_calls, ["meta/assist/candidate/3"])
         self.assertEqual(gate_calls, [True, True])
+        session.refresh_tactical_input_frame.assert_called_once_with()
 
     def test_meta_beacon_owner_keeps_generic_reward_probe_passive(self):
         adapter, oracle, _ = self.make_adapter()

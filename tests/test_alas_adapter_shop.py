@@ -3,6 +3,7 @@
 import time
 import unittest
 from alas_headless import AlasSemanticAdapter, AlasSemanticUnmapped
+from alas_headless.semantic_oracle import SemanticTargetMissing
 from tests.semantic_support.adapter_cases import AlasSemanticAdapterTestsSupport
 from tests.semantic_support.adapter_fixtures import FakeOracle, NamedButton
 from types import SimpleNamespace
@@ -52,6 +53,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
     def test_battle_pass_navigation_recovers_from_existing_shop(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.recommendation_shop_visible_value = True
+        oracle.enabled_values["event-list/page/back"] = False
         adapter.begin_battle_pass()
 
         self.assertTrue(adapter.appear(NamedButton("SHOP_CHECK")))
@@ -62,5 +64,22 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         adapter._battle_pass_context.passive_transition_until = time.monotonic() - 1
         self.assertFalse(adapter.appear(NamedButton("EVENT_LIST_CHECK")))
         adapter.end_battle_pass()
-        with self.assertRaisesRegex(AlasSemanticUnmapped, "EVENT_LIST_CHECK"):
-            adapter.appear(NamedButton("EVENT_LIST_CHECK"))
+        self.assertFalse(adapter.appear(NamedButton("EVENT_LIST_CHECK")))
+
+    def test_main_shop_transition_reuses_only_proven_destination_receipt(self):
+        adapter, oracle, _ = self.make_adapter()
+        first = adapter.click(NamedButton("MAIN_GOTO_SHOP"))
+        self.assertEqual(oracle.click_calls, ["main/shop"])
+
+        def missing(_semantic_id):
+            raise SemanticTargetMissing("semantic target is absent: main/shop")
+
+        oracle.click = missing
+        with self.assertRaises(SemanticTargetMissing):
+            adapter.click(NamedButton("MAIN_GOTO_SHOP"))
+
+        oracle.recommendation_shop_visible_value = True
+        self.assertIs(adapter.click(NamedButton("MAIN_GOTO_SHOP")), first)
+        oracle.state_generation = first.generation
+        with self.assertRaises(SemanticTargetMissing):
+            adapter.click(NamedButton("MAIN_GOTO_SHOP"))

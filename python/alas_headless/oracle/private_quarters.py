@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 import re
 import math
-from typing import Optional, Tuple
+from typing import Mapping, Optional, Tuple
 from .contracts import ActionReceipt, Point
 from .errors import SemanticGateClosed, SemanticTargetMissing
 
@@ -194,23 +194,23 @@ class PrivateQuartersOracle:
         if not state.generation <= ui.generation <= state.generation+2:
             raise SemanticGateClosed('Private Quarters physics frames are incoherent')
         data = ui.snapshot.get('private_quarters_physics')
-        if (not isinstance(data, dict) or data.get('schema') != 'alas-headless.private-colliders/v1'
+        if (not isinstance(data, Mapping) or data.get('schema') != 'alas-headless.private-colliders/v1'
                 or type(data.get('status')) is not int or data['status'] != 1):
             raise SemanticGateClosed('Private Quarters physics observation is unavailable')
         if data.get('truncated') is not False or type(data.get('error_count')) is not int or data['error_count']:
             raise SemanticGateClosed('Private Quarters physics observation is incomplete')
         camera = data.get('camera_path')
         rows = data.get('colliders')
-        if not isinstance(camera, str) or not isinstance(rows, list):
+        if not isinstance(camera, str) or not isinstance(rows, (list, tuple)):
             raise SemanticGateClosed('Private Quarters physics observation is malformed')
         def vector(value):
-            if (not isinstance(value, list) or len(value) != 3 or any(
+            if (not isinstance(value, (list, tuple)) or len(value) != 3 or any(
                     type(v) not in (int, float) or not math.isfinite(v) for v in value)):
                 raise SemanticGateClosed('Private Quarters physics vector is malformed')
             return tuple(float(v) for v in value)
         colliders, ids = [], set()
         for row in rows:
-            if (not isinstance(row, dict) or type(row.get('instance_id')) is not int
+            if (not isinstance(row, Mapping) or type(row.get('instance_id')) is not int
                     or not row['instance_id'] or row['instance_id'] in ids
                     or not isinstance(row.get('name'), str) or not row['name']
                     or not isinstance(row.get('path'), str) or not row['path']
@@ -223,7 +223,7 @@ class PrivateQuartersOracle:
             ids.add(row['instance_id'])
             point = row.get('input_point')
             if point is not None:
-                if (not isinstance(point, list) or len(point) != 2 or any(
+                if (not isinstance(point, (list, tuple)) or len(point) != 2 or any(
                         type(v) not in (int, float) or not math.isfinite(v) for v in point)):
                     raise SemanticGateClosed('Private Quarters physics input point is malformed')
                 point = tuple(float(v) for v in point)

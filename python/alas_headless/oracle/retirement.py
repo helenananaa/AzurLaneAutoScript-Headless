@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from typing import Dict, List, Optional, Tuple, Union
 from .contracts import (
     ActionReceipt,
@@ -40,7 +41,7 @@ class RetirementOracle:
                 if self._foreground_component() != self.fingerprint.component:
                     raise SemanticGateClosed("game activity is not top-resumed")
                 raw = self._request("GET /v1/ui\n")
-                if not isinstance(raw, dict):
+                if not isinstance(raw, Mapping):
                     raise ObserverTransportError(
                         "UI observer response is not a mapping"
                     )
@@ -55,13 +56,13 @@ class RetirementOracle:
                 raw_texts = raw.get("texts")
                 raw_images = raw.get("images")
                 if not all(
-                    isinstance(value, list)
+                    isinstance(value, (list, tuple))
                     for value in (raw_toggles, raw_texts, raw_images)
                 ):
                     raise SemanticGateClosed("UI record lists are malformed")
-                assert isinstance(raw_toggles, list)
-                assert isinstance(raw_texts, list)
-                assert isinstance(raw_images, list)
+                assert isinstance(raw_toggles, (list, tuple))
+                assert isinstance(raw_texts, (list, tuple))
+                assert isinstance(raw_images, (list, tuple))
                 for field, records in (
                     ("toggle_count", raw_toggles),
                     ("text_count", raw_texts),

@@ -1,6 +1,7 @@
 """Session regression cases for the adapter."""
 
 import unittest
+from contextlib import nullcontext
 from alas_headless import (
     AlasCombatObserverManifest,
     AlasSemanticSession,
@@ -29,6 +30,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         adapter.campaign_combat_committed.return_value = False
         adapter.operation_siren_combat_committed.return_value = False
         adapter.click.return_value = receipt
+        adapter.prepared_input_frame.side_effect = lambda provider: nullcontext()
         session = AlasSemanticSession.__new__(AlasSemanticSession)
         session.adapter = adapter
         session.open = lambda: adapter

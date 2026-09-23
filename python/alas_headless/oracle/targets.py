@@ -784,7 +784,7 @@ class TargetsOracle:
                 and matches[0].bounds is not None
             )
         if semantic_id == "login/update/download":
-            return self._login_update_download_prompt_matches(state)
+            return self._login_update_action_prompt_matches(state)
         if semantic_id == "mail/manage/back":
             return self._mail_manager_back_delegated_raycast_proven(state)
         if semantic_id == "exercise/opponent/start":

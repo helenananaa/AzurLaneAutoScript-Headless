@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import Dict, Tuple
+from typing import Dict, Mapping, Tuple
 from .contracts import (
     CampaignMapCellState,
     CampaignMapEnemyState,
@@ -101,7 +101,7 @@ class CampaignMapOracle:
             ):
                 raise SemanticGateClosed("campaign map grid topology is invalid")
             world_value = button.raw.get("world_position")
-            if not isinstance(world_value, dict):
+            if not isinstance(world_value, Mapping):
                 raise SemanticGateClosed("campaign map grid world position is absent")
             cell_world_positions[coordinate] = tuple(
                 self._finite_number(
@@ -495,7 +495,7 @@ class CampaignMapOracle:
                 if ammo > capacity:
                     raise SemanticGateClosed("campaign map fleet ammo exceeds capacity")
             anchor_value = anchor_matches[0].raw.get("anchor_world_position")
-            if not isinstance(anchor_value, dict):
+            if not isinstance(anchor_value, Mapping):
                 raise SemanticGateClosed("campaign map fleet world anchor is absent")
             anchor = tuple(
                 self._finite_number(

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from ...semantic_oracle import SemanticGateClosed
+from ...semantic_oracle import SemanticGateClosed, SemanticTargetMissing
 from .contracts import (
     _BattlePassFlowContext,
     _DataKeyFlowContext,
@@ -188,7 +188,19 @@ class RewardsAdapterPorts:
         if self._supply_pack_context is not None:
             context = self._supply_pack_context
             if name == "SHOP_GOTO_SUPPLY_PACK":
-                receipt = self.oracle.click_toggle("shop/gift-pack")
+                if self.oracle.gift_pack_page_visible():
+                    raise SemanticTargetMissing("gift pack tab is already selected")
+                try:
+                    receipt = self.oracle.click_toggle("shop/gift-pack")
+                except SemanticGateClosed:
+                    # The tab can become selected between ALAS' presence read
+                    # and its click. The caller retries its page check without
+                    # inventing an input receipt or tapping a checked toggle.
+                    if self.oracle.gift_pack_page_visible():
+                        raise SemanticTargetMissing(
+                            "gift pack tab became selected before input"
+                        ) from None
+                    raise
                 context.gift_pack_selected = True
                 context.passive_transition_until = time.monotonic() + 12.0
                 return receipt

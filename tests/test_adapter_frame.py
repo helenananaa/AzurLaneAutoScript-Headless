@@ -2,6 +2,7 @@ import copy
 import hashlib
 import json
 import unittest
+from unittest import mock
 
 from alas_headless.adapter import (
     SemanticFrameClock,
@@ -122,6 +123,8 @@ class FakeRuntimeHandle:
         self.ui = ui()
         self.requests = []
         self.foreground_calls = 0
+        self.component = COMPONENT
+        self.taps = []
         self.after_request = None
 
     def observer_request(self, request_line):
@@ -143,10 +146,10 @@ class FakeRuntimeHandle:
 
     def foreground_component(self):
         self.foreground_calls += 1
-        return COMPONENT
+        return self.component
 
     def tap(self, x, y):
-        raise AssertionError("frame acquisition cannot inject input")
+        self.taps.append((x, y))
 
     def swipe(self, x1, y1, x2, y2, duration_ms):
         raise AssertionError("frame acquisition cannot inject input")
@@ -188,6 +191,7 @@ class SemanticFrameTests(unittest.TestCase):
         handle.ui['toggle_truncated'] = True
         frame = clock.acquire(include_ui=True)
         self.assertTrue(frame.projections['ui']['toggle_truncated'])
+        self.assertEqual(handle.requests, ["GET /v1/state\n", "GET /v1/ui\n"])
         reader = SemanticFrameReader(clock, clock._oracle).oracle()
         self.assertEqual(reader.retirement_selection_state().capacity_used, 833)
         with self.assertRaisesRegex(SemanticGateClosed, 'toggle snapshot is truncated'):
@@ -195,6 +199,17 @@ class SemanticFrameTests(unittest.TestCase):
         handle.ui['text_truncated'] = True
         with self.assertRaisesRegex(SemanticGateClosed, 'text snapshot is truncated'):
             clock.acquire(include_ui=True)
+
+    def test_single_ui_capture_rejects_malformed_truncation_and_extraction_errors(self):
+        for field, value in (("toggle_truncated", None), ("toggle_truncated", 1),
+                             ("toggle_truncated", "true"), ("error_count", 1)):
+            with self.subTest(field=field, value=value):
+                handle, _, clock = make_clock()
+                handle.ui[field] = value
+                with self.assertRaises(SemanticGateClosed):
+                    clock.acquire(include_ui=True)
+                self.assertEqual(handle.requests, ["GET /v1/state\n", "GET /v1/ui\n"])
+                self.assertIsNone(clock.current_frame_id)
 
     def test_acquire_builds_one_immutable_atomic_frame(self):
         handle, monotonic, clock = make_clock()
@@ -257,7 +272,147 @@ class SemanticFrameTests(unittest.TestCase):
             ["GET /v1/state\n", "GET /v1/ui\n"],
         )
         self.assertEqual(len(handle.requests), live_request_count)
+        self.assertEqual(handle.foreground_calls, 1)
         self.assertEqual(reader.identity(), frame.identity)
+
+    def test_capture_rejects_foreground_change_during_any_endpoint(self):
+        for endpoint in ("GET /v1/state\n", "GET /v1/ui\n"):
+            with self.subTest(endpoint=endpoint):
+                handle, _, clock = make_clock()
+                def change_foreground():
+                    if handle.requests[-1] == endpoint:
+                        handle.component = "com.android.launcher/.Launcher"
+                handle.after_request = change_foreground
+                with self.assertRaisesRegex(SemanticGateClosed, "not top-resumed"):
+                    clock.acquire(include_ui=True)
+                self.assertIsNone(clock.current_frame_id)
+                self.assertEqual(handle.foreground_calls, 1)
+                self.assertEqual(handle.taps, [])
+
+    def test_direct_live_state_read_still_checks_foreground(self):
+        handle, _, clock = make_clock()
+        handle.component = "com.android.launcher/.Launcher"
+        with self.assertRaisesRegex(SemanticGateClosed, "not top-resumed"):
+            clock._oracle.read_state()
+        self.assertEqual(handle.requests, [])
+        self.assertEqual(handle.foreground_calls, 1)
+
+    def test_frame_reader_rechecks_actual_foreground_only_at_input(self):
+        handle, _, clock = make_clock()
+        clock.acquire()
+        reader = SemanticFrameReader(clock, clock._oracle).oracle()
+        self.assertTrue(reader.enabled("login/enter"))
+        self.assertEqual(handle.foreground_calls, 1)
+
+        handle.component = "com.android.launcher/.Launcher"
+        self.assertTrue(reader.enabled("login/enter"))
+        with self.assertRaisesRegex(SemanticGateClosed, "before semantic input"):
+            reader.click("login/enter")
+        self.assertEqual(handle.taps, [])
+        self.assertEqual(handle.foreground_calls, 2)
+
+        handle.component = COMPONENT
+        reader.click("login/enter")
+        self.assertEqual(len(handle.taps), 1)
+        self.assertEqual(handle.foreground_calls, 3)
+
+    def test_parsed_frame_is_reused_read_only_and_replaced_at_screenshot(self):
+        handle, _, clock = make_clock()
+        frame = clock.acquire(include_ui=True)
+        provider = SemanticFrameReader(clock, clock._oracle)
+        reader = provider.oracle()
+        with mock.patch.object(reader, "_request", wraps=reader._request) as request:
+            first = reader.read_state()
+            first_ui = reader.read_ui_state()
+            first_text = reader.read_text_state()
+            self.assertIs(first.snapshot, frame.projections["snapshot"])
+            self.assertIs(first.buttons[0].raw, frame.projections["buttons"]["buttons"][0])
+            self.assertIs(first_ui.snapshot, frame.projections["ui"])
+            for _ in range(33):
+                self.assertIs(reader.read_state(), first)
+                self.assertIs(reader.read_ui_state(), first_ui)
+                self.assertIs(reader.read_text_state(), first_text)
+                self.assertTrue(reader.observation_target_present("login/enter"))
+            self.assertEqual(request.call_count, 3)
+        with self.assertRaises(TypeError):
+            first.snapshot["pid"] = 0
+        with self.assertRaises(TypeError):
+            first.buttons[0].raw["adb_point"]["x"] = 0
+        with self.assertRaises(TypeError):
+            first_ui.snapshot["text_truncated"] = True
+
+        handle.snapshot["generation"] = 11
+        handle.buttons["generation"] = 11
+        handle.buttons["buttons"] = []
+        handle.buttons["button_count"] = 0
+        handle.ui["generation"] = 11
+        clock.acquire(include_ui=True)
+        with self.assertRaises(StaleFrameError):
+            reader.read_state()
+        next_reader = provider.oracle()
+        self.assertEqual(next_reader.read_state().generation, 11)
+        self.assertFalse(next_reader.observation_target_present("login/enter"))
+
+    def test_cached_reads_still_reject_invalidated_or_changed_runtime(self):
+        for change in ("invalidate", "pid", "fingerprint", "close"):
+            with self.subTest(change=change):
+                handle, _, clock = make_clock()
+                clock.acquire(include_ui=True)
+                reader = SemanticFrameReader(clock, clock._oracle).oracle()
+                reads = (
+                    reader.read_state, reader.read_ui_state, reader.read_text_state,
+                    lambda: reader.observation_target_present("login/enter"),
+                )
+                for read in reads:
+                    read()
+                if change == "invalidate":
+                    clock.invalidate()
+                elif change == "pid":
+                    handle.pid += 1
+                elif change == "fingerprint":
+                    handle.fingerprint_sha256 = "b" * 64
+                else:
+                    clock.close()
+                for read in reads:
+                    with self.assertRaises(StaleFrameError):
+                        read()
+
+    def test_cached_text_and_partial_ui_do_not_admit_strict_ui(self):
+        handle, _, clock = make_clock()
+        handle.ui["toggle_truncated"] = True
+        clock.acquire(include_ui=True)
+        reader = SemanticFrameReader(clock, clock._oracle).oracle()
+        reader.read_text_state()
+        reader.read_ui_state(_preserve_partial_toggles=True)
+        for _ in range(2):
+            with self.assertRaisesRegex(SemanticGateClosed, "toggle snapshot is truncated"):
+                reader.read_ui_state()
+
+    def test_frozen_map_and_physics_payloads_keep_typed_readers_compatible(self):
+        from tests.semantic_support.campaign_fixtures import make_campaign_map_backend
+        from tests.test_private_quarters_physics import backend as physics_backend
+
+        campaign = make_campaign_map_backend(generations=(10,))
+        campaign.ui = campaign.ui_sequence[0]
+        for kind, backend in (("campaign", campaign), ("physics", physics_backend())):
+            with self.subTest(kind=kind):
+                handle, _, clock = make_clock()
+                handle.buttons["buttons"] = backend.buttons["buttons"]
+                handle.buttons["button_count"] = len(handle.buttons["buttons"])
+                for key in ("images", "image_count", "texts", "text_count",
+                            "toggles", "toggle_count", "private_quarters_physics"):
+                    if key in backend.ui:
+                        handle.ui[key] = backend.ui[key]
+                clock.acquire(include_ui=True)
+                reader = SemanticFrameReader(clock, clock._oracle).oracle()
+                if kind == "campaign":
+                    state = reader._campaign_map_state_once(
+                        "12-4", columns=3, rows=2,
+                        land=((1, 2),), expected_fleet_count=2,
+                    )
+                    self.assertEqual(len(state.fleets), 2)
+                else:
+                    self.assertEqual(reader.private_quarters_physics().colliders[0].instance_id, -31)
 
     def test_ui_projection_can_be_rebased_only_inside_stable_state_sandwich(self):
         handle, _, clock = make_clock()
@@ -277,6 +432,7 @@ class SemanticFrameTests(unittest.TestCase):
             ["GET /v1/state\n", "GET /v1/ui\n", "GET /v1/state\n"],
         )
         self.assertEqual(frame.generation, 12)
+        self.assertEqual(handle.foreground_calls, 1)
         self.assertEqual(frame.projections["ui_source_generation"], 11)
         self.assertEqual(frame.projections["ui"]["generation"], 12)
         self.assertEqual(reader.oracle().read_state().generation, 12)

@@ -1,0 +1,75 @@
+{
+  "schema": "alas-headless.live-resumption-20260923/v1",
+  "device": "emulator-5554",
+  "game_package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "research": {
+    "navigation_passed": true,
+    "home": true,
+    "project_codes": [
+      "D-732-MI",
+      "G-412-MI",
+      "G-412-MI",
+      "H-339-MI",
+      "D-347-MI"
+    ],
+    "queue_statuses": [
+      "finished",
+      "finished",
+      "finished",
+      "finished",
+      "finished"
+    ],
+    "queue_reward_claimable": true,
+    "actions": [
+      "main/tech",
+      "research-menu/research",
+      "research/queue/enter",
+      "research/page/back",
+      "research/page/back",
+      "research-menu/page/back"
+    ]
+  },
+  "private_quarters": {
+    "first_run_passed": false,
+    "first_run_error": "ALAS resource is not semantically mapped: FLEET_CHECK",
+    "first_run_original_count": 0,
+    "first_run_overview_remaining": 0,
+    "first_run_actions": [
+      "main/live",
+      "dorm-menu/private-quarters",
+      "dorm-menu/private-quarters",
+      "private-quarters/room/new-jersey",
+      "private-quarters/dialogue/continue",
+      "private-quarters/dialogue/continue",
+      "private-quarters/dialogue/continue",
+      "private-quarters/dialogue/continue",
+      "private-quarters/character/new-jersey",
+      "private-quarters/interact",
+      "private-quarters/room/back",
+      "private-quarters/interact",
+      "private-quarters/room/back",
+      "private-quarters/interact",
+      "private-quarters/room/back",
+      "private-quarters/room/back",
+      "private-quarters/room/back",
+      "private-quarters/home"
+    ],
+    "second_run_passed": true,
+    "second_run_original_count": 0,
+    "second_run_overview_remaining": 0,
+    "second_run_home": true,
+    "second_run_actions": [
+      "main/live",
+      "dorm-menu/private-quarters",
+      "private-quarters/home",
+      "main/already"
+    ],
+    "claim": "three interactions and room exit observed in first run; separate zero-interaction rerun proved return to main"
+  },
+  "raw_artifact_sha256": {
+    "interaction": "e264773cb9279c133e799f18c42835ea191b210dc56b232cf3c0d7f6e8ec5ce5",
+    "return_validation": "24079ff420dace0cd24e271cbae7e05a919cdc03aca05c1c5f2b51631bc3fa39",
+    "research_navigation": "778437b2dc3fc162c15c44fed07d018e06d0eecc8a5271506824623d7d4ec14b"
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "schema": "alas-headless.daily-continuity-20260923/v1",
+  "device": "emulator-5554",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "initial_remaining": {
+    "tactical_training": 3,
+    "fierce_assault": 3,
+    "escort_mission": 3,
+    "advance_mission": 3,
+    "module_development": 0,
+    "supply_line_disruption": 0
+  },
+  "tactical": {
+    "interrupted": true,
+    "original_intent": [
+      {
+        "kind": "tactical_training",
+        "before": 3,
+        "stage": 1,
+        "fleet": 1
+      }
+    ],
+    "final_remaining": 0,
+    "full_task_passed": false
+  },
+  "fierce": {
+    "task_result": false,
+    "transactions": [
+      {
+        "kind": "fierce_assault",
+        "before": 3,
+        "stage": 1,
+        "fleet": 1
+      }
+    ],
+    "quick_receipts": [
+      {
+        "semantic_id": "daily/execute/fierce_assault/stage/1/quick/all",
+        "generation": 47241
+      }
+    ],
+    "final_remaining": 0,
+    "full_task_passed": false,
+    "observed_blocker": "delayed award overlay blocked original final ui_click"
+  },
+  "escort": {
+    "task_result": true,
+    "transactions": [],
+    "quick_receipts": 0,
+    "active_in_carousel": false
+  },
+  "carousel": [
+    {
+      "slot": 1,
+      "kind": "tactical_training",
+      "active": true,
+      "remaining": 0,
+      "generation": 53968
+    },
+    {
+      "slot": 2,
+      "kind": "fierce_assault",
+      "active": true,
+      "remaining": 0,
+      "generation": 54013
+    },
+    {
+      "slot": 3,
+      "kind": "advance_mission",
+      "active": false,
+      "remaining": 3,
+      "generation": 54058
+    },
+    {
+      "slot": 4,
+      "kind": "escort_mission",
+      "active": false,
+      "remaining": 3,
+      "generation": 54103
+    },
+    {
+      "slot": 5,
+      "error": "centered daily identity is absent or ambiguous"
+    },
+    {
+      "slot": 6,
+      "kind": "module_development",
+      "active": true,
+      "remaining": 0,
+      "generation": 54184
+    },
+    {
+      "slot": 7,
+      "kind": "supply_line_disruption",
+      "active": true,
+      "remaining": 0,
+      "generation": 54230
+    }
+  ],
+  "full_daily_continuous_qualification": false,
+  "raw_artifact_sha256": {
+    "initial": "2dc13cc14556fac6364041823016f48ea708769c6ea400f7bf172af91a40b20f",
+    "tactical_interrupted": "404e4fe3e5049537d5a46cd34bcbad78ba1e0f8064c3be6ce16d7341b7532928",
+    "fierce_failed": "0a6ad3e67303a13b6e59bc6422c40311aa9b5e40b5fa6917e41c73ec29d6f1a5",
+    "escort_inactive": "8f696cfe11255f31cc62af20f36cea56cbdf1812d0973fb68fe255ea815575ba",
+    "carousel": "9b2ade2622e87ac0ce2c5d8c578bd0dea074c05f413b2241386a815b9fd18ae1"
+  }
+}

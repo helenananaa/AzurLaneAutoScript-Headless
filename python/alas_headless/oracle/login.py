@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from typing import Optional, Tuple
-from .contracts import ActionReceipt, OracleState, TextState, UI_SCHEMA
+from .contracts import ActionReceipt, OracleState, TextState, UiState, UI_SCHEMA
 from .errors import ObserverTransportError, SemanticGateClosed
 
 
@@ -77,8 +78,11 @@ class LoginOracle:
             and buttons[0].actionable
         )
 
-    def _login_update_download_prompt_matches(self, state: OracleState) -> bool:
-        ui_state = self.read_text_state()
+    def _login_update_download_prompt_matches(
+        self, state: OracleState, ui_state: Optional[UiState] = None
+    ) -> bool:
+        if ui_state is None:
+            ui_state = self.read_text_state()
         if (
             ui_state.generation < state.generation
             or ui_state.generation > state.generation + 2
@@ -121,8 +125,40 @@ class LoginOracle:
 
     def login_update_download_available(self) -> bool:
         return self._retry_transition_read(
-            lambda: self._login_update_download_prompt_matches(self.read_state())
+            lambda: self._login_update_action_prompt_matches(self.read_state())
         )
+
+    def _login_update_retry_prompt_matches(
+        self, state: OracleState, ui_state: Optional[UiState] = None
+    ) -> bool:
+        if self._login_update_retry_attempted:
+            return False
+        if ui_state is None:
+            ui_state = self.read_text_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed("login update retry snapshots are not coherent")
+        content = tuple(
+            text for text in ui_state.texts
+            if text.path.endswith("DialogPanel/dialog/content/Text")
+            and text.active_in_hierarchy and text.active_and_enabled
+            and not text.truncated and text.bounds is not None
+        )
+        if len(content) != 1 or content[0].text.strip() != "部分文件下载失败，是否重试？":
+            return False
+        retry = self._matches(state, "login/update/download")
+        cancel = self._matches(state, "login/update/cancel")
+        return bool(
+            len(retry) == len(cancel) == 1
+            and retry[0].actionable and retry[0].raycast_top is True
+            and retry[0].point is not None and retry[0].bounds is not None
+            and retry[0].bounds.contains(retry[0].point)
+            and cancel[0].active_in_hierarchy and cancel[0].active_and_enabled
+        )
+
+    def _login_update_action_prompt_matches(self, state: OracleState) -> bool:
+        ui_state = self.read_text_state()
+        return (self._login_update_download_prompt_matches(state, ui_state)
+                or self._login_update_retry_prompt_matches(state, ui_state))
 
     @staticmethod
     def _login_update_restart_text_matches(value: str) -> bool:
@@ -356,7 +392,7 @@ class LoginOracle:
         if self._foreground_component() != self.fingerprint.component:
             return False
         ui_snapshot = self._request("GET /v1/ui\n")
-        if not isinstance(ui_snapshot, dict):
+        if not isinstance(ui_snapshot, Mapping):
             return False
         try:
             self._validate_identity(
@@ -377,7 +413,7 @@ class LoginOracle:
                 return False
             raw_texts = ui_snapshot.get("texts")
             if (
-                not isinstance(raw_texts, list)
+                not isinstance(raw_texts, (list, tuple))
                 or self._integer(ui_snapshot.get("text_count"), "text_count")
                 != len(raw_texts)
             ):

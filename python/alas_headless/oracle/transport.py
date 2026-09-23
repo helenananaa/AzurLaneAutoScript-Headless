@@ -47,15 +47,15 @@ def request_observer_state(
 
     combined = request("GET /v1/state\n")
     combined_response = (
-        isinstance(combined, dict)
+        isinstance(combined, Mapping)
         and combined.get("protocol_schema") == OBSERVER_SCHEMA
         and combined.get("status") == "ok"
-        and isinstance(combined.get("snapshot"), dict)
-        and isinstance(combined.get("buttons"), dict)
+        and isinstance(combined.get("snapshot"), Mapping)
+        and isinstance(combined.get("buttons"), Mapping)
     )
     if combined_response:
         return combined["snapshot"], combined["buttons"], True
-    if isinstance(combined, dict) and combined.get("status") == "bad-request":
+    if isinstance(combined, Mapping) and combined.get("status") == "bad-request":
         # Compatibility with pre-state observer builds. The atomic endpoint
         # reduces this pair to one socket round trip without changing cadence.
         return (
@@ -64,7 +64,7 @@ def request_observer_state(
             False,
         )
     if (
-        isinstance(combined, dict)
+        isinstance(combined, Mapping)
         and combined.get("protocol_schema") == OBSERVER_SCHEMA
         and combined.get("status") == "unavailable"
     ):

@@ -111,16 +111,18 @@ class SessionDispatchPorts:
             # GET_ITEMS_SHIP_1 is a build-owned acknowledgement.  Delegate it
             # before the generic AwardInfo fallback aliases only GET_ITEMS_1.
             return adapter.appear(button)
-        if adapter.oracle.enabled("overlay/network-reconnect/confirm"):
+        observation_oracle = adapter._frame_or_live_observation_oracle()
+        if observation_oracle.enabled("overlay/network-reconnect/confirm"):
             # NetworkDown is a global exact overlay and may mount over any
-            # owned page between ALAS' page probe and its next action.  Expose
+            # owned page. Observe it in ALAS' current screenshot frame; input
+            # revalidates the current target independently. Expose
             # only the reviewed reconnect pair before asking any covered page
             # reader to classify its underlay; the original ALAS popup handler
             # remains the owner of the retry.
             if name == "POPUP_CONFIRM":
                 return True
             if name == "POPUP_CANCEL":
-                return adapter.oracle.enabled(
+                return observation_oracle.enabled(
                     "overlay/network-reconnect/cancel"
                 )
             return False
@@ -197,7 +199,7 @@ class SessionDispatchPorts:
             and adapter.oracle.award_info_page_visible()
         ):
             return name == "GET_ITEMS_1"
-        if adapter.oracle.enabled("reward/award-info/close"):
+        if observation_oracle.enabled("reward/award-info/close"):
             return name == "GET_ITEMS_1"
         combat_oracle = adapter._frame_or_live_observation_oracle()
         if (
@@ -371,20 +373,23 @@ class SessionDispatchPorts:
             and self.open()._exercise_execution_active
         ):
             return self.open().oracle.click_exercise_combat_pause()
+        navigation_frame = None
         if name == "CLICK_SAFE_AREA":
+            navigation_frame = self.refresh_frame()
             adapter = self.open()
-            if adapter.oracle.exercise_reward_item_info_visible():
+            navigation_oracle = adapter._require_frame_observation_oracle()
+            if navigation_oracle.exercise_reward_item_info_visible():
                 receipt = adapter.oracle.click_exercise_reward_item_info_cancel()
                 self._combat_result_transition_until = time.monotonic() + 1.5
                 return receipt
             if (
                 getattr(adapter, "_exercise_execution_active", False)
-                and adapter.oracle.award_info_page_visible()
+                and navigation_oracle.award_info_page_visible()
             ):
                 receipt = adapter.oracle.click_exercise_award_info_close()
                 self._combat_result_transition_until = time.monotonic() + 1.5
                 return receipt
-            if adapter.oracle.daily_battle_result_visible():
+            if navigation_oracle.daily_battle_result_visible():
                 receipt = adapter.oracle.click_daily_battle_result()
                 # ChapterMap can take well over the generic overlay-close
                 # interval to remount after the typed result action.  Keep
@@ -520,15 +525,13 @@ class SessionDispatchPorts:
             self._combat_last_result_receipt = receipt
             self._arm_combat_result_transition(adapter)
             return receipt
-        if (
-            name == "CLICK_SAFE_AREA"
-            and self.open().oracle.enabled("reward/award-info/close")
-        ):
-            self.refresh_frame()
-            return self.open().oracle.click("reward/award-info/close")
-        if name == "GOTO_MAIN" and self.open().oracle.exercise_page_visible():
-            self.refresh_frame()
-            return self.open().oracle.click("exercise/page/back")
+        if name in ("CLICK_SAFE_AREA", "GOTO_MAIN"):
+            navigation_frame = navigation_frame or self.refresh_frame()
+            navigation_oracle = self.open()._require_frame_observation_oracle()
+            if name == "CLICK_SAFE_AREA" and navigation_oracle.enabled("reward/award-info/close"):
+                return navigation_oracle.click("reward/award-info/close")
+            if name == "GOTO_MAIN" and navigation_oracle.exercise_page_visible():
+                return navigation_oracle.click("exercise/page/back")
         if (name == 'AUTO_SEARCH_MENU_EXIT' and self.adapter is not None
                 and self.adapter._campaign_context is not None):
             self.refresh_frame()
@@ -634,5 +637,18 @@ class SessionDispatchPorts:
         # A page scan can legitimately take longer than one frame lease.  The
         # semantic target is re-read by Adapter.click(); refresh the frozen
         # screenshot-equivalent immediately before that read/input boundary.
-        self.refresh_frame()
-        return self.open().click(button)
+        prepared_frame = navigation_frame or self.refresh_frame()
+        adapter = self.open()
+        frame_oracle = (
+            adapter._require_frame_observation_oracle()
+            if name == "LOGIN_GAME_UPDATE" else None
+        )
+        def prepared_oracle():
+            self._frame_clock.borrow(prepared_frame.frame_id, require_fresh=True)
+            return adapter._require_frame_observation_oracle()
+
+        with adapter.prepared_input_frame(prepared_oracle):
+            receipt = adapter.click(button)
+        if frame_oracle is not None and frame_oracle._login_update_retry_attempted:
+            adapter.oracle._login_update_retry_attempted = True
+        return receipt

@@ -1,0 +1,38 @@
+{
+  "schema": "alas-headless.login-update-post-retry/v1",
+  "input_injected": false,
+  "serial": "emulator-5554",
+  "package": "com.bilibili.azurlane",
+  "pid": 1921,
+  "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "generation": 18749,
+  "ui_generation": 18750,
+  "texts": [
+    {
+      "path": "OverlayCamera/Overlay/UIMain/DialogPanel/dialog/content/Text",
+      "text": "部分文件下载失败，是否重试？"
+    },
+    {
+      "path": "OverlayCamera/Overlay/UIMain/UpdatePanel/progressInfo",
+      "text": "正在检查更新..."
+    }
+  ],
+  "dialog_buttons": [
+    {
+      "path": "OverlayCamera/Overlay/UIMain/DialogPanel/dialog/title/back",
+      "actionable": false,
+      "raycast_top": null
+    },
+    {
+      "path": "OverlayCamera/Overlay/UIMain/DialogPanel/dialog/exit_button",
+      "actionable": false,
+      "raycast_top": null
+    },
+    {
+      "path": "OverlayCamera/Overlay/UIMain/DialogPanel/dialog/action_button",
+      "actionable": true,
+      "raycast_top": true
+    }
+  ]
+}

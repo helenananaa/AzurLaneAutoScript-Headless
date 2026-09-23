@@ -8,7 +8,8 @@ import math
 import time
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import Any, Callable, Mapping
+from collections.abc import Mapping
+from typing import Any, Callable
 
 from ..semantic_oracle import SemanticGateClosed, SemanticOracle
 from .errors import StaleFrameError
@@ -30,14 +31,6 @@ def _freeze(value: Any) -> Any:
     if isinstance(value, (str, int, float, bool, type(None))):
         return value
     raise SemanticGateClosed("semantic frame contains a mutable projection value")
-
-
-def _thaw(value: Any) -> Any:
-    if isinstance(value, Mapping):
-        return {key: _thaw(child) for key, child in value.items()}
-    if isinstance(value, tuple):
-        return [_thaw(child) for child in value]
-    return value
 
 
 def _canonical_sha256(value: Mapping[str, Any]) -> str:
@@ -208,7 +201,9 @@ class SemanticFrameClock:
             raise StaleFrameError()
         try:
             fingerprint_before, pid_before = self._runtime_identity()
-            state = self._oracle.read_state()
+            # Capture owns one closing foreground check for all endpoints.
+            # No frame is published until it passes; input still checks again.
+            state = self._oracle.read_state(check_foreground=False)
             ui_state = None
             ui_snapshot = None
             ui_source_generation = None
@@ -220,22 +215,19 @@ class SemanticFrameClock:
                 # rebasing its clock metadata onto the closing state.
                 for attempt in range(30):
                     before = state
-                    try:
-                        candidate_ui = self._oracle.read_ui_state()
-                    except SemanticGateClosed as exc:
-                        if str(exc) != 'toggle snapshot is truncated':
-                            raise
-                        # Dock cards can exhaust unrelated Toggle/Image caps.
-                        # Preserve those flags in the immutable frame: only the
-                        # retirement slice reader validates its exact records;
-                        # generic UI consumers still reject the partial frame.
-                        candidate_ui = self._oracle.read_ui_state(_preserve_partial_toggles=True)
+                    # Capture the actual truncation flag in one request. The
+                    # consuming capability owns whether that slice is usable;
+                    # strict readers still reject incomplete Toggle data.
+                    candidate_ui = self._oracle.read_ui_state(
+                        check_foreground=False,
+                        _preserve_partial_toggles=True
+                    )
                     if candidate_ui.generation == before.generation:
                         ui_state = candidate_ui
                         ui_snapshot = dict(candidate_ui.snapshot)
                         ui_source_generation = candidate_ui.generation
                         break
-                    after = self._oracle.read_state()
+                    after = self._oracle.read_state(check_foreground=False)
                     if (
                         before.generation <= candidate_ui.generation <= after.generation
                         and before.scene_handle == after.scene_handle
@@ -255,6 +247,8 @@ class SemanticFrameClock:
                     raise SemanticGateClosed(
                         "semantic frame mixes UI and state generations"
                     )
+            if self._oracle._foreground_component() != self._oracle.fingerprint.component:
+                raise SemanticGateClosed("game activity is not top-resumed")
             fingerprint_after, pid_after = self._runtime_identity()
             if (
                 fingerprint_after != fingerprint_before
@@ -389,7 +383,50 @@ class SemanticFrameClock:
 
 
 class _FrameBoundSemanticOracle(SemanticOracle):
-    """Disable transition retry loops for one immutable frame."""
+    """Parse each immutable projection once, while checking its lease on use."""
+
+    def __init__(self, *args: Any, frame_guard: Callable[[], Any], **kwargs: Any):
+        super().__init__(*args, **kwargs)
+        self._frame_guard = frame_guard
+        self._frame_reads: dict[Any, Any] = {}
+
+    def _frame_read(self, key: Any, read: Callable[[], Any]) -> Any:
+        self._frame_guard()
+        if key not in self._frame_reads:
+            # Failed/partial reads never become successful cached observations.
+            self._frame_reads[key] = read()
+        return self._frame_reads[key]
+
+    def read_state(self):
+        return self._frame_read("state", super().read_state)
+
+    def read_ui_state(self, *, check_foreground=True, _preserve_partial_toggles=False):
+        # A text-only or partial-toggle read must not satisfy a strict UI read.
+        return self._frame_read(
+            ("ui", check_foreground, _preserve_partial_toggles),
+            lambda: super(_FrameBoundSemanticOracle, self).read_ui_state(
+                check_foreground=check_foreground,
+                _preserve_partial_toggles=_preserve_partial_toggles,
+            ),
+        )
+
+    def read_text_state(self):
+        return self._frame_read("text", super().read_text_state)
+
+    def recommendation_shop_visible(self):
+        return self._frame_read("shop-shell", super().recommendation_shop_visible)
+
+    def observation_surface_present(self, surface):
+        return self._frame_read(
+            ("surface", surface),
+            lambda: super(_FrameBoundSemanticOracle, self).observation_surface_present(surface),
+        )
+
+    def observation_target_present(self, semantic_id):
+        return self._frame_read(
+            ("target", semantic_id),
+            lambda: super(_FrameBoundSemanticOracle, self).observation_target_present(semantic_id),
+        )
 
     def _retry_transition_read(
         self,
@@ -435,23 +472,41 @@ class SemanticFrameReader:
                 return {
                     "protocol_schema": "alas-headless.observer/v1",
                     "status": "ok",
-                    "snapshot": _thaw(projections["snapshot"]),
-                    "buttons": _thaw(projections["buttons"]),
+                    "snapshot": projections["snapshot"],
+                    "buttons": projections["buttons"],
                 }
             if request_line == "GET /v1/snapshot\n":
-                return _thaw(projections["snapshot"])
+                return projections["snapshot"]
             if request_line == "GET /v1/buttons\n":
-                return _thaw(projections["buttons"])
+                return projections["buttons"]
             if request_line == "GET /v1/ui\n" and "ui" in projections:
-                return _thaw(projections["ui"])
+                return projections["ui"]
             raise StaleFrameError()
 
         live = self._live_oracle
+
+        def frame_foreground_component() -> str:
+            # Acquisition already proved the exact foreground for this frozen
+            # screenshot-equivalent frame. Passive reads must not repeat ADB
+            # foreground queries for every ALAS page candidate.
+            self._clock.borrow(frame_id)
+            return live.fingerprint.component
+
+        def checked_input(action: Callable[..., Any], *args: Any) -> Any:
+            # This oracle also supplies the final typed proof for some actions.
+            # Recheck the real activity at the actual input boundary, even if
+            # the immutable observation still describes the previous page.
+            self._clock.borrow(frame_id)
+            if live._foreground_component() != live.fingerprint.component:
+                raise SemanticGateClosed("game activity changed before semantic input")
+            return action(*args)
+
         self._oracle = _FrameBoundSemanticOracle(
             request,
-            live._foreground_component,
-            live._tap,
+            frame_foreground_component,
+            lambda x, y: checked_input(live._tap, x, y),
             live.fingerprint,
+            frame_guard=lambda: self._clock.borrow(frame_id),
             targets=live._targets.values(),
             image_targets=live._image_targets.values(),
             toggle_targets=live._toggle_targets.values(),
@@ -459,7 +514,9 @@ class SemanticFrameReader:
             blockers=live._blockers,
             monotonic=live._monotonic,
             sleep=lambda _: None,
-            swipe=live._swipe,
+            swipe=lambda x1, y1, x2, y2, duration_ms: checked_input(
+                live._swipe, x1, y1, x2, y2, duration_ms
+            ),
         )
         self._frame_id = frame_id
         return self._oracle

@@ -47,11 +47,13 @@ def _adb(serial: str, *arguments: str) -> str:
 
 
 def validate(
-    *, alas_root: Path, seed_config: str, driver_revision: str
+    *, alas_root: Path, seed_config: str, driver_revision: str,
+    serial_override: str | None = None, allow_natural_claims: bool = False,
+    supply_pack_only: bool = False,
 ) -> Mapping[str, Any]:
     seed_path = alas_root / "config" / (seed_config + ".json")
     seed = json.loads(seed_path.read_text(encoding="utf-8"))
-    serial = seed["Alas"]["Emulator"]["Serial"]
+    serial = serial_override or seed["Alas"]["Emulator"]["Serial"]
     package = seed["Alas"]["Emulator"]["PackageName"]
     if not _adb(serial, "shell", "pidof", package):
         raise RuntimeError("game package is not running")
@@ -67,11 +69,12 @@ def validate(
     from module.config.config import name_to_function
 
     payload = copy.deepcopy(seed)
+    payload["Alas"]["Emulator"]["Serial"] = serial
     payload["Alas"]["Error"].update({"HandleError": False, "SaveError": False})
     payload["Freebies"]["Scheduler"]["Enable"] = False
-    payload["Freebies"]["BattlePass"]["Collect"] = True
+    payload["Freebies"]["BattlePass"]["Collect"] = not supply_pack_only
     payload["Freebies"]["DataKey"].update(
-        {"Collect": True, "ForceCollect": False}
+        {"Collect": not supply_pack_only, "ForceCollect": False}
     )
     payload["Freebies"]["Mail"].update(
         {
@@ -89,9 +92,11 @@ def validate(
     _write_json(config_path, payload)
 
     instance: object | None = None
-    result: dict[str, Any] = {"passed": False}
     observations: list[dict[str, Any]] = []
     actions: list[dict[str, Any]] = []
+    result: dict[str, Any] = {
+        "passed": False, "observations": observations, "actions": actions,
+    }
     try:
         instance = AzurLaneAutoScript(config_name)
         instance.config.bind("Freebies")
@@ -150,7 +155,7 @@ def validate(
         result["scheduler_next_run"] = str(instance.config.Scheduler_NextRun)
         if result["task_result"] is not True:
             raise AssertionError("original ALAS Freebies task did not return success")
-        if any(
+        if not allow_natural_claims and any(
             action["method"]
             in (
                 "click_data_key_limit_choice",
@@ -180,12 +185,14 @@ def validate(
         "seed_config": seed_config,
         "seed_config_sha256": _sha256(seed_path),
         "configured": {
-            "BattlePass.Collect": True,
-            "DataKey.Collect": True,
+            "BattlePass.Collect": not supply_pack_only,
+            "DataKey.Collect": not supply_pack_only,
             "DataKey.ForceCollect": False,
             "Mail.*": False,
             "SupplyPack.Collect": True,
             "SupplyPack.DayOfWeek": 0,
+            "AllowNaturalClaims": allow_natural_claims,
+            "SupplyPackOnly": supply_pack_only,
         },
         "source_sha256": {
             **semantic_source_hashes(ROOT),
@@ -205,6 +212,9 @@ def main() -> int:
     parser.add_argument("--alas-root", type=Path, required=True)
     parser.add_argument("--seed-config", default="semantic_e2e")
     parser.add_argument("--driver-revision", required=True)
+    parser.add_argument("--serial")
+    parser.add_argument("--allow-natural-claims", action="store_true")
+    parser.add_argument("--supply-pack-only", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     arguments = parser.parse_args()
     output = arguments.output.resolve()
@@ -212,6 +222,9 @@ def main() -> int:
         alas_root=arguments.alas_root.resolve(),
         seed_config=arguments.seed_config,
         driver_revision=arguments.driver_revision,
+        serial_override=arguments.serial,
+        allow_natural_claims=arguments.allow_natural_claims,
+        supply_pack_only=arguments.supply_pack_only,
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     _write_json(output, result)

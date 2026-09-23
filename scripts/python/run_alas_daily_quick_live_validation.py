@@ -103,7 +103,7 @@ def main():
             and result['receipts'][0]['semantic_id'].endswith('/quick/all')
             and result['transactions'][0]['before'] > 0
             and result['transactions'][0]['after'] == 0 and result['grant_remaining'] == 0)
-    except (Exception, SystemExit) as exc:
+    except (Exception, SystemExit, KeyboardInterrupt) as exc:
         result['error'] = type(exc).__name__ + ': ' + str(exc)
         result['traceback'] = traceback.format_exc()
         result['receipts'] = [dataclasses.asdict(r) for r in session.open().daily_execution_receipts()]
@@ -113,7 +113,8 @@ def main():
         config_path.unlink(missing_ok=True)
         result['temporary_config_removed'] = not config_path.exists()
         save()
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    print('PASSED', result['passed'], 'transactions', len(result['transactions']),
+          'receipts', len(result.get('receipts', [])), 'error', result.get('error'))
     return 0 if result['passed'] else 1
 
 

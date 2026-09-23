@@ -41,12 +41,15 @@ class FakeCoreOracle:
             "overlay/guild-message/close": False,
             "overlay/network-reconnect/cancel": False,
             "overlay/network-reconnect/confirm": False,
+            "reward/award-info/close": False,
+            "reward/award-info1/close": False,
         }
         self.operation_siren_order_confirmation_visible_value = True
         self.operation_siren_page_visible_value = False
         self.operation_siren_local_map_visible_value = False
         self.exists_values = {}
         self.observation_surfaces = set()
+        self.blocking_rules = ()
         self.observation_prompt_kind_value = None
         self.enable_main_after_overlay_click = False
         self.text_groups = ()
@@ -513,3 +516,6 @@ class FakeCoreOracle:
 
     def read_state(self):
         return SimpleNamespace(generation=self.state_generation)
+
+    def _blocking_rules(self, state, semantic_id):
+        return self.blocking_rules

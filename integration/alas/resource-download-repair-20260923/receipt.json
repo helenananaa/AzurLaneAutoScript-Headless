@@ -1,0 +1,239 @@
+{
+  "schema": "alas-headless.resource-download-repair/v1",
+  "serial": "emulator-5554",
+  "avd": "alas_game_api32_x64",
+  "package": "com.bilibili.azurlane",
+  "pid": 2309,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "root_cause": "Downloader requires NET_CAPABILITY_VALIDATED; default guest connectivity probes failed before resource requests.",
+  "installed_classes3_dex_sha256": "eea4e1a6db89cf549b7aa440509971fda852aa93fe8664c7c440f144f9f217a7",
+  "probe_settings_before": {
+    "captive_portal_http_url": null,
+    "captive_portal_https_url": null
+  },
+  "probe_settings_after": {
+    "captive_portal_http_url": "http://connectivitycheck.platform.hicloud.com/generate_204",
+    "captive_portal_https_url": "https://connectivitycheck.platform.hicloud.com/generate_204"
+  },
+  "https_probe_status": 204,
+  "network_validated_after": true,
+  "download_completed": true,
+  "bytes_requested": 374513855,
+  "files_completed": 91,
+  "files_failed": 0,
+  "completed_observation": {
+    "time": 1790132160.6763484,
+    "generation": 12347,
+    "pid": 2309,
+    "texts": [
+      {
+        "path": "OverlayCamera/Overlay/UIMain/UpdatePanel/progressInfo",
+        "text": "正在下载更新:进度357.2MB/357.2MB  总共91个  已完成91个  失败0个  速度737KB/S"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+        "text": ""
+      }
+    ]
+  },
+  "progress": [
+    {
+      "time": 1790131739.9973905,
+      "generation": 3961,
+      "pid": 2309,
+      "texts": [
+        {
+          "path": "OverlayCamera/Overlay/UIMain/UpdatePanel/progressInfo",
+          "text": "正在下载更新:进度18MB/357.2MB  总共91个  已完成23个  失败0个  速度747KB/S"
+        },
+        {
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "time": 1790131760.0186782,
+      "generation": 4362,
+      "pid": 2309,
+      "texts": [
+        {
+          "path": "OverlayCamera/Overlay/UIMain/UpdatePanel/progressInfo",
+          "text": "正在下载更新:进度34.4MB/357.2MB  总共91个  已完成43个  失败0个  速度744KB/S"
+        },
+        {
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "time": 1790131780.062586,
+      "generation": 4763,
+      "pid": 2309,
+      "texts": [
+        {
+          "path": "OverlayCamera/Overlay/UIMain/UpdatePanel/progressInfo",
+          "text": "正在下载更新:进度49.6MB/357.2MB  总共91个  已完成54个  失败0个  速度686KB/S"
+        },
+        {
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "time": 1790131802.0153198,
+      "generation": 5202,
+      "pid": 2309,
+      "texts": [
+        {
+          "path": "OverlayCamera/Overlay/UIMain/UpdatePanel/progressInfo",
+          "text": "正在下载更新:进度69.3MB/357.2MB  总共91个  已完成57个  失败0个  速度662KB/S"
+        },
+        {
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "time": 1790131922.4505424,
+      "generation": 7611,
+      "pid": 2309,
+      "texts": [
+        {
+          "path": "OverlayCamera/Overlay/UIMain/UpdatePanel/progressInfo",
+          "text": "正在下载更新:进度174.8MB/357.2MB  总共91个  已完成60个  失败0个  速度817KB/S"
+        },
+        {
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "time": 1790131976.2821584,
+      "generation": 8688,
+      "pid": 2309,
+      "texts": [
+        {
+          "path": "OverlayCamera/Overlay/UIMain/UpdatePanel/progressInfo",
+          "text": "正在下载更新:进度220.8MB/357.2MB  总共91个  已完成67个  失败0个  速度643KB/S"
+        },
+        {
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "time": 1790131996.2952769,
+      "generation": 9088,
+      "pid": 2309,
+      "texts": [
+        {
+          "path": "OverlayCamera/Overlay/UIMain/UpdatePanel/progressInfo",
+          "text": "正在下载更新:进度236.6MB/357.2MB  总共91个  已完成68个  失败0个  速度826KB/S"
+        },
+        {
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "time": 1790132016.3229814,
+      "generation": 9489,
+      "pid": 2309,
+      "texts": [
+        {
+          "path": "OverlayCamera/Overlay/UIMain/UpdatePanel/progressInfo",
+          "text": "正在下载更新:进度253.4MB/357.2MB  总共91个  已完成71个  失败0个  速度746KB/S"
+        },
+        {
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "time": 1790132029.5365279,
+      "generation": 9753,
+      "pid": 2309,
+      "texts": [
+        {
+          "path": "OverlayCamera/Overlay/UIMain/UpdatePanel/progressInfo",
+          "text": "正在下载更新:进度263.8MB/357.2MB  总共91个  已完成71个  失败0个  速度951KB/S"
+        },
+        {
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "time": 1790132094.4574454,
+      "generation": 11052,
+      "pid": 2309,
+      "texts": [
+        {
+          "path": "OverlayCamera/Overlay/UIMain/UpdatePanel/progressInfo",
+          "text": "正在下载更新:进度310.5MB/357.2MB  总共91个  已完成71个  失败0个  速度760KB/S"
+        },
+        {
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "time": 1790132160.6763484,
+      "generation": 12347,
+      "pid": 2309,
+      "texts": [
+        {
+          "path": "OverlayCamera/Overlay/UIMain/UpdatePanel/progressInfo",
+          "text": "正在下载更新:进度357.2MB/357.2MB  总共91个  已完成91个  失败0个  速度737KB/S"
+        },
+        {
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": ""
+        }
+      ]
+    }
+  ],
+  "scope": "Local original AVD only. No APK modification, resource verification bypass, userdata reset or host proxy/DNS change.",
+  "evidence_sha256": {
+    "before-connectivity.txt": "58bfaf94e7ef2f38504768f83cfd7b5a78c090edba58fb15e31ee2b888437ceb",
+    "validated-connectivity.txt": "3507117d2e8e5aa4bb0dc3b72845bc6f580e0fa733172a035524f220007533e7",
+    "network-download.log": "b74d9115431cbe0426c65d512d27ec093aa0b9eccb93d02a51258dbce8223ab1",
+    "downloader-network-check.txt": "a25259cf4a8d3770c19dfaea33427502b134562ff52d0717b007a0b346a91a99",
+    "downloader-final.log": "e7119fc8f42020e0d6ec668121165fdac588ea342b8521342e1a377c22f030d6"
+  },
+  "post_cold_start": {
+    "observed_at": 1790132371.4100337,
+    "pid": 18011,
+    "generation": 2026,
+    "age_ms": 13,
+    "status": "ok",
+    "texts": [
+      {
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/current_server/Text",
+        "text": "点击更换"
+      },
+      {
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/current_server/server_name",
+        "text": "巴巴罗萨"
+      },
+      {
+        "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/version",
+        "text": "ver 9.7.385"
+      }
+    ],
+    "opening": [],
+    "download_prompt_present": false,
+    "login_home_verified": false,
+    "runner_status": "Native ALAS login ended fail-closed: game activity is not top-resumed. Final foreground recheck was MainActivity; typed opening overlay remains; home not verified."
+  }
+}

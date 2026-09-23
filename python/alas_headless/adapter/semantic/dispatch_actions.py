@@ -30,7 +30,8 @@ class DispatchActionsPorts:
     """Dispatch actions ports on the shared adapter context."""
 
     def _click_priority(self, name):
-        if (name in ("POPUP_CONFIRM", "POPUP_CANCEL")
+        if (not self._login_flow.active
+                and name in ("POPUP_CONFIRM", "POPUP_CANCEL")
                 and self.oracle.exists("research/progress/confirm")):
             self._package_gate()
             target = "research/progress/confirm" if name == "POPUP_CONFIRM" else "research/progress/cancel"
@@ -204,6 +205,15 @@ class DispatchActionsPorts:
             except (SemanticGateClosed, SemanticTargetMissing):
                 continue
         return False
+
+    def _main_shop_destination_visible(self):
+        receipt = self._main_shop_transition_receipt
+        return bool(
+            receipt is not None
+            and self.oracle.read_state().generation > receipt.generation
+            and self.oracle.observation_target_present("shop/home")
+            and self.oracle.recommendation_shop_visible()
+        )
 
     def _click_main(self, name, semantic_id):
         if (
@@ -408,7 +418,11 @@ class DispatchActionsPorts:
                         and self.oracle.main_page_visible()
                         and self.oracle.enabled('main/battle')):
                     return self.oracle.main_page_receipt()
-                return self.oracle.click_private_quarters_home()
+                receipt = self.oracle.click_private_quarters_home()
+                # The old page can unmount before the new main raycast settles.
+                # Only ALAS' passive page scan gets this bounded transition.
+                self._private_quarters_home_transition_until = time.monotonic() + 30.0
+                return receipt
             if (semantic_id == 'dorm-menu/private-quarters' and self._private_quarters_entry_receipt is not None
                     and self.oracle.private_quarters_page_visible()
                     and self.oracle.enabled('private-quarters/home')
@@ -451,11 +465,15 @@ class DispatchActionsPorts:
                         )
                         return receipt
                 context = self._campaign_context
-                previous = context.archive_menu_entry_receipt if context is not None else None
-                if (previous is not None and self.oracle.war_archives_page_visible()
+                previous = self._campaign_archive_entry_receipt
+                if (previous is not None
+                        and time.monotonic() <= self._campaign_archive_entry_transition_until
+                        and self.oracle.war_archives_page_visible()
                         and self.oracle.read_state().generation > previous.generation):
                     return previous
                 receipt = self.oracle.click_campaign_archive_entrance()
+                self._campaign_archive_entry_receipt = receipt
+                self._campaign_archive_entry_transition_until = time.monotonic() + 30.0
                 if context is not None:
                     context.archive_menu_entry_receipt = receipt
                 return receipt
@@ -734,6 +752,16 @@ class DispatchActionsPorts:
                 # original ALAS loop can observe its destination; never issue
                 # the same underlay click through the new top raycast.
                 return self._main_battle_transition_receipt
+            if (
+                semantic_id == "main/shop"
+                and self._main_shop_transition_receipt is not None
+                and time.monotonic() <= self._main_shop_transition_until
+                and self._main_shop_destination_visible()
+            ):
+                # ALAS may still classify the departing main alias after the
+                # exact Shop shell has mounted. The first click already owns
+                # this edge; let ui_goto observe its destination.
+                return self._main_shop_transition_receipt
             if semantic_id in ("os/order/scan", "os/order/submarine"):
                 order_kind = semantic_id.rsplit("/", 1)[1]
                 for attempt in range(12):
@@ -775,6 +803,12 @@ class DispatchActionsPorts:
                             and getattr(self.oracle, 'input_dispatch_count', 0) == before_input
                             and self._main_battle_destination_visible()):
                         return self._main_battle_transition_receipt
+                    if (semantic_id == 'main/shop'
+                            and self._main_shop_transition_receipt is not None
+                            and time.monotonic() <= self._main_shop_transition_until
+                            and getattr(self.oracle, 'input_dispatch_count', 0) == before_input
+                            and self._main_shop_destination_visible()):
+                        return self._main_shop_transition_receipt
                     raise
             if semantic_id == 'main/more':
                 self._main_more_entry_receipt = receipt
@@ -789,6 +823,9 @@ class DispatchActionsPorts:
             if semantic_id == "main/battle":
                 self._main_battle_transition_receipt = receipt
                 self._main_battle_transition_until = time.monotonic() + 20.0
+            if semantic_id == "main/shop":
+                self._main_shop_transition_receipt = receipt
+                self._main_shop_transition_until = time.monotonic() + 20.0
             if semantic_id == "os/map/auto-search/off":
                 self._operation_siren_auto_search_transition_until = (
                     time.monotonic() + 30.0

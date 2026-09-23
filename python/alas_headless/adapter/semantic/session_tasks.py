@@ -1103,6 +1103,9 @@ class SessionTasksPorts:
     def daily_execution_receipts(self) -> Tuple[ActionReceipt, ...]:
         return self.open().daily_execution_receipts()
 
+    def daily_quick_complete(self) -> bool:
+        return self.open().daily_quick_complete()
+
     def complete_daily_battle_result(self) -> Tuple[ActionReceipt, ...]:
         return self.open().complete_daily_battle_result()
 

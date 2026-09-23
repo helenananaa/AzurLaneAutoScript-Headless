@@ -85,6 +85,16 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         with self.assertRaisesRegex(AlasSemanticUnmapped, "FLEET_CHECK"):
             adapter.appear(NamedButton("FLEET_CHECK"))
 
+    def test_private_quarters_home_transition_only_leases_passive_page_scan(self):
+        adapter, _, _ = self.make_adapter()
+        adapter._private_quarters_home_transition_until = time.monotonic() + 30.0
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        with self.assertRaises(AlasSemanticUnmapped):
+            adapter.click(NamedButton("FLEET_CHECK"))
+        adapter._private_quarters_home_transition_until = 0.0
+        with self.assertRaisesRegex(AlasSemanticUnmapped, "FLEET_CHECK"):
+            adapter.appear(NamedButton("FLEET_CHECK"))
+
     def test_network_reconnect_popup_uses_only_exact_semantic_targets(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.enabled_values.update(

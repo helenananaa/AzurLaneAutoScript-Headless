@@ -742,6 +742,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "/Msgbox(Clone)/",
         (
             "retirement/equipment/preserve/confirm",
+            "enhancement/equipment/preserve/confirm",
             "campaign/map/submarine/oil/confirm",
             "campaign/map/withdraw/confirm",
             "campaign/map/submarine/oil/cancel",

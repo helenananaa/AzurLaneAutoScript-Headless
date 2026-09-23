@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import math
 import re
+from collections.abc import Mapping
 import threading
 import time
-from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 from .blockers import DEFAULT_BLOCKERS
 from .button_targets import DEFAULT_TARGETS
 from .contracts import (
@@ -77,6 +78,7 @@ class CoreOracle:
         self._swipe = self._dispatch_swipe if swipe is not None else None
         self._last_generation: Optional[int] = None
         self._login_update_seen = False
+        self._login_update_retry_attempted = False
         self._login_update_restart_consumed = False
         self._gems_farming_equipment_loadouts: Dict[
             str, GemsFarmingEquipmentLoadout
@@ -265,7 +267,7 @@ class CoreOracle:
             raise SemanticGateClosed("observer snapshot is stale")
 
     def _parse_button(self, raw: Any) -> ButtonState:
-        if not isinstance(raw, dict):
+        if not isinstance(raw, Mapping):
             raise SemanticGateClosed("button record is not an object")
         name = raw.get("name")
         path = raw.get("path")
@@ -285,14 +287,14 @@ class CoreOracle:
         point = None
         bounds = None
         if point_value is not None:
-            if not isinstance(point_value, dict):
+            if not isinstance(point_value, Mapping):
                 raise SemanticGateClosed("button point is malformed")
             point = Point(
                 self._finite_number(point_value.get("x"), "adb_point.x"),
                 self._finite_number(point_value.get("y"), "adb_point.y"),
             )
         if bounds_value is not None:
-            if not isinstance(bounds_value, dict):
+            if not isinstance(bounds_value, Mapping):
                 raise SemanticGateClosed("button bounds are malformed")
             candidate_bounds = Bounds(
                 self._finite_number(bounds_value.get("left"), "adb_bounds.left"),
@@ -324,7 +326,7 @@ class CoreOracle:
 
     def _parse_toggle(self, raw: Any) -> ToggleState:
         button = self._parse_button(raw)
-        checked = raw.get("checked") if isinstance(raw, dict) else None
+        checked = raw.get("checked") if isinstance(raw, Mapping) else None
         if not isinstance(checked, bool):
             raise SemanticGateClosed("toggle state is malformed")
         return ToggleState(
@@ -341,7 +343,7 @@ class CoreOracle:
         )
 
     def _parse_text(self, raw: Any) -> TextState:
-        if not isinstance(raw, dict):
+        if not isinstance(raw, Mapping):
             raise SemanticGateClosed("text record is not an object")
         kind = raw.get("kind")
         name = raw.get("name")
@@ -361,7 +363,7 @@ class CoreOracle:
         bounds_value = raw.get("adb_bounds")
         bounds = None
         if bounds_value is not None:
-            if not isinstance(bounds_value, dict):
+            if not isinstance(bounds_value, Mapping):
                 raise SemanticGateClosed("text bounds are malformed")
             candidate = Bounds(
                 self._finite_number(bounds_value.get("left"), "text bounds.left"),
@@ -384,7 +386,7 @@ class CoreOracle:
         )
 
     def _parse_image(self, raw: Any) -> ImageState:
-        if not isinstance(raw, dict) or raw.get("kind") != "image":
+        if not isinstance(raw, Mapping) or raw.get("kind") != "image":
             raise SemanticGateClosed("image record is not supported")
         name = raw.get("name")
         path = raw.get("path")
@@ -403,7 +405,7 @@ class CoreOracle:
         if (
             not isinstance(raycast_target, bool)
             or (raycast_top is not None and not isinstance(raycast_top, bool))
-            or not isinstance(color_value, dict)
+            or not isinstance(color_value, Mapping)
         ):
             raise SemanticGateClosed("image state is malformed")
         color = tuple(
@@ -413,7 +415,7 @@ class CoreOracle:
         bounds_value = raw.get("adb_bounds")
         bounds = None
         if bounds_value is not None:
-            if not isinstance(bounds_value, dict):
+            if not isinstance(bounds_value, Mapping):
                 raise SemanticGateClosed("image bounds are malformed")
             candidate = Bounds(
                 self._finite_number(bounds_value.get("left"), "image bounds.left"),
@@ -439,13 +441,14 @@ class CoreOracle:
             raw=raw,
         )
 
-    def read_state(self) -> OracleState:
-        if self._foreground_component() != self.fingerprint.component:
+    def read_state(self, *, check_foreground: bool = True) -> OracleState:
+        """Read live state; frame capture may defer its foreground check to closure."""
+        if check_foreground and self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("game activity is not top-resumed")
         snapshot, buttons_snapshot, combined_response = request_observer_state(
             self._request
         )
-        if not isinstance(snapshot, dict) or not isinstance(buttons_snapshot, dict):
+        if not isinstance(snapshot, Mapping) or not isinstance(buttons_snapshot, Mapping):
             raise ObserverTransportError("observer response is not a mapping")
         self._validate_identity(snapshot)
         self._validate_identity(buttons_snapshot, BUTTON_SCHEMA)
@@ -482,7 +485,7 @@ class CoreOracle:
         if self._integer(buttons_snapshot.get("error_count"), "error_count") != 0:
             raise SemanticGateClosed("button snapshot contains extraction errors")
         raw_buttons = buttons_snapshot.get("buttons")
-        if not isinstance(raw_buttons, list):
+        if not isinstance(raw_buttons, (list, tuple)):
             raise SemanticGateClosed("button list is malformed")
         if self._integer(buttons_snapshot.get("button_count"), "button_count") != len(
             raw_buttons
@@ -510,7 +513,7 @@ class CoreOracle:
         ):
             raise SemanticGateClosed("game activity is not top-resumed")
         ui_snapshot = self._request("GET /v1/ui\n")
-        if not isinstance(ui_snapshot, dict):
+        if not isinstance(ui_snapshot, Mapping):
             raise ObserverTransportError("UI observer response is not a mapping")
         self._validate_identity(ui_snapshot, UI_SCHEMA)
         if ui_snapshot.get("schema") != 1:
@@ -546,9 +549,9 @@ class CoreOracle:
         raw_texts = ui_snapshot.get("texts")
         raw_images = ui_snapshot.get("images")
         if (
-            not isinstance(raw_toggles, list)
-            or not isinstance(raw_texts, list)
-            or not isinstance(raw_images, list)
+            not isinstance(raw_toggles, (list, tuple))
+            or not isinstance(raw_texts, (list, tuple))
+            or not isinstance(raw_images, (list, tuple))
         ):
             raise SemanticGateClosed("UI record lists are malformed")
         if self._integer(ui_snapshot.get("toggle_count"), "toggle_count") != len(
@@ -592,7 +595,7 @@ class CoreOracle:
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("game activity is not top-resumed")
         ui_snapshot = self._request("GET /v1/ui\n")
-        if not isinstance(ui_snapshot, dict):
+        if not isinstance(ui_snapshot, Mapping):
             raise ObserverTransportError("UI observer response is not a mapping")
         self._validate_identity(ui_snapshot, UI_SCHEMA)
         if ui_snapshot.get("schema") != 1:
@@ -602,7 +605,7 @@ class CoreOracle:
         if self._integer(ui_snapshot.get("error_count"), "UI error_count") != 0:
             raise SemanticGateClosed("UI snapshot contains extraction errors")
         raw_texts = ui_snapshot.get("texts")
-        if not isinstance(raw_texts, list) or self._integer(
+        if not isinstance(raw_texts, (list, tuple)) or self._integer(
             ui_snapshot.get("text_count"), "text_count"
         ) != len(raw_texts):
             raise SemanticGateClosed("text record list is malformed")

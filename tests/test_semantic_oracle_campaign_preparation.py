@@ -97,6 +97,11 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         for destination, current in (("hard", "normal"), ("normal", "hard")):
             oracle.campaign_mode_switch_state = lambda: destination
             self.assertEqual(oracle.campaign_map_preparation_mode_state("12-4"), current)
+        # Native detail identity owns this interpretation; an event-like name
+        # does not invalidate an otherwise exact chapter detail.
+        self.assertEqual(oracle.campaign_map_preparation_mode_state("A1"), "hard")
+        oracle.campaign_map_preparation_state = lambda stage: SimpleNamespace(
+            proceed_button=SimpleNamespace(path="UnknownUI/panel/start_button"))
         with self.assertRaisesRegex(SemanticGateClosed, "not on an event stage"):
             oracle.campaign_map_preparation_mode_state("A1")
 
