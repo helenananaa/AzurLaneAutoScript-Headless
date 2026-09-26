@@ -359,6 +359,7 @@ class _CampaignFlowContext:
     expected_fleet_mutations: Tuple[str, ...] = ()
     gems_farming_hard_pending_roles: Tuple[str, ...] = ()
     fleet_mutation_receipts: List[ActionReceipt] = field(default_factory=list)
+    hard_recommend_confirmation_receipts: List[ActionReceipt] = field(default_factory=list)
     auto_search_role_receipts: List[ActionReceipt] = field(default_factory=list)
     auto_search_role_state: Optional[CampaignAutoSearchRoleState] = None
     fleet_dropdown_row: Optional[str] = None

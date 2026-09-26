@@ -494,6 +494,43 @@ class ResearchOracle:
 
         return self._retry_transition_read(self._research_queue_state_once)
 
+    def research_queue_indicator_empty_slots(self) -> int:
+        """Read the five queue markers on the Research card page."""
+
+        state = self.read_state()
+        enter = self._unique(state, "research/queue/enter")
+        if not enter.actionable or enter.raycast_top is not True:
+            raise SemanticGateClosed("research card-page queue control is not actionable")
+        ui = self.read_ui_state()
+        if (ui.image_truncated or not state.generation <= ui.generation <= state.generation + 2):
+            raise SemanticGateClosed("research queue indicators are incoherent")
+        root = "TechnologyUI(Clone)/blur_panel/adapt/left/btn_queue/"
+        markers = {
+            "empty": ("empty", "mark_empty"),
+            "complete": ("complete", "mark_complete"),
+            "waiting": ("waiting", "mark_wait"),
+            "doing": ("doing", "mark_doing_bg"),
+        }
+        empty = 0
+        seen_empty = False
+        for slot in range(1, 6):
+            prefix = root + str(slot) + "/"
+            matches = [image for image in ui.images
+                       if image.path.endswith(tuple(prefix + path for path, _ in markers.values()))
+                       and image.active_in_hierarchy and image.active_and_enabled]
+            if len(matches) != 1 or matches[0].truncated:
+                raise SemanticGateClosed("research queue indicator is missing or ambiguous")
+            marker = next((kind for kind, (path, sprite) in markers.items()
+                           if matches[0].path.endswith(prefix + path) and matches[0].sprite == sprite), None)
+            if marker is None:
+                raise SemanticGateClosed("research queue indicator is unsupported")
+            if marker == "empty":
+                seen_empty = True
+                empty += 1
+            elif seen_empty:
+                raise SemanticGateClosed("research queue indicators are out of order")
+        return empty
+
     def _research_queue_state_once(self) -> ResearchQueueState:
         """Read one coherent Research queue snapshot without relaxing gates."""
 

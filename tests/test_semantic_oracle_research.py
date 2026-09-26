@@ -17,6 +17,27 @@ from unittest import mock
 
 
 class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
+    def test_research_card_page_queue_indicators_require_five_known_ordered_marks(self):
+        root = "root/UICamera/Canvas/UIMain/TechnologyUI(Clone)/blur_panel/adapt/left/btn_queue"
+        backend = FakeBackend([make_button("btn_queue", root)])
+        variants = (("doing", "mark_doing_bg"), ("waiting", "mark_wait"),
+                    ("complete", "mark_complete"), ("empty", "mark_empty"),
+                    ("empty", "mark_empty"))
+        backend.ui = make_ui([], images=[make_image(f"{root}/{slot}/{kind}", sprite)
+                                          for slot, (kind, sprite) in enumerate(variants, 1)])
+        oracle = make_oracle(backend)
+        self.assertEqual(oracle.research_queue_indicator_empty_slots(), 2)
+        self.assertEqual(backend.taps, [])
+
+        backend.ui["images"][0]["sprite"] = "unknown"
+        with self.assertRaisesRegex(SemanticGateClosed, "unsupported"):
+            oracle.research_queue_indicator_empty_slots()
+        backend.ui["images"][0]["sprite"] = "mark_doing_bg"
+        backend.ui["images"].pop()
+        backend.ui["image_count"] -= 1
+        with self.assertRaisesRegex(SemanticGateClosed, "missing or ambiguous"):
+            oracle.research_queue_indicator_empty_slots()
+
     def test_research_exhausted_reset_is_false_but_unknown_state_is_not(self):
         from alas_headless.alas_adapter import AlasSemanticAdapter
         from types import SimpleNamespace

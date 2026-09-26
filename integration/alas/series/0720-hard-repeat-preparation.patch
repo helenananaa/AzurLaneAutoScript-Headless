@@ -1,0 +1,12 @@
+diff --git a/module/hard/hard.py b/module/hard/hard.py
+--- a/module/hard/hard.py
++++ b/module/hard/hard.py
+@@ -124,5 +124,8 @@
+         logger.attr('Remain', remain)
+         for n in range(remain):
++            if n and semantic_adapter is not None:
++                semantic_adapter.prepare_campaign_run()
++                self.campaign.map_fleet_checked = False
+             self.campaign.run()
+ 
+         if semantic_resume or semantic_manual_clear:

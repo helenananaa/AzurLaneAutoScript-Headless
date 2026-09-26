@@ -558,14 +558,31 @@ class CampaignPreparationAdapterPorts:
             context.fleet_mutation_receipts.append(receipt)
             context.passive_transition_until = time.monotonic() + 5.0
             deadline = time.monotonic() + 8.0
+            confirmed = False
             while True:
-                observed = self.oracle.campaign_fleet_selection_state(
-                    self._campaign_resolved_entrance_stage(),
-                    fallback_oil_cost=context.map_preparation_oil_cost,
-                )
-                row = next(item for item in observed.rows if item.row_key == row_key)
-                if row.hard_satisfied is True:
-                    break
+                if self.oracle.campaign_hard_recommend_prompt_present():
+                    if not confirmed:
+                        confirm_receipt = (
+                            self.oracle.confirm_campaign_hard_recommend_prompt()
+                        )
+                        context.hard_recommend_confirmation_receipts.append(
+                            confirm_receipt
+                        )
+                        confirmed = True
+                else:
+                    try:
+                        observed = self.oracle.campaign_fleet_selection_state(
+                            self._campaign_resolved_entrance_stage(),
+                            fallback_oil_cost=context.map_preparation_oil_cost,
+                        )
+                    except SemanticGateClosed:
+                        observed = None
+                    if observed is not None:
+                        row = next(
+                            item for item in observed.rows if item.row_key == row_key
+                        )
+                        if row.hard_satisfied is True:
+                            break
                 if time.monotonic() >= deadline:
                     raise SemanticGateClosed(
                         "hard campaign fleet recommendation did not settle: "
@@ -649,6 +666,18 @@ class CampaignPreparationAdapterPorts:
             receipt.semantic_id for receipt in context.fleet_mutation_receipts
         ) != context.expected_fleet_mutations:
             raise SemanticGateClosed("campaign fleet mutation sequence changed")
+        if context.mode == "hard" and (
+            len(context.hard_recommend_confirmation_receipts)
+            > sum(
+                receipt.semantic_id.endswith("/recommend")
+                for receipt in context.fleet_mutation_receipts
+            )
+            or any(
+                receipt.semantic_id != "campaign/hard/recommend/confirm"
+                for receipt in context.hard_recommend_confirmation_receipts
+            )
+        ):
+            raise SemanticGateClosed("hard recommendation confirmation changed")
         if (
             context.required_fleet_mutations > 0
             and prepared.generation <= context.initial_fleet_state.generation

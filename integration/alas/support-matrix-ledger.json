@@ -2800,6 +2800,9 @@
         "integration/alas/series/0050-combat-flow-ports.patch",
         "integration/alas/series/0380-exercise-full-flow-port.patch",
         "integration/alas/exercise-easiest-live-validation-receipt.json",
+        "integration/alas/exercise-sun18-trial2-live-validation-receipt-20260923.json",
+        "integration/alas/exercise-sun18-preserve-live-validation-receipt-20260923.json",
+        "integration/alas/exercise-chapter-navigation-live-validation-receipt-20260923.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -8763,7 +8766,7 @@
         "Exercise"
       ],
       "name": "Exercise",
-      "note": "演习主流程、四种选敌、对手刷新、结构化血量、低血退出、胜负结算与七字段入口契约均已适配并实机闭环；仅非 aggressive 时段边界及 OpponentTrial 大于 1 的自然实机样本未逐值触发",
+      "note": "演习主流程、四种选敌、对手刷新、结构化血量、低血退出、胜负结算与七字段入口契约均已适配并实机闭环；2026-09-23 sun18 时段下原任务从 8 连续单次运行至 5，5 次时零出战、零刷新并调度次日；原 ALAS 演习到普通章节再回演习的导航往返通过；OpponentTrial=2 仅配置读取而首战成功，尚缺第二次尝试自然触发及其他策略时段",
       "status": "L"
     },
     {
@@ -8880,7 +8883,7 @@
         "Storage"
       ],
       "name": "Main2",
-      "note": "已纳入三实例 9 组、54 字段共享等价类，除 Scheduler.Command 外无差异；六个 StopCondition 字段在导航前严校。已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；Main2 已在真实 API 32 x86_64 AVD 上从关卡页单进程完成 normal 1-1 的入口、阵型策略、单舰队出击、普通战、Boss 战、胜利结算、RunCount 归零及调度关闭，且无 raw-input fallback，凭证见 integration/alas/main2-1-1-live-validation-receipt.json。自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图仍未实机提升",
+      "note": "三实例 9 组、54 字段共享等价，除 Scheduler.Command 外无差异；六个 StopCondition 字段导航前严校，64 条普通图路由和 RunCount 五类循环独立离线验证。实机已完成 normal 1-1 单舰队完整任务，见 integration/alas/main2-1-1-live-validation-receipt.json；2026-09-23 又完成独立 normal 12-4 官方自动寻敌一局：舰队 (1,2,0)、一队道中二队 Boss、官方战斗、总奖励退出、RunCount 归零、调度关闭，零手动 combat/viewport 输入且无 raw fallback，见 docs/main2-opsi-to-campaign-20260923.zh-CN.md。其他图自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图仍未实机提升",
       "status": "L"
     },
     {
@@ -8896,7 +8899,7 @@
         "Storage"
       ],
       "name": "Main3",
-      "note": "已纳入三实例 9 组、54 字段共享等价类，除 Scheduler.Command 外无差异；六个 StopCondition 字段在导航前严校。已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；Main3 已在真实 API 32 x86_64 AVD 上从关卡页单进程完成 normal 1-1 的入口、单舰队出击、普通战、Boss 战、胜利结算、RunCount 归零及调度关闭，且无 raw-input fallback，凭证见 integration/alas/main3-1-1-live-validation-receipt.json。自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图仍未实机提升",
+      "note": "三实例 9 组、54 字段共享等价，除 Scheduler.Command 外无差异；六个 StopCondition 字段导航前严校，64 条普通图路由和 RunCount 五类循环独立离线验证。实机已完成 normal 1-1 单舰队完整任务，见 integration/alas/main3-1-1-live-validation-receipt.json；2026-09-23 又完成独立 normal 12-4 官方自动寻敌一局：已匹配舰队 (1,2,0) 无需重选、一队道中二队 Boss、官方战斗、总奖励退出、RunCount 归零、调度关闭，零手动 combat/viewport 输入且无 raw fallback，见 docs/main3-12-4-auto-search-20260923.zh-CN.md。其他图自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图仍未实机提升",
       "status": "L"
     },
     {
@@ -9044,7 +9047,7 @@
         "OpsiShop"
       ],
       "name": "OpsiShop",
-      "note": "新版统一港口商店已完成类型化 19 卡库存、票券余额、精确商品身份/价格/余量及单件购买后置闭环；自定义过滤实机命中并完成 DevelopmentMaterialT2 的 3→2、票券 1205→1200，含输入超时后按精确对话框恢复；黄币购买、五预设逐值实机、余额不足、刷新及全港口分支仍未闭环",
+      "note": "新版统一港口商店已完成类型化 19 卡库存、票券余额、精确商品身份/价格/余量及单件购买后置闭环；自定义过滤实机命中并完成 DevelopmentMaterialT2 的 3→2、票券 1205→1200，含输入超时后按精确对话框恢复。2026-09-23 原任务从利维浦真实 19 卡库存对五种过滤配置完成只读比较：四个内置预设各选中四张在售 T3，自定义选中零张已售罄目标，零购买，见 docs/opsi-shop-presets-readonly-20260923.zh-CN.md。差异商品排序、黄币购买、余额不足、刷新及全港口分支仍未闭环",
       "status": "L"
     },
     {
@@ -12443,9 +12446,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "3b155bcda598338f9065b41f41f323b690c47417878c1dac3bb038c4cc737352",
-      "manifest_sha256": "27b81bec6348bcf44332903e6f813bd66419b7bf378672b394ec78a9a5a754f0",
-      "member_count": 118
+      "combined_sha256": "e42e7462abe5fdb15a350130454d29f437973007ffb8f701ddb2b26af46520df",
+      "manifest_sha256": "2654d7a7fa456bde845fa7c48e8c180981629afb5ddf113fc6e1281e18367dfb",
+      "member_count": 119
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

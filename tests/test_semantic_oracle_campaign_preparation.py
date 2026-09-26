@@ -24,6 +24,60 @@ from types import SimpleNamespace
 
 
 class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
+    def test_hard_recommend_confirmation_requires_exact_prompt(self):
+        root = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+        fleet = (
+            "UICamera/Canvas/UIOrigin/LevelFleetSelectView(Clone)/"
+            "panel/Fixed/start_button"
+        )
+
+        def prompt_backend(content="是否采用推荐配置补齐空余位置?"):
+            backend = FakeBackend([
+                make_button("start_button", fleet, raycast_top=False),
+                make_button("custom_button_1(Clone)",
+                            root + "button_container/custom_button_1(Clone)"),
+                make_button("custom_button_2(Clone)",
+                            root + "button_container/custom_button_2(Clone)"),
+            ])
+            backend.ui = make_ui([
+                make_text(content, root + "msg_panel/content"),
+                make_text("确 定", root + "button_container/custom_button_1(Clone)/pic"),
+                make_text("取 消", root + "button_container/custom_button_2(Clone)/pic"),
+            ], images=[
+                make_image(root + "button_container/custom_button_1(Clone)",
+                           "btn_big_blue"),
+                make_image(root + "button_container/custom_button_2(Clone)",
+                           "btn_big_grey"),
+            ])
+            return backend
+
+        backend = prompt_backend()
+        self.assertTrue(make_oracle(backend).campaign_hard_recommend_prompt_present())
+        receipt = make_oracle(backend).confirm_campaign_hard_recommend_prompt()
+        self.assertEqual(receipt.semantic_id, "campaign/hard/recommend/confirm")
+        self.assertEqual(len(backend.taps), 1)
+
+        backend = prompt_backend()
+        cancel_receipt = make_oracle(backend).cancel_campaign_hard_recommend_prompt()
+        self.assertEqual(cancel_receipt.semantic_id, "campaign/hard/recommend/cancel")
+        self.assertEqual(cancel_receipt.path,
+                         root + "button_container/custom_button_2(Clone)")
+
+        backend = prompt_backend("购买道具?")
+        self.assertTrue(make_oracle(backend).campaign_hard_recommend_prompt_present())
+        with self.assertRaises(SemanticGateClosed):
+            make_oracle(backend).confirm_campaign_hard_recommend_prompt()
+        self.assertEqual(backend.taps, [])
+
+        backend = FakeBackend([make_button("start_button", fleet)])
+        self.assertFalse(make_oracle(backend).campaign_hard_recommend_prompt_present())
+
+        backend = prompt_backend()
+        backend.buttons["buttons"][1]["raycast_top"] = False
+        with self.assertRaises(SemanticGateClosed):
+            make_oracle(backend).confirm_campaign_hard_recommend_prompt()
+        self.assertEqual(backend.taps, [])
+
     def test_auto_reentry_requires_exact_label_hit_and_unblocked_surface(self):
         root = "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/"
         for top, label, allowed in ((True, "再次前往", True), (None, "再次前往", False), (True, "购买", False)):
@@ -524,6 +578,56 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
             text["path"] = "Mirror/" + text["path"]
         with self.assertRaisesRegex(SemanticGateClosed, "not reviewed"):
             make_oracle(backend).campaign_map_preparation_state("12-4")
+
+    def test_hard_114_clear_panel_alternate_proceed_is_narrowly_reviewed(self):
+        root = "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/"
+
+        def backend_for_hard():
+            backend = FakeBackend([
+                make_button(
+                    "btn_normal",
+                    "UICamera/Canvas/UIMain/LevelMainScene(Clone)/"
+                    "main/left_chapter/buttons/btn_normal",
+                    raycast_top=None,
+                ),
+                make_button("start_button_l", root + "start_button_l", 1007, 523,
+                            raycast_top=None),
+                make_button("btnBack", root + "btnBack", 1069, 191),
+            ])
+            backend.ui = make_ui([
+                make_text("11–4", root + "title_form/title_index"),
+                make_text("撕裂的夜幕", root + "title_form/title"),
+                make_text("100%", root + "progress/Text/value"),
+            ], images=[make_image(root + "start_button_l", "qianwang_butten")])
+            return backend
+
+        backend = backend_for_hard()
+        oracle = make_oracle(backend)
+        state = oracle.campaign_map_preparation_state("11-4")
+        self.assertEqual(state.proceed_button.path, root + "start_button_l")
+        self.assertEqual(
+            oracle.click_campaign_map_preparation("11-4").semantic_id,
+            "campaign/map-preparation/proceed",
+        )
+        self.assertEqual(len(backend.taps), 1)
+
+        for missing in ("hard_underlay", "progress", "sprite"):
+            backend = backend_for_hard()
+            if missing == "hard_underlay":
+                backend.buttons["buttons"].pop(0)
+            elif missing == "progress":
+                backend.ui["texts"].pop()
+            else:
+                backend.ui["images"].clear()
+            with self.subTest(missing=missing), self.assertRaises(SemanticGateClosed):
+                make_oracle(backend).campaign_map_preparation_state("11-4")
+            self.assertEqual(backend.taps, [])
+
+        backend = backend_for_hard()
+        backend.buttons["buttons"][1]["raycast_top"] = False
+        with self.assertRaises(SemanticGateClosed):
+            make_oracle(backend).campaign_map_preparation_state("11-4")
+        self.assertEqual(backend.taps, [])
 
     def test_current_event_map_preparation_uses_sp_detail_surface(self):
         root = "root/OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/panel/"

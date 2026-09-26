@@ -297,6 +297,16 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertEqual(oracle.click_calls, ["research/queue/enter"])
         sleep.assert_called_once_with(0.25)
 
+    def test_research_queue_entry_requires_panel_postcondition_without_second_input(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_research()
+        oracle.research_queue_visible_value = False
+
+        with self.assertRaisesRegex(SemanticGateClosed, "identity is not proven"):
+            adapter.click(NamedButton("RESEARCH_GOTO_QUEUE"))
+
+        self.assertEqual(oracle.click_calls, ["research/queue/enter"])
+
     def test_research_atomic_start_confirms_the_selected_exact_cost(self):
         oracle = FakeOracle()
         oracle.research_project_values = [
@@ -846,6 +856,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
 
     def test_research_fill_slots_are_limited_by_current_run_budget(self):
         oracle = FakeOracle()
+        oracle.enabled_values["research/queue/enter"] = False
         adapter = AlasSemanticAdapter(
             oracle,
             lambda: None,
@@ -858,6 +869,15 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         gated.begin_research()
         oracle.research_queue_visible_value = False
         self.assertEqual(gated.research_queue_fill_slots(), 0)
+
+    def test_research_fill_reads_card_page_markers_after_queue_reward(self):
+        adapter, oracle, _ = self.make_adapter(research_start_budget=1)
+        adapter.begin_research()
+        oracle.enabled_values["research/queue/enter"] = True
+        oracle.research_queue_visible_value = False
+        oracle.research_queue_indicator_empty_slots = lambda: 5
+
+        self.assertEqual(adapter.research_queue_fill_slots(), 5)
 
     def test_research_detail_availability_is_false_before_selection(self):
         adapter, oracle, _ = self.make_adapter()

@@ -109,6 +109,7 @@ class DailyAdapterPorts:
         )
         self._exercise_pending = False
         self._exercise_execution_active = True
+        self._exercise_start_transition_until = time.monotonic() + 15.0
         return replace(receipt, semantic_id="exercise/execute")
 
     def complete_daily_battle_result(self, timeout_seconds: float = 30.0) -> Tuple[ActionReceipt, ...]:

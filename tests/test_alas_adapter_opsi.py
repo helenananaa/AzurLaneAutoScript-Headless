@@ -94,6 +94,27 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         oracle.operation_siren_local_map_visible_value = False
         self.assertFalse(adapter.appear(NamedButton("IN_MAP")))
 
+    def test_campaign_task_does_not_resume_operation_siren_map(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.operation_siren_local_map_visible_value = True
+
+        adapter.begin_campaign_pre_sortie("12-4")
+        self.assertFalse(adapter.appear(NamedButton("IN_MAP")))
+        adapter.end_campaign_pre_sortie()
+
+        self.assertTrue(adapter.appear(NamedButton("IN_MAP")))
+
+    def test_campaign_map_probe_survives_unavailable_optional_opsi_reader(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.operation_siren_local_map_visible = Mock(
+            side_effect=SemanticGateClosed("optional OpSi schema changed")
+        )
+        oracle.campaign_in_map_value = True
+
+        adapter.begin_campaign_pre_sortie("12-4")
+        self.assertTrue(adapter.appear(NamedButton("IN_MAP")))
+        adapter.end_campaign_pre_sortie()
+
     def test_operation_siren_entry_transition_makes_page_probes_passive(self):
         adapter, oracle, gate_calls = self.make_adapter()
         adapter._operation_siren_entry_transition_until = time.monotonic() + 1.0

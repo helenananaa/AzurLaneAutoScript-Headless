@@ -10,6 +10,26 @@ from types import SimpleNamespace
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_shop_shell_owns_passive_page_scan_without_mapping_unknown_input(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.recommendation_shop_visible_value = True
+        oracle.enabled_values["shop/home"] = True
+
+        self.assertFalse(adapter.appear(NamedButton("SUPPLY_PACK_CHECK")))
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("SHOP_CHECK")))
+        with self.assertRaises(AlasSemanticUnmapped):
+            adapter.click(NamedButton("SUPPLY_PACK_CHECK"))
+
+        oracle.recommendation_shop_visible_value = False
+        with self.assertRaisesRegex(AlasSemanticUnmapped, "SUPPLY_PACK_CHECK"):
+            adapter.appear(NamedButton("SUPPLY_PACK_CHECK"))
+
+        oracle.recommendation_shop_visible_value = True
+        oracle.enabled_values["shop/home"] = False
+        with self.assertRaisesRegex(AlasSemanticUnmapped, "SUPPLY_PACK_CHECK"):
+            adapter.appear(NamedButton("SUPPLY_PACK_CHECK"))
+
     def test_regular_shop_purchase_is_atomic_and_postconditioned(self):
         oracle = FakeOracle()
         state = {"remaining": 4, "balance": 3626, "dialog": False}

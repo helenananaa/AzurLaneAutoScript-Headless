@@ -19,6 +19,19 @@ from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_update_restart_probe_uses_current_immutable_frame(self):
+        adapter, oracle, _ = self.make_adapter()
+        frame = Mock()
+        frame.login_update_restart_prompt_available.return_value = False
+        adapter._frame_observation_oracle = lambda: frame
+        oracle.login_update_restart_prompt_available = Mock(
+            side_effect=AssertionError("live cross-frame probe was used")
+        )
+
+        self.assertFalse(adapter.login_update_restart_prompt_available())
+        frame.login_update_restart_prompt_available.assert_called_once_with()
+        oracle.login_update_restart_prompt_available.assert_not_called()
+
     def test_login_retry_attempt_is_copied_to_new_observation_frame(self):
         adapter, oracle, _ = self.make_adapter()
         frame = Mock()

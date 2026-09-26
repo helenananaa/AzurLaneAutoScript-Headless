@@ -78,7 +78,7 @@ class LoginAdapterPorts:
 
     def login_update_restart_prompt_available(self) -> bool:
         self._package_gate()
-        return self.oracle.login_update_restart_prompt_available()
+        return self._frame_or_live_observation_oracle().login_update_restart_prompt_available()
 
     def click_login_update_restart_prompt(self) -> ActionReceipt:
         self._package_gate()

@@ -1482,7 +1482,15 @@ class CampaignPreparationOracle:
         proceed_matches = tuple(
             button
             for button in button_state.buttons
-            if button.name == "start_button" and button.path == root + "start_button"
+            if (
+                button.name == "start_button"
+                and button.path == root + "start_button"
+            ) or (
+                stage_code == "11-4"
+                and root == _CAMPAIGN_LIVE_NORMAL_MAP_PANEL_ROOT
+                and button.name == "start_button_l"
+                and button.path == root + "start_button_l"
+            )
         )
         cancel_matches = tuple(
             button
@@ -1495,11 +1503,43 @@ class CampaignPreparationOracle:
             )
         proceed = proceed_matches[0]
         cancel = cancel_matches[0]
+        hard_114_proceed = proceed.path == root + "start_button_l"
+        if hard_114_proceed:
+            # The hard 11-4 clear-mode panel uses this alternate button.
+            # Its raycast flag is unavailable, so require the exact hard
+            # underlay, complete stage progress, and reviewed button sprite.
+            hard_underlay = tuple(
+                button for button in button_state.buttons
+                if button.path == (
+                    "UICamera/Canvas/UIMain/LevelMainScene(Clone)/"
+                    "main/left_chapter/buttons/btn_normal"
+                ) and button.name == "btn_normal"
+                and button.active_in_hierarchy and button.active_and_enabled
+            )
+            progress = tuple(
+                item for item in ui_state.texts
+                if item.path == root + "progress/Text/value"
+                and item.text.strip() == "100%"
+                and item.active_in_hierarchy and item.active_and_enabled
+                and not item.truncated
+            )
+            sprites = tuple(
+                item for item in ui_state.images
+                if item.path == proceed.path and item.sprite == "qianwang_butten"
+                and item.active_in_hierarchy and item.active_and_enabled
+            )
+            if len(hard_underlay) != 1 or len(progress) != 1 or len(sprites) != 1:
+                raise SemanticGateClosed(
+                    "hard 11-4 alternate proceed is not structurally proven"
+                )
         for semantic_id, button in (
             ("campaign/map-preparation/proceed", proceed),
             ("campaign/map-preparation/cancel", cancel),
         ):
-            sp_detail = "LevelInfoSPUI(Clone)/panel/" in button.path
+            reviewed_missing_raycast = (
+                "LevelInfoSPUI(Clone)/panel/" in button.path
+                or (hard_114_proceed and button is proceed)
+            )
             if (
                 not button.active_in_hierarchy
                 or not button.active_and_enabled
@@ -1508,7 +1548,7 @@ class CampaignPreparationOracle:
                 or button.bounds is None
                 or (
                     button.raycast_top is not True
-                    and not (sp_detail and button.raycast_top is None)
+                    and not (reviewed_missing_raycast and button.raycast_top is None)
                 )
                 or self._blocking_rules(button_state, semantic_id)
             ):
@@ -1621,7 +1661,14 @@ class CampaignPreparationOracle:
             raise SemanticGateClosed("campaign stage attempts are exhausted")
         target = observed.proceed_button
         actionable = target.actionable or (
-            "LevelInfoSPUI(Clone)/panel/" in target.path
+            (
+                "LevelInfoSPUI(Clone)/panel/" in target.path
+                or (
+                    stage_code == "11-4"
+                    and target.path
+                    == _CAMPAIGN_LIVE_NORMAL_MAP_PANEL_ROOT + "start_button_l"
+                )
+            )
             and target.active_in_hierarchy
             and target.active_and_enabled
             and target.interactable
@@ -1634,7 +1681,10 @@ class CampaignPreparationOracle:
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed immediately before input")
         point = target.point
-        if "LevelInfoSPUI(Clone)/panel/" in target.path:
+        if (
+            "LevelInfoSPUI(Clone)/panel/" in target.path
+            or target.path == _CAMPAIGN_LIVE_NORMAL_MAP_PANEL_ROOT + "start_button_l"
+        ):
             point = Point(
                 (target.bounds.left + target.bounds.right) / 2.0,
                 (target.bounds.top + target.bounds.bottom) / 2.0,

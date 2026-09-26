@@ -271,6 +271,28 @@ class GemsFarmingOracle:
     def cancel_campaign_hard_recommend_prompt(self) -> ActionReceipt:
         """Cancel the exact official-recommend prompt left by hard recovery."""
 
+        return self._campaign_hard_recommend_prompt_action(confirm=False)
+
+    def confirm_campaign_hard_recommend_prompt(self) -> ActionReceipt:
+        """Confirm the exact official-recommend prompt after ALAS requested it."""
+
+        return self._campaign_hard_recommend_prompt_action(confirm=True)
+
+    def campaign_hard_recommend_prompt_present(self) -> bool:
+        """Detect a modal before choosing whether confirmation is needed."""
+
+        root = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+        return any(
+            item.path.startswith(root)
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            for item in self.read_state().buttons
+        )
+
+    def _campaign_hard_recommend_prompt_action(
+        self, *, confirm: bool
+    ) -> ActionReceipt:
+
         state = self.read_state()
         ui_state = self.read_ui_state()
         if not any(
@@ -296,12 +318,12 @@ class GemsFarmingOracle:
             and not item.truncated
         }
         content = texts.get(root + "msg_panel/content")
-        confirm = "".join(
+        confirm_label = "".join(
             texts.get(
                 root + "button_container/custom_button_1(Clone)/pic", ""
             ).split()
         )
-        cancel = "".join(
+        cancel_label = "".join(
             texts.get(
                 root + "button_container/custom_button_2(Clone)/pic", ""
             ).split()
@@ -314,17 +336,20 @@ class GemsFarmingOracle:
                 "是否使用推荐编队填充空位?",
                 "�Ƿ�����Ƽ����ò������λ��?",
             )
-            or (cancel, confirm) not in (("取消", "确定"), ("ȡ��", "ȷ��"))
+            or (cancel_label, confirm_label) not in (("取消", "确定"), ("ȡ��", "ȷ��"))
         ):
             raise SemanticGateClosed(
                 "hard fleet recommendation prompt text is not reviewed"
             )
-        path = root + "button_container/custom_button_2(Clone)"
+        button_name = (
+            "custom_button_1(Clone)" if confirm else "custom_button_2(Clone)"
+        )
+        path = root + "button_container/" + button_name
         buttons = tuple(
             item
             for item in state.buttons
             if item.path == path
-            and item.name == "custom_button_2(Clone)"
+            and item.name == button_name
             and item.active_in_hierarchy
             and item.active_and_enabled
             and item.interactable
@@ -337,24 +362,27 @@ class GemsFarmingOracle:
             item
             for item in ui_state.images
             if item.path == path
-            and item.sprite == "btn_big_grey"
+            and item.sprite == ("btn_big_blue" if confirm else "btn_big_grey")
             and item.active_in_hierarchy
             and item.active_and_enabled
             and not item.truncated
         )
         if len(buttons) != 1 or len(images) != 1:
             raise SemanticGateClosed(
-                "hard fleet recommendation cancel is absent or ambiguous"
+                "hard fleet recommendation response is absent or ambiguous"
             )
         target = buttons[0]
         assert target.point is not None and target.bounds is not None
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed(
-                "foreground changed before hard recommendation cancellation"
+                "foreground changed before hard recommendation response"
             )
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
         return ActionReceipt(
-            semantic_id="campaign/hard/recommend/cancel",
+            semantic_id=(
+                "campaign/hard/recommend/confirm" if confirm
+                else "campaign/hard/recommend/cancel"
+            ),
             generation=state.generation,
             point=target.point,
             bounds=target.bounds,

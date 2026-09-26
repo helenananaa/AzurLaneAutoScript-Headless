@@ -332,6 +332,11 @@ class CoreAdapterPorts:
         self._operation_siren_pending_order: Optional[str] = None
         self._exercise_pending = False
         self._exercise_execution_active = False
+        self._exercise_start_transition_until = 0.0
+        self._exercise_chapter_back_transition_until = 0.0
+        self._exercise_entry_transition_until = 0.0
+        self._exercise_page_back_transition_until = 0.0
+        self._exercise_chapter_entry_transition_until = 0.0
         self._last_campaign_auto_search_completion: Optional[
             CampaignAutoSearchCompletionProof
         ] = None

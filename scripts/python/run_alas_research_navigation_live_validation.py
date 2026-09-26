@@ -18,6 +18,7 @@ def main():
     parser.add_argument('--driver-revision', required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--recovery-only', action='store_true')
+    parser.add_argument('--start-from-shop', action='store_true')
     args = parser.parse_args()
     output = args.output.resolve()
     if output.exists():
@@ -28,7 +29,7 @@ def main():
     os.environ.update(ALAS_SEMANTIC_MODE='1', ALAS_SEMANTIC_DRIVER_REVISION=args.driver_revision)
     from alas import AzurLaneAutoScript
     from module.research.research import RewardResearch
-    from module.ui.page import page_research, page_main
+    from module.ui.page import page_research, page_main, page_shop
     from alas_headless.runtime import bind_semantic_session, reset_semantic_session
     from alas_headless.semantic_sources import semantic_source_hashes
 
@@ -59,6 +60,10 @@ def main():
             from module.handler.login import LoginHandler
             LoginHandler(app.config, app.device).handle_app_login()
             result['login_recovery_performed'] = True
+        if args.start_from_shop:
+            host.ui_ensure(page_shop)
+            result['shop_before_main'] = oracle.recommendation_shop_visible()
+            save()
         host.ui_ensure(page_main)
         result['before'] = dataclasses.asdict(oracle.read_ui_state())
         if args.recovery_only:

@@ -589,6 +589,11 @@
       "order": 118,
       "path": "integration/alas/series/0710-navigation-frame-reuse.patch",
       "sha256": "8a2ae5bd4a349f3365ec82164609d36e98f3c1a47951a9a2c66e30512a075ae2"
+    },
+    {
+      "order": 119,
+      "path": "integration/alas/series/0720-hard-repeat-preparation.patch",
+      "sha256": "58c77e322ec70e34d540cb4cdf40774497a929c625c7b7ffe2f6626236225854"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

@@ -67,7 +67,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
         "ALAS_SEMANTIC_DRIVER_REVISION": args.driver_revision,
         "ALAS_SEMANTIC_ADB": args.adb,
         "ALAS_SEMANTIC_CAMPAIGN_STAGE_ENTRY_BUDGET": (
-            "0" if args.manual_resume else "1"
+            "0" if args.manual_resume else str(args.sortie_budget)
         ),
         "ALAS_SEMANTIC_CAMPAIGN_FLEET_MUTATION_BUDGET": (
             "1" if args.manual_resume else "3"
@@ -91,6 +91,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             sys.path.insert(0, str(path))
 
     instance = None
+    completion_proofs = []
     started = _now()
     try:
         os.chdir(alas_root)
@@ -100,6 +101,14 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
         instance.config.init_task("Hard")
         session = instance.device.semantic_adapter
         startup_oracle = session.open().oracle
+        original_wait = session.wait_campaign_auto_search_completion
+
+        def collect_auto_search_completion(*wait_args, **wait_kwargs):
+            proof = original_wait(*wait_args, **wait_kwargs)
+            completion_proofs.append(proof)
+            return proof
+
+        session.wait_campaign_auto_search_completion = collect_auto_search_completion
         login_needed = False
         try:
             login_needed = bool(
@@ -114,16 +123,17 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             from module.handler.login import LoginHandler
 
             LoginHandler(instance.config, device=instance.device).handle_app_login()
-        instance.run("hard")
-        session = instance.device.semantic_adapter
-        completion = session.last_campaign_auto_search_completion()
+        run_result = instance.run("hard")
+        completion = completion_proofs[-1] if completion_proofs else None
         post = _load(config_path)["Hard"]
         result = {
             "schema": SCHEMA,
             "passed": (
                 args.manual_resume
                 or args.manual_clear_start
-                or completion is not None
+                or (run_result is True
+                    and len(completion_proofs) == args.sortie_budget
+                    and completion is not None)
             ),
             "started_at": started,
             "finished_at": _now(),
@@ -132,6 +142,8 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             "serial": args.serial,
             "driver_revision": args.driver_revision,
             "sortie_budget": args.sortie_budget,
+            "run_result": run_result,
+            "completion_count": len(completion_proofs),
             "manual_resume": args.manual_resume,
             "manual_clear_start": args.manual_clear_start,
             "scheduler_enabled_after": post["Scheduler"]["Enable"],
@@ -154,7 +166,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             "raw_input_fallback_used": False,
         }
         return result
-    except Exception as exc:
+    except BaseException as exc:
         return {
             "schema": SCHEMA,
             "passed": False,

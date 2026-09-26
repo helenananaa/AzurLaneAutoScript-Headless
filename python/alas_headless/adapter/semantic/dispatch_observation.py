@@ -31,6 +31,86 @@ class DispatchObservationPorts:
     """Dispatch observation ports on the shared adapter context."""
 
     def _appear_priority(self, name):
+        if (
+            name == "GET_MISSION"
+            and (
+                time.monotonic() <= self._exercise_chapter_entry_transition_until
+                or self.oracle.campaign_page_is_normal()
+            )
+        ):
+            self._package_gate()
+            notice_matches = getattr(
+                self.oracle, "_campaign_urgent_notice_matches", lambda state: False
+            )
+            if notice_matches(self.oracle.read_state()):
+                raise SemanticGateClosed("urgent commission notice has no campaign owner")
+            return False
+        if (
+            name in UI_PAGE_CHECK_RESOURCES
+            and time.monotonic() <= self._exercise_page_back_transition_until
+            and not self.oracle.campaign_menu_is_entry()
+        ):
+            self._package_gate()
+            return False
+        if (
+            name in UI_PAGE_CHECK_RESOURCES
+            and time.monotonic() <= self._exercise_chapter_back_transition_until
+            and not self.oracle.campaign_menu_is_entry()
+        ):
+            self._package_gate()
+            return False
+        if (
+            name in UI_PAGE_CHECK_RESOURCES
+            and time.monotonic() <= self._exercise_entry_transition_until
+            and not self.oracle.exercise_page_visible()
+        ):
+            self._package_gate()
+            return False
+        if (
+            name in (
+                "MAP_PREPARATION", "FLEET_PREPARATION", "RAID_FLEET_PREPARATION",
+                "AUTO_SEARCH_MENU_EXIT", "AUTO_SEARCH_REWARD", "WITHDRAW",
+            )
+            and (
+                time.monotonic() <= self._exercise_entry_transition_until
+                or self.oracle.exercise_page_visible()
+            )
+            and self._campaign_context is None
+        ):
+            self._package_gate()
+            return False
+        if (
+            name in ("GET_ITEMS_1", "GET_ITEMS_2", "GET_ITEMS_3", "GET_SHIP")
+            and (
+                time.monotonic() <= self._exercise_entry_transition_until
+                or time.monotonic() <= self._exercise_chapter_entry_transition_until
+            )
+            and self._award_close_target() is None
+            and (
+                name != "GET_SHIP"
+                or not self.oracle.observation_target_present("reward/new-ship/continue")
+            )
+        ):
+            self._package_gate()
+            return False
+        if (
+            name in ("BATTLE_PREPARATION", "BATTLE_PREPARATION_WITH_OVERLAY")
+            and self._exercise_execution_active
+            and not self._exercise_pending
+            and self.oracle.daily_precombat_visible()
+        ):
+            if time.monotonic() <= self._exercise_start_transition_until:
+                return False
+            raise SemanticGateClosed("Exercise start did not leave preparation")
+        if name == "IN_MAP" and self._campaign_context is not None:
+            # ALAS reuses IN_MAP for OpSi and campaigns. An exact OpSi map
+            # cannot be resumed as a campaign sortie. Failure to parse an
+            # optional OpSi surface must not suppress a valid campaign map.
+            try:
+                if self.oracle.operation_siren_local_map_visible():
+                    return False
+            except SemanticGateClosed:
+                pass
         if name == 'POPUP_CANCEL_WHITE' and self.oracle.private_quarters_download_prompt_absent():
             return False
         if name == 'PRIVATE_QUARTERS_LOADING_CHECK':
@@ -74,7 +154,9 @@ class DispatchObservationPorts:
         if (not self._login_flow.active and self._campaign_context is None and name in (
                 'MAP_PREPARATION', 'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION',
                 'AUTO_SEARCH_MENU_EXIT', 'AUTO_SEARCH_REWARD', 'WITHDRAW')
-                and (observation_oracle.main_page_visible() or observation_oracle.campaign_menu_is_entry())):
+                and (observation_oracle.main_page_visible()
+                     or observation_oracle.campaign_menu_is_entry()
+                     or observation_oracle.campaign_page_is_normal())):
             state = observation_oracle.read_state()
             blockers = observation_oracle._blocking_rules(state, 'ui/absence-probe')
             if not any(rule.blocker_id != 'campaign-menu' for rule in blockers):
@@ -172,6 +254,16 @@ class DispatchObservationPorts:
                 return len(observation_oracle.research_projects()) == 5
             except SemanticGateClosed:
                 return False
+        if (
+            not self._login_flow.active
+            and name in UI_PAGE_CHECK_RESOURCES
+            and observation_oracle.observation_target_present("shop/home")
+            and observation_oracle.recommendation_shop_visible()
+        ):
+            # The exact Shop shell owns the passive Page.iter_pages() sweep.
+            # Supply Pack and other legacy page checks may precede SHOP_CHECK
+            # while the Shop home transition is still settling.
+            return name == "SHOP_CHECK"
         if (
             not self._login_flow.active
             and name in ('MAIN_GOTO_FLEET', 'MAIN_GOTO_CAMPAIGN_WHITE')
@@ -286,8 +378,8 @@ class DispatchObservationPorts:
                 pass
         if (
             not self._login_flow.active
-            and self._operation_siren_allows_passive_probe()
             and name in ("GET_ITEMS_1", "GET_ITEMS_2", "GET_ITEMS_3")
+            and self._operation_siren_allows_passive_probe()
         ):
             self._package_gate()
             return self._award_close_target() is not None
@@ -367,6 +459,7 @@ class DispatchObservationPorts:
     def _appear_passive_surface(self, name, semantic_id):
         if (
             semantic_id is None
+            and self._campaign_context is None
             and self._operation_siren_allows_passive_probe()
         ):
             if name == "IN_MAP":
@@ -554,6 +647,7 @@ class DispatchObservationPorts:
             if (
                 self.oracle.main_page_visible()
                 or self.oracle.campaign_menu_is_entry()
+                or self.oracle.campaign_page_is_normal()
             ):
                 # Page.iter_pages() probes legacy pixel-only identities such
                 # as FLEET_CHECK before it reaches the exact main/campaign
@@ -832,6 +926,11 @@ class DispatchObservationPorts:
                     # ui_goto(page_campaign_menu) probes Exercise first.
                     # The exact campaign-menu root makes this a passive miss.
                     return False
+                if self.oracle.campaign_page_is_normal():
+                    # Hard and normal chapter pages are also unrelated to
+                    # Exercise.  ALAS enumerates pages before navigating back
+                    # through the campaign menu.
+                    return False
                 if self._active_flow_allows_passive_probe():
                     return False
                 raise AlasSemanticUnmapped(
@@ -1006,7 +1105,10 @@ class DispatchObservationPorts:
                 or self.oracle.daily_battle_result_visible()
             ):
                 return False
-            if self.oracle.operation_siren_local_map_visible():
+            if (
+                self._campaign_context is None
+                and self.oracle.operation_siren_local_map_visible()
+            ):
                 return True
             if self._campaign_context is not None:
                 if self._campaign_context.sortie_receipt is not None:

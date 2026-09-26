@@ -117,7 +117,9 @@ class DispatchActionsPorts:
         ):
             if (self.oracle.observation_target_present("exercise/page/back")
                     and self.oracle.exercise_page_visible()):
-                return self.oracle.click("exercise/page/back")
+                receipt = self.oracle.click("exercise/page/back")
+                self._exercise_page_back_transition_until = time.monotonic() + 20.0
+                return receipt
             if (self.oracle.observation_target_present("exercise/opponent/back")
                     and self.oracle.exercise_opponent_detail_visible()):
                 return self.oracle.click_exercise_opponent_back()
@@ -143,7 +145,11 @@ class DispatchActionsPorts:
                 )
                 and input_oracle.enabled("campaign-menu/page/back")
             ):
-                return input_oracle.click("campaign-menu/page/back")
+                from_chapter = input_oracle.campaign_page_is_normal()
+                receipt = input_oracle.click("campaign-menu/page/back")
+                if from_chapter:
+                    self._exercise_chapter_back_transition_until = time.monotonic() + 20.0
+                return receipt
             raise AlasSemanticUnmapped(
                 "ALAS resource is not semantically mapped for input: BACK_ARROW"
             )
@@ -454,7 +460,13 @@ class DispatchActionsPorts:
                     and self.oracle.read_state().generation > self._main_more_entry_receipt.generation):
                 return self._main_more_entry_receipt
             if semantic_id == "campaign-menu/exercise":
-                return self.oracle.click_campaign_exercise_entrance()
+                receipt = self.oracle.click_campaign_exercise_entrance()
+                self._exercise_entry_transition_until = time.monotonic() + 20.0
+                return receipt
+            if semantic_id == "campaign-menu/normal" and self._campaign_context is None:
+                receipt = self.oracle.click(semantic_id)
+                self._exercise_chapter_entry_transition_until = time.monotonic() + 20.0
+                return receipt
             if semantic_id == "campaign-menu/archive":
                 if self._data_key_context is not None:
                     target = self._award_close_target()

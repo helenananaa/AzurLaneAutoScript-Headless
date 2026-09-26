@@ -441,6 +441,10 @@ class ResearchAdapterPorts:
             raise SemanticGateClosed("research queue used outside ALAS research flow")
         if not self._action_ledger.allowed("research.start"):
             return 0
+        if self.oracle.enabled("research/queue/enter"):
+            # ALAS calls get_queue_slot() from its card page. The queue modal
+            # is not open there, so use its current five typed status marks.
+            return self.oracle.research_queue_indicator_empty_slots()
         return self.research_queue_empty_slots()
 
     def research_queue_remaining_seconds(self) -> int:
@@ -648,6 +652,7 @@ class ResearchAdapterPorts:
                     cached is not None
                     and time.monotonic() <= context.passive_transition_until
                 ):
+                    self.oracle.research_queue_state()
                     return cached
                 deadline = time.monotonic() + 6.0
                 while True:
@@ -666,6 +671,10 @@ class ResearchAdapterPorts:
                             raise
                         time.sleep(0.25)
                 context.navigation_receipts[target] = receipt
+                # ALAS may poll again before the queue panel has mounted.
+                # Wait for its exact typed identity here so a second click
+                # cannot close the panel or repeat an input without progress.
+                self.oracle.research_queue_state()
                 return receipt
             if name == "RESEARCH_DETAIL_QUIT":
                 return self.oracle.click("research/detail/root")
