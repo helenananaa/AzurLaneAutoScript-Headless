@@ -43,6 +43,7 @@ def main():
     os.chdir(alas)
     from alas import AzurLaneAutoScript
     from module.os_ash.meta import AshBeaconAssist
+    from module.meta_reward.meta_reward import MetaReward
     from alas_headless.semantic_sources import semantic_source_hashes
     from alas_headless import SemanticGateClosed
     instance = AzurLaneAutoScript(name)
@@ -54,6 +55,14 @@ def main():
     def save():
         output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     original = AshBeaconAssist._make_an_attack
+    original_reward = MetaReward.run
+    def observed_reward(host, *a, **kw):
+        result['reward_started'] = True
+        save()
+        value = original_reward(host, *a, **kw)
+        result['reward_returned'] = True
+        save()
+        return value
     def read_assist():
         for attempt in range(5):
             try:
@@ -72,7 +81,10 @@ def main():
         save()
         return value
     AshBeaconAssist._make_an_attack = observed_attack
+    MetaReward.run = observed_reward
     try:
+        result['runtime'] = dataclasses.asdict(session.open().oracle.fingerprint)
+        save()
         result['task_result'] = instance.run('opsi_ash_assist')
         adapter = session.open()
         result['grant_remaining'] = adapter._action_ledger.remaining('meta.assist')
@@ -81,14 +93,23 @@ def main():
         result['passed'] = bool(result['task_result'] is True and result['attacks']
             and all(a.get('after',{}).get('remaining_attempts') == a['before']['remaining_attempts']-1 for a in result['attacks'])
             and result['attacks'][-1]['after']['remaining_attempts'] == 0
-            and result['owner_released'])
+            and result['owner_released'] and result.get('reward_returned', False))
     except (Exception, SystemExit) as exc:
         result['error'] = str(exc)
         result['traceback'] = traceback.format_exc()
     finally:
         AshBeaconAssist._make_an_attack = original
+        MetaReward.run = original_reward
+        try:
+            oracle = session.open().oracle
+            result['retained_state'] = dataclasses.asdict(oracle.read_state())
+            result['retained_ui'] = dataclasses.asdict(oracle.read_ui_state())
+        except Exception as exc:
+            result['retained_state_error'] = str(exc)
+        result['final_config'] = json.loads(profile.read_text(encoding='utf-8'))
         save()
         session.close()
+        profile.unlink()
     print('passed',result['passed'], 'attacks',len(result['attacks']))
     return 0 if result['passed'] else 1
 

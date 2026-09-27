@@ -302,8 +302,9 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         adapter.begin_research()
         oracle.research_queue_visible_value = False
 
-        with self.assertRaisesRegex(SemanticGateClosed, "identity is not proven"):
-            adapter.click(NamedButton("RESEARCH_GOTO_QUEUE"))
+        for _ in range(2):
+            with self.assertRaisesRegex(SemanticGateClosed, "identity is not proven"):
+                adapter.click(NamedButton("RESEARCH_GOTO_QUEUE"))
 
         self.assertEqual(oracle.click_calls, ["research/queue/enter"])
 
@@ -832,6 +833,19 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertEqual(duplicate, first)
         self.assertEqual(oracle.click_calls, ["research/page/back"])
 
+    def test_research_queue_round_trips_do_not_reuse_opposite_navigation(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_research()
+        for _ in range(2):
+            entry = adapter.click(NamedButton("RESEARCH_GOTO_QUEUE"))
+            self.assertIs(adapter.click(NamedButton("RESEARCH_GOTO_QUEUE")), entry)
+            back = adapter.click(NamedButton("BACK_ARROW"))
+            self.assertIs(adapter.click(NamedButton("BACK_ARROW")), back)
+        self.assertEqual(oracle.click_calls, [
+            "research/queue/enter", "research/page/back",
+            "research/queue/enter", "research/page/back",
+        ])
+
     def test_research_queue_snapshot_is_bounded_across_queue_exit(self):
         adapter, oracle, _ = self.make_adapter()
         adapter.begin_research()
@@ -840,6 +854,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         oracle.research_queue_visible_value = False
 
         self.assertEqual(adapter.research_queue_empty_slots(), 5)
+        self.assertFalse(adapter.appear(NamedButton("QUEUE_CHECK")))
         adapter._research_context.last_queue_observed_at = time.monotonic() - 31.0
         with self.assertRaisesRegex(SemanticGateClosed, "identity is not proven"):
             adapter.research_queue_empty_slots()

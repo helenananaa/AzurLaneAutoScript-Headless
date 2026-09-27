@@ -1591,16 +1591,27 @@ class SessionTasksPorts:
         """Evaluate update completion from one coherent immutable frame."""
 
         live_oracle = adapter.oracle
-        self.refresh_frame()
-        frame_oracle = adapter._require_frame_observation_oracle()
-        # The update-progress latch belongs to this game process, not to an
-        # individual frame reader. Preserve it while the immutable oracle
-        # evaluates the completion text/opening transition.
-        frame_oracle._login_update_seen = live_oracle._login_update_seen
-        frame_oracle._login_update_restart_consumed = (
-            live_oracle._login_update_restart_consumed
-        )
-        required = frame_oracle.login_update_restart_required()
+        from ...adapter.errors import StaleFrameError
+        refreshed = False
+        try:
+            frame_oracle = adapter._require_frame_observation_oracle()
+        except StaleFrameError:
+            self.refresh_frame()
+            refreshed = True
+            frame_oracle = adapter._require_frame_observation_oracle()
+
+        def evaluate(reader):
+            # The latch belongs to this process; a provisional positive must
+            # not consume it before the fresh restart proof is evaluated.
+            reader._login_update_seen = live_oracle._login_update_seen
+            reader._login_update_restart_consumed = live_oracle._login_update_restart_consumed
+            return reader.login_update_restart_required()
+
+        required = evaluate(frame_oracle)
+        if required and not refreshed:
+            self.refresh_frame()
+            frame_oracle = adapter._require_frame_observation_oracle()
+            required = evaluate(frame_oracle)
         if frame_oracle._login_update_restart_consumed:
             live_oracle._login_update_restart_consumed = True
         return required

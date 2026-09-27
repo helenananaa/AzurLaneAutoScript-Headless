@@ -43,6 +43,21 @@ from .resources import (
 class SessionDispatchPorts:
     """Session dispatch on the shared immutable frame."""
 
+    def _meta_assist_result_return_observation(self, button: Any) -> bool:
+        self.refresh_frame()
+        adapter = self.open()
+        oracle = adapter._frame_or_live_observation_oracle()
+        state = oracle.read_state()
+        if any(b.active_in_hierarchy and b.path ==
+               'OverlayCamera/Overlay/UIOverlay/Loading(Clone)'
+               for b in state.buttons):
+            # No action or completion while the result page unloads. ALAS'
+            # existing combat loop owns the next screenshot and timeout.
+            return False
+        oracle.meta_assist_state()
+        adapter._operation_siren_combat_active = False
+        return adapter.appear(button)
+
     def appear(self, button: Any) -> bool:
         name = AlasSemanticAdapter._button_name(button)
         adapter = self.open()
@@ -234,11 +249,7 @@ class SessionDispatchPorts:
                     # The statistics Button can outlive its result page during
                     # the return animation. Only the fresh typed assist list
                     # can complete that transition; never click the old Button.
-                    self.refresh_frame()
-                    adapter = self.open()
-                    adapter.oracle.meta_assist_state()
-                    adapter._operation_siren_combat_active = False
-                    return adapter.appear(button)
+                    return self._meta_assist_result_return_observation(button)
                 if (str(exc) == 'combat Unity selector path is ambiguous'
                         and adapter._campaign_context is not None):
                     # The live combat reader may observe a newly mounted dock
@@ -452,6 +463,22 @@ class SessionDispatchPorts:
                     self._arm_combat_result_transition(adapter)
                 return receipt
             observation = self._combat_result_observation
+            if (name == 'BATTLE_STATUS_S'
+                    and getattr(adapter, '_meta_assist_active', False)
+                    and observation is not None and observation[0] == name):
+                # META's award/grade page can become the statistics page
+                # during ALAS' deliberate sleep before clicking. Re-prove
+                # the current exact result target instead of committing the
+                # no-longer-visible resource from the preceding screenshot.
+                self.refresh_frame()
+                adapter = self.open()
+                current_result = adapter._frame_or_live_observation_oracle()
+                if current_result.daily_battle_result_visible():
+                    receipt = current_result.click_daily_battle_result()
+                    self._combat_result_observation = None
+                    self._combat_last_result_receipt = receipt
+                    self._arm_combat_result_transition(adapter)
+                    return receipt
             if (
                 name == "BATTLE_STATUS_S"
                 and adapter.campaign_combat_committed()
@@ -502,7 +529,15 @@ class SessionDispatchPorts:
                 and result_oracle.award_info_page_visible()
             ):
                 return result_oracle.click_exercise_award_info_close()
-            if result_oracle.campaign_battle_reward_visible():
+            pending_daily = getattr(adapter, "_daily_pending_receipt", None)
+            daily_quick_reward = (
+                adapter.daily_execution_active()
+                and pending_daily is not None
+                and pending_daily.semantic_id.endswith("/quick/all")
+            )
+            # Let Daily correlate its quick receipt with the reward close via
+            # the ordinary refreshed adapter input path below.
+            if not daily_quick_reward and result_oracle.campaign_battle_reward_visible():
                 target = (
                     "reward/award-info/close"
                     if result_oracle.enabled("reward/award-info/close")

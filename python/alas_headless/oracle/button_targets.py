@@ -7,6 +7,7 @@ from .contracts import SemanticTarget
 
 
 DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
+    SemanticTarget('private-quarters/level-up/close', 'bg', 'OverlayCamera/Overlay/UIMain/LevelUpWindow/bg'),
     SemanticTarget('private-quarters/home', 'home', 'SelectDorm3DUI(Clone)/Main/option/home'),
     SemanticTarget('private-quarters/page/left', 'left', 'SelectDorm3DUI(Clone)/Main/btn_switch/left'),
     SemanticTarget('private-quarters/page/right', 'right', 'SelectDorm3DUI(Clone)/Main/btn_switch/right'),
@@ -57,6 +58,7 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     SemanticTarget("main/shop", "shop", "frame/bottom/frame/shop"),
     SemanticTarget("main/dock", "dock", "frame/bottom/frame/dock"),
     SemanticTarget("meta/character/back", "back", "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back"),
+    SemanticTarget("meta/character/sync", "SynBtn", "UICamera/Canvas/UIMain/MetaCharacterUI(Clone)/HidePanel/MenuPanel/SynBtn"),
     SemanticTarget("meta/reward-preview/open", "award_btn", "WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/main/award_btn"),
     SemanticTarget("meta/dossier/list", "list_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossDetailUI(Clone)/list_btn"),
     SemanticTarget("meta/dossier/current", "current_list_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/current_list_btn"),

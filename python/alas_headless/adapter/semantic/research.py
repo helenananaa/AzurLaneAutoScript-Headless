@@ -365,7 +365,20 @@ class ResearchAdapterPorts:
 
     def shipyard_select_ship(self, index: int) -> ShipyardState:
         self._package_gate()
-        self.oracle.click_shipyard_ship(index)
+        for attempt in range(3):
+            try:
+                receipt = self.oracle.click_shipyard_ship(index)
+                break
+            except SemanticGateClosed as exc:
+                # This exact failure is raised before any tap. Reacquire the
+                # two endpoints; never retry a dispatched/ambiguous action.
+                if str(exc) != "shipyard input snapshots are not coherent" or attempt == 2:
+                    raise
+                time.sleep(0.1)
+        if not receipt.semantic_id.endswith('/already'):
+            # Preserve original ShipyardUI's 1.5-second detail transition
+            # delay: the checked toggle can precede the new title/DEV pane.
+            time.sleep(1.5)
         deadline = time.monotonic() + 8.0
         last_error: Optional[SemanticOracleError] = None
         while time.monotonic() < deadline:
@@ -378,7 +391,7 @@ class ResearchAdapterPorts:
 
     def shipyard_state(self, index: int) -> ShipyardState:
         self._package_gate()
-        return self.oracle.shipyard_state(index)
+        return self._frame_or_live_observation_oracle().shipyard_state(index)
 
     def research_detail_state(self) -> ResearchDetailState:
         self._package_gate()
@@ -561,7 +574,9 @@ class ResearchAdapterPorts:
                 return self.oracle.research_reset_available()
             if name == "QUEUE_CHECK":
                 try:
-                    self.research_queue_state()
+                    # The retained post-exit capacity is not page identity.
+                    # ALAS must see the current queue before skipping entry.
+                    self.oracle.research_queue_state()
                     return True
                 except SemanticGateClosed:
                     return False
@@ -671,6 +686,9 @@ class ResearchAdapterPorts:
                             raise
                         time.sleep(0.25)
                 context.navigation_receipts[target] = receipt
+                # A new entry ends the previous exit transaction. The shared
+                # transition deadline must not revive its cached BACK_ARROW.
+                context.navigation_receipts.pop("research/page/back", None)
                 # ALAS may poll again before the queue panel has mounted.
                 # Wait for its exact typed identity here so a second click
                 # cannot close the panel or repeat an input without progress.
@@ -821,5 +839,8 @@ class ResearchAdapterPorts:
                     self.oracle.click("research/page/back")
                 )
                 context.navigation_receipts["research/page/back"] = receipt
+                # ALAS may return to the queue again within the same task.
+                # Duplicate suppression belongs only to this navigation leg.
+                context.navigation_receipts.pop("research/queue/enter", None)
                 return receipt
         return UNHANDLED

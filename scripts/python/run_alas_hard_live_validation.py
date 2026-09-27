@@ -10,6 +10,8 @@ import os
 import sys
 import traceback
 import uuid
+import hashlib
+from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
@@ -21,6 +23,7 @@ if str(ROOT / "python") not in sys.path:
     sys.path.insert(0, str(ROOT / "python"))
 
 from alas_headless.adb_device import resolve_adb_serial  # noqa: E402
+from alas_headless.semantic_sources import semantic_source_hashes  # noqa: E402
 
 
 def _now() -> str:
@@ -32,6 +35,41 @@ def _load(path: Path) -> Mapping[str, Any]:
     if not isinstance(value, dict):
         raise ValueError(f"expected JSON object: {path}")
     return value
+
+
+def _completion_value(completion: Any) -> Mapping[str, Any]:
+    return {
+        "stage": completion.stage_code,
+        "result_generation": completion.result_generation,
+        "result_path": completion.result_path,
+        "fleet1_role": completion.fleet1_role,
+        "fleet2_role": completion.fleet2_role,
+        "waited_seconds": completion.waited_seconds,
+        "combat_auto_generation": completion.combat_auto_generation,
+        "combat_auto_proven": completion.combat_auto_proven,
+        "passive_after_sortie": completion.passive_after_sortie,
+        "result_exit_receipt": (
+            asdict(completion.result_exit_receipt)
+            if completion.result_exit_receipt is not None else None
+        ),
+    }
+
+
+def _observe_counters(oracle: Any, phase: str, **known: Any) -> Mapping[str, Any]:
+    """Retain diagnostics without turning optional sampling into a task gate."""
+    observation = {"phase": phase, **known}
+    for name, read in (
+        ("remain", oracle.campaign_hard_remain),
+        ("oil", oracle.campaign_oil),
+        ("generation", lambda: oracle.read_state().generation),
+    ):
+        if name in observation:
+            continue
+        try:
+            observation[name] = read()
+        except Exception as exc:
+            observation[name + "_error"] = f"{type(exc).__name__}: {exc}"
+    return observation
 
 
 def _write(path: Path | None, value: Mapping[str, Any]) -> None:
@@ -92,6 +130,13 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
 
     instance = None
     completion_proofs = []
+    observations = []
+    runtime = None
+    sources = {
+        **semantic_source_hashes(ROOT),
+        "runner": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "hard": hashlib.sha256((alas_root / "module/hard/hard.py").read_bytes()).hexdigest(),
+    }
     started = _now()
     try:
         os.chdir(alas_root)
@@ -101,11 +146,21 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
         instance.config.init_task("Hard")
         session = instance.device.semantic_adapter
         startup_oracle = session.open().oracle
+        runtime = asdict(startup_oracle.fingerprint)
+        original_remain = session.campaign_hard_remain
+
+        def observe_quota():
+            value = original_remain()
+            observations.append(_observe_counters(startup_oracle, "before_runs", remain=value))
+            return value
+
+        session.campaign_hard_remain = observe_quota
         original_wait = session.wait_campaign_auto_search_completion
 
         def collect_auto_search_completion(*wait_args, **wait_kwargs):
             proof = original_wait(*wait_args, **wait_kwargs)
             completion_proofs.append(proof)
+            observations.append(_observe_counters(startup_oracle, "after_run", run=len(completion_proofs)))
             return proof
 
         session.wait_campaign_auto_search_completion = collect_auto_search_completion
@@ -144,22 +199,16 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             "sortie_budget": args.sortie_budget,
             "run_result": run_result,
             "completion_count": len(completion_proofs),
+            "auto_search_completions": [_completion_value(p) for p in completion_proofs],
+            "observations": observations,
+            "runtime": runtime,
+            "source_sha256": sources,
             "manual_resume": args.manual_resume,
             "manual_clear_start": args.manual_clear_start,
             "scheduler_enabled_after": post["Scheduler"]["Enable"],
             "scheduler_next_run_after": post["Scheduler"]["NextRun"],
             "auto_search_completion": (
-                {
-                    "stage": completion.stage_code,
-                    "result_generation": completion.result_generation,
-                    "result_path": completion.result_path,
-                    "fleet1_role": completion.fleet1_role,
-                    "fleet2_role": completion.fleet2_role,
-                    "waited_seconds": completion.waited_seconds,
-                    "combat_auto_generation": completion.combat_auto_generation,
-                    "combat_auto_proven": completion.combat_auto_proven,
-                    "passive_after_sortie": completion.passive_after_sortie,
-                }
+                _completion_value(completion)
                 if completion is not None
                 else None
             ),
@@ -178,6 +227,10 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             "driver_revision": args.driver_revision,
             "sortie_budget": args.sortie_budget,
             "error": f"{type(exc).__name__}: {exc}",
+            "auto_search_completions": [_completion_value(p) for p in completion_proofs],
+            "observations": observations,
+            "runtime": runtime,
+            "source_sha256": sources,
             "traceback": traceback.format_exc(),
             "raw_input_fallback_used": False,
         }

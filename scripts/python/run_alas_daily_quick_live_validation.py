@@ -20,6 +20,22 @@ KINDS = {
 }
 
 
+def continuity_passed(result):
+    """The completed transaction proof survives later card-scan state resets."""
+    receipts = result.get('receipts', [])
+    transactions = result.get('transactions', [])
+    return bool(result.get('task_result') is True
+        and len(receipts) == len(transactions) == 1
+        and receipts[0]['semantic_id'].endswith('/quick/all')
+        and transactions[0]['before'] > 0 and transactions[0]['after'] == 0
+        and result.get('grant_remaining') == 0
+        and any(check.get('complete') is True and check.get('reward_closed') is True
+                and check.get('remaining') == 0
+                for check in result.get('completion_checks', []))
+        and result.get('award_absent_after_task') is True
+        and result.get('daily_page_after_task') is True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--alas-root', required=True, type=Path)
@@ -58,7 +74,7 @@ def main():
     from alas_headless.semantic_sources import semantic_source_hashes
     result = dict(schema='alas-headless.daily-quick-live/v1', passed=False,
                   kind=KINDS[args.kind], stage=args.stage, serial=args.serial,
-                  driver_revision=args.driver_revision, transactions=[])
+                  driver_revision=args.driver_revision, transactions=[], actions=[], completion_checks=[])
     result['source_sha256'] = {**semantic_source_hashes(ROOT),
         'daily': hashlib.sha256((alas / 'module/daily/daily.py').read_bytes()).hexdigest(),
         'runner': hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
@@ -90,6 +106,23 @@ def main():
             raise ScriptEnd('This qualification requires an unlocked batch-skip control')
         session.click_daily_precombat_start = reject_normal_battle
         adapter = session.open()
+        original_complete = session.daily_quick_complete
+        def observed_complete():
+            complete = original_complete()
+            if complete:
+                result['completion_checks'].append(dict(
+                    complete=True, reward_closed=adapter._daily_quick_reward_closed,
+                    remaining=adapter.oracle.daily_remaining_for_kind(result['kind'])))
+                save()
+            return complete
+        session.daily_quick_complete = observed_complete
+        original_click = adapter.oracle.click
+        def observed_click(semantic_id):
+            receipt = original_click(semantic_id)
+            result['actions'].append(dataclasses.asdict(receipt))
+            save()
+            return receipt
+        adapter.oracle.click = observed_click
         result['runtime_before'] = dataclasses.asdict(adapter.oracle.fingerprint)
         result['before_ui'] = dataclasses.asdict(adapter.oracle.read_ui_state())
         save()
@@ -98,11 +131,10 @@ def main():
         result['grant_remaining'] = adapter._action_ledger.remaining('daily.execute')
         result['scheduler_after'] = json.loads(config_path.read_text(encoding='utf-8'))['Daily']['Scheduler']
         result['after_ui'] = dataclasses.asdict(adapter.oracle.read_ui_state())
-        result['passed'] = bool(result['task_result'] is True
-            and len(result['receipts']) == len(result['transactions']) == 1
-            and result['receipts'][0]['semantic_id'].endswith('/quick/all')
-            and result['transactions'][0]['before'] > 0
-            and result['transactions'][0]['after'] == 0 and result['grant_remaining'] == 0)
+        result['reward_closed'] = adapter._daily_quick_reward_closed
+        result['award_absent_after_task'] = adapter._award_close_target() is None
+        result['daily_page_after_task'] = adapter.oracle.daily_page_visible()
+        result['passed'] = continuity_passed(result)
     except (Exception, SystemExit, KeyboardInterrupt) as exc:
         result['error'] = type(exc).__name__ + ': ' + str(exc)
         result['traceback'] = traceback.format_exc()

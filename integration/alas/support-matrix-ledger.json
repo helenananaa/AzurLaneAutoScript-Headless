@@ -8614,7 +8614,7 @@
         "Daily"
       ],
       "name": "Daily",
-      "note": "普通挑战指定关卡/舰队已闭环；战术研修与斩首行动批量快速各实耗3→0，领奖为分段恢复，修复后的完整连续任务仍待验收。每日页归属及重复入口已通过两轮原生往返，重复请求零额外输入。其他星期类型、难度和舰队未完整覆盖；2026-09-12余下3/3类型均锁定。见 docs/daily-meta-live-20260912.zh-CN.md、docs/daily-navigation-20260912.zh-CN.md。",
+      "note": "普通挑战指定关卡/舰队已闭环；战术研修与斩首行动批量快速各实耗3→0，领奖为分段恢复，修复后的完整连续任务仍待验收。每日页归属及重复入口已通过两轮原生往返，重复请求零额外输入。其他星期类型、难度和舰队未完整覆盖；2026-09-12余下3/3类型均锁定。见 docs/daily-meta-live-20260912.zh-CN.md、docs/daily-navigation-20260912.zh-CN.md。 2026-09-26：强袭作战 first/舰队1 原任务单进程批量3→0、关联领奖、0700完成判断、返回Daily与次日00:00调度通过；原始验收误用后续卡片已清空的标记，保留原始记录并另存更正评估。战术研修当日3→0和任务返回通过但先于奖励分发修复；其他类型、难度和舰队仍未全覆盖。见 docs/daily-native-continuity-20260926.zh-CN.md。",
       "status": "L"
     },
     {
@@ -8840,7 +8840,7 @@
         "Hard"
       ],
       "name": "Hard",
-      "note": "困难 11-4 已在真实 API 32 x86_64 AVD 上完成三次首通推进并达到 100%：舰队 1 清理 6 队道中、舰队 2 击破 Boss，全部战斗使用官方自动战斗；覆盖零弹药、伏击、紧急委托、地图恢复和三类结算。刷新额度后，ALAS 原 Hard 入口又完成官方地图自律实机闭环：9.7.328 职能页签精确设置 fleet1=all/fleet2=standby，出击后游戏接管地图与战斗，观察器证明官方自动战斗并被动验收合计奖励页，随后精确退出；三份凭证均无 raw-input fallback。官方地图自律仅在精确进度大于 95% 时放行。HardFleet=2 与其他困难关卡未外推",
+      "note": "困难 11-4 已在真实 API 32 x86_64 AVD 上完成三次首通推进并达到 100%：舰队 1 清理 6 队道中、舰队 2 击破 Boss，全部战斗使用官方自动战斗；覆盖零弹药、伏击、紧急委托、地图恢复和三类结算。刷新额度后，ALAS 原 Hard 入口又完成官方地图自律实机闭环：9.7.328 职能页签精确设置 fleet1=all/fleet2=standby，出击后游戏接管地图与战斗，观察器证明官方自动战斗并被动验收合计奖励页，随后精确退出；三份凭证均无 raw-input fallback。官方地图自律仅在精确进度大于 95% 时放行。HardFleet=2 与其他困难关卡未外推。2026-09-26 在本地 AVD、游戏 9.7.394 上，原 Hard 11-4、HardFleet=2 同进程三局连续通过：困难次数3→2→1→0，油量1506→1299；三局均为fleet1=standby/fleet2=all，官方自动战斗、总奖励与退出证明独立留存，任务正常返回并排到2026-09-27 00:00。0720重入补丁得到实机验证；没有重启或分段重跑。见 docs/hard-native-continuity-20260926.zh-CN.md 与 integration/alas/hard-native-continuity-live-validation-receipt-20260926.json。推荐补位确认仍未在本轮触发，其他困难图及跨日无人值守不在本轮范围，保持L。",
       "status": "L"
     },
     {
@@ -8945,7 +8945,7 @@
         "OpsiAshAssist"
       ],
       "name": "OpsiAshAssist",
-      "note": "Tier候选选择、档案到当前列表、任务上下文及真实次数已接通。2026-09-12实耗三次支援，最后一场1→0的原生战斗、结算与返回单进程通过。同步页已纠正，1830/2000的原生无奖励分支通过。实际同步奖励领取、支援到奖励的完整任务、无目标和舰队不可用分支仍未完整验收。见 docs/daily-meta-live-20260912.zh-CN.md、docs/meta-reward-page-20260912.zh-CN.md。",
+      "note": "Tier候选选择、档案到当前列表、任务上下文及真实次数已接通。2026-09-12实耗三次支援，最后一场1→0的原生战斗、结算与返回单进程通过。同步页已纠正，1830/2000的原生无奖励分支通过。实际同步奖励领取、支援到奖励的完整任务、无目标和舰队不可用分支仍未完整验收。见 docs/daily-meta-live-20260912.zh-CN.md、docs/meta-reward-page-20260912.zh-CN.md。 2026-09-26：游戏9.7.394实耗Tier15支援3→2→1→0，前两场分段恢复；修复后末场1→0、结算、返回及MetaReward启动在同进程完成。当前MetaCharacterUI进入列表形态且PTPanel缺失，重复科研菜单入口被拒绝；实际同步奖励和完整任务未通过，保持B。见 docs/meta-assist-continuity-20260926.zh-CN.md。 同日继续：0730将新版META菜单加入原ALAS页面图；原MetaReward在支援上下文、零战斗额度下完成主页→菜单→MetaCharacterSynUI→主页。9926同步值、22/22已达门槛均已领取，无奖励分支通过；出现未领取奖励仍明确拒绝，实际领取及三场完整任务保持未验收。见 docs/meta-character-navigation-20260926.zh-CN.md。",
       "status": "B"
     },
     {
@@ -9075,7 +9075,7 @@
         "PrivateQuarters"
       ],
       "name": "PrivateQuarters",
-      "note": "选房页、真实次数、原生全部关闭分支与次日调度已验证；新泽西物理点击、原生三次触摸及IK/watch/base返回有实机证据。好感升3级弹窗阻断最终退出，原任务超时；重启恢复后确认0/3并回主页，属于分段清空。升级弹窗自动关闭、完整TargetInteract=true、自动选角色/地点、其他角色、礼物和商店仍未资格化。见 docs/private-quarters-physics-20260912.zh-CN.md。 2026-09-13原pq_run已完成新泽西选房入房、对话及三次互动；最后退出触发旧按钮别名循环误报。控件身份修复及离线保护回放通过，实机恢复另记，仍非单进程完整成功。见 docs/private-quarters-native-20260913.zh-CN.md。 恢复后全关闭原任务确认0/3、次日调度及主页通过（final-overview-r15），仍为分段证据。",
+      "note": "选房页、真实次数、原生全部关闭分支与次日调度已验证；新泽西物理点击、原生三次触摸及IK/watch/base返回有实机证据。好感升3级弹窗阻断最终退出，原任务超时；重启恢复后确认0/3并回主页，属于分段清空。升级弹窗自动关闭、完整TargetInteract=true、自动选角色/地点、其他角色、礼物和商店仍未资格化。见 docs/private-quarters-physics-20260912.zh-CN.md。 2026-09-13原pq_run已完成新泽西选房入房、对话及三次互动；最后退出触发旧按钮别名循环误报。控件身份修复及离线保护回放通过，实机恢复另记，仍非单进程完整成功。见 docs/private-quarters-native-20260913.zh-CN.md。 恢复后全关闭原任务确认0/3、次日调度及主页通过（final-overview-r15），仍为分段证据。 2026-09-26：修复选房入场旧主页别名及无关被动探针，实机相关ALAS文件同步现有补丁。新泽西原任务从3/3执行三次互动，到等级4、20/800后被真实LevelUpWindow阻挡；背景和房间返回均非顶层命中，原任务超时，未形成连续闭环。保持P，升级关闭仍待可验证输入目标。见 docs/private-quarters-continuity-20260926.zh-CN.md。 同日冷启动后独立全关闭恢复验证0/3、次日调度和回主页通过，不与三次互动失败拼接。 升级关闭候选代码已补：真实Button矩形内整数点原生命中搜索、原ROOM_BACK输入分发和一次输入后的弹窗消失/房间返回后置条件；仅离线通过，未构建安装新观察器或实机关闭，见 docs/private-quarters-level-up-candidate-20260926.zh-CN.md。 同日后续已完成x86_64增量观察器构建安装、冷启动、五帧健康、原登录及0/3零互动往返；升级关闭仍未实机验证，见 docs/private-quarters-observer-deployment-20260926.zh-CN.md。",
       "status": "P"
     },
     {
@@ -9108,7 +9108,7 @@
         "Research"
       ],
       "name": "Research",
-      "note": "Original bounded tasks now pass cube only_05_hour enforcement fallback (3 cubes) and part only_no_project (20 T1 anti-aircraft parts), queueing and scheduling. Natural half-hour paths, multi-resource confirmation, reset, all presets and unattended cross-round operation remain unqualified. See docs/research-continuation-20260912.zh-CN.md. Original UI progress-notice confirmation, Shipyard navigation and unobscured main return also passed in notice-recovery-r5.json; no strengthening or purchase. Part only_05_hour enforcement fallback also passed (Q-202-MI, 20 T2 general parts); the natural half-hour branch remains unqualified. A bounded UseCoin=only_no_project natural-completion continuation passed: one finished project, G-412-MI, 1500 gold, queueing and scheduling; subsequent context-free return to main also passed. See docs/shipyard-series-20260912.zh-CN.md. Multi-resource confirmation now compares the complete cost set and rechecks a fresh input frame; original start/queue methods passed offline contract replay. No selectable dual-resource card was available in the bounded live navigation/read, which returned to main without spending. Actual multi-resource confirmation remains live-unqualified. See docs/research-dual-resource-20260913.zh-CN.md.",
+      "note": "Original bounded tasks now pass cube only_05_hour enforcement fallback (3 cubes) and part only_no_project (20 T1 anti-aircraft parts), queueing and scheduling. Natural half-hour paths, multi-resource confirmation, reset, all presets and unattended cross-round operation remain unqualified. See docs/research-continuation-20260912.zh-CN.md. Original UI progress-notice confirmation, Shipyard navigation and unobscured main return also passed in notice-recovery-r5.json; no strengthening or purchase. Part only_05_hour enforcement fallback also passed (Q-202-MI, 20 T2 general parts); the natural half-hour branch remains unqualified. A bounded UseCoin=only_no_project natural-completion continuation passed: one finished project, G-412-MI, 1500 gold, queueing and scheduling; subsequent context-free return to main also passed. See docs/shipyard-series-20260912.zh-CN.md. Multi-resource confirmation now compares the complete cost set and rechecks a fresh input frame; original start/queue methods passed offline contract replay. No selectable dual-resource card was available in the bounded live navigation/read, which returned to main without spending. Actual multi-resource confirmation remains live-unqualified. See docs/research-dual-resource-20260913.zh-CN.md. On 2026-09-26, original Research queue filling completed without the one-start harness truncation: two reward claims, five queued projects plus a sixth waiting, six gold-only starts (10500 gold), queue re-entry and scheduling at 11:08:01 in one 145.031-second run. Two queue navigation round trips and a separate context-free home return also passed. Game 9.7.394 on the local AVD only; no reset, cubes, parts or purchases. See docs/research-native-continuity-20260926.zh-CN.md and integration/alas/research-native-continuity-live-validation-receipt-20260926.json. Status remains L; natural half-hour, dual-resource, reset and unattended cross-round coverage remain unqualified.",
       "status": "L"
     },
     {
@@ -9135,7 +9135,7 @@
         "Shipyard"
       ],
       "name": "Shipyard",
-      "note": "Original typed UI passed series 9 to 1 to 9 with exact top hits and selected-series postconditions, Neptune DEV 30/30 with separate fate-stage V (8 blueprints), restoration of Takahashi and main return. Earlier Duncan/Valparaiso DEV reads remain scoped. Navbar fate badges no longer select FATE controls on a DEV pane. Actual FATE-pane actions, other series, purchases, strengthening and full task remain unqualified. See docs/shipyard-series-20260912.zh-CN.md. 2026-09-13原helper读取二期六艘、七期五艘DEV满级并恢复九期原选船和主页通过；未找到实际FATE面板。开发等级支持无害字号变化，未知内容仍拒绝，保持B。见docs/shipyard-fate-survey-20260913.zh-CN.md。",
+      "note": "Original typed UI passed series 9 to 1 to 9 with exact top hits and selected-series postconditions, Neptune DEV 30/30 with separate fate-stage V (8 blueprints), restoration of Takahashi and main return. Earlier Duncan/Valparaiso DEV reads remain scoped. Navbar fate badges no longer select FATE controls on a DEV pane. Actual FATE-pane actions, other series, purchases, strengthening and full task remain unqualified. See docs/shipyard-series-20260912.zh-CN.md. 2026-09-13原helper读取二期六艘、七期五艘DEV满级并恢复九期原选船和主页通过；未找到实际FATE面板。开发等级支持无害字号变化，未知内容仍拒绝，保持B。见docs/shipyard-fate-survey-20260913.zh-CN.md。 2026-09-26第三期五舰DEV30/30与独立天运V读取、恢复九期第4艘及主页通过；修复观察帧被更新探测刷新和切船详情等待，249项定向测试通过。实际FATE操作仍未资格化，保持B。见docs/shipyard-series3-20260926.zh-CN.md。",
       "status": "B"
     },
     {
@@ -12446,9 +12446,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "e42e7462abe5fdb15a350130454d29f437973007ffb8f701ddb2b26af46520df",
-      "manifest_sha256": "2654d7a7fa456bde845fa7c48e8c180981629afb5ddf113fc6e1281e18367dfb",
-      "member_count": 119
+      "combined_sha256": "f8a0a3e97ec5cb2b6cf1e395e81dd808753ada4a949e60aa0c004e44f42e2573",
+      "manifest_sha256": "6869bfedc72293339e2dcc58c4ebf5529f58436b7fc24a722987cc2dc1e053f2",
+      "member_count": 120
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

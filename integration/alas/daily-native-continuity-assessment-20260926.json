@@ -1,0 +1,19 @@
+{
+  "schema": "alas-headless.daily-continuity-assessment/v1",
+  "evidence": {
+    "tactical": {
+      "receipt": "integration/alas/daily-native-continuity-20260926-tactical.json",
+      "sha256": "53717a46abfa5f1bdc9c71bccd0bddbb9f7ccc38ea44c92ab52aec8c906447ce",
+      "original_passed": true,
+      "continuity_assessment": false
+    },
+    "fierce": {
+      "receipt": "integration/alas/daily-native-continuity-20260926-fierce.json",
+      "sha256": "788704ae586afcbf5b4697970d66149abf7608500cc7c9c0fca297523c552b99",
+      "original_passed": false,
+      "continuity_assessment": true
+    }
+  },
+  "assessor_sha256": "f5a114abe17a6644b42782bd585df6842a252d7c5bc5af180d7ff897d6039431",
+  "note": "Original receipts unchanged. Fierce original acceptance incorrectly required reward_closed after subsequent card scans reset it; retained in-loop completion_checks proves transaction completion. Tactical predates dispatch fix and does not prove the completion hook."
+}

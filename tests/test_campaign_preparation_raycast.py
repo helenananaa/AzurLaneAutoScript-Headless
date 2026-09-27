@@ -77,6 +77,7 @@ def test_native_preparation_selector_accepts_only_the_reviewed_controls():
     selector = source.split("bool IsCampaignPreparationSwitch", 1)[1].split("bool ShouldEvaluateTopRaycast", 1)[0]
     program = '''
 #include <string_view>
+#include <string>
 #include <cassert>
 bool EndsWith(std::string_view value, std::string_view suffix) {
     return value.size() >= suffix.size() && value.substr(value.size()-suffix.size()) == suffix;

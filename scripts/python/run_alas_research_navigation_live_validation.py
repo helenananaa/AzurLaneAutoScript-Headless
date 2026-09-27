@@ -19,6 +19,7 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--recovery-only', action='store_true')
     parser.add_argument('--start-from-shop', action='store_true')
+    parser.add_argument('--queue-round-trips', type=int, choices=(1, 2), default=1)
     args = parser.parse_args()
     output = args.output.resolve()
     if output.exists():
@@ -56,7 +57,10 @@ def main():
             return receipt
         oracle.click = record_click
         host = RewardResearch(app.config, app.device)
-        if oracle.enabled('login/enter'):
+        if (oracle.enabled('login/enter')
+                or oracle.login_update_download_available()
+                or oracle.login_update_in_progress()
+                or oracle.login_update_restart_prompt_available()):
             from module.handler.login import LoginHandler
             LoginHandler(app.config, app.device).handle_app_login()
             result['login_recovery_performed'] = True
@@ -81,9 +85,13 @@ def main():
         result['repeat_reused'] = prior is not None and repeated is prior
         result['repeat_inputs'] = oracle.input_dispatch_count - count
         save()
-        host.queue_enter()
-        result['queue'] = dataclasses.asdict(oracle.research_queue_state())
-        host.queue_quit()
+        result['queue_round_trips'] = []
+        for _ in range(args.queue_round_trips):
+            host.queue_enter()
+            result['queue'] = dataclasses.asdict(oracle.research_queue_state())
+            host.queue_quit()
+            result['queue_round_trips'].append(result['queue'])
+            save()
         # RewardResearch.run releases this scope in its finally block before
         # a caller navigates home; keep the diagnostic lifecycle identical.
         adapter.end_research()

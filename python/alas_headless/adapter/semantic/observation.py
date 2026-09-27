@@ -159,7 +159,7 @@ class ObservationAdapterPorts:
             ("guild/page/back", lambda: oracle.guild_page_visible()),
             ("os/page/back", lambda: oracle.operation_siren_page_visible()),
             ("meta/home", lambda: oracle.meta_page_visible()),
-            ("meta/character/back", lambda: oracle.meta_character_page_visible()),
+            ("meta/character/back", lambda: oracle.meta_character_page_visible() or oracle.meta_character_menu_visible()),
             ("private-quarters/home", lambda: oracle.private_quarters_page_visible()),
             ("game-room/home", lambda: oracle.game_room_page_visible()),
             ("battle-pass/home", lambda: oracle.battle_pass_page_visible()),

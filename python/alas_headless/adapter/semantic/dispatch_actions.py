@@ -439,10 +439,26 @@ class DispatchActionsPorts:
                     and self.oracle.enabled('dorm-menu/dorm')
                     and self.oracle.read_state().generation > self._main_live_entry_receipt.generation):
                 return self._main_live_entry_receipt
+            if (semantic_id == 'main/live' and self._main_live_entry_receipt is not None
+                    and self._private_quarters_entry_receipt is not None
+                    and self._private_quarters_entry_receipt.generation >= self._main_live_entry_receipt.generation
+                    and self.oracle.private_quarters_page_visible()
+                    and self.oracle.enabled('private-quarters/home')
+                    and self.oracle.read_state().generation > self._private_quarters_entry_receipt.generation):
+                # The same ALAS page scan can advance through the live menu
+                # before reaching a fading main-page alias. Both entries have
+                # completed; acknowledge arrival without another input.
+                return self._private_quarters_entry_receipt
             if (semantic_id == 'research-menu/shipyard' and self._shipyard_entry_receipt is not None
                     and self.oracle.shipyard_page_visible()
                     and self.oracle.read_state().generation > self._shipyard_entry_receipt.generation):
                 return self._shipyard_entry_receipt
+            if (semantic_id == 'research-menu/meta' and self._meta_character_entry_receipt is not None
+                    and (self.oracle.meta_character_page_visible() or self.oracle.meta_character_menu_visible())
+                    and self.oracle.read_state().generation > self._meta_character_entry_receipt.generation):
+                return self._meta_character_entry_receipt
+            if semantic_id == 'meta/character/sync':
+                return self.oracle.click_meta_character_sync()
             if (semantic_id == 'main/tech' and self._main_tech_entry_receipt is not None
                     and self.oracle.observation_target_present('research-menu/page/back')
                     and self.oracle.enabled('research-menu/page/back')
@@ -554,15 +570,34 @@ class DispatchActionsPorts:
             if semantic_id == "os/voucher/back":
                 return self.oracle.click("os/voucher/back")
             if semantic_id == "reward/meta/enter":
-                return self.oracle.click_meta_entrance()
+                previous = self._meta_entry_receipt
+                if previous is not None and not self.oracle.meta_entrance_available():
+                    self.oracle.meta_entrance_state()
+                    if self.oracle.read_state().generation > previous.generation:
+                        return previous
+                receipt = self.oracle.click_meta_entrance()
+                self._meta_entry_receipt = receipt
+                return receipt
             if name in REWARD_RESOURCE_FIELDS:
                 return self.oracle.click_reward_resource(
                     REWARD_RESOURCE_FIELDS[name]
                 )
             if semantic_id in ("meta/current/open", "meta/dossier/open"):
-                return self.oracle.click_meta_card(
+                previous = self._meta_current_entry_receipt
+                if (semantic_id == 'meta/current/open' and previous is not None
+                        and not self.oracle.observation_target_present('meta/current/open')):
+                    try:
+                        self.oracle.meta_current_empty_points()
+                    except SemanticGateClosed:
+                        self.oracle.meta_current_detail_state()
+                    if self.oracle.read_state().generation > previous.generation:
+                        return previous
+                receipt = self.oracle.click_meta_card(
                     dossier=semantic_id == "meta/dossier/open"
                 )
+                if semantic_id == 'meta/current/open':
+                    self._meta_current_entry_receipt = receipt
+                return receipt
             if semantic_id == "meta/current/list":
                 try:
                     self.oracle.meta_current_detail_state()
@@ -826,12 +861,15 @@ class DispatchActionsPorts:
                 self._main_more_entry_receipt = receipt
             if semantic_id == 'research-menu/shipyard':
                 self._shipyard_entry_receipt = receipt
+            if semantic_id == 'research-menu/meta':
+                self._meta_character_entry_receipt = receipt
             if semantic_id == 'main/tech':
                 self._main_tech_entry_receipt = receipt
             if semantic_id == 'main/live':
                 self._main_live_entry_receipt = receipt
             if semantic_id == 'dorm-menu/private-quarters':
                 self._private_quarters_entry_receipt = receipt
+                self._private_quarters_entry_transition_until = time.monotonic() + 30.0
             if semantic_id == "main/battle":
                 self._main_battle_transition_receipt = receipt
                 self._main_battle_transition_until = time.monotonic() + 20.0

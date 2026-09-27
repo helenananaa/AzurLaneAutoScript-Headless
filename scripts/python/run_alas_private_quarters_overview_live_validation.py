@@ -55,14 +55,28 @@ def main():
     result['source_sha256'].update({str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in
         (Path(__file__), alas/'module/private_quarters/interact.py', alas/'module/private_quarters/private_quarters.py', alas/'module/device/control.py')})
     result['receipts'] = []
+    result['daily_count_observations'] = []
+    def save():
+        output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
     original_click = session.click
     def record_click(button):
         receipt = original_click(button)
         result['receipts'].append(dataclasses.asdict(receipt))
+        save()
         return receipt
     session.click = record_click
     try:
         task = PrivateQuarters(instance.config, instance.device)
+        oracle = session.open().oracle
+        result['runtime_before'] = dataclasses.asdict(oracle.fingerprint)
+        result['state_before'] = dataclasses.asdict(oracle.read_state())
+        original_count = task._pq_get_daily_count
+        def observed_count(*count_args, **count_kwargs):
+            count = original_count(*count_args, **count_kwargs)
+            result['daily_count_observations'].append(count)
+            save()
+            return count
+        task._pq_get_daily_count = observed_count
         if args.recover_room:
             instance.device.screenshot()
             task._pq_goto_room_exit()
@@ -81,6 +95,12 @@ def main():
         UI(instance.config, instance.device).ui_ensure(page_main)
         result['home'] = oracle.main_page_visible()
         result['passed'] = result['home'] and result['original_count'] == result['overview']['remaining']
+        result['interaction_count'] = sum(r['semantic_id'] == 'private-quarters/interact'
+                                          for r in result['receipts'])
+        result['continuous_interaction_passed'] = bool(
+            result['passed'] and args.interact and not args.from_overview and not args.recover_room
+            and result['daily_count_observations'] == [3]
+            and result['interaction_count'] == 3 and result['original_count'] == 0)
     except (Exception, SystemExit) as exc:
         result['error'] = str(exc)
         result['traceback'] = traceback.format_exc()

@@ -113,10 +113,17 @@ class MetaAdapterPorts:
         return self.oracle.click_daily_precombat_back()
 
     def _appear_meta(self, name, semantic_id):
+        if name == 'META_MENU_CHECK':
+            return self.oracle.meta_character_menu_visible()
         if name == 'META_CHECK':
             return self.oracle.meta_character_page_visible()
         if name in ('SYNC_ENTER', 'SYNC_ENTER2', 'SYNC_REWARD_NOTICE', 'SYNC_TAP',
                     'META_REWARD_NOTICE', 'REWARD_ENTER'):
+            if self.oracle.meta_character_sync_page_visible():
+                _, eligible, claimed = self.oracle.meta_character_sync_rewards()
+                if eligible != claimed:
+                    raise SemanticGateClosed('META synchronization claimable rewards are not yet adapted')
+                return name == 'REWARD_ENTER'
             # These belong to MetaCharacterUI, never WorldBoss's reward preview.
             self.oracle.meta_character_pending_sync()
             return name == 'SYNC_ENTER'
@@ -161,7 +168,7 @@ class MetaAdapterPorts:
                 return False
         if semantic_id == "meta/current/create":
             try:
-                self.oracle.meta_current_empty_points()
+                self.oracle.meta_current_empty_points(require_create=True)
                 return True
             except SemanticGateClosed:
                 return False

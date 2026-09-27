@@ -9,6 +9,75 @@ from unittest.mock import Mock
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_meta_character_entry_ack_requires_newer_proven_page(self):
+        for newer, visible in ((True, True), (False, True), (True, False)):
+            adapter, oracle, _ = self.make_adapter()
+            previous = SimpleNamespace(generation=10)
+            adapter._meta_character_entry_receipt = previous
+            oracle.meta_character_page_visible = Mock(return_value=False)
+            oracle.meta_character_menu_visible = Mock(return_value=visible)
+            oracle.read_state = Mock(return_value=SimpleNamespace(generation=11 if newer else 10))
+            oracle.click = Mock(side_effect=SemanticGateClosed('entry absent'))
+            if newer and visible:
+                self.assertIs(adapter.click(NamedButton('RESHMENU_GOTO_META')), previous)
+                oracle.click.assert_not_called()
+            else:
+                with self.assertRaises(SemanticGateClosed):
+                    adapter.click(NamedButton('RESHMENU_GOTO_META'))
+            adapter.reset_task_state()
+            self.assertIsNone(adapter._meta_character_entry_receipt)
+
+    def test_meta_current_entry_reuses_only_proven_newer_page(self):
+        adapter, oracle, _ = self.make_adapter()
+        previous = SimpleNamespace(generation=10)
+        adapter._meta_current_entry_receipt = previous
+        oracle.observation_target_present = Mock(return_value=False)
+        oracle.meta_current_empty_points = Mock(return_value=(0, 200))
+        oracle.read_state = Mock(return_value=SimpleNamespace(generation=11))
+        oracle.click_meta_card = Mock(side_effect=SemanticGateClosed('no landing'))
+        self.assertIs(adapter.click(NamedButton('META_MAIN_BEACON_ENTRANCE')), previous)
+        oracle.click_meta_card.assert_not_called()
+        oracle.read_state.return_value.generation = 10
+        with self.assertRaises(SemanticGateClosed):
+            adapter.click(NamedButton('META_MAIN_BEACON_ENTRANCE'))
+        adapter.reset_task_state()
+        self.assertIsNone(adapter._meta_current_entry_receipt)
+
+    def test_worldboss_landing_does_not_impersonate_sync_page(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values['meta/current/open'] = True
+        oracle.meta_page_visible_value = True
+        for name in ('FLEET_CHECK', 'META_CHECK', 'SHIPYARD_CHECK'):
+            self.assertFalse(adapter.appear(NamedButton(name)))
+        self.assertTrue(adapter.appear(NamedButton('GOTO_MAIN')))
+        adapter.begin_meta_assist()
+        self.assertTrue(adapter.appear(NamedButton('GOTO_MAIN')))
+        adapter.end_meta_assist()
+        oracle.exists_values['meta/current/open'] = False
+        oracle.main_page_visible_value = True
+        for name in ('GOTO_MAIN_WHITE', 'RPG_HOME'):
+            self.assertFalse(adapter.appear(NamedButton(name)))
+
+    def test_meta_entry_acknowledges_only_newer_proven_destination(self):
+        for newer, valid in ((True, True), (False, True), (True, False)):
+            with self.subTest(newer=newer, valid=valid):
+                adapter, oracle, _ = self.make_adapter()
+                previous = SimpleNamespace(generation=10)
+                adapter._meta_entry_receipt = previous
+                oracle.meta_entrance_available = Mock(return_value=False)
+                oracle.meta_entrance_state = Mock(
+                    return_value=object(), side_effect=None if valid else SemanticGateClosed('unknown page'))
+                oracle.read_state = Mock(return_value=SimpleNamespace(generation=11 if newer else 10))
+                oracle.click_meta_entrance = Mock(side_effect=SemanticGateClosed('entry absent'))
+                if newer and valid:
+                    self.assertIs(adapter.click(NamedButton('META_ENTRANCE')), previous)
+                    oracle.click_meta_entrance.assert_not_called()
+                else:
+                    with self.assertRaises(SemanticGateClosed):
+                        adapter.click(NamedButton('META_ENTRANCE'))
+                adapter.reset_task_state()
+                self.assertIsNone(adapter._meta_entry_receipt)
+
     def test_meta_landing_alias_uses_typed_entrance_state(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.meta_entrance_state = Mock(return_value=SimpleNamespace())

@@ -16922,3 +16922,20 @@ diff --git a/module/hard/hard.py b/module/hard/hard.py
              self.campaign.run()
  
          if semantic_resume or semantic_manual_clear:
+diff --git a/module/ui/page.py b/module/ui/page.py
+--- a/module/ui/page.py
++++ b/module/ui/page.py
+@@ -359,3 +359,13 @@
+ page_hospital = Page(HOSIPITAL_CHECK)
+ page_hospital.link(button=GOTO_MAIN_WHITE, destination=page_main)
+ page_campaign_menu.link(button=CAMPAIGN_MENU_GOTO_EVENT, destination=page_hospital)
++
++
++# A new game menu is an ordinary ALAS navigation edge in semantic mode.
++# Legacy PTPanel clients can still reach page_meta directly from research.
++import os as _semantic_os
++if _semantic_os.environ.get('ALAS_SEMANTIC_MODE') == '1':
++    from types import SimpleNamespace as _SemanticButton
++    page_meta_menu = Page(_SemanticButton(name='META_MENU_CHECK'))
++    page_meta_menu.link(button=_SemanticButton(name='META_MENU_SYNC'), destination=page_meta)
++    page_meta_menu.link(button=GOTO_MAIN, destination=page_main)

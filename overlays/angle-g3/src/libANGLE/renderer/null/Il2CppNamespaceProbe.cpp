@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "libANGLE/renderer/null/Il2CppNamespaceProbe.h"
+#include "libANGLE/renderer/null/PrivateQuartersRaycast.h"
 
 #include "common/platform.h"
 
@@ -714,6 +715,10 @@ bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
   }
   if (name == "award_btn" &&
       EndsWith(path, "WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/main/award_btn")) {
+    return true;
+  }
+  if (EndsWith(path, "MetaCharacterUI(Clone)/HidePanel/MenuPanel/SynBtn") ||
+      path.find("MetaCharacterUI(Clone)/HidePanel/PTPanel/") != std::string_view::npos) {
     return true;
   }
   if (name == "current_list_btn" &&
@@ -1952,6 +1957,30 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
       bool raycastMatches =
           topRaycastMatches(transform, Vector2{record.screenX, record.screenY},
                             &raycastEvaluated);
+      if (path == "OverlayCamera/Overlay/UIMain/LevelUpWindow/bg") {
+        // This Button's center can be covered by the unlock artwork. Always
+        // validate the actual integer input point, even if its float pivot hit.
+        int x = 0;
+        int y = 0;
+        raycastMatches = FindPrivateQuartersLevelUpPoint(
+            record.adbLeft, record.adbTop, record.adbRight, record.adbBottom,
+            screenWidth, screenHeight,
+            [&](int px, int py) {
+              bool evaluated = false;
+              const bool matches = topRaycastMatches(
+                  transform, Vector2{static_cast<float>(px),
+                                     static_cast<float>(screenHeight - py)},
+                  &evaluated);
+              raycastEvaluated = raycastEvaluated || evaluated;
+              return matches;
+            }, &x, &y);
+        if (raycastMatches) {
+          record.adbX = static_cast<float>(x);
+          record.adbY = static_cast<float>(y);
+          record.screenX = record.adbX;
+          record.screenY = static_cast<float>(screenHeight) - record.adbY;
+        }
+      }
       const bool needsReviewedPointSearch =
           IsCampaignScoutControl(path) ||
           path.find("CourtYardUI(Clone)/main/") != std::string_view::npos ||

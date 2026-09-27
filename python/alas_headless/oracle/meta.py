@@ -18,11 +18,77 @@ from .errors import SemanticGateClosed
 class MetaOracle:
     """Meta operations sharing the oracle frame and input boundary."""
 
+    def meta_character_menu_visible(self) -> bool:
+        state = self.read_state()
+        targets = [b for b in self._matches(state, 'meta/character/sync')
+                   if b.active_in_hierarchy and b.active_and_enabled]
+        if not targets:
+            return False
+        if len(targets) != 1:
+            raise SemanticGateClosed('META synchronization menu is ambiguous')
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('META synchronization menu frames are incoherent')
+        images = [i for i in ui.images if i.path == targets[0].path
+                  and i.active_in_hierarchy and i.active_and_enabled and not i.truncated]
+        if len(images) != 1 or images[0].sprite != 'menu_syn_btn':
+            raise SemanticGateClosed('META synchronization menu identity is unsupported')
+        return not self._blocking_rules(state, 'meta/character/sync')
+
+    def click_meta_character_sync(self) -> ActionReceipt:
+        if not self.meta_character_menu_visible():
+            raise SemanticGateClosed('META synchronization menu is absent')
+        # Generic typed click revalidates unique target, exact top raycast,
+        # freshness, blockers and foreground immediately before input.
+        return self.click('meta/character/sync')
+
     def meta_character_page_visible(self) -> bool:
         state = self.read_state()
         root = 'UICamera/Canvas/UIMain/MetaCharacterUI(Clone)/HidePanel/PTPanel/'
         return any(b.path.startswith(root) and b.active_in_hierarchy
-                   and b.active_and_enabled for b in state.buttons)
+                   and b.active_and_enabled for b in state.buttons) or self.meta_character_sync_page_visible()
+
+    def meta_character_sync_page_visible(self) -> bool:
+        root = 'OverlayCamera/Overlay/UIMain/MetaCharacterSynUI(Clone)/'
+        return any(b.active_in_hierarchy and b.active_and_enabled
+                   and b.path == root + 'TaskPanel/BtnGetMore'
+                   for b in self.read_state().buttons)
+
+    def meta_character_sync_rewards(self) -> Tuple[int, int, int]:
+        """Read complete milestone totals without relying on repeated-row order."""
+        root = 'OverlayCamera/Overlay/UIMain/MetaCharacterSynUI(Clone)/'
+        state = self.read_state()
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('META synchronization reward frames are incoherent')
+        controls = [b for b in state.buttons if b.path == root+'TaskPanel/BtnGetMore'
+                    and b.active_in_hierarchy and b.active_and_enabled]
+        images = [i for i in ui.images if i.active_in_hierarchy and i.active_and_enabled]
+        identity = [i for i in images if i.path == root+'TaskPanel/BtnGetMore']
+        if len(controls) != 1 or len(identity) != 1 or identity[0].truncated or identity[0].sprite != 'btn_getall':
+            raise SemanticGateClosed('META synchronization reward identity is unsupported')
+        texts = [t for t in ui.texts if t.active_in_hierarchy and t.active_and_enabled]
+        def numbers(path):
+            matches = [t for t in texts if t.path == path]
+            if not matches or any(t.truncated or not re.fullmatch(r'[0-9]+', t.text.strip()) for t in matches):
+                raise SemanticGateClosed('META synchronization reward numbers are incomplete')
+            return [int(t.text.strip()) for t in matches]
+        points = numbers(root+'PTPanel/Count/NumText')
+        row = root+'TaskPanel/Scroll/Viewport/Content/TaskTpl(Clone)/'
+        thresholds = numbers(row+'PT/Count/NumText')
+        indices = numbers(row+'Target/IndexText')
+        got = [i for i in images if i.path == row+'Info/AwardInfo/Award/Tag/Got']
+        masks = [i for i in images if i.path == row+'GotMask']
+        if (len(points) != 1 or len(thresholds) != len(set(thresholds))
+                or len(indices) != len(thresholds) or len(set(indices)) != len(indices)
+                or any(t <= 0 for t in thresholds)
+                or len(masks) != len(got) or any(i.truncated for i in masks+got)
+                or any(i.sprite != 'tag_got' for i in got)):
+            raise SemanticGateClosed('META synchronization reward rows are incomplete or ambiguous')
+        eligible = sum(t <= points[0] for t in thresholds)
+        if len(got) > eligible or self._blocking_rules(state, 'meta/character/rewards'):
+            raise SemanticGateClosed('META synchronization reward state is inconsistent or obscured')
+        return points[0], eligible, len(got)
 
     def meta_character_pending_sync(self) -> Tuple[int, int]:
         """Read the pre-unlock phase; other reward phases remain unqualified."""
@@ -53,7 +119,7 @@ class MetaOracle:
         return current, required
 
     def click_meta_character_back(self) -> ActionReceipt:
-        if not self.meta_character_page_visible():
+        if not (self.meta_character_page_visible() or self.meta_character_menu_visible()):
             raise SemanticGateClosed('META character page is absent')
         state = self.read_state()
         target = self._unique(state, 'meta/character/back')
@@ -471,13 +537,14 @@ class MetaOracle:
     def click_meta_current_detail_list(self) -> ActionReceipt:
         return self._click_meta_current_detail_control("meta/current/detail/list")
 
-    def meta_current_empty_points(self) -> Tuple[int, int]:
+    def meta_current_empty_points(self, *, require_create: bool = False) -> Tuple[int, int]:
         """Read current-beacon points from the exact empty-beacon page."""
 
         button_state = self.read_state()
         controls = tuple(
             self._unique(button_state, semantic_id)
-            for semantic_id in ("meta/current/list", "meta/current/create")
+            for semantic_id in (("meta/current/list", "meta/current/create")
+                                if require_create else ("meta/current/list",))
         )
         if not all(
             target.active_in_hierarchy
@@ -521,7 +588,7 @@ class MetaOracle:
     def click_meta_current_create(self) -> ActionReceipt:
         """Create a current beacon from the exact empty-beacon control."""
 
-        self.meta_current_empty_points()
+        self.meta_current_empty_points(require_create=True)
         state = self.read_state()
         target = self._unique(state, "meta/current/create")
         if not (

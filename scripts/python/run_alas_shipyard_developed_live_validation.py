@@ -7,8 +7,21 @@ import os
 from pathlib import Path
 import sys
 import traceback
+from collections.abc import Mapping
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def snapshot_document(value):
+    """Serialize immutable frame mappings without deepcopying mappingproxy."""
+    if dataclasses.is_dataclass(value):
+        return {field.name: snapshot_document(getattr(value, field.name))
+                for field in dataclasses.fields(value)}
+    if isinstance(value, Mapping):
+        return {key: snapshot_document(item) for key, item in value.items()}
+    if isinstance(value, (tuple, list)):
+        return [snapshot_document(item) for item in value]
+    return value
 
 
 def main():
@@ -67,8 +80,10 @@ def main():
             LoginHandler(app.config, app.device).handle_app_login()
             result['login_recovery'] = True
         host.ui_ensure(page_shipyard)
-        ui = oracle.read_ui_state()
-        result['before_ui'] = dataclasses.asdict(ui)
+        app.device.screenshot()
+        frame_oracle = session._frame_reader.oracle()
+        ui = frame_oracle.read_ui_state()
+        result['before_ui'] = snapshot_document(ui)
         toggles = sorted((t for t in ui.toggles
             if '/bottom_panel/ships/bg/content/ship_tpl' in t.path
             and t.active_in_hierarchy and t.active_and_enabled and t.bounds is not None),
@@ -78,7 +93,7 @@ def main():
             raise ValueError('original selected ship is ambiguous')
         result['original_index'] = selected[0]
         if args.series is not None:
-            result['original_series'] = oracle.shipyard_series()
+            result['original_series'] = frame_oracle.shipyard_series()
         save()
         if args.series is not None:
             if not host._shipyard_set_series(args.series):
@@ -90,18 +105,20 @@ def main():
             app.device.screenshot()
             state = session.shipyard_state(index)
             result['reads'].append(dict(state=dataclasses.asdict(state),
-                buttons=dataclasses.asdict(oracle.read_state()),
-                ui=dataclasses.asdict(oracle.read_ui_state()),
                 cannot_strengthen=host._shipyard_cannot_strengthen(),
                 append=host._shipyard_get_append(),
-                blueprint_count=host._shipyard_get_bp_count(index)))
+                blueprint_count=host._shipyard_get_bp_count(index),
+                buttons=snapshot_document(session._frame_reader.oracle().read_state()),
+                ui=snapshot_document(session._frame_reader.oracle().read_ui_state())))
             save()
         if args.series is not None:
             host._shipyard_set_series(result['original_series'])
             result['restored_series'] = oracle.shipyard_series()
         host.shipyard_bottom_navbar_ensure(left=selected[0])
+        app.device.screenshot()
         result['restored'] = dataclasses.asdict(session.shipyard_state(selected[0]))
-        host.ui_ensure(page_main)
+        save()
+        host.ui_ensure(page_main, skip_first_screenshot=False)
         result['home'] = oracle.main_page_visible()
         result['after_ui'] = dataclasses.asdict(oracle.read_ui_state())
         result['passed'] = result['home'] and len(result['reads']) == len(args.indices)
@@ -111,8 +128,8 @@ def main():
         if session._frame_reader is not None:
             try:
                 frame_oracle = session._frame_reader.oracle()
-                result['failure_frame_state'] = dataclasses.asdict(frame_oracle.read_state())
-                result['failure_frame_ui'] = dataclasses.asdict(frame_oracle.read_ui_state())
+                result['failure_frame_state'] = snapshot_document(frame_oracle.read_state())
+                result['failure_frame_ui'] = snapshot_document(frame_oracle.read_ui_state())
             except Exception as read_error:
                 result['failure_frame_error'] = str(read_error)
         if 'oracle' in locals():

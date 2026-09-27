@@ -101,6 +101,58 @@ def test_live_area_overlay_wins_over_the_main_underlay():
     assert not a.appear(SimpleNamespace(name='MAIN_GOTO_CAMPAIGN'))
 
 
+@pytest.mark.parametrize('transition', ['_private_quarters_home_transition_until',
+                                      '_private_quarters_entry_transition_until'])
+@pytest.mark.parametrize('name', ['MAP_PREPARATION', 'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION', 'WITHDRAW'])
+def test_home_transition_allows_passive_preparation_probe_but_not_input(transition, name):
+    import time
+    from alas_headless import AlasSemanticUnmapped
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    oracle = FakeOracle()
+    oracle.operation_siren_world_overview_visible = lambda: False
+    a = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    button = SimpleNamespace(name=name)
+    with pytest.raises(AlasSemanticUnmapped):
+        a.appear(button)
+    setattr(a, transition, time.monotonic() + 30)
+    assert not a.appear(button)
+    with pytest.raises(SemanticGateClosed):
+        a.click(button)
+    setattr(a, transition, time.monotonic() - 1)
+    with pytest.raises(AlasSemanticUnmapped):
+        a.appear(button)
+
+
+def test_private_quarters_navigation_probes_preserve_real_notice_and_reward():
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    o = FakeOracle()
+    o.private_quarters_page_visible = lambda: True
+    a = AlasSemanticAdapter(o, package_gate=lambda: None)
+    for name in ('GET_MISSION', 'GET_ITEMS_1', 'MAP_PREPARATION'):
+        assert not a.appear(SimpleNamespace(name=name))
+    o._campaign_urgent_notice_matches = lambda state: True
+    with pytest.raises(SemanticGateClosed, match='urgent commission'):
+        a.appear(SimpleNamespace(name='GET_MISSION'))
+    o.enabled_values['reward/award-info/close'] = True
+    from alas_headless import AlasSemanticUnmapped
+    with pytest.raises(AlasSemanticUnmapped):
+        a.appear(SimpleNamespace(name='GET_ITEMS_1'))
+
+
+def test_overview_optional_popup_probe_requires_unobscured_page():
+    from alas_headless import AlasSemanticUnmapped
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    o = FakeOracle()
+    o.private_quarters_page_visible = lambda: True
+    o.enabled_values['private-quarters/home'] = True
+    a = AlasSemanticAdapter(o, package_gate=lambda: None)
+    button = SimpleNamespace(name='MONTHLY_PASS_NOTICE')
+    assert not a.appear(button)
+    o._blocking_rules = lambda state, semantic_id: [object()]
+    with pytest.raises(AlasSemanticUnmapped):
+        a.appear(button)
+
+
 def test_repeated_live_entry_reuses_only_a_real_receipt_at_its_destination():
     from tests.semantic_support.adapter_fixtures import FakeOracle
     o = FakeOracle()
@@ -114,6 +166,32 @@ def test_repeated_live_entry_reuses_only_a_real_receipt_at_its_destination():
     assert o.click_calls == []
     a.reset_task_state()
     assert a._main_live_entry_receipt is None
+
+
+@pytest.mark.parametrize('entry,generation,visible,enabled,ack', [
+    (11, 12, True, True, True), (None, 12, True, True, False),
+    (9, 12, True, True, False), (11, 11, True, True, False),
+    (11, 12, False, True, False), (11, 12, True, False, False),
+])
+def test_fading_main_entry_after_private_quarters_requires_observed_arrival(entry, generation, visible, enabled, ack):
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    from alas_headless.oracle.errors import SemanticTargetMissing
+    o = FakeOracle()
+    o.observation_target_present = lambda target: False
+    o.private_quarters_page_visible = lambda: visible
+    o.enabled = lambda target: enabled
+    o.read_state = lambda: SimpleNamespace(generation=generation)
+    def reject_input(target):
+        raise SemanticTargetMissing('main/live is absent')
+    o.click = reject_input
+    a = AlasSemanticAdapter(o, package_gate=lambda: None)
+    a._main_live_entry_receipt = SimpleNamespace(generation=10)
+    a._private_quarters_entry_receipt = None if entry is None else SimpleNamespace(generation=entry)
+    if ack:
+        assert a._click_mapped('MAIN_GOTO_DORMMENU', 'main/live') is a._private_quarters_entry_receipt
+    else:
+        with pytest.raises(SemanticTargetMissing):
+            a._click_mapped('MAIN_GOTO_DORMMENU', 'main/live')
 
 
 @pytest.mark.parametrize('count,remaining', [('3/3',3),('0/3',0),('2/5',2)])

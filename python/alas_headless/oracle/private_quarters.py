@@ -7,6 +7,7 @@ from .contracts import ActionReceipt, Point
 from .errors import SemanticGateClosed, SemanticTargetMissing
 
 ROOT = 'UICamera/Canvas/UIMain/SelectDorm3DUI(Clone)/'
+LEVEL_UP_ROOT = 'OverlayCamera/Overlay/UIMain/LevelUpWindow/'
 
 
 @dataclass(frozen=True)
@@ -261,6 +262,9 @@ class PrivateQuartersOracle:
 
     def private_quarters_room_back_control_identity(self) -> str:
         state = self.read_state()
+        if self._private_quarters_level_up_present(state):
+            target = self._private_quarters_level_up_target(state)
+            return 'PRIVATE_QUARTERS_ROOM_BACK@' + target.path
         target = self._unique(state, 'private-quarters/room/back')
         if not target.actionable or self._blocking_rules(state, 'private-quarters/room/back'):
             raise SemanticGateClosed('Private Quarters room back is not actionable')
@@ -268,6 +272,8 @@ class PrivateQuartersOracle:
 
     def click_private_quarters_room_back(self) -> ActionReceipt:
         state = self.read_state()
+        if self._private_quarters_level_up_present(state):
+            return self.click_private_quarters_level_up_close()
         target = self._unique(state, 'private-quarters/room/back')
         if (not target.actionable or target.raycast_top is not True or target.point is None
                 or target.bounds is None or not target.bounds.contains(target.point)
@@ -278,6 +284,45 @@ class PrivateQuartersOracle:
         self._tap(round(target.point.x), round(target.point.y))
         return ActionReceipt(semantic_id='private-quarters/room/back', generation=state.generation,
                              point=target.point, bounds=target.bounds, path=target.path)
+
+    def _private_quarters_level_up_present(self, state) -> bool:
+        return any(b.path.startswith(LEVEL_UP_ROOT) and b.active_in_hierarchy
+                   and b.active_and_enabled for b in state.buttons)
+
+    def _private_quarters_level_up_target(self, state):
+        # The shared popup is owned here only over the real PrivateQuarters room.
+        if not any(b.path == 'UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/btn_back'
+                   and b.active_in_hierarchy and b.active_and_enabled for b in state.buttons):
+            raise SemanticGateClosed('Private Quarters level-up room is absent')
+        target = self._unique(state, 'private-quarters/level-up/close')
+        if (target.path != LEVEL_UP_ROOT + 'bg' or not target.actionable
+                or target.raycast_top is not True or target.point is None or target.bounds is None
+                or not target.bounds.contains(target.point)
+                or target.point.x != round(target.point.x) or target.point.y != round(target.point.y)
+                or self._blocking_rules(state, 'private-quarters/level-up/close')):
+            raise SemanticGateClosed('Private Quarters level-up close is not actionable')
+        return target
+
+    def click_private_quarters_level_up_close(self, timeout_seconds=5.0) -> ActionReceipt:
+        state = self.read_state()
+        target = self._private_quarters_level_up_target(state)
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed before Private Quarters level-up close')
+        self._tap(int(target.point.x), int(target.point.y))
+        deadline = self._monotonic() + timeout_seconds
+        while self._monotonic() < deadline:
+            self._sleep(0.25)
+            after = self.read_state()
+            if after.generation <= state.generation or self._private_quarters_level_up_present(after):
+                continue
+            if not self._matches(after, 'private-quarters/room/back'):
+                continue
+            back = self._unique(after, 'private-quarters/room/back')
+            if back.actionable and back.raycast_top is True and not self._blocking_rules(after, 'private-quarters/room/back'):
+                return ActionReceipt(semantic_id='private-quarters/level-up/close',
+                                     generation=state.generation, point=target.point,
+                                     bounds=target.bounds, path=target.path)
+        raise SemanticGateClosed('Private Quarters level-up close postcondition was not proven; input already sent')
 
     def click_private_quarters_new_jersey_dialogue(self) -> ActionReceipt:
         state = self.read_state()

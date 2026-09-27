@@ -1,0 +1,273 @@
+{
+  "schema": "alas-headless.private-quarters-observer-deployment/v1",
+  "stage": "installed-health-and-zero-navigation-passed",
+  "build": {
+    "distro": "Ubuntu-22.04",
+    "user": "helenanana",
+    "angle_root": "/home/helenanana/src/alas-headless-angle/angle",
+    "base_commit": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+    "output": "out/AndroidNullObserverX64",
+    "abi": "x86_64",
+    "jobs": 8,
+    "elapsed_seconds": 10.64,
+    "steps": 12,
+    "incremental": true
+  },
+  "source_sha256": {
+    "overlays/angle-g3/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp": "81ddabd05ac9d5416a8ac12606d849aa7fd89a61938e212d93e084d498816eb5",
+    "overlays/angle-g3/src/libANGLE/renderer/null/PrivateQuartersRaycast.h": "63737e5912ed07de7708f28a903fcafaa8e52506e03cc6383f7229c2c1672b3e",
+    "python/alas_headless/oracle/private_quarters.py": "6716598b811ff1d5555afd444203aab3479ff40432d62ff84cf88233b7bc50c4",
+    "python/alas_headless/oracle/button_targets.py": "d660cf21546c7f643fcf35b53e56cbe086990306708b9e5a996bd95800d652f6",
+    "python/alas_headless/oracle/actions.py": "f21c657028745ab7ee70c37df5555d3f07da7ecdd20226ff56dfa16f6c994e58",
+    "python/alas_headless/adapter/semantic/dispatch_observation.py": "3f042681d5c87efd16ba91330d3a228d831ae4a5b0b7192353347f4c74e6aaaf",
+    "python/alas_headless/adapter/semantic/core.py": "c4dc247507c8346accb118f78165fcd76ef0aaa9a5050b7d58302a7109c437a0",
+    "python/alas_headless/adapter/semantic/dispatch_actions.py": "eb2b26faf4df0fb26381e3f7a29593592b9923cc6cbc84f70b118d463746320f"
+  },
+  "candidate_sha256": "f5d3d11f9f5ac529b8c9f7ca931440d924f869355b8beea197b914439660c1dd",
+  "installed_sha256": "f5d3d11f9f5ac529b8c9f7ca931440d924f869355b8beea197b914439660c1dd",
+  "rollback_sha256": "dc4a85c5be094add97f24dec2fe78632a835cd9f42f5d742870b54ea747ca1f6",
+  "rollback_tested": false,
+  "launch_extra": "-force-gfx-st",
+  "health": {
+    "passed": true,
+    "samples": [
+      {
+        "state_generation": 250,
+        "ui_generation": 250,
+        "age_ms": 1795
+      },
+      {
+        "state_generation": 263,
+        "ui_generation": 264,
+        "age_ms": 145
+      },
+      {
+        "state_generation": 269,
+        "ui_generation": 270,
+        "age_ms": 66
+      },
+      {
+        "state_generation": 292,
+        "ui_generation": 293,
+        "age_ms": 17
+      },
+      {
+        "state_generation": 315,
+        "ui_generation": 317,
+        "age_ms": 52
+      }
+    ],
+    "startup_errors": [
+      "game activity is not top-resumed",
+      "game activity is not top-resumed",
+      "game activity is not top-resumed",
+      "game activity is not top-resumed",
+      "game activity is not top-resumed"
+    ],
+    "runtime": {
+      "package": "com.bilibili.azurlane",
+      "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "width": 1280,
+      "height": 720,
+      "max_age_ms": 10000,
+      "peer_uid": 2000,
+      "expected_pid": 27842
+    }
+  },
+  "level_up_close_live_qualified": false,
+  "support_status": "P",
+  "native_libraries": {
+    "lib/x86_64/libEGL_alasx.so": "74dd4d2f02fb1e2b5d08c1aa8caf25782c4eeba6e365efbd30de75d4e6aa0fe7",
+    "lib/x86_64/libEGL_angle.so": "70fec9a09627c24d296b8fbb5c4afccebdfb9cc040f3aa9c1352fc8171daa806",
+    "lib/x86_64/libGLESv1_CM_alasx.so": "296249fda5141644d77614df9c8f81f1e564aba6f29d7aade457ff5512e6fda2",
+    "lib/x86_64/libGLESv1_CM_angle.so": "ac9744e4f53ec7ab0f74dbd8523e74b4cf39cd81449532a3754626f8b764dcc5",
+    "lib/x86_64/libGLESv2_alasx.so": "77f379d7891bdb7a08bcce028b1a45b7696c0020a956ce69325f43dd6ed7ffb4",
+    "lib/x86_64/libGLESv2_angle.so": "db3dba18017090f0926ddb7ca188506af6b6d28d8494ae2bc66b7d0cb2abd33b",
+    "lib/x86_64/libfeature_support_angle.so": "4aa6e005683d87132f2576a6d684535cccef1ace3194a88c5cbf3cc3d4d7497e"
+  },
+  "zero_navigation": {
+    "passed": true,
+    "home": true,
+    "original_count": 0,
+    "interaction_count": 0,
+    "scheduler": {
+      "Enable": false,
+      "NextRun": "2026-09-27 00:00:00",
+      "Command": "PrivateQuarters",
+      "SuccessInterval": 30,
+      "FailureInterval": 30,
+      "ServerUpdate": "00:00"
+    },
+    "runtime_before": {
+      "package": "com.bilibili.azurlane",
+      "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "width": 1280,
+      "height": 720,
+      "max_age_ms": 10000,
+      "peer_uid": 2000,
+      "expected_pid": 27842
+    },
+    "receipts": [
+      {
+        "semantic_id": "private-quarters/home",
+        "generation": 4642,
+        "point": {
+          "x": 1125.049,
+          "y": 36.0
+        },
+        "bounds": {
+          "left": 1111.049,
+          "top": 21.667,
+          "right": 1139.049,
+          "bottom": 50.333
+        },
+        "path": "UICamera/Canvas/UIMain/SelectDorm3DUI(Clone)/Main/option/home",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "main/live",
+        "generation": 4670,
+        "point": {
+          "x": 561.926,
+          "y": 683.572
+        },
+        "bounds": {
+          "left": 478.952,
+          "top": 650.25,
+          "right": 644.899,
+          "bottom": 716.895
+        },
+        "path": "OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/bottom/frame/live",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "main/live",
+        "generation": 4670,
+        "point": {
+          "x": 561.926,
+          "y": 683.572
+        },
+        "bounds": {
+          "left": 478.952,
+          "top": 650.25,
+          "right": 644.899,
+          "bottom": 716.895
+        },
+        "path": "OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/bottom/frame/live",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "dorm-menu/private-quarters",
+        "generation": 4689,
+        "point": {
+          "x": 1073.333,
+          "y": 480.0
+        },
+        "bounds": {
+          "left": 980.0,
+          "top": 309.0,
+          "right": 1166.667,
+          "bottom": 651.0
+        },
+        "path": "OverlayCamera/Overlay/UIMain/MainLiveAreaUI(Clone)/dorm_btn",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "private-quarters/home",
+        "generation": 4836,
+        "point": {
+          "x": 1125.049,
+          "y": 36.0
+        },
+        "bounds": {
+          "left": 1111.049,
+          "top": 21.667,
+          "right": 1139.049,
+          "bottom": 50.333
+        },
+        "path": "UICamera/Canvas/UIMain/SelectDorm3DUI(Clone)/Main/option/home",
+        "policy_sha256": null,
+        "capability_id": null
+      }
+    ],
+    "continuous_interaction_passed": false
+  },
+  "artifacts": {
+    "build.log": {
+      "path": "artifacts/private-quarters-observer-20260926/build.log",
+      "sha256": "e53f61b397235fe8d7d6a4724be71de6f114bb8dec76773ee14a71bf46d872fe",
+      "bytes": 3330
+    },
+    "candidate.apk": {
+      "path": "artifacts/private-quarters-observer-20260926/candidate.apk",
+      "sha256": "f5d3d11f9f5ac529b8c9f7ca931440d924f869355b8beea197b914439660c1dd",
+      "bytes": 30004204
+    },
+    "health.json": {
+      "path": "artifacts/private-quarters-observer-20260926/health.json",
+      "sha256": "6506a7cbccbb5c70eccb435e926d4e0877546d7aa4b50dbde58ac1ef82295765",
+      "bytes": 1082
+    },
+    "loaded-libraries.txt": {
+      "path": "artifacts/private-quarters-observer-20260926/loaded-libraries.txt",
+      "sha256": "5edc0847fea1e97529ff81f5e1ced713cbbae70cacb30f711746cca5da6eda2f",
+      "bytes": 1665
+    },
+    "login-home.json": {
+      "path": "artifacts/private-quarters-observer-20260926/login-home.json",
+      "sha256": "8f05c6ea2a69033b0efaf5b043e8b38eea06cbc4915c731b7207a6cb425569f6",
+      "bytes": 416537
+    },
+    "login-home.log": {
+      "path": "artifacts/private-quarters-observer-20260926/login-home.log",
+      "sha256": "8bab71131c4341206f5a0684068df6ef6e57a92f44449245408d67d9e71a81b0",
+      "bytes": 5328
+    },
+    "package.log": {
+      "path": "artifacts/private-quarters-observer-20260926/package.log",
+      "sha256": "4c777cdfd91122034e322d09d2fa72cd350728c7f5104dc74ca9b5f5171fd3c9",
+      "bytes": 243
+    },
+    "rollback-installed.apk": {
+      "path": "artifacts/private-quarters-observer-20260926/rollback-installed.apk",
+      "sha256": "dc4a85c5be094add97f24dec2fe78632a835cd9f42f5d742870b54ea747ca1f6",
+      "bytes": 15227563
+    },
+    "zero-navigation-r2.json": {
+      "path": "artifacts/private-quarters-observer-20260926/zero-navigation-r2.json",
+      "sha256": "b33a6f79807cac53e57bfa56e0f663fcc540f5a452b33638cf05f6516969a7e9",
+      "bytes": 376482
+    },
+    "zero-navigation-r2.log": {
+      "path": "artifacts/private-quarters-observer-20260926/zero-navigation-r2.log",
+      "sha256": "21ea92e89a79511b40e1d531b5ca1323c9d991965fce2605b11769660377a028",
+      "bytes": 6167
+    },
+    "zero-navigation-r3.json": {
+      "path": "artifacts/private-quarters-observer-20260926/zero-navigation-r3.json",
+      "sha256": "b705c7b0d2ed954ff73bc2097cd919b99187256a4a85460ba5750554376c2063",
+      "bytes": 116689
+    },
+    "zero-navigation-r3.log": {
+      "path": "artifacts/private-quarters-observer-20260926/zero-navigation-r3.log",
+      "sha256": "d250d9c2504d856c46427434d6971c8091732f439a7503a381911ad4f69f2e99",
+      "bytes": 8815
+    },
+    "zero-navigation.json": {
+      "path": "artifacts/private-quarters-observer-20260926/zero-navigation.json",
+      "sha256": "fea870459f04c2c1de1090a7daf547509cede277af66e0110cf6bed47a19dda3",
+      "bytes": 554780
+    },
+    "zero-navigation.log": {
+      "path": "artifacts/private-quarters-observer-20260926/zero-navigation.log",
+      "sha256": "4b3390389d464a2a35a100eeb95bfef96e3aa032c55806e6abb3e38969fb5e35",
+      "bytes": 4826
+    }
+  }
+}

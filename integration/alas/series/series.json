@@ -594,6 +594,11 @@
       "order": 119,
       "path": "integration/alas/series/0720-hard-repeat-preparation.patch",
       "sha256": "58c77e322ec70e34d540cb4cdf40774497a929c625c7b7ffe2f6626236225854"
+    },
+    {
+      "order": 120,
+      "path": "integration/alas/series/0730-meta-menu-navigation.patch",
+      "sha256": "2470720d0569ac8b1fe25edeb6653b34d806f039849e46db94a766eb85fdf406"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

@@ -2,13 +2,44 @@
 
 import time
 import unittest
-from alas_headless import SemanticGateClosed
+from contextlib import nullcontext
+from alas_headless import AlasSemanticSession, SemanticGateClosed
 from tests.semantic_support.adapter_cases import AlasSemanticAdapterTestsSupport
 from tests.semantic_support.adapter_fixtures import NamedButton
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_session_reward_dispatch_preserves_daily_quick_owner(self):
+        for quick, campaign in ((True, False), (False, False), (True, True)):
+            with self.subTest(quick=quick, campaign=campaign):
+                adapter, oracle, _ = self.make_adapter()
+                adapter._daily_kind = "fierce_assault"
+                adapter._daily_stage = 1
+                if quick:
+                    adapter._daily_pending_receipt = oracle.click_receipt(
+                        "daily/execute/fierce_assault/stage/1/quick/all", generation=6
+                    )
+                if campaign:
+                    adapter.begin_campaign_pre_sortie("11-4", mode="hard")
+                oracle.enabled_values["reward/award-info/close"] = True
+                oracle.campaign_battle_reward_visible = lambda: True
+                adapter.prepared_input_frame = lambda provider: nullcontext()
+                session = AlasSemanticSession.__new__(AlasSemanticSession)
+                session.adapter = adapter
+                session.open = lambda: adapter
+                session.refresh_frame = Mock()
+                session._combat_result_action_oracle = lambda owner: oracle
+                session._arm_combat_result_transition = Mock()
+
+                session.click(NamedButton("GET_ITEMS_1"))
+
+                self.assertEqual(adapter._daily_quick_reward_closed, quick and not campaign)
+                self.assertEqual(oracle.click_calls, ["reward/award-info/close"])
+                self.assertEqual(session.refresh_frame.call_count, int(quick and not campaign))
+                self.assertEqual(session._arm_combat_result_transition.call_count,
+                                 int(not quick or campaign))
+
     def test_current_raid_result_returns_to_raid_not_daily_page(self):
         adapter, oracle, _ = self.make_adapter(campaign_sortie_budget=1)
         self.assertFalse(adapter.current_raid_result_active())

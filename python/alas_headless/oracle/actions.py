@@ -18,6 +18,7 @@ class ActionsOracle:
     def click(self, semantic_id: str) -> Union[ActionReceipt, PrivateQuartersPhysicsReceipt]:
         if semantic_id.startswith('private-quarters/'):
             private_quarters_actions = {
+                'private-quarters/level-up/close': self.click_private_quarters_level_up_close,
                 'private-quarters/interact': self.click_private_quarters_interact,
                 'private-quarters/character/new-jersey': self.click_private_quarters_new_jersey_body,
                 'private-quarters/home': self.click_private_quarters_home,

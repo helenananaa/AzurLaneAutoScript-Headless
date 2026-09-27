@@ -31,11 +31,36 @@ class DispatchObservationPorts:
     """Dispatch observation ports on the shared adapter context."""
 
     def _appear_priority(self, name):
+        if (name in ('GOTO_MAIN_WHITE', 'RPG_HOME')
+                and not self._login_flow.active and self.oracle.main_page_visible()):
+            return False
+        if (name in UI_PAGE_CHECK_RESOURCES
+                and self.oracle.observation_target_present('meta/current/open')
+                and self.oracle.meta_page_visible()):
+            # WorldBoss landing is not the MetaCharacter sync page. Let the
+            # native unknown-page recovery reach its reviewed GOTO_MAIN edge.
+            return False
+        if (name in ('MAP_PREPARATION', 'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION',
+                     'AUTO_SEARCH_MENU_EXIT', 'AUTO_SEARCH_REWARD', 'WITHDRAW')
+                and self._campaign_context is None
+                and (self.oracle.main_page_visible()
+                     or time.monotonic() <= max(self._private_quarters_home_transition_until,
+                                               self._private_quarters_entry_transition_until))):
+            # ui_additional also probes this virtual campaign resource
+            # on the proven main page and reviewed PQ entry/home transitions.
+            self._package_gate()
+            return False
         if (
             name == "GET_MISSION"
             and (
                 time.monotonic() <= self._exercise_chapter_entry_transition_until
                 or self.oracle.campaign_page_is_normal()
+                or self.oracle.main_page_visible()
+                or self.oracle.observation_target_present('dorm-menu/page/root')
+                or getattr(self.oracle, 'private_quarters_page_visible', lambda: False)()
+                or getattr(self.oracle, 'meta_character_menu_visible', lambda: False)()
+                or getattr(self.oracle, 'meta_character_page_visible', lambda: False)()
+                or time.monotonic() <= self._private_quarters_home_transition_until
             )
         ):
             self._package_gate()
@@ -155,6 +180,8 @@ class DispatchObservationPorts:
                 'MAP_PREPARATION', 'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION',
                 'AUTO_SEARCH_MENU_EXIT', 'AUTO_SEARCH_REWARD', 'WITHDRAW')
                 and (observation_oracle.main_page_visible()
+                     or observation_oracle.observation_target_present('dorm-menu/page/root')
+                     or getattr(observation_oracle, 'private_quarters_page_visible', lambda: False)()
                      or observation_oracle.campaign_menu_is_entry()
                      or observation_oracle.campaign_page_is_normal())):
             state = observation_oracle.read_state()
@@ -167,7 +194,9 @@ class DispatchObservationPorts:
                 return False
         if (not self._login_flow.active and name in ('GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'GET_SHIP')
                 and self._mission_context is None
-                and (observation_oracle.main_page_visible() or observation_oracle.campaign_menu_is_entry())
+                and (observation_oracle.main_page_visible() or observation_oracle.campaign_menu_is_entry()
+                     or observation_oracle.observation_target_present('dorm-menu/page/root')
+                     or getattr(observation_oracle, 'private_quarters_page_visible', lambda: False)())
                 and (name != 'GET_SHIP' or not observation_oracle.observation_target_present('reward/new-ship/continue'))
                 and self._award_close_target() is None):
             # ui_goto probes generic rewards on main and the campaign menu.
@@ -209,6 +238,8 @@ class DispatchObservationPorts:
                 return False
             if getattr(observation_oracle, 'meta_character_page_visible', lambda: False)():
                 return name == 'META_CHECK'
+            if getattr(observation_oracle, 'meta_character_menu_visible', lambda: False)():
+                return name == 'META_MENU_CHECK'
             if (observation_oracle.observation_target_present('archive/page/back')
                     and observation_oracle.war_archives_page_visible()):
                 return name == 'WAR_ARCHIVES_CHECK'
@@ -474,6 +505,10 @@ class DispatchObservationPorts:
                 # This virtual ALAS resource has an exact semantic identity;
                 # do not hide it behind the transition-wide passive-miss rule.
                 return self.oracle.campaign_menu_is_entry()
+            if name == "GOTO_MAIN":
+                # META uses the original unknown-page recovery during its
+                # task scope. Its reviewed home edge is not an absent asset.
+                return self._goto_main_target() is not None
             if name in ("GUILD_POPUP_CONFIRM", "GUILD_POPUP_CANCEL"):
                 # GuildMsgBoxUI is a reviewed global overlay and can be the
                 # first post-login surface seen by an Operation Siren task.
@@ -644,6 +679,12 @@ class DispatchObservationPorts:
             and name not in BUILD_VIRTUAL_RESOURCES
             and name not in TACTICAL_VIRTUAL_RESOURCES
         ):
+            if (getattr(self.oracle, 'private_quarters_page_visible', lambda: False)()
+                    and self.oracle.enabled('private-quarters/home')
+                    and not self.oracle._blocking_rules(self.oracle.read_state(), 'ui/absence-probe')):
+                # An unobscured SelectDorm3DUI owns these legacy page/popup
+                # probes. Its mapped controls still use their normal ports.
+                return False
             if (
                 self.oracle.main_page_visible()
                 or self.oracle.campaign_menu_is_entry()

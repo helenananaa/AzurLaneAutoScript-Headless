@@ -96,3 +96,72 @@ def test_exhausted_assist_remains_observable_without_enabling_input():
     with pytest.raises(SemanticGateClosed, match='exhausted'):
         oracle.click_meta_assist_start()
     assert backend.taps == []
+
+
+@pytest.mark.parametrize("loading", [True, False])
+def test_result_return_waits_for_loading_without_completing_combat(loading):
+    from types import SimpleNamespace
+    from unittest.mock import Mock
+    oracle = FakeOracle()
+    oracle.read_state = lambda: SimpleNamespace(buttons=[SimpleNamespace(
+        active_in_hierarchy=loading,
+        path='OverlayCamera/Overlay/UIOverlay/Loading(Clone)')])
+    oracle.meta_assist_state = Mock(return_value='valid-assist-list')
+    adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    adapter._operation_siren_combat_active = True
+    adapter.appear = Mock(return_value=True)
+    session = AlasSemanticSession.__new__(AlasSemanticSession)
+    session.refresh_frame = Mock()
+    session.open = lambda: adapter
+    assert session._meta_assist_result_return_observation('BEACON_MY') is (not loading)
+    assert adapter._operation_siren_combat_active is loading
+    assert oracle.meta_assist_state.call_count == (0 if loading else 1)
+    assert adapter.appear.call_count == (0 if loading else 1)
+    assert not oracle.click_calls
+
+
+def test_result_return_unknown_page_keeps_owner_and_rejects():
+    from types import SimpleNamespace
+    from unittest.mock import Mock
+    oracle = FakeOracle()
+    oracle.read_state = lambda: SimpleNamespace(buttons=[])
+    oracle.meta_assist_state = Mock(side_effect=SemanticGateClosed('unknown return page'))
+    adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    adapter._operation_siren_combat_active = True
+    session = AlasSemanticSession.__new__(AlasSemanticSession)
+    session.refresh_frame = Mock()
+    session.open = lambda: adapter
+    with pytest.raises(SemanticGateClosed, match='unknown return page'):
+        session._meta_assist_result_return_observation('BEACON_MY')
+    assert adapter._operation_siren_combat_active
+    assert not oracle.click_calls
+
+
+@pytest.mark.parametrize("current_result", [True, False])
+def test_assist_delayed_result_click_reproves_current_target(current_result):
+    from unittest.mock import Mock
+    oracle = FakeOracle()
+    adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    adapter._meta_assist_active = True
+    adapter._operation_siren_combat_active = True
+    old = Mock()
+    old.daily_battle_result_visible.return_value = False
+    old.operation_siren_battle_result_visible.return_value = False
+    fresh = Mock()
+    fresh.daily_battle_result_visible.return_value = current_result
+    adapter._frame_or_live_observation_oracle = lambda: fresh
+    session = AlasSemanticSession.__new__(AlasSemanticSession)
+    session.open = lambda: adapter
+    session.adapter = adapter
+    session._combat_result_action_oracle = lambda a: old
+    session._combat_result_observation = ('BATTLE_STATUS_S', 0)
+    session.refresh_frame = Mock()
+    session._arm_combat_result_transition = Mock()
+    session._live_combat_click = Mock(side_effect=SemanticGateClosed('no current result'))
+    if current_result:
+        assert session.click('BATTLE_STATUS_S') is fresh.click_daily_battle_result.return_value
+        session._arm_combat_result_transition.assert_called_once_with(adapter)
+    else:
+        with pytest.raises(SemanticGateClosed, match='no current result'):
+            session.click('BATTLE_STATUS_S')
+        fresh.click_daily_battle_result.assert_not_called()

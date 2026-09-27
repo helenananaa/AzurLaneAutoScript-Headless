@@ -8,6 +8,120 @@ ROOT = 'UICamera/Canvas/UIMain/ShipBluePrintUI(Clone)/main'
 CARD = 'OverlayCamera/Overlay/UIMain/blur_panel/adapt/bottom_panel/ships/bg/content/ship_tpl(Clone)'
 
 
+@pytest.mark.parametrize('observations,expected,refreshes', [
+    ([False], False, 0), ([True, False], False, 1), ([True, True], True, 1),
+])
+def test_update_restart_probe_preserves_frame_and_revalidates_positive(
+        observations, expected, refreshes):
+    from alas_headless import AlasSemanticSession
+    from unittest.mock import Mock
+    live = SimpleNamespace(_login_update_seen=True, _login_update_restart_consumed=False)
+    frame = SimpleNamespace(login_update_restart_required=Mock(side_effect=observations))
+    adapter = SimpleNamespace(oracle=live, _require_frame_observation_oracle=lambda: frame)
+    session = AlasSemanticSession.__new__(AlasSemanticSession)
+    session.refresh_frame = Mock()
+    assert session._login_update_restart_required_on_frame(adapter) is expected
+    assert session.refresh_frame.call_count == refreshes
+
+
+def test_update_restart_probe_acquires_missing_frame():
+    from alas_headless import AlasSemanticSession
+    from alas_headless.adapter.errors import StaleFrameError
+    from unittest.mock import Mock
+    live = SimpleNamespace(_login_update_seen=True, _login_update_restart_consumed=False)
+    frame = SimpleNamespace(login_update_restart_required=lambda: False)
+    adapter = SimpleNamespace(oracle=live,
+        _require_frame_observation_oracle=Mock(side_effect=[StaleFrameError(), frame]))
+    session = AlasSemanticSession.__new__(AlasSemanticSession)
+    session.refresh_frame = Mock()
+    assert session._login_update_restart_required_on_frame(adapter) is False
+    session.refresh_frame.assert_called_once_with()
+
+
+def test_shipyard_helpers_keep_screenshot_frame_until_refresh():
+    from unittest.mock import Mock
+    live = make_oracle(backend())
+    live.shipyard_state = Mock(side_effect=AssertionError('unexpected live read'))
+    frame = make_oracle(backend(research=False))
+    adapter = AlasSemanticAdapter(live, package_gate=lambda: None,
+                                 frame_observation_oracle=lambda: frame)
+    before = adapter.shipyard_state(3)
+    assert adapter.shipyard_state(3) == before
+    frame = make_oracle(backend(research=True))
+    assert adapter.shipyard_state(3).phase == 'research'
+    assert before.phase == 'dev'
+    live.shipyard_state.assert_not_called()
+
+
+def test_shipyard_frame_still_rejects_incoherent_state():
+    frame_backend = backend()
+    frame_backend.ui['generation'] = 13
+    adapter = AlasSemanticAdapter(make_oracle(backend()), package_gate=lambda: None,
+        frame_observation_oracle=lambda: make_oracle(frame_backend))
+    with pytest.raises(SemanticGateClosed, match='incoherent'):
+        adapter.shipyard_state(3)
+
+
+@pytest.mark.parametrize('error,retry', [
+    ('shipyard input snapshots are not coherent', True),
+    ('foreground changed immediately after shipyard input', False),
+])
+def test_shipyard_selection_retries_only_preinput_coherence(monkeypatch, error, retry):
+    from unittest.mock import Mock
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    import alas_headless.adapter.semantic.research as ports
+    monkeypatch.setattr(ports.time, 'sleep', lambda _: None)
+    oracle = FakeOracle()
+    oracle.click_shipyard_ship = Mock(side_effect=[SemanticGateClosed(error),
+        SimpleNamespace(semantic_id='shipyard/ship/3')])
+    oracle.shipyard_state = Mock(return_value='selected')
+    adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    if retry:
+        assert adapter.shipyard_select_ship(3) == 'selected'
+        assert oracle.click_shipyard_ship.call_count == 2
+    else:
+        with pytest.raises(SemanticGateClosed):
+            adapter.shipyard_select_ship(3)
+        assert oracle.click_shipyard_ship.call_count == 1
+
+
+@pytest.mark.parametrize('already', [False, True])
+def test_shipyard_selection_preserves_native_detail_settle(monkeypatch, already):
+    from unittest.mock import Mock
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    import alas_headless.adapter.semantic.research as ports
+    sleep = Mock()
+    monkeypatch.setattr(ports.time, 'sleep', sleep)
+    oracle = FakeOracle()
+    oracle.click_shipyard_ship = Mock(return_value=SimpleNamespace(
+        semantic_id='shipyard/ship/3' + ('/already' if already else '')))
+    oracle.shipyard_state = Mock(return_value='settled')
+    adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    assert adapter.shipyard_select_ship(3) == 'settled'
+    if already:
+        sleep.assert_not_called()
+    else:
+        sleep.assert_called_once_with(1.5)
+
+
+@pytest.mark.parametrize('name', ['MAP_PREPARATION', 'FLEET_PREPARATION',
+                                  'RAID_FLEET_PREPARATION', 'WITHDRAW'])
+def test_shipyard_return_home_allows_only_passive_campaign_probe(name):
+    from alas_headless import AlasSemanticUnmapped
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    oracle = FakeOracle()
+    oracle.main_page_visible = lambda: True
+    adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    button = SimpleNamespace(name=name)
+    assert adapter.appear(button) is False
+    with pytest.raises((AlasSemanticUnmapped, SemanticGateClosed)):
+        adapter.click(button)
+    assert oracle.click_calls == []
+    oracle.main_page_visible = lambda: False
+    with pytest.raises(AlasSemanticUnmapped):
+        adapter.appear(button)
+
+
 def test_shipyard_series_reads_exact_current_sprite():
     b = backend()
     b.ui['images'].append(make_image(
