@@ -48,7 +48,7 @@ class CampaignMapAdapterPorts:
         hard_event_stage = re.fullmatch(r"[cd][1-3]", context.stage_code)
         if (
             context.mode == "hard"
-            and context.stage_code not in ("11-4", "12-1")
+            and re.fullmatch(r"[1-9]\d*-[1-4]", context.stage_code) is None
             and hard_event_stage is None
         ):
             raise SemanticGateClosed(
@@ -541,6 +541,10 @@ class CampaignMapAdapterPorts:
         """
 
         self._package_gate()
+        if self._campaign_context is None and self._operation_siren_allows_passive_probe():
+            # Shared Camera calls this optional campaign recovery hook before
+            # an OS swipe. It grants no OS input or reconnect capability.
+            return False
         context = self._require_campaign_context()
         if context.map_state is None:
             raise SemanticGateClosed("campaign map state is unavailable")

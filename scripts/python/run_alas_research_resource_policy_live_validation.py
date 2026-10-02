@@ -49,6 +49,14 @@ RESOURCE_FILTERS = {
 STRATEGIES = ("always_use", "only_05_hour", "only_no_project", "do_not_use")
 
 
+def _has_resource_cost(dispatches: list[Mapping[str, Any]]) -> bool:
+    return any(
+        item.get("expected_prompt_costs")
+        or (item.get("expected_prompt_cost") or {}).get("resource_id")
+        for item in dispatches
+    )
+
+
 from alas_headless.semantic_sources import semantic_source_hashes
 
 
@@ -503,11 +511,8 @@ def validate(
         elif not result["dispatches"]:
             raise AssertionError("resource policy did not produce its bounded start receipt")
         else:
-            if not (
-                result["dispatches"][0].get("expected_prompt_costs")
-                or result["dispatches"][0]["expected_prompt_cost"]["resource_id"]
-            ):
-                raise AssertionError("resource policy selected a resource-free project")
+            if not _has_resource_cost(result["dispatches"]):
+                raise AssertionError("resource policy started no resource-consuming project")
             if result["research_start_grant_remaining"] != start_budget - len(result["dispatches"]):
                 raise AssertionError("Research start-budget accounting is inconsistent")
         result["passed"] = True

@@ -1,0 +1,11 @@
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -1069,7 +1069,7 @@
+                 semantic_session is not None
+                 and semantic_session.operation_siren_auto_search_completed_empty()
+             )
+-            if rescan and semantic_empty:
++            if rescan and semantic_empty and not self.is_in_task_explore:
+                 logger.info(
+                     'Skip pixel map rescan: exact auto search was accepted, '
+                     'returned to off, and no exact question remains'

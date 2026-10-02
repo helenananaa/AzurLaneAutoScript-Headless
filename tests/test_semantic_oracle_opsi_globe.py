@@ -16,7 +16,7 @@ from unittest import mock
 
 
 class OperationSirenSemanticOracleTests(OperationSirenSemanticOracleTestsSupport, unittest.TestCase):
-    def test_globe_unpin_drags_exact_selected_zone_point(self):
+    def test_globe_unpin_drags_one_unobscured_typed_plane_point(self):
         backend = FakeBackend(
             [
                 make_button(
@@ -32,22 +32,27 @@ class OperationSirenSemanticOracleTests(OperationSirenSemanticOracleTestsSupport
             {"left": 470, "top": 396, "right": 546, "bottom": 455},
         )
         backend.ui = make_ui([], images=[pin], generation=10)
+        backend.ui['globe_geometry'] = dict(status=1, truncated=False, error_count=0,
+            camera_path='WorldMap3D/Main Camera', objects=[dict(name='port',
+            truncated=False, plane_hit=True, ui_clear=True, ui_top_path='WorldMap3D/entity/Plane',
+            plane_instance_id=55, input_point=[508, 426])])
 
         def unpin():
             backend.buttons = make_buttons(
-                backend.buttons["buttons"], generation=12
+                backend.buttons["buttons"], generation=13
             )
-            backend.ui = make_ui([], images=[], generation=12)
+            backend.ui = make_ui([], images=[], generation=13)
+            backend.ui_sequence = [make_ui([], generation=12), make_ui([], generation=13)]
 
         backend.on_swipe = unpin
         oracle = make_oracle(backend)
-        with mock.patch.object(oracle, "operation_siren_globe_state"):
+        with mock.patch.object(oracle, "operation_siren_globe_state"), mock.patch.object(oracle, "operation_siren_globe_drag_owned", return_value=True):
             receipt = oracle.operation_siren_globe_unpin()
 
         self.assertEqual(receipt.semantic_id, "os/globe/zone/unpin")
-        self.assertEqual(backend.swipes, [(508, 426, 476, 402, 150)])
+        self.assertEqual(backend.swipes, [(508, 426, 558, 376, 2000)])
 
-    def test_globe_unpin_has_a_four_gesture_fail_closed_bound(self):
+    def test_globe_unpin_stops_after_one_unproven_drag(self):
         backend = FakeBackend(
             [
                 make_button(
@@ -63,13 +68,17 @@ class OperationSirenSemanticOracleTests(OperationSirenSemanticOracleTestsSupport
             {"left": 470, "top": 396, "right": 546, "bottom": 455},
         )
         backend.ui = make_ui([], images=[pin], generation=10)
+        backend.ui['globe_geometry'] = dict(status=1, truncated=False, error_count=0,
+            camera_path='WorldMap3D/Main Camera', objects=[dict(name='port',
+            truncated=False, plane_hit=True, ui_clear=True, ui_top_path='WorldMap3D/entity/Plane',
+            plane_instance_id=55, input_point=[508, 426])])
         oracle = make_oracle(backend)
-        with mock.patch.object(oracle, "operation_siren_globe_state"):
+        with mock.patch.object(oracle, "operation_siren_globe_state"), mock.patch.object(oracle, "operation_siren_globe_drag_owned", return_value=True):
             with self.assertRaisesRegex(SemanticGateClosed, "unpin was not proven"):
                 oracle.operation_siren_globe_unpin()
 
-        self.assertEqual(len(backend.swipes), 4)
-        self.assertEqual(backend.requests.count("GET /v1/ui\n"), 69)
+        self.assertEqual(len(backend.swipes), 1)
+        self.assertEqual(backend.requests.count("GET /v1/ui\n"), 17)
 
     def test_globe_zone_click_proves_lightweight_typed_mismatch(self):
         backend = FakeBackend(
@@ -96,16 +105,9 @@ class OperationSirenSemanticOracleTests(OperationSirenSemanticOracleTestsSupport
 
         backend.on_tap = select_other_zone
         oracle = make_oracle(backend)
-        receipt = oracle.click_operation_siren_globe_zone(
-            "圣彼得堡", (944.0, 363.0)
-        )
-
-        self.assertEqual(receipt.semantic_id, "os/globe/zone/select-mismatch")
-        self.assertEqual(receipt.generation, 12)
-        self.assertEqual(backend.taps, [(944, 363)])
-        self.assertEqual(backend.requests.count("GET /v1/state\n"), 2)
-        self.assertEqual(backend.requests.count("GET /v1/ui\n"), 4)
-        self.assertEqual(backend.foreground_requests, 4)
+        with self.assertRaisesRegex(SemanticGateClosed, "projected zone probes are unsupported"):
+            oracle.click_operation_siren_globe_zone("port", (944.0, 363.0))
+        self.assertEqual(backend.taps, [])
 
     def test_globe_zone_empty_probe_has_bounded_publication_wait(self):
         backend = FakeBackend(
@@ -120,15 +122,9 @@ class OperationSirenSemanticOracleTests(OperationSirenSemanticOracleTestsSupport
         backend.ui = make_ui([], generation=10)
         oracle = make_oracle(backend)
 
-        with self.assertRaisesRegex(
-            SemanticGateClosed, "zone selection was not proven"
-        ):
-            oracle.click_operation_siren_globe_zone(
-                "西大陆架D", (647.0, 355.0)
-            )
-
-        self.assertEqual(backend.taps, [(647, 355)])
-        self.assertEqual(backend.requests.count("GET /v1/ui\n"), 25)
+        with self.assertRaisesRegex(SemanticGateClosed, "projected zone probes are unsupported"):
+            oracle.click_operation_siren_globe_zone("zone", (647.0, 355.0))
+        self.assertEqual(backend.taps, [])
 
     def test_mission_overview_is_actionable_without_a_selected_zone_panel(self):
         globe_back = make_button(

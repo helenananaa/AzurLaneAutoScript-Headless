@@ -26,6 +26,12 @@ class DormOracle:
     def dorm_state(self) -> DormState:
         """Read the dorm summary without opening a mutating sub-page."""
 
+        # A one-click collection briefly covers the summary with native tips.
+        # Wait for the complete read to pass; never repeat the collection input.
+        return self._retry_transition_read(self._dorm_state_once, attempts=24)
+
+    def _dorm_state_once(self) -> DormState:
+
         button_state = self.read_state()
         page = self._unique(button_state, "dorm/page/manage")
         if (

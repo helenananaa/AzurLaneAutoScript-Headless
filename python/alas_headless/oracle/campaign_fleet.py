@@ -493,9 +493,24 @@ class CampaignFleetOracle:
                 if row_kind == "surface"
                 else ()
             )
+            fixed_hard_row = False
+            if (hard_mode and row_kind == 'surface'
+                    and not select_matches and not clear_matches and not recommend_matches):
+                duty_root = 'OverlayCamera/Overlay/UIMain/' + path_root + '/DutySelect/'
+                duties = [b for b in button_state.buttons if b.path.startswith(duty_root)
+                          and b.active_in_hierarchy and b.active_and_enabled]
+                selected = [i for i in ui_state.images if i.path.startswith(duty_root)
+                            and i.path.endswith('/Checkmark') and i.sprite == 'gou'
+                            and i.active_in_hierarchy and i.active_and_enabled
+                            and not i.truncated and i.bounds is not None]
+                expected = {duty_root + 'Item' + str(index) for index in range(1, 5)}
+                fixed_hard_row = (len(duties) == 4 and {b.path for b in duties} == expected
+                                  and all(b.bounds is not None for b in duties)
+                                  and len(selected) == 1
+                                  and selected[0].path[:-len('/Checkmark')] in expected)
             if hard_mode and row_kind == "surface":
-                available = bool(recommend_matches or clear_matches)
-                if len(recommend_matches) != 1 or len(clear_matches) != 1:
+                available = fixed_hard_row or bool(recommend_matches or clear_matches)
+                if not fixed_hard_row and (len(recommend_matches) != 1 or len(clear_matches) != 1):
                     raise SemanticGateClosed(
                         "hard campaign fleet row controls are absent or ambiguous: "
                         + row_key
@@ -514,7 +529,7 @@ class CampaignFleetOracle:
                     )
                 available = bool(select_matches or clear_matches)
             if available:
-                if not hard_submarine and (
+                if not hard_submarine and not fixed_hard_row and (
                     len(select_matches) != 1 or len(clear_matches) != 1
                 ):
                     raise SemanticGateClosed(
@@ -596,7 +611,8 @@ class CampaignFleetOracle:
                 raise SemanticGateClosed(
                     "campaign fleet row level is outside the pinned range"
                 )
-            if not available and (levels or any(name.text.strip() for name in names)):
+            if not available and (levels or (
+                    not hard_submarine and any(name.text.strip() for name in names))):
                 raise SemanticGateClosed(
                     "campaign unavailable fleet row contains a selection: " + row_key
                 )

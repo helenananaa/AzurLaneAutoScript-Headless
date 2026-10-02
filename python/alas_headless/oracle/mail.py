@@ -8,6 +8,20 @@ from .contracts import OracleState
 from .errors import SemanticGateClosed
 
 
+def classify_mail_confirmation_text(value: str) -> str:
+    plain = "".join(value.split())
+    if plain == "※是否领取所有选中的邮件":
+        return "claim"
+    if plain in (
+        "※是否删除所有选中的邮件",
+        "确定要删除选中的已读邮件吗？<color=#238c40>（未领取附件的邮件将会保留）</color>",
+    ):
+        return "delete"
+    if plain == "没有符合条件的邮件":
+        return "empty"
+    raise SemanticGateClosed("mail confirmation text is unsupported")
+
+
 class MailOracle:
     """Mail operations sharing the oracle frame and input boundary."""
 
@@ -15,6 +29,9 @@ class MailOracle:
         """Return the explicit ``used/capacity`` marker from the pinned mail page."""
 
         button_state = self.read_state()
+        return self._mail_count_from_state(button_state)
+
+    def _mail_count_from_state(self, button_state: OracleState) -> Tuple[int, int]:
         page_back = self._unique(button_state, "mail/page/back")
         if not page_back.actionable or self._blocking_rules(
             button_state, "mail/page/back"
@@ -90,7 +107,14 @@ class MailOracle:
     def mail_is_empty(self) -> bool:
         """Classify empty mail only from the explicit typed counter."""
 
-        used, _ = self.mail_count()
+        state = self.read_state()
+        if (self._mail_manager_back_delegated_raycast_proven(state)
+                and not self._blocking_rules(state, "mail/manage/back")):
+            # The manager can mount after ALAS' preceding batch-claim probe.
+            # It owns this screenshot's foreground, so the empty-page sentinel
+            # is absent. Do not parse its covered MailUI counter or grant input.
+            return False
+        used, _ = self._mail_count_from_state(state)
         return used == 0
 
     def mail_confirmation_kind(self) -> Optional[str]:
@@ -146,14 +170,7 @@ class MailOracle:
             or "".join(cancel_labels[0].text.split()) != "取消"
         ):
             raise SemanticGateClosed("mail confirmation is incomplete or ambiguous")
-        plain = "".join(texts[0].text.split())
-        if plain == "※是否领取所有选中的邮件":
-            return "claim"
-        if plain == "※是否删除所有选中的邮件":
-            return "delete"
-        if plain == "没有符合条件的邮件":
-            return "empty"
-        raise SemanticGateClosed("mail confirmation text is unsupported")
+        return classify_mail_confirmation_text(texts[0].text)
 
     def main_mail_unread_count(self) -> int:
         """Read the exact numeric badge attached to the pinned main mail Button."""

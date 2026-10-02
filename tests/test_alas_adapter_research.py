@@ -55,6 +55,35 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertTrue(adapter.appear(NamedButton("RESHMENU_CHECK")))
         oracle.recommendation_shop_visible.assert_not_called()
 
+    def test_research_menu_owns_passive_urgent_commission_probe(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values['research-menu/page/back'] = True
+        self.assertFalse(adapter.appear(NamedButton('GET_MISSION')))
+        for name in ('GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'GET_SHIP'):
+            self.assertFalse(adapter.appear(NamedButton(name)))
+        oracle._campaign_urgent_notice_matches = lambda state: True
+        with self.assertRaisesRegex(SemanticGateClosed, 'urgent commission notice'):
+            adapter.appear(NamedButton('GET_MISSION'))
+        oracle.exists_values['research-menu/page/back'] = False
+        oracle._campaign_urgent_notice_matches = lambda state: False
+        adapter._record_mission_transition(SimpleNamespace(semantic_id='research/page/back'))
+        self.assertGreater(adapter._research_menu_return_transition_until, time.monotonic())
+        self.assertFalse(adapter.appear(NamedButton('GET_MISSION')))
+        self.assertFalse(adapter.appear(NamedButton('GET_ITEMS_1')))
+        self.assertFalse(adapter.appear(NamedButton('MONTHLY_PASS_NOTICE')))
+        self.assertFalse(adapter.appear(NamedButton('MAP_PREPARATION')))
+        oracle._blocking_rules = lambda state, target: [SimpleNamespace(blocker_id='research-page')]
+        self.assertFalse(adapter.appear(NamedButton('MONTHLY_PASS_NOTICE')))
+        oracle._blocking_rules = lambda state, target: [SimpleNamespace(blocker_id='unknown-overlay')]
+        with self.assertRaisesRegex(AlasSemanticUnmapped, 'MONTHLY_PASS_NOTICE'):
+            adapter.appear(NamedButton('MONTHLY_PASS_NOTICE'))
+        with self.assertRaisesRegex(AlasSemanticUnmapped, 'MAP_PREPARATION'):
+            adapter.appear(NamedButton('MAP_PREPARATION'))
+        oracle._blocking_rules = lambda state, target: []
+        adapter._research_menu_return_transition_until = 0.0
+        with self.assertRaisesRegex(AlasSemanticUnmapped, 'GET_MISSION'):
+            adapter.appear(NamedButton('GET_MISSION'))
+
     def test_research_page_short_circuits_unrelated_page_probe(self):
         adapter, oracle, _ = self.make_adapter()
         adapter.begin_research()
@@ -73,9 +102,21 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         oracle.exists_values['research/page/back'] = True
         oracle.research_project_values = [SimpleNamespace(slot=index) for index in range(5)]
         self.assertIsNone(adapter._research_context)
+        oracle._blocking_rules = Mock(return_value=[SimpleNamespace(blocker_id='research-page')])
+        self.assertFalse(adapter.appear(NamedButton('DOCK_CHECK')))
+        self.assertFalse(adapter.appear(NamedButton('GOTO_MAIN_WHITE')))
+        self.assertFalse(adapter.appear(NamedButton('RPG_HOME')))
         self.assertFalse(adapter.appear(NamedButton('FLEET_CHECK')))
         self.assertTrue(adapter.appear(NamedButton('RESEARCH_CHECK')))
         self.assertEqual(oracle.click_calls, [])
+        oracle.enabled_values['research/page/back'] = True
+        self.assertEqual(adapter.click(NamedButton('BACK_ARROW')).semantic_id, 'research/page/back')
+        self.assertEqual(oracle.click_calls, ['research/page/back'])
+        oracle.exists_values.clear()
+        oracle._blocking_rules.return_value = []
+        adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+        with self.assertRaises(AlasSemanticUnmapped):
+            adapter.appear(NamedButton('DOCK_CHECK'))
 
     def test_research_page_check_rejects_selected_detail_panel(self):
         adapter, oracle, _ = self.make_adapter()
@@ -656,47 +697,48 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         )
 
     def test_research_start_budget_can_admit_one_existing_running_queue_add(self):
-        oracle = FakeOracle()
-        oracle.research_project_values = [
-            SimpleNamespace(
-                slot=1,
-                code="G-412",
-                status=ResearchProjectStatus.RUNNING,
-            )
-        ]
-        adapter = AlasSemanticAdapter(
-            oracle,
-            lambda: None,
-            research_start_budget=1,
-        )
-        adapter.begin_research()
-        adapter.click(NamedButton("ENTRANCE_1"))
+        for status in (ResearchProjectStatus.RUNNING, ResearchProjectStatus.WAITING):
+            with self.subTest(status=status):
+                oracle = FakeOracle()
+                oracle.research_project_values = [
+                    SimpleNamespace(slot=1, code="G-412", status=status)
+                ]
+                adapter = AlasSemanticAdapter(
+                    oracle, lambda: None, research_start_budget=1,
+                )
+                adapter.begin_research()
+                adapter.click(NamedButton("ENTRANCE_1"))
 
-        receipt = adapter.click(NamedButton("RESEARCH_QUEUE_ADD"))
-        duplicate = adapter.click(NamedButton("RESEARCH_QUEUE_ADD"))
+                receipt = adapter.click(NamedButton("RESEARCH_QUEUE_ADD"))
+                duplicate = adapter.click(NamedButton("RESEARCH_QUEUE_ADD"))
 
-        self.assertEqual(receipt.semantic_id, "research/detail/queue")
-        self.assertEqual(duplicate, receipt)
-        self.assertEqual(adapter._action_ledger.remaining("research.start"), 1)
-        self.assertTrue(adapter.appear(NamedButton("POPUP_CANCEL")))
-        self.assertTrue(adapter.appear(NamedButton("POPUP_CONFIRM")))
-        confirm = adapter.click(NamedButton("POPUP_CONFIRM_RESEARCH_QUEUE"))
-        self.assertEqual(confirm.semantic_id, "research/queue/confirm")
-        self.assertEqual(adapter._action_ledger.remaining("research.start"), 0)
-        self.assertEqual(
-            oracle.click_calls,
-            [
-                "research/project/1",
-                "research/detail/queue",
-                "research/queue/confirm",
-            ],
-        )
+                self.assertEqual(receipt.semantic_id, "research/detail/queue")
+                self.assertEqual(duplicate, receipt)
+                self.assertEqual(adapter._action_ledger.remaining("research.start"), 1)
+                self.assertTrue(adapter.appear(NamedButton("POPUP_CANCEL")))
+                self.assertTrue(adapter.appear(NamedButton("POPUP_CONFIRM")))
+                confirm = adapter.click(NamedButton("POPUP_CONFIRM_RESEARCH_QUEUE"))
+                self.assertEqual(confirm.semantic_id, "research/queue/confirm")
+                self.assertEqual(adapter._action_ledger.remaining("research.start"), 0)
+                self.assertEqual(
+                    oracle.click_calls,
+                    ["research/project/1", "research/detail/queue", "research/queue/confirm"],
+                )
 
-        gated = AlasSemanticAdapter(oracle, lambda: None)
-        gated.begin_research()
-        gated.click(NamedButton("ENTRANCE_1"))
-        with self.assertRaisesRegex(SemanticGateClosed, "budgeted running project"):
-            gated.click(NamedButton("RESEARCH_QUEUE_ADD"))
+                gated = AlasSemanticAdapter(oracle, lambda: None)
+                gated.begin_research()
+                gated.click(NamedButton("ENTRANCE_1"))
+                with self.assertRaisesRegex(SemanticGateClosed, "budgeted running project"):
+                    gated.click(NamedButton("RESEARCH_QUEUE_ADD"))
+
+                oracle.enabled_values["research/detail/stop"] = False
+                unsafe = AlasSemanticAdapter(
+                    oracle, lambda: None, research_start_budget=1,
+                )
+                unsafe.begin_research()
+                unsafe.click(NamedButton("ENTRANCE_1"))
+                with self.assertRaisesRegex(SemanticGateClosed, "budgeted running project"):
+                    unsafe.click(NamedButton("RESEARCH_QUEUE_ADD"))
 
     def test_research_session_prioritizes_exact_network_reconnect_popup(self):
         adapter, oracle, _ = self.make_adapter()
@@ -779,8 +821,29 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         )
         self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
         adapter._research_context.passive_transition_until = time.monotonic() - 1.0
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        adapter._research_menu_return_transition_until = time.monotonic() - 1.0
         with self.assertRaises(AlasSemanticUnmapped):
             adapter.appear(NamedButton("FLEET_CHECK"))
+
+    def test_main_tech_repeat_waits_for_exact_research_menu(self):
+        adapter, oracle, _ = self.make_adapter()
+        first = adapter.click(NamedButton('MAIN_GOTO_RESHMENU'))
+        oracle.enabled_values['main/tech'] = False
+        oracle.exists_values['research-menu/page/back'] = False
+        oracle.enabled_values['research-menu/page/back'] = False
+        oracle.click = Mock(side_effect=SemanticGateClosed('semantic target is not actionable'))
+
+        def mount_menu():
+            oracle.exists_values['research-menu/page/back'] = True
+            oracle.enabled_values['research-menu/page/back'] = True
+            return SimpleNamespace(generation=first.generation + 1)
+
+        oracle.read_state = Mock(side_effect=mount_menu)
+        repeated = adapter.click(NamedButton('MAIN_GOTO_RESHMENU_WHITE'))
+
+        self.assertIs(repeated, first)
+        oracle.click.assert_called_once_with('main/tech')
 
     def test_research_entry_after_grace_requires_fresh_destination(self):
         adapter, oracle, _ = self.make_adapter()

@@ -49,6 +49,9 @@ class MissionMailLedgerTests(unittest.TestCase):
         self.assertEqual(receipt.capability_id, "mission.claim")
         self.assertEqual(receipt.policy_sha256, adapter._action_ledger.policy_sha256)
         self.assertFalse(adapter.mission_claim_allowed())
+        self.assertIsNone(adapter._mission_context.stable_state)
+        self.assertIsNone(adapter._mission_context.last_signature)
+        self.assertEqual(adapter._mission_context.stable_generations, 0)
 
         adapter.end_mission_reward()
         adapter.begin_mission_reward(daily=True, weekly=False)

@@ -778,7 +778,7 @@ def enhancement_config_policy(
 
 
 class MissionDisposition(str, Enum):
-    """Observed task-page state proven only from reviewed Unity Buttons."""
+    """Observed task-page state from reviewed Unity controls and status markers."""
 
     CLAIMABLE_ALL = "claimable-all"
     CLAIMABLE_ROW = "claimable-row"
@@ -1126,6 +1126,16 @@ class MetaCurrentDetailState:
     level: int
     current_hp: int
     max_hp: int
+
+
+@dataclass(frozen=True)
+class MetaDossierDetailState:
+    current_points: int
+    point_capacity: int
+    level: int
+    current_hp: int
+    max_hp: int
+    auto_sprite: Optional[str]
 
 
 @dataclass(frozen=True)

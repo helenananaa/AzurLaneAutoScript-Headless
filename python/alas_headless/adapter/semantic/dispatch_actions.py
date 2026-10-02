@@ -29,13 +29,262 @@ from .resources import (
 class DispatchActionsPorts:
     """Dispatch actions ports on the shared adapter context."""
 
+    def _click_main_tech(self):
+        return self._click_main_ready('main/tech')
+
+    def _click_main_ready(self, semantic_id):
+        before_input = getattr(self.oracle, 'input_dispatch_count', 0)
+        try:
+            return self.oracle.click(semantic_id)
+        except SemanticGateClosed as exc:
+            if semantic_id == 'main/live' and self._main_live_entry_receipt is not None:
+                # Existing live-menu submission owns its destination checks.
+                # Do not wait for or resubmit the departing source control.
+                raise
+            if (semantic_id == 'main/more' and self._main_more_entry_receipt is not None
+                    and time.monotonic() <= self._main_more_entry_until):
+                # A submitted sidebar entry has its own destination receipt
+                # checks below. Waiting for the covered source again would
+                # consume that transition window and risk another toggle.
+                raise
+            if (str(exc) != 'semantic target is not actionable'
+                    or getattr(self.oracle, 'input_dispatch_count', 0) != before_input
+                    or not self.oracle.main_page_visible()):
+                raise
+            # The home return can expose Main before its bottom controls regain
+            # raycasts. Await fresh actionability; the ordinary click still owns
+            # every input check, and no input is repeated after dispatch.
+            deadline = time.monotonic() + 12.0
+            while time.monotonic() < deadline:
+                if not self.oracle.main_page_visible():
+                    raise exc
+                if self.oracle.enabled(semantic_id):
+                    return self.oracle.click(semantic_id)
+                time.sleep(0.2)
+            raise
+
     def _click_priority(self, name):
+        if name == 'AUTO_SEARCH_REWARD':
+            oracle = self._frame_or_live_observation_oracle()
+            if oracle.observation_target_present('os/auto-search/reward/close'):
+                self._package_gate()
+                receipt = self._fresh_input_oracle().click('os/auto-search/reward/close')
+                deadline = time.monotonic()+4.0
+                while time.monotonic() < deadline:
+                    state = self.oracle.read_state()
+                    if (state.generation > receipt.generation and not any(
+                            button.active_in_hierarchy and '/WorldAutoFightRewardUI(Clone)/' in '/'+button.path
+                            for button in state.buttons)):
+                        self._package_gate()
+                        return receipt
+                    time.sleep(.1)
+                raise SemanticGateClosed('auto-search reward close postcondition was not observed; do not retry')
+        if name in ('POPUP_CONFIRM', 'POPUP_CANCEL') and not self._login_flow.active:
+            oracle = self._frame_or_live_observation_oracle()
+            if getattr(oracle, 'operation_siren_energy_submission_prompt_visible', lambda: False)():
+                self._package_gate()
+                # The live oracle re-proves input and observes the newer
+                # postcondition after the submitted frame is invalidated.
+                return self.oracle.click_operation_siren_energy_submission(
+                    confirm=name == 'POPUP_CONFIRM')
+        if name == 'COIN' and self._minigame_context is not None:
+            self._package_gate()
+            oracle = self._fresh_input_oracle()
+            before = oracle.minigame_coin_amount()
+            receipt = oracle.click('game-room/free-coins')
+            deadline = time.monotonic() + 8.0
+            while time.monotonic() < deadline:
+                state = self.oracle.read_state()
+                if (state.generation > receipt.generation
+                        and self.oracle.game_room_page_visible()
+                        and not any(rule.blocker_id != 'award-info' for rule in
+                                    self.oracle._blocking_rules(state, 'ui/absence-probe'))
+                        and not self.oracle.observation_target_present('game-room/free-coins')
+                        and self.oracle.minigame_coin_amount() > before):
+                    self._package_gate()
+                    return receipt
+                time.sleep(.1)
+            raise SemanticGateClosed('free minigame coin claim was not proven; do not retry')
+        if name == 'GOTO_MAIN':
+            oracle = self._frame_or_live_observation_oracle()
+            if (oracle.observation_target_present('minigame/new-year/back')
+                    and oracle.new_year_challenge_result() is not None):
+                self._package_gate()
+                receipt = self._fresh_input_oracle().click_new_year_challenge_result_close()
+                deadline = time.monotonic() + 5.0
+                while time.monotonic() < deadline:
+                    if (self.oracle.read_state().generation > receipt.generation
+                            and self.oracle.new_year_challenge_result() is None
+                            and (self.oracle.new_year_challenge_home_visible()
+                                 or self.oracle.game_room_page_visible())):
+                        return receipt
+                    time.sleep(.1)
+                raise SemanticGateClosed('retained Fushun result did not close; inspect before retry')
+        if (name == 'GET_ITEMS_1' and self._mission_context is None
+                and self._build_context is None and self._research_context is None
+                and self._commission_context is None
+                and not self.daily_execution_active()
+                and not self._meta_beacon_active and not self._meta_assist_active):
+            oracle = self._frame_or_live_observation_oracle()
+            if (oracle.award_info_page_visible()
+                    and oracle.enabled('reward/award-info/close')):
+                self._package_gate()
+                return self._fresh_input_oracle().click('reward/award-info/close')
+        if self._campaign_context is None and name == 'AUTO_SEARCH_MENU_EXIT':
+            self._package_gate()
+            if self.oracle.observation_target_present('reward/campaign-total/exit'):
+                receipt = self._fresh_input_oracle().click('reward/campaign-total/exit')
+                deadline = time.monotonic() + 20.0
+                while time.monotonic() < deadline:
+                    if (self.oracle.read_state().generation > receipt.generation
+                            and not self.oracle.observation_target_present('reward/campaign-total/exit')
+                            and (self.oracle.event_campaign_page_visible()
+                                 or self.oracle.campaign_page_is_normal())):
+                        return receipt
+                    time.sleep(.1)
+                raise SemanticGateClosed('inherited total reward did not return to stage; do not retry')
+        if self._campaign_context is None and name in ('WITHDRAW', 'CAMPAIGN_WITHDRAW_CONFIRM'):
+            self._package_gate()
+            oracle = self._fresh_input_oracle()
+            confirm = name == 'CAMPAIGN_WITHDRAW_CONFIRM'
+            receipt_field = '_inherited_withdraw_' + ('confirm' if confirm else 'open') + '_receipt'
+            if getattr(self, receipt_field, None) is not None:
+                raise SemanticGateClosed('inherited withdrawal input already submitted')
+            if oracle.inherited_campaign_withdraw_control(confirm=confirm) is None:
+                raise SemanticGateClosed('inherited withdrawal target is not actionable')
+            receipt = oracle.click_campaign_withdraw(confirm=confirm)
+            setattr(self, receipt_field, receipt)
+            # Input invalidates its leased frame. Observe the postcondition
+            # from fresh live state, never borrow the submitted input frame.
+            oracle = self.oracle
+            deadline = time.monotonic() + 12.0
+            while time.monotonic() < deadline:
+                post = oracle.read_state()
+                if post.generation > receipt.generation:
+                    if confirm:
+                        map_mounted = any(b.active_in_hierarchy and b.active_and_enabled
+                                          and b.path.startswith('LevelCamera/Canvas/UIMain/LevelGrid/')
+                                          for b in post.buttons)
+                        if not map_mounted and oracle.campaign_withdraw_control(confirm=True) is None:
+                            return receipt
+                    elif oracle.campaign_withdraw_control(confirm=True) is not None:
+                        return receipt
+                time.sleep(.1)
+            raise SemanticGateClosed('inherited withdrawal postcondition not observed; do not retry')
+        if name == 'MAP_PREPARATION_CANCEL' and self._campaign_context is None:
+            self._package_gate()
+            oracle = self._fresh_input_oracle()
+            detail = getattr(oracle, 'inherited_event_map_preparation_state', lambda: None)()
+            if detail is not None:
+                return oracle.cancel_campaign_map_preparation(detail.stage_code)
+        if name in ('POPUP_CONFIRM', 'POPUP_CANCEL'):
+            if getattr(self.oracle, 'meta_skill_full_prompt_visible', lambda: False)():
+                self._package_gate()
+                return self.oracle.click_meta_skill_full_prompt(name == 'POPUP_CONFIRM')
+        if (name in ('GOTO_MAIN', 'GAME_ROOM_GOTO_MAIN')
+                and self.oracle.observation_target_present('game-room/back')
+                and getattr(self.oracle, 'game_room_page_visible', lambda: False)()
+                and self.oracle.observation_target_present('game-room/home')):
+            self._package_gate()
+            receipt = self._fresh_input_oracle().click('game-room/home')
+            deadline = time.monotonic() + 12.0
+            while time.monotonic() < deadline:
+                state = self.oracle.read_state()
+                if (state.generation > receipt.generation
+                        and self.oracle.main_page_visible()
+                        and not self.oracle._blocking_rules(state, 'ui/absence-probe')):
+                    self._package_gate()
+                    return receipt
+                time.sleep(.1)
+            raise SemanticGateClosed('game-room home return was not proven; inspect before retry')
+        if name == 'DOSSIER_REWARD_RECEIVE':
+            self._package_gate()
+            return self.oracle.click_meta_dossier_sync_rewards()
+        if (name == 'CLICK_SAFE_AREA' and (self._meta_beacon_active or self._meta_assist_active)
+                and self._meta_reward_close_receipt is not None
+                and not self.oracle.observation_target_present('reward/award-info/close')
+                and not self.oracle.observation_target_present('reward/award-info1/close')
+                and self.oracle.meta_page_visible()
+                and self.oracle.read_state().generation > self._meta_reward_close_receipt.generation):
+            self._package_gate()
+            receipt = self._meta_reward_close_receipt
+            self._meta_reward_close_receipt = None
+            return receipt
+        if self._meta_beacon_active and name == 'DOSSIER_REWARD_ENTER':
+            self._package_gate()
+            return self.oracle.click_meta_dossier_sync_open()
+        if self._meta_beacon_active and name == 'META_AUTO_CONFIRM':
+            self._package_gate()
+            return self.oracle.click_meta_dossier_auto_result_confirm()
+        if self._meta_beacon_active and name == 'META_AUTO_ATTACK_CONFIRM':
+            self._package_gate()
+            return self.oracle.click_meta_dossier_auto_confirm()
+        if self._meta_beacon_active and name == 'META_AUTO_ATTACK_START':
+            self._package_gate()
+            return self.oracle.click_meta_dossier_auto_start()
+        if (name in ('SYNC_ENTER', 'SYNC_ENTER2', 'SYNC_TAP')
+                and getattr(self.oracle, 'meta_character_sync_page_visible', lambda: False)()):
+            self._package_gate()
+            return self.oracle.click_meta_character_sync_rewards()
+        if (name in ('GET_ITEMS_1', 'GET_ITEMS_2', 'CLICK_SAFE_AREA')
+                and (getattr(self.oracle, 'meta_character_sync_page_visible', lambda: False)()
+                     or ((self._meta_assist_active or self._meta_beacon_active)
+                         and self.oracle.award_info_page_visible()))):
+            self._package_gate()
+            target = self._award_close_target()
+            if target is None:
+                if (not self.oracle.exists('reward/award-info/close')
+                        and not self.oracle.exists('reward/award-info1/close')):
+                    if getattr(self.oracle, 'meta_character_sync_page_visible', lambda: False)():
+                        self.oracle.meta_character_sync_rewards()
+                    raise SemanticTargetMissing('META reward popup has disappeared')
+                raise SemanticGateClosed('META synchronization reward close is not actionable')
+            return self.oracle.click(target)
+        if (self._build_context is not None
+                and name in ('GET_ITEMS_1', 'GET_ITEMS_2')):
+            self._package_gate()
+            target = self._award_close_target()
+            if target is None:
+                if (not self.oracle.exists('reward/award-info/close')
+                        and not self.oracle.exists('reward/award-info1/close')):
+                    # ui_page_main_popups probes both aliases in one ALAS
+                    # frame. The first may already have closed the reward;
+                    # the second must re-enter the original loop without a
+                    # duplicate tap, once the exact queue is proven again.
+                    self.oracle.build_queue_timers()
+                    raise SemanticTargetMissing('construction reward popup has disappeared')
+                raise SemanticGateClosed('construction reward close is not actionable')
+            return self._close_build_award(target)
+        if (name in ('GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3')
+                and self.oracle.award_info_page_visible()
+                and self.oracle.exists('guild/report/close')):
+            self._package_gate()
+            target = self._award_close_target()
+            if target is None:
+                raise SemanticGateClosed('guild report reward close is not actionable')
+            return self.oracle.click(target)
         if (not self._login_flow.active
                 and name in ("POPUP_CONFIRM", "POPUP_CANCEL")
                 and self.oracle.exists("research/progress/confirm")):
             self._package_gate()
             target = "research/progress/confirm" if name == "POPUP_CONFIRM" else "research/progress/cancel"
-            return self.oracle.click(target)
+            receipt = self.oracle.click(target)
+            self._research_progress_close_receipt = receipt
+            self._research_progress_close_until = time.monotonic() + 5.0
+            return receipt
+        if (not self._login_flow.active and name in ('POPUP_CONFIRM','POPUP_CANCEL')
+                and self._research_progress_close_receipt is not None
+                and time.monotonic() <= self._research_progress_close_until):
+            prior = self._research_progress_close_receipt
+            state = self.oracle.read_state()
+            if (state.generation > prior.generation and self.oracle.main_page_visible()
+                    and not self.oracle._blocking_rules(state, 'ui/absence-probe')):
+                # A native popup handler can repeat its leased observation
+                # while this already submitted dismissal reaches Main.
+                # Complete the prior receipt; do not route a second input to
+                # the unrelated generic network-confirm mapping.
+                self._package_gate()
+                return prior
         if name == "RESET_FLEET_PREPARATION":
             self._package_gate()
             receipt = self.oracle.click_operation_siren_reset_fleet()
@@ -71,11 +320,11 @@ class DispatchActionsPorts:
                         time.monotonic() + 20.0
                     )
                 return receipt
-        if self._campaign_context is not None and name in (
+        if name in (
             "RETIRE_APPEAR_1",
             "RETIRE_APPEAR_2",
             "RETIRE_APPEAR_3",
-        ):
+        ) and self.dock_full_recovery_owned():
             if name == "RETIRE_APPEAR_2":
                 raise SemanticGateClosed(
                     "campaign dock expansion is not authorized"
@@ -88,6 +337,12 @@ class DispatchActionsPorts:
                 return self.click_meta_precombat_start()
             if name == "BACK_ARROW":
                 return self.click_meta_precombat_back()
+        if self._login_flow.active and name == 'GET_SHIP':
+            if not self.oracle.new_ship_reward_visible():
+                raise SemanticGateClosed('reviewed login new-ship popup is absent')
+            receipt = self.oracle.click('reward/new-ship/continue')
+            self._login_flow.extend_passive_transition(60.0)
+            return receipt
         if (
             self._login_flow.active
             and name in ("GET_ITEMS_1", "GET_ITEMS_2")
@@ -103,6 +358,52 @@ class DispatchActionsPorts:
         return UNHANDLED
 
     def _click_back(self, name):
+        if name == 'BACK_ARROW':
+            # This port reads its final live proof and then waits for a new
+            # generation. A screenshot lease is invalidated by the tap and
+            # cannot supply the postcondition reader.
+            input_oracle = self.oracle
+            if input_oracle.observation_target_present('meowfficer/buy/max'):
+                try:
+                    input_oracle.meowfficer_purchase_state()
+                except SemanticGateClosed:
+                    pass
+                else:
+                    self._package_gate()
+                    return input_oracle.click('meowfficer/buy/close')
+            if input_oracle.enhancement_dock_back_control() is not None:
+                self._package_gate()
+                receipt = input_oracle.click_enhancement_dock_back()
+                if self._campaign_context is not None:
+                    self._campaign_context.passive_transition_until = time.monotonic() + 20.0
+                return receipt
+        if name == 'BACK_ARROW' and self._meta_assist_active:
+            if self.oracle.daily_precombat_visible():
+                return self.click_meta_precombat_back()
+            prior = self._meta_precombat_back_receipt
+            if (prior is not None
+                    and time.monotonic() <= self._meta_precombat_back_until
+                    and self.oracle.read_state().generation > prior.generation):
+                self.oracle.meta_assist_state()
+                return prior
+        if name == 'BACK_ARROW' and (
+            self._commission_context is None
+            or self._commission_context.flow_kind == 'tactical'
+        ):
+            input_oracle = self._fresh_input_oracle()
+            if (self._commission_context is None
+                    and input_oracle.observation_target_present('tactical/page/back')
+                    and input_oracle.enabled('tactical/page/back')):
+                # The original page graph may leave a classroom retained by
+                # the preceding task. This is navigation, not a tactical grant.
+                return input_oracle.click('tactical/page/back')
+            if (input_oracle.observation_target_present('commission/page/back')
+                    and input_oracle.enabled('commission/page/back')):
+                # A different ALAS task may inherit this exact page. Its
+                # normal page graph uses BACK_ARROW to leave it.
+                receipt = input_oracle.click('commission/page/back')
+                self._commission_return_transition_until = time.monotonic() + 12.0
+                return receipt
         if name == "BACK_ARROW" and all(
             context is None
             for context in (
@@ -115,6 +416,10 @@ class DispatchActionsPorts:
                 self._campaign_context,
             )
         ):
+            if (self.oracle.observation_target_present('research/page/back')
+                    and self.oracle.enabled('research/page/back')):
+                return self._record_mission_transition(
+                    self.oracle.click('research/page/back'))
             if (self.oracle.observation_target_present("exercise/page/back")
                     and self.oracle.exercise_page_visible()):
                 receipt = self.oracle.click("exercise/page/back")
@@ -176,7 +481,7 @@ class DispatchActionsPorts:
             and not (
                 self._commission_context is not None
                 and self._commission_context.flow_kind == "tactical"
-                and name in TACTICAL_VIRTUAL_RESOURCES
+                and (name in TACTICAL_VIRTUAL_RESOURCES or name == "GET_MISSION")
             )
             and not (
                 self._commission_context is not None
@@ -222,6 +527,14 @@ class DispatchActionsPorts:
         )
 
     def _click_main(self, name, semantic_id):
+        if (name in ('GOTO_MAIN', 'GOTO_MAIN_WHITE', 'RPG_HOME')
+                and self.oracle.award_info_page_visible()
+                and (self.oracle.meta_page_visible()
+                     or self.oracle.exists('guild/report/close'))):
+            target = self._award_close_target()
+            if target is None:
+                raise SemanticGateClosed('reward overlay has no actionable close target')
+            return self._record_mission_transition(self.oracle.click(target))
         if (
             semantic_id == "reward/page/back"
             and not self.oracle.observation_target_present("reward/page/back")
@@ -247,6 +560,43 @@ class DispatchActionsPorts:
                     self.oracle.click("mail/manage/back")
                 )
             target = self._goto_main_target()
+            if (target is None
+                    and self.oracle.observation_target_present('campaign-menu/page/back')):
+                # OS exit mounts LevelMainScene before its back button becomes
+                # actionable. Await that exact existing edge using live reads.
+                for attempt in range(24):
+                    if not self.oracle.observation_target_present('campaign-menu/page/back'):
+                        break
+                    if self.oracle.enabled('campaign-menu/page/back'):
+                        target = 'campaign-menu/page/back'
+                        break
+                    if attempt < 23:
+                        time.sleep(0.2)
+            if target in (None, 'research/page/back'):
+                previous = self._research_back_receipt
+                if (previous is not None
+                        and not self.oracle.observation_target_present('research/page/back')
+                        and (self.oracle.enabled('research-menu/page/back')
+                             or self.oracle.main_page_visible())
+                        and self.oracle.read_state().generation > previous.generation):
+                    # The old ALAS page edge can outlive its actual return.
+                    # Consume only our own receipt on a proven destination.
+                    self._research_back_receipt = None
+                    return previous
+            if target in ('minigame/new-year/back', 'minigame/poke/back', 'minigame/shooting/back'):
+                input_oracle = self._fresh_input_oracle()
+                if target == 'minigame/poke/back':
+                    receipt = input_oracle.click_poke_minigame_back()
+                elif target == 'minigame/shooting/back':
+                    receipt = input_oracle.click_shooting_minigame_back()
+                else:
+                    receipt = input_oracle.click_new_year_challenge_prepare_control('back')
+                deadline = time.monotonic() + 5.0
+                while time.monotonic() < deadline:
+                    if self.oracle.game_room_page_visible():
+                        return receipt
+                    time.sleep(0.1)
+                raise SemanticGateClosed('minigame prepare back did not restore the game room')
             if target == 'private-quarters/home':
                 return self.oracle.click_private_quarters_home()
             if target == 'meta/character/back':
@@ -267,13 +617,46 @@ class DispatchActionsPorts:
                     return self.oracle.main_page_receipt()
                 raise SemanticGateClosed("GOTO_MAIN has no reviewed page target")
             if target == "os/page/back":
+                previous = self._operation_siren_exit_receipt
+                if previous is not None and previous.semantic_id == 'os/exit/confirm':
+                    input_oracle = self._fresh_input_oracle()
+                    state = input_oracle.read_state()
+                    if (state.generation > previous.generation
+                            and not input_oracle.observation_target_present('os/page/back')
+                            and ((input_oracle.main_page_visible()
+                                  and input_oracle.enabled('main/battle'))
+                                 or (input_oracle.campaign_menu_is_entry()
+                                     and input_oracle.enabled('campaign-menu/page/back')))):
+                        # ui_goto can repeat its old screenshot's map edge
+                        # after our exact exit confirmation reached the menu.
+                        # A fresh actionable destination consumes that receipt;
+                        # original ALAS takes its next screenshot without input.
+                        self._operation_siren_exit_receipt = None
+                        return previous
                 return self._record_mission_transition(
                     self.oracle.click_operation_siren_back()
                 )
+            if target == "os/globe/map":
+                # The original unknown-page home recovery returns one level
+                # to the local OS page, then its page graph owns the next edge.
+                receipt = self.oracle.click_operation_siren_globe_map()
+                self.begin_operation_siren_page_remount(20.0)
+                return receipt
             if target == 'daily/page/back':
                 return self._record_mission_transition(self.oracle.click_daily_control(target))
             if target == "meta/home":
-                return self._record_mission_transition(self.oracle.click_meta_home())
+                previous = self._meta_home_receipt
+                if (previous is not None
+                        and not self.oracle.observation_target_present('meta/home')
+                        and self.oracle.main_page_visible()
+                        and self.oracle.read_state().generation > previous.generation):
+                    # ALAS can select its old home edge from the screenshot
+                    # frame after the live page has already reached main.
+                    self._meta_home_receipt = None
+                    return previous
+                receipt = self.oracle.click_meta_home()
+                self._meta_home_receipt = receipt
+                return self._record_mission_transition(receipt)
             if target == "raid/page/home":
                 return self._record_mission_transition(
                     self.click_raid_home(event="raid_20260827")
@@ -316,7 +699,42 @@ class DispatchActionsPorts:
                 receipt = self._record_mission_transition(self.oracle.click(target))
                 context.navigation_receipts[target] = receipt
                 return receipt
+            from_chapter = (
+                target == 'campaign-menu/page/back'
+                and self.oracle.campaign_page_is_normal()
+            )
+            from_event = (
+                target == 'campaign-menu/page/back'
+                and self.oracle.event_campaign_page_visible()
+            )
             receipt = self._record_mission_transition(self.oracle.click(target))
+            if target == 'research/page/back':
+                self._research_back_receipt = receipt
+            if target == 'build/page/back':
+                self._build_return_transition_until = time.monotonic() + 12.0
+            if target == 'commission/page/back':
+                self._commission_return_transition_until = time.monotonic() + 12.0
+            if target == 'campaign-menu/page/back':
+                deadline = time.monotonic() + 12.0
+                while time.monotonic() < deadline:
+                    if self.oracle.read_state().generation > receipt.generation:
+                        if (from_event
+                                and not self.oracle.event_campaign_page_visible()
+                                and self.oracle.campaign_page_is_normal()):
+                            # The event selector can return to its retained
+                            # normal chapter before the campaign entrance.
+                            # ALAS' page graph owns the next back edge.
+                            return receipt
+                        if from_chapter:
+                            if (self.oracle.campaign_menu_is_entry()
+                                    and not self.oracle.campaign_page_is_normal()):
+                                return receipt
+                        elif (self.oracle.main_page_visible()
+                              and not self.oracle.observation_target_present(target)):
+                            return receipt
+                    time.sleep(0.2)
+                raise SemanticGateClosed(
+                    'Campaign back did not reach its exact next page')
             context = self._battle_pass_context
             if context is not None:
                 context.home_receipt = receipt
@@ -326,6 +744,9 @@ class DispatchActionsPorts:
 
     def _click_confirmation(self, name):
         if name in ("POPUP_CONFIRM", "POPUP_CANCEL"):
+            if (name == 'POPUP_CONFIRM' and self._mission_context is not None
+                    and self.oracle.mission_overflow_prompt_visible()):
+                return self.oracle.click_mission_overflow_confirm()
             if (
                 self._commission_context is not None
                 and self._commission_context.start_receipt is not None
@@ -344,12 +765,32 @@ class DispatchActionsPorts:
                     context.start_confirm_receipt = receipt
                 return receipt
             prompt_kind = self.oracle.observation_prompt_kind()
+            prior_exit = self._operation_siren_exit_receipt
+            if (name == "POPUP_CONFIRM" and prompt_kind is None
+                    and prior_exit is not None
+                    and time.monotonic() <= self._operation_siren_entry_transition_until):
+                # ui_goto can reuse the screenshot which preceded its exit
+                # confirmation. Consume that repeated request only after the
+                # real destination is observed; never inject a second tap.
+                deadline = min(time.monotonic() + 5.0,
+                               self._operation_siren_entry_transition_until)
+                while time.monotonic() < deadline:
+                    if self.oracle.observation_surface_present(ObservationSurface.MESSAGE_BOX):
+                        break
+                    state = self.oracle.read_state()
+                    if (state.generation > prior_exit.generation
+                            and (self.oracle.main_page_visible()
+                                 or self.oracle.campaign_menu_is_entry())):
+                        self._operation_siren_exit_receipt = None
+                        return prior_exit
+                    time.sleep(0.1)
             if (prompt_kind == "opsi-exit"
                     and self.oracle.operation_siren_exit_prompt_visible()):
                 receipt = self.oracle.click_operation_siren_exit(
                     confirm=name == "POPUP_CONFIRM"
                 )
                 if name == "POPUP_CONFIRM":
+                    self._operation_siren_exit_receipt = receipt
                     self._operation_siren_entry_transition_until = (
                         time.monotonic() + 30.0
                     )
@@ -439,6 +880,22 @@ class DispatchActionsPorts:
                     and self.oracle.enabled('dorm-menu/dorm')
                     and self.oracle.read_state().generation > self._main_live_entry_receipt.generation):
                 return self._main_live_entry_receipt
+            if (semantic_id == 'main/live' and self._minigame_context is not None
+                    and self._main_live_entry_receipt is not None
+                    and time.monotonic() <= self._minigame_context.passive_transition_until):
+                # The panel may mount before its entry finishes its raycast
+                # animation. Await that existing input's postcondition rather
+                # than toggling the covered main-page button again.
+                deadline = min(time.monotonic() + 5.0,
+                               self._minigame_context.passive_transition_until)
+                while time.monotonic() < deadline:
+                    if (self.oracle.enabled('dorm-menu/academy')
+                            and self.oracle.read_state().generation > self._main_live_entry_receipt.generation):
+                        return self._main_live_entry_receipt
+                    if self.oracle.observation_surface_present(ObservationSurface.MESSAGE_BOX):
+                        break
+                    time.sleep(0.1)
+                raise SemanticGateClosed('live-menu academy entry did not become actionable')
             if (semantic_id == 'main/live' and self._main_live_entry_receipt is not None
                     and self._private_quarters_entry_receipt is not None
                     and self._private_quarters_entry_receipt.generation >= self._main_live_entry_receipt.generation
@@ -475,8 +932,19 @@ class DispatchActionsPorts:
                     and self.oracle.enabled('reward/page/back')
                     and self.oracle.read_state().generation > self._main_more_entry_receipt.generation):
                 return self._main_more_entry_receipt
+            if (semantic_id == 'main/more' and self._main_more_entry_receipt is not None
+                    and time.monotonic() <= self._main_more_entry_until
+                    and self.oracle.observation_target_present('reward/page/back')):
+                state = self.oracle.read_state()
+                blockers = self.oracle._blocking_rules(state, 'ui/absence-probe')
+                if (state.generation > self._main_more_entry_receipt.generation
+                        and blockers and all(rule.blocker_id == 'loading' for rule in blockers)):
+                    # The sidebar exists beneath Loading after this exact entry.
+                    # Preserve ALAS polling without toggling the source twice.
+                    return self._main_more_entry_receipt
             if semantic_id == "campaign-menu/exercise":
                 receipt = self.oracle.click_campaign_exercise_entrance()
+                self._exercise_entry_receipt = receipt
                 self._exercise_entry_transition_until = time.monotonic() + 20.0
                 return receipt
             if semantic_id == "campaign-menu/normal" and self._campaign_context is None:
@@ -519,7 +987,9 @@ class DispatchActionsPorts:
                 )
                 return receipt
             if semantic_id == "campaign-menu/event":
-                return self.oracle.click_campaign_event_entrance()
+                receipt = self.oracle.click_campaign_event_entrance()
+                self._campaign_event_entry_transition_until = time.monotonic() + 12.0
+                return receipt
             if semantic_id == "event/mode/story":
                 return self.oracle.click_event_story_mode()
             if semantic_id == "event/mode/battle":
@@ -583,6 +1053,12 @@ class DispatchActionsPorts:
                     REWARD_RESOURCE_FIELDS[name]
                 )
             if semantic_id in ("meta/current/open", "meta/dossier/open"):
+                dossier_previous = self._meta_dossier_entry_receipt
+                if (semantic_id == 'meta/dossier/open' and dossier_previous is not None
+                        and not self.oracle.observation_target_present('meta/dossier/open')):
+                    self.oracle.meta_dossier_empty_points()
+                    if self.oracle.read_state().generation > dossier_previous.generation:
+                        return dossier_previous
                 previous = self._meta_current_entry_receipt
                 if (semantic_id == 'meta/current/open' and previous is not None
                         and not self.oracle.observation_target_present('meta/current/open')):
@@ -597,6 +1073,8 @@ class DispatchActionsPorts:
                 )
                 if semantic_id == 'meta/current/open':
                     self._meta_current_entry_receipt = receipt
+                else:
+                    self._meta_dossier_entry_receipt = receipt
                 return receipt
             if semantic_id == "meta/current/list":
                 try:
@@ -607,7 +1085,18 @@ class DispatchActionsPorts:
                     return self.oracle.click_meta_current_detail_list()
                 return self.oracle.click_meta_current_list()
             if semantic_id == "meta/current/create":
+                if self._meta_beacon_active:
+                    try:
+                        self.oracle.meta_dossier_empty_points(require_create=True)
+                    except SemanticGateClosed:
+                        pass
+                    else:
+                        return self.oracle.click_meta_dossier_create()
                 return self.oracle.click_meta_current_create()
+            if semantic_id == "meta/current/reward":
+                if self._meta_beacon_active and self.oracle.meta_dossier_detail_visible():
+                    return self.oracle.click_meta_dossier_reward()
+                return self.oracle.click_meta_current_reward()
             if semantic_id == "meta/current/help":
                 return self.oracle.click_meta_current_help()
             if semantic_id is not None and semantic_id.startswith("meta/help/"):
@@ -615,13 +1104,15 @@ class DispatchActionsPorts:
                     semantic_id.rsplit("/", 1)[1]
                 )
             if semantic_id == "meta/assist/start":
+                if self._meta_beacon_active and self.oracle.meta_dossier_detail_visible():
+                    return self.oracle.click_meta_dossier_start()
                 try:
                     self.oracle.meta_current_detail_state()
                 except SemanticGateClosed:
                     pass
                 else:
                     return self.oracle.click_meta_current_start()
-                return self.oracle.click_meta_assist_start()
+                return self.click_meta_assist_entry()
             if semantic_id == "campaign-menu/daily":
                 def arrived():
                     return (self._daily_entry_receipt is not None
@@ -639,6 +1130,7 @@ class DispatchActionsPorts:
                         return self._daily_entry_receipt
                     raise
                 self._daily_entry_receipt = receipt
+                self._daily_entry_transition_until = time.monotonic() + 12.0
                 return receipt
             if semantic_id == "daily/precombat/start" and self._exercise_pending:
                 return self.click_exercise_precombat_start()
@@ -666,7 +1158,33 @@ class DispatchActionsPorts:
                 ):
                     return cached
             if self._build_context is not None and semantic_id == "main/build":
-                self._build_context.coins_owned = self.oracle.main_gold()
+                entry = self._build_context.entry_receipt
+                if (
+                    entry is not None
+                    and time.monotonic() <= self._build_context.passive_transition_until
+                    and self.oracle.exists("build/page/back")
+                    and self.oracle.read_state().generation > entry.generation
+                ):
+                    return entry
+                try:
+                    self._build_context.coins_owned = self.oracle.main_gold()
+                except SemanticGateClosed as exc:
+                    if (str(exc) != "main build entry identity is not proven"
+                            or entry is None
+                            or time.monotonic() > self._build_context.passive_transition_until):
+                        raise
+                    # ALAS can repeat the entry while Build replaces main.
+                    # Reuse only its real prior receipt after the typed
+                    # destination becomes actionable; never submit another tap.
+                    deadline = time.monotonic() + 5.0
+                    while True:
+                        if (self.oracle.exists("build/page/back")
+                                and self.oracle.enabled("build/page/back")
+                                and self.oracle.read_state().generation > entry.generation):
+                            return entry
+                        if time.monotonic() >= deadline:
+                            raise
+                        time.sleep(0.25)
             if (
                 self._research_context is not None
                 and semantic_id.startswith("research/project/")
@@ -723,7 +1241,23 @@ class DispatchActionsPorts:
                     semantic_id == "main/more"
                     and self._mission_context.summary_entry_receipt is not None
                 ):
-                    return self._mission_context.summary_entry_receipt
+                    previous = self._mission_context.summary_entry_receipt
+                    deadline = time.monotonic() + 5.0
+                    while time.monotonic() < deadline:
+                        state = self._live_oracle.read_state()
+                        blockers = self._live_oracle._blocking_rules(state, 'reward/page/back')
+                        if any(rule.blocker_id != 'loading' for rule in blockers):
+                            raise SemanticGateClosed('reward sidebar entry is obscured')
+                        if (state.generation > previous.generation and not blockers
+                                and (self._live_oracle.enabled('reward/page/back')
+                                     or (self._live_oracle.observation_target_present('reward/page/back')
+                                         and self._live_oracle.enabled('reward/tactical/go')))):
+                            # The Mellow sidebar root has no generic input
+                            # listener; its exact root and actionable child
+                            # prove the destination without another toggle.
+                            return previous
+                        time.sleep(0.2)
+                    raise SemanticGateClosed('reward sidebar entry postcondition was not observed')
                 if (
                     semantic_id == "main/task"
                     and self._mission_context.entry_receipt is not None
@@ -790,7 +1324,6 @@ class DispatchActionsPorts:
             if (
                 semantic_id == "main/battle"
                 and self._main_battle_transition_receipt is not None
-                and time.monotonic() <= self._main_battle_transition_until
                 and self._main_battle_destination_visible()
             ):
                 # ui_goto can still classify the fading main underlay after
@@ -809,6 +1342,40 @@ class DispatchActionsPorts:
                 # exact Shop shell has mounted. The first click already owns
                 # this edge; let ui_goto observe its destination.
                 return self._main_shop_transition_receipt
+            if (semantic_id == "main/dock"
+                    and self._main_dock_transition_receipt is not None
+                    and time.monotonic() <= self._main_dock_transition_until):
+                state = self.oracle.read_state()
+                blockers = self.oracle._blocking_rules(state, 'ui/absence-probe')
+                dock_mounted = any(
+                    button.active_in_hierarchy
+                    and button.path == 'OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/index_button'
+                    for button in state.buttons)
+                if (state.generation > self._main_dock_transition_receipt.generation
+                        and (dock_mounted
+                             or time.monotonic() <= self._main_dock_transition_until - 10.0
+                             or (blockers and all(
+                            rule.blocker_id == 'loading' for rule in blockers)))):
+                    return self._main_dock_transition_receipt
+            if (semantic_id == "main/mail" and self._mail_context is not None
+                    and self._mail_context.entry_receipt is not None
+                    and time.monotonic() <= self._mail_context.passive_transition_until):
+                state = self.oracle.read_state()
+                blockers = self.oracle._blocking_rules(state, 'ui/absence-probe')
+                if (state.generation > self._mail_context.entry_receipt.generation
+                        and not any(rule.blocker_id not in ('loading', 'mail-page')
+                                    for rule in blockers)):
+                    return self._mail_context.entry_receipt
+            if (semantic_id == "main/guild"
+                    and self._main_guild_entry_receipt is not None
+                    and time.monotonic() <= self._main_guild_entry_until):
+                state = self.oracle.read_state()
+                blockers = self.oracle._blocking_rules(state, 'ui/absence-probe')
+                if (state.generation > self._main_guild_entry_receipt.generation
+                        and not self.oracle.enabled("main/guild")
+                        and not any(rule.blocker_id not in ('loading', 'guild-page')
+                                    for rule in blockers)):
+                    return self._main_guild_entry_receipt
             if semantic_id in ("os/order/scan", "os/order/submarine"):
                 order_kind = semantic_id.rsplit("/", 1)[1]
                 for attempt in range(12):
@@ -831,7 +1398,8 @@ class DispatchActionsPorts:
             else:
                 before_input = getattr(self.oracle, 'input_dispatch_count', 0)
                 try:
-                    receipt = self.oracle.click(semantic_id)
+                    receipt = (self._click_main_ready(semantic_id) if semantic_id in ('main/tech', 'main/more', 'main/live')
+                               else self.oracle.click(semantic_id))
                 except SemanticTargetMissing:
                     if (semantic_id == "research-menu/research"
                             and getattr(self.oracle, 'input_dispatch_count', 0) == before_input):
@@ -846,7 +1414,6 @@ class DispatchActionsPorts:
                         return self._main_tech_entry_receipt
                     if (semantic_id == 'main/battle'
                             and self._main_battle_transition_receipt is not None
-                            and time.monotonic() <= self._main_battle_transition_until
                             and getattr(self.oracle, 'input_dispatch_count', 0) == before_input
                             and self._main_battle_destination_visible()):
                         return self._main_battle_transition_receipt
@@ -857,8 +1424,79 @@ class DispatchActionsPorts:
                             and self._main_shop_destination_visible()):
                         return self._main_shop_transition_receipt
                     raise
+                except SemanticGateClosed as exc:
+                    if (semantic_id == 'main/live'
+                            and str(exc) == 'semantic target is not actionable'
+                            and self._main_live_entry_receipt is not None
+                            and getattr(self.oracle, 'input_dispatch_count', 0) == before_input):
+                        # The main theme checks can race the already dispatched
+                        # live-area entry. Complete only that exact edge after
+                        # the real destination is actionable; do not tap again.
+                        deadline = time.monotonic() + 12.0
+                        while time.monotonic() < deadline:
+                            state = self.oracle.read_state()
+                            if (state.generation > self._main_live_entry_receipt.generation
+                                    and self.oracle.observation_target_present('dorm-menu/dorm')
+                                    and self.oracle.enabled('dorm-menu/dorm')
+                                    and not self.oracle.enabled('main/live')):
+                                return self._main_live_entry_receipt
+                            time.sleep(0.2)
+                        raise
+                    if (semantic_id == 'main/battle'
+                            and str(exc) == 'semantic target is not actionable'
+                            and self._main_battle_transition_receipt is not None
+                            and getattr(self.oracle, 'input_dispatch_count', 0) == before_input):
+                        # The destination can mount between the earlier probe
+                        # and the input check. Its fresh proof completes the
+                        # already owned edge without a second input.
+                        deadline = time.monotonic() + 12.0
+                        while time.monotonic() < deadline:
+                            if self._main_battle_destination_visible():
+                                return self._main_battle_transition_receipt
+                            time.sleep(0.2)
+                        raise
+                    if (semantic_id == 'main/tech'
+                            and str(exc) == 'semantic target is not actionable'
+                            and self._main_tech_entry_receipt is not None
+                            and getattr(self.oracle, 'input_dispatch_count', 0) == before_input):
+                        deadline = time.monotonic() + 12.0
+                        while time.monotonic() < deadline:
+                            state = self.oracle.read_state()
+                            if (state.generation > self._main_tech_entry_receipt.generation
+                                    and self.oracle.observation_target_present('research-menu/page/back')
+                                    and self.oracle.enabled('research-menu/page/back')
+                                    and not self.oracle.enabled('main/tech')):
+                                return self._main_tech_entry_receipt
+                            time.sleep(0.2)
+                    if (semantic_id == 'main/shop'
+                            and str(exc) == 'semantic target is not actionable'
+                            and self._main_shop_transition_receipt is not None
+                            and time.monotonic() <= self._main_shop_transition_until
+                            and getattr(self.oracle, 'input_dispatch_count', 0) == before_input):
+                        state = self.oracle.read_state()
+                        blockers = self.oracle._blocking_rules(state, 'ui/absence-probe')
+                        if (state.generation > self._main_shop_transition_receipt.generation
+                                and blockers
+                                and all(rule.blocker_id == 'loading' for rule in blockers)):
+                            return self._main_shop_transition_receipt
+                    if (semantic_id == 'main/more'
+                            and str(exc) == 'semantic target is not actionable'
+                            and self._main_more_entry_receipt is not None
+                            and time.monotonic() <= self._main_more_entry_until
+                            and getattr(self.oracle, 'input_dispatch_count', 0) == before_input):
+                        state = self.oracle.read_state()
+                        blockers = self.oracle._blocking_rules(state, 'ui/absence-probe')
+                        if (state.generation > self._main_more_entry_receipt.generation
+                                and not any(rule.blocker_id not in ('reward-page', 'loading')
+                                            for rule in blockers)):
+                            # ALAS can reissue the same main sidebar edge
+                            # while CommissionInfoUI mounts. The first input
+                            # already owns it; no second input is authorized.
+                            return self._main_more_entry_receipt
+                    raise
             if semantic_id == 'main/more':
                 self._main_more_entry_receipt = receipt
+                self._main_more_entry_until = time.monotonic() + 8.0
             if semantic_id == 'research-menu/shipyard':
                 self._shipyard_entry_receipt = receipt
             if semantic_id == 'research-menu/meta':
@@ -867,15 +1505,24 @@ class DispatchActionsPorts:
                 self._main_tech_entry_receipt = receipt
             if semantic_id == 'main/live':
                 self._main_live_entry_receipt = receipt
+                if self._minigame_context is not None:
+                    self._minigame_context.passive_transition_until = time.monotonic() + 20.0
+            if semantic_id == 'main/build' and self._build_context is not None:
+                self._build_context.entry_receipt = receipt
             if semantic_id == 'dorm-menu/private-quarters':
                 self._private_quarters_entry_receipt = receipt
                 self._private_quarters_entry_transition_until = time.monotonic() + 30.0
             if semantic_id == "main/battle":
                 self._main_battle_transition_receipt = receipt
-                self._main_battle_transition_until = time.monotonic() + 20.0
             if semantic_id == "main/shop":
                 self._main_shop_transition_receipt = receipt
                 self._main_shop_transition_until = time.monotonic() + 20.0
+            if semantic_id == "main/dock":
+                self._main_dock_transition_receipt = receipt
+                self._main_dock_transition_until = time.monotonic() + 12.0
+            if semantic_id == "main/guild":
+                self._main_guild_entry_receipt = receipt
+                self._main_guild_entry_until = time.monotonic() + 12.0
             if semantic_id == "os/map/auto-search/off":
                 self._operation_siren_auto_search_transition_until = (
                     time.monotonic() + 30.0
@@ -891,6 +1538,8 @@ class DispatchActionsPorts:
                 self._mission_context.summary_entry_receipt = receipt
             if semantic_id == "main/mail" and self._mail_context is not None:
                 self._mail_context.entry_clicked = True
+                self._mail_context.entry_receipt = receipt
+                self._mail_context.passive_transition_until = time.monotonic() + 12.0
             if (
                 self._minigame_context is not None
                 and semantic_id
@@ -906,6 +1555,8 @@ class DispatchActionsPorts:
                     time.monotonic() + 20.0
                 )
             receipt = self._record_mission_transition(receipt)
+            if semantic_id == "dorm/page/back":
+                self._dorm_return_transition_until = time.monotonic() + 8.0
             if (
                 self._research_context is not None
                 and semantic_id in (
@@ -936,12 +1587,16 @@ class DispatchActionsPorts:
                 raise SemanticGateClosed("stable mission claim-all is absent")
             if not self._action_ledger.allowed("mission.claim"):
                 raise SemanticGateClosed(
-                    "mission claim input requires the separate one-claim opt-in"
+                    "mission claim input requires a positive mission claim budget"
                 )
             receipt = self._dispatch_mutation(
                 "mission.claim",
                 lambda: self.oracle.click("task/claim/all"),
             )
+            context.last_signature = None
+            context.last_generation = -1
+            context.stable_generations = 0
+            context.stable_state = None
             return receipt
         if name == "MISSION_SINGLE":
             state = self._stable_mission_state()
@@ -953,22 +1608,39 @@ class DispatchActionsPorts:
                 raise SemanticGateClosed("stable mission claim row is absent")
             if not self._action_ledger.allowed("mission.claim"):
                 raise SemanticGateClosed(
-                    "mission claim input requires the separate one-claim opt-in"
+                    "mission claim input requires a positive mission claim budget"
                 )
             expected_path = state.claim_rows[0].path
-            return self._dispatch_mutation(
+            receipt = self._dispatch_mutation(
                 "mission.claim",
                 lambda: self.oracle.click_mission_claim_row(expected_path),
             )
+            context.last_signature = None
+            context.last_generation = -1
+            context.stable_generations = 0
+            context.stable_state = None
+            return receipt
         if name in ("GET_ITEMS_1", "GET_ITEMS_2"):
             target = self._award_close_target()
             if target is None:
+                if self._mission_award_close_completed():
+                    raise SemanticTargetMissing('mission reward popup already closed by this flow')
+                if (self.oracle.enabled("task/page/back")
+                        and not self.oracle.exists("reward/award-info/close")
+                        and not self.oracle.exists("reward/award-info1/close")):
+                    raise SemanticTargetMissing("mission reward popup has disappeared")
                 raise SemanticGateClosed("reviewed reward popup close is absent")
-            return self.oracle.click(target)
+            receipt = self.oracle.click(target)
+            context.award_close_receipt = receipt
+            return receipt
         if name == "GET_SHIP":
             if not self.oracle.new_ship_reward_visible():
+                if self._mission_award_close_completed(('reward/new-ship/continue',)):
+                    raise SemanticTargetMissing('mission ship reward already closed by this flow')
                 raise SemanticGateClosed("reviewed ship reward popup is absent")
-            return self.oracle.click("reward/new-ship/continue")
+            receipt = self.oracle.click("reward/new-ship/continue")
+            context.award_close_receipt = receipt
+            return receipt
         raise AlasSemanticUnmapped(
             "ALAS resource is not semantically mapped for input: {0}".format(name)
         )

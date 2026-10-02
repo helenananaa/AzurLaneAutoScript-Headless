@@ -1,0 +1,17 @@
+--- a/module/meowfficer/buy.py
++++ b/module/meowfficer/buy.py
+@@ -55,7 +55,13 @@
+             total = BUY_MAX
+             bought = total - remain
+ 
+-        return self._meow_get_buy_count(bought, total, coins, buy_amount, overflow_th)
++        count = self._meow_get_buy_count(bought, total, coins, buy_amount, overflow_th)
++        if semantic_adapter is not None and bought == 0:
++            # The current native free-box panel permits only one box. Keep
++            # purchase batching in ALAS' existing three-pass buy loop, which
++            # reads today's quota and affordability again after the free box.
++            return min(count, 1)
++        return count
+ 
+     @staticmethod
+     def _meow_get_buy_count(bought, total, coins, buy_amount, overflow_th):

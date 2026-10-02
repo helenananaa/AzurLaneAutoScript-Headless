@@ -148,27 +148,69 @@ class FrameRuntimeHandle(FakeRuntimeHandle):
 
 
 class SessionRuntimeHandleTests(unittest.TestCase):
+    def test_shared_guild_back_path_does_not_enter_dock_exit_port(self):
+        from tests.semantic_support.observer_fixtures import make_button
+        handle = FrameRuntimeHandle()
+        original_request = handle.observer_request
+        def request(line):
+            value = original_request(line)
+            if line == 'GET /v1/state\n':
+                records = [make_button('back', 'OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back')]
+                value['buttons'].update(buttons=records, button_count=1)
+            return value
+        handle.observer_request = request
+        session = AlasSemanticSession(driver_revision=REVISION, runtime_handle=handle)
+        adapter = session.open()
+        receipt = SimpleNamespace(semantic_id='guild/page/back')
+        adapter.click = mock.Mock(return_value=receipt)
+        adapter.oracle.click_dock_page_back = mock.Mock(side_effect=AssertionError('not Dock'))
+        self.assertIs(session.click('GOTO_MAIN'), receipt)
+        adapter.oracle.click_dock_page_back.assert_not_called()
+        adapter.click.assert_called_once_with('GOTO_MAIN')
+
+    def test_dock_filter_anchor_retains_strict_dock_return_port(self):
+        from tests.semantic_support.observer_fixtures import make_button
+        handle = FrameRuntimeHandle()
+        original_request = handle.observer_request
+        def request(line):
+            value = original_request(line)
+            if line == 'GET /v1/state\n':
+                root = 'OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/'
+                records = [make_button('back', root+'back'), make_button('index_button', root+'index_button')]
+                value['buttons'].update(buttons=records, button_count=2)
+            return value
+        handle.observer_request = request
+        session = AlasSemanticSession(driver_revision=REVISION, runtime_handle=handle)
+        adapter = session.open()
+        receipt = SimpleNamespace(semantic_id='dock/page/back', generation=7)
+        def dock_back():
+            adapter.oracle.read_state = mock.Mock(return_value=SimpleNamespace(generation=8, buttons=()))
+            adapter.oracle.main_page_visible = mock.Mock(return_value=True)
+            return receipt
+        adapter.oracle.click_dock_page_back = mock.Mock(side_effect=dock_back)
+        self.assertIs(session.click('GOTO_MAIN'), receipt)
+        adapter.oracle.click_dock_page_back.assert_called_once_with()
+
     def test_navigation_preparation_reuses_frame_and_keeps_input_guards(self):
-        from tests.semantic_support.observer_fixtures import make_button, make_text
+        from tests.semantic_support.observer_fixtures import make_button
         for resource in ("CLICK_SAFE_AREA", "GOTO_MAIN"):
             for condition in ("valid", "foreground", "expired", "duplicate"):
                 with self.subTest(resource=resource, condition=condition):
                     handle = FrameRuntimeHandle()
                     original_request = handle.observer_request
-                    page = "root/UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/"
+                    # Exercise home now owns a full destination postcondition.
+                    # This case tests generic frame preparation on the exact
+                    # inherited commission return; exercise flow has its own tests.
+                    page = "root/UICamera/Canvas/UIMain/EventUI(Clone)/"
                     records = ([make_button("close", "root/AwardInfoUI(Clone)/items/close")]
                                if resource == "CLICK_SAFE_AREA" else [
-                                   make_button("backBtn", page + "blur_panel/adapt/top/backBtn"),
-                                   *[make_button(f"rivaltpl_{i}", page + f"center/rival_list/rivaltpl_{i}", raycast_top=None)
-                                     for i in range(1, 5)]])
+                                   make_button("back_btn", page + "blur_panel/adapt/top/back_btn")])
                     if condition == "duplicate":
                         records.append(copy.deepcopy(records[0]))
                     def request(line):
                         value = original_request(line)
                         if line == "GET /v1/state\n":
                             value["buttons"].update(buttons=records, button_count=len(records))
-                        elif resource == "GOTO_MAIN":
-                            value.update(texts=[make_text("8/10", page + "center/season_info/count")], text_count=1)
                         return value
                     handle.observer_request = request
                     session = AlasSemanticSession(driver_revision=REVISION, runtime_handle=handle)
@@ -193,7 +235,13 @@ class SessionRuntimeHandleTests(unittest.TestCase):
                                 session.click(resource)
                             self.assertEqual(handle.taps, [])
                     if condition == "valid":
-                        self.assertEqual(handle.requests, ["GET /v1/state\n", "GET /v1/ui\n"], (resource, condition))
+                        # One immutable state/UI frame is captured. Generic
+                        # navigation may additionally revalidate live Button
+                        # state at its final input boundary, without recapturing UI.
+                        self.assertEqual(handle.requests[:2], ["GET /v1/state\n", "GET /v1/ui\n"], (resource, condition))
+                        self.assertEqual(handle.requests.count("GET /v1/ui\n"), 1)
+                        self.assertTrue(all(line == "GET /v1/state\n"
+                                            for line in handle.requests[2:]))
 
     def test_combat_loading_keeps_exact_precombat_mount_transition_bounded(self):
         session = AlasSemanticSession(
@@ -296,6 +344,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         context = SimpleNamespace(passive_transition_until=50.0)
         session.adapter = SimpleNamespace(
             campaign_combat_committed=lambda: True,
+            meta_beacon_active=lambda: False,
             _campaign_context=context,
         )
         receipt = object()
@@ -528,6 +577,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         session.adapter = SimpleNamespace(
             oracle=oracle,
             _meta_assist_active=False,
+            meta_beacon_active=lambda: False,
             _frame_or_live_observation_oracle=lambda: oracle,
             campaign_combat_committed=lambda: True,
             _campaign_context=SimpleNamespace(passive_transition_until=0.0, submarine_move_confirm=None),
@@ -1496,6 +1546,21 @@ class SessionRuntimeHandleTests(unittest.TestCase):
             side_effect=failure,
         ):
             self.assertFalse(session.restart_game_after_update())
+
+    def test_login_reconnect_owner_probe_uses_boot_grace_but_expires_closed(self):
+        session = AlasSemanticSession(driver_revision=REVISION,
+                                      runtime_handle=FrameRuntimeHandle())
+        adapter = session.open()
+        adapter.begin_login()
+        failure = SemanticGateClosed('game activity is not top-resumed')
+        with mock.patch.object(adapter.oracle, 'enabled', side_effect=failure):
+            self.assertFalse(session.server_maintenance_visible())
+            self.assertFalse(session.restart_game_after_update())
+            adapter._login_flow._context.passive_transition_until = 0.0
+            with self.assertRaisesRegex(SemanticGateClosed, 'not top-resumed'):
+                session.server_maintenance_visible()
+            with self.assertRaisesRegex(SemanticGateClosed, 'not top-resumed'):
+                session.restart_game_after_update()
 
     def test_update_restart_preflight_uses_coherent_frame_and_process_latch(self):
         session = AlasSemanticSession(

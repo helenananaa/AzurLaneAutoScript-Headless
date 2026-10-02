@@ -16,6 +16,9 @@ from types import SimpleNamespace
 
 
 class FakeCampaignOracle:
+    def campaign_dock_full_visible(self, stage_code):
+        return getattr(self, 'dock_full_visible_value', False)
+
     def campaign_2x_book_selected(self, mode=None):
         return getattr(self, "campaign_2x_book_value", False)
 

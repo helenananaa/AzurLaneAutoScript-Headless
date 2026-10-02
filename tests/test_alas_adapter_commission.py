@@ -143,6 +143,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
 
     def test_unknown_commission_presence_is_false_only_on_proven_surface(self):
         adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values['meowfficer/page/back'] = False
         adapter.begin_commission()
         oracle.exists_values["reward/page/back"] = True
 

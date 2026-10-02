@@ -46,7 +46,23 @@ class LoginOracle:
     def server_maintenance_visible(self) -> bool:
         """Recognize CN maintenance; a cancel button does not make it actionable login."""
 
-        state = self.read_state()
+        # Asset updates can temporarily stop publication on Unity's main
+        # thread. Wait for a complete fresh read; never consume the old frame.
+        state = self._retry_transition_read(self.read_state, attempts=12)
+        buttons = self._matches(state, "overlay/server-maintenance/confirm")
+        if not buttons:
+            # This passive probe cannot identify maintenance without its
+            # confirm control. A page transition elsewhere needs no modal
+            # text sandwich tied to the previous scene.
+            return False
+        content_probe = tuple(t for t in self.read_ui_state().texts
+                              if t.path.endswith('Msgbox(Clone)/window/msg_panel/content')
+                              and t.active_in_hierarchy and t.active_and_enabled)
+        if (len(content_probe) == 1 and not content_probe[0].truncated
+                and content_probe[0].text.strip() != '服务器维护'):
+            # This shared button belongs to another modal. Only maintenance
+            # content needs the stable sandwich tied to this probe's frame.
+            return False
         ui_state = self._stable_msgbox_ui_state(state)
 
         def matches(suffix: str) -> Tuple[TextState, ...]:
@@ -67,7 +83,6 @@ class LoginOracle:
         cancel = matches(
             "Msgbox(Clone)/window/button_container/custom_button_2(Clone)/pic"
         )
-        buttons = self._matches(state, "overlay/server-maintenance/confirm")
         return bool(
             len(content) == 1
             and content[0].text.strip() == "服务器维护"

@@ -8,6 +8,14 @@ from .contracts import BlockerRule
 
 
 DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
+    # This foreground result can be inherited by another task while the map
+    # remains mounted. Only its reviewed dismissal may cross that layer.
+    BlockerRule('operation-siren-auto-reward', '/WorldAutoFightRewardUI(Clone)/',
+                ('os/auto-search/reward/close',)),
+    BlockerRule('meta-dossier-auto-result', '/ArchivesWorldBossAutoBattleResultUI(Clone)/',
+                ('meta/dossier/auto/result/confirm',)),
+    BlockerRule('meta-dossier-auto-prompt', '/ArchivesWorldBossAutoBattleTipUI(Clone)/',
+                ('meta/dossier/auto/confirm',)),
     BlockerRule("loading", "/UIOverlay/Loading(Clone)"),
     BlockerRule(
         "bulletin",
@@ -113,6 +121,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "meta/home",
             "meta/current/open",
             "meta/dossier/open",
+            "reward/award-info/close",
         ),
     ),
     BlockerRule(
@@ -126,6 +135,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         (
             "meta/home",
             "meta/current/detail/list",
+            "meta/current/reward",
             "meta/current/help",
             "meta/current/start",
         ),
@@ -277,8 +287,13 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "operation-siren-map",
         "/top/adapt/top_stage/resources/WorldResPanel(Clone)/",
         (
+            "os/auto-search/reward/close",
+            "campaign/dock-full/organize",
+            "campaign/dock-full/enhance",
             "os/page/back",
             "os/map/globe",
+            "os/map/camera-swipe",
+            "os/map/guidepost/relative",
             "os/port/enter",
             "os/port/supply",
             "os/port/dock",
@@ -413,7 +428,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
     BlockerRule(
         "daily-precombat",
         "/PreCombatUI(Clone)/",
-        ("daily/precombat/back", "daily/precombat/start"),
+        ("daily/precombat/back", "daily/precombat/start", "meta/precombat/vanguard/add", "meta/precombat/main/add"),
     ),
     BlockerRule(
         "campaign-map-preparation",
@@ -494,6 +509,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "/CommanderCatUI(Clone)/",
         (
             "meowfficer/page/back",
+            "meowfficer/buy/close",
+            "reward/award-info/close",
             "meowfficer/fort/enter",
             "meowfficer/fort/close",
             "meowfficer/buy/enter",
@@ -536,6 +553,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "/CommanderReserveUI(Clone)/",
         (
             "meowfficer/page/back",
+            "meowfficer/buy/close",
+            "reward/award-info/close",
             "meowfficer/buy/min",
             "meowfficer/buy/add",
             "meowfficer/buy/max",
@@ -698,6 +717,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "dorm/feed/item/50004",
             "dorm/feed/item/50005",
             "dorm/feed/item/50006",
+            "dorm/empty-food/cancel",
         ),
     ),
     BlockerRule(
@@ -752,6 +772,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "campaign/dock-full/organize",
             "campaign/dock-full/enhance",
             "tactical/continue/cancel",
+            "tactical/completion/ack",
             "tactical/course/cancel",
             "tactical/course/confirm",
             "commission/start/cancel",
@@ -826,6 +847,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         (
             "tactical/page/back",
             "tactical/continue/cancel",
+            "tactical/completion/ack",
             "tactical/course/cancel",
             "tactical/course/confirm",
             "tactical/slot/1",

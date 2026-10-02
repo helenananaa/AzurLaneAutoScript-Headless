@@ -2,6 +2,8 @@
 
 import copy
 import unittest
+from types import SimpleNamespace
+from unittest.mock import Mock
 from alas_headless.semantic_oracle import CampaignMapEntryState, SemanticGateClosed
 from tests.semantic_support.campaign_fixtures import make_campaign_map_backend
 from tests.semantic_support.observer_fixtures import (
@@ -21,6 +23,48 @@ from tests.semantic_support.oracle_cases import (
 
 
 class CampaignDockFullTests(CampaignDockFullTestsSupport, unittest.TestCase):
+    def test_os_underlay_allows_exact_dock_choices_but_other_blockers_do_not(self):
+        backend = self._backend()
+        backend.buttons['buttons'].append(make_button('stamina',
+            'LevelCamera/Canvas/LevelOrigin/top/adapt/top_stage/resources/WorldResPanel(Clone)/res/stamina'))
+        backend.buttons['button_count'] += 1
+        oracle = make_oracle(backend)
+        self.assertTrue(oracle.campaign_dock_full_visible(''))
+        with self.assertRaises(SemanticGateClosed):
+            oracle.click_campaign_dock_full_choice('', 'expand')
+        oracle.click_campaign_dock_full_choice('', 'enhance')
+        self.assertEqual(backend.taps, [(840, 515)])
+        backend.buttons['buttons'].append(make_button('Loading(Clone)',
+            'OverlayCamera/Overlay/UIOverlay/Loading(Clone)'))
+        backend.buttons['button_count'] += 1
+        with self.assertRaises(SemanticGateClosed):
+            oracle.click_campaign_dock_full_choice('', 'enhance')
+        self.assertEqual(len(backend.taps), 1)
+
+    def test_transient_modal_close_retries_complete_observation(self):
+        backend = self._backend()
+        oracle = make_oracle(backend)
+        before = oracle.read_state()
+        backend.buttons = make_buttons([])
+        after = oracle.read_state()
+        oracle.read_state = Mock(side_effect=[before] + [after] * 6)
+
+        self.assertFalse(oracle.campaign_dock_full_visible('d3'))
+        self.assertGreater(oracle.read_state.call_count, 2)
+        self.assertEqual(backend.taps, [])
+
+    def test_persistently_incoherent_modal_remains_closed(self):
+        backend = self._backend()
+        oracle = make_oracle(backend)
+        before = oracle.read_state()
+        backend.buttons = make_buttons([])
+        after = oracle.read_state()
+        # Each complete attempt opens on a modal which disappears while read.
+        oracle.read_state = Mock(side_effect=[before, after, after, after, after] * 4)
+        with self.assertRaisesRegex(SemanticGateClosed, 'not coherent'):
+            oracle.campaign_dock_full_visible('d3')
+        self.assertEqual(backend.taps, [])
+
     def test_dock_full_modal_owns_organize_above_preparation_underlays(self):
         for root in ('LevelStageInfoView(Clone)', 'LevelFleetSelectView(Clone)'):
             with self.subTest(root=root):
@@ -310,6 +354,17 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "campaign/stage/12-4")
         self.assertEqual(receipt.path, stage_path)
         self.assertEqual(backend.taps, [(905, 353)])
+        self.assertTrue(oracle.campaign_stage_actionable('12-4'))
+        self.assertFalse(oracle.campaign_stage_actionable('13-4'))
+        with self.assertRaisesRegex(SemanticGateClosed, 'stage is absent'):
+            oracle.click_campaign_stage('13-4')
+        exact_stage = oracle.campaign_stage_state('12-4')
+        original_page_reader = oracle.campaign_page_state
+        oracle.campaign_page_state = Mock(return_value=SimpleNamespace(stages=(exact_stage, exact_stage)))
+        with self.assertRaisesRegex(SemanticGateClosed, 'ambiguous'):
+            oracle.campaign_stage_actionable('12-4')
+        oracle.campaign_page_state = original_page_reader
+        self.assertEqual(backend.taps, [(905, 353)])
 
         backend.buttons["buttons"][1]["raycast_top"] = False
         with self.assertRaisesRegex(SemanticGateClosed, "not actionable"):
@@ -391,6 +446,9 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
             make_oracle(backend).campaign_map_achievement_state("12-4")
 
     def test_campaign_in_map_probe_only_admits_reviewed_non_map_surfaces(self):
+        daily = FakeBackend([make_button('back_button', 'UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_button')])
+        self.assertFalse(make_oracle(daily).campaign_is_in_map())
+        self.assertEqual(daily.taps, [])
         login = FakeBackend(
             [
                 make_button(

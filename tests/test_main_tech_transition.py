@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 import pytest
-from alas_headless import AlasSemanticAdapter, SemanticTargetMissing
+from alas_headless import AlasSemanticAdapter, SemanticTargetMissing, SemanticGateClosed
 from tests.semantic_support.adapter_fixtures import FakeOracle
 
 
@@ -43,3 +43,39 @@ def test_tech_transition_race_is_rechecked_only_before_input(dispatched):
             adapter._click_mapped('MAIN_GOTO_RESHMENU', 'main/tech')
     else:
         assert adapter._click_mapped('MAIN_GOTO_RESHMENU', 'main/tech') is prior
+
+
+@pytest.mark.parametrize('main,dispatched,ready', [
+    (True, False, True), (True, False, False),
+    (False, False, True), (True, True, True),
+])
+@pytest.mark.parametrize('target',['main/tech','main/more','main/live'])
+def test_tech_home_return_waits_for_actionability_without_dispatch(monkeypatch, main, dispatched, ready,target):
+    from alas_headless.adapter.semantic import dispatch_actions
+    clock = [0.0]
+    monkeypatch.setattr(dispatch_actions.time, 'monotonic', lambda: clock[0])
+    monkeypatch.setattr(dispatch_actions.time, 'sleep', lambda seconds: clock.__setitem__(0, clock[0] + seconds))
+    oracle = FakeOracle()
+    oracle.input_dispatch_count = 0
+    oracle.main_page_visible = lambda: main
+    oracle.enabled = lambda target: ready and clock[0] >= 0.4
+    calls = []
+    receipt = SimpleNamespace(generation=11)
+    def click(target):
+        calls.append(target)
+        if len(calls) == 1:
+            oracle.input_dispatch_count += int(dispatched)
+            raise SemanticGateClosed('semantic target is not actionable')
+        oracle.input_dispatch_count += 1
+        return receipt
+    oracle.click = click
+    adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    if main and not dispatched and ready:
+        assert adapter._click_main_ready(target) is receipt
+        assert oracle.input_dispatch_count == 1
+        assert len(calls) == 2
+    else:
+        with pytest.raises(SemanticGateClosed):
+            adapter._click_main_ready(target)
+        assert oracle.input_dispatch_count == int(dispatched)
+        assert len(calls) == 1

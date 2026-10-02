@@ -9,6 +9,15 @@ from tests.semantic_support.adapter_fixtures import NamedButton
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_exercise_entry_hides_unowned_campaign_withdraw_confirmation(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter._exercise_entry_transition_until = time.monotonic() + 20.0
+        self.assertFalse(adapter.appear(NamedButton('CAMPAIGN_WITHDRAW_CONFIRM')))
+        self.assertEqual(oracle.click_calls, [])
+        adapter._exercise_entry_transition_until = 0.0
+        with self.assertRaises(AlasSemanticUnmapped):
+            adapter.appear(NamedButton('CAMPAIGN_WITHDRAW_CONFIRM'))
+
     def test_typed_main_or_reward_page_hides_exercise_page_check(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.main_page_visible_value = True

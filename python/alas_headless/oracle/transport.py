@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 import socket
 import subprocess
@@ -80,7 +81,7 @@ class TcpObserverTransport:
         host: str,
         port: int,
         timeout_seconds: float = 3.0,
-        maximum_response_bytes: int = 1024 * 1024,
+        maximum_response_bytes: int = 4 * 1024 * 1024,
         trace: Optional[RuntimeTraceRecorder] = None,
     ) -> None:
         self._host = host
@@ -90,12 +91,17 @@ class TcpObserverTransport:
         self._trace = trace
 
     def request(self, request_line: str) -> Mapping[str, Any]:
+        number = r'[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?'
+        projection = re.fullmatch(r'GET /v1/globe-projection (' + number + r') (' + number + r')\n', request_line)
+        projection_request = projection is not None and all(math.isfinite(float(v)) for v in projection.groups())
+        drag = re.fullmatch(r'GET /v1/(?:os-map-drag|globe-map-drag) ' + ' '.join(['(' + number + ')'] * 4) + r'\n', request_line)
+        drag_request = drag is not None and all(math.isfinite(float(v)) for v in drag.groups())
         if request_line not in (
             "GET /v1/snapshot\n",
             "GET /v1/buttons\n",
             "GET /v1/ui\n",
             "GET /v1/state\n",
-        ):
+        ) and not projection_request and not drag_request:
             raise ObserverTransportError(
                 "client refused an unsupported observer request"
             )
@@ -261,10 +267,13 @@ class AdbObserverBridge:
                 [*prefix, "-s", self.serial, *arguments],
                 check=True,
                 capture_output=True,
-                text=True,
+                text=False,
                 timeout=timeout,
             )
-        except (OSError, subprocess.SubprocessError) as exc:
+            # ADB emits UTF-8 independently of Windows' locale. Decode on the
+            # calling thread so malformed output is a classified failure.
+            output = completed.stdout.decode('utf-8')
+        except (OSError, subprocess.SubprocessError, UnicodeError) as exc:
             if self.trace is not None:
                 self.trace.emit(
                     "adb.command",
@@ -282,7 +291,7 @@ class AdbObserverBridge:
                 duration_ns=time.monotonic_ns() - started_ns,
                 fields={"operation": operation},
             )
-        return completed.stdout.strip()
+        return output.strip()
 
     @staticmethod
     def _classify_adb_operation(arguments: Sequence[str]) -> str:
@@ -469,8 +478,13 @@ class AdbObserverBridge:
             raise ObserverTransportError("expected exactly one numeric game PID")
         return int(pid_text)
 
-    def tap(self, x: int, y: int) -> None:
-        self._run(("shell", "input", "tap", str(x), str(y)))
+    def tap(self, x: float, y: float) -> None:
+        if any(isinstance(value, bool) or not isinstance(value, (int, float))
+               or not math.isfinite(value) for value in (x, y)):
+            raise ValueError("typed tap point must contain finite numbers")
+        # Keep down and up separated for the Unity input loop. Both endpoints
+        # remain the caller's single reviewed point; this introduces no drag.
+        self._run(("shell", "input", "swipe", str(x), str(y), str(x), str(y), "100"))
 
     def swipe(
         self,

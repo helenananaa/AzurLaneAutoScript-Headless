@@ -23,7 +23,8 @@ def completed_menu(recovery=None):
     o.enabled_values['reward/campaign-total/exit'] = True
     o.campaign_official_combat_auto_state = Mock(return_value=(81, True))
     o.read_state = Mock(return_value=SimpleNamespace(generation=90, buttons=(SimpleNamespace(
-        name='ButtonExit', path='OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit', actionable=True),)))
+        name='ButtonExit', path='OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit',
+        active_in_hierarchy=True, active_and_enabled=True, actionable=True),)))
     o.campaign_auto_search_reentry_available = Mock(return_value=True)
     o._campaign_2x_book_control = Mock(return_value=(None, None, False, 100))
     o.click_campaign_auto_search_reentry = Mock(return_value=o.click_receipt('reward/campaign-total/go'))

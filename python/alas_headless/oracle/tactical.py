@@ -23,6 +23,45 @@ from .errors import SemanticGateClosed
 class TacticalOracle:
     """Tactical operations sharing the oracle frame and input boundary."""
 
+    def _tactical_completion_prompt_matches(self, state: OracleState) -> bool:
+        choices = tuple(b for b in state.buttons
+                        if b.active_in_hierarchy and b.active_and_enabled
+                        and '/Msgbox(Clone)/window/button_container/' in b.path)
+        suffix = 'Msgbox(Clone)/window/button_container/custom_button_1(Clone)'
+        if len(choices) != 1 or not choices[0].path.endswith(suffix):
+            return False
+        ui = self._stable_msgbox_ui_state(state)
+        def texts(suffix):
+            return tuple(t for t in ui.texts if t.path.endswith(suffix)
+                         and t.active_in_hierarchy and t.active_and_enabled)
+        content = texts('Msgbox(Clone)/window/msg_panel/content')
+        label = texts(suffix + '/pic')
+        if len(content) != 1 or len(label) != 1:
+            return False
+        if any(t.truncated or t.bounds is None for t in (*content, *label)):
+            return False
+        # The original Tactical handler owns this one-button max-level notice.
+        # Its underlying student page distinguishes it from unrelated notices.
+        students = any(t.active_in_hierarchy and t.active_and_enabled
+                       and '/NewNavalTacticsStudentsPage(Clone)/' in t.path
+                       for t in ui.texts)
+        plain = re.sub(r'<[^>]*>', '', content[0].text).strip()
+        return bool(students and ''.join(label[0].text.split()) == '确定'
+                    and re.fullmatch(
+                        r'「[^」\n]+」学习完成，「[^」\n]+」技能获得[1-9][0-9]*点经验'
+                        r'[(（]技能等级提升:[1-9]→10[)）]！', plain))
+
+    def click_tactical_completion_ack(self) -> ActionReceipt:
+        receipt = self.click('tactical/completion/ack')
+        for _ in range(16):
+            self._sleep(.25)
+            after = self.read_state()
+            if (after.generation > receipt.generation
+                    and not any(b.active_in_hierarchy and '/Msgbox(Clone)/' in b.path
+                                for b in after.buttons)):
+                return receipt
+        raise SemanticGateClosed('tactical completion prompt did not close after input')
+
     def click_tactical_empty_slot(self, slot: int) -> ActionReceipt:
         """Click one visually ordered empty tactical slot after exact revalidation."""
 

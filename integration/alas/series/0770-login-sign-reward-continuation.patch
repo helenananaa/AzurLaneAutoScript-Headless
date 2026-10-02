@@ -1,0 +1,18 @@
+diff --git a/module/handler/login.py b/module/handler/login.py
+--- a/module/handler/login.py
++++ b/module/handler/login.py
+@@ -116,7 +116,13 @@ class LoginHandler(UI):
+             if self.handle_urgent_commission():
+                 continue
+             # Popups appear at page_main
+-            if self.ui_page_main_popups(get_ship=login_success):
++            semantic_get_ship = (
++                semantic_adapter is not None
++                and semantic_adapter.open()._require_frame_observation_oracle().new_ship_reward_visible()
++            )
++            if self.ui_page_main_popups(get_ship=login_success or semantic_get_ship):
++                if semantic_adapter is not None:
++                    continue
+                 return True
+             # Always goto page_main
+             if self.appear_then_click(GOTO_MAIN, offset=(30, 30), interval=5):

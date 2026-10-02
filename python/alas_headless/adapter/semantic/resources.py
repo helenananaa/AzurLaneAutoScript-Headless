@@ -177,8 +177,14 @@ DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
     "META_MAIN_BEACON_ENTRANCE": "meta/current/open",
     "META_MAIN_DOSSIER_ENTRANCE": "meta/dossier/open",
     "BEACON_LIST": "meta/current/list",
+    "BEACON_REWARD": "meta/current/reward",
     "DOSSIER_LIST": "meta/dossier/list",
+    "DOSSIER_REWARD_ENTER": "meta/dossier/sync/open",
+    "DOSSIER_REWARD_RECEIVE": "meta/dossier/sync/rewards",
     "META_BEGIN_ENTRANCE": "meta/current/create",
+    "META_AUTO_ATTACK_START": "meta/dossier/auto/start",
+    "META_AUTO_ATTACK_CONFIRM": "meta/dossier/auto/confirm",
+    "META_AUTO_CONFIRM": "meta/dossier/auto/result/confirm",
     "ASH_START": "meta/assist/start",
     "HELP_ENTER": "meta/current/help",
     "HELP_CONFIRM": "meta/help/confirm",
@@ -479,6 +485,8 @@ EVENT_CAMPAIGN_ASIDE_RESOURCES: Mapping[str, str] = {
 
 CAMPAIGN_VIRTUAL_RESOURCES = frozenset(
     {
+        "AUTO_SEARCH_MAP_OPTION_OFF",
+        "AUTO_SEARCH_MAP_OPTION_ON",
         "WITHDRAW",
         "CAMPAIGN_WITHDRAW_CONFIRM",
         "EMERGENCY_REPAIR_AVAILABLE",
@@ -520,6 +528,7 @@ CAMPAIGN_VIRTUAL_RESOURCES = frozenset(
 
 CAMPAIGN_CLICK_RESOURCES = frozenset(
     {
+        "AUTO_SEARCH_MAP_OPTION_OFF",
         "EMERGENCY_REPAIR_AVAILABLE",
         "EMERGENCY_REPAIR_CONFIRM",
         "WITHDRAW",
@@ -594,10 +603,12 @@ PAGE_VIRTUAL_RESOURCES = frozenset(
         "RESEARCH_CHECK",
         "SHIPYARD_CHECK",
         "TACTICAL_CHECK",
+        "GUILD_CHECK",
         "WAR_ARCHIVES_CHECK",
         "DATA_KEY_COLLECTED",
         "DATA_KEY_COLLECT",
         "BATTLE_PASS_CHECK",
+        "PRIVATE_QUARTERS_CHECK",
         "SHOP_CHECK",
     }
 )

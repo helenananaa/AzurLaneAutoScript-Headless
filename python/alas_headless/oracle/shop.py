@@ -596,7 +596,11 @@ class ShopOracle:
         return "DefaultItem"
 
     def general_shop_items(self) -> Tuple[GeneralShopItemState, ...]:
-        """Return the ten exact cards from the selected Supply Shop tab."""
+        """Return the ten exact cards after a bounded passive transition read."""
+        return self._retry_transition_read(self._general_shop_items_once)
+
+    def _general_shop_items_once(self) -> Tuple[GeneralShopItemState, ...]:
+        """Read one complete card snapshot without injecting input."""
 
         if not self.munitions_page_visible():
             raise SemanticGateClosed("supply shop is not selected")

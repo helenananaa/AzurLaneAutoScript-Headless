@@ -9,13 +9,21 @@ import math
 import re
 from typing import Optional, Tuple
 from .contracts import ActionReceipt, ButtonState, Point
-from .errors import SemanticGateClosed, SemanticOracleError
+from .errors import SemanticGateClosed, SemanticOracleError, SemanticTargetNotActionable
 
 
 class ActionsOracle:
     """Actions operations sharing the oracle frame and input boundary."""
 
     def click(self, semantic_id: str) -> Union[ActionReceipt, PrivateQuartersPhysicsReceipt]:
+        if semantic_id in ('meowfficer/buy/add', 'meowfficer/buy/min'):
+            matches = self._matches(self.read_state(), semantic_id)
+            if not matches:
+                return self.click_meowfficer_purchase_quantity(semantic_id)
+        if semantic_id == 'meowfficer/buy/close':
+            return self.click_meowfficer_purchase_close()
+        if semantic_id == 'game-room/list' and self.game_room_list_visible():
+            raise SemanticGateClosed('game-room list entry is covered by its open list')
         if semantic_id.startswith('private-quarters/'):
             private_quarters_actions = {
                 'private-quarters/level-up/close': self.click_private_quarters_level_up_close,
@@ -108,6 +116,10 @@ class ActionsOracle:
         ) and not self._minigame_ticket_prompt_matches(state):
             raise SemanticGateClosed("minigame ticket prompt identity is not proven")
         target = self._unique(state, semantic_id)
+        delegated_operation_siren_reward = semantic_id == 'os/auto-search/reward/close'
+        if (delegated_operation_siren_reward
+                and not self._operation_siren_auto_search_reward_control_proven(state)):
+            raise SemanticGateClosed('auto-search reward close identity is not proven')
         if delegated_activity_main_back:
             delegated_activity_main_back = bool(
                 target.active_in_hierarchy
@@ -333,7 +345,7 @@ class ActionsOracle:
                     target.active_in_hierarchy
                     and target.active_and_enabled
                     and target.interactable
-                    and target.raycast_top is None
+                    and target.raycast_top is not False
                     and target.point is not None
                     and target.bounds is not None
                     and target.bounds.contains(target.point)
@@ -458,6 +470,15 @@ class ActionsOracle:
             and target.bounds is not None
             and self.game_room_page_visible()
         )
+        delegated_game_room_free = bool(
+            semantic_id == 'game-room/free-coins'
+            and target.active_in_hierarchy and target.active_and_enabled
+            and target.interactable and target.raycast_top is None
+            and target.point is not None and target.bounds is not None
+            and self.game_room_page_visible()
+            and not self.game_room_list_visible()
+            and self.minigame_coin_amount() <= 30
+        )
         delegated_game_room_back = bool(
             semantic_id == "game-room/back"
             and target.active_in_hierarchy
@@ -499,6 +520,9 @@ class ActionsOracle:
             and not self._tactical_continue_prompt_matches(state)
         ):
             raise SemanticGateClosed("tactical continue prompt identity is not proven")
+        if (semantic_id == "tactical/completion/ack"
+                and not self._tactical_completion_prompt_matches(state)):
+            raise SemanticGateClosed("tactical completion prompt identity is not proven")
         if semantic_id in (
             "build/warning/cancel",
             "build/warning/confirm",
@@ -581,8 +605,10 @@ class ActionsOracle:
                 and not delegated_academy_game_room
                 and not delegated_game_room_list
                 and not delegated_game_room_home
+                and not delegated_game_room_free
                 and not delegated_game_room_back
                 and not delegated_operation_siren_control
+                and not delegated_operation_siren_reward
                 and not delegated_operation_siren_boss_start
                 and not delegated_operation_siren_help
                 and not delegated_meta_back
@@ -615,8 +641,37 @@ class ActionsOracle:
             or target.point is None
             or target.bounds is None
         ):
+            if semantic_id == 'dorm/feed':
+                raise SemanticTargetNotActionable(semantic_id, state.generation)
+            if (semantic_id == 'login/enter' and target.active_in_hierarchy
+                    and target.active_and_enabled and target.interactable
+                    and target.raycast_top is False and target.point is not None
+                    and target.bounds is not None and target.bounds.contains(target.point)
+                    and all(rule.blocker_id == 'loading' for rule in
+                            self._blocking_rules(state, semantic_id))):
+                # Authentication can briefly take the login root's raycast
+                # after a positive ALAS observation, including its known
+                # loading curtain. No input was submitted.
+                raise SemanticTargetNotActionable(semantic_id, state.generation)
             raise SemanticGateClosed("semantic target is not actionable")
         point = target.point
+        if delegated_game_room_back:
+            ui_state = self.read_ui_state()
+            if not state.generation <= ui_state.generation <= state.generation + 2:
+                raise SemanticGateClosed('game-room back graphic is not coherent')
+            # btnBack's wide decorative image does not receive raycasts. Its
+            # unique img2 child owns the actual Button hit area.
+            graphics = [image for image in ui_state.images
+                        if image.path == target.path + '/img2'
+                        and image.active_in_hierarchy and image.active_and_enabled
+                        and image.raycast_target is True and image.bounds is not None
+                        and target.bounds.contains(Point(image.bounds.left, image.bounds.top))
+                        and target.bounds.contains(Point(image.bounds.right, image.bounds.bottom))]
+            if len(graphics) != 1:
+                raise SemanticGateClosed('game-room back hit graphic is absent or ambiguous')
+            graphic_bounds = graphics[0].bounds
+            point = Point((graphic_bounds.left + graphic_bounds.right) / 2.0,
+                          (graphic_bounds.top + graphic_bounds.bottom) / 2.0)
         if (
             delegated_guild_control
             or delegated_guild_dispatch_detail
@@ -677,7 +732,7 @@ class ActionsOracle:
                 (target.bounds.left + target.bounds.right) / 2.0,
                 (target.bounds.top + target.bounds.bottom) / 2.0,
             )
-        if dorm_page_control:
+        if dorm_page_control and not target.actionable:
             ui_state = self.read_ui_state()
             if not self._dorm_page_control_proven(
                 state, semantic_id, ui_state=ui_state

@@ -19,6 +19,24 @@ from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_login_inherited_new_ship_uses_exact_reward_boundary(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_login()
+        oracle.new_ship_reward_visible_value = True
+        self.assertTrue(adapter.appear(NamedButton('GET_SHIP')))
+        receipt = adapter.click(NamedButton('GET_SHIP'))
+        self.assertEqual(receipt.semantic_id, 'reward/new-ship/continue')
+        self.assertEqual(oracle.click_calls, ['reward/new-ship/continue'])
+
+    def test_login_new_ship_rejects_absent_acquisition_page(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_login()
+        oracle.new_ship_reward_visible_value = False
+        self.assertFalse(adapter.appear(NamedButton('GET_SHIP')))
+        with self.assertRaisesRegex(SemanticGateClosed, 'popup is absent'):
+            adapter.click(NamedButton('GET_SHIP'))
+        self.assertEqual(oracle.click_calls, [])
+
     def test_update_restart_probe_uses_current_immutable_frame(self):
         adapter, oracle, _ = self.make_adapter()
         frame = Mock()

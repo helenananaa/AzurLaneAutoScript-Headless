@@ -16,6 +16,8 @@ def main():
     parser.add_argument('--alas-root', required=True, type=Path)
     parser.add_argument('--serial', required=True)
     parser.add_argument('--driver-revision', required=True)
+    parser.add_argument('--seed-config', default='semantic_e2e')
+    parser.add_argument('--start-current', action='store_true')
     parser.add_argument('--output', required=True, type=Path)
     args = parser.parse_args()
     output = args.output.resolve()
@@ -24,7 +26,7 @@ def main():
     output.parent.mkdir(parents=True, exist_ok=True)
     alas = args.alas_root.resolve()
     profile = alas/'config'/('_codex_meta_reward_'+uuid.uuid4().hex+'.json')
-    config = json.loads((alas/'config/semantic_e2e.json').read_text(encoding='utf-8'))
+    config = json.loads((alas/'config'/(args.seed_config+'.json')).read_text(encoding='utf-8'))
     config['Alas']['Emulator']['Serial'] = args.serial
     config['Alas']['Error'].update(HandleError=False, SaveError=False)
     profile.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding='utf-8')
@@ -55,8 +57,12 @@ def main():
         oracle = session.open().oracle
         result['runtime'] = dataclasses.asdict(oracle.fingerprint)
         session.begin_meta_assist()
-        UI(app.config, app.device).ui_ensure(page_main)
-        result['start_home'] = oracle.main_page_visible()
+        if args.start_current:
+            result['start_home'] = False
+            result['start_current'] = True
+        else:
+            UI(app.config, app.device).ui_ensure(page_main)
+            result['start_home'] = oracle.main_page_visible()
         save()
         MetaReward(app.config, app.device).run()
         result['reward_returned'] = True
@@ -65,7 +71,8 @@ def main():
         save()
         UI(app.config, app.device).ui_ensure(page_main)
         result['final_home'] = oracle.main_page_visible()
-        result['passed'] = bool(result['start_home'] and result['reward_returned'] and result['final_home'])
+        result['passed'] = bool((result['start_home'] or result.get('start_current'))
+                                and result['reward_returned'] and result['final_home'])
     except (Exception, SystemExit, KeyboardInterrupt) as exc:
         result['error'] = str(exc)
         result['traceback'] = traceback.format_exc()

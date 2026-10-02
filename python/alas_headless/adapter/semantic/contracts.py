@@ -32,6 +32,10 @@ class AlasSemanticUnmapped(SemanticGateClosed):
     """An ALAS resource has no reviewed semantic mapping."""
 
 
+class AlasSemanticActionDeferred(SemanticGateClosed):
+    """No input was dispatched because the task's action grant is exhausted."""
+
+
 class MissionClaimableDetected(SemanticGateClosed):
     """A proven claim target was observed, but no claim input was injected."""
 
@@ -135,11 +139,13 @@ class _MissionFlowContext:
     last_generation: int = -1
     stable_generations: int = 0
     stable_state: Optional[MissionPageState] = None
+    award_close_receipt: Optional[ActionReceipt] = None
 
 
 @dataclass
 class _MailFlowContext:
     entry_clicked: bool = False
+    entry_receipt: Optional[ActionReceipt] = None
     recovered_existing_page: bool = False
     initial_surface_probed: bool = False
     surface_kind: Optional[str] = None
@@ -155,6 +161,7 @@ class _CommissionFlowContext:
     reward_detected_count: Optional[int] = None
     reward_claim_receipt: Optional[ActionReceipt] = None
     reward_close_receipts: List[ActionReceipt] = field(default_factory=list)
+    ship_exp_observation_generation: Optional[int] = None
     reward_proof: Optional[CommissionRewardProof] = None
     selected_signature: Optional[Tuple[Union[int, str], ...]] = None
     selected_at: float = 0.0
@@ -166,7 +173,11 @@ class _CommissionFlowContext:
     passive_transition_until: float = 0.0
     cancelled_tactical_prompts: Set[str] = field(default_factory=set)
     tactical_back_receipt: Optional[ActionReceipt] = None
+    tactical_empty_slot_receipt: Optional[ActionReceipt] = None
     tactical_reward_receipt: Optional[ActionReceipt] = None
+    tactical_confirm_receipt: Optional[ActionReceipt] = None
+    tactical_confirm_before_slots: Optional[Set[Tuple[int, int]]] = None
+    tactical_confirmed_at: float = 0.0
 
 
 @dataclass
@@ -227,11 +238,14 @@ class _DormFlowContext:
 
 @dataclass
 class _BuildFlowContext:
+    entry_receipt: Optional[ActionReceipt] = None
+    queue_entry_receipt: Optional[ActionReceipt] = None
     prep_opened: bool = False
     prep_validated: bool = False
     warning_confirmed: bool = False
     coins_owned: Optional[int] = None
     submit_receipt: Optional[ActionReceipt] = None
+    submit_transition_until: float = 0.0
     passive_transition_until: float = 0.0
     queue_finish_transition_until: float = 0.0
 
@@ -263,6 +277,7 @@ class _DataKeyFlowContext:
 class _MinigameFlowContext:
     passive_transition_until: float = 0.0
     ticket_prompt_confirmed: bool = False
+    ticket_confirm_receipt: Optional[ActionReceipt] = None
     entry_receipt: Optional[ActionReceipt] = None
     play_receipt: Optional[ActionReceipt] = None
     selected_tickets: int = 0

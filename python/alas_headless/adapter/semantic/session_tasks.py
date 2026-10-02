@@ -559,6 +559,9 @@ class SessionTasksPorts:
     def meta_current_empty_points(self) -> Tuple[int, int]:
         return self.open().meta_current_empty_points()
 
+    def meta_dossier_empty_points(self) -> Tuple[int, int]:
+        return self.open().meta_dossier_empty_points()
+
     def meta_current_detail_state(self) -> MetaCurrentDetailState:
         return self.open().meta_current_detail_state()
 
@@ -612,7 +615,13 @@ class SessionTasksPorts:
         return self.open().set_campaign_map_preparation_mode(destination)
 
     def campaign_auto_search_selected(self) -> bool:
-        return self.open().campaign_auto_search_selected()
+        adapter = self.open()
+        previous = adapter._observation_oracle_override
+        adapter._observation_oracle_override = adapter._frame_or_live_observation_oracle()
+        try:
+            return adapter.campaign_auto_search_selected()
+        finally:
+            adapter._observation_oracle_override = previous
 
     def campaign_map_formation(self) -> str:
         return self.open().campaign_map_formation()
@@ -737,6 +746,9 @@ class SessionTasksPorts:
             return 0
         notice = adapter._frame_or_live_observation_oracle().campaign_ambush_notice()
         return int(notice in ("success", "failed"))
+
+    def campaign_remaining_attempts(self):
+        return self.open().campaign_remaining_attempts()
 
     def campaign_stage_entry_allowed(self) -> bool:
         return self.open().campaign_stage_entry_allowed()
@@ -1122,7 +1134,7 @@ class SessionTasksPorts:
         return self.open().exercise_refresh_allowed()
 
     def exercise_duel_hp(self) -> Tuple[float, float]:
-        return self.open().oracle.exercise_duel_hp()
+        return self.open()._frame_or_live_observation_oracle().exercise_duel_hp()
 
     def exercise_quit_low_hp(self) -> Tuple[ActionReceipt, ...]:
         """Quit an Exercise duel through the exact official pause flow."""
@@ -1149,7 +1161,8 @@ class SessionTasksPorts:
         receipts.append(oracle.click_exercise_combat_quit_confirm())
         deadline = time.monotonic() + 15.0
         while time.monotonic() < deadline:
-            if oracle.daily_precombat_visible() and oracle.exercise_page_visible():
+            if (oracle.daily_precombat_visible() and oracle.exercise_page_visible()
+                    and not oracle._blocking_rules(oracle.read_state(), 'daily/precombat/back')):
                 return tuple(receipts)
             time.sleep(0.25)
         raise SemanticGateClosed("Exercise quit did not return to preparation")
@@ -1220,19 +1233,30 @@ class SessionTasksPorts:
         receipts: List[ActionReceipt] = []
         while time.monotonic() < deadline:
             oracle = self.open().oracle
-            if oracle.exercise_page_visible():
-                return tuple(receipts)
-            if oracle.exercise_merit_shop_visible():
-                receipts.append(oracle.click_exercise_merit_shop_close())
-            elif oracle.exercise_reward_item_info_visible():
-                receipts.append(oracle.click_exercise_reward_item_info_cancel())
-            elif oracle.award_info_page_visible():
-                receipts.append(oracle.click_exercise_award_info_close())
-            elif oracle.daily_battle_result_visible():
-                receipts.append(oracle.click_daily_battle_result())
-            else:
+            try:
+                if oracle.exercise_page_visible():
+                    return tuple(receipts)
+                if oracle.exercise_merit_shop_visible():
+                    action = oracle.click_exercise_merit_shop_close
+                elif oracle.exercise_reward_item_info_visible():
+                    action = oracle.click_exercise_reward_item_info_cancel
+                elif oracle.award_info_page_visible():
+                    action = oracle.click_exercise_award_info_close
+                elif oracle.daily_battle_result_visible():
+                    action = oracle.click_daily_battle_result
+                else:
+                    action = None
+            except SemanticGateClosed as exc:
+                # A busy result transition may briefly stop publishing. Retry
+                # observation inside the existing deadline; never retry input.
+                if str(exc) != 'observer snapshot is stale':
+                    raise
                 time.sleep(0.25)
                 continue
+            if action is None:
+                time.sleep(0.25)
+                continue
+            receipts.append(action())
             time.sleep(1.0)
         raise SemanticGateClosed("Exercise result stack did not return to overview")
 
@@ -1344,6 +1368,10 @@ class SessionTasksPorts:
         self.refresh_frame()
         return self.open().minigame_prepare_default_ticket()
 
+    def minigame_ticket_selection(self) -> Tuple[int, int]:
+        self.refresh_frame()
+        return self.open()._frame_or_live_observation_oracle().new_year_challenge_ticket_count()
+
     def minigame_help_visible(self) -> bool:
         self.refresh_frame()
         return self.open().oracle.new_year_challenge_help_visible()
@@ -1354,7 +1382,7 @@ class SessionTasksPorts:
 
     def minigame_result(self) -> Optional[Tuple[int, int]]:
         self.refresh_frame()
-        return self.open().oracle.new_year_challenge_result()
+        return self.open()._frame_or_live_observation_oracle().new_year_challenge_result()
 
     def minigame_attack_state(self) -> Tuple[int, int, bool]:
         self.refresh_frame()
@@ -1564,12 +1592,12 @@ class SessionTasksPorts:
 
     def server_maintenance_visible(self) -> bool:
         adapter = self.open()
-        if adapter.oracle.enabled("overlay/network-reconnect/confirm"):
-            # ui_additional owns NetworkDown immediately after the maintenance
-            # and update probes.  Do not make a different Msgbox reader race
-            # the already-proven global reconnect owner.
-            return False
         try:
+            if adapter.oracle.enabled("overlay/network-reconnect/confirm"):
+                # This passive owner probe shares the login boot grace with
+                # maintenance; a transient SDK activity can hide Unity here.
+                # ui_additional still owns actual NetworkDown input.
+                return False
             return adapter.server_maintenance_visible()
         except (SemanticGateClosed, ObserverTransportError) as exc:
             if self._login_probe_is_transient(adapter, exc):

@@ -1,7 +1,7 @@
 """Transport regression cases for the oracle."""
 
 import unittest
-from alas_headless.semantic_oracle import AdbObserverBridge
+from alas_headless.semantic_oracle import AdbObserverBridge, ObserverTransportError
 from tests.semantic_support.observer_fixtures import FakeBackend, PACKAGE, make_oracle
 from tests.semantic_support.oracle_cases import SemanticOracleTestsSupport
 from types import SimpleNamespace
@@ -9,6 +9,19 @@ from unittest import mock
 
 
 class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
+    def test_adb_utf8_output_is_independent_of_windows_locale(self):
+        bridge = AdbObserverBridge('emulator-5554', PACKAGE)
+        with mock.patch('alas_headless.semantic_oracle.subprocess.run',
+                        return_value=SimpleNamespace(stdout='当前活动\n'.encode('utf-8'))) as run:
+            self.assertEqual(bridge._run(('shell', 'dumpsys', 'activity', 'activities')), '当前活动')
+        self.assertIs(run.call_args.kwargs['text'], False)
+
+    def test_malformed_adb_output_is_a_classified_transport_failure(self):
+        bridge = AdbObserverBridge('emulator-5554', PACKAGE)
+        with mock.patch('alas_headless.semantic_oracle.subprocess.run',
+                        return_value=SimpleNamespace(stdout=b'\x80')):
+            with self.assertRaises(ObserverTransportError):
+                bridge._run(('shell', 'dumpsys', 'activity', 'activities'))
     def test_observer_bridge_targets_the_pinned_adb_server(self):
         bridge = AdbObserverBridge(
             "127.0.0.1:5589",
@@ -16,7 +29,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
             adb="/runtime/platform-tools/adb",
             adb_server_port=5043,
         )
-        completed = SimpleNamespace(stdout="device\n")
+        completed = SimpleNamespace(stdout=b"device\n")
         with mock.patch(
             "alas_headless.semantic_oracle.subprocess.run",
             return_value=completed,
@@ -35,7 +48,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         )
 
     def test_observer_bridge_uses_only_its_configured_adb_server(self):
-        completed = SimpleNamespace(stdout="device\n")
+        completed = SimpleNamespace(stdout=b"device\n")
         with mock.patch(
             "alas_headless.semantic_oracle.subprocess.run",
             return_value=completed,

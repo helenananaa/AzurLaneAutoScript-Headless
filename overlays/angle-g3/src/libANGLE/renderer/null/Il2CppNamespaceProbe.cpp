@@ -26,6 +26,7 @@
 #include <limits>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "common/unsafe_buffers.h"
 #endif
@@ -34,6 +35,13 @@ namespace rx::alas {
 
 #if defined(ANGLE_PLATFORM_ANDROID)
 namespace {
+std::mutex gGlobeProjectionMutex;
+bool gGlobeProjectionRequested = false;
+float gGlobeProjectionX = 0, gGlobeProjectionY = 0;
+std::mutex gMapDragMutex;
+bool gMapDragRequested = false;
+uint32_t gMapDragScope = 1;
+std::array<float, 4> gMapDragEndpoints = {};
 constexpr std::array<std::string_view, kIl2CppAllowlistSize>
     kAllowlistedSymbols = {
         "il2cpp_domain_get",
@@ -100,7 +108,10 @@ uintptr_t ResolveDynamicAddress(const dl_phdr_info &info, ElfW(Addr) value,
   return IsRangeInModule(info, absolute, size) ? absolute : 0;
 }
 
-bool ResolveFromDynamic(const dl_phdr_info &info, Il2CppDynamicProbe *result) {
+bool ResolveFromDynamic(const dl_phdr_info &info, Il2CppDynamicProbe *result,
+                        const std::string_view *names = kAllowlistedSymbols.data(),
+                        size_t nameCount = kAllowlistedSymbols.size()) {
+  if (nameCount > result->symbols.size()) return false;
   result->diagnosticStage = 10;
   const ElfW(Dyn) *dynamic = nullptr;
   size_t dynamicCount = 0;
@@ -196,9 +207,28 @@ bool ResolveFromDynamic(const dl_phdr_info &info, Il2CppDynamicProbe *result) {
       continue;
     }
     const std::string_view name = remaining.substr(0, terminator);
-    for (size_t allowlistIndex = 0; allowlistIndex < kAllowlistedSymbols.size();
+    if (name == "il2cpp_field_get_type") {
+      const uintptr_t address = info.dlpi_addr + symbol.st_value;
+      if (IsRangeInModule(info, address, 1)) result->optionalFieldGetType = address;
+    }
+    if (name == "il2cpp_field_get_flags" || name == "il2cpp_field_static_get_value") {
+      const uintptr_t address = info.dlpi_addr + symbol.st_value;
+      if (IsRangeInModule(info, address, 1)) {
+        if (name == "il2cpp_field_get_flags") result->optionalFieldGetFlags = address;
+        else result->optionalFieldStaticGetValue = address;
+      }
+    }
+    if (name == "il2cpp_method_get_flags" || name == "il2cpp_object_get_class" || name == "il2cpp_class_get_image") {
+      const uintptr_t address = info.dlpi_addr + symbol.st_value;
+      if (IsRangeInModule(info, address, 1)) {
+        if (name == "il2cpp_method_get_flags") result->optionalMethodGetFlags = address;
+        else if (name == "il2cpp_object_get_class") result->optionalObjectGetClass = address;
+        else result->optionalClassGetImage = address;
+      }
+    }
+    for (size_t allowlistIndex = 0; allowlistIndex < nameCount;
          ++allowlistIndex) {
-      if (name != kAllowlistedSymbols[allowlistIndex] ||
+      if (name != ANGLE_UNSAFE_BUFFERS(names[allowlistIndex]) ||
           result->symbols[allowlistIndex] != 0) {
         continue;
       }
@@ -223,6 +253,46 @@ int FindAndResolveIl2Cpp(dl_phdr_info *info, size_t, void *opaque) {
   result->moduleFound = true;
   result->dynamicParsed = ResolveFromDynamic(*info, result);
   return 1;
+}
+
+// Optional, loaded-module observation. Absence does not affect IL2CPP/UI admission.
+constexpr std::array<std::string_view, 14> kLuaReadSymbols = {
+    "lua_gettop", "lua_settop", "lua_type", "lua_pushstring", "lua_rawget",
+    "lua_pushnil", "lua_next", "lua_tonumber", "lua_toboolean", "lua_tolstring",
+    "lua_getupvalue", "lua_topointer", "lua_checkstack", "lua_version"};
+int FindAndResolveLua(dl_phdr_info *info, size_t, void *opaque) {
+  if (!info || !info->dlpi_name) return 0;
+  const std::string_view path(info->dlpi_name);
+  const size_t slash = path.rfind('/');
+  if (path.substr(slash == std::string_view::npos ? 0 : slash + 1) != "libtolua.so") return 0;
+  auto *result = static_cast<Il2CppDynamicProbe *>(opaque);
+  result->moduleFound = true;
+  result->dynamicParsed = ResolveFromDynamic(*info, result, kLuaReadSymbols.data(), kLuaReadSymbols.size());
+  return 1;
+}
+NativeLuaReadApi LoadedLuaReadApi() {
+  static Il2CppDynamicProbe loaded;
+  if (loaded.symbolCount != kLuaReadSymbols.size()) {
+    loaded = {};
+    dl_iterate_phdr(FindAndResolveLua, &loaded);
+  }
+  NativeLuaReadApi api;
+  if (!loaded.dynamicParsed || loaded.symbolCount != kLuaReadSymbols.size()) return api;
+  api.getTop = reinterpret_cast<decltype(api.getTop)>(loaded.symbols[0]);
+  api.setTop = reinterpret_cast<decltype(api.setTop)>(loaded.symbols[1]);
+  api.type = reinterpret_cast<decltype(api.type)>(loaded.symbols[2]);
+  api.pushString = reinterpret_cast<decltype(api.pushString)>(loaded.symbols[3]);
+  api.rawGet = reinterpret_cast<decltype(api.rawGet)>(loaded.symbols[4]);
+  api.pushNil = reinterpret_cast<decltype(api.pushNil)>(loaded.symbols[5]);
+  api.next = reinterpret_cast<decltype(api.next)>(loaded.symbols[6]);
+  api.toNumber = reinterpret_cast<decltype(api.toNumber)>(loaded.symbols[7]);
+  api.toBoolean = reinterpret_cast<decltype(api.toBoolean)>(loaded.symbols[8]);
+  api.toString = reinterpret_cast<decltype(api.toString)>(loaded.symbols[9]);
+  api.getUpvalue = reinterpret_cast<decltype(api.getUpvalue)>(loaded.symbols[10]);
+  api.toPointer = reinterpret_cast<decltype(api.toPointer)>(loaded.symbols[11]);
+  api.checkStack = reinterpret_cast<decltype(api.checkStack)>(loaded.symbols[12]);
+  api.version = reinterpret_cast<decltype(api.version)>(loaded.symbols[13]);
+  return api;
 }
 
 struct UiProbeResult {
@@ -251,6 +321,11 @@ struct UiProbeResult {
   std::array<ObserverToggleRecord, kMaxObserverToggles> toggles = {};
   std::array<ObserverTextRecord, kMaxObserverTexts> texts = {};
   std::array<ObserverImageRecord, kMaxObserverImages> images = {};
+  uint32_t globeObjectStatus = 0, globeObjectCount = 0, globeObjectTruncated = 0, globeObjectErrors = 0;
+  std::array<char, kObserverPathBytes> globeCameraPath = {};
+  std::array<ObserverGlobeObjectRecord, 512> globeObjects = {};
+  NativeLuaGlobeDiagnostic luaGlobe = {};
+  ObserverMapDragProof mapDrag = {};
   uint32_t privatePhysicsStatus = 0;
   uint32_t colliderCount = 0;
   uint32_t colliderTruncated = 0;
@@ -352,7 +427,18 @@ bool IsShipyardSeriesControl(std::string_view name, std::string_view path) {
          EndsWith(path, "version_panel/window/content/" + std::string(name));
 }
 
+bool IsMeowfficerPurchaseControl(std::string_view name, std::string_view path) {
+  if ((name == "home" || name == "reserve_btn" || name == "boxes_btn") &&
+      EndsWith(path, "CommanderCatDockUI(Clone)/box/" + std::string(name))) return true;
+  if (name == "back_btn" &&
+      EndsWith(path, "CommanderCatUI(Clone)/blur_panel/top/back_btn")) return true;
+  if ((name == "max" || name == "Button") &&
+      EndsWith(path, "CommanderReserveUI(Clone)/frame/bg1/" + std::string(name))) return true;
+  return name == "frame" && EndsWith(path, "CommanderReserveUI(Clone)/frame");
+}
+
 bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
+  if (IsMeowfficerPurchaseControl(name, path)) return true;
   if (IsShipyardSeriesControl(name, path)) return true;
   if (name == "mouseChild" && IsCampaignScoutControl(path)) {
     return true;
@@ -502,14 +588,14 @@ bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
       EndsWith(path, name == "get_btn" ? "/frame/get_btn" : "/frame/go_btn")) {
     return true;
   }
-  if (name == "bgNormal$" &&
-      EndsWith(path, "/bgNormal$")) {
+  if ((name == "bgNormal$" || name == "bgEmergence$") &&
+      EndsWith(path, "/" + std::string(name))) {
     constexpr std::string_view kPrefix =
         "EventUI(Clone)/scrollRect$/content/";
     const size_t prefix = path.find(kPrefix);
     if (prefix != std::string_view::npos) {
       const size_t indexBegin = prefix + kPrefix.size();
-      const size_t indexEnd = path.size() - std::string_view("/bgNormal$").size();
+      const size_t indexEnd = path.size() - name.size() - 1;
       if (indexBegin < indexEnd &&
           std::all_of(path.begin() + indexBegin, path.begin() + indexEnd,
                       [](char value) { return value >= '0' && value <= '9'; })) {
@@ -710,7 +796,8 @@ bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
   if (EndsWith(path, "SelectDorm3DUI(Clone)/Main/option/home") ||
       EndsWith(path, "SelectDorm3DUI(Clone)/Main/btn_switch/left") ||
       EndsWith(path, "SelectDorm3DUI(Clone)/Main/btn_switch/right") ||
-      EndsWith(path, "SelectDorm3DUI(Clone)/Map/floor_2/Xinzexi")) {
+      EndsWith(path, "SelectDorm3DUI(Clone)/Map/floor_2/Xinzexi") ||
+      EndsWith(path, "SelectDorm3DUI(Clone)/Map/floor_2/Xinzexi_special")) {
     return true;
   }
   if (name == "award_btn" &&
@@ -929,6 +1016,12 @@ bool ShouldEvaluateToggleTopRaycast(std::string_view name,
                         "filter/content/toggle_tpl(Clone)");
 }
 
+bool IsArchivesRewardMarker(std::string_view path) {
+  return EndsWith(path, "WorldBossUI(Clone)/pages/ArchivesWorldBossEmptyUI(Clone)/archives_btn/tip") ||
+         EndsWith(path, "WorldBossUI(Clone)/pages/ArchivesWorldBossDetailUI(Clone)/archives_btn/tip") ||
+         EndsWith(path, "WorldBossUI(Clone)/pages/ArchivesWorldBossListUI(Clone)/main/award/get_all");
+}
+
 bool ShouldEvaluateImageTopRaycast(std::string_view name,
                                    std::string_view path) {
   if (EndsWith(path, "DockyardQuickSelectSettingUI(Clone)/window/notifications/options/notify_tpl_0/on/Image2")) return true;
@@ -1018,7 +1111,8 @@ using LoadedImageObjectCollector =
 const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
                                  const void *coreImage, const void *uiImage,
                                  const void *uiModuleImage,
-                                 const void *textMeshProImage, const void *physicsImage, int screenWidth,
+                                 const void *textMeshProImage, const void *physicsImage,
+                                 const void *gameImage, const void *systemImage, int screenWidth,
                                  int screenHeight) {
   // Campaign maps need more complete Image records than overlay pages.  Keep
   // the large reusable collection out of UnityMain's comparatively small
@@ -1043,6 +1137,9 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
   result.imageSourceCount = 0;
   result.imageSourceCapacity = 0;
   result.privatePhysicsStatus = 0;
+  result.globeObjectStatus = result.globeObjectCount = result.globeObjectTruncated = result.globeObjectErrors = 0;
+  result.globeCameraPath.fill(0);
+  result.luaGlobe = {};
   result.colliderCount = 0;
   result.colliderTruncated = 0;
   result.colliderErrors = 0;
@@ -1071,6 +1168,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
   using ClassFromType = void *(*)(const void *);
   using ClassGetFieldFromName = void *(*)(void *, const char *);
   using FieldGetValue = void (*)(void *, void *, void *);
+  using FieldGetType = const void *(*)(void *);
 
   const auto classFromName = reinterpret_cast<ClassFromName>(probe.symbols[7]);
   const auto classGetMethodFromName =
@@ -1093,6 +1191,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
   const auto classGetFieldFromName =
       reinterpret_cast<ClassGetFieldFromName>(probe.symbols[30]);
   const auto fieldGetValue = reinterpret_cast<FieldGetValue>(probe.symbols[31]);
+  const auto optionalFieldGetType = reinterpret_cast<FieldGetType>(probe.optionalFieldGetType);
 
   void *sceneManagerClass =
       classFromName(coreImage, "UnityEngine.SceneManagement", "SceneManager");
@@ -1132,6 +1231,24 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
       findMethodInHierarchy(buttonClass, "get_isActiveAndEnabled");
   const void *getInteractable =
       findMethodInHierarchy(buttonClass, "get_interactable");
+  const void *getButtonOnClick = findMethodInHierarchy(buttonClass, "get_onClick");
+  void *unityEventBaseClass = classFromName(coreImage, "UnityEngine.Events", "UnityEventBase");
+  void *invokableCallListClass = classFromName(coreImage, "UnityEngine.Events", "InvokableCallList");
+  void *eventCallsField = unityEventBaseClass
+                             ? classGetFieldFromName(unityEventBaseClass, "m_Calls")
+                             : nullptr;
+  const void *getClickListenerCount = invokableCallListClass
+                                         ? findMethodInHierarchy(invokableCallListClass, "get_Count")
+                                         : nullptr;
+  void *runtimeCallsField = invokableCallListClass
+                               ? classGetFieldFromName(invokableCallListClass, "m_RuntimeCalls")
+                               : nullptr;
+  void *runtimeCallsClass = runtimeCallsField && optionalFieldGetType
+                               ? classFromType(optionalFieldGetType(runtimeCallsField))
+                               : nullptr;
+  const void *getRuntimeClickListenerCount = runtimeCallsClass
+                                                ? findMethodInHierarchy(runtimeCallsClass, "get_Count")
+                                                : nullptr;
   const void *getToggleActiveAndEnabled =
       toggleClass != nullptr
           ? findMethodInHierarchy(toggleClass, "get_isActiveAndEnabled")
@@ -1162,6 +1279,9 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
       imageClass != nullptr
           ? findMethodInHierarchy(imageClass, "get_isActiveAndEnabled")
           : nullptr;
+  void *canvasRendererClass = uiModuleImage ? classFromName(uiModuleImage, "UnityEngine", "CanvasRenderer") : nullptr;
+  const void *getImageCanvasRenderer = imageClass ? findMethodInHierarchy(imageClass, "get_canvasRenderer") : nullptr;
+  const void *getInheritedAlpha = canvasRendererClass ? findMethodInHierarchy(canvasRendererClass, "GetInheritedAlpha") : nullptr;
   const void *getImageSprite =
       imageClass != nullptr ? findMethodInHierarchy(imageClass, "get_sprite")
                             : nullptr;
@@ -1493,7 +1613,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
   };
 
   auto populateControlRecord = [&](void *component, bool interactable,
-                                   ObserverButtonRecord *record) {
+                                   ObserverButtonRecord *record, bool allowInactive = false) {
     if (component == nullptr || record == nullptr || getGameObject == nullptr ||
         getTransform == nullptr || getName == nullptr ||
         getActiveInHierarchy == nullptr) {
@@ -1507,11 +1627,11 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
     if (gameObject == nullptr || transform == nullptr ||
         !invokeValue(getActiveInHierarchy, gameObject, nullptr,
                      &activeInHierarchy, sizeof(uint8_t)) ||
-        !activeInHierarchy) {
+        (!activeInHierarchy && !allowInactive)) {
       return false;
     }
 
-    record->flags = 0x1u | 0x2u | (interactable ? 0x4u : 0u);
+    record->flags = (activeInHierarchy ? 0x1u | 0x2u : 0u) | (interactable ? 0x4u : 0u);
     const std::string objectName = invokeString(gameObject);
     if (!objectName.empty()) {
       if (!CopyBoundedString(objectName, &record->name)) {
@@ -1753,6 +1873,8 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
     }
 
     ObserverButtonRecord &record = result.records[result.recordCount++];
+    record.clickListenerCount = -1;
+    record.runtimeClickListenerCount = -1;
     record.flags = 0x1u | 0x2u | (interactable ? 0x4u : 0u);
     if (getInstanceId != nullptr) {
       invokeValue(getInstanceId, gameObject, nullptr, &record.instanceId, sizeof(record.instanceId));
@@ -1782,6 +1904,29 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
         record.flags |= 0x200u;
       }
       record.flags |= 0x10u;
+    }
+
+    // Read the existing event list without invoking it or rebuilding its cache.
+    // Missing metadata affects this diagnostic alone, never target admission.
+    if (IsMeowfficerPurchaseControl(objectName, path) && getButtonOnClick &&
+        eventCallsField && getClickListenerCount) {
+      void *event = invokeObject(getButtonOnClick, button);
+      void *calls = nullptr;
+      if (event) fieldGetValue(event, eventCallsField, &calls);
+      int32_t count = -1;
+      if (calls && invokeValue(getClickListenerCount, calls, nullptr, &count, sizeof(count)) &&
+          count >= 0) {
+        record.clickListenerCount = count;
+      }
+      void *runtimeCalls = nullptr;
+      if (calls && runtimeCallsField && getRuntimeClickListenerCount) {
+        fieldGetValue(calls, runtimeCallsField, &runtimeCalls);
+        count = -1;
+        if (runtimeCalls && invokeValue(getRuntimeClickListenerCount, runtimeCalls, nullptr,
+                                       &count, sizeof(count)) && count >= 0) {
+          record.runtimeClickListenerCount = count;
+        }
+      }
     }
 
     Vector3 world = {};
@@ -1898,6 +2043,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
       if ((objectName == "extend" &&
            EndsWith(path, "NewMainMellowTheme(Clone)/frame/left/extend")) ||
           IsCampaignPreparationSwitch(objectName, path) ||
+          IsMeowfficerPurchaseControl(objectName, path) ||
           IsRetirementControl(path) || IsSubmarineCallControl(path) ||
           IsCampaignStrategyDetailsControl(path) || IsCampaignDeploymentControl(path) ||
           IsCampaignScoutControl(path) || IsShipyardSeriesControl(objectName, path) ||
@@ -1957,9 +2103,11 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
       bool raycastMatches =
           topRaycastMatches(transform, Vector2{record.screenX, record.screenY},
                             &raycastEvaluated);
-      if (path == "OverlayCamera/Overlay/UIMain/LevelUpWindow/bg") {
-        // This Button's center can be covered by the unlock artwork. Always
-        // validate the actual integer input point, even if its float pivot hit.
+      if (path == "OverlayCamera/Overlay/UIMain/LevelUpWindow/bg" ||
+          EndsWith(path, "SelectDorm3DUI(Clone)/Map/floor_2/Xinzexi_special")) {
+        // The level-up backdrop and the duplicate New Jersey special tiles
+        // need a real top hit at the exact integer input point.  The latter
+        // must identify one owning Button despite identical paths and bounds.
         int x = 0;
         int y = 0;
         raycastMatches = FindPrivateQuartersLevelUpPoint(
@@ -2233,20 +2381,22 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
       std::array<void *, kReservedTrailingImages> trailingImages = {};
       size_t trailingImageCount = 0;
 
-      auto appendImageRecord = [&](void *image) {
+      auto appendImageRecord = [&](void *image, bool allowInactive = false) {
         if (result.imageRecordCount >= result.images.size()) {
           result.imageRecordTruncated = 1;
           return;
         }
         ObserverButtonRecord geometry;
-        if (!populateControlRecord(image, false, &geometry)) {
+        if (!populateControlRecord(image, false, &geometry, allowInactive)) {
           ++result.uiRecordErrors;
           return;
         }
         bool raycastTarget = false;
+        bool activeAndEnabled = false;
         Color color = {};
         float fillAmount = 0.0f;
-        if (!invokeBoolean(getImageRaycastTarget, image, &raycastTarget) ||
+        if (!invokeBoolean(getImageActiveAndEnabled, image, &activeAndEnabled) ||
+            !invokeBoolean(getImageRaycastTarget, image, &raycastTarget) ||
             !invokeValue(getImageColor, image, nullptr, &color,
                          sizeof(color)) ||
             !invokeValue(getImageFillAmount, image, nullptr, &fillAmount,
@@ -2259,7 +2409,8 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
         record.name = geometry.name;
         record.path = geometry.path;
         record.flags =
-            0x1u | 0x2u | 0x20u | (raycastTarget ? 0x40u : 0u) | 0x80u | 0x100u;
+            (geometry.flags & 0x1u) | (activeAndEnabled ? 0x2u : 0u) |
+            0x20u | (raycastTarget ? 0x40u : 0u) | 0x80u | 0x100u;
         if ((geometry.flags & 0x200u) != 0) {
           record.flags |= 0x10u;
         }
@@ -2277,6 +2428,22 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
         record.blue = color.blue;
         record.alpha = color.alpha;
         record.fillAmount = fillAmount;
+        // Optional CanvasGroup visibility is independent from Image.color.
+        // A missing getter leaves this capability unknown, without losing UI records.
+        void *canvasRenderer = getImageCanvasRenderer ? invokeObject(getImageCanvasRenderer, image) : nullptr;
+        float inheritedAlpha = 0;
+        if (canvasRenderer && getInheritedAlpha &&
+            invokeValue(getInheritedAlpha, canvasRenderer, nullptr, &inheritedAlpha, sizeof(inheritedAlpha)) &&
+            std::isfinite(inheritedAlpha)) {
+          record.inheritedAlpha = inheritedAlpha;
+          record.flags |= 0x2000u;
+        }
+
+        if ((geometry.flags & 0x100u) != 0) {
+          record.adbX = geometry.adbX;
+          record.adbY = geometry.adbY;
+          record.flags |= 0x1000u; // native transform projection; observation only
+        }
         if ((geometry.flags & 0x400u) != 0) {
           record.adbLeft = geometry.adbLeft;
           record.adbTop = geometry.adbTop;
@@ -2314,7 +2481,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
         const std::string_view imagePath(
             record.path.data(),
             ANGLE_UNSAFE_TODO(strnlen(record.path.data(), record.path.size())));
-        if (ShouldEvaluateImageTopRaycast(imageName, imagePath) &&
+        if (activeAndEnabled && ShouldEvaluateImageTopRaycast(imageName, imagePath) &&
             (geometry.flags & 0x100u) != 0 && (geometry.flags & 0x400u) != 0) {
           if (EndsWith(imagePath, "DockyardQuickSelectSettingUI(Clone)/window/notifications/options/notify_tpl_0/on/Image2")) {
             geometry.screenX = (geometry.screenLeft + geometry.screenRight) / 2.0f;
@@ -2340,6 +2507,33 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
           continue;
         }
         if (!active) {
+          // Game-computed archive reward eligibility uses SetActive(false).
+          // Export only these reviewed markers under an active owner; absence
+          // of an arbitrary inactive Image is never negative reward evidence.
+          void *object = invokeObject(getGameObject, image);
+          const std::string name = object != nullptr ? invokeString(object) : std::string();
+          if (name != "tip" && name != "get_all") {
+            continue;
+          }
+          void *transform = invokeObject(getTransform, object);
+          void *parent = transform != nullptr && getParent != nullptr
+                             ? invokeObject(getParent, transform) : nullptr;
+          void *owner = parent != nullptr ? invokeObject(getGameObject, parent) : nullptr;
+          bool ownerActive = false;
+          if (owner == nullptr || !invokeBoolean(getActiveInHierarchy, owner, &ownerActive) ||
+              !ownerActive) {
+            continue;
+          }
+          std::string path;
+          for (int depth = 0; transform != nullptr && depth < 24; ++depth) {
+            const std::string part = invokeString(transform);
+            if (part.empty()) break;
+            path = path.empty() ? part : part + "/" + path;
+            transform = getParent != nullptr ? invokeObject(getParent, transform) : nullptr;
+          }
+          if (IsArchivesRewardMarker(path)) {
+            appendImageRecord(image, true);
+          }
           continue;
         }
         if (result.imageRecordCount < ordinaryLimit) {
@@ -2411,6 +2605,590 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
                       fleetImages.begin() + fleetImageCount,
                       image) == fleetImages.begin() + fleetImageCount) {
           appendImageRecord(image);
+        }
+      }
+    }
+  }
+
+  // Observe an ALAS-selected OS gesture at the actual Unity UI drag port.
+  // Additive, optional capability: no input callbacks are invoked here.
+  bool mapDragRequested = false;
+  {
+    std::lock_guard<std::mutex> lock(gMapDragMutex);
+    mapDragRequested = gMapDragRequested;
+    result.mapDrag.endpoints = gMapDragEndpoints;
+    result.mapDrag.scope = gMapDragScope;
+  }
+  if (mapDragRequested) {
+    auto &proof = result.mapDrag;
+    proof.status = 2;
+    auto pathOf = [&](void *transform) {
+      std::string path;
+      for (int depth = 0; transform && depth < 64; ++depth) {
+        const std::string part = invokeString(transform);
+        if (part.empty()) break;
+        path = path.empty() ? part : part + "/" + path;
+        transform = getParent ? invokeObject(getParent, transform) : nullptr;
+      }
+      return path;
+    };
+    void *dragClass = gameImage ? classFromName(gameImage, "", "EventTriggerListener") : nullptr;
+    const void *enabledGetter = dragClass ? findMethodInHierarchy(dragClass, "get_isActiveAndEnabled") : nullptr;
+    LoadedObjectCollector handlers;
+    void *handler = nullptr, *handlerTransform = nullptr;
+    size_t matching = 0;
+    std::vector<std::pair<void *, void *>> enabledHandlers;
+    if (dragClass && enabledGetter && raycastReady &&
+        collectLoadedInstances(dragClass, &handlers) && !handlers.truncated) {
+      for (size_t i = 0; i < handlers.count; ++i) {
+        void *candidate = handlers.objects[i];
+        void *go = invokeObject(getGameObject, candidate);
+        void *transform = go ? invokeObject(getTransform, go) : nullptr;
+        bool active = false, enabled = false;
+        if (!transform || !invokeBoolean(getActiveInHierarchy, go, &active) ||
+            !invokeBoolean(enabledGetter, candidate, &enabled)) { matching = 2; break; }
+        if (!active || !enabled) continue;
+        enabledHandlers.emplace_back(transform, candidate);
+        const char *expectedPath = proof.scope == 2 ? "WorldMap3D/entity/Plane"
+            : "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer";
+        if (pathOf(transform) != expectedPath) continue;
+        ++matching; handler = candidate; handlerTransform = transform;
+      }
+    }
+    if (matching == 1 && handler && handlerTransform &&
+        invokeValue(getInstanceId, handler, nullptr, &proof.handlerInstanceId, sizeof(proof.handlerInstanceId)) &&
+        proof.handlerInstanceId != 0 && CopyBoundedString(pathOf(handlerTransform), &proof.handlerPath)) {
+      proof.status = 1;
+      for (size_t i = 0; i < proof.samples.size(); ++i) {
+        auto &sample = proof.samples[i];
+        const float fraction = static_cast<float>(i) / static_cast<float>(proof.samples.size() - 1);
+        sample.x = proof.endpoints[0] + fraction * (proof.endpoints[2] - proof.endpoints[0]);
+        sample.y = proof.endpoints[1] + fraction * (proof.endpoints[3] - proof.endpoints[1]);
+        if (sample.x < 0 || sample.y < 0 || sample.x >= screenWidth || sample.y >= screenHeight) continue;
+        bool evaluated = false;
+        const bool owned = topRaycastMatches(handlerTransform,
+            Vector2{sample.x, static_cast<float>(screenHeight) - sample.y}, &evaluated);
+        if (!evaluated) { proof.status = 2; continue; }
+        int32_t hitCount = 0;
+        if (!invokeValue(getRaycastCount, raycastResults, nullptr, &hitCount, sizeof(hitCount))) { proof.status = 2; continue; }
+        sample.owned = owned ? 1u : 0u;
+        if (hitCount > 0) {
+          int32_t firstIndex = 0; void *arguments[] = {&firstIndex};
+          void *first = invokeObject(getRaycastItem, raycastResults, arguments); void *go = nullptr;
+          if (first) fieldGetValue(first, raycastGameObjectField, &go);
+          void *topTransform = go ? invokeObject(getTransform, go) : nullptr;
+          if (!topTransform || !CopyBoundedString(pathOf(topTransform), &sample.topPath)) { proof.status = 2; continue; }
+          // ExecuteEvents chooses the nearest enabled IDragHandler. A child
+          // EventTriggerListener must not silently be treated as the parent.
+          bool reachedHandler = false;
+          for (int depth = 0; topTransform && depth < 64; ++depth) {
+            for (const auto &entry : enabledHandlers) {
+              if (entry.first == topTransform) {
+                if (entry.second != handler) sample.owned = 0;
+                reachedHandler = true;
+              }
+            }
+            if (reachedHandler) break;
+            topTransform = getParent ? invokeObject(getParent, topTransform) : nullptr;
+          }
+          if (!reachedHandler) sample.owned = 0;
+        }
+      }
+    }
+  }
+
+  // Optional globe geometry is observation only; projected renderer centers
+  // do not authorize input or identify a zone without a reviewed game mapping.
+  bool globeVisible = false;
+  for (size_t i = 0; i < result.recordCount; ++i) {
+    globeVisible |= EndsWith(std::string(result.records[i].path.data()),
+        "top/adapt/top_chapter/back_button");
+  }
+  if (globeVisible) {
+    result.globeObjectStatus = 2;
+    // Unity main-thread, raw scalar diagnostics only. GetMainState is a typed
+    // managed getter; no Lua function, callback, metamethod or workflow is run.
+    result.luaGlobe.status = 2;
+    result.luaGlobe.stage = 10;
+    if (gameImage && systemImage && optionalFieldGetType) {
+      void *client = classFromName(gameImage, "", "LuaClient");
+      const void *getter = client ? classGetMethodFromName(client, "GetMainState", 0) : nullptr;
+      void *stateClass = getter ? classFromType(methodGetReturnType(getter)) : nullptr;
+      void *pointerClass = classFromName(systemImage, "System", "IntPtr");
+      void *field = nullptr;
+      for (void *owner = stateClass; owner && !field; owner = classGetParent(owner))
+        field = classGetFieldFromName(owner, "L");
+      result.luaGlobe.stage = 11;
+      if (field && pointerClass && classFromType(optionalFieldGetType(field)) == pointerClass) {
+        void *getterException = nullptr;
+        void *stateObject = runtimeInvoke(getter, nullptr, nullptr, &getterException);
+        void *nativeState = nullptr;
+        if (getterException) {
+          result.luaGlobe.stage = 13; // Getter threw; no field or Lua access.
+        } else if (!stateObject) {
+          result.luaGlobe.stage = 14; // Getter returned no managed state.
+        } else {
+          fieldGetValue(stateObject, field, &nativeState);
+          result.luaGlobe.stage = nativeState ? 12u : 15u;
+        }
+        if (!nativeState && probe.optionalFieldGetFlags && probe.optionalFieldStaticGetValue) {
+          // Some clients do not own LuaClient.Instance. Read the actual typed
+          // LuaState.mainState static field, never an offset or a Lua callback.
+          using FieldGetFlags = uint32_t (*)(void *);
+          using FieldStaticGetValue = void (*)(void *, void *);
+          const auto flags = reinterpret_cast<FieldGetFlags>(probe.optionalFieldGetFlags);
+          const auto staticValue = reinterpret_cast<FieldStaticGetValue>(probe.optionalFieldStaticGetValue);
+          void *mainField = classGetFieldFromName(stateClass, "mainState");
+          result.luaGlobe.stage = 16;
+          if (mainField && (flags(mainField) & 0x10u) && !(flags(field) & 0x10u)
+              && classFromType(optionalFieldGetType(mainField)) == stateClass) {
+            void *mainState = nullptr;
+            staticValue(mainField, &mainState);
+            result.luaGlobe.stage = 17;
+            if (mainState) {
+              fieldGetValue(mainState, field, &nativeState);
+              result.luaGlobe.stage = nativeState ? 19u : 18u;
+            }
+          }
+        }
+        if (nativeState) {
+          const NativeLuaReadApi api = LoadedLuaReadApi();
+          // ToLua.ToObject reads the userdata's existing translator entry.
+          // This optional path never runs a Lua function or metamethod.
+          using MethodFlags = uint32_t (*)(const void *, uint32_t *);
+          using ObjectClass = void *(*)(void *);
+          struct IdentityContext {
+            RuntimeInvoke invoke;
+            ObjectUnbox unbox;
+            ObjectClass objectClass;
+            ClassGetParent parent;
+            void *unityObject;
+            const void *toObject, *instanceId;
+          } identity{runtimeInvoke, objectUnbox,
+              reinterpret_cast<ObjectClass>(probe.optionalObjectGetClass),
+              classGetParent, classFromName(coreImage, "UnityEngine", "Object"), nullptr, getInstanceId};
+          NativeLuaUnityObjectApi objects;
+          if (probe.optionalMethodGetFlags && probe.optionalClassGetImage
+              && identity.objectClass && identity.unityObject && getInstanceId) {
+            using ClassImage = const void *(*)(void *);
+            const auto classImage = reinterpret_cast<ClassImage>(probe.optionalClassGetImage);
+            const void *luaImage = stateClass ? classImage(stateClass) : nullptr;
+            void *toLua = luaImage ? classFromName(luaImage, "LuaInterface", "ToLua") : nullptr;
+            const void *method = toLua ? classGetMethodFromName(toLua, "ToObject", 2) : nullptr;
+            void *intClass = classFromName(systemImage, "System", "Int32");
+            void *objectClass = classFromName(systemImage, "System", "Object");
+            const auto flags = reinterpret_cast<MethodFlags>(probe.optionalMethodGetFlags);
+            uint32_t implementationFlags = 0;
+            if (method && intClass && objectClass && pointerClass && (flags(method, &implementationFlags) & 0x10u)
+                && classFromType(methodGetParam(method, 0)) == pointerClass
+                && classFromType(methodGetParam(method, 1)) == intClass
+                && classFromType(methodGetReturnType(method)) == objectClass) {
+              identity.toObject = method;
+              objects.context = &identity;
+              objects.instanceId = +[](void *opaque, void *lua, int index) -> int32_t {
+                auto &context = *static_cast<IdentityContext *>(opaque);
+                void *args[] = {&lua, &index};
+                void *exception = nullptr;
+                void *object = context.invoke(context.toObject, nullptr, args, &exception);
+                if (!object || exception) return 0;
+                bool unityObject = false;
+                for (void *klass = context.objectClass(object); klass; klass = context.parent(klass)) {
+                  if (klass == context.unityObject) { unityObject = true; break; }
+                }
+                if (!unityObject) return 0;
+                void *boxed = context.invoke(context.instanceId, object, nullptr, &exception);
+                if (!boxed || exception) return 0;
+                const void *value = context.unbox(boxed);
+                int32_t id = 0;
+                if (value) std::memcpy(&id, value, sizeof(id));
+                return id;
+              };
+            }
+          }
+          NativeLuaGlobeReader(api, nativeState, result.luaGlobe, objects).read();
+        }
+      }
+    }
+    // Read-only native metadata for the game's actual plane input component.
+    // Diagnostic records never carry an input point or authorize a gesture.
+    if (gameImage && systemImage) {
+      void *pointerClass = classFromName(gameImage, "", "PointerInfo");
+      void *typeClass = classFromName(systemImage, "System", "RuntimeType");
+      if (pointerClass && typeClass) {
+        void *pointerType = typeGetObject(classGetType(pointerClass));
+        for (const char *member : {"GetMethods", "GetFields"}) {
+          const void *getter = findMethodInHierarchy(typeClass, member, 0);
+          void *items = getter ? invokeObject(getter, pointerType) : nullptr;
+          if (!items) continue;
+          const uintptr_t count = arrayLength(items);
+          void *infoClass = classFromName(systemImage, "System.Reflection",
+              std::string(member) == "GetMethods" ? "RuntimeMethodInfo" : "RuntimeFieldInfo");
+          const void *toString = infoClass ? findMethodInHierarchy(infoClass, "ToString", 0) : nullptr;
+          if (!toString || count > 128 || static_cast<const ManagedArrayHeader *>(items)->maxLength != count) continue;
+          const auto *elements = ANGLE_UNSAFE_BUFFERS(reinterpret_cast<void *const *>(
+              reinterpret_cast<const uint8_t *>(items) + sizeof(ManagedArrayHeader)));
+          for (uintptr_t index = 0; index < count && result.globeObjectCount < result.globeObjects.size(); ++index) {
+            void *info = ANGLE_UNSAFE_BUFFERS(elements[index]);
+            const std::string signature = info ? readString(invokeObject(toString, info)) : "";
+            if (signature.empty()) continue;
+            auto &record = result.globeObjects[result.globeObjectCount++]; record = {};
+            const bool nameOk = CopyBoundedString("pointer-metadata", &record.name);
+            const bool pathOk = CopyBoundedString("PointerInfo/" + signature, &record.path);
+            record.flags = nameOk && pathOk ? 1u : 0u;
+          }
+        }
+      }
+    }
+    auto pathOf = [&](void *transform) {
+      std::string path;
+      for (int depth = 0; transform != nullptr && depth < 64; ++depth) {
+        const std::string part = invokeString(transform);
+        if (part.empty()) break;
+        path = path.empty() ? part : part + "/" + path;
+        transform = getParent ? invokeObject(getParent, transform) : nullptr;
+      }
+      return path;
+    };
+    // The camera held by the native input component may differ from the
+    // scene renderer camera. Observe the actual binding before changing input.
+    if (gameImage) {
+      void *pointerClass = classFromName(gameImage, "", "PointerInfo");
+      LoadedObjectCollector pointers;
+      if (pointerClass && collectLoadedInstances(pointerClass, &pointers) && !pointers.truncated) {
+        for (size_t i = 0; i < pointers.count; ++i) {
+          void *pointer = pointers.objects[i];
+          void *go = invokeObject(getGameObject, pointer);
+          bool active = false;
+          if (!go || !invokeBoolean(getActiveInHierarchy, go, &active) || !active ||
+              pathOf(invokeObject(getTransform, go)) != "WorldMap3D/entity/Plane") continue;
+          void *camField = classGetFieldFromName(pointerClass, "cam");
+          void *texField = classGetFieldFromName(pointerClass, "tex");
+          void *nativeCamera = nullptr, *texture = nullptr;
+          if (camField) fieldGetValue(pointer, camField, &nativeCamera);
+          if (texField) fieldGetValue(pointer, texField, &texture);
+          float mapX = 0, mapY = 0;
+          bool projectionRequested = false;
+          {
+            std::lock_guard<std::mutex> lock(gGlobeProjectionMutex);
+            projectionRequested = gGlobeProjectionRequested;
+            mapX = gGlobeProjectionX; mapY = gGlobeProjectionY;
+          }
+          const void *mapProjection = findMethodInHierarchy(pointerClass, "GetMapScreenPos", 1);
+          void *vector2Class = classFromName(coreImage, "UnityEngine", "Vector2");
+          void *vector3Class = classFromName(coreImage, "UnityEngine", "Vector3");
+          if (projectionRequested && mapProjection &&
+              classFromType(methodGetParam(mapProjection, 0)) == vector2Class &&
+              classFromType(methodGetReturnType(mapProjection)) == vector3Class &&
+              result.globeObjectCount < result.globeObjects.size()) {
+            Vector2 mapPoint{mapX, mapY}; Vector3 projected{};
+            void *mapArguments[] = {&mapPoint};
+            if (invokeValue(mapProjection, pointer, mapArguments, &projected, sizeof(projected)) &&
+                std::isfinite(projected.x) && std::isfinite(projected.y) && std::isfinite(projected.z)) {
+              auto &record = result.globeObjects[result.globeObjectCount++]; record = {};
+              CopyBoundedString("map-projection", &record.name);
+              CopyBoundedString("WorldMap3D/entity/Plane/PointerInfo/GetMapScreenPos", &record.path);
+              record.center = {mapX, mapY, 0};
+              record.screen = {projected.x, static_cast<float>(screenHeight) - projected.y, projected.z};
+              record.flags = 3u; // observation only; no plane/input authorization
+            }
+          }
+          if (nativeCamera && result.globeObjectCount < result.globeObjects.size()) {
+            auto &record = result.globeObjects[result.globeObjectCount++]; record = {};
+            void *camGo = invokeObject(getGameObject, nativeCamera);
+            void *camTransform = camGo ? invokeObject(getTransform, camGo) : nullptr;
+            const bool nameOk = CopyBoundedString("pointer-camera", &record.name);
+            const bool pathOk = CopyBoundedString(pathOf(camTransform), &record.path);
+            record.flags = nameOk && pathOk ? 1u : 0u;
+            Vector3 position{};
+            if (camTransform && invokeValue(getPosition, camTransform, nullptr, &position, sizeof(position)))
+              record.center = {position.x, position.y, position.z};
+          }
+          void *textureClass = classFromName(coreImage, "UnityEngine", "Texture");
+          const void *getWidth = textureClass ? findMethodInHierarchy(textureClass, "get_width") : nullptr;
+          const void *getHeight = textureClass ? findMethodInHierarchy(textureClass, "get_height") : nullptr;
+          // Read the game's own pointer interpretation for diagnostics. This
+          // is semantic input-component state, never a rendered frame, and
+          // the record carries no actionable point or input authorization.
+          const void *getPointerColor = findMethodInHierarchy(pointerClass, "GetPointerColor", 0);
+          if (getInstanceId)
+            invokeValue(getInstanceId, pointer, nullptr, &result.luaGlobe.activePointerId, sizeof(int32_t));
+          void *colorClass = classFromName(coreImage, "UnityEngine", "Color");
+          struct PointerColor { float r, g, b, a; } pointerColor{};
+          if (getPointerColor && colorClass &&
+              classFromType(methodGetReturnType(getPointerColor)) == colorClass &&
+              invokeValue(getPointerColor, pointer, nullptr, &pointerColor, sizeof(pointerColor)) &&
+              std::isfinite(pointerColor.r) && std::isfinite(pointerColor.g) &&
+              std::isfinite(pointerColor.b) && std::isfinite(pointerColor.a) &&
+              result.globeObjectCount < result.globeObjects.size()) {
+            auto &record = result.globeObjects[result.globeObjectCount++]; record = {};
+            const bool nameOk = CopyBoundedString("pointer-color", &record.name);
+            const bool pathOk = CopyBoundedString("WorldMap3D/entity/Plane/PointerInfo/GetPointerColor", &record.path);
+            record.center = {pointerColor.r, pointerColor.g, pointerColor.b};
+            record.extents = {pointerColor.a, 0, 0};
+            record.flags = nameOk && pathOk ? 1u : 0u;
+          }
+          int32_t width = 0, height = 0;
+          if (texture && getWidth && getHeight &&
+              invokeValue(getWidth, texture, nullptr, &width, sizeof(width)) &&
+              invokeValue(getHeight, texture, nullptr, &height, sizeof(height)) &&
+              result.globeObjectCount < result.globeObjects.size()) {
+            auto &record = result.globeObjects[result.globeObjectCount++]; record = {};
+            CopyBoundedString("pointer-texture-size", &record.name);
+            CopyBoundedString("WorldMap3D/entity/Plane/PointerInfo/tex", &record.path);
+            record.center = {static_cast<float>(width), static_cast<float>(height), 0};
+            record.flags = 1u;
+          }
+          // Optional source-texture metadata helps explain color-mask lookup
+          // failures. No texel is read and this record cannot authorize input.
+          void *texture2DClass = classFromName(coreImage, "UnityEngine", "Texture2D");
+          void *enumClass = systemImage ? classFromName(systemImage, "System", "Enum") : nullptr;
+          const void *enumToString = enumClass ? findMethodInHierarchy(enumClass, "ToString", 0) : nullptr;
+          if (texture && texture2DClass && enumToString &&
+              result.globeObjectCount < result.globeObjects.size()) {
+            std::string properties;
+            bool complete = true;
+            for (const char *property : {"format", "filterMode", "wrapMode"}) {
+              const std::string getterName = "get_" + std::string(property);
+              const void *getter = findMethodInHierarchy(texture2DClass, getterName.c_str(), 0);
+              void *valueClass = getter ? classFromType(methodGetReturnType(getter)) : nullptr;
+              bool isEnum = false;
+              void *klass = valueClass;
+              for (int depth = 0; klass && depth < 8; ++depth, klass = classGetParent(klass)) {
+                if (klass == enumClass) { isEnum = true; break; }
+              }
+              void *boxed = isEnum ? invokeObject(getter, texture) : nullptr;
+              const std::string value = boxed ? readString(invokeObject(enumToString, boxed)) : "";
+              if (value.empty()) { complete = false; break; }
+              properties += (properties.empty() ? "" : "/") + std::string(property) + "=" + value;
+            }
+            if (complete) {
+              auto &record = result.globeObjects[result.globeObjectCount++]; record = {};
+              const bool nameOk = CopyBoundedString("pointer-texture-settings", &record.name);
+              const bool pathOk = CopyBoundedString("WorldMap3D/entity/Plane/PointerInfo/tex/" + properties, &record.path);
+              record.flags = nameOk && pathOk ? 1u : 0u;
+            }
+          }
+        }
+      }
+    }
+    void *rendererClass = classFromName(coreImage, "UnityEngine", "Renderer");
+    void *boundsClass = classFromName(coreImage, "UnityEngine", "Bounds");
+    const void *getEnabled = rendererClass ? findMethodInHierarchy(rendererClass, "get_enabled") : nullptr;
+    const void *getBounds = rendererClass ? findMethodInHierarchy(rendererClass, "get_bounds") : nullptr;
+    void *centerField = boundsClass ? classGetFieldFromName(boundsClass, "m_Center") : nullptr;
+    void *extentField = boundsClass ? classGetFieldFromName(boundsClass, "m_Extents") : nullptr;
+    const void *getMainCamera = cameraClass ? findMethodInHierarchy(cameraClass, "get_main") : nullptr;
+    void *camera = getMainCamera ? invokeObject(getMainCamera, nullptr) : nullptr;
+    // The game globe camera is untagged, so Camera.main may be absent.
+    LoadedObjectCollector cameras;
+    size_t globeCameraCount = 0;
+    const void *cameraEnabled = cameraClass ? findMethodInHierarchy(cameraClass, "get_enabled") : nullptr;
+    if (cameraEnabled && collectLoadedInstances(cameraClass, &cameras)) {
+      for (size_t i = 0; i < cameras.count; ++i) {
+        void *candidate = cameras.objects[i];
+        void *go = invokeObject(getGameObject, candidate);
+        bool enabled = false, active = false;
+        if (!go || !invokeBoolean(cameraEnabled, candidate, &enabled) ||
+            !invokeBoolean(getActiveInHierarchy, go, &active) || !enabled || !active) continue;
+        void *transform = invokeObject(getTransform, go);
+        const std::string path = pathOf(transform);
+        if (result.globeObjectCount < result.globeObjects.size()) {
+          auto &record = result.globeObjects[result.globeObjectCount++]; record = {};
+          CopyBoundedString("camera:" + invokeString(go), &record.name);
+          CopyBoundedString(path, &record.path); record.flags = 1u;
+          Vector3 position{};
+          if (invokeValue(getPosition, transform, nullptr, &position, sizeof(position)))
+            record.center = {position.x, position.y, position.z};
+        }
+        if (path == "WorldMap3D/Main Camera") { camera = candidate; ++globeCameraCount; }
+      }
+    }
+    if (globeCameraCount != 1 || cameras.truncated) camera = nullptr;
+    if (camera) {
+      void *go = invokeObject(getGameObject, camera);
+      CopyBoundedString(pathOf(go ? invokeObject(getTransform, go) : nullptr), &result.globeCameraPath);
+    }
+    static thread_local LoadedObjectCollector globeCollector;
+    if (getEnabled && getBounds && centerField && extentField && collectLoadedInstances(rendererClass, &globeCollector)) {
+      result.globeObjectStatus = 1;
+      result.globeObjectTruncated = globeCollector.truncated ? 1u : 0u;
+      for (size_t i = 0; i < globeCollector.count; ++i) {
+        void *renderer = globeCollector.objects[i];
+        void *go = renderer ? invokeObject(getGameObject, renderer) : nullptr;
+        bool enabled = false, active = false;
+        if (!go || !invokeBoolean(getEnabled, renderer, &enabled) || !invokeBoolean(getActiveInHierarchy, go, &active)) {
+          ++result.globeObjectErrors; continue;
+        }
+        if (!enabled || !active) continue;
+        if (result.globeObjectCount >= result.globeObjects.size()) {
+          result.globeObjectTruncated = 1; break;
+        }
+        auto &record = result.globeObjects[result.globeObjectCount];
+        record = {};
+        if (CopyBoundedString(invokeString(go), &record.name) &&
+            CopyBoundedString(pathOf(invokeObject(getTransform, go)), &record.path)) record.flags |= 1u;
+        void *bounds = invokeObject(getBounds, renderer);
+        if (!bounds || !invokeValue(getInstanceId, renderer, nullptr, &record.instanceId, sizeof(record.instanceId))) {
+          ++result.globeObjectErrors; continue;
+        }
+        fieldGetValue(bounds, centerField, record.center.data());
+        fieldGetValue(bounds, extentField, record.extents.data());
+        bool finite = true;
+        for (int axis = 0; axis < 3; ++axis) finite &= std::isfinite(record.center[axis]) && std::isfinite(record.extents[axis]);
+        if (!finite) { ++result.globeObjectErrors; continue; }
+        Vector3 point{record.center[0], record.center[1], record.center[2]}, screen{};
+        // The game's WSEntranceTpl places its root at CalcModelPosition.
+        // Sprite bounds centers can shift with mark_port_1/mark_port_2 art;
+        // select the exact entrance root, never an art-dependent offset.
+        if (std::string(record.name.data()) == "port") {
+          void *ancestor = invokeObject(getTransform, go);
+          for (int depth = 0; ancestor && depth < 12; ++depth) {
+            const std::string ancestorPath = pathOf(ancestor);
+            const std::string ancestorName = invokeString(ancestor);
+            if (ancestorPath.rfind("WorldMap3D/entity/sprite_scene/port_", 0) == 0 &&
+                ancestorName.rfind("port_", 0) == 0) {
+              Vector3 anchor{};
+              if (invokeValue(getPosition, ancestor, nullptr, &anchor, sizeof(anchor)) &&
+                  std::isfinite(anchor.x) && std::isfinite(anchor.y) && std::isfinite(anchor.z)) {
+                point = anchor; record.portAnchor = {anchor.x, anchor.y, anchor.z}; record.flags |= 16u;
+              }
+              break;
+            }
+            ancestor = getParent ? invokeObject(getParent, ancestor) : nullptr;
+          }
+        }
+        void *arguments[] = {&point};
+        if (camera && worldToScreenPoint && invokeValue(worldToScreenPoint, camera, arguments, &screen, sizeof(screen)) &&
+            std::isfinite(screen.x) && std::isfinite(screen.y) && std::isfinite(screen.z)) {
+          record.screen = {screen.x, static_cast<float>(screenHeight) - screen.y, screen.z};
+          record.flags |= 2u;
+        }
+        ++result.globeObjectCount;
+      }
+    }
+    void *colliderClass = physicsImage ? classFromName(physicsImage, "UnityEngine", "Collider") : nullptr;
+    const void *colliderEnabled = colliderClass ? findMethodInHierarchy(colliderClass, "get_enabled") : nullptr;
+    const void *colliderBounds = colliderClass ? findMethodInHierarchy(colliderClass, "get_bounds") : nullptr;
+    static thread_local LoadedObjectCollector globeColliderCollector;
+    if (colliderEnabled && colliderBounds && centerField && extentField && collectLoadedInstances(colliderClass, &globeColliderCollector)) {
+      result.globeObjectStatus = 1;
+      result.globeObjectTruncated = globeColliderCollector.truncated ? 1u : 0u;
+      for (size_t i = 0; i < globeColliderCollector.count; ++i) {
+        void *renderer = globeColliderCollector.objects[i];
+        void *go = renderer ? invokeObject(getGameObject, renderer) : nullptr;
+        bool enabled = false, active = false;
+        if (!go || !invokeBoolean(colliderEnabled, renderer, &enabled) || !invokeBoolean(getActiveInHierarchy, go, &active)) {
+          ++result.globeObjectErrors; continue;
+        }
+        if (!enabled || !active) continue;
+        if (result.globeObjectCount >= result.globeObjects.size()) {
+          result.globeObjectTruncated = 1; break;
+        }
+        auto &record = result.globeObjects[result.globeObjectCount];
+        record = {};
+        if (CopyBoundedString("collider:" + invokeString(go), &record.name) &&
+            CopyBoundedString(pathOf(invokeObject(getTransform, go)), &record.path)) record.flags |= 1u;
+        void *bounds = invokeObject(colliderBounds, renderer);
+        if (!bounds || !invokeValue(getInstanceId, renderer, nullptr, &record.instanceId, sizeof(record.instanceId))) {
+          ++result.globeObjectErrors; continue;
+        }
+        fieldGetValue(bounds, centerField, record.center.data());
+        fieldGetValue(bounds, extentField, record.extents.data());
+        bool finite = true;
+        for (int axis = 0; axis < 3; ++axis) finite &= std::isfinite(record.center[axis]) && std::isfinite(record.extents[axis]);
+        if (!finite) { ++result.globeObjectErrors; continue; }
+        Vector3 point{record.center[0], record.center[1], record.center[2]}, screen{};
+        void *arguments[] = {&point};
+        if (camera && worldToScreenPoint && invokeValue(worldToScreenPoint, camera, arguments, &screen, sizeof(screen)) &&
+            std::isfinite(screen.x) && std::isfinite(screen.y) && std::isfinite(screen.z)) {
+          record.screen = {screen.x, static_cast<float>(screenHeight) - screen.y, screen.z};
+          record.flags |= 2u;
+        }
+        ++result.globeObjectCount;
+      }
+    }
+    // A live Renderer or PointerInfo supplies the exact projected point. Prove that
+    // its screen ray hits the sole complete world-plane collider and that
+    // EventSystem has no UI hit before exposing a typed port input point.
+    void *plane = nullptr;
+    size_t activeColliderCount = 0;
+    if (!result.globeObjectTruncated && !result.globeObjectErrors) {
+      for (size_t i = 0; i < globeColliderCollector.count; ++i) {
+        void *candidate = globeColliderCollector.objects[i];
+        void *go = invokeObject(getGameObject, candidate);
+        bool enabled = false, active = false;
+        if (!go || !invokeBoolean(colliderEnabled, candidate, &enabled) ||
+            !invokeBoolean(getActiveInHierarchy, go, &active)) { plane = nullptr; break; }
+        if (!enabled || !active) continue;
+        ++activeColliderCount;
+        if (pathOf(invokeObject(getTransform, go)) == "WorldMap3D/entity/Plane") plane = candidate;
+      }
+    }
+    void *rayClass = classFromName(coreImage, "UnityEngine", "Ray");
+    void *hitClass = physicsImage ? classFromName(physicsImage, "UnityEngine", "RaycastHit") : nullptr;
+    const void *makeRay = cameraClass ? findMethodInHierarchy(cameraClass, "ScreenPointToRay", 1) : nullptr;
+    const void *cast = colliderClass ? findMethodInHierarchy(colliderClass, "Raycast", 3) : nullptr;
+    void *floatClass = getImageFillAmount ? classFromType(methodGetReturnType(getImageFillAmount)) : nullptr;
+    void *boolClass = classFromType(methodGetReturnType(getActiveInHierarchy));
+    const bool publicCast = cast && rayClass && hitClass && floatClass && boolClass &&
+        classFromType(methodGetParam(cast, 0)) == rayClass && classFromType(methodGetParam(cast, 1)) == hitClass &&
+        classFromType(methodGetParam(cast, 2)) == floatClass && classFromType(methodGetReturnType(cast)) == boolClass;
+    const bool privateCast = cast && rayClass && hitClass && floatClass && boolClass &&
+        classFromType(methodGetParam(cast, 0)) == rayClass && classFromType(methodGetParam(cast, 1)) == floatClass &&
+        classFromType(methodGetParam(cast, 2)) == boolClass && classFromType(methodGetReturnType(cast)) == hitClass;
+    if (plane && activeColliderCount == 1 && camera && makeRay && (publicCast || privateCast)) {
+      for (size_t i = 0; i < result.globeObjectCount; ++i) {
+        auto &record = result.globeObjects[i];
+        const std::string path(record.path.data());
+        const std::string prefix = "WorldMap3D/entity/sprite_scene/port_";
+        const bool portPoint = path.rfind(prefix, 0) == 0 && std::string(record.name.data()) == "port" &&
+                               (record.flags & 19u) == 19u;
+        const bool mapPoint = path == "WorldMap3D/entity/Plane/PointerInfo/GetMapScreenPos" &&
+                              std::string(record.name.data()) == "map-projection" && (record.flags & 3u) == 3u;
+        if ((!portPoint && !mapPoint) || record.screen[2] <= 0) continue;
+        for (int sample = 0; sample < (portPoint ? 2 : 1); ++sample) {
+          ObserverGlobeObjectRecord precise{};
+          auto &proof = sample == 0 ? record : precise;
+          proof.inputX = sample == 0 ? std::round(record.screen[0]) : record.screen[0];
+          proof.inputY = sample == 0 ? std::round(record.screen[1]) : record.screen[1];
+          if (proof.inputX < 0 || proof.inputY < 0 || proof.inputX >= screenWidth || proof.inputY >= screenHeight) continue;
+          if (sample == 1) {
+            record.preciseInputX = proof.inputX; record.preciseInputY = proof.inputY;
+            record.preciseFlags = 1u;
+          }
+          Vector3 screenPoint{proof.inputX, static_cast<float>(screenHeight) - proof.inputY, 0};
+          void *rayArguments[] = {&screenPoint};
+          void *ray = invokeObject(makeRay, camera, rayArguments);
+          void *hit = objectNew(hitClass); float maxDistance = 10000; uint8_t hitValue = 0;
+          if (!ray || !hit || !objectUnbox(ray) || !objectUnbox(hit)) continue;
+          if (privateCast) {
+            void *arguments[] = {objectUnbox(ray), &maxDistance, &hitValue};
+            if (!invokeObject(cast, plane, arguments)) continue;
+          } else {
+            void *arguments[] = {objectUnbox(ray), objectUnbox(hit), &maxDistance};
+            if (!invokeValue(cast, plane, arguments, &hitValue, sizeof(hitValue))) continue;
+          }
+          if (!hitValue || !invokeValue(getInstanceId, plane, nullptr, &proof.planeInstanceId, sizeof(proof.planeInstanceId))) continue;
+          proof.flags |= 4u;
+          if (sample == 1) {
+            record.precisePlaneInstanceId = proof.planeInstanceId;
+            record.preciseFlags |= 4u;
+          }
+          bool evaluated = false;
+          const bool same = topRaycastMatches(invokeObject(getTransform, invokeObject(getGameObject, plane)), Vector2{screenPoint.x, screenPoint.y}, &evaluated);
+          int32_t uiHits = -1;
+          if (evaluated && invokeValue(getRaycastCount, raycastResults, nullptr, &uiHits, sizeof(uiHits)) && uiHits >= 0) {
+            if (uiHits == 0 || same) {
+              proof.flags |= 8u;
+              if (sample == 1) record.preciseFlags |= 8u;
+            }
+            if (uiHits > 0) {
+              int32_t firstIndex = 0; void *arguments[] = {&firstIndex};
+              void *uiHit = invokeObject(getRaycastItem, raycastResults, arguments); void *go = nullptr;
+              if (uiHit) fieldGetValue(uiHit, raycastGameObjectField, &go);
+              if (go && sample == 0) CopyBoundedString(pathOf(invokeObject(getTransform, go)), &record.uiTopPath);
+            }
+          }
         }
       }
     }
@@ -2723,6 +3501,7 @@ int32_t ObserverMainThreadTick(uint64_t requestGeneration,
   const void *uiModuleImage = nullptr;
   const void *textMeshProImage = nullptr;
   const void *physicsImage = nullptr;
+  const void *gameImage = nullptr, *systemImage = nullptr;
   for (size_t index = 0; index < assemblyCount; ++index) {
     const void *assembly = ANGLE_UNSAFE_BUFFERS(assemblies[index]);
     const void *image = assemblyGetImage(assembly);
@@ -2733,6 +3512,8 @@ int32_t ObserverMainThreadTick(uint64_t requestGeneration,
     const std::string_view imageName(name);
     assemblyCSharp |=
         imageName == "Assembly-CSharp" || imageName == "Assembly-CSharp.dll";
+    if (imageName == "Assembly-CSharp" || imageName == "Assembly-CSharp.dll") gameImage = image;
+    if (imageName == "mscorlib" || imageName == "mscorlib.dll") systemImage = image;
     unityUi |=
         imageName == "UnityEngine.UI" || imageName == "UnityEngine.UI.dll";
     if (imageName == "UnityEngine.CoreModule" ||
@@ -2785,7 +3566,7 @@ int32_t ObserverMainThreadTick(uint64_t requestGeneration,
   snapshot.mainThread = actualTid == gObserverMainThreadTid.load() ? 1u : 0u;
   if (snapshot.mainThread != 0) {
     const UiProbeResult &ui = ProbeUnityUi(
-        probe, coreImage, uiImage, uiModuleImage, textMeshProImage, physicsImage, width,
+        probe, coreImage, uiImage, uiModuleImage, textMeshProImage, physicsImage, gameImage, systemImage, width,
         height);
     snapshot.uiDiagnosticStage = ui.diagnosticStage;
     snapshot.uiMethodMask = ui.methodMask;
@@ -2807,7 +3588,15 @@ int32_t ObserverMainThreadTick(uint64_t requestGeneration,
     uiSnapshot.toggles = ui.toggles;
     uiSnapshot.texts = ui.texts;
     uiSnapshot.images = ui.images;
+    uiSnapshot.mapDrag = ui.mapDrag;
     uiSnapshot.privatePhysicsStatus = ui.privatePhysicsStatus;
+    uiSnapshot.globeObjectStatus = ui.globeObjectStatus;
+    uiSnapshot.globeObjectCount = ui.globeObjectCount;
+    uiSnapshot.globeObjectTruncated = ui.globeObjectTruncated;
+    uiSnapshot.globeObjectErrors = ui.globeObjectErrors;
+    uiSnapshot.globeCameraPath = ui.globeCameraPath;
+    uiSnapshot.globeObjects = ui.globeObjects;
+    uiSnapshot.luaGlobe = ui.luaGlobe;
     uiSnapshot.colliderCount = ui.colliderCount;
     uiSnapshot.colliderTruncated = ui.colliderTruncated;
     uiSnapshot.colliderErrors = ui.colliderErrors;
@@ -2958,6 +3747,31 @@ bool GetLatestObserverUiSnapshot(ObserverUiSnapshot *snapshot) {
   }
   *snapshot = gObserverUiSnapshot;
   return true;
+}
+
+bool RequestOperationSirenMapDrag(float x1, float y1, float x2, float y2, bool globe) {
+#if defined(ANGLE_PLATFORM_ANDROID)
+  if (!std::isfinite(x1) || !std::isfinite(y1) || !std::isfinite(x2) || !std::isfinite(y2)) return false;
+  std::lock_guard<std::mutex> lock(gMapDragMutex);
+  gMapDragEndpoints = {x1, y1, x2, y2};
+  gMapDragScope = globe ? 2u : 1u;
+  gMapDragRequested = true;
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool RequestGlobeMapProjection(float x, float y) {
+#if defined(ANGLE_PLATFORM_ANDROID)
+  if (!std::isfinite(x) || !std::isfinite(y)) return false;
+  std::lock_guard<std::mutex> lock(gGlobeProjectionMutex);
+  gGlobeProjectionX = x; gGlobeProjectionY = y;
+  gGlobeProjectionRequested = true;
+  return true;
+#else
+  return false;
+#endif
 }
 
 } // namespace rx::alas

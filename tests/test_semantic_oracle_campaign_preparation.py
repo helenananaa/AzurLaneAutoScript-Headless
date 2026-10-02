@@ -582,7 +582,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
     def test_hard_114_clear_panel_alternate_proceed_is_narrowly_reviewed(self):
         root = "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/"
 
-        def backend_for_hard():
+        def backend_for_hard(stage="11–4"):
             backend = FakeBackend([
                 make_button(
                     "btn_normal",
@@ -595,7 +595,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
                 make_button("btnBack", root + "btnBack", 1069, 191),
             ])
             backend.ui = make_ui([
-                make_text("11–4", root + "title_form/title_index"),
+                make_text(stage, root + "title_form/title_index"),
                 make_text("撕裂的夜幕", root + "title_form/title"),
                 make_text("100%", root + "progress/Text/value"),
             ], images=[make_image(root + "start_button_l", "qianwang_butten")])
@@ -610,6 +610,13 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
             "campaign/map-preparation/proceed",
         )
         self.assertEqual(len(backend.taps), 1)
+
+        other = backend_for_hard("12–4")
+        self.assertEqual(
+            make_oracle(other).click_campaign_map_preparation("12-4").semantic_id,
+            "campaign/map-preparation/proceed",
+        )
+        self.assertEqual(len(other.taps), 1)
 
         for missing in ("hard_underlay", "progress", "sprite"):
             backend = backend_for_hard()
@@ -965,8 +972,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         for image in wrong_head.ui["images"]:
             if image["path"].endswith("/panel/head/Image"):
                 image["sprite"] = "haorenlichade_m_qianting"
-        with self.assertRaisesRegex(SemanticGateClosed, "image identity is malformed"):
-            make_oracle(wrong_head).campaign_preparation_state("c1")
+        self.assertEqual(make_oracle(wrong_head).campaign_preparation_state("c1").stage_code, "c1")
         self.assertEqual(wrong_head.taps, [])
 
     def test_live_eventb_b2_map_preparation_accepts_only_reviewed_profile(self):
@@ -1041,8 +1047,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         for image in wrong_head.ui["images"]:
             if image["path"].endswith("/panel/head/Image"):
                 image["sprite"] = "emotion_zhongxun"
-        with self.assertRaisesRegex(SemanticGateClosed, "image identity is malformed"):
-            make_oracle(wrong_head).campaign_preparation_state("a2")
+        self.assertEqual(make_oracle(wrong_head).campaign_preparation_state("a2").stage_code, "a2")
         self.assertEqual(wrong_head.taps, [])
 
     def test_live_eventc_c2_hard_preparation_accepts_exact_profile(self):

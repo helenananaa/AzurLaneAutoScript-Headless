@@ -91,9 +91,35 @@ class SessionCombatPorts:
         return snapshot
 
     def _live_combat_visible(self) -> Tuple[str, ...]:
-        return alas_combat_visible_resource_names(
-            self._live_combat_snapshot(), self._live_combat_manifest()
-        )
+        try:
+            return alas_combat_visible_resource_names(
+                self._live_combat_snapshot(), self._live_combat_manifest()
+            )
+        except SemanticGateClosed as exc:
+            adapter = self.open()
+            result_path = ('OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/'
+                           'NewBattleResultStatisticsPage(Clone)/bottom/confirmBtn')
+            if (adapter.meta_beacon_active() and str(exc) ==
+                    'combat action control is not exact top-raycast actionable: '
+                    + result_path + ', raycast_top=False'):
+                state = adapter.oracle.read_state()
+                results = [b for b in state.buttons if b.path == result_path]
+                if (len(results) == 1 and results[0].active_in_hierarchy
+                        and results[0].active_and_enabled
+                        and results[0].raycast_top is False
+                        and results[0].point is not None and results[0].bounds is not None
+                        and results[0].bounds.contains(results[0].point)):
+                    # A covered/mounting statistics control is absent for this
+                    # passive poll. The original loop waits; input still needs
+                    # the independent actionable result proof.
+                    return ()
+                if len(results) == 1 and results[0].actionable:
+                    return alas_combat_visible_resource_names(
+                        self._live_combat_snapshot(), self._live_combat_manifest()
+                    )
+                if not results and adapter.oracle.meta_page_visible():
+                    return ()
+            raise
 
     def _campaign_combat_transition_error(self, exc: Exception) -> bool:
         adapter = self.adapter
@@ -196,6 +222,12 @@ class SessionCombatPorts:
 
     def combat_is_executing(self) -> bool:
         try:
+            adapter = self.open()
+            if getattr(adapter, "_exercise_execution_active", False):
+                # Exercise's native HP daemon follows the pause probe from
+                # this screenshot. Both observations must use its immutable
+                # frame even if the live client has entered result loading.
+                return adapter._frame_or_live_observation_oracle().daily_combat_visible()
             if getattr(
                 self.open().oracle,
                 "daily_battle_result_visible",
@@ -243,6 +275,16 @@ class SessionCombatPorts:
             raise SemanticGateClosed(
                 "live combat input requires one committed ALAS grid input"
             )
+        if adapter.meta_beacon_active() and resource_name == 'BATTLE_STATUS_S':
+            # META's shared grade/Worldboss statistics stack has a reviewed
+            # typed result port; its artwork is not the campaign grade asset.
+            self.refresh_tactical_input_frame()
+            oracle = self.open().oracle
+            receipt = oracle.click_daily_battle_result()
+            self._combat_last_generation = receipt.generation
+            self._combat_last_result_receipt = receipt
+            self._arm_combat_result_transition(adapter)
+            return receipt
         handle = self._runtime_handle
         if handle is None:
             raise SemanticGateClosed("semantic runtime handle is unavailable")
@@ -497,6 +539,7 @@ class SessionCombatPorts:
                 or oracle.daily_page_visible()
                 or oracle.main_page_visible()
                 or oracle.event_campaign_page_visible()
+                or (adapter.meta_beacon_active() and oracle.meta_page_visible())
             ):
                 return tuple(receipts)
             if current_raid_event is not None:

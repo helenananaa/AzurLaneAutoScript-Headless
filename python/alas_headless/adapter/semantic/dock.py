@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any, Optional, Tuple, Union
+from .contracts import AlasSemanticActionDeferred
 from ...semantic_oracle import (
     AwakenCostState,
     AwakenExecutionReceipt,
@@ -70,11 +71,11 @@ class DockAdapterPorts:
 
         if not self._awaken_flow_active or not isinstance(use_array, bool):
             raise SemanticGateClosed("awaken phase is not active")
-        if not self.awaken_allowed():
-            return "finish"
         candidates = self.oracle.awaken_dock_candidates()
         if not candidates:
             return "finish"
+        if not self.awaken_allowed():
+            raise AlasSemanticActionDeferred('awaken execution budget exhausted with remaining candidates; task completion is unproven')
         candidate = candidates[0]
         detail, _ = self.oracle.open_awaken_dock_candidate(
             candidate.position,

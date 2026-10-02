@@ -41,7 +41,7 @@ class AlasMedalShopConfigTests(unittest.TestCase):
         self.assertFalse(result["android_input_injected"])
 
     def test_valid_values_are_accepted(self):
-        for value in ("DR > PR > BookRedT3", " DR ＞ FoodT6 ", " \n "):
+        for value in ("DR > PR > BookRedT3", " DR ＞ FoodT6 ", " \n ", ">", " ＞ "):
             self.assertEqual(
                 validate_alas_medal_shop_filter(filter_=FILTER_CONTRACT, value=value),
                 value,

@@ -1,0 +1,65 @@
+diff --git a/module/os/camera.py b/module/os/camera.py
+--- a/module/os/camera.py
++++ b/module/os/camera.py
+@@ -20,6 +20,10 @@
+         return super()._map_swipe(vector, box=box)
+ 
+     def _update_view(self):
++        # Original Camera owns outside-map recovery and its existing retries.
++        return super()._update_view()
++
++    def _load_semantic_os_view(self):
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is None:
+             return super()._update_view()
+diff --git a/module/map/camera.py b/module/map/camera.py
+--- a/module/map/camera.py
++++ b/module/map/camera.py
+@@ -139,7 +139,8 @@
+             install_alas_campaign_camera_view,
+         )
+         semantic_session = current_semantic_session()
+-        if semantic_session is not None:
++        os_view_loader = getattr(self, '_load_semantic_os_view', None)
++        if semantic_session is not None and not callable(os_view_loader):
+             state = semantic_session.campaign_camera_state()
+             observation = install_alas_campaign_camera_view(
+                 self,
+@@ -153,15 +154,19 @@
+                 f'generation={observation.generation}'
+             )
+             return True
+-        self._view_init()
++        if semantic_session is None:
++            self._view_init()
+         try:
+-            if not self.is_in_map() \
+-                    and not self.is_in_strategy_submarine_move() \
+-                    and not self.is_in_strategy_mob_move() \
+-                    and not self.is_in_strategy_air_strike():
+-                logger.warning('Image to detect is not in_map')
+-                raise MapDetectionError('Image to detect is not in_map')
+-            self.view.load(self.device.image)
++            if semantic_session is not None and callable(os_view_loader):
++                os_view_loader()
++            else:
++                if not self.is_in_map() \
++                        and not self.is_in_strategy_submarine_move() \
++                        and not self.is_in_strategy_mob_move() \
++                        and not self.is_in_strategy_air_strike():
++                    logger.warning('Image to detect is not in_map')
++                    raise MapDetectionError('Image to detect is not in_map')
++                self.view.load(self.device.image)
+         except MapDetectionError as e:
+             if self.info_bar_count():
+                 logger.warning('Perspective error caused by info bar')
+@@ -321,7 +326,8 @@
+ 
+         def is_still_prev():
+             # Still the same as prev view
+-            return np.linalg.norm(self.view.center_offset - prev_center_offset) < 0.001
++            return (prev_center_offset is not None
++                    and np.linalg.norm(self.view.center_offset - prev_center_offset) < 0.001)
+ 
+         while 1:
+             # Camera.update() has no skip_first_screenshot

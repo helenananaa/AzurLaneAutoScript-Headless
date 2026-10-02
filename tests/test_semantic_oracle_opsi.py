@@ -115,6 +115,51 @@ class OperationSirenSemanticOracleTests(OperationSirenSemanticOracleTestsSupport
         self.assertEqual(state.action_points, 340)
         self.assertEqual(state.action_point_capacity, 200)
 
+    def test_operation_siren_back_rejects_msgbox_underlay_and_foreground_change(self):
+        backend = self._operation_siren_header_backend(200)
+        backend.buttons["buttons"][0]["raycast_top"] = None
+        oracle = make_oracle(backend)
+        receipt = oracle.click_operation_siren_back()
+        self.assertEqual(receipt.semantic_id, "os/page/back")
+        self.assertEqual(len(backend.taps), 1)
+        backend.taps.clear()
+        backend.buttons["buttons"].append(make_button("custom_button_1(Clone)",
+            "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)"))
+        backend.buttons["button_count"] += 1
+        with self.assertRaisesRegex(SemanticGateClosed, "not actionable"):
+            oracle.click_operation_siren_back()
+        self.assertEqual(backend.taps, [])
+        backend.buttons["buttons"].pop()
+        backend.buttons["button_count"] -= 1
+        state = oracle.read_state()
+        with mock.patch.object(oracle, "operation_siren_state"), \
+                mock.patch.object(oracle, "read_state", return_value=state), \
+                mock.patch.object(oracle, "_foreground_component", return_value="another/package"):
+            with self.assertRaisesRegex(SemanticGateClosed, "foreground changed"):
+                oracle.click_operation_siren_back()
+        self.assertEqual(backend.taps, [])
+
+    def test_operation_siren_back_closes_exact_inherited_inventory(self):
+        backend = self._operation_siren_header_backend(200)
+        path = 'OverlayCamera/Overlay/UIMain/WorldInventoryUI(Clone)/adapt/blur_panel/adapt/top/back_btn'
+        backend.buttons['buttons'].append(make_button('back_btn', path))
+        backend.buttons['button_count'] += 1
+        receipt = make_oracle(backend).click_operation_siren_back()
+        self.assertEqual(receipt.semantic_id, 'os/storage/back')
+        self.assertEqual(receipt.path, path)
+        self.assertEqual(len(backend.taps), 1)
+
+    def test_operation_siren_inherited_inventory_does_not_bypass_foreign_modal(self):
+        backend = self._operation_siren_header_backend(200)
+        backend.buttons['buttons'].extend([
+            make_button('back_btn', 'OverlayCamera/Overlay/UIMain/WorldInventoryUI(Clone)/adapt/blur_panel/adapt/top/back_btn'),
+            make_button('custom_button_1(Clone)', 'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)'),
+        ])
+        backend.buttons['button_count'] += 2
+        with self.assertRaisesRegex(SemanticGateClosed, 'storage back is not actionable'):
+            make_oracle(backend).click_operation_siren_back()
+        self.assertEqual(backend.taps, [])
+
     def test_operation_siren_header_rejects_ap_above_legacy_safety_bound(self):
         with self.assertRaisesRegex(SemanticGateClosed, "summary is inconsistent"):
             make_oracle(
@@ -613,6 +658,8 @@ class OperationSirenSemanticOracleTests(OperationSirenSemanticOracleTestsSupport
             make_oracle(backend).operation_siren_auto_search_info_count(),
             2,
         )
+        backend.ui['texts'][1]['text'] = backend.ui['texts'][0]['text']
+        self.assertEqual(make_oracle(backend).operation_siren_auto_search_info_count(), 1)
 
     def test_auto_search_reward_close_is_exact_and_actionable(self):
         path = (

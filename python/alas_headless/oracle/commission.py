@@ -18,7 +18,7 @@ from .contracts import (
     Point,
     TextState,
 )
-from .errors import SemanticGateClosed
+from .errors import SemanticCommissionRowIncomplete, SemanticGateClosed
 
 
 class CommissionOracle:
@@ -45,15 +45,16 @@ class CommissionOracle:
             raise SemanticGateClosed("commission page identity is not proven")
 
         row_pattern = re.compile(
-            r"(?:^|/)EventUI\(Clone\)/scrollRect\$/content/([0-9]+)/bgNormal\$$"
+            r"(?:^|/)EventUI\(Clone\)/scrollRect\$/content/([0-9]+)/(?:bgNormal|bgEmergence)\$$"
         )
         indexed_buttons: Dict[int, ButtonState] = {}
         row_roots: Dict[int, str] = {}
         for button in button_state.buttons:
-            if button.name != "bgNormal$":
+            if button.name not in ("bgNormal$", "bgEmergence$"):
                 continue
             match = row_pattern.search(button.path)
-            if match is None or not button.active_in_hierarchy:
+            if (match is None or not button.path.endswith("/" + button.name)
+                    or not button.active_in_hierarchy):
                 continue
             index = int(match.group(1))
             if index in indexed_buttons:
@@ -61,7 +62,7 @@ class CommissionOracle:
                     "commission row Button index is ambiguous: {0}".format(index)
                 )
             indexed_buttons[index] = button
-            row_roots[index] = button.path[: -len("/bgNormal$")]
+            row_roots[index] = button.path[: -(len(button.name) + 1)]
 
         if not indexed_buttons:
             if self.commission_is_empty():
@@ -106,6 +107,8 @@ class CommissionOracle:
                 and item.bounds is not None
             )
             if len(matches) != 1:
+                if not matches and path.endswith('/iconType$'):
+                    raise SemanticCommissionRowIncomplete(path, ui_state.generation)
                 raise SemanticGateClosed(
                     "commission row image is absent or ambiguous: " + path
                 )
@@ -149,7 +152,6 @@ class CommissionOracle:
                     "commission row status image is absent or ambiguous: " + root
                 )
             status_image = status_matches[0]
-            type_image = exact_image(root + "/iconType$")
             if not name or re.fullmatch(r"[0-9]{1,3}", level_text) is None:
                 raise SemanticGateClosed("commission row identity is malformed")
             level = int(level_text)
@@ -162,6 +164,7 @@ class CommissionOracle:
                     "commission row status sprite is not reviewed: "
                     + status_image.sprite
                 ) from exc
+            type_image = exact_image(root + "/iconType$")
             if not type_image.sprite:
                 raise SemanticGateClosed("commission row type sprite is empty")
             rows.append(
@@ -457,12 +460,12 @@ class CommissionOracle:
         if matches:
             row_pattern = re.compile(
                 r"(?:^|/)EventUI\(Clone\)/scrollRect\$/content/([0-9]+)/"
-                r"bgNormal\$$"
+                r"(?:bgNormal|bgEmergence)\$$"
             )
             visible_rows = tuple(
                 button
                 for button in button_state.buttons
-                if button.name == "bgNormal$"
+                if button.name in ("bgNormal$", "bgEmergence$")
                 and row_pattern.search(button.path) is not None
                 and button.actionable
                 and button.point is not None
@@ -850,8 +853,8 @@ class CommissionOracle:
         row_buttons = tuple(
             button
             for button in button_state.buttons
-            if button.name == "bgNormal$"
-            and button.path.endswith(root + "/bgNormal$")
+            if button.name in ("bgNormal$", "bgEmergence$")
+            and button.path.endswith(root + "/" + button.name)
             and button.active_in_hierarchy
         )
         if len(row_buttons) != 1:
@@ -927,6 +930,11 @@ class CommissionOracle:
         )
 
     def commission_start_prompt_cost(self) -> Optional[int]:
+        # Rebind the whole button/text sandwich after an opening animation;
+        # its original snapshot may have different modal button geometry.
+        return self._retry_transition_read(self._commission_start_prompt_cost_once)
+
+    def _commission_start_prompt_cost_once(self) -> Optional[int]:
         state = self.read_state()
         parts = self._msgbox_prompt_parts(state)
         if parts is None:

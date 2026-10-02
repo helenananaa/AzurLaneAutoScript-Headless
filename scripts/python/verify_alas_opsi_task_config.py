@@ -76,6 +76,8 @@ def main() -> int:
     source.add_argument("--upstream", type=Path)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
+    if args.output:
+        args.output = args.output.resolve()
     result = (
         verify_clean_upstream(args.upstream)
         if args.upstream is not None

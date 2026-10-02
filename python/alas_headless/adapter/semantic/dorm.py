@@ -17,6 +17,7 @@ from ...semantic_oracle import (
 from .contracts import AlasSemanticUnmapped, _DormFlowContext
 from .dispatch_result import UNHANDLED
 from .resources import DORM_VIRTUAL_RESOURCES
+from ...oracle.errors import SemanticTargetNotActionable
 
 
 class DormAdapterPorts:
@@ -226,8 +227,16 @@ class DormAdapterPorts:
             self._input_frame_refresher is not None
             and self._frame_observation_oracle is not None
         ):
-            self._input_frame_refresher()
-            return self._require_frame_observation_oracle().dorm_feed_state()
+            deadline = time.monotonic() + 5.0
+            while True:
+                self._input_frame_refresher()
+                try:
+                    return self._require_frame_observation_oracle().dorm_feed_state()
+                except SemanticGateClosed as exc:
+                    if (str(exc) != "dorm feed panel identity is not proven"
+                            or time.monotonic() >= deadline):
+                        raise
+                time.sleep(0.25)
         return self._stable_dorm_feed_state()
 
     def dorm_feed_food(self, item_index: int, count: int) -> Tuple[ActionReceipt, ...]:
@@ -246,7 +255,19 @@ class DormAdapterPorts:
             raise SemanticGateClosed("dorm feed count exceeds the remaining budget")
         receipts = []
         for _ in range(count):
-            before = self._fresh_dorm_feed_state()
+            try:
+                before = self._fresh_dorm_feed_state()
+            except SemanticGateClosed as exc:
+                # Only a refusal before the first card can be retried by ALAS
+                # without repeating food that has already been consumed.
+                if (not receipts
+                        and str(exc) == "dorm feed panel identity is not proven"
+                        and self.oracle.dorm_empty_food_cancel_available()):
+                    raise SemanticTargetNotActionable(
+                        "dorm/feed/item/{0}".format(50001 + item_index),
+                        self.oracle.read_state().generation,
+                    ) from exc
+                raise
             item = before.items[item_index]
             if item.count <= 0 or before.food + item.value > before.capacity:
                 raise SemanticGateClosed("dorm feed item is unavailable or would overflow")
@@ -354,7 +375,22 @@ class DormAdapterPorts:
                     and time.monotonic() <= context.passive_transition_until
                 ):
                     return context.feed_entry_receipt
-                if self.oracle.enabled("dorm/feed/close"):
+                close_panel = context.feed_panel_observed
+                if close_panel:
+                    # ALAS has already read this feed panel. Its close control
+                    # may still be mounting; do not reinterpret that interval
+                    # as a request to open the covered dorm feed button.
+                    for attempt in range(24):
+                        if self.oracle.enabled("dorm/feed/close"):
+                            break
+                        if attempt == 23:
+                            raise SemanticGateClosed(
+                                "observed dorm feed panel close is not actionable"
+                            )
+                        time.sleep(0.25)
+                else:
+                    close_panel = self.oracle.enabled("dorm/feed/close")
+                if close_panel:
                     receipt = self._record_mission_transition(
                         self.oracle.click("dorm/feed/close")
                     )

@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--alas-root', type=Path, required=True)
+    parser.add_argument('--config', default='semantic_e2e')
     parser.add_argument('--serial', required=True)
     parser.add_argument('--driver-revision', required=True)
     parser.add_argument('--output', type=Path, required=True)
@@ -34,7 +35,7 @@ def main():
     from alas_headless.runtime import bind_semantic_session, reset_semantic_session
     from alas_headless.semantic_sources import semantic_source_hashes
 
-    app = AzurLaneAutoScript('semantic_e2e')
+    app = AzurLaneAutoScript(args.config)
     app.config.override(Emulator_Serial=args.serial)
     session = app.device.semantic_adapter
     token = bind_semantic_session(session)
@@ -57,10 +58,17 @@ def main():
             return receipt
         oracle.click = record_click
         host = RewardResearch(app.config, app.device)
-        if (oracle.enabled('login/enter')
+        known_game_page = (
+            oracle.main_page_visible()
+            or oracle.exists('research-menu/page/back')
+            or oracle.exists('research/page/back')
+        )
+        if (not known_game_page and (
+                oracle.enabled('overlay/bulletin/close')
+                or oracle.enabled('login/enter')
                 or oracle.login_update_download_available()
                 or oracle.login_update_in_progress()
-                or oracle.login_update_restart_prompt_available()):
+                or oracle.login_update_restart_prompt_available())):
             from module.handler.login import LoginHandler
             LoginHandler(app.config, app.device).handle_app_login()
             result['login_recovery_performed'] = True
@@ -103,6 +111,19 @@ def main():
     except BaseException as exc:
         result['error'] = str(exc)
         result['traceback'] = traceback.format_exc()
+        if 'oracle' in locals():
+            try:
+                state = oracle.read_state()
+                result['failure_observation'] = {
+                    'generation': state.generation,
+                    'main_visible': oracle.main_page_visible(),
+                    'research_back': oracle.exists('research/page/back'),
+                    'research_menu_back': oracle.exists('research-menu/page/back'),
+                    'blockers': [rule.blocker_id for rule in oracle._blocking_rules(
+                        state, 'ui/absence-probe')],
+                }
+            except Exception as diagnostic_error:
+                result['failure_observation_error'] = str(diagnostic_error)
     finally:
         reset_semantic_session(token)
         session.close()

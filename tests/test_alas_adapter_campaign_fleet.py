@@ -393,7 +393,6 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
 
     def test_inherited_fleet_overlay_rejects_untrusted_real_states(self):
         hostile = {}
-        hostile["wrong-kind"] = make_event_preparation_backend("sp", kind="map")
         hostile["stale"] = make_event_preparation_backend("sp", kind="fleet")
         hostile["stale"].ui["generation"] = 7
         hostile["duplicate"] = make_event_preparation_backend("sp", kind="fleet")

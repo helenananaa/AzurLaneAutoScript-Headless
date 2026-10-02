@@ -350,6 +350,8 @@ class CampaignPreparationOracle:
                     **_CAMPAIGN_LIVE_MAP_BUTTON_SPECS,
                     **_CAMPAIGN_LIVE_D1_MAP_BUTTON_ADDITIONS,
                     **_CAMPAIGN_LIVE_B2_MAP_BUTTON_ADDITIONS,
+                    "panel/auto_button": ("auto_button", 1),
+                    "panel/start_button_l": ("start_button_l", 1),
                 },
                 "toggle": _CAMPAIGN_LIVE_MAP_TOGGLE_SPECS,
                 "text": {
@@ -360,11 +362,14 @@ class CampaignPreparationOracle:
                     **_CAMPAIGN_LIVE_MAP_IMAGE_SPECS,
                     **_CAMPAIGN_LIVE_D1_MAP_IMAGE_ADDITIONS,
                     **_CAMPAIGN_LIVE_B2_MAP_IMAGE_ADDITIONS,
+                    "panel/auto_button": (("btn_auto",), True),
+                    "panel/start_button_l": (("qianwang_butten",), True),
                 },
             }.get(record_kind)
             if reviewed is None or relative not in reviewed:
                 raise SemanticGateClosed(
-                    "campaign live map-preparation record is not reviewed"
+                    "campaign live map-preparation record is not reviewed: "
+                    + record_kind + " " + relative
                 )
             observed = (("map", matched_panel_root),)
         elif path.startswith(live_normal_map_prefix):
@@ -438,9 +443,24 @@ class CampaignPreparationOracle:
             )
         stage_identity = texts[title_path][0].text.strip().lower()
         if stage_identity == "sp":
-            button_specs = _CAMPAIGN_LIVE_MAP_BUTTON_SPECS
-            text_counts = _CAMPAIGN_LIVE_MAP_TEXT_COUNTS
-            image_specs = _CAMPAIGN_LIVE_MAP_IMAGE_SPECS
+            button_specs = dict(_CAMPAIGN_LIVE_MAP_BUTTON_SPECS)
+            text_counts = dict(_CAMPAIGN_LIVE_MAP_TEXT_COUNTS)
+            image_specs = dict(_CAMPAIGN_LIVE_MAP_IMAGE_SPECS)
+            if "panel/start_button_l" in buttons:
+                button_specs.pop("panel/start_button")
+                button_specs["panel/start_button_l"] = ("start_button_l", 1)
+                image_specs.pop("panel/start_button")
+                image_specs["panel/start_button_l"] = (("qianwang_butten",), True)
+            # Reward rows are display data, not stage or action identity.
+            # Bind every image/text slice to the native repeated row count.
+            drop_count = len(buttons.get("panel/drops/frame/list/item(Clone)", ()))
+            if drop_count < 1:
+                raise SemanticGateClosed("campaign SP reward rows are incomplete")
+            button_specs["panel/drops/frame/list/item(Clone)"] = ("item(Clone)", drop_count)
+            text_counts["panel/drops/frame/list/item(Clone)/icon_bg/count"] = drop_count
+            for path, (sprites, raycast) in tuple(image_specs.items()):
+                if path.startswith("panel/drops/frame/list/item(Clone)/"):
+                    image_specs[path] = ((sprites[0],) * drop_count, raycast)
         elif stage_identity in ("c1", "c2", "c3", "d1", "d2", "d3"):
             profile = {
                 "c1": {
@@ -553,6 +573,23 @@ class CampaignPreparationOracle:
             raise SemanticGateClosed(
                 "campaign live map-preparation stage profile is not reviewed"
             )
+        # The official auto-search entry is additive to the existing start
+        # control. Observing it does not admit an action through this port.
+        if "panel/auto_button" in buttons or "panel/auto_button" in images:
+            button_specs = {**button_specs, "panel/auto_button": ("auto_button", 1)}
+            image_specs = {**image_specs, "panel/auto_button": (("btn_auto",), True)}
+        # Enemy art and reward art do not identify the selected stage or
+        # authorize input. Stage/underlay text and actionable controls own that
+        # proof below. Preserve structural checks while tolerating new art.
+        image_counts = {path: len(sprites) for path, (sprites, _) in image_specs.items()}
+        image_specs = {
+            path: ((), raycast)
+            if path == "panel/head/Image" or path.startswith("panel/drops/")
+            else (sprites, raycast)
+            for path, (sprites, raycast) in image_specs.items()
+        }
+        if "panel/start_button" in button_specs:
+            image_specs["panel/start_button"] = (("qianwang_butten", "btn_start"), True)
         if set(buttons) != set(button_specs):
             raise SemanticGateClosed(
                 "campaign live map-preparation button surface is incomplete"
@@ -564,7 +601,7 @@ class CampaignPreparationOracle:
                 or not button.active_in_hierarchy
                 or not button.active_and_enabled
                 or not button.interactable
-                or button.raycast_top is not None
+                or button.raycast_top is False
                 or button.point is None
                 or button.bounds is None
                 or not button.bounds.contains(button.point)
@@ -585,7 +622,7 @@ class CampaignPreparationOracle:
                 or not toggle.active_and_enabled
                 or not toggle.interactable
                 or (path == "panel/quickPlay" and not toggle.checked)
-                or toggle.raycast_top is not None
+                or toggle.raycast_top is False
                 or toggle.point is None
                 or toggle.bounds is None
                 for toggle in observed
@@ -620,7 +657,6 @@ class CampaignPreparationOracle:
             exact_text = {
                 "panel/Level/Text": "LV 110",
                 "panel/cost/text": "10",
-                "panel/drops/frame/list/item/icon_bg/count": "800",
                 "panel/title_form/title_en": "",
             }
         elif stage_identity in ("c1", "c2", "c3", "d1", "d2", "d3"):
@@ -648,16 +684,19 @@ class CampaignPreparationOracle:
         for path, expected in exact_text.items():
             if texts[path][0].text != expected:
                 raise SemanticGateClosed(
-                    "campaign live map-preparation text value changed"
+                    "campaign live map-preparation text value changed: "
+                    + path + " expected=" + repr(expected)
+                    + " observed=" + repr(texts[path][0].text)
                 )
         if texts[title_path][0].text.strip().lower() != stage_identity:
             raise SemanticGateClosed(
                 "campaign live map-preparation stage identity changed"
             )
-        if any(
-            item.text != ""
-            for item in texts["panel/drops/frame/list/item(Clone)/icon_bg/count"]
-        ):
+        clone_counts = texts["panel/drops/frame/list/item(Clone)/icon_bg/count"]
+        if (stage_identity == "sp" and any(
+                item.text.strip() and re.fullmatch(r"[0-9]+", item.text.strip()) is None
+                for item in (*clone_counts, *texts["panel/drops/frame/list/item/icon_bg/count"])
+        )) or (stage_identity != "sp" and any(item.text != "" for item in clone_counts)):
             raise SemanticGateClosed(
                 "campaign live map-preparation clone count changed"
             )
@@ -733,17 +772,20 @@ class CampaignPreparationOracle:
                 continue
             observed = images[path]
             if (
+                (image_counts.get(path, 0) and len(observed) != image_counts[path])
+            ) or (
                 sprites
-                and tuple(sorted(image.sprite for image in observed))
-                != tuple(sorted(sprites))
+                and (any(image.sprite not in sprites for image in observed)
+                     if path == "panel/start_button"
+                     else tuple(sorted(image.sprite for image in observed)) != tuple(sorted(sprites)))
             ) or any(
                 not image.active_in_hierarchy
                 or not image.active_and_enabled
                 or image.truncated
                 or not image.sprite
                 or image.raycast_target is not raycast_target
-                or image.raycast_top is not None
-                or (sprites and image.bounds is None)
+                or image.raycast_top is False
+                or ((sprites or image_counts.get(path, 0)) and image.bounds is None)
                 for image in observed
             ):
                 raise SemanticGateClosed(
@@ -1052,34 +1094,15 @@ class CampaignPreparationOracle:
     ) -> Optional[int]:
         """Require the exact reviewed selector identity obscured by LevelInfoSPUI."""
 
-        expected_stage_roots = {
-            "sp": (_CAMPAIGN_LIVE_EVENTSP_STAGE_ROOT,),
-            "a2": (_CAMPAIGN_LIVE_EVENTA2_STAGE_ROOT,),
-            "a3": (_CAMPAIGN_LIVE_EVENTA3_STAGE_ROOT,),
-            "c1": (_CAMPAIGN_LIVE_EVENTC1_STAGE_ROOT,),
-            "c2": (
-                _CAMPAIGN_LIVE_EVENTA2_STAGE_ROOT,
-                _CAMPAIGN_LIVE_EVENTC2_STAGE_ROOT,
-            ),
-            "c3": (
-                _CAMPAIGN_LIVE_EVENTA3_STAGE_ROOT,
-                _CAMPAIGN_LIVE_EVENTC3_STAGE_ROOT,
-            ),
-            "d1": (_CAMPAIGN_LIVE_EVENTD1_STAGE_ROOT,),
-            "d2": (
-                _CAMPAIGN_LIVE_EVENTB2_STAGE_ROOT,
-                _CAMPAIGN_LIVE_EVENTD2_STAGE_ROOT,
-            ),
-            "d3": (
-                _CAMPAIGN_LIVE_EVENTB3_STAGE_ROOT,
-                _CAMPAIGN_LIVE_EVENTD3_STAGE_ROOT,
-            ),
-            "b2": (_CAMPAIGN_LIVE_EVENTB2_STAGE_ROOT,),
-            "b3": (_CAMPAIGN_LIVE_EVENTB3_STAGE_ROOT,),
-        }.get(stage_code)
+        supported_stage = stage_code in (
+            "sp", "a2", "a3", "c1", "c2", "c3", "d1", "d2", "d3", "b2", "b3"
+        )
         if (
-            expected_stage_roots is None
-            or stage_button.path not in expected_stage_roots
+            not supported_stage
+            or re.fullmatch(
+                re.escape(_CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT)
+                + r"Battle/Nodes/Chapter_[0-9]+/main", stage_button.path
+            ) is None
             or stage_button.name != "main"
             or not stage_button.active_in_hierarchy
             or not stage_button.active_and_enabled
@@ -1135,7 +1158,7 @@ class CampaignPreparationOracle:
         ):
             return None
 
-        tries_path = _CAMPAIGN_LIVE_EVENTSP_STAGE_ROOT + "/triesLimit/Text"
+        tries_path = stage_button.path + "/triesLimit/Text"
         selected_text_path = _CAMPAIGN_LIVE_EVENTSP_SELECTED_ROOT + "Text"
         relevant_texts = tuple(
             item
@@ -1486,8 +1509,9 @@ class CampaignPreparationOracle:
                 button.name == "start_button"
                 and button.path == root + "start_button"
             ) or (
-                stage_code == "11-4"
-                and root == _CAMPAIGN_LIVE_NORMAL_MAP_PANEL_ROOT
+                root in (_CAMPAIGN_LIVE_NORMAL_MAP_PANEL_ROOT,
+                         _CAMPAIGN_LIVE_MAP_PANEL_ROOT,
+                         _CAMPAIGN_LIVE_MAP_UIORIGIN_PANEL_ROOT)
                 and button.name == "start_button_l"
                 and button.path == root + "start_button_l"
             )
@@ -1503,9 +1527,10 @@ class CampaignPreparationOracle:
             )
         proceed = proceed_matches[0]
         cancel = cancel_matches[0]
-        hard_114_proceed = proceed.path == root + "start_button_l"
-        if hard_114_proceed:
-            # The hard 11-4 clear-mode panel uses this alternate button.
+        hard_clear_proceed = (root == _CAMPAIGN_LIVE_NORMAL_MAP_PANEL_ROOT
+                              and proceed.path == root + "start_button_l")
+        if hard_clear_proceed:
+            # A completed hard clear-mode panel uses this alternate button.
             # Its raycast flag is unavailable, so require the exact hard
             # underlay, complete stage progress, and reviewed button sprite.
             hard_underlay = tuple(
@@ -1530,7 +1555,7 @@ class CampaignPreparationOracle:
             )
             if len(hard_underlay) != 1 or len(progress) != 1 or len(sprites) != 1:
                 raise SemanticGateClosed(
-                    "hard 11-4 alternate proceed is not structurally proven"
+                    "hard clear-mode alternate proceed is not structurally proven"
                 )
         for semantic_id, button in (
             ("campaign/map-preparation/proceed", proceed),
@@ -1538,7 +1563,7 @@ class CampaignPreparationOracle:
         ):
             reviewed_missing_raycast = (
                 "LevelInfoSPUI(Clone)/panel/" in button.path
-                or (hard_114_proceed and button is proceed)
+                or (hard_clear_proceed and button is proceed)
             )
             if (
                 not button.active_in_hierarchy
@@ -1664,8 +1689,7 @@ class CampaignPreparationOracle:
             (
                 "LevelInfoSPUI(Clone)/panel/" in target.path
                 or (
-                    stage_code == "11-4"
-                    and target.path
+                    target.path
                     == _CAMPAIGN_LIVE_NORMAL_MAP_PANEL_ROOT + "start_button_l"
                 )
             )
@@ -1814,6 +1838,14 @@ class CampaignPreparationOracle:
         return targets
 
     def campaign_dock_full_visible(self, stage_code: str) -> bool:
+        # A transient battle Msgbox can close while its text is being read.
+        # Retry the complete observation, including its opening Button state;
+        # retaining the old modal signature cannot prove its new absence.
+        return self._retry_transition_read(
+            lambda: self._campaign_dock_full_visible_once(stage_code)
+        )
+
+    def _campaign_dock_full_visible_once(self, stage_code: str) -> bool:
         state = self.read_state()
         if not any(
             button.path.startswith(
@@ -1855,6 +1887,26 @@ class CampaignPreparationOracle:
             bounds=target.bounds,
             path=target.path,
         )
+
+    def inherited_event_map_preparation_state(self):
+        """Identify a retained event detail for ALAS' generic cancel handler."""
+        root = 'OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/panel/'
+        state = self.read_state()
+        if not any(b.path == root + 'btnBack' and b.active_in_hierarchy
+                   and b.active_and_enabled for b in state.buttons):
+            return None
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('inherited event detail snapshots are incoherent')
+        indexes = [t for t in ui.texts if t.path == root + 'title_form/title_index'
+                   and t.active_in_hierarchy and t.active_and_enabled
+                   and not t.truncated and t.bounds is not None]
+        if len(indexes) != 1:
+            raise SemanticGateClosed('inherited event detail stage is ambiguous')
+        stage = indexes[0].text.strip().lower()
+        if re.fullmatch(r'[a-z]+[0-9]*', stage) is None:
+            raise SemanticGateClosed('inherited event detail stage is malformed')
+        return self.campaign_map_preparation_state(stage)
 
     def cancel_campaign_map_preparation(self, stage_code: str) -> ActionReceipt:
         """Close the exact stage-detail preparation without advancing."""

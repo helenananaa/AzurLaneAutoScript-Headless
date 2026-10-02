@@ -14,6 +14,39 @@ from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_session_safe_area_alias_requires_meta_owner_and_exact_award(self):
+        adapter = Mock()
+        adapter._meta_beacon_active = True
+        adapter._meta_assist_active = False
+        adapter._meta_reward_close_receipt = None
+        adapter._exercise_execution_active = False
+        frame = adapter._require_frame_observation_oracle.return_value
+        frame.exercise_reward_item_info_visible.return_value = False
+        frame.daily_battle_result_visible.return_value = False
+        frame.operation_siren_battle_result_visible.return_value = False
+        frame.enabled.return_value = False
+        adapter.campaign_combat_committed.return_value = False
+        adapter.operation_siren_combat_committed.return_value = False
+        adapter.oracle.award_info_page_visible.return_value = True
+        adapter.prepared_input_frame.side_effect = lambda provider: nullcontext()
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session._opsi_sample_use = None
+        session._combat_result_action_oracle = lambda _adapter: frame
+        session._combat_result_observation = None
+        session.open = lambda: adapter
+        session.refresh_frame = Mock()
+        session.click(NamedButton('CLICK_SAFE_AREA'))
+        self.assertEqual(adapter.click.call_count, 1, adapter.mock_calls)
+        adapter.oracle.award_info_page_visible.return_value = False
+        with self.assertRaises(AlasSemanticUnmapped):
+            session.click(NamedButton('CLICK_SAFE_AREA'))
+        adapter.oracle.award_info_page_visible.return_value = True
+        adapter._meta_beacon_active = False
+        with self.assertRaises(AlasSemanticUnmapped):
+            session.click(NamedButton('CLICK_SAFE_AREA'))
+        self.assertEqual(adapter.click.call_count, 1)
+
     def test_lazy_session_rejects_unmapped_before_opening_adb(self):
         session = AlasSemanticSession(
             "emulator-test", "be80ce591a481c12d60c50d6040d40c035b40a2b"

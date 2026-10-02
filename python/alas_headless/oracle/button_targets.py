@@ -7,6 +7,7 @@ from .contracts import SemanticTarget
 
 
 DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
+    SemanticTarget('meta/current/reward', 'award_btn', 'WorldBossUI(Clone)/pages/CurrentWorldBossDetailUI(Clone)/btns/award_btn'),
     SemanticTarget('private-quarters/level-up/close', 'bg', 'OverlayCamera/Overlay/UIMain/LevelUpWindow/bg'),
     SemanticTarget('private-quarters/home', 'home', 'SelectDorm3DUI(Clone)/Main/option/home'),
     SemanticTarget('private-quarters/page/left', 'left', 'SelectDorm3DUI(Clone)/Main/btn_switch/left'),
@@ -62,6 +63,18 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     SemanticTarget("meta/reward-preview/open", "award_btn", "WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/main/award_btn"),
     SemanticTarget("meta/dossier/list", "list_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossDetailUI(Clone)/list_btn"),
     SemanticTarget("meta/dossier/current", "current_list_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/current_list_btn"),
+    SemanticTarget("meta/dossier/empty/list", "list_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossEmptyUI(Clone)/list_btn"),
+    SemanticTarget("meta/dossier/create", "tpl", "WorldBossUI(Clone)/pages/ArchivesWorldBossEmptyUI(Clone)/useItem/list/tpl"),
+    SemanticTarget("meta/dossier/sync/open", "archives_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossEmptyUI(Clone)/archives_btn"),
+    SemanticTarget("meta/dossier/sync/back", "back", "WorldBossUI(Clone)/pages/ArchivesWorldBossListUI(Clone)/blur_panel/adapt/top/back"),
+    SemanticTarget("meta/dossier/sync/rewards", "get_all", "WorldBossUI(Clone)/pages/ArchivesWorldBossListUI(Clone)/main/award/get_all"),
+    SemanticTarget("meta/dossier/auto/start", "auto_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossDetailUI(Clone)/btns/auto_btn"),
+    SemanticTarget("meta/dossier/auto/confirm", "start", "WorldBossUI(Clone)/ArchivesWorldBossAutoBattleTipUI(Clone)/window/btns/start"),
+    SemanticTarget("meta/dossier/auto/result/confirm", "start", "WorldBossUI(Clone)/ArchivesWorldBossAutoBattleResultUI(Clone)/window/btns/start"),
+    SemanticTarget("meta/dossier/reward", "award_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossDetailUI(Clone)/btns/award_btn"),
+    SemanticTarget("meta/dossier/start", "start_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossDetailUI(Clone)/btns/start_btn"),
+    SemanticTarget("meta/precombat/vanguard/add", "tip", "PreCombatUI(Clone)/adapt/middle/mask/GridFrame/vanguard_1/tip"),
+    SemanticTarget("meta/precombat/main/add", "tip", "PreCombatUI(Clone)/adapt/middle/mask/GridFrame/main_1/tip"),
     SemanticTarget("main/task", "task", "frame/bottom/frame/task"),
     SemanticTarget("main/build", "build", "frame/bottom/frame/build"),
     SemanticTarget("main/guild", "guild", "frame/bottom/frame/guild"),
@@ -224,9 +237,24 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "GameHallUI(Clone)/ad/topPanel/btnHome",
     ),
     SemanticTarget(
+        "game-room/free-coins",
+        "free",
+        "GameHallUI(Clone)/ad/container/content/top/free",
+    ),
+    SemanticTarget(
         "minigame/shooting/back",
         "back",
         "GameRoomShootingUI(Clone)/noAdaptPanel/blur_panel/top/back",
+    ),
+    SemanticTarget(
+        "minigame/new-year/back",
+        "back",
+        "GameRoomFushun2UI(Clone)/back",
+    ),
+    SemanticTarget(
+        "minigame/poke/back",
+        "btnBack",
+        "GameRoomPokeUI(Clone)/pop/menuUI/btnBack",
     ),
     SemanticTarget(
         "minigame/tickets/cancel",
@@ -336,12 +364,12 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     SemanticTarget(
         "meowfficer/buy/cancel",
         "cancel_btn",
-        "CommanderReserveUI(Clone)/CommanderMsgBoxUI(Clone)/frame/cancel_btn",
+        "CommanderMsgBoxUI(Clone)/frame/cancel_btn",
     ),
     SemanticTarget(
         "meowfficer/buy/confirm",
         "confirm_btn",
-        "CommanderReserveUI(Clone)/CommanderMsgBoxUI(Clone)/frame/confirm_btn",
+        "CommanderMsgBoxUI(Clone)/frame/confirm_btn",
     ),
     SemanticTarget(
         "meowfficer/train/enter",
@@ -893,6 +921,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "MilitaryExerciseUI(Clone)/blur_panel/adapt/top/backBtn",
     ),
     SemanticTarget(
+        "exercise/page/home",
+        "option",
+        "MilitaryExerciseUI(Clone)/blur_panel/adapt/top/option",
+    ),
+    SemanticTarget(
         "exercise/opponent/1",
         "rivaltpl_1",
         "MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_1",
@@ -942,6 +975,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
             "LevelStageInfoView(Clone)/panel/btnBack",
             "LevelInfoSPUI(Clone)/panel/btnBack",
         ),
+    ),
+    SemanticTarget(
+        "campaign/map-preparation/proceed-clear",
+        "start_button_l",
+        "LevelStageInfoView(Clone)/panel/start_button_l",
     ),
     SemanticTarget(
         "campaign/fleet-preparation/cancel",
@@ -1142,6 +1180,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "tactical/continue/cancel",
         "custom_button_2(Clone)",
         "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
+    ),
+    SemanticTarget(
+        "tactical/completion/ack",
+        "custom_button_1(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
     ),
     SemanticTarget(
         "tactical/course/cancel",

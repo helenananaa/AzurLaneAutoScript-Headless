@@ -1,0 +1,22 @@
+diff --git a/module/handler/login.py b/module/handler/login.py
+--- a/module/handler/login.py
++++ b/module/handler/login.py
+@@ -75,7 +75,17 @@
+ 
+             # Login
+             if self.match_template_color(LOGIN_CHECK, offset=(30, 30), interval=5):
+-                self.device.click(LOGIN_CHECK)
++                if semantic_adapter is not None:
++                    from alas_headless.oracle.errors import SemanticTargetNotActionable
++                    try:
++                        self.device.click(LOGIN_CHECK)
++                    except SemanticTargetNotActionable as exc:
++                        if exc.semantic_id != 'login/enter':
++                            raise
++                        logger.info('Login entry raycast is settling; wait for next screenshot')
++                        continue
++                else:
++                    self.device.click(LOGIN_CHECK)
+                 if not login_success:
+                     logger.info('Login success')
+                     login_success = True

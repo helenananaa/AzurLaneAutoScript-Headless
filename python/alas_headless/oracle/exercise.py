@@ -11,6 +11,33 @@ from .errors import SemanticGateClosed
 class ExerciseOracle:
     """Exercise operations sharing the oracle frame and input boundary."""
 
+    def click_exercise_home(self) -> ActionReceipt:
+        """Use the reviewed home option, independently of the stack back."""
+        if not self.exercise_page_visible():
+            raise SemanticGateClosed('Exercise page identity is absent')
+        state = self.read_state()
+        target = self._unique(state, 'exercise/page/home')
+        if not (target.active_in_hierarchy and target.active_and_enabled
+                and target.interactable and target.raycast_top in (None, True)
+                and target.point is not None and target.bounds is not None
+                and target.bounds.contains(target.point)
+                and not self._blocking_rules(state, 'exercise/page/home')):
+            raise SemanticGateClosed('Exercise home option is not actionable')
+        ui = self.read_ui_state()
+        images = tuple(image for image in ui.images
+                       if image.path == target.path and image.active_in_hierarchy
+                       and image.active_and_enabled)
+        if not (state.generation <= ui.generation <= state.generation + 2
+                and len(images) == 1 and not images[0].truncated
+                and images[0].sprite == 'viewall_1920'
+                and images[0].raycast_target is True):
+            raise SemanticGateClosed('Exercise home option identity is not proven')
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed before Exercise home input')
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(semantic_id='exercise/page/home', generation=state.generation,
+                             point=target.point, bounds=target.bounds, path=target.path)
+
     def exercise_page_visible(self) -> bool:
         state = self.read_state()
         back = self._matches(state, "exercise/page/back")

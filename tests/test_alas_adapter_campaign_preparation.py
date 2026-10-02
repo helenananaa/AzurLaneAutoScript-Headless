@@ -17,6 +17,28 @@ from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_inherited_cancel_repeat_reuses_receipt_only_after_proven_close(self):
+        for failure in (None, "stale", "map", "fleet", "page", "blocker"):
+            with self.subTest(failure=failure):
+                oracle = FakeOracle()
+                adapter = AlasSemanticAdapter(oracle, lambda: None)
+                adapter.begin_campaign_pre_sortie("12-4")
+                previous = oracle.click_receipt("campaign/map-preparation/cancel", generation=9)
+                adapter._campaign_context.inherited_cancel_receipt = previous
+                oracle.read_state = Mock(return_value=SimpleNamespace(
+                    generation=9 if failure == "stale" else 10))
+                oracle.observation_target_present = Mock(side_effect=lambda target:
+                    target == {"map": "campaign/map-preparation/cancel",
+                               "fleet": "campaign/fleet-preparation/cancel"}.get(failure))
+                oracle.campaign_page_is_normal = Mock(return_value=failure != "page")
+                oracle._blocking_rules = Mock(return_value=("foreign-popup",) if failure == "blocker" else ())
+                if failure is None:
+                    self.assertIs(adapter.click(NamedButton("MAP_PREPARATION_CANCEL")), previous)
+                else:
+                    with self.assertRaisesRegex(SemanticGateClosed, "single-use"):
+                        adapter.click(NamedButton("MAP_PREPARATION_CANCEL"))
+                self.assertEqual(oracle.click_calls, [])
+
     def test_completed_inherited_run_resets_observations_without_refilling_grants(self):
         oracle = FakeOracle()
         oracle.campaign_page_value = True

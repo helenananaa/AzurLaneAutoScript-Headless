@@ -1265,6 +1265,55 @@ class CampaignStateOracle(CampaignHealthOracle):
         self._tap(int(round(point.x)), int(round(point.y)))
         return True
 
+    def campaign_map_auto_search_state(self):
+        """Read the official map auto-fight switch from its exact layers."""
+        return self._retry_transition_read(self._campaign_map_auto_search_state_once)
+
+    def _campaign_map_auto_search_state_once(self):
+        state = self.read_state()
+        suffix = '/right_stage/event/collapse/LevelStageAutoFightPanel(Clone)/'
+        controls = tuple(b for b in state.buttons if suffix in b.path
+                         and b.name in ('On', 'Off')
+                         and b.active_in_hierarchy and b.active_and_enabled)
+        if not controls:
+            return None
+        if self._blocking_rules(state, 'campaign/map/auto-search/on'):
+            # The original recovery handler owns the overlay. Never treat
+            # its retained map switch as the current input surface.
+            return None
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2 or ui.image_truncated:
+            raise SemanticGateClosed('map auto-search frames are incomplete')
+        entry = self._campaign_map_entry_state_from_snapshots(state, ui)
+        if len(controls) != 1:
+            raise SemanticGateClosed('map auto-search switch is ambiguous')
+        target = controls[0]
+        stage_roots = tuple(p.removesuffix('/top_stage/back_button') for p in entry.button_paths
+                            if p.endswith('/top_stage/back_button'))
+        if len(stage_roots) != 1 or target.path != stage_roots[0] + suffix + target.name:
+            raise SemanticGateClosed('map auto-search switch has a foreign root')
+        sprite = 'auto_fight_' + target.name.lower()
+        layers = []
+        for path, expected in ((target.path, sprite), (target.path+'/Icon', sprite+'_icon')):
+            matches = tuple(i for i in ui.images if i.path == path
+                            and i.active_in_hierarchy and i.active_and_enabled)
+            if (len(matches) != 1 or matches[0].truncated or matches[0].sprite != expected
+                    or matches[0].bounds is None or matches[0].raycast_top is False):
+                raise SemanticGateClosed('map auto-search switch layer is incomplete')
+            layers.append(matches[0])
+        if (not target.interactable or target.raycast_top is False or target.point is None
+                or target.bounds is None or not target.bounds.contains(target.point)
+                or not layers[0].bounds.contains(target.point) or not layers[0].raycast_target):
+            raise SemanticGateClosed('map auto-search switch is not actionable')
+        return state, ui, target.name == 'On', layers[0]
+
+    def click_campaign_map_auto_search_on(self, *, post_input_foreground=None) -> ActionReceipt:
+        switch = self.campaign_map_auto_search_state()
+        if switch is None or switch[2]:
+            raise SemanticGateClosed('map auto-search is not an OFF switch')
+        return self._click_exact_image(switch[0], switch[3], 'campaign/map/auto-search/on',
+                                       post_input_foreground=post_input_foreground)
+
     def campaign_withdraw_control(self, *, confirm: bool = False):
         """Observe the exact map retreat or its own confirmation, without input."""
         state = self.read_state()
@@ -1293,6 +1342,11 @@ class CampaignStateOracle(CampaignHealthOracle):
             path = paths[0]
         targets = [b for b in state.buttons if b.path == path
                    and b.active_in_hierarchy and b.active_and_enabled]
+        if confirm and not targets:
+            # The text collector can see the new modal one generation before
+            # its Button collector. No control exists to act on yet; the
+            # original postcondition loop will refresh without another input.
+            return None
         if len(targets) != 1:
             raise SemanticGateClosed('campaign withdrawal control is ambiguous')
         target = targets[0]
@@ -1301,6 +1355,28 @@ class CampaignStateOracle(CampaignHealthOracle):
                 or not target.bounds.contains(target.point)):
             return None
         return target, max(state.generation, ui.generation)
+
+    def inherited_campaign_withdraw_control(self, *, confirm: bool = False):
+        """Identify the original UI recovery edge on an inherited map/modal."""
+        state = self.read_state()
+        if confirm:
+            root = 'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/'
+            if not any(b.path == root + 'button_container/custom_button_1(Clone)'
+                       and b.active_in_hierarchy and b.active_and_enabled
+                       for b in state.buttons):
+                return None
+            content = tuple(t for t in self.read_ui_state().texts
+                            if t.path == root + 'msg_panel/content'
+                            and t.active_in_hierarchy and t.active_and_enabled)
+            if not any(re.sub(r'<[^>]+>', '', t.text).strip() in
+                       ('真的要撤退吗?', '真的要撤退吗？') for t in content):
+                return None
+        if not confirm:
+            if not any(b.path.endswith('/LevelStageView(Clone)/bottom_stage/Normal/retreat_button')
+                       and b.active_in_hierarchy and b.active_and_enabled
+                       for b in state.buttons):
+                return None
+        return self.campaign_withdraw_control(confirm=confirm)
 
     def click_campaign_withdraw(self, *, confirm: bool = False) -> ActionReceipt:
         control = self.campaign_withdraw_control(confirm=confirm)
@@ -1677,12 +1753,21 @@ class CampaignStateOracle(CampaignHealthOracle):
             for stage in self.campaign_page_state().stages
             if stage.stage_code == stage_code
         )
+        if not matches:
+            raise SemanticTargetMissing("campaign stage is absent")
         if len(matches) != 1:
             raise SemanticGateClosed("campaign stage is absent or ambiguous")
         return matches[0]
 
     def campaign_stage_actionable(self, stage_code: str) -> bool:
-        button = self.campaign_stage_state(stage_code).button
+        try:
+            button = self.campaign_stage_state(stage_code).button
+        except SemanticTargetMissing:
+            # Presence on a complete immutable chapter frame is a negative
+            # observation, not permission to enter a different stage. ALAS
+            # owns the next screenshot and navigation; clicks still re-prove
+            # the exact stage and propagate missing-target errors.
+            return False
         if button.actionable:
             return True
         # Current LevelSelectSPFullUI event nodes expose the reviewed wide

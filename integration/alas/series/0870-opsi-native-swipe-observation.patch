@@ -1,0 +1,12 @@
+diff --git a/module/map/camera.py b/module/map/camera.py
+--- a/module/map/camera.py
++++ b/module/map/camera.py
+@@ -252,7 +252,7 @@
+ 
+     def _update_view_data(self):
+         if self._prev_view is not None and np.linalg.norm(self._prev_swipe) > 0:
+-            if self.config.MAP_SWIPE_PREDICT:
++            if self.config.MAP_SWIPE_PREDICT or getattr(self.view, 'semantic_swipe_prediction', False):
+                 swipe = self._prev_view.predict_swipe(
+                     self.view,
+                     with_current_fleet=self.config.MAP_SWIPE_PREDICT_WITH_CURRENT_FLEET,

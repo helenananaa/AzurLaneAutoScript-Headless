@@ -18,6 +18,117 @@ from tests.semantic_support.oracle_cases import SemanticOracleTestsSupport
 
 
 class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
+    def test_empty_queue_batch_button_returns_to_pool_without_mutation_grant(self):
+        from alas_headless import AlasSemanticAdapter
+        from tests.semantic_support.adapter_fixtures import NamedButton
+        page = 'root/Overlay/UIMain/blur_panel/'
+        queue = 'root/UICamera/Canvas/UIMain/BuildShipDetailUI1(Clone)/'
+        bounds = {'left': 1117, 'top': 95, 'right': 1265, 'bottom': 147}
+        backend = FakeBackend([
+            make_button('back_btn', page + 'adapt/top/back_btn'),
+            make_button('all_launch', queue + 'all_launch', 1191, 121,
+                        raycast_top=None, bounds=bounds),
+        ])
+        backend.ui = make_ui([
+            make_text('2', queue + 'title/value'),
+            make_text('2409', queue + 'quick_count/value'),
+        ], toggles=[make_toggle(page + 'adapt/left_length/frame/tagRoot/queue_btn', checked=True)],
+            images=[{**make_image(queue + 'all_launch', 'btn_batch', bounds), 'raycast_target': True}])
+        oracle = make_oracle(backend)
+        self.assertTrue(oracle.build_queue_empty())
+        self.assertTrue(oracle.build_queue_all_launch_visible())
+        self.assertFalse(oracle.build_queue_all_launch_available())
+        adapter = AlasSemanticAdapter(oracle, lambda: None)
+        adapter.begin_build()
+        self.assertTrue(adapter.appear(NamedButton('BUILD_FINISH_ORDERS')))
+        before = adapter._action_ledger.remaining('build.submit')
+        adapter.click(NamedButton('BUILD_FINISH_ORDERS'))
+        self.assertEqual(backend.taps, [(1191, 121)])
+        self.assertEqual(adapter._action_ledger.remaining('build.submit'), before)
+        with unittest.mock.patch.object(oracle, 'build_queue_empty', return_value=False):
+            self.assertFalse(oracle.build_queue_all_launch_available(allow_empty=True))
+            with self.assertRaisesRegex(SemanticGateClosed, 'requires an empty queue'):
+                oracle.click_build_empty_queue_return()
+        backend.ui['images'][0]['sprite'] = 'unexpected'
+        self.assertFalse(oracle.build_queue_all_launch_visible())
+        with self.assertRaises(SemanticGateClosed):
+            oracle.click_build_empty_queue_return()
+        self.assertEqual(backend.taps, [(1191, 121)])
+
+    def test_origin_queue_and_return_navigation_require_exact_shell_and_images(self):
+        root = 'root/UICamera/Canvas/UIOrigin/blur_panel/'
+        back_path = root + 'adapt/top/back_btn'
+        pool_path = root + 'adapt/left_length/frame/tagRoot/build_btn'
+        queue_path = root + 'adapt/left_length/frame/tagRoot/queue_btn'
+        bounds = {'left': 20, 'top': 20, 'right': 100, 'bottom': 90}
+        backend = FakeBackend([make_button('back_btn', back_path, 58, 53,
+                                           raycast_top=None, bounds=bounds)])
+        images = [make_image(back_path + '/mask/Image', 'back_btn', bounds),
+                  make_image(pool_path, 'build_unsel', bounds)]
+        for image in images:
+            image['raycast_target'] = True
+        backend.ui = make_ui([
+            make_text('2', 'root/BuildShipDetailUI1(Clone)/title/value'),
+            make_text('2409', 'root/BuildShipDetailUI1(Clone)/quick_count/value'),
+        ], toggles=[make_toggle(queue_path, checked=True, raycast_top=None),
+                    make_toggle(pool_path, raycast_top=None, x=58, y=53, bounds=bounds)],
+            images=images)
+        oracle = make_oracle(backend)
+        self.assertEqual(oracle.build_queue_timers(), ())
+        self.assertEqual(oracle.click_toggle('build/nav/pools').path, pool_path)
+        self.assertEqual(backend.taps, [(58, 53)])
+        baseline = copy.deepcopy(backend.ui)
+        for mutate in (
+            lambda ui: ui['images'][1].update(sprite='unexpected'),
+            lambda ui: ui['images'][0].update(raycast_top=False),
+            lambda ui: ui['toggles'].append(copy.deepcopy(ui['toggles'][1])),
+            lambda ui: ui['toggles'][0].update(checked=False),
+        ):
+            backend.ui = copy.deepcopy(baseline)
+            mutate(backend.ui)
+            with self.assertRaises(SemanticGateClosed):
+                oracle.click_toggle('build/nav/pools')
+            self.assertEqual(backend.taps, [(58, 53)])
+        backend.ui = baseline
+        backend.buttons = make_buttons(backend.buttons['buttons'] + [make_button(
+            'confirm', 'root/OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/confirm',
+        )])
+        with self.assertRaisesRegex(SemanticGateClosed, 'blocked'):
+            oracle.click_toggle('build/nav/pools')
+        self.assertEqual(backend.taps, [(58, 53)])
+
+    def test_build_side_navigation_accepts_both_reviewed_roots_and_rejects_duplicates(self):
+        suffix = '/blur_panel/adapt/left_length/frame/tagRoot/'
+        for semantic_id, name in (
+            ('build/nav/pools', 'build_btn'),
+            ('build/nav/queue', 'queue_btn'),
+            ('build/nav/support', 'support_btn'),
+            ('build/nav/unseam', 'unseam_btn'),
+        ):
+            paths = ['root/Overlay/UIMain' + suffix + name,
+                     'root/UICamera/Canvas/UIOrigin' + suffix + name]
+            for path in paths:
+                backend = FakeBackend([])
+                backend.ui = make_ui([], toggles=[make_toggle(path, checked=True)])
+                oracle = make_oracle(backend)
+                self.assertTrue(oracle.toggle_selected(semantic_id))
+                self.assertEqual(oracle.click_toggle(semantic_id).path, path)
+                self.assertEqual(len(backend.taps), 1)
+
+            backend = FakeBackend([])
+            backend.ui = make_ui([], toggles=[make_toggle(p, checked=True) for p in paths])
+            oracle = make_oracle(backend)
+            with self.assertRaisesRegex(SemanticGateClosed, 'absent or ambiguous'):
+                oracle.toggle_selected(semantic_id)
+            with self.assertRaises(SemanticGateClosed):
+                oracle.click_toggle(semantic_id)
+            self.assertEqual(backend.taps, [])
+
+            backend.ui = make_ui([], toggles=[make_toggle(paths[1], checked=False, raycast_top=False)])
+            with self.assertRaisesRegex(SemanticGateClosed, 'not actionable'):
+                oracle.click_toggle(semantic_id)
+            self.assertEqual(backend.taps, [])
+
     def test_build_pool_and_costs_use_exact_typed_controls(self):
         base = (
             "root/UICamera/Canvas/UIMain/BuildShipUI(Clone)/"

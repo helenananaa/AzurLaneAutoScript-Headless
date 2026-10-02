@@ -232,6 +232,14 @@ class TacticalAdapterPorts:
             self._commission_context is not None
             and self._commission_context.flow_kind == "tactical"
         ):
+            if name == "GET_MISSION":
+                return (self._action_ledger.allowed("tactical.reward")
+                        and self.oracle.enabled("tactical/completion/ack"))
+            if name == "GOTO_MAIN":
+                # Another task can leave a detail panel that page enumeration
+                # deliberately rejects. Preserve ALAS' reviewed recovery edge
+                # before suppressing unrelated presence probes.
+                return self._goto_main_target() is not None
             if name == "TACTICAL_CHECK":
                 return bool(
                     self.oracle.exists("tactical/page/back")
@@ -305,6 +313,11 @@ class TacticalAdapterPorts:
         return UNHANDLED
 
     def _click_tactical(self, name):
+        if (name == "GET_MISSION" and self._commission_context is not None
+                and self._commission_context.flow_kind == "tactical"):
+            if not self._action_ledger.allowed("tactical.reward"):
+                raise SemanticGateClosed("tactical reward acknowledgement is not authorized")
+            return self.oracle.click_tactical_completion_ack()
         if (
             self._commission_context is not None
             and self._commission_context.flow_kind == "tactical"
@@ -316,7 +329,19 @@ class TacticalAdapterPorts:
                     raise SemanticGateClosed(
                         "tactical assignment requires a positive budget"
                     )
-                return self.oracle.click_tactical_first_empty_slot()
+                prior = context.tactical_empty_slot_receipt
+                if (prior is not None
+                        and self.oracle.enabled('tactical/dock/back')
+                        and self.oracle.tactical_candidate_ships()
+                        and self.oracle.read_state().generation > prior.generation):
+                    # A successful slot entry can leave one old classroom
+                    # probe in flight. The exact Dock destination proves the
+                    # original input completed; never tap the covered slot.
+                    context.tactical_empty_slot_receipt = None
+                    return prior
+                receipt = self.oracle.click_tactical_first_empty_slot()
+                context.tactical_empty_slot_receipt = receipt
+                return receipt
             if name == "BACK_ARROW":
                 targets = tuple(
                     target
@@ -353,14 +378,47 @@ class TacticalAdapterPorts:
             if name == "TACTICAL_CLASS_CANCEL":
                 return self.oracle.click("tactical/book/cancel")
             if name == "POPUP_CONFIRM":
+                prior = context.tactical_confirm_receipt
+                if (prior is not None
+                        and time.monotonic() - context.tactical_confirmed_at <= 12.0
+                        and not self._tactical_course_target_enabled("tactical/course/confirm")):
+                    if context.tactical_confirm_before_slots is None:
+                        raise SemanticGateClosed('prior tactical course slot observation is unavailable')
+                    # The modal can disappear before its new student card
+                    # mounts. Wait read-only for the prior input's exact
+                    # running-slot postcondition instead of clicking again.
+                    deadline = min(context.tactical_confirmed_at + 12.0,
+                                   time.monotonic() + 4.0)
+                    while True:
+                        state = self.oracle.read_state()
+                        slots = self.oracle.tactical_slots()
+                        if (state.generation > prior.generation and any(
+                                (slot.slot, slot.ship_id) not in context.tactical_confirm_before_slots
+                                and getattr(slot.status, 'value', slot.status) == 'running'
+                                for slot in slots)):
+                            return prior
+                        if time.monotonic() >= deadline:
+                            raise SemanticGateClosed('confirmed tactical course has no new running slot')
+                        time.sleep(.1)
                 if not self._action_ledger.allowed("tactical.assign"):
                     raise SemanticGateClosed(
                         "tactical course confirmation requires a positive budget"
                     )
+                try:
+                    before_slots = {(slot.slot, slot.ship_id)
+                                    for slot in self.oracle.tactical_slots()
+                                    if getattr(slot.status, 'value', slot.status) == 'running'}
+                except SemanticGateClosed:
+                    # An unavailable observation is not an empty classroom;
+                    # it cannot later prove that an existing course is new.
+                    before_slots = None
                 receipt = self._dispatch_mutation(
                     "tactical.assign",
                     lambda: self.oracle.click("tactical/course/confirm"),
                 )
+                context.tactical_confirm_before_slots = before_slots
+                context.tactical_confirm_receipt = receipt
+                context.tactical_confirmed_at = time.monotonic()
                 return receipt
             raise AlasSemanticUnmapped(
                 "tactical resource requires a typed workflow helper: {0}".format(name)

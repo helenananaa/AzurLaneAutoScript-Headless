@@ -10,6 +10,14 @@ from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_hard_detail_notice_absence_does_not_admit_a_start_action(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_campaign_pre_sortie('12-4', mode='hard')
+        oracle.observation_target_present = lambda target: target in ('campaign/map-preparation/cancel','campaign/map-preparation/proceed-clear')
+        oracle.campaign_map_preparation_state = Mock(side_effect=SemanticGateClosed('pending hard progress'))
+        self.assertFalse(adapter.appear(NamedButton('GET_MISSION')))
+        oracle.campaign_map_preparation_state.assert_not_called()
+        self.assertEqual(oracle.click_calls, [])
     def test_session_reward_dispatch_preserves_daily_quick_owner(self):
         for quick, campaign in ((True, False), (False, False), (True, True)):
             with self.subTest(quick=quick, campaign=campaign):
@@ -23,6 +31,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
                 if campaign:
                     adapter.begin_campaign_pre_sortie("11-4", mode="hard")
                 oracle.enabled_values["reward/award-info/close"] = True
+                oracle.award_info_page_visible_value = True
                 oracle.campaign_battle_reward_visible = lambda: True
                 adapter.prepared_input_frame = lambda provider: nullcontext()
                 session = AlasSemanticSession.__new__(AlasSemanticSession)

@@ -234,6 +234,12 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         self._next_submarine_config = snapshot
         return snapshot
 
+    def campaign_remaining_attempts(self):
+        """Expose the game's reviewed stage counter to ALAS' stop decision."""
+        self._require_campaign_context()
+        return self.oracle.campaign_stage_state(
+            self._campaign_resolved_entrance_stage()).remaining_attempts
+
     def campaign_stage_entry_allowed(self) -> bool:
         context = self._require_campaign_context()
         if (context.auto_search_completion is not None
@@ -255,16 +261,28 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
             )
         return True
 
+    def dock_full_recovery_owned(self) -> bool:
+        # The modal is account-wide. Original ALAS also calls Retirement
+        # during Operation Siren search, with no campaign stage context.
+        return (self._campaign_context is not None
+                or self._build_context is not None
+                or self._operation_siren_allows_passive_probe())
+
     def campaign_dock_full_visible(self) -> bool:
-        context = self._require_campaign_context()
+        if not self.dock_full_recovery_owned():
+            return False
+        context = self._campaign_context
         return self._frame_or_live_observation_oracle().campaign_dock_full_visible(
-            context.resolved_stage_code or context.stage_code
+            (context.resolved_stage_code or context.stage_code) if context else ""
         )
 
     def click_campaign_dock_full_choice(self, choice: str) -> ActionReceipt:
-        context = self._require_campaign_context()
+        self._package_gate()
+        if not self.dock_full_recovery_owned():
+            raise SemanticGateClosed("dock-full recovery has no owned task surface")
+        context = self._campaign_context
         return self.oracle.click_campaign_dock_full_choice(
-            context.resolved_stage_code or context.stage_code,
+            (context.resolved_stage_code or context.stage_code) if context else "",
             choice,
         )
 
@@ -691,7 +709,7 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
             )
         if (
             context.mode == "hard"
-            and stage_code not in ("11-4", "12-1")
+            and re.fullmatch(r"[1-9]\d*-[1-4]", stage_code) is None
             and re.fullmatch(r"[cd][1-3]", stage_code) is None
         ):
             raise SemanticGateClosed(
@@ -714,7 +732,11 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         while time.monotonic() < deadline:
             self._package_gate()
             if recovery_handler is not None:
-                if self.oracle.campaign_dock_full_visible(context.stage_code) or self.oracle.retirement_selection_visible():
+                map_switch = getattr(self.oracle, 'campaign_map_auto_search_state', lambda: None)()
+                if (self.oracle.campaign_dock_full_visible(context.stage_code)
+                        or self.oracle.retirement_selection_visible()
+                        or getattr(self.oracle, 'enhancement_dock_visible', lambda: False)()
+                        or (map_switch is not None and not map_switch[2])):
                     if self._input_frame_refresher is not None:
                         self._input_frame_refresher()
                     recovery_used = True
@@ -937,9 +959,9 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
             raise SemanticGateClosed(
                 "campaign auto-search continue is qualified only for hard mode"
             )
-        if context.stage_code not in ("11-4", "12-1"):
+        if re.fullmatch(r"[1-9]\d*-[1-4]", context.stage_code) is None:
             raise SemanticGateClosed(
-                "campaign auto-search continue is qualified only for hard 11-4"
+                "campaign auto-search continue requires a main hard stage"
             )
         if context.auto_search_completion is None:
             raise SemanticGateClosed(
@@ -1241,6 +1263,9 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         return UNHANDLED
 
     def _appear_campaign(self, name):
+        if self._campaign_context is not None and name in ('AUTO_SEARCH_MAP_OPTION_OFF', 'AUTO_SEARCH_MAP_OPTION_ON'):
+            switch = self.oracle.campaign_map_auto_search_state()
+            return switch is not None and switch[2] == (name == 'AUTO_SEARCH_MAP_OPTION_ON')
         if self._campaign_context is not None and name in ('EMERGENCY_REPAIR_AVAILABLE', 'EMERGENCY_REPAIR_CONFIRM'):
             return self.campaign_repair_appear(name)
         if self._campaign_context is not None and name in ('WITHDRAW', 'CAMPAIGN_WITHDRAW_CONFIRM'):
@@ -1439,16 +1464,36 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                         raise SemanticGateClosed(
                             "campaign map preparation ownership proof is partial"
                         )
-                    if any(owned_receipts):
-                        return False
-                    raise SemanticGateClosed(
-                        "inherited campaign fleet preparation kind is not fleet"
-                    )
+                    # An inherited, exactly identified map-detail page also
+                    # proves that no fleet overlay is present. This negative
+                    # probe grants no fleet mutation or sortie authority.
+                    return False
                 if preparation_kind != "fleet":
                     raise SemanticGateClosed(
                         "campaign preparation kind is not reviewed"
                     )
                 if all(owned_receipts):
+                    if context.mode == "hard":
+                        # ALAS will inspect the fleet rows again in this same
+                        # screenshot frame. A live input preflight may already
+                        # see a fully mounted panel while this immutable frame
+                        # still contains levels whose ship sprites are loading.
+                        # Let the original preparation loop take its next
+                        # screenshot instead of entering it with partial rows.
+                        try:
+                            self.oracle.campaign_fleet_selection_state(
+                                _resolved_stage_code,
+                                fallback_oil_cost=context.map_preparation_oil_cost,
+                            )
+                        except SemanticGateClosed as exc:
+                            if (
+                                str(exc).startswith(
+                                    "campaign fleet row ship identity is inconsistent: "
+                                )
+                                and time.monotonic() <= context.passive_transition_until
+                            ):
+                                return False
+                            raise
                     return True
                 if any(owned_receipts):
                     raise SemanticGateClosed(
@@ -1516,6 +1561,26 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         return UNHANDLED
 
     def _click_campaign_strategy(self, name):
+        if name == 'AUTO_SEARCH_MAP_OPTION_OFF':
+            self._require_campaign_context()
+            self._package_gate()
+            receipt = self._fresh_input_oracle().click_campaign_map_auto_search_on(
+                post_input_foreground=self.oracle._foreground_component)
+            deadline = time.monotonic() + 60.0
+            while time.monotonic() < deadline:
+                if (self.oracle.read_state().generation > receipt.generation
+                        and self.oracle.campaign_dock_full_visible(self._campaign_context.stage_code)):
+                    # The client can immediately pause a submitted map resume
+                    # on its own dock-capacity check. Return to ALAS recovery.
+                    return receipt
+                switch = self.oracle.campaign_map_auto_search_state()
+                if switch is not None and switch[0].generation > receipt.generation and switch[2]:
+                    return receipt
+                auto = self.oracle.campaign_official_combat_auto_state()
+                if auto is not None and auto[0] > receipt.generation and auto[1]:
+                    return receipt
+                time.sleep(.1)
+            raise SemanticGateClosed('map auto-search ON postcondition not observed; do not retry')
         if name in ('EMERGENCY_REPAIR_AVAILABLE', 'EMERGENCY_REPAIR_CONFIRM'):
             return self.click_campaign_repair(name)
         if name in ('WITHDRAW', 'CAMPAIGN_WITHDRAW_CONFIRM'):
@@ -1730,15 +1795,9 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         if self._campaign_context is not None and name == "FLEET_PREPARATION":
             context = self._require_campaign_context()
             remaining_sorties = self._action_ledger.remaining("campaign.sortie")
-            exact_sortie_budget = (
-                remaining_sorties > 0
-                if context.mode == "normal"
-                else remaining_sorties in (1, 2, 3)
-            )
             if (
                 not context.sortie_authorized
                 or not self._action_ledger.allowed("campaign.sortie")
-                or not exact_sortie_budget
                 or remaining_sorties != context.sortie_budget_before
                 or context.sortie_receipt is not None
                 or context.prepared_fleet_state is None
@@ -2028,6 +2087,14 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                 context.entry_receipt is None
                 and context.inherited_cancel_receipt is not None
             ):
+                previous = context.inherited_cancel_receipt
+                self._package_gate()
+                if (self.oracle.read_state().generation > previous.generation
+                        and not self.oracle.observation_target_present('campaign/map-preparation/cancel')
+                        and not self.oracle.observation_target_present('campaign/fleet-preparation/cancel')
+                        and self.oracle.campaign_page_is_normal()
+                        and not self.oracle._blocking_rules(self.oracle.read_state(), 'ui/absence-probe')):
+                    return previous
                 raise SemanticGateClosed(
                     "inherited campaign preparation cancel is single-use"
                 )

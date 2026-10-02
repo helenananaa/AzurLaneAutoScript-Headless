@@ -73,6 +73,19 @@ class PrivateQuartersOracle:
             return True
         if self.private_quarters_page_visible() or self.private_quarters_entry_destination_visible():
             return False
+        timeline = [b for b in state.buttons if b.active_in_hierarchy and b.active_and_enabled]
+        if len(timeline) == 1 and timeline[0].path == (
+                'UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/ExtraScreen/'
+                'TimelineScreen/TimelineTouch/content/clickTpl'):
+            return False
+        if not state.buttons:
+            ui = self.read_ui_state()
+            if not state.generation <= ui.generation <= state.generation+2:
+                raise SemanticGateClosed('Private Quarters loading frames are incoherent')
+            if any(i.path == 'UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/bg/bottom'
+                   and i.active_in_hierarchy and i.active_and_enabled and not i.truncated
+                   and i.sprite == 'bg_mask' for i in ui.images):
+                return True
         raise SemanticGateClosed('Private Quarters loading surface is not yet identified')
 
     def private_quarters_intimacy_max(self) -> bool:
@@ -326,6 +339,24 @@ class PrivateQuartersOracle:
 
     def click_private_quarters_new_jersey_dialogue(self) -> ActionReceipt:
         state = self.read_state()
+        timeline_path = ('UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/ExtraScreen/'
+                         'TimelineScreen/TimelineTouch/content/clickTpl')
+        timeline = [b for b in state.buttons if b.active_in_hierarchy and b.active_and_enabled]
+        if len(timeline) == 1 and timeline[0].path == timeline_path:
+            target = timeline[0]
+            ui = self.read_ui_state()
+            if not state.generation <= ui.generation <= state.generation+2:
+                raise SemanticGateClosed('Private Quarters timeline frames are incoherent')
+            images = [i for i in ui.images if i.path == timeline_path and i.active_in_hierarchy
+                      and i.active_and_enabled and not i.truncated]
+            if (len(images) != 1 or images[0].sprite != 'timeline_touch_btn'
+                    or not target.actionable or self._blocking_rules(state, 'private-quarters/dialogue/continue')):
+                raise SemanticGateClosed('Private Quarters timeline continuation is ambiguous')
+            if self._foreground_component() != self.fingerprint.component:
+                raise SemanticGateClosed('foreground changed before Private Quarters timeline input')
+            self._tap(round(target.point.x), round(target.point.y))
+            return ActionReceipt(semantic_id='private-quarters/dialogue/continue', generation=state.generation,
+                                 point=target.point, bounds=target.bounds, path=target.path)
         if not self._matches(state, 'private-quarters/dialogue/continue'):
             raise SemanticTargetMissing('Private Quarters dialogue control is absent')
         target = self._unique(state, 'private-quarters/dialogue/continue')
@@ -359,7 +390,26 @@ class PrivateQuartersOracle:
         path = ROOT+'Map/floor_2/Xinzexi'
         matches = [b for b in state.buttons if b.path == path and b.active_in_hierarchy
                    and b.active_and_enabled]
-        if len(matches) != 1:
+        special_path = ROOT+'Map/floor_2/Xinzexi_special'
+        special = [b for b in state.buttons if b.path == special_path and b.active_in_hierarchy
+                   and b.active_and_enabled]
+        if not matches and len(special) == 2:
+            ui = self.read_ui_state()
+            if not state.generation <= ui.generation <= state.generation+2:
+                raise SemanticGateClosed('Private Quarters room frames are incoherent')
+            icons = [i for i in ui.images if i.path == special_path+'/icon'
+                     and i.active_in_hierarchy and i.active_and_enabled and not i.truncated]
+            status = [i for i in ui.images if i.path == special_path+'/front/complete/tip/main'
+                      and i.active_in_hierarchy and i.active_and_enabled and not i.truncated]
+            locks = [i for i in ui.images if i.path.startswith(special_path+'/front/lock/')
+                     and i.active_in_hierarchy and i.active_and_enabled]
+            if (len(icons) != 2 or any(i.sprite != 'room_icon_xinzexi' for i in icons)
+                    or len(status) != 2 or any(i.sprite != 'state_main' for i in status)
+                    or locks or sum(b.actionable for b in special) != 1
+                    or any(b.raycast_top is not False for b in special if not b.actionable)):
+                raise SemanticGateClosed('Private Quarters special room identity or hit is ambiguous')
+            return True
+        if len(matches) != 1 or special:
             raise SemanticGateClosed('Private Quarters New Jersey room is absent or ambiguous')
         ui = self.read_ui_state()
         if not state.generation <= ui.generation <= state.generation+2:
@@ -382,7 +432,15 @@ class PrivateQuartersOracle:
         if not self.private_quarters_new_jersey_unlocked():
             raise SemanticGateClosed('Private Quarters New Jersey room is locked')
         state = self.read_state()
-        target = self._unique(state, 'private-quarters/room/new-jersey')
+        special = [b for b in state.buttons if b.path == ROOT+'Map/floor_2/Xinzexi_special'
+                   and b.active_in_hierarchy and b.active_and_enabled]
+        if special:
+            if (len(special) != 2 or sum(b.actionable for b in special) != 1
+                    or any(b.raycast_top is not False for b in special if not b.actionable)):
+                raise SemanticGateClosed('Private Quarters special room hit changed')
+            target = next(b for b in special if b.actionable)
+        else:
+            target = self._unique(state, 'private-quarters/room/new-jersey')
         if (not target.actionable or target.raycast_top is not True or target.point is None
                 or target.bounds is None or not target.bounds.contains(target.point)
                 or self._blocking_rules(state, 'private-quarters/room/new-jersey')):

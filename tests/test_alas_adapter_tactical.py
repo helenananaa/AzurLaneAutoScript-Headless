@@ -9,6 +9,73 @@ from unittest.mock import patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_duplicate_empty_slot_input_requires_fresh_dock_destination(self):
+        oracle = FakeOracle()
+        adapter = AlasSemanticAdapter(oracle, lambda: None, tactical_assign_budget=1)
+        adapter.begin_tactical()
+        prior = SimpleNamespace(generation=10)
+        adapter._commission_context.tactical_empty_slot_receipt = prior
+        oracle.enabled = lambda target: target == 'tactical/dock/back'
+        oracle.tactical_candidate_ships = lambda: (SimpleNamespace(ship_id=818014),)
+        oracle.read_state = lambda: SimpleNamespace(generation=11)
+        oracle.click_tactical_first_empty_slot = lambda: self.fail('duplicate input')
+        self.assertIs(adapter.click(NamedButton('ADD_NEW_STUDENT')), prior)
+        self.assertIsNone(adapter._commission_context.tactical_empty_slot_receipt)
+
+    def test_unknown_dock_does_not_reuse_empty_slot_receipt(self):
+        oracle = FakeOracle()
+        adapter = AlasSemanticAdapter(oracle, lambda: None, tactical_assign_budget=1)
+        adapter.begin_tactical()
+        adapter._commission_context.tactical_empty_slot_receipt = SimpleNamespace(generation=10)
+        oracle.enabled = lambda target: True
+        def unknown():
+            raise SemanticGateClosed('unknown Dock')
+        oracle.tactical_candidate_ships = unknown
+        with self.assertRaisesRegex(SemanticGateClosed, 'unknown Dock'):
+            adapter.click(NamedButton('ADD_NEW_STUDENT'))
+
+    def test_tactical_can_discover_reviewed_research_return(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_tactical()
+        oracle.exists_values['research/page/back'] = True
+        oracle.enabled_values['research/page/back'] = True
+        self.assertTrue(adapter.appear(NamedButton('GOTO_MAIN')))
+        receipt = adapter.click(NamedButton('GOTO_MAIN'))
+        self.assertEqual(receipt.semantic_id, 'research/page/back')
+        self.assertEqual(oracle.click_calls, ['research/page/back'])
+
+    def test_tactical_unknown_page_does_not_authorize_return(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_tactical()
+        self.assertFalse(adapter.appear(NamedButton('GOTO_MAIN')))
+        with self.assertRaises(SemanticGateClosed):
+            adapter.click(NamedButton('GOTO_MAIN'))
+        self.assertFalse(oracle.click_calls)
+
+    def test_tactical_task_can_return_from_inherited_commission_page(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_tactical()
+        oracle.exists_values['commission/page/back'] = True
+        oracle.enabled_values['commission/page/back'] = True
+        receipt = adapter.click(NamedButton('BACK_ARROW'))
+        self.assertEqual(receipt.semantic_id, 'commission/page/back')
+        self.assertEqual(oracle.click_calls, ['commission/page/back'])
+
+    def test_course_confirm_duplicate_requires_new_running_slot(self):
+        oracle = FakeOracle()
+        adapter = AlasSemanticAdapter(oracle, lambda: None, tactical_assign_budget=1)
+        adapter.begin_tactical()
+        receipt = adapter.click(NamedButton("POPUP_CONFIRM"))
+        oracle.enabled_values['tactical/course/confirm'] = False
+        oracle.tactical_slot_values = [SimpleNamespace(
+            slot=1, ship_id=818014, status=SimpleNamespace(value='running'))]
+        self.assertEqual(adapter.click(NamedButton("POPUP_CONFIRM")), receipt)
+        self.assertEqual(oracle.click_calls, ['tactical/course/confirm'])
+
+        oracle.tactical_slot_values = []
+        with self.assertRaises(SemanticGateClosed):
+            adapter.click(NamedButton("POPUP_CONFIRM"))
+
     def test_tactical_assignment_budget_is_spent_only_on_course_confirm(self):
         oracle = FakeOracle()
         oracle.tactical_book_values = [

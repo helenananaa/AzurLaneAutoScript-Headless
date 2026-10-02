@@ -21,6 +21,15 @@ from .contracts import _OperationSirenGlobeSwipeIntent
 class SessionOpsiPorts:
     """Session opsi on the shared immutable frame."""
 
+    def operation_siren_map_swipe_owned(self):
+        return self.open().operation_siren_map_swipe_owned()
+
+    def begin_operation_siren_map_swipe_vector(self,vector,**options):
+        return self.open().begin_operation_siren_map_swipe_vector(vector,**options)
+
+    def end_operation_siren_map_swipe_vector(self,intent):
+        self.open().end_operation_siren_map_swipe_vector(intent)
+
     def operation_siren_shop_items(self):
         for attempt in range(8):
             try:
@@ -97,6 +106,9 @@ class SessionOpsiPorts:
 
     def operation_siren_state(self) -> OperationSirenState:
         return self.open().operation_siren_state()
+
+    def operation_siren_map_geometry(self, zone_name: str, *, rows: int, columns: int):
+        return self.open().operation_siren_map_geometry(zone_name, rows=rows, columns=columns)
 
     def operation_siren_mission_entry_available(self) -> bool:
         return self.open().operation_siren_mission_entry_available()
@@ -436,6 +448,21 @@ class SessionOpsiPorts:
         self,
     ) -> Optional[ActionReceipt]:
         return self.open().try_click_operation_siren_map_exit_confirm()
+
+    def operation_siren_globe_port_projection(self, zone_id: int):
+        return self.open().operation_siren_globe_port_projection(zone_id)
+
+    def operation_siren_globe_drag_owned(self, start, end):
+        return self.open().operation_siren_globe_drag_owned(start,end)
+
+    def operation_siren_globe_map_projection(self, area_pos):
+        return self.open().operation_siren_globe_map_projection(area_pos)
+
+    def click_operation_siren_globe_map_zone(self, expected_zone_name, area_pos):
+        return self.open().click_operation_siren_globe_map_zone(expected_zone_name, area_pos)
+
+    def click_operation_siren_globe_port(self, expected_zone_name: str, zone_id: int) -> ActionReceipt:
+        return self.open().click_operation_siren_globe_port(expected_zone_name, zone_id)
 
     def click_operation_siren_globe_zone(
         self, expected_zone_name: str, point: Tuple[float, float]

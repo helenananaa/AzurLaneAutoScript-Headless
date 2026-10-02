@@ -460,6 +460,9 @@ class FakeCoreOracle:
     def click_daily_precombat_start(self):
         return self.click("daily/precombat/start")
 
+    def click_meta_assist_precombat_start(self):
+        return self.click_daily_precombat_start()
+
     def daily_detail_visible(self):
         return self.daily_detail_visible_value
 
@@ -515,7 +518,7 @@ class FakeCoreOracle:
         return (semantic_ids[0], SimpleNamespace(path="root/target"))
 
     def read_state(self):
-        return SimpleNamespace(generation=self.state_generation)
+        return SimpleNamespace(generation=self.state_generation, buttons=())
 
     def _blocking_rules(self, state, semantic_id):
         return self.blocking_rules

@@ -1,0 +1,17 @@
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -543,6 +543,13 @@
+             self.disable_raid_on_event()
+             self.handle_commission_notice()
+ 
++            if (semantic_adapter is not None
++                    and self.config.Campaign_Name.lower() == 'sp'
++                    and semantic_adapter.campaign_remaining_attempts() == 0):
++                logger.info('SP attempts are exhausted, delay task to next day')
++                self.config.task_delay(server_update=True)
++                break
++
+             # if in hard mode, check remain times
+             if self.ui_page_appear(page_campaign) and MODE_SWITCH_1.get(main=self) == 'normal':
+                 if semantic_adapter is not None:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from typing import Optional
 from ...semantic_oracle import (
     ActionReceipt,
@@ -19,7 +20,20 @@ class GuildAdapterPorts:
 
     def guild_logistics_state(self) -> GuildLogisticsState:
         self._package_gate()
-        return self.oracle.guild_logistics_state()
+        while True:
+            try:
+                return self.oracle.guild_logistics_state()
+            except SemanticGateClosed as exc:
+                if (str(exc) not in (
+                        "guild logistics page identity is absent",
+                        "guild logistics snapshots are not coherent",
+                    )
+                        or time.monotonic() >= self._guild_logistics_transition_until):
+                    raise
+                # Supply/mission claims briefly replace the logistics panel
+                # with an award modal. ALAS closes that modal, then reads the
+                # same page again; wait only after our exact claim receipt.
+                time.sleep(0.2)
 
     def ensure_guild_section(self, section: str) -> Optional[ActionReceipt]:
         self._package_gate()
@@ -47,29 +61,42 @@ class GuildAdapterPorts:
         state = self.oracle.guild_logistics_state()
         if not state.supply_claimable:
             raise SemanticGateClosed("guild supply is not claimable")
-        return self._dispatch_mutation(
+        receipt = self._dispatch_mutation(
             "guild.claim",
             lambda: self.oracle.click("guild/logistics/supply"),
         )
+        self._guild_logistics_transition_until = time.monotonic() + 6.0
+        return receipt
 
     def claim_guild_mission(self) -> ActionReceipt:
         self._package_gate()
         state = self.oracle.guild_logistics_state()
         if not state.mission_claimable:
             raise SemanticGateClosed("guild mission is not claimable")
-        return self._dispatch_mutation(
+        receipt = self._dispatch_mutation(
             "guild.claim",
             lambda: self.oracle.click("guild/logistics/mission"),
         )
+        self._guild_logistics_transition_until = time.monotonic() + 6.0
+        return receipt
 
     def claim_all_guild_reports(self) -> ActionReceipt:
         self._package_gate()
         if not self.oracle.enabled("guild/report/claim-all"):
             raise SemanticGateClosed("guild reports are not claimable")
-        return self._dispatch_mutation(
+        receipt = self._dispatch_mutation(
             "guild.claim",
             lambda: self.oracle.click("guild/report/claim-all"),
         )
+        deadline = time.monotonic() + 5.0
+        while time.monotonic() < deadline:
+            if (self.oracle.read_state().generation > receipt.generation
+                    and self._award_close_target() is not None):
+                # Return after the reward mounts so the existing ALAS lobby
+                # reward-close loop cannot mistake its animation for absence.
+                return receipt
+            time.sleep(0.2)
+        raise SemanticGateClosed("guild report claim reward did not become actionable")
 
     def exchange_guild_item(self, item: GuildExchangeItemState) -> ActionReceipt:
         self._package_gate()
@@ -86,10 +113,12 @@ class GuildAdapterPorts:
         self._package_gate()
         if not self.oracle.enabled("guild/exchange/confirm"):
             raise SemanticGateClosed("guild exchange confirmation is absent")
-        return self._dispatch_mutation(
+        receipt = self._dispatch_mutation(
             "guild.exchange",
             lambda: self.oracle.click("guild/exchange/confirm"),
         )
+        self._guild_logistics_transition_until = time.monotonic() + 6.0
+        return receipt
 
     def confirm_guild_dispatch(self) -> ActionReceipt:
         self._package_gate()
@@ -119,6 +148,7 @@ class GuildAdapterPorts:
             "17013": "PlateGunT3",
             "17003": "PlateGeneralT3",
             "oxycola": "OxyCola",
+            "suansukele": "OxyCola",
             "mizhilengqueshui": "Coolant",
             "exploit": "Merit",
             "gold": "Coin",

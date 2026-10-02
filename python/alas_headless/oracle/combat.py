@@ -165,6 +165,26 @@ class CombatOracle:
             for button in state.buttons
         )
 
+    def daily_battle_loading_visible(self) -> bool:
+        """Recognize the typed combat loader without requiring a Loading button."""
+        state = self.read_state()
+        if any(b.active_in_hierarchy and b.active_and_enabled
+               and b.path != 'OverlayCamera/Overlay/UIOverlay/Loading(Clone)'
+               for b in state.buttons):
+            return False
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2 or ui.skipped_count:
+            raise SemanticGateClosed('combat loading snapshots are not coherent or complete')
+        root = 'UICamera/Canvas/UIMain/CombatLoadUI(Clone)/loading/loading_label'
+        def texts(path):
+            return [t for t in ui.texts if t.path == path and t.active_in_hierarchy
+                    and t.active_and_enabled and not t.truncated and t.bounds is not None]
+        labels, percents = texts(root), texts(root + '/percent')
+        return bool(len(labels) == len(percents) == 1
+                    and labels[0].text == 'NOW LOADING...'
+                    and re.fullmatch(r'(?:100(?:\.0+)?|\d{1,2}(?:\.\d+)?)%', percents[0].text)
+                    and all(r.blocker_id == 'loading' for r in self._blocking_rules(state, 'ui/absence-probe')))
+
     @staticmethod
     def _daily_combat_visible(state: OracleState) -> bool:
         return any(
@@ -388,9 +408,15 @@ class CombatOracle:
         )
 
     def click_daily_precombat_back(self) -> ActionReceipt:
-        state = self.read_state()
-        if not self._daily_precombat_visible(state):
-            raise SemanticGateClosed("daily precombat page is absent")
+        def ready_state():
+            state = self.read_state()
+            if not self._daily_precombat_visible(state):
+                raise SemanticGateClosed("daily precombat page is absent")
+            blockers = self._blocking_rules(state, 'daily/precombat/back')
+            if blockers:
+                raise SemanticGateClosed('daily precombat back is blocked: '+','.join(b.blocker_id for b in blockers))
+            return state
+        state = self._retry_transition_read(ready_state)
         target = self._unique(state, "daily/precombat/back")
         if (
             not target.active_in_hierarchy
@@ -402,7 +428,11 @@ class CombatOracle:
             or not target.bounds.contains(target.point)
         ):
             raise SemanticGateClosed("daily precombat back is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed before daily precombat back')
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed after daily precombat back')
         return ActionReceipt(
             semantic_id="daily/precombat/back",
             generation=state.generation,
@@ -412,9 +442,32 @@ class CombatOracle:
         )
 
     def click_daily_precombat_start(self) -> ActionReceipt:
-        state = self.read_state()
-        if not self._daily_precombat_visible(state):
-            raise SemanticGateClosed("daily precombat page is absent")
+        return self._click_shared_precombat_start(owned_meta_assist=False)
+
+    def click_meta_assist_precombat_start(self) -> ActionReceipt:
+        return self._click_shared_precombat_start(owned_meta_assist=True)
+
+    def _click_shared_precombat_start(self, *, owned_meta_assist: bool) -> ActionReceipt:
+        def ready_state():
+            state = self.read_state()
+            if not self._daily_precombat_visible(state):
+                raise SemanticGateClosed("daily precombat page is absent")
+            if owned_meta_assist:
+                summary = self.meta_assist_state()
+                if summary.remaining_attempts <= 0:
+                    raise SemanticGateClosed('META assist has no remaining attempts')
+                state = self.read_state()
+                if not self._daily_precombat_visible(state):
+                    raise SemanticGateClosed('META assist precombat changed during observation')
+            blockers = self._blocking_rules(state, 'daily/precombat/start')
+            if owned_meta_assist:
+                blockers = tuple(rule for rule in blockers
+                    if not (rule.blocker_id == 'meta-assist' and rule.path_fragment ==
+                        '/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/'))
+            if blockers:
+                raise SemanticGateClosed('daily precombat start is blocked: '+','.join(b.blocker_id for b in blockers))
+            return state
+        state = self._retry_transition_read(ready_state)
         target = self._unique(state, "daily/precombat/start")
         if (
             not target.active_in_hierarchy
@@ -426,7 +479,11 @@ class CombatOracle:
             or not target.bounds.contains(target.point)
         ):
             raise SemanticGateClosed("daily precombat start is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed before daily precombat start')
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed after daily precombat start')
         return ActionReceipt(
             semantic_id="daily/precombat/start",
             generation=state.generation,

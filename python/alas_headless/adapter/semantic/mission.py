@@ -132,6 +132,18 @@ class MissionAdapterPorts:
         )
 
     def _record_mission_transition(self, receipt: ActionReceipt) -> ActionReceipt:
+        if receipt.semantic_id == "task/page/back":
+            self._mission_page_return_transition_until = time.monotonic() + 15.0
+        if receipt.semantic_id == "meowfficer/page/back":
+            self._meowfficer_return_transition_until = time.monotonic() + 12.0
+        if receipt.semantic_id == "guild/page/back":
+            self._guild_return_transition_until = time.monotonic() + 12.0
+        if receipt.semantic_id == "research/page/back":
+            # Keep the passive ALAS page scan scoped to an actual reviewed
+            # Research back input, including the original queue_quit path.
+            # Page.iter_pages() may spend several seconds on the intermediate
+            # menu before ui_additional() finishes its unrelated passive scans.
+            self._research_menu_return_transition_until = time.monotonic() + 15.0
         context = self._mission_context
         if context is not None and receipt.semantic_id in (
             "main/more",
@@ -186,7 +198,7 @@ class MissionAdapterPorts:
 
     def _stable_mission_state(self) -> Optional[MissionPageState]:
         context = self._require_mission_context()
-        candidate = self.oracle.mission_page_state()
+        candidate = self._frame_or_live_observation_oracle().mission_page_state()
 
         if candidate.disposition == MissionDisposition.UNKNOWN:
             context.last_signature = None
@@ -208,6 +220,38 @@ class MissionAdapterPorts:
             if context.stable_generations >= 2:
                 context.stable_state = candidate
         return context.stable_state
+
+    def _mission_award_close_completed(self, expected_ids=('reward/award-info/close', 'reward/award-info1/close')) -> bool:
+        context = self._require_mission_context()
+        receipt = context.award_close_receipt
+        if receipt is None or receipt.semantic_id not in expected_ids:
+            return False
+
+        def destination():
+            state = self.oracle.read_state()
+            if any(button.active_in_hierarchy and '/AwardInfoUI' in button.path
+                   for button in state.buttons):
+                return False
+            if any(button.active_in_hierarchy and '/NewShipUI' in button.path
+                   for button in state.buttons):
+                # AwardInfo can hand its next reward to NewShipUI before the
+                # original loop refreshes its screenshot. Acknowledge only our
+                # completed Award close; the original GET_SHIP branch still
+                # owns the next input.
+                if (receipt.semantic_id in ('reward/award-info/close', 'reward/award-info1/close')
+                        and state.generation > receipt.generation
+                        and self.oracle.new_ship_reward_visible()):
+                    return True
+                raise SemanticGateClosed('mission next ship reward is not proven')
+            page = self.oracle.mission_page_state()
+            if page.generation <= receipt.generation or page.disposition == MissionDisposition.UNKNOWN:
+                raise SemanticGateClosed('mission award return is not proven')
+            return True
+
+        if self.oracle._retry_transition_read(destination, attempts=16, interval_seconds=0.25):
+            context.award_close_receipt = None
+            return True
+        return False
 
     def _mission_notice_appears(self) -> bool:
         context = self._require_mission_context()

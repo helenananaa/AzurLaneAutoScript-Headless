@@ -142,6 +142,9 @@ class TargetsOracle:
         delegated_build_pool = self._build_pool_delegated_raycast_proven(
             button_state, ui_state, semantic_id
         )
+        delegated_build_origin_nav = self._build_origin_pool_navigation_proven(
+            button_state, ui_state, semantic_id, matches
+        )
         delegated_guild_nav = self._guild_nav_delegated_raycast_proven(
             button_state,
             ui_state,
@@ -228,6 +231,7 @@ class TargetsOracle:
         if len(matches) != 1 or (
             not matches[0].actionable
             and not delegated_build_pool
+            and not delegated_build_origin_nav
             and not delegated_campaign_auto
             and not delegated_campaign_event_auto
             and not delegated_operation_siren_strategic
@@ -326,7 +330,8 @@ class TargetsOracle:
             return False
         raise SemanticGateClosed("semantic image target sprite is unexpected")
 
-    def click_image(self, semantic_id: str) -> ActionReceipt:
+    def _coherent_image_input_states(self) -> Tuple[OracleState, UiState]:
+        """Read both endpoints again before input when a transition splits them."""
         button_state = self.read_state()
         ui_state = self.read_ui_state()
         if ui_state.image_truncated or ui_state.method_mask & 0x8 == 0:
@@ -336,6 +341,12 @@ class TargetsOracle:
             or ui_state.generation > button_state.generation + 2
         ):
             raise SemanticGateClosed("button and image snapshots are not coherent")
+        return button_state, ui_state
+
+    def click_image(self, semantic_id: str) -> ActionReceipt:
+        button_state, ui_state = self._retry_transition_read(
+            self._coherent_image_input_states
+        )
         matches = self._image_matches(ui_state, semantic_id)
         if len(matches) != 1:
             raise SemanticGateClosed("semantic image target is absent or ambiguous")
@@ -424,6 +435,11 @@ class TargetsOracle:
             for rule in self._blockers
             if semantic_id not in rule.allowed_target_ids
             and not (
+                rule.blocker_id == 'meta-current-detail'
+                and semantic_id in ('daily/precombat/start', 'daily/precombat/back')
+                and self._daily_precombat_visible(state)
+            )
+            and not (
                 rule.blocker_id == "tactical-dock"
                 and (
                     semantic_id.startswith("enhancement/dock/")
@@ -489,6 +505,11 @@ class TargetsOracle:
         cancel = exact_text(
             "Msgbox(Clone)/window/button_container/custom_button_2(Clone)/pic"
         )
+        # Multi-choice dialogs (including dock-full recovery) reuse the same
+        # confirm prefab for several choices. They are not this two-button
+        # prompt; leave them to their task-specific typed parser.
+        if content is None or cancel is None:
+            return None
         confirm = exact_text(
             "Msgbox(Clone)/window/button_container/custom_button_1(Clone)/pic"
         )
@@ -616,6 +637,8 @@ class TargetsOracle:
         matches = self._matches(state, semantic_id)
         if semantic_id == "tactical/continue/cancel":
             return bool(matches and self._tactical_continue_prompt_matches(state))
+        if semantic_id == "tactical/completion/ack":
+            return bool(matches and self._tactical_completion_prompt_matches(state))
         if semantic_id in (
             "overlay/network-reconnect/cancel",
             "overlay/network-reconnect/confirm",
@@ -649,6 +672,8 @@ class TargetsOracle:
 
     def _enabled_once(self, semantic_id: str) -> bool:
         state = self.read_state()
+        if semantic_id == 'os/auto-search/reward/close':
+            return self._operation_siren_auto_search_reward_control_proven(state)
         if semantic_id in ("os/order/back", "os/order/scan", "os/order/submarine"):
             if self._operation_siren_order_prompt_mounted(state):
                 return False
@@ -677,7 +702,7 @@ class TargetsOracle:
                 and matches[0].active_in_hierarchy
                 and matches[0].active_and_enabled
                 and matches[0].interactable
-                and matches[0].raycast_top is None
+                and matches[0].raycast_top is not False
                 and matches[0].point is not None
                 and matches[0].bounds is not None
                 and matches[0].bounds.contains(matches[0].point)
@@ -915,7 +940,7 @@ class TargetsOracle:
                 and matches[0].active_in_hierarchy
                 and matches[0].active_and_enabled
                 and matches[0].interactable
-                and matches[0].raycast_top is None
+                and matches[0].raycast_top is not False
                 and matches[0].point is not None
                 and matches[0].bounds is not None
                 and matches[0].bounds.contains(matches[0].point)
@@ -948,6 +973,9 @@ class TargetsOracle:
             semantic_id == "tactical/continue/cancel"
             and not self._tactical_continue_prompt_matches(state)
         ):
+            return False
+        if (semantic_id == "tactical/completion/ack"
+                and not self._tactical_completion_prompt_matches(state)):
             return False
         if semantic_id in (
             "overlay/network-reconnect/cancel",

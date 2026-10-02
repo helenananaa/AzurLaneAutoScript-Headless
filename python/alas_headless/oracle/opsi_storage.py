@@ -19,6 +19,53 @@ from .errors import SemanticGateClosed, SemanticTargetMissing
 class OpsiStorageOracle:
     """Opsi storage operations sharing the oracle frame and input boundary."""
 
+    def operation_siren_storage_loggers_absent(self) -> bool:
+        """Prove the complete current inventory contains only reviewed non-loggers."""
+
+        state = self.read_state()
+        back = self._unique(state, "os/storage/back")
+        if not (back.active_in_hierarchy and back.active_and_enabled):
+            raise SemanticGateClosed("operation siren storage identity is absent")
+        ui = self.read_ui_state()
+        if (not state.generation <= ui.generation <= state.generation + 2
+                or ui.skipped_count):
+            raise SemanticGateClosed("operation siren inventory is incomplete")
+        root = "OverlayCamera/Overlay/UIMain/WorldInventoryUI(Clone)/adapt/item_scrollview/Viewport/item_grid/"
+        ids = [int(match.group(1)) for button in state.buttons
+               if (match := re.fullmatch(re.escape(root) + r"([0-9]+)", button.path))]
+        if not ids or len(ids) != len(set(ids)):
+            raise SemanticGateClosed("operation siren inventory cards are absent or ambiguous")
+        nonlogger_sprites = {
+            "jingtidianchi", "Wdashijiezhaungbeibi", "Wdashijiehuobi",
+            "Wshengminghuifu1", "Wshengminghuifu2", "Wshengminghuifu3",
+            "Wshengminghuifu4", "Wshengminghuifu5", "Wxingdonglihuifu1",
+            "Wxingdonglihuifu2", "Wxingdonglihuifu3",
+            "Wyangben1", "Wyangben2", "Wyangben3", "Wyangben4",
+            "Wyangben5", "Wyangben6",
+        }
+        for item_id in ids:
+            path = root + str(item_id) + "/bg/icon_bg/icon"
+            icons = [image for image in ui.images if image.path == path
+                     and image.active_in_hierarchy and image.active_and_enabled
+                     and not image.truncated]
+            if len(icons) != 1:
+                raise SemanticGateClosed("operation siren inventory icon is missing or ambiguous")
+            if icons[0].sprite not in nonlogger_sprites:
+                # Activated obscure coordinates belong to coordinate checkout,
+                # not the original logger activation flow. Require the same
+                # typed name identity used by operation_siren_storage_state;
+                # the sprite alone must not admit an unopened logger.
+                if icons[0].sprite == "Wluopanjihuo2":
+                    names = [text for text in ui.texts
+                             if text.path == root + str(item_id) + "/bg/name"
+                             and text.active_in_hierarchy and text.active_and_enabled
+                             and not text.truncated and text.bounds is not None]
+                    if (len(names) == 1 and re.sub(r"<[^>]*>", "", names[0].text)
+                            .strip().startswith("海域坐标:")):
+                        continue
+                raise SemanticGateClosed("operation siren logger inventory requires typed use support")
+        return True
+
     def operation_siren_storage_visible(self) -> bool:
         """Recognize the Operation Siren inventory by its exact page back control."""
 

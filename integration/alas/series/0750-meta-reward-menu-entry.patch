@@ -1,0 +1,46 @@
+diff --git a/module/meta_reward/meta_reward.py b/module/meta_reward/meta_reward.py
+index 91697db8..c071b9a0 100644
+--- a/module/meta_reward/meta_reward.py
++++ b/module/meta_reward/meta_reward.py
+@@ -1,3 +1,5 @@
++import time
++
+ from module.base.timer import Timer
+ from module.combat.combat import Combat
+ from module.logger import logger
+@@ -196,7 +198,34 @@ class BeaconReward(Combat, UI):
+             return
+ 
+         self.ui_ensure(page_meta)
+-        self.meta_wait_reward_page()
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        semantic_sync_page_ready = False
++        if semantic_session is not None:
++            from alas_headless import SemanticGateClosed
++
++            oracle = semantic_session.open().oracle
++            if oracle.meta_character_menu_visible():
++                receipt = oracle.click_meta_character_sync()
++                logger.info(
++                    f'Semantic META sync menu entry: {receipt.semantic_id}, '
++                    f'generation={receipt.generation}'
++                )
++                deadline = time.monotonic() + 12.0
++                while time.monotonic() < deadline:
++                    self.device.screenshot()
++                    frame_oracle = semantic_session.open()._require_frame_observation_oracle()
++                    if frame_oracle.read_state().generation <= receipt.generation:
++                        continue
++                    try:
++                        frame_oracle.meta_character_sync_rewards()
++                    except SemanticGateClosed:
++                        continue
++                    semantic_sync_page_ready = True
++                    break
++                else:
++                    raise SemanticGateClosed('META sync menu did not reach a coherent reward page')
++        if not semantic_sync_page_ready:
++            self.meta_wait_reward_page()
+ 
+         # Sync rewards
+         # "sync" is the period that you gather meta points to 100% and get a meta ship

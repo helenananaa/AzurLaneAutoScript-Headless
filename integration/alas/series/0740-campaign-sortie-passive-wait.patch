@@ -1,0 +1,32 @@
+diff --git a/module/device/device.py b/module/device/device.py
+--- a/module/device/device.py
++++ b/module/device/device.py
+@@ -69,7 +69,10 @@
+     click_record = collections.deque(maxlen=15)
+     stuck_timer = Timer(60, count=60).start()
+     stuck_timer_long = Timer(180, count=180).start()
+-    stuck_long_wait_list = ['BATTLE_STATUS_S', 'PAUSE', 'LOGIN_CHECK']
++    stuck_long_wait_list = [
++        'BATTLE_STATUS_S', 'PAUSE', 'LOGIN_CHECK',
++        'SEMANTIC_CAMPAIGN_SORTIE_TRANSITION',
++    ]
+ 
+     def __init__(self, *args, **kwargs):
+         for trial in range(4):
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -303,6 +303,13 @@
+                                 finally:
+                                     self.enter_map_cancel(skip_first_screenshot=False)
+                         if sortie_clicked:
++                            # The exact, budgeted semantic sortie may stream
++                            # through CombatLoadUI for over a minute.  Give
++                            # ALAS's existing bounded long-wait watchdog the
++                            # same passive window without admitting input.
++                            self.device.stuck_record_add(
++                                'SEMANTIC_CAMPAIGN_SORTIE_TRANSITION'
++                            )
+                             continue
+                         if fleet_authorized:
+                             proof = semantic_adapter.confirm_campaign_fleet_preparation()

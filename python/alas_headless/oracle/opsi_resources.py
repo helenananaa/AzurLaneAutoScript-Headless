@@ -960,6 +960,42 @@ class OpsiResourcesOracle:
             path=target.path,
         )
 
+    def _operation_siren_auto_search_reward_control_proven(self, state) -> bool:
+        targets = self._matches(state, 'os/auto-search/reward/close')
+        if len(targets) != 1:
+            return False
+        target = targets[0]
+        root = target.path.removesuffix('/Window/Fixed/ButtonExit')
+        if root not in ('WorldAutoFightRewardUI(Clone)',
+                        'OverlayCamera/Overlay/UIMain/WorldAutoFightRewardUI(Clone)'):
+            return False
+        if not (target.active_in_hierarchy and target.active_and_enabled
+                and target.interactable and target.raycast_top is not False
+                and target.point is not None and target.bounds is not None
+                and target.bounds.contains(target.point)):
+            return False
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation+2:
+            raise SemanticGateClosed('auto-search reward frames are incoherent')
+        def label(path, expected):
+            texts = [text for text in ui.texts if text.path == path
+                     and text.active_in_hierarchy and text.active_and_enabled]
+            return len(texts) == 1 and not texts[0].truncated and texts[0].text.strip() == expected
+        graphics = [image for image in ui.images if image.path == target.path
+                    and image.active_in_hierarchy and image.active_and_enabled]
+        if not (label(target.path+'/pic', '离开')
+                and label(root+'/Window/Fixed/top/bg/obtain/title/title_en', 'TOTAL REWARDS')
+                and len(graphics) == 1):
+            return False
+        graphic = graphics[0]
+        if (graphic.truncated or graphic.sprite != 'btn_big_grey'
+                or graphic.raycast_target is not True or graphic.raycast_top is False
+                or graphic.bounds is None
+                or any(abs(getattr(graphic.bounds,k)-getattr(target.bounds,k)) > .05
+                       for k in ('left','top','right','bottom'))):
+            return False
+        return not self._blocking_rules(state, 'os/auto-search/reward/close')
+
     def operation_siren_world_overview_visible(self) -> bool:
         """Recognize the post-special-zone overview dismissal exactly."""
 

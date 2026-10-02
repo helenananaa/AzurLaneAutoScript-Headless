@@ -1,0 +1,13 @@
+diff --git a/module/os_ash/meta.py b/module/os_ash/meta.py
+--- a/module/os_ash/meta.py
++++ b/module/os_ash/meta.py
+@@ -466,6 +466,9 @@
+     def _check_dossier_point(self) -> bool:
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
++            if self.appear(DOSSIER_LIST, offset=(20, 20)):
++                current, _ = semantic_adapter.meta_dossier_empty_points()
++                return current >= 100
+             state = semantic_adapter.meta_entrance_state()
+             return state.dossier_points >= state.consume_points
+         if self.appear(META_DOSSIER_FLAG, offset=(180, 20)):

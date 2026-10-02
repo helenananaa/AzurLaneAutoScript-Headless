@@ -129,7 +129,7 @@ class AdbRuntimeHandle:
     def foreground_component(self) -> str:
         return self.__bridge.foreground_component()
 
-    def tap(self, x: int, y: int) -> None:
+    def tap(self, x: float, y: float) -> None:
         self.__bridge.tap(x, y)
 
     def swipe(

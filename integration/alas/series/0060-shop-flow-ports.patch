@@ -2,23 +2,28 @@ diff --git a/module/shop/base.py b/module/shop/base.py
 index cadc42b9..7322cfdd 100644
 --- a/module/shop/base.py
 +++ b/module/shop/base.py
-@@ -250,6 +250,34 @@ class ShopBase(UI):
+@@ -250,6 +250,39 @@ class ShopBase(UI):
              logger.warning('Expected type \'ShopItemGrid\' but was None')
              return []
  
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if semantic_adapter is not None:
 +            records = semantic_adapter.general_shop_items()
-+            synthetic = np.zeros((720, 1280, 3), dtype=np.uint8)
 +            items = []
 +            for record in records:
++                if record.remaining is not None and record.remaining <= 0:
++                    continue
 +                button = shop_items.grids.buttons[record.index]
-+                item = shop_items.item_class(synthetic, button)
++                item = shop_items.item_class.__new__(shop_items.item_class)
++                item.image_raw = None
++                item.image = None
++                item._button = button
 +                item.is_valid = True
 +                item.name = record.canonical_name
 +                item.amount = record.amount
 +                item.cost = record.cost
 +                item.price = record.price
++                item.tag = None
 +                item.semantic_shop_index = record.index
 +                item.group, item.sub_genre, item.tier = None, None, None
 +                result = re.search(FILTER_REGEX, item.name)

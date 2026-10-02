@@ -660,6 +660,17 @@ class ResearchAdapterPorts:
     def _click_research(self, name):
         if self._research_context is not None and name in RESEARCH_CLICK_RESOURCES:
             context = self._research_context
+            if name in ('POPUP_CONFIRM', 'POPUP_CANCEL'):
+                prompt_kind = self.oracle.observation_prompt_kind()
+                if ((prompt_kind == 'opsi-exit'
+                        and self.oracle.operation_siren_exit_prompt_visible())
+                        or (name == 'POPUP_CONFIRM' and prompt_kind is None
+                            and self._operation_siren_exit_receipt is not None
+                            and time.monotonic() <= self._operation_siren_entry_transition_until)):
+                    # The shared OS port also owns repeated old confirmation
+                    # probes after exit; it proves the destination and returns
+                    # its existing receipt without submitting another input.
+                    return UNHANDLED
             if name == "RESEARCH_GOTO_QUEUE":
                 target = "research/queue/enter"
                 cached = context.navigation_receipts.get(target)
@@ -770,7 +781,9 @@ class ResearchAdapterPorts:
                     return context.queue_add_receipt
                 confirmed_start = context.start_confirm_receipt is not None
                 existing_running = (
-                    context.selected_status == ResearchProjectStatus.RUNNING
+                    context.selected_status in (
+                        ResearchProjectStatus.RUNNING, ResearchProjectStatus.WAITING
+                    )
                     and self._action_ledger.allowed("research.start")
                     and self.research_detail_is_running()
                     and self.research_detail_can_queue()
@@ -814,6 +827,13 @@ class ResearchAdapterPorts:
                     )
                 target = self._award_close_target()
                 if target is None:
+                    if (context.popup_close_receipts
+                            and not self.oracle.observation_target_present('reward/award-info/close')
+                            and not self.oracle.observation_target_present('reward/award-info1/close')):
+                        previous = context.popup_close_receipts[-1]
+                        self.oracle.research_queue_state()
+                        if self.oracle.read_state().generation > previous.generation:
+                            return previous
                     raise SemanticGateClosed("reviewed research reward popup is absent")
                 receipt = self.oracle.click(target)
                 context.popup_close_receipts.append(receipt)

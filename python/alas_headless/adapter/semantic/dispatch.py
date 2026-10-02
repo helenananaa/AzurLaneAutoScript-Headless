@@ -132,6 +132,8 @@ class DispatchAdapterPorts:
             return result
 
     def click(self, button: Any) -> Union[ActionReceipt, PrivateQuartersPhysicsReceipt]:
+        if self._operation_siren_camera_grid(button):
+            return self.click_operation_siren_camera_grid(button)
         if self._campaign_grid_location(button) is not None:
             return self.click_campaign_combat_grid(button)
         name = self._button_name(button)

@@ -13,6 +13,7 @@ from ...semantic_oracle import (
     CommissionScrollState,
     CommissionStartProof,
     SemanticGateClosed,
+    SemanticTargetMissing,
 )
 from .contracts import _CommissionFlowContext
 from .dispatch_result import UNHANDLED
@@ -256,6 +257,51 @@ class CommissionAdapterPorts:
         context.start_confirm_receipt = None
         return receipt
 
+    def _close_commission_award(self, target):
+        """Let the original receive loop observe the next popup after one close."""
+        oracle = self.oracle
+        receipt = oracle.click(target)
+        for attempt in range(20):
+            state = oracle.read_state()
+            if state.generation > receipt.generation and not any(
+                button.active_in_hierarchy and any(root in button.path for root in (
+                    '/AwardInfoUI(Clone)/', '/AwardInfoUI1(Clone)/'))
+                for button in state.buttons
+            ):
+                return receipt
+            if attempt < 19:
+                time.sleep(0.1)
+        raise SemanticGateClosed('commission reward did not close after one input')
+
+    def _commission_ship_exp_completed_transition(self):
+        """Acknowledge an observed EXP page already closed by our last input."""
+        context = self._require_commission_context()
+        observed = context.ship_exp_observation_generation
+        context.ship_exp_observation_generation = None
+        if (context.flow_kind != 'commission' or observed is None
+                or context.reward_claim_receipt is None
+                or not context.reward_close_receipts
+                or time.monotonic() > context.passive_transition_until):
+            return None
+        previous = context.reward_close_receipts[-1]
+        if (previous.semantic_id != 'reward/ship-exp/close'
+                or observed < previous.generation):
+            return None
+        state = self.oracle.read_state()
+        if (state.generation <= observed
+                or any(button.active_in_hierarchy and '/ShipExpUI(Clone)/' in button.path
+                       for button in state.buttons)):
+            return None
+        # The next native award is the concrete postcondition of the recorded
+        # EXP close. No alternate input or reward completion is manufactured.
+        if self._award_close_target() is None:
+            return None
+        blockers = self.oracle._blocking_rules(state, 'ui/absence-probe')
+        if any(rule.blocker_id not in ('award-info', 'award-info1', 'commission-page')
+               for rule in blockers):
+            return None
+        return previous
+
     def _click_commission(self, name, button, semantic_id, commission_row_match):
         if (
             self._commission_context is not None
@@ -320,12 +366,39 @@ class CommissionAdapterPorts:
                     raise SemanticGateClosed(
                         "tactical reward requires the separate explicit opt-in"
                     )
-                receipt = self.oracle.click("reward/ship-exp/close")
+                if (context.flow_kind == 'commission'
+                        and not self.oracle.observation_target_present('reward/ship-exp/close')):
+                    completed = self._commission_ship_exp_completed_transition()
+                    if completed is not None:
+                        return completed
+                input_count = getattr(self.oracle, 'input_dispatch_count', None)
+                try:
+                    receipt = self.oracle.click("reward/ship-exp/close")
+                except SemanticTargetMissing:
+                    # EXP can disappear between the presence read and the
+                    # guarded click. Reuse only the already recorded close
+                    # whose next native award is freshly proven, before any
+                    # new input. ALAS will handle that award on its next loop.
+                    if (context.flow_kind == 'commission'
+                            and type(input_count) is int
+                            and self.oracle.input_dispatch_count == input_count):
+                        completed = self._commission_ship_exp_completed_transition()
+                        if completed is not None:
+                            return completed
+                    raise
+                context.ship_exp_observation_generation = None
                 if context.flow_kind == "commission":
                     context.reward_close_receipts.append(receipt)
                 return self._record_mission_transition(receipt)
             if name in ("GET_ITEMS_1", "GET_ITEMS_2", "GET_ITEMS_3"):
                 context = self._commission_context
+                if (name == 'GET_ITEMS_1'
+                        and context.flow_kind == 'commission'
+                        and context.reward_claim_receipt is None
+                        and self.oracle.enabled('reward/ship-exp/close')):
+                    receipt = self.oracle.click('reward/ship-exp/close')
+                    context.reward_close_receipts.append(receipt)
+                    return self._record_mission_transition(receipt)
                 if (
                     context.flow_kind != "commission"
                     and context.tactical_reward_receipt is None
@@ -351,7 +424,9 @@ class CommissionAdapterPorts:
                             # that observation race into another ADB input.
                             return recorded_awards[-1]
                     raise SemanticGateClosed("reviewed commission reward popup is absent")
-                receipt = self.oracle.click(target)
+                receipt = (self._close_commission_award(target)
+                           if context.flow_kind == 'commission'
+                           else self.oracle.click(target))
                 if (
                     context.flow_kind == "commission"
                     and context.reward_claim_receipt is not None

@@ -1,17 +1,80 @@
 """Mail regression cases for the adapter."""
 
 import unittest
+from unittest.mock import patch
 from alas_headless import AlasSemanticAdapter, AlasSemanticUnmapped, SemanticGateClosed
 from tests.semantic_support.adapter_cases import AlasSemanticAdapterTestsSupport
 from tests.semantic_support.adapter_fixtures import FakeOracle, NamedButton
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_other_task_can_return_from_retained_manager_to_mail_page(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values['mail/manage/back'] = True
+        oracle.enabled_values['mail/manage/back'] = True
+        self.assertTrue(adapter.appear(NamedButton('GOTO_MAIN_WHITE')))
+        original = oracle.click
+        def arrive(target):
+            receipt = original(target)
+            oracle.state_generation = receipt.generation + 1
+            oracle.exists_values['mail/manage/back'] = False
+            oracle.enabled_values['mail/page/back'] = True
+            return receipt
+        oracle.click = arrive
+        receipt = adapter.click(NamedButton('GOTO_MAIN_WHITE'))
+        self.assertEqual(receipt.semantic_id, 'mail/manage/back')
+        self.assertEqual(oracle.click_calls, ['mail/manage/back'])
+
+    def test_inherited_manager_return_never_repeats_input_without_postcondition(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values['mail/manage/back'] = True
+        oracle.enabled_values['mail/manage/back'] = True
+        with patch('alas_headless.adapter.semantic.mail.time.monotonic', side_effect=[0,13]):
+            with self.assertRaisesRegex(SemanticGateClosed, 'did not restore mail page'):
+                adapter._click_mail('GOTO_MAIN_WHITE')
+        self.assertEqual(oracle.click_calls, ['mail/manage/back'])
+
     def test_mail_page_identity_and_manage_use_exact_semantic_targets(self):
         adapter, _, _ = self.make_adapter()
 
         self.assertEqual(adapter.semantic_id_for("MAIL_CHECK"), "mail/page/back")
         self.assertEqual(adapter.semantic_id_for("MAIL_MANAGE"), "mail/manage")
+
+    def test_other_task_can_leave_retained_mail_page_by_exact_back(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values["mail/page/back"] = True
+        oracle.enabled_values["mail/page/back"] = True
+        original = oracle.click
+        def arrive(target):
+            receipt = original(target)
+            oracle.state_generation = receipt.generation + 1
+            oracle.main_page_visible_value = True
+            oracle.exists_values["mail/page/back"] = False
+            return receipt
+        oracle.click = arrive
+
+        receipt = adapter.click(NamedButton("GOTO_MAIN_WHITE"))
+
+        self.assertEqual(receipt.semantic_id, "mail/page/back")
+        self.assertEqual(oracle.click_calls, ["mail/page/back"])
+
+    def test_mail_back_requires_new_main_state_without_repeating_input(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values["mail/page/back"] = True
+        oracle.enabled_values["mail/page/back"] = True
+        with patch('alas_headless.adapter.semantic.mail.time.monotonic', side_effect=[0,13]):
+            with self.assertRaisesRegex(SemanticGateClosed, 'did not reach main'):
+                adapter._click_mail('GOTO_MAIN_WHITE')
+        self.assertEqual(oracle.click_calls, ["mail/page/back"])
+
+    def test_other_task_cannot_leave_obscured_mail_page(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values["mail/page/back"] = True
+        oracle.enabled_values["mail/page/back"] = False
+
+        with self.assertRaises(SemanticGateClosed):
+            adapter.click(NamedButton("GOTO_MAIN_WHITE"))
+        self.assertEqual(oracle.click_calls, [])
 
     def test_mail_context_reuses_alas_state_machine_and_exact_back(self):
         adapter, oracle, _ = self.make_adapter()
@@ -30,6 +93,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
 
         self.assertEqual(receipt.semantic_id, "mail/page/back")
         self.assertEqual(oracle.click_calls, ["main/mail", "mail/page/back"])
+        oracle.enabled_values["mail/page/back"] = False
         self.assertFalse(adapter.appear(NamedButton("MAIL_CHECK")))
         oracle.main_page_visible_value = True
         self.assertTrue(adapter.appear(NamedButton("MAIN_GOTO_CAMPAIGN_WHITE")))
@@ -221,3 +285,18 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         oracle.exists_values["mail/page/back"] = True
         oracle.mail_empty = True
         self.assertTrue(adapter.appear(NamedButton("MAIL_WHITE_EMPTY")))
+
+    def test_empty_probe_does_not_read_under_an_actionable_manager(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_mail()
+        oracle.exists_values["mail/page/back"] = True
+        oracle.exists_values["mail/manage/back"] = True
+        oracle.enabled_values["mail/manage/back"] = True
+        def covered_count():
+            raise SemanticGateClosed("mail page identity is not safely actionable")
+        oracle.mail_is_empty = covered_count
+        self.assertFalse(adapter.appear(NamedButton("MAIL_WHITE_EMPTY")))
+        oracle.enabled_values["mail/manage/back"] = False
+        with self.assertRaises(SemanticGateClosed):
+            adapter.appear(NamedButton("MAIL_WHITE_EMPTY"))
+        self.assertEqual(oracle.click_calls, [])

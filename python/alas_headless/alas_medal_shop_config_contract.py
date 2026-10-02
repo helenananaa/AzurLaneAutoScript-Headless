@@ -40,6 +40,10 @@ def validate_alas_medal_shop_filter(*, filter_: object, value: object) -> str:
     normalized = re.sub(r"[‐‑‒–—―−－﹣﹘⁃]", "-", normalized)
     if not normalized:
         return value
+    # ALAS treats a lone separator as a no-match selector.  Keep the source
+    # policy intact: an empty string is replaced by ALAS's default buys.
+    if normalized == ">":
+        return value
     invalid = tuple(
         token
         for token in normalized.split(">")

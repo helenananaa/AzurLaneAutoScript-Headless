@@ -182,9 +182,9 @@ class CampaignMapOracle:
             # remains a separate typed-node contract; this prefix alone must
             # never set ``is_siren``.
             sprite_match = re.fullmatch(r"(?:sr)?(qx|qz|zl|hm|ys)([123])", image.sprite)
-            emotion_match = re.fullmatch(r"emotion_(qx|qz|zl|hm|ys)", image.sprite)
+            emotion_match = re.fullmatch(r"(?:emotion_|ghost)(qx|qz|zl|hm|ys)", image.sprite)
             cleared_sprite_match = re.fullmatch(
-                r"(?:(?:sr)?(?:qx|qz|zl|hm|ys)[123]|emotion_(?:qx|qz|zl|hm|ys))_d_blue",
+                r"(?:(?:sr)?(?:qx|qz|zl|hm|ys)[123]|(?:emotion_|ghost)(?:qx|qz|zl|hm|ys))_d_blue",
                 image.sprite,
             )
             boss_title_images = tuple(
@@ -677,6 +677,17 @@ class CampaignMapOracle:
         if self.daily_battle_result_visible():
             return False
 
+        # A scheduler task can inherit the ready Operation Siren globe.
+        # Report this reviewed non-campaign surface to ALAS; its own UI graph
+        # chooses how to leave it before starting the campaign.
+        if self.operation_siren_globe_visible():
+            return False
+
+        if self.retirement_selection_visible() or self.enhancement_dock_visible():
+            # Original retirement recovery navigates through these exact
+            # non-map surfaces before returning to the campaign map.
+            return False
+
         state = self.read_state()
         non_map_targets = (
             "login/enter",
@@ -695,6 +706,7 @@ class CampaignMapOracle:
             "research-menu/page/back",
             "research/page/back",
             "tactical/page/back",
+            "daily/page/back",
         )
         observed = tuple(
             semantic_id
@@ -702,5 +714,10 @@ class CampaignMapOracle:
             if self._matches(state, semantic_id)
         )
         if observed:
+            return False
+        if (self._matches(state, "shop/home")
+                and self.recommendation_shop_visible()):
+            # Freebies leaves the reviewed Shop shell mounted. The native
+            # Campaign page graph owns leaving it before stage admission.
             return False
         raise SemanticGateClosed("campaign startup surface is not reviewed")

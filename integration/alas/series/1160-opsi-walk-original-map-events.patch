@@ -1,0 +1,32 @@
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -403,6 +403,28 @@
+             from alas_headless import SemanticGateClosed
+             self.device.stuck_record_clear()
+             for _ in self.loop(skip_first=skip_first_screenshot):
++                # Preserve ALAS' map-event owner while typed state replaces
++                # pixel/homography movement observations. Story choices and
++                # ordinary rewards can interrupt the same walk.
++                event = self.handle_map_event(drop=drop)
++                if event:
++                    confirm_timer.reset()
++                    stuck_timer.reset()
++                    result.add('event')
++                    if event == 'story_skip':
++                        clicked_story = True
++                    elif event == 'map_get_items':
++                        if clicked_story:
++                            logger.info('Got items from story')
++                            self.device.click_record_clear()
++                            clicked_story = False
++                    else:
++                        clicked_story = False
++                    continue
++                if self.handle_popup_confirm('WALK_UNTIL_STABLE'):
++                    confirm_timer.reset()
++                    stuck_timer.reset()
++                    continue
+                 if semantic_session.operation_siren_low_resolve_prompt_visible():
+                     semantic_session.click_operation_siren_low_resolve_cancel()
+                     result.add('fleet_unavailable')

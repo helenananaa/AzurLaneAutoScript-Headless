@@ -24,6 +24,113 @@ from .errors import SemanticGateClosed
 class MeowfficerOracle:
     """Meowfficer operations sharing the oracle frame and input boundary."""
 
+    def click_meowfficer_purchase_quantity(self, semantic_id: str) -> ActionReceipt:
+        """Use the reviewed native pressPersistTrigger graphic, then prove one step."""
+        if semantic_id not in ('meowfficer/buy/add', 'meowfficer/buy/min'):
+            raise ValueError('unsupported meowfficer quantity control')
+        state = self.read_state()
+        ui = self.read_ui_state()
+        before = self._meowfficer_purchase_state_from_states(state, ui)
+        delta = 1 if semantic_id.endswith('/add') else -1
+        expected = before.count + delta
+        if not 1 <= expected <= 15:
+            raise SemanticGateClosed('meowfficer quantity would exceed its bounds')
+        if (not state.generation <= ui.generation <= state.generation + 2
+                or ui.image_truncated or self._blocking_rules(state, semantic_id)):
+            raise SemanticGateClosed('meowfficer quantity state is incoherent or obscured')
+        submit = self._unique(state, 'meowfficer/buy/submit')
+        root = submit.path.removesuffix('/frame/bg1/Button')
+        if not submit.actionable:
+            raise SemanticGateClosed('meowfficer quantity panel is not actionable')
+        proven = {}
+        for suffix, sprite in (('/frame', 'buy_bg'),
+                               ('/frame/bg1/count', 'buy_count_bg'),
+                               ('/frame/bg1/count/min', '-'),
+                               ('/frame/bg1/count/add', '+')):
+            matches = [i for i in ui.images if i.path == root + suffix]
+            if len(matches) != 1:
+                raise SemanticGateClosed('meowfficer quantity graphic is absent or ambiguous')
+            image = matches[0]
+            if (image.sprite != sprite or not image.active_in_hierarchy
+                    or not image.active_and_enabled or not image.raycast_target
+                    or image.raycast_top is False or image.truncated or image.bounds is None):
+                raise SemanticGateClosed('meowfficer quantity graphic is not proven')
+            proven[suffix] = image
+        target = proven['/frame/bg1/count/' + semantic_id.rsplit('/', 1)[1]]
+        bounds = target.bounds
+        point = Point((bounds.left + bounds.right) / 2, (bounds.top + bounds.bottom) / 2)
+        # The count background is decorative and its +/- children overhang it
+        # in the native layout. Only the enclosing purchase frame owns bounds.
+        for parent in ('/frame',):
+            parent_bounds = proven[parent].bounds
+            if (not parent_bounds.contains(Point(bounds.left, bounds.top))
+                    or not parent_bounds.contains(Point(bounds.right, bounds.bottom))):
+                raise SemanticGateClosed('meowfficer quantity graphic is outside its panel')
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed before meowfficer quantity input')
+        self._tap(round(point.x), round(point.y))
+
+        def advanced():
+            after = self.meowfficer_purchase_state()
+            if after.generation <= state.generation or after.count != expected:
+                raise SemanticGateClosed('meowfficer quantity did not advance exactly once')
+            return after
+
+        self._retry_transition_read(advanced, attempts=20, interval_seconds=0.1)
+        return ActionReceipt(semantic_id=semantic_id, generation=state.generation,
+                             point=point, bounds=bounds, path=target.path)
+
+    def click_meowfficer_purchase_close(self) -> ActionReceipt:
+        """Close the reviewed reserve background outside its blocking frame."""
+        self.meowfficer_purchase_state()  # bg1 ready; no animation or prompt
+        state = self.read_state()
+        semantic_id = 'meowfficer/buy/close'
+        if self._blocking_rules(state, semantic_id):
+            raise SemanticGateClosed('meowfficer purchase close is obscured')
+        matches = [b for b in state.buttons if b.path.endswith('CommanderReserveUI(Clone)/bg')]
+        if len(matches) != 1:
+            raise SemanticGateClosed('meowfficer purchase background is ambiguous')
+        bg = matches[0]
+        if (not bg.active_in_hierarchy or not bg.active_and_enabled
+                or not bg.interactable or bg.raycast_top is False or bg.bounds is None):
+            raise SemanticGateClosed('meowfficer purchase background is unavailable')
+        ui = self.read_ui_state()
+        if (not state.generation <= ui.generation <= state.generation+2
+                or ui.snapshot.get('image_truncated') is not False):
+            raise SemanticGateClosed('meowfficer purchase close frame is incoherent')
+        images = [i for i in ui.images if i.active_in_hierarchy and i.active_and_enabled
+                  and not i.truncated and i.path == bg.path and i.sprite == 'white_dot'
+                  and i.raycast_target and i.bounds == bg.bounds]
+        frames = [i for i in ui.images if i.active_in_hierarchy and i.active_and_enabled
+                  and not i.truncated and i.path == bg.path.removesuffix('/bg')+'/frame'
+                  and i.sprite == 'buy_bg' and i.raycast_target and i.bounds is not None]
+        if len(images) != 1 or len(frames) != 1:
+            raise SemanticGateClosed('meowfficer purchase close geometry is ambiguous')
+        frame = frames[0].bounds
+        point = Point((max(0, bg.bounds.left)+frame.left)/2, (frame.top+frame.bottom)/2)
+        if (frame.left <= max(0, bg.bounds.left) or not bg.bounds.contains(point)
+                or frame.contains(point)):
+            raise SemanticGateClosed('meowfficer purchase close background is covered')
+        for image in ui.images:
+            dock_underlay = (image.path.endswith('UICamera/Canvas/UIMain/CommanderCatUI(Clone)/background')
+                             and image.sprite == 'commander_bg_1')
+            if (image.active_in_hierarchy and image.active_and_enabled and image.raycast_target
+                    and image.bounds is not None and image.bounds.contains(point)
+                    and image.path not in (bg.path, bg.path.removesuffix('/bg')) and not dock_underlay):
+                raise SemanticGateClosed('meowfficer purchase close point is covered')
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed before meowfficer purchase close')
+        self._tap(round(point.x), round(point.y))
+        def closed():
+            after = self.read_state()
+            if after.generation <= state.generation or any(
+                    b.active_in_hierarchy and b.path == bg.path for b in after.buttons):
+                raise SemanticGateClosed('meowfficer purchase close has not advanced')
+            return self.meowfficer_dock_state()
+        self._retry_transition_read(closed, attempts=30, interval_seconds=.1)
+        return ActionReceipt(semantic_id=semantic_id, generation=state.generation,
+                             point=point, bounds=bg.bounds, path=bg.path)
+
     def meowfficer_dock_state(self) -> MeowfficerDockState:
         """Read the Commander Cat dock counters without entering a sub-page."""
 
@@ -45,7 +152,7 @@ class MeowfficerOracle:
                 or not control.active_in_hierarchy
                 or not control.active_and_enabled
                 or not control.interactable
-                or control.raycast_top is not None
+                or control.raycast_top is False
                 or control.point is None
                 or control.bounds is None
                 or not control.bounds.contains(control.point)
@@ -98,7 +205,9 @@ class MeowfficerOracle:
                 raise SemanticGateClosed("meowfficer resource is malformed: " + key)
             scalars[key] = int(values[key])
         return MeowfficerDockState(
-            purchased=pairs["purchase"][0],
+            # CommanderCatDockUI displays remaining / daily total, matching
+            # original ALAS DigitCounter's remain, bought, total contract.
+            purchased=pairs["purchase"][1] - pairs["purchase"][0],
             purchase_total=pairs["purchase"][1],
             coins=scalars["coins"],
             capacity_used=pairs["capacity"][0],
@@ -114,9 +223,10 @@ class MeowfficerOracle:
         """Read the exact reserve count and total coin price."""
 
         button_state = self.read_state()
+        return self._meowfficer_purchase_state_from_states(button_state, self.read_ui_state())
+
+    def _meowfficer_purchase_state_from_states(self, button_state, ui_state) -> MeowfficerPurchaseState:
         for semantic_id in (
-            "meowfficer/buy/min",
-            "meowfficer/buy/add",
             "meowfficer/buy/max",
             "meowfficer/buy/submit",
         ):
@@ -129,14 +239,13 @@ class MeowfficerOracle:
                 or not control.active_in_hierarchy
                 or not control.active_and_enabled
                 or not control.interactable
-                or control.raycast_top is not None
+                or control.raycast_top is False
                 or control.point is None
                 or control.bounds is None
                 or not control.bounds.contains(control.point)
             ):
                 raise SemanticGateClosed("meowfficer purchase control is not proven")
 
-        ui_state = self.read_ui_state()
         if (
             ui_state.generation < button_state.generation
             or ui_state.generation > button_state.generation + 2
@@ -153,11 +262,13 @@ class MeowfficerOracle:
                 and item.active_in_hierarchy
                 and item.active_and_enabled
                 and not item.truncated
-                and re.fullmatch(r"[0-9]+", item.text.strip()) is not None
             )
             if len(matches) != 1:
                 raise SemanticGateClosed("meowfficer purchase number is ambiguous")
-            return int(matches[0].text.strip())
+            value = re.sub(r"<[^>]*>", "", matches[0].text).strip()
+            if re.fullmatch(r"[0-9]+", value) is None:
+                raise SemanticGateClosed("meowfficer purchase number is malformed")
+            return int(value)
 
         count = exact_number("count/Text")
         total_price = exact_number("price_all/Text")
@@ -180,6 +291,34 @@ class MeowfficerOracle:
             )
         )
         if any(len(matches) != 1 for matches in controls):
+            return False
+        ui = self.read_ui_state()
+        if (ui.generation < button_state.generation
+                or ui.generation > button_state.generation + 2
+                or ui.snapshot.get('text_truncated') is not False):
+            return False
+        def unique_text(suffix):
+            texts = [item.text.strip() for item in ui.texts
+                     if item.path.endswith(suffix) and item.active_in_hierarchy
+                     and item.active_and_enabled and not item.truncated]
+            return texts[0] if len(texts) == 1 else None
+        content = unique_text('CommanderMsgBoxUI(Clone)/frame/bg/content/Text')
+        count = unique_text('CommanderReserveUI(Clone)/frame/bg1/count/Text')
+        price = unique_text('CommanderReserveUI(Clone)/frame/bg1/price_all/Text')
+        if content is None or count is None or price is None:
+            return False
+        content = re.sub(r'</?color(?:=[^>]+)?>', '', content)
+        paid = re.fullmatch(r'是否消耗([0-9]+)物资购买([0-9]+)个喵箱[？?]', content)
+        if paid is not None:
+            if (price, count) != paid.groups():
+                return False
+        elif content == '每天的第一次喵箱预定免费喵！':
+            if (count, price) != ('1', '0'):
+                return False
+        else:
+            return False
+        if (not count.isdecimal() or not price.isdecimal()
+                or not 1 <= int(count) <= 15 or int(price) > int(count)*1500):
             return False
         return all(
             not self._blocking_rules(button_state, semantic_id)
@@ -529,7 +668,7 @@ class MeowfficerOracle:
                 or not control.active_in_hierarchy
                 or not control.active_and_enabled
                 or not control.interactable
-                or control.raycast_top is not None
+                or control.raycast_top is False
                 or control.point is None
                 or control.bounds is None
                 or not control.bounds.contains(control.point)
@@ -763,7 +902,7 @@ class MeowfficerOracle:
             not control.active_in_hierarchy
             or not control.active_and_enabled
             or not control.interactable
-            or control.raycast_top is not None
+            or control.raycast_top is False
             or control.point is None
             or control.bounds is None
             or not control.bounds.contains(control.point)
@@ -841,7 +980,7 @@ class MeowfficerOracle:
                 or not control.active_in_hierarchy
                 or not control.active_and_enabled
                 or not control.interactable
-                or control.raycast_top is not None
+                or control.raycast_top is False
                 or control.point is None
                 or control.bounds is None
                 or not control.bounds.contains(control.point)
@@ -999,7 +1138,7 @@ class MeowfficerOracle:
             not control.active_in_hierarchy
             or not control.active_and_enabled
             or not control.interactable
-            or control.raycast_top is not None
+            or control.raycast_top is False
             or control.point is None
             or control.bounds is None
             or not control.bounds.contains(control.point)

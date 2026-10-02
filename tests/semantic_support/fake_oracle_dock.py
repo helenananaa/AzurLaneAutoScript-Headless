@@ -12,6 +12,9 @@ from types import SimpleNamespace
 
 
 class FakeDockOracle:
+    def enhancement_dock_back_control(self):
+        return None
+
     def retirement_selection_visible(self):
         return False
 

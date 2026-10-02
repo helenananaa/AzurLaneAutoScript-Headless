@@ -23,7 +23,7 @@ diff --git a/module/awaken/awaken.py b/module/awaken/awaken.py
          logger.hr('Awaken run', level=1)
          self.ui_ensure(page_dock)
          self.dock_favourite_set(enable=favourite, wait_loading=False)
-@@ -371,25 +382,36 @@ class Awaken(Dock):
+@@ -371,25 +382,37 @@ class Awaken(Dock):
          return result
  
      def run(self):
@@ -33,6 +33,7 @@ diff --git a/module/awaken/awaken.py b/module/awaken/awaken.py
 +        )
 +        semantic_session = current_semantic_session()
 +        if semantic_session is not None:
++            self.ui_ensure(page_dock)
 +            semantic_session.begin_awaken_task(awaken_config.favourite)
 +
          # Run Awakening+ first

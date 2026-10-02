@@ -9,6 +9,7 @@ import time
 from dataclasses import replace
 from typing import Any, Tuple
 from ...adapter.flows import LOGIN_ACTION_TARGETS
+from ...adapter import StaleFrameError
 from ...alas_combat_state_replay import (
     ALAS_COMBAT_DEFENSIVE_RESOURCE_NAMES,
     ALAS_COMBAT_RESOURCE_ACTION_TARGETS,
@@ -54,13 +55,32 @@ class SessionDispatchPorts:
             # No action or completion while the result page unloads. ALAS'
             # existing combat loop owns the next screenshot and timeout.
             return False
-        oracle.meta_assist_state()
+        if adapter.meta_beacon_active():
+            if not oracle.meta_page_visible():
+                raise SemanticGateClosed('META result return page is not reviewed')
+        else:
+            oracle.meta_assist_state()
         adapter._operation_siren_combat_active = False
         return adapter.appear(button)
 
     def appear(self, button: Any) -> bool:
         name = AlasSemanticAdapter._button_name(button)
         adapter = self.open()
+        clock = getattr(self, '_frame_clock', None)
+        if clock is not None:
+            try:
+                clock.borrow()
+            except StaleFrameError:
+                # ALAS may skip its first screenshot after a navigation tap.
+                # That input invalidated our frame; establish one new semantic
+                # boundary before the page sweep instead of polling live state
+                # separately for every candidate. Valid frames remain frozen.
+                self.refresh_frame()
+        if name in ('RETIRE_APPEAR_1', 'RETIRE_APPEAR_2', 'RETIRE_APPEAR_3'):
+            # The shared dock modal must precede combat defensive probes in
+            # both campaign and OS. Its dedicated parser proves all choices.
+            if adapter.dock_full_recovery_owned():
+                return adapter.appear(button)
         if name.startswith('PRIVATE_QUARTERS_') or (
                 name == 'POPUP_CANCEL_WHITE'
                 and time.monotonic() <= getattr(adapter, '_private_quarters_transition_until', 0.0)):
@@ -243,7 +263,11 @@ class SessionDispatchPorts:
                     self._combat_result_observation = (name, time.monotonic())
                 return visible
             except SemanticGateClosed as exc:
-                if (adapter._meta_assist_active and str(exc).startswith(
+                if ((adapter._meta_assist_active or (
+                        adapter.meta_beacon_active()
+                        and self._combat_last_result_receipt is not None
+                        and time.monotonic() <= self._combat_result_transition_until))
+                        and str(exc).startswith(
                         'combat action control is not exact top-raycast actionable: '
                         'OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/')):
                     # The statistics Button can outlive its result page during
@@ -343,6 +367,9 @@ class SessionDispatchPorts:
         return self.open().image_color_count(button, color, threshold, count)
 
     def click(self, button: Any) -> Union[ActionReceipt, PrivateQuartersPhysicsReceipt]:
+        if AlasSemanticAdapter._operation_siren_camera_grid(button):
+            self.refresh_frame()
+            return self.open().click_operation_siren_camera_grid(button)
         if AlasSemanticAdapter._campaign_grid_location(button) is not None:
             self.refresh_frame()
             context = self.open()._campaign_context
@@ -350,6 +377,9 @@ class SessionDispatchPorts:
                 return self.open().click_campaign_submarine_grid(button)
             return self.open().click_campaign_combat_grid(button)
         name = AlasSemanticAdapter._button_name(button)
+        if name in ('SYNC_ENTER', 'SYNC_ENTER2', 'SYNC_TAP'):
+            self.refresh_frame()
+            return self.open().click(button)
         if name == 'SUBMARINE_READY' and self.open()._campaign_context is not None:
             self.refresh_frame()
             return self.open().click_campaign_submarine_call()
@@ -565,8 +595,52 @@ class SessionDispatchPorts:
             navigation_oracle = self.open()._require_frame_observation_oracle()
             if name == "CLICK_SAFE_AREA" and navigation_oracle.enabled("reward/award-info/close"):
                 return navigation_oracle.click("reward/award-info/close")
+            tactical_context = self.open()._commission_context
+            if (name == 'GOTO_MAIN'
+                    and tactical_context is not None
+                    and tactical_context.flow_kind == 'tactical'
+                    and navigation_oracle.enabled('tactical/dock/cancel')
+                    and navigation_oracle.tactical_candidate_ships()):
+                # The ordinary Dock exit rejects selection dialogs. This
+                # task owns the reviewed student selection return instead.
+                return navigation_oracle.click('tactical/dock/back')
+            if (name == "GOTO_MAIN"
+                    and not (getattr(navigation_oracle, 'meta_character_page_visible', lambda: False)()
+                             or navigation_oracle.meta_character_menu_visible())
+                    and any(
+                    button.active_in_hierarchy
+                    and button.path == "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back"
+                    for button in navigation_oracle.read_state().buttons)
+                    and any(button.active_in_hierarchy and button.path ==
+                            "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/index_button"
+                            for button in navigation_oracle.read_state().buttons)):
+                # The shared back path also belongs to Guild. Dock needs its
+                # distinct filter anchor before entering the capacity proof.
+                oracle = self.open().oracle
+                receipt = oracle.click_dock_page_back()
+                deadline = time.monotonic() + 12.0
+                while time.monotonic() < deadline:
+                    state = oracle.read_state()
+                    if (state.generation > receipt.generation
+                            and oracle.main_page_visible()
+                            and not any(
+                                button.active_in_hierarchy
+                                and button.path == "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back"
+                                for button in state.buttons)):
+                        return receipt
+                    time.sleep(0.2)
+                raise SemanticGateClosed("Dock return did not reach the exact main page")
             if name == "GOTO_MAIN" and navigation_oracle.exercise_page_visible():
-                return navigation_oracle.click("exercise/page/back")
+                oracle = self.open().oracle
+                receipt = oracle.click_exercise_home()
+                deadline = time.monotonic() + 12.0
+                while time.monotonic() < deadline:
+                    if (oracle.read_state().generation > receipt.generation
+                            and oracle.main_page_visible()
+                            and not oracle.observation_target_present("exercise/page/back")):
+                        return receipt
+                    time.sleep(0.2)
+                raise SemanticGateClosed("Exercise return did not reach the exact main page")
         if (name == 'AUTO_SEARCH_MENU_EXIT' and self.adapter is not None
                 and self.adapter._campaign_context is not None):
             self.refresh_frame()
@@ -617,6 +691,10 @@ class SessionDispatchPorts:
             and not name.startswith("DAILY_MISSION_")
             and name not in ("DAILY_NORMAL_RUN", "DAILY_SKIP")
             and name not in ("MISSION_FINISH", "MISSION_CHECKOUT")
+            and not (name == 'CLICK_SAFE_AREA' and self.adapter is not None
+                     and (self.adapter._meta_beacon_active or self.adapter._meta_assist_active)
+                     and (self.adapter.oracle.award_info_page_visible()
+                          or self.adapter._meta_reward_close_receipt is not None))
             and name not in MISSION_CLICK_RESOURCES
             and name not in MAIL_CLICK_RESOURCES
             and name not in CAMPAIGN_CLICK_RESOURCES
@@ -638,7 +716,10 @@ class SessionDispatchPorts:
             )
             and not (
                 self.adapter is not None
-                and name in TACTICAL_VIRTUAL_RESOURCES
+                and (name in TACTICAL_VIRTUAL_RESOURCES
+                     or (name == "GET_MISSION"
+                         and self.adapter._commission_context is not None
+                         and self.adapter._commission_context.flow_kind == "tactical"))
             )
             and not (
                 self.adapter is not None

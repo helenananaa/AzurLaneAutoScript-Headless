@@ -396,6 +396,36 @@ class EnhancementSemanticOracleTests(unittest.TestCase):
 
         self.assertFalse(preview.material_protection_proven)
 
+    def test_partial_experience_enhancement_requires_exact_result(self):
+        for result_exp in (14, 0):
+            with self.subTest(result_exp=result_exp):
+                backend = FakeBackend([])
+                def page(generation, materials=(), exp=0):
+                    set_enhancement_page(backend, generation, materials=materials,
+                                         complete_card_images=bool(materials))
+                    for text in backend.ui['texts']:
+                        if '/attrs/attr_2/' in text['path']:
+                            if text['path'].endswith('/addition'): text['text']='+0'
+                            if text['path'].endswith('/exp_container/Text'):
+                                text['text']=f'{exp}/25'
+                page(20)
+                step = 0
+                def advance():
+                    nonlocal step
+                    step += 1
+                    if step == 1: page(21, ((0, 'maikaoer'),), 14)
+                    else: page(22, exp=result_exp)
+                backend.on_tap = advance
+                oracle = make_oracle(backend)
+                if result_exp == 14:
+                    receipt = oracle.enhance_with_official_recommendation(timeout_seconds=.1)
+                    self.assertEqual(receipt.consumed_count, 1)
+                    self.assertEqual(receipt.attributes_after[0].exp_current, 14)
+                else:
+                    with self.assertRaisesRegex(SemanticGateClosed, 'do not retry'):
+                        oracle.enhance_with_official_recommendation(timeout_seconds=.1)
+                self.assertEqual(backend.taps, [(1024, 626), (1191, 626)])
+
     def test_official_enhancement_confirms_only_a_protected_preview(self):
         backend = FakeBackend([])
         set_enhancement_page(backend, 20)

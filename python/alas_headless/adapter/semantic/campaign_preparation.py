@@ -365,7 +365,9 @@ class CampaignPreparationAdapterPorts:
         context.requested_fleets = (fleet1, fleet2, submarine)
 
         if context.mode == "hard":
-            if (fleet1, fleet2, submarine) != (1, 2, 0):
+            if (not all(isinstance(value, int) and not isinstance(value, bool)
+                        and value > 0 for value in (fleet1, fleet2))
+                    or submarine != 0):
                 raise SemanticGateClosed(
                     "hard campaign requires the two fixed surface fleet rows"
                 )
@@ -373,6 +375,11 @@ class CampaignPreparationAdapterPorts:
                 raise SemanticGateClosed(
                     "hard campaign fleet restrictions are not present"
                 )
+            # Original ALAS fleet_preparation() treats enabled surface fleet
+            # settings as booleans on a proven hard panel, then keeps the
+            # game's two fixed presets. Ordinary fleet indices (e.g. 5/6)
+            # are not dropdown selections on this surface.
+            context.requested_fleets = (1, 2, 0)
             rows = {row.row_key: row for row in initial.rows}
             if set(rows) != {"fleet1", "fleet2", "submarine"}:
                 raise SemanticGateClosed("hard campaign fleet rows are incomplete")
@@ -706,6 +713,19 @@ class CampaignPreparationAdapterPorts:
                 return self._require_frame_observation_oracle()
             return self.oracle
 
+        def ready_role_state() -> CampaignAutoSearchRoleState:
+            deadline = time.monotonic() + 5.0
+            while True:
+                try:
+                    return fresh_role_oracle().campaign_auto_search_role_state()
+                except SemanticGateClosed as exc:
+                    if (str(exc) != 'campaign auto-search role control is incomplete'
+                            or time.monotonic() >= deadline):
+                        raise
+                    # A checked duty tab can precede its actionable role rows.
+                    # Refresh observation only; retain every original input gate.
+                    time.sleep(0.2)
+
         self._package_gate()
         context = self._require_campaign_context()
         if context.prepared_fleet_state is None or context.requested_fleets is None:
@@ -729,7 +749,7 @@ class CampaignPreparationAdapterPorts:
                     "fleet1_mob_fleet2_boss": ("mob", "boss"),
                     "fleet1_boss_fleet2_mob": ("boss", "mob"),
                 }.get(fleet_order)
-            elif context.stage_code not in ("11-4", "12-1"):
+            elif re.fullmatch(r"[1-9]\d*-[1-4]", context.stage_code) is None:
                 raise SemanticGateClosed(
                     "hard campaign auto-search roles are not qualified for this stage"
                 )
@@ -873,7 +893,7 @@ class CampaignPreparationAdapterPorts:
                     )
                 time.sleep(0.2)
 
-        state = fresh_role_oracle().campaign_auto_search_role_state()
+        state = ready_role_state()
         for fleet_index, (actual, target) in enumerate(
             zip((state.fleet1_role, state.fleet2_role), expected), 1
         ):
@@ -892,7 +912,7 @@ class CampaignPreparationAdapterPorts:
             context.passive_transition_until = time.monotonic() + 3.0
             deadline = time.monotonic() + 5.0
             while True:
-                state = fresh_role_oracle().campaign_auto_search_role_state()
+                state = ready_role_state()
                 observed = (
                     state.fleet1_role
                     if fleet_index == 1
@@ -963,10 +983,6 @@ class CampaignPreparationAdapterPorts:
         if not self._action_ledger.allowed("campaign.sortie"):
             return False
         remaining_sorties = self._action_ledger.remaining("campaign.sortie")
-        if context.mode == "hard" and remaining_sorties not in (1, 2, 3):
-            raise SemanticGateClosed(
-                "hard campaign sortie budget must match one through three remaining runs"
-            )
         if context.mode not in ("normal", "hard"):
             raise SemanticGateClosed("campaign sortie mode is not reviewed")
         if context.prepared_fleet_state is None or context.requested_fleets is None:
@@ -1016,7 +1032,7 @@ class CampaignPreparationAdapterPorts:
                 context.mode == "hard"
                 and (
                     (
-                        context.stage_code not in ("11-4", "12-1")
+                        re.fullmatch(r"[1-9]\d*-[1-4]", context.stage_code) is None
                         and not hard_event_stage
                     )
                     or context.requested_fleets != (1, 2, 0)
@@ -1409,7 +1425,27 @@ class CampaignPreparationAdapterPorts:
             )
         )
         context.passive_transition_until = time.monotonic() + 20.0
-        return receipt
+        # Difficulty changes update title, level, achievements and controls
+        # across several Unity frames. Close this input's postcondition before
+        # the next ALAS preparation probe consumes an intermediate frame.
+        last_error = None
+        for _ in range(20):
+            time.sleep(0.25)
+            if self._input_frame_refresher is not None:
+                self._input_frame_refresher()
+            try:
+                after = self.oracle.campaign_preparation_state(context.resolved_stage_code)
+                if (after is not None and after.kind == "map"
+                        and after.generation > receipt.generation
+                        and self.oracle.campaign_map_preparation_mode_state(
+                            context.resolved_stage_code) == destination):
+                    return receipt
+            except SemanticGateClosed as exc:
+                last_error = exc
+        raise SemanticGateClosed(
+            "campaign difficulty switch postcondition was not proven"
+            + (": " + str(last_error) if last_error is not None else "")
+        )
 
     def confirm_campaign_pre_sortie(self) -> CampaignPreSortieProof:
         """Prove entry, fleet-preparation cancel, and exact stage restoration."""

@@ -1,0 +1,48 @@
+--- a/module/dorm/dorm.py
++++ b/module/dorm/dorm.py
+@@ -1,5 +1,7 @@
+ import time
+ import typing as t
++
++from alas_headless.oracle.errors import SemanticTargetNotActionable
+ 
+ from module.base.button import ButtonGrid
+ from module.base.decorator import Config, cached_property
+@@ -412,6 +414,21 @@
+             in: DORM_CHECK
+             out: DORM_FEED_CHECK
+         """
++        def click_feed():
++            try:
++                self.device.click(DORM_FEED_ENTER)
++            except SemanticTargetNotActionable as exc:
++                adapter = getattr(self.device, 'semantic_adapter', None)
++                if adapter is None or exc.semantic_id != 'dorm/feed':
++                    raise
++                oracle = adapter.open().oracle
++                if (oracle.read_state().generation < exc.generation
++                        or not oracle.enabled('dorm/statistics/confirm')):
++                    raise
++                # No feed input was dispatched. The next original loop frame
++                # lets ui_additional handle the newly mounted statistics.
++                logger.info('Dorm statistics mounted before feed input; refresh original loop')
++
+         self.interval_clear(DORM_CHECK)
+         for _ in self.loop(skip_first=False):
+             # End
+@@ -429,13 +446,13 @@
+                 semantic_adapter is not None
+                 and semantic_adapter.open().oracle.enabled("dorm/feed")
+             ):
+-                self.device.click(DORM_FEED_ENTER)
++                click_feed()
+                 continue
+             if self.ui_additional(get_ship=False):
+                 self.interval_clear(DORM_CHECK)
+                 continue
+             if self.appear(DORM_CHECK, offset=(20, 20), interval=5):
+-                self.device.click(DORM_FEED_ENTER)
++                click_feed()
+                 continue
+             if self.appear(DORM_MANAGE_CHECK, offset=(20, 20), interval=5):
+                 self.device.click(DORM_FURNITURE_SHOP_QUIT)

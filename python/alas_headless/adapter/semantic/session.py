@@ -511,7 +511,7 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                 frame_clock.borrow(frame_id, require_fresh=True)
                 frame_clock.invalidate(frame_id)
 
-            def invalidate_then_tap(x: int, y: int) -> None:
+            def invalidate_then_tap(x: float, y: float) -> None:
                 invalidate_current_frame()
                 handle.tap(x, y)
 
@@ -847,12 +847,17 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
         if self._login_update_restart_performed:
             return False
         adapter = self.open()
-        if adapter.oracle.enabled("overlay/network-reconnect/confirm"):
-            # The exact NetworkDown prompt is mutually exclusive with the
-            # reviewed update-restart contract.  Let the original following
-            # handle_popup_confirm("UI_ADDITIONAL") branch consume it.
-            return False
         try:
+            if getattr(adapter._frame_or_live_observation_oracle(),
+                       'operation_siren_energy_submission_prompt_visible', lambda: False)():
+                # This reviewed item-panel Msgbox reuses the update dialog's
+                # custom button. Its native popup handler owns it; it is not
+                # an incomplete login restart candidate.
+                return False
+            if adapter.oracle.enabled("overlay/network-reconnect/confirm"):
+                # Probe within the same boot grace as the update owner. The
+                # following original popup branch owns actual reconnect input.
+                return False
             explicit_prompt = adapter.login_update_restart_prompt_available()
         except (SemanticGateClosed, ObserverTransportError) as exc:
             if self._login_probe_is_transient(adapter, exc):

@@ -267,7 +267,7 @@ def click_reset_ticket(oracle):
     return _dispatch_control(oracle, state, target, 'os/reset/ticket')
 
 
-def reset_shop(oracle):
+def reset_shop(oracle, *, cancel=False):
     state = oracle.read_state()
     root = RESET_SHOP_ROOT
     if not any(v.path == root + 'button_container/custom_button_1(Clone)' and _active(v) for v in state.buttons):
@@ -278,8 +278,9 @@ def reset_shop(oracle):
         return None
     if texts[0].truncated or not state.generation <= ui.generation <= state.generation + 2:
         raise SemanticGateClosed('monthly reset shop snapshots are incoherent')
-    path = root + 'button_container/custom_button_1(Clone)'
-    if _text(ui, path + '/pic').replace(' ', '') != '确定':
+    path = root + ('button_container/custom_button_2(Clone)' if cancel
+                   else 'button_container/custom_button_1(Clone)')
+    if _text(ui, path + '/pic').replace(' ', '') != ('取消' if cancel else '确定'):
         raise SemanticGateClosed('monthly reset shop confirmation label changed')
     targets = [v for v in state.buttons if v.path == path and _active(v)]
     if len(targets) != 1:

@@ -209,6 +209,7 @@ from .oracle.mission import MissionOracle
 from .oracle.opsi_globe import OpsiGlobeOracle
 from .oracle.opsi_mission import OpsiMissionOracle
 from .oracle.opsi_navigation import OpsiNavigationOracle
+from .oracle.opsi_map import OpsiMapOracle
 from .oracle.opsi_resources import OpsiResourcesOracle
 from .oracle.opsi_shop import OpsiShopOracle
 from .oracle.opsi_state import OpsiStateOracle
@@ -252,6 +253,7 @@ class SemanticOracle(
     OpsiGlobeOracle,
     OpsiMissionOracle,
     OpsiNavigationOracle,
+    OpsiMapOracle,
     OpsiResourcesOracle,
     OpsiShopOracle,
     OpsiStateOracle,

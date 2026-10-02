@@ -74,9 +74,7 @@ class MeowfficerAdapterPorts:
         if count > remaining:
             raise SemanticGateClosed("meowfficer purchase exceeds today's quota")
         free = 1 if before.purchased == 0 else 0
-        expected_cost = max(0, count - free) * 1500
-        if before.coins < expected_cost:
-            raise SemanticGateClosed("meowfficer purchase coins are insufficient")
+        maximum_cost = max(0, count - free) * 1500
 
         self.oracle.click("meowfficer/buy/enter")
         purchase = self.oracle._retry_transition_read(
@@ -93,22 +91,35 @@ class MeowfficerAdapterPorts:
                 )
             return state
 
-        if purchase.count != 1:
-            self.oracle.click("meowfficer/buy/min")
+        if count == 15 and purchase.count != count:
+            self.oracle.click("meowfficer/buy/max")
             purchase = self.oracle._retry_transition_read(
-                lambda: read_selected(1),
-                attempts=20,
-                interval_seconds=0.1,
+                lambda: read_selected(count), attempts=20, interval_seconds=0.1,
             )
-        for selected in range(2, count + 1):
+        elif count != 15 and purchase.count != 1:
+            for selected in range(purchase.count - 1, 0, -1):
+                self.oracle.click("meowfficer/buy/min")
+                purchase = self.oracle._retry_transition_read(
+                    lambda selected=selected: read_selected(selected),
+                    attempts=20,
+                    interval_seconds=0.1,
+                )
+        for selected in range(purchase.count + 1, count + 1):
             self.oracle.click("meowfficer/buy/add")
             purchase = self.oracle._retry_transition_read(
                 lambda selected=selected: read_selected(selected),
                 attempts=20,
                 interval_seconds=0.1,
             )
-        if purchase.count != count or purchase.total_price != expected_cost:
+        # The game quotes the actual price, including current discounts.
+        # Source strategy authorizes at most the ordinary undiscounted cost.
+        if (purchase.count != count or type(purchase.total_price) is not int
+                or not 0 <= purchase.total_price <= maximum_cost
+                or (maximum_cost > 0 and purchase.total_price == 0)):
             raise SemanticGateClosed("meowfficer purchase price is inconsistent")
+        expected_cost = purchase.total_price
+        if before.coins < expected_cost:
+            raise SemanticGateClosed("meowfficer purchase coins are insufficient")
 
         self.oracle.click("meowfficer/buy/submit")
         deadline = time.monotonic() + timeout_seconds
@@ -154,7 +165,7 @@ class MeowfficerAdapterPorts:
             except SemanticGateClosed:
                 time.sleep(0.1)
                 continue
-            self.oracle.click("meowfficer/page/back")
+            self.oracle.click("meowfficer/buy/close")
             time.sleep(0.2)
 
         raise SemanticGateClosed("meowfficer purchase timed out") from last_error

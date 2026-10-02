@@ -1,0 +1,13 @@
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -314,6 +314,9 @@
+                 semantic_adapter.operation_siren_globe_unpin()
+             for attempt in range(3):
+                 self.globe_in_sight(zone)
++                # Centering reads may outlive the frame borrowed on entry.
++                # Refresh ALAS' immutable semantic frame before selection.
++                self.device.screenshot()
+                 try:
+                     if 0 <= zone.zone_id <= 7:
+                         semantic_adapter.click_operation_siren_globe_port(zone.cn, zone.zone_id)

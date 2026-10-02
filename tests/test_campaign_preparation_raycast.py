@@ -17,6 +17,11 @@ def test_native_repair_raycast_keeps_other_strategy_panels_out():
     helpers = 'bool EndsWith' + source.split('bool EndsWith', 1)[1].split('bool ShouldEvaluateToggleTopRaycast', 1)[0]
     program = '#include <string_view>\n#include <string>\n#include <array>\n#include <algorithm>\n#include <cassert>\n' + helpers + '''
 int main() {
+    assert(ShouldEvaluateTopRaycast("bgNormal$", "UICamera/Canvas/UIMain/EventUI(Clone)/scrollRect$/content/0/bgNormal$"));
+    assert(ShouldEvaluateTopRaycast("bgEmergence$", "UICamera/Canvas/UIMain/EventUI(Clone)/scrollRect$/content/12/bgEmergence$"));
+    assert(!ShouldEvaluateTopRaycast("bgEmergence$", "OtherUI(Clone)/scrollRect$/content/0/bgEmergence$"));
+    assert(!ShouldEvaluateTopRaycast("bgEmergence$", "EventUI(Clone)/scrollRect$/content/x/bgEmergence$"));
+    assert(!ShouldEvaluateTopRaycast("bgNormal$", "EventUI(Clone)/scrollRect$/content/0/bgEmergence$"));
     assert(ShouldEvaluateTopRaycast("mouseChild", "OverlayCamera/Overlay/UIMain/ChapterPreCombatUI(Clone)/adapt/middle/HeroContainer/info/sebao_root/mouseChild"));
     assert(!ShouldEvaluateTopRaycast("mouseChild", "OtherUI(Clone)/adapt/middle/HeroContainer/info/sebao_root/mouseChild"));
     assert(ShouldEvaluateTopRaycast("strategy", "OverlayCamera/Overlay/UIMain/ChapterPreCombatUI(Clone)/adapt/middle/strategy"));

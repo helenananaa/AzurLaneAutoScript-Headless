@@ -138,22 +138,34 @@ DEFAULT_TOGGLE_TARGETS: Tuple[SemanticToggleTarget, ...] = (
     SemanticToggleTarget(
         "build/nav/pools",
         "build_btn",
-        "Overlay/UIMain/blur_panel/adapt/left_length/frame/tagRoot/build_btn",
+        (
+            "Overlay/UIMain/blur_panel/adapt/left_length/frame/tagRoot/build_btn",
+            "UIOrigin/blur_panel/adapt/left_length/frame/tagRoot/build_btn",
+        ),
     ),
     SemanticToggleTarget(
         "build/nav/queue",
         "queue_btn",
-        "Overlay/UIMain/blur_panel/adapt/left_length/frame/tagRoot/queue_btn",
+        (
+            "Overlay/UIMain/blur_panel/adapt/left_length/frame/tagRoot/queue_btn",
+            "UIOrigin/blur_panel/adapt/left_length/frame/tagRoot/queue_btn",
+        ),
     ),
     SemanticToggleTarget(
         "build/nav/support",
         "support_btn",
-        "Overlay/UIMain/blur_panel/adapt/left_length/frame/tagRoot/support_btn",
+        (
+            "Overlay/UIMain/blur_panel/adapt/left_length/frame/tagRoot/support_btn",
+            "UIOrigin/blur_panel/adapt/left_length/frame/tagRoot/support_btn",
+        ),
     ),
     SemanticToggleTarget(
         "build/nav/unseam",
         "unseam_btn",
-        "Overlay/UIMain/blur_panel/adapt/left_length/frame/tagRoot/unseam_btn",
+        (
+            "Overlay/UIMain/blur_panel/adapt/left_length/frame/tagRoot/unseam_btn",
+            "UIOrigin/blur_panel/adapt/left_length/frame/tagRoot/unseam_btn",
+        ),
     ),
     SemanticToggleTarget(
         "build/pool/event",

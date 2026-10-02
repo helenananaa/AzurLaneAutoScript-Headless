@@ -1,0 +1,23 @@
+--- a/module/guild/logistics.py
++++ b/module/guild/logistics.py
+@@ -478,8 +478,18 @@
+                     if target is None:
+                         self.device.sleep(0.2)
+                         continue
+-                    adapter.oracle.click(target)
+-                    return
++                    # Preserve normal ALAS input pacing while the reward
++                    # layer installs its native continuation listener.
++                    self.device.sleep(0.5)
++                    receipt = adapter.oracle.click(target)
++                    for _ in range(30):
++                        state = adapter.oracle.read_state()
++                        if (state.generation > receipt.generation
++                                and not adapter.oracle.award_info_page_visible()):
++                            return
++                        self.device.sleep(0.2)
++                    raise RuntimeError('Guild award close did not dismiss the reward')
++                raise RuntimeError('Guild award close did not become actionable')
+ 
+             if state.supply_claimable:
+                 adapter.claim_guild_supply()

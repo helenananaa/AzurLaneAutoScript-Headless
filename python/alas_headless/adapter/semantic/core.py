@@ -299,11 +299,14 @@ class CoreAdapterPorts:
         self._current_raid_result_event: Optional[str] = None
         self._network_reconnect_transition_until = 0.0
         self._main_battle_transition_receipt: Optional[ActionReceipt] = None
-        self._main_battle_transition_until = 0.0
         self._main_shop_transition_receipt: Optional[ActionReceipt] = None
         self._main_shop_transition_until = 0.0
+        self._main_dock_transition_receipt: Optional[ActionReceipt] = None
+        self._main_dock_transition_until = 0.0
         self._event_story_transition_until = 0.0
+        self._campaign_event_entry_transition_until = 0.0
         self._operation_siren_entry_transition_until = 0.0
+        self._operation_siren_exit_receipt: Optional[ActionReceipt] = None
         self._operation_siren_page_remount_until = 0.0
         self._operation_siren_entry_receipt: Optional[ActionReceipt] = None
         self._campaign_archive_entry_receipt: Optional[ActionReceipt] = None
@@ -320,12 +323,33 @@ class CoreAdapterPorts:
         self._meta_assist_active = False
         self._meta_precombat_start_receipt = None
         self._meta_precombat_start_until = 0.0
+        self._meta_precombat_back_receipt = None
+        self._meta_precombat_back_until = 0.0
+        self._meta_assist_entry_receipt = None
+        self._meta_assist_entry_until = 0.0
         self._main_more_entry_receipt = None
+        self._main_more_entry_until = 0.0
+        self._commission_return_transition_until = 0.0
+        self._mission_page_return_transition_until = 0.0
+        self._meowfficer_return_transition_until = 0.0
+        self._build_return_transition_until = 0.0
+        self._guild_return_transition_until = 0.0
+        self._dorm_return_transition_until = 0.0
+        self._main_guild_entry_receipt = None
+        self._main_guild_entry_until = 0.0
+        self._guild_logistics_transition_until = 0.0
         self._shipyard_entry_receipt = None
         self._meta_entry_receipt = None
+        self._meta_home_receipt = None
+        self._research_back_receipt = None
+        self._research_progress_close_receipt = None
+        self._research_progress_close_until = 0.0
         self._meta_current_entry_receipt = None
+        self._meta_dossier_entry_receipt = None
+        self._meta_reward_close_receipt = None
         self._meta_character_entry_receipt = None
         self._daily_entry_receipt = None
+        self._daily_entry_transition_until = 0.0
         self._main_tech_entry_receipt = None
         self._main_live_entry_receipt = None
         self._private_quarters_entry_receipt = None
@@ -333,12 +357,14 @@ class CoreAdapterPorts:
         self._private_quarters_transition_until = 0.0
         self._private_quarters_home_transition_until = 0.0
         self._private_quarters_entry_transition_until = 0.0
+        self._research_menu_return_transition_until = 0.0
         self._operation_siren_pending_order: Optional[str] = None
         self._exercise_pending = False
         self._exercise_execution_active = False
         self._exercise_start_transition_until = 0.0
         self._exercise_chapter_back_transition_until = 0.0
         self._exercise_entry_transition_until = 0.0
+        self._exercise_entry_receipt: Optional[ActionReceipt] = None
         self._exercise_page_back_transition_until = 0.0
         self._exercise_chapter_entry_transition_until = 0.0
         self._last_campaign_auto_search_completion: Optional[
@@ -351,6 +377,8 @@ class CoreAdapterPorts:
         self._operation_siren_globe_swipe_intent: Optional[
             _OperationSirenGlobeSwipeIntent
         ] = None
+        self._operation_siren_camera_geometry = None
+        self._operation_siren_map_swipe_intent = None
         self._awaken_flow_active = False
         self._enhancement_flow_active = False
         self._enhancement_current_candidate = None
@@ -473,8 +501,8 @@ class CoreAdapterPorts:
         if not isinstance(name, str) or not name:
             raise AlasSemanticUnmapped("ALAS resource has no stable name")
         # InfoHandler temporarily annotates this reviewed shared asset between
-        # its presence probe and click.  Normalize only the proven Research
-        # suffix; broad prefix stripping could admit unrelated popup inputs.
+        # its presence probe and click. Normalize only reviewed task suffixes;
+        # broad prefix stripping could admit unrelated popup inputs.
         if name in (
             "POPUP_CONFIRM_RESEARCH_START",
             "POPUP_CONFIRM_RESEARCH_QUEUE",
@@ -490,6 +518,8 @@ class CoreAdapterPorts:
             "POPUP_CONFIRM_MINIGAME_ENTER",
             "POPUP_CONFIRM_FINISH_ORDERS",
             "POPUP_CONFIRM_TACTICAL",
+            "POPUP_CONFIRM_MISSION_REWARD",
+            "POPUP_CONFIRM_COMMISSION_START",
         ):
             return (
                 "POPUP_CONFIRM_WHITE"

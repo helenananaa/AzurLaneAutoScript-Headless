@@ -85,6 +85,8 @@ class LoginAdapterPorts:
         return self.oracle.click_login_update_restart_prompt()
 
     def _appear_login(self, name):
+        if self._login_flow.active and name == 'GET_SHIP':
+            return self.oracle.new_ship_reward_visible()
         if name == "LOGIN_CHECK" or (
             self._login_flow.active and name in LOGIN_OBSERVATION_TARGETS
         ):

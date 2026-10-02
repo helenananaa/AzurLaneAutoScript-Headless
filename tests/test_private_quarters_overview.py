@@ -43,6 +43,37 @@ def test_loading_and_arrived_room_are_distinct_observations():
         make_oracle(FakeBackend([])).private_quarters_loading_visible()
 
 
+def test_room_transition_background_is_passive_loading_only_with_exact_identity():
+    path = 'UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/bg/bottom'
+    b = FakeBackend([])
+    b.ui = make_ui([], images=[make_image(path, 'bg_mask')])
+    assert make_oracle(b).private_quarters_loading_visible()
+    b.ui = make_ui([], images=[make_image(path, 'other')])
+    with pytest.raises(SemanticGateClosed, match='not yet identified'):
+        make_oracle(b).private_quarters_loading_visible()
+
+
+@pytest.mark.parametrize('hit,sprite,allowed', [
+    (True, 'timeline_touch_btn', True),
+    (False, 'timeline_touch_btn', False),
+    (True, 'other', False),
+])
+def test_room_timeline_continuation_uses_reviewed_button(hit, sprite, allowed):
+    path = ('UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/ExtraScreen/'
+            'TimelineScreen/TimelineTouch/content/clickTpl')
+    b = FakeBackend([make_button('clickTpl', path, raycast_top=hit)])
+    b.ui = make_ui([], images=[make_image(path, sprite)])
+    o = make_oracle(b)
+    assert not o.private_quarters_loading_visible()
+    if allowed:
+        assert o.click_private_quarters_new_jersey_dialogue().path == path
+        assert len(b.taps) == 1
+    else:
+        with pytest.raises(SemanticGateClosed):
+            o.click_private_quarters_new_jersey_dialogue()
+        assert b.taps == []
+
+
 def test_missing_dialogue_yields_to_original_presence_loop():
     from alas_headless.oracle.errors import SemanticTargetMissing
     b = FakeBackend([])
@@ -277,6 +308,36 @@ def test_room_requires_positive_unlock_state(locked):
         assert b.taps == []
     else:
         assert o.click_private_quarters_new_jersey().path == path
+
+
+@pytest.mark.parametrize('hits,icon,status,locked,allowed', [
+    ((True, False), 'room_icon_xinzexi', 'state_main', False, True),
+    ((True, True), 'room_icon_xinzexi', 'state_main', False, False),
+    ((False, False), 'room_icon_xinzexi', 'state_main', False, False),
+    ((True, None), 'room_icon_xinzexi', 'state_main', False, False),
+    ((True, False), 'room_icon_other', 'state_main', False, False),
+    ((True, False), 'room_icon_xinzexi', 'state_other', False, False),
+    ((True, False), 'room_icon_xinzexi', 'state_main', True, False),
+])
+def test_special_room_requires_unique_real_hit_and_reviewed_identity(hits, icon, status, locked, allowed):
+    b = backend()
+    path = ROOT+'Map/floor_2/Xinzexi_special'
+    b.buttons['buttons'].extend(make_button('Xinzexi_special', path, raycast_top=hit) for hit in hits)
+    b.buttons['button_count'] = len(b.buttons['buttons'])
+    b.ui['images'] = ([make_image(path+'/icon', icon), make_image(path+'/icon', icon),
+                       make_image(path+'/front/complete/tip/main', status),
+                       make_image(path+'/front/complete/tip/main', status)]
+                      + ([make_image(path+'/front/lock/Image', 'state_lock')] if locked else []))
+    b.ui['image_count'] = len(b.ui['images'])
+    o = make_oracle(b)
+    if allowed:
+        assert o.private_quarters_new_jersey_unlocked()
+        assert o.click_private_quarters_new_jersey().path == path
+        assert len(b.taps) == 1
+    else:
+        with pytest.raises(SemanticGateClosed):
+            o.click_private_quarters_new_jersey()
+        assert b.taps == []
 
 
 @pytest.mark.parametrize('speaker,choice,allowed', [('新泽西',False,True),('其他角色',False,False),('新泽西',True,False)])

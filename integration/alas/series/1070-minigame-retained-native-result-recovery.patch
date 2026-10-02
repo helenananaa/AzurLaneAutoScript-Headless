@@ -1,0 +1,14 @@
+--- a/module/minigame/minigame.py
++++ b/module/minigame/minigame.py
+@@ -194,6 +194,11 @@
+             in: Any page
+             out: page_game_room
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and semantic_adapter.minigame_result() is not None:
++            from module.minigame.new_year_challenge import NewYearChallenge
++            NewYearChallenge(config=self.config, device=self.device).exit_game(skip_first_screenshot=False)
++
+         # TEMP: 2026.02.18 separate self.ui_ensure(page_game_room) into 2 steps
+         # EN has different page_academy detection, to use ui_ensure(page_game_room),
+         # ui_goto must use `if self.ui_page_appear(page)` instead of `if self.appear(page.check_button)`

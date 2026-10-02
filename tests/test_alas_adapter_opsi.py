@@ -10,6 +10,16 @@ from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_storage_visibility_waits_for_the_inventory_screenshot_frame(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.operation_siren_storage_visible = Mock(return_value=True)
+        frame = SimpleNamespace(operation_siren_storage_visible=Mock(return_value=False))
+        adapter._frame_or_live_observation_oracle = lambda: frame
+        self.assertFalse(adapter.operation_siren_storage_visible())
+        oracle.operation_siren_storage_visible.assert_not_called()
+        frame.operation_siren_storage_visible.return_value = True
+        self.assertTrue(adapter.operation_siren_storage_visible())
+
     def test_operation_siren_order_owns_its_confirmation_popup(self):
         adapter, oracle, _ = self.make_adapter()
 
@@ -117,6 +127,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
 
     def test_operation_siren_entry_transition_makes_page_probes_passive(self):
         adapter, oracle, gate_calls = self.make_adapter()
+        oracle.campaign_dock_full_visible = Mock(return_value=False)
         adapter._operation_siren_entry_transition_until = time.monotonic() + 1.0
 
         self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))

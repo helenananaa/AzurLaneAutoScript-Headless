@@ -44,7 +44,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
 
         state = make_oracle(backend).meowfficer_dock_state()
 
-        self.assertEqual(state.purchased, 15)
+        self.assertEqual(state.purchased, 0)
         self.assertEqual(state.purchase_total, 15)
         self.assertEqual(state.coins, 707)
         self.assertEqual(state.capacity_used, 34)
@@ -52,6 +52,15 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         self.assertEqual(state.fort_current, 0)
         self.assertEqual(state.training_finished, 1)
         self.assertEqual(state.box_counts, (2205, 1531, 479))
+
+        # The same native field counts remaining attempts, not completed buys.
+        for remaining, purchased in ((7, 8), (0, 15)):
+            backend.ui = make_ui([
+                make_text(f"{remaining}/15" if item["path"].endswith("reserve_btn/Text") else item["text"],
+                          item["path"])
+                for item in backend.ui["texts"]
+            ])
+            self.assertEqual(make_oracle(backend).meowfficer_dock_state().purchased, purchased)
 
     def test_meowfficer_back_uses_visible_part_of_clipped_button(self):
         root = "root/UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/"
@@ -187,6 +196,11 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         )
         oracle = make_oracle(backend)
 
+        backend.ui = make_ui([
+            make_text('是否消耗3000物资购买3个喵箱？', root+'bg/content/Text'),
+            make_text('3', 'root/CommanderReserveUI(Clone)/frame/bg1/count/Text'),
+            make_text('3000', 'root/CommanderReserveUI(Clone)/frame/bg1/price_all/Text'),
+        ])
         self.assertTrue(oracle.enabled("meowfficer/buy/cancel"))
         self.assertTrue(oracle.enabled("meowfficer/buy/confirm"))
 

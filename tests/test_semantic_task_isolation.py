@@ -31,6 +31,17 @@ def main_buttons():
         make_button("formation", "UICamera/Canvas/UIMain/MainUI/frame/right/1/formation"),
     ]
 
+def test_tactical_completion_alias_does_not_enter_unrelated_daily_flow():
+    backend = FakeBackend([])
+    adapter, oracle = real_adapter(backend)
+    target = oracle._targets['daily/page/back']
+    backend.buttons['buttons'] = [make_button(target.name, 'root/'+target.path_suffix)]
+    backend.buttons['button_count'] = 1
+    assert oracle.daily_page_visible()
+    assert adapter.appear(NamedButton('GET_MISSION')) is False
+    with pytest.raises(AlasSemanticUnmapped): adapter.click(NamedButton('GET_MISSION'))
+    assert not backend.taps
+
 
 def test_main_return_can_probe_absent_rewards_without_a_mission_flow():
     backend = FakeBackend(main_buttons())
@@ -265,6 +276,38 @@ def test_reset_shop_keeps_valid_navigation_and_rejects_changed_action_label():
         adapter.appear(NamedButton("POPUP_CONFIRM"))
     with pytest.raises(SemanticGateClosed, match="confirmation label changed"):
         adapter.click(NamedButton("POPUP_CONFIRM"))
+    assert backend.taps == []
+
+
+def test_reset_shop_original_handler_cancel_probe_and_named_confirm():
+    backend = shop_prompt_backend()
+    root = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+    cancel = root + "button_container/custom_button_2(Clone)"
+    backend.buttons["buttons"].append(make_button("custom_button_2(Clone)", cancel))
+    backend.buttons["button_count"] += 1
+    backend.ui["texts"].append(make_text("取 消", cancel + "/pic"))
+    backend.ui["text_count"] += 1
+    adapter, _ = real_adapter(backend)
+    assert adapter.appear(NamedButton("POPUP_CANCEL"))
+    assert adapter.appear(NamedButton("POPUP_CONFIRM"))
+    assert adapter.appear(NamedButton("POPUP_CONFIRM_UI_ADDITIONAL"))
+    assert backend.taps == []
+    assert adapter.click(NamedButton("POPUP_CONFIRM_UI_ADDITIONAL")).semantic_id == "os/reset/shop"
+    assert len(backend.taps) == 1
+
+
+@pytest.mark.parametrize("label", ["购买", "确定"])
+def test_reset_shop_cancel_probe_rejects_other_button_labels(label):
+    backend = shop_prompt_backend()
+    root = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+    cancel = root + "button_container/custom_button_2(Clone)"
+    backend.buttons["buttons"].append(make_button("custom_button_2(Clone)", cancel))
+    backend.buttons["button_count"] += 1
+    backend.ui["texts"].append(make_text(label, cancel + "/pic"))
+    backend.ui["text_count"] += 1
+    adapter, _ = real_adapter(backend)
+    with pytest.raises(SemanticGateClosed, match="confirmation label changed"):
+        adapter.appear(NamedButton("POPUP_CANCEL"))
     assert backend.taps == []
 
 

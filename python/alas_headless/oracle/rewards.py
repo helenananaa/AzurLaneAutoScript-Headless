@@ -59,10 +59,20 @@ class RewardsOracle:
 
         button_state = self.read_state()
         page = self._unique(button_state, "reward/page/back")
+        if (
+            page.active_in_hierarchy and page.active_and_enabled
+            and page.interactable and page.point is not None
+            and page.bounds is not None and page.bounds.contains(page.point)
+            and page.raycast_top is False
+            and not self._blocking_rules(button_state, "reward/page/back")
+        ):
+            raise SemanticGateClosed("reward resource page close is temporarily covered")
         if not page.actionable or self._blocking_rules(
             button_state, "reward/page/back"
         ):
-            raise SemanticGateClosed("reward resource page identity is not proven")
+            blockers = self._blocking_rules(button_state, 'reward/page/back')
+            raise SemanticGateClosed('reward resource page identity is not proven: blockers='
+                +','.join(rule.blocker_id for rule in blockers))
         ui_state = self.read_ui_state()
         if (
             ui_state.generation < button_state.generation

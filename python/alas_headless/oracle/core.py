@@ -49,7 +49,7 @@ class CoreOracle:
         self,
         request: Callable[[str], Mapping[str, Any]],
         foreground_component: Callable[[], str],
-        tap: Callable[[int, int], None],
+        tap: Callable[[float, float], None],
         fingerprint: OracleFingerprint,
         targets: Iterable[SemanticTarget] = DEFAULT_TARGETS,
         image_targets: Iterable[SemanticImageTarget] = DEFAULT_IMAGE_TARGETS,
@@ -97,7 +97,7 @@ class CoreOracle:
         with self._input_dispatch_lock:
             self._input_dispatch_count += 1
 
-    def _dispatch_tap(self, x: int, y: int) -> None:
+    def _dispatch_tap(self, x: float, y: float) -> None:
         self._mark_input_dispatched()
         self._tap_backend(x, y)
 
@@ -964,6 +964,7 @@ class CoreOracle:
         state: OracleState,
         image: ImageState,
         semantic_id: str,
+        *, post_input_foreground=None,
     ) -> ActionReceipt:
         """Tap one exact image-only control after the common input gates."""
 
@@ -984,7 +985,7 @@ class CoreOracle:
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("game activity changed before Dock input")
         self._tap(int(round(point.x)), int(round(point.y)))
-        if self._foreground_component() != self.fingerprint.component:
+        if (post_input_foreground or self._foreground_component)() != self.fingerprint.component:
             raise SemanticGateClosed("game activity changed after Dock input")
         return ActionReceipt(
             semantic_id=semantic_id,

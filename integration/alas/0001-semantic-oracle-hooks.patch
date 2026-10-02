@@ -639,7 +639,7 @@ index 6d9e42f4..d25882e3 100644
 +        try:
 +            # Must using white UI
 +            self.ui_ensure(
-+                page_main_white if semantic_adapter is not None else page_main
++                page_main
 +            )
 +            if self.appear(page_main_white.check_button, offset=(30, 30)):
 +                logger.info('At page_main_white')
@@ -3441,23 +3441,28 @@ diff --git a/module/shop/base.py b/module/shop/base.py
 index cadc42b9..7322cfdd 100644
 --- a/module/shop/base.py
 +++ b/module/shop/base.py
-@@ -250,6 +250,34 @@ class ShopBase(UI):
+@@ -250,6 +250,39 @@ class ShopBase(UI):
              logger.warning('Expected type \'ShopItemGrid\' but was None')
              return []
  
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if semantic_adapter is not None:
 +            records = semantic_adapter.general_shop_items()
-+            synthetic = np.zeros((720, 1280, 3), dtype=np.uint8)
 +            items = []
 +            for record in records:
++                if record.remaining is not None and record.remaining <= 0:
++                    continue
 +                button = shop_items.grids.buttons[record.index]
-+                item = shop_items.item_class(synthetic, button)
++                item = shop_items.item_class.__new__(shop_items.item_class)
++                item.image_raw = None
++                item.image = None
++                item._button = button
 +                item.is_valid = True
 +                item.name = record.canonical_name
 +                item.amount = record.amount
 +                item.cost = record.cost
 +                item.price = record.price
++                item.tag = None
 +                item.semantic_shop_index = record.index
 +                item.group, item.sub_genre, item.tier = None, None, None
 +                result = re.search(FILTER_REGEX, item.name)
@@ -8151,7 +8156,7 @@ diff --git a/module/awaken/awaken.py b/module/awaken/awaken.py
          logger.hr('Awaken run', level=1)
          self.ui_ensure(page_dock)
          self.dock_favourite_set(enable=favourite, wait_loading=False)
-@@ -371,25 +382,36 @@ class Awaken(Dock):
+@@ -371,25 +382,37 @@ class Awaken(Dock):
          return result
  
      def run(self):
@@ -8161,6 +8166,7 @@ diff --git a/module/awaken/awaken.py b/module/awaken/awaken.py
 +        )
 +        semantic_session = current_semantic_session()
 +        if semantic_session is not None:
++            self.ui_ensure(page_dock)
 +            semantic_session.begin_awaken_task(awaken_config.favourite)
 +
          # Run Awakening+ first
@@ -10136,7 +10142,7 @@ index dbf43837..2dfe1ebf 100644
              Fleet_FleetOrder='fleet1_all_fleet2_standby' if hard_fleet == 1 else 'fleet1_standby_fleet2_all',
              Emotion_Mode='nothing',  # Dont calculate and dont ignore
          )
-@@ -52,18 +55,70 @@ class CampaignHard(CampaignRun):
+@@ -52,18 +55,67 @@ class CampaignHard(CampaignRun):
          self.load_campaign(name='campaign_hard', folder='campaign_hard')  # Load campaign file
          module = importlib.import_module('.' + name, 'campaign.campaign_main')  # Load map from normal mode.
          self.campaign.MAP = module.MAP
@@ -10195,9 +10201,6 @@ index dbf43837..2dfe1ebf 100644
 +            # class.  Class binding is required so decision-preview copies
 +            # execute against their sandbox rather than the live instance.
 +            setattr(type(self.campaign), 'battle_6', module.Campaign.battle_6)
-+        elif semantic_adapter is not None and hard_stage != '11-4':
-+            raise RuntimeError(
-+                'Semantic hard official auto-search is qualified only for 11-4')
 +        if not semantic_resume:
 +            self.device.screenshot()
 +            self.campaign.device.image = self.device.image
@@ -10215,7 +10218,7 @@ index dbf43837..2dfe1ebf 100644
              remain = semantic_adapter.campaign_hard_remain()
          else:
              remain = OCR_HARD_REMAIN.ocr(self.device.image)
-@@ -71,6 +127,9 @@ class CampaignHard(CampaignRun):
+@@ -71,6 +124,9 @@ class CampaignHard(CampaignRun):
          for n in range(remain):
              self.campaign.run()
  
@@ -16939,3 +16942,1350 @@ diff --git a/module/ui/page.py b/module/ui/page.py
 +    page_meta_menu = Page(_SemanticButton(name='META_MENU_CHECK'))
 +    page_meta_menu.link(button=_SemanticButton(name='META_MENU_SYNC'), destination=page_meta)
 +    page_meta_menu.link(button=GOTO_MAIN, destination=page_main)
+diff --git a/module/device/device.py b/module/device/device.py
+--- a/module/device/device.py
++++ b/module/device/device.py
+@@ -69,7 +69,10 @@
+     click_record = collections.deque(maxlen=15)
+     stuck_timer = Timer(60, count=60).start()
+     stuck_timer_long = Timer(180, count=180).start()
+-    stuck_long_wait_list = ['BATTLE_STATUS_S', 'PAUSE', 'LOGIN_CHECK']
++    stuck_long_wait_list = [
++        'BATTLE_STATUS_S', 'PAUSE', 'LOGIN_CHECK',
++        'SEMANTIC_CAMPAIGN_SORTIE_TRANSITION',
++    ]
+ 
+     def __init__(self, *args, **kwargs):
+         for trial in range(4):
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -303,6 +303,13 @@
+                                 finally:
+                                     self.enter_map_cancel(skip_first_screenshot=False)
+                         if sortie_clicked:
++                            # The exact, budgeted semantic sortie may stream
++                            # through CombatLoadUI for over a minute.  Give
++                            # ALAS's existing bounded long-wait watchdog the
++                            # same passive window without admitting input.
++                            self.device.stuck_record_add(
++                                'SEMANTIC_CAMPAIGN_SORTIE_TRANSITION'
++                            )
+                             continue
+                         if fleet_authorized:
+                             proof = semantic_adapter.confirm_campaign_fleet_preparation()
+diff --git a/module/meta_reward/meta_reward.py b/module/meta_reward/meta_reward.py
+index 91697db8..c071b9a0 100644
+--- a/module/meta_reward/meta_reward.py
++++ b/module/meta_reward/meta_reward.py
+@@ -1,3 +1,5 @@
++import time
++
+ from module.base.timer import Timer
+ from module.combat.combat import Combat
+ from module.logger import logger
+@@ -196,7 +198,34 @@ class BeaconReward(Combat, UI):
+             return
+ 
+         self.ui_ensure(page_meta)
+-        self.meta_wait_reward_page()
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        semantic_sync_page_ready = False
++        if semantic_session is not None:
++            from alas_headless import SemanticGateClosed
++
++            oracle = semantic_session.open().oracle
++            if oracle.meta_character_menu_visible():
++                receipt = oracle.click_meta_character_sync()
++                logger.info(
++                    f'Semantic META sync menu entry: {receipt.semantic_id}, '
++                    f'generation={receipt.generation}'
++                )
++                deadline = time.monotonic() + 12.0
++                while time.monotonic() < deadline:
++                    self.device.screenshot()
++                    frame_oracle = semantic_session.open()._require_frame_observation_oracle()
++                    if frame_oracle.read_state().generation <= receipt.generation:
++                        continue
++                    try:
++                        frame_oracle.meta_character_sync_rewards()
++                    except SemanticGateClosed:
++                        continue
++                    semantic_sync_page_ready = True
++                    break
++                else:
++                    raise SemanticGateClosed('META sync menu did not reach a coherent reward page')
++        if not semantic_sync_page_ready:
++            self.meta_wait_reward_page()
+ 
+         # Sync rewards
+         # "sync" is the period that you gather meta points to 100% and get a meta ship
+diff --git a/module/os_handler/storage.py b/module/os_handler/storage.py
+--- a/module/os_handler/storage.py
++++ b/module/os_handler/storage.py
+@@ -134,6 +134,12 @@ class StorageHandler(GlobeOperation, ZoneManager):
+             out: STORAGE_CHECK, scroll to bottom
+         """
+         logger.hr('Storage logger use all')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            oracle = semantic_adapter.open().oracle
++            oracle.operation_siren_storage_loggers_absent()
++            logger.info('All loggers in storage have been used')
++            return
+         for _ in self.loop():
+             if SCROLL_STORAGE.appear(main=self):
+                 SCROLL_STORAGE.set_bottom(main=self, skip_first_screenshot=True)
+diff --git a/module/handler/login.py b/module/handler/login.py
+--- a/module/handler/login.py
++++ b/module/handler/login.py
+@@ -116,7 +116,13 @@ class LoginHandler(UI):
+             if self.handle_urgent_commission():
+                 continue
+             # Popups appear at page_main
+-            if self.ui_page_main_popups(get_ship=login_success):
++            semantic_get_ship = (
++                semantic_adapter is not None
++                and semantic_adapter.open()._require_frame_observation_oracle().new_ship_reward_visible()
++            )
++            if self.ui_page_main_popups(get_ship=login_success or semantic_get_ship):
++                if semantic_adapter is not None:
++                    continue
+                 return True
+             # Always goto page_main
+             if self.appear_then_click(GOTO_MAIN, offset=(30, 30), interval=5):
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -199,6 +199,25 @@
+         zone = self.name_to_zone(zone)
+         # logger.info(f'Globe in_sight: {zone}')
+ 
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            for _ in range(6):
++                point = semantic_adapter.operation_siren_globe_port_projection(zone.zone_id)
++                if point_in_area((point.x, point.y), area=sight):
++                    self.device.sleep(0.5)
++                    settled = semantic_adapter.operation_siren_globe_port_projection(zone.zone_id)
++                    if (point_in_area((settled.x, settled.y), area=sight)
++                            and np.linalg.norm((settled.x-point.x, settled.y-point.y)) < 3):
++                        return
++                    continue
++                vector = np.clip(np.array((500.0 - point.x, 420.0 - point.y)), -300, 300)
++                self.device.swipe_vector(tuple(vector), name=f'GLOBE_SWIPE_{int(vector[0])}_{int(vector[1])}', box=sight)
++                self.device.sleep(1)
++                after = semantic_adapter.operation_siren_globe_port_projection(zone.zone_id)
++                if np.linalg.norm(np.array((after.x-point.x, after.y-point.y))) < 10:
++                    raise GameStuckError('Semantic globe port did not move after camera swipe')
++            raise GameStuckError('Semantic globe port did not enter the map sight')
++
+         while 1:
+             if point_in_area(self.globe2screen([zone.location])[0], area=sight):
+                 break
+@@ -261,157 +280,19 @@
+ 
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
+-            sight = (20, 220, 980, 620)
+-            previous_anchor_name = None
+-            anchor_repeat_count = 0
+-            global_recovery = False
+-            for focus_attempt in range(16):
+-                try:
+-                    state = semantic_adapter.operation_siren_globe_state()
+-                except SemanticGateClosed:
+-                    state = None
+-                if state is not None and state.zone_name == zone.cn:
+-                    self.globe_update()
+-                    logger.attr('Globe_pinned', zone)
+-                    return
+-
+-                # The exact selected-zone name and the fixed typed panel pin
+-                # anchor the ALAS globe camera without screenshot matching.
+-                if state is not None:
+-                    global_recovery = False
+-                    if state.zone_name == previous_anchor_name:
+-                        anchor_repeat_count += 1
+-                    else:
+-                        previous_anchor_name = state.zone_name
+-                        anchor_repeat_count = 0
+-                    self.globe_update()
+-                    try:
+-                        receipt = semantic_adapter.operation_siren_globe_unpin()
+-                    except SemanticGateClosed:
+-                        logger.warning(
+-                            'Semantic globe unpin did not settle; retry anchor'
+-                        )
+-                        continue
+-                    # The selected-zone panel flips horizontally near screen
+-                    # edges.  Anchor the camera with the exact typed pin point
+-                    # used for this unpin receipt instead of the legacy fixed
+-                    # ZONE_PINNED template coordinate.
+-                    selected = self.name_to_zone(state.zone_name)
+-                    pinned_globe = self.globe.screen2globe([receipt.start])[0]
+-                    self.globe_camera = tuple(
+-                        selected.location - pinned_globe + self.globe.homo_center
+-                    )
+-                    # The selected panel re-centers its typed pin before the
+-                    # dismissal drag; do not count that UI gesture as an ALAS
+-                    # globe-camera move until live evidence proves otherwise.
+-                elif not hasattr(self, 'globe_camera'):
+-                    raise GameStuckError(
+-                        'Semantic globe has no selected-zone camera anchor'
+-                    )
+-
+-                for _ in range(8):
+-                    target = self.globe2screen([zone.location])[0]
+-                    if point_in_area(target, area=sight):
+-                        break
+-                    area = (
+-                        400, 200,
+-                        GLOBE_MAP_SHAPE[0] - 400,
+-                        GLOBE_MAP_SHAPE[1] - 250,
+-                    )
+-                    loca = point_limit(zone.location, area=area)
+-                    vector = (
+-                        np.array(loca) - np.array(self.globe_camera, dtype=float)
+-                    ) / self.config.OS_GLOBE_SWIPE_MULTIPLY
+-                    vector = tuple(
+-                        np.min([np.abs(vector), (620, 340)], axis=0)
+-                        * np.sign(vector)
+-                    )
+-                    self.globe_swipe(vector)
+-                else:
+-                    raise GameStuckError(
+-                        'Semantic globe target did not enter the safe sight area'
+-                    )
+-
+-                target = self.globe2screen([zone.location])[0] + (8, -5)
+-                # A proven unpin drag also moves the globe camera.  The
+-                # configured swipe multiplier is close but not exact on
+-                # every emulator, so probe a deterministic sparse spiral
+-                # around ALAS' projected anchor.  A mismatch immediately
+-                # supplies a stronger typed anchor for the next attempt.
+-                probe_offsets = tuple(sorted(
+-                    (
+-                        (x, y)
+-                        for x in range(-160, 161, 32)
+-                        for y in range(-160, 161, 32)
+-                    ),
+-                    key=lambda point: (
+-                        max(abs(point[0]), abs(point[1])),
+-                        abs(point[0]) + abs(point[1]),
+-                        point[1],
+-                        point[0],
+-                    ),
+-                ))
+-                # A mismatch supplies a fresh exact typed anchor.  Retry the
+-                # recalibrated projection once.  If that exact point selects
+-                # the same neighboring zone again, rotate through recovery
+-                # points instead of getting trapped on that pin forever.
+-                center_offset = probe_offsets[0]
+-                recovery_offsets = probe_offsets[1:]
+-                shift = focus_attempt * 17 % len(recovery_offsets)
+-                rotated_recovery = (
+-                    recovery_offsets[shift:] + recovery_offsets[:shift]
+-                )
+-                if anchor_repeat_count == 0:
+-                    probe_offsets = (center_offset,) + rotated_recovery
+-                else:
+-                    probe_offsets = rotated_recovery + (center_offset,)
+-                if global_recovery:
+-                    probe_points = tuple(sorted(
+-                        (
+-                            (x, y)
+-                            for x in range(100, 901, 160)
+-                            for y in range(260, 581, 80)
+-                        ),
+-                        key=lambda point: (
+-                            abs(point[0] - 500) + abs(point[1] - 420),
+-                            point[1],
+-                            point[0],
+-                        ),
+-                    ))
+-                else:
+-                    probe_points = tuple(
+-                        target + offset for offset in probe_offsets[:16]
+-                    )
+-                selected_mismatch = False
+-                for probe in probe_points:
+-                    if not point_in_area(probe, area=sight):
+-                        continue
+-                    try:
+-                        receipt = semantic_adapter.click_operation_siren_globe_zone(
+-                            zone.cn, (float(probe[0]), float(probe[1])))
+-                    except SemanticGateClosed:
+-                        continue
+-                    if receipt.semantic_id == 'os/globe/zone/select':
+-                        self.globe_update()
+-                        logger.attr('Globe_pinned', zone)
+-                        return
+-                    logger.warning(
+-                        f'Semantic globe probe {tuple(probe)} selected another '
+-                        f'zone; re-anchor and retry'
+-                    )
+-                    selected_mismatch = True
+-                    break
+-                if not selected_mismatch:
+-                    if global_recovery:
+-                        raise GameStuckError(
+-                            'Semantic globe could not recover a selected zone'
+-                        )
+-                    logger.warning(
+-                        'Semantic target probes were empty; discover a global '
+-                        'typed zone anchor'
+-                    )
+-                    global_recovery = True
+-            raise GameStuckError('Semantic globe could not select the expected zone')
++            try:
++                state = semantic_adapter.operation_siren_globe_state()
++            except SemanticGateClosed:
++                state = None
++            if state is not None and state.zone_name == zone.cn:
++                logger.attr('Globe_pinned', zone)
++                return
++            if state is not None:
++                semantic_adapter.operation_siren_globe_unpin()
++            self.globe_in_sight(zone)
++            semantic_adapter.click_operation_siren_globe_port(zone.cn, zone.zone_id)
++            logger.attr('Globe_pinned', zone)
++            return
+ 
+         while 1:
+             if self.handle_zone_pinned():
+diff --git a/module/handler/info_handler.py b/module/handler/info_handler.py
+--- a/module/handler/info_handler.py
++++ b/module/handler/info_handler.py
+@@ -476,6 +476,10 @@
+                     semantic_adapter.click_event_story_skip()
+                     self.story_popup_timeout.reset()
+                     return True
++                return False
++            # Native story observations own the semantic boundary. A proven
++            # idle branch must not continue into legacy image probes.
++            if oracle.event_story_surface_absent():
+                 return False
+         if self.story_popup_timeout.started() and not self.story_popup_timeout.reached():
+             if self.handle_popup_confirm('STORY_SKIP'):
+diff --git a/module/config/config_updater.py b/module/config/config_updater.py
+--- a/module/config/config_updater.py
++++ b/module/config/config_updater.py
+@@ -1,3 +1,4 @@
++import os
+ import re
+ import typing as t
+ from copy import deepcopy
+@@ -624,6 +625,7 @@
+             dict:
+         """
+         new = {}
++        semantic_mode = os.environ.get('ALAS_SEMANTIC_MODE') == '1'
+ 
+         for keys, data in deep_iter(self.args, depth=3):
+             value = deep_get(old, keys=keys, default=data['value'])
+@@ -632,7 +634,8 @@
+             if is_template or value is None or value == '' \
+                     or typ in ['lock', 'state'] or (display == 'hide' and typ != 'stored'):
+                 value = data['value']
+-            value = parse_value(value, data=data)
++            if not (semantic_mode and not is_template and keys[1:] == ['Campaign', 'Event']):
++                value = parse_value(value, data=data)
+             deep_set(new, keys=keys, value=value)
+ 
+         # AzurStatsID
+@@ -644,7 +647,9 @@
+             deep_set(new, keys='OpsiMeowfficerFarming.Scheduler.Enable', value=True)
+         # Update to latest event
+         server = to_server(deep_get(new, 'Alas.Emulator.PackageName', 'cn'))
+-        if not is_template:
++        # Preserve the user's campaign identity in semantic mode. The native
++        # campaign loader owns task-local capability errors for missing modules.
++        if not is_template and not semantic_mode:
+             for task in EVENTS + RAIDS + COALITIONS:
+                 opts = deep_get(self.args, keys=f'{task}.Campaign.Event.option_{server}', default=[])
+                 if opts and not deep_get(new, keys=f'{task}.Campaign.Event', default='campaign_main') in opts:
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -338,6 +338,8 @@
+                         logger.info('Semantic pre-sortie: map preparation active')
+                         observed_mode = (
+                             semantic_adapter.campaign_map_preparation_mode_state()
++                            if self.config.MAP_HAS_MODE_SWITCH
++                            else self.config.Campaign_Mode
+                         )
+                         if observed_mode != self.config.Campaign_Mode:
+                             receipt = (
+@@ -354,13 +356,21 @@
+                             # hierarchy. Re-read every subsequent decision from
+                             # the new immutable semantic frame.
+                             continue
+-                        self.map_clear_percentage = (
+-                            semantic_adapter.campaign_map_clear_percentage()
+-                        )
+-                        self.map_is_100_percent_clear = self.map_clear_percentage > 0.95
+-                        self.map_has_clear_mode = (
+-                            self.map_is_100_percent_clear
+-                            and semantic_adapter.campaign_clear_mode_available())
++                        if (self.config.MAP_IS_ONE_TIME_STAGE
++                                and self.config.Campaign_Name.lower() == 'sp'):
++                            # Original SP uses AUTO_SEARCH, not a progress bar,
++                            # to identify clear mode. Keep its native decision.
++                            self.map_has_clear_mode = (
++                                semantic_adapter.campaign_auto_search_selected()
++                                and semantic_adapter.campaign_clear_mode_available())
++                        else:
++                            self.map_clear_percentage = (
++                                semantic_adapter.campaign_map_clear_percentage()
++                            )
++                            self.map_is_100_percent_clear = self.map_clear_percentage > 0.95
++                            self.map_has_clear_mode = (
++                                self.map_is_100_percent_clear
++                                and semantic_adapter.campaign_clear_mode_available())
+                         self.handle_fast_forward()
+                         auto_search_selected = (
+                             semantic_adapter.campaign_auto_search_selected()
+diff --git a/module/ui/ui.py b/module/ui/ui.py
+--- a/module/ui/ui.py
++++ b/module/ui/ui.py
+@@ -522,6 +522,12 @@
+         if self.ui_page_os_popups():
+             return True
+ 
++        # Semantic withdrawal still uses the original typed confirmation
++        # handler, which requires this campaign's opening action receipt.
++        if (getattr(self.device, 'semantic_adapter', None) is not None
++                and self.handle_popup_confirm('WITHDRAW')):
++            return True
++
+         # Research popup, lost connection popup
+         if self.handle_popup_confirm("UI_ADDITIONAL"):
+             return True
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -201,11 +201,15 @@
+ 
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
++            def project():
++                if 0 <= zone.zone_id <= 7:
++                    return semantic_adapter.operation_siren_globe_port_projection(zone.zone_id)
++                return semantic_adapter.operation_siren_globe_map_projection(zone.area_pos)
+             for _ in range(6):
+-                point = semantic_adapter.operation_siren_globe_port_projection(zone.zone_id)
++                point = project()
+                 if point_in_area((point.x, point.y), area=sight):
+                     self.device.sleep(0.5)
+-                    settled = semantic_adapter.operation_siren_globe_port_projection(zone.zone_id)
++                    settled = project()
+                     if (point_in_area((settled.x, settled.y), area=sight)
+                             and np.linalg.norm((settled.x-point.x, settled.y-point.y)) < 3):
+                         return
+@@ -213,7 +217,7 @@
+                 vector = np.clip(np.array((500.0 - point.x, 420.0 - point.y)), -300, 300)
+                 self.device.swipe_vector(tuple(vector), name=f'GLOBE_SWIPE_{int(vector[0])}_{int(vector[1])}', box=sight)
+                 self.device.sleep(1)
+-                after = semantic_adapter.operation_siren_globe_port_projection(zone.zone_id)
++                after = project()
+                 if np.linalg.norm(np.array((after.x-point.x, after.y-point.y))) < 10:
+                     raise GameStuckError('Semantic globe port did not move after camera swipe')
+             raise GameStuckError('Semantic globe port did not enter the map sight')
+@@ -290,7 +294,10 @@
+             if state is not None:
+                 semantic_adapter.operation_siren_globe_unpin()
+             self.globe_in_sight(zone)
+-            semantic_adapter.click_operation_siren_globe_port(zone.cn, zone.zone_id)
++            if 0 <= zone.zone_id <= 7:
++                semantic_adapter.click_operation_siren_globe_port(zone.cn, zone.zone_id)
++            else:
++                semantic_adapter.click_operation_siren_globe_map_zone(zone.cn, zone.area_pos)
+             logger.attr('Globe_pinned', zone)
+             return
+ 
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -10,6 +10,7 @@
+ from module.os_handler.assets import ACTION_POINT_CANCEL, ACTION_POINT_USE, AUTO_SEARCH_REWARD
+ 
+ from alas_headless import SemanticGateClosed
++from alas_headless.oracle.errors import SemanticViewportReanchorRequired
+ 
+ 
+ class GlobeCamera(GlobeOperation, ZoneManager):
+@@ -293,13 +294,20 @@
+                 return
+             if state is not None:
+                 semantic_adapter.operation_siren_globe_unpin()
+-            self.globe_in_sight(zone)
+-            if 0 <= zone.zone_id <= 7:
+-                semantic_adapter.click_operation_siren_globe_port(zone.cn, zone.zone_id)
+-            else:
+-                semantic_adapter.click_operation_siren_globe_map_zone(zone.cn, zone.area_pos)
+-            logger.attr('Globe_pinned', zone)
+-            return
++            for attempt in range(3):
++                self.globe_in_sight(zone)
++                try:
++                    if 0 <= zone.zone_id <= 7:
++                        semantic_adapter.click_operation_siren_globe_port(zone.cn, zone.zone_id)
++                    else:
++                        semantic_adapter.click_operation_siren_globe_map_zone(zone.cn, zone.area_pos)
++                except SemanticViewportReanchorRequired:
++                    if attempt == 2:
++                        raise
++                    logger.info('Native globe target moved before input; reanchor original camera')
++                    continue
++                logger.attr('Globe_pinned', zone)
++                return
+ 
+         while 1:
+             if self.handle_zone_pinned():
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -1069,7 +1069,7 @@
+                 semantic_session is not None
+                 and semantic_session.operation_siren_auto_search_completed_empty()
+             )
+-            if rescan and semantic_empty:
++            if rescan and semantic_empty and not self.is_in_task_explore:
+                 logger.info(
+                     'Skip pixel map rescan: exact auto search was accepted, '
+                     'returned to off, and no exact question remains'
+diff --git a/module/os/camera.py b/module/os/camera.py
+--- a/module/os/camera.py
++++ b/module/os/camera.py
+@@ -18,6 +18,19 @@
+ 
+     def _map_swipe(self, vector, box=(239, 128, 993, 628)):
+         return super()._map_swipe(vector, box=box)
++
++    def _update_view(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is None:
++            return super()._update_view()
++        from alas_headless.alas_opsi_camera_view import install_alas_opsi_camera_view
++        shape = location_ensure(self.zone.shape)
++        geometry = semantic_adapter.operation_siren_map_geometry(
++            self.zone.cn, rows=shape[1] + 1, columns=shape[0] + 1)
++        observed = install_alas_opsi_camera_view(self, geometry)
++        logger.info(f'Semantic OS camera view: camera={observed.camera_location}, '
++                    f'visible={len(observed.visible_nodes)}, generation={observed.generation}')
++        return True
+ 
+     def _view_init(self):
+         if not hasattr(self, 'view'):
+@@ -94,6 +107,9 @@
+         Similar to `Camera.update()`, but for OPSI.
+         """
+         # self.device.screenshot()
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            self._update_view()
++            return
+         self._view_init()
+ 
+         try:
+diff --git a/module/device/control.py b/module/device/control.py
+--- a/module/device/control.py
++++ b/module/device/control.py
+@@ -186,11 +186,15 @@
+         semantic_adapter = getattr(self, 'semantic_adapter', None)
+         semantic_intent = None
+         if semantic_adapter is not None:
+-            begin_swipe = (
+-                semantic_adapter.begin_operation_siren_globe_swipe_vector
+-                if name.startswith('GLOBE_SWIPE_')
+-                else semantic_adapter.begin_campaign_map_swipe_vector
+-            )
++            if name.startswith('GLOBE_SWIPE_'):
++                begin_swipe = semantic_adapter.begin_operation_siren_globe_swipe_vector
++                end_swipe = semantic_adapter.end_operation_siren_globe_swipe_vector
++            elif name.startswith('MAP_SWIPE_') and semantic_adapter.operation_siren_map_swipe_owned():
++                begin_swipe = semantic_adapter.begin_operation_siren_map_swipe_vector
++                end_swipe = semantic_adapter.end_operation_siren_map_swipe_vector
++            else:
++                begin_swipe = semantic_adapter.begin_campaign_map_swipe_vector
++                end_swipe = semantic_adapter.end_campaign_map_swipe_vector
+             semantic_intent = begin_swipe(
+                 vector,
+                 box=box,
+@@ -216,11 +220,6 @@
+                 distance_check=distance_check)
+         finally:
+             if semantic_intent is not None:
+-                end_swipe = (
+-                    semantic_adapter.end_operation_siren_globe_swipe_vector
+-                    if name.startswith('GLOBE_SWIPE_')
+-                    else semantic_adapter.end_campaign_map_swipe_vector
+-                )
+                 end_swipe(semantic_intent)
+ 
+     def drag(self, p1, p2, segments=1, shake=(0, 15), point_random=(-10, -10, 10, 10), shake_random=(-5, -5, 5, 5),
+diff --git a/module/map/camera.py b/module/map/camera.py
+--- a/module/map/camera.py
++++ b/module/map/camera.py
+@@ -252,7 +252,7 @@
+ 
+     def _update_view_data(self):
+         if self._prev_view is not None and np.linalg.norm(self._prev_swipe) > 0:
+-            if self.config.MAP_SWIPE_PREDICT:
++            if self.config.MAP_SWIPE_PREDICT or getattr(self.view, 'semantic_swipe_prediction', False):
+                 swipe = self._prev_view.predict_swipe(
+                     self.view,
+                     with_current_fleet=self.config.MAP_SWIPE_PREDICT_WITH_CURRENT_FLEET,
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -285,11 +285,18 @@
+ 
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
++            # Globe entry can leave a lease from the previous local-map panel.
++            self.device.screenshot()
+             try:
+                 state = semantic_adapter.operation_siren_globe_state()
+             except SemanticGateClosed:
+                 state = None
+             if state is not None and state.zone_name == zone.cn:
++                if zone.zone_id > 7:
++                    # Refresh the native plane projection also when no pin
++                    # click is needed; the original safe-skip unpin uses it.
++                    semantic_adapter.operation_siren_globe_map_projection(zone.area_pos)
++                    self.device.screenshot()
+                 logger.attr('Globe_pinned', zone)
+                 return
+             if state is not None:
+@@ -306,6 +313,9 @@
+                         raise
+                     logger.info('Native globe target moved before input; reanchor original camera')
+                     continue
++                # Match the original loop's next screenshot after pin input.
++                # Zone type/switch checks must see the newly selected panel.
++                self.device.screenshot()
+                 logger.attr('Globe_pinned', zone)
+                 return
+ 
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -208,10 +208,10 @@
+                 return semantic_adapter.operation_siren_globe_map_projection(zone.area_pos)
+             for _ in range(6):
+                 point = project()
+-                if point_in_area((point.x, point.y), area=sight):
++                if point_in_area((point.x, point.y), area=sight, threshold=0):
+                     self.device.sleep(0.5)
+                     settled = project()
+-                    if (point_in_area((settled.x, settled.y), area=sight)
++                    if (point_in_area((settled.x, settled.y), area=sight, threshold=0)
+                             and np.linalg.norm((settled.x-point.x, settled.y-point.y)) < 3):
+                         return
+                     continue
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -300,6 +300,11 @@
+                 logger.attr('Globe_pinned', zone)
+                 return
+             if state is not None:
++                pinned_zone = self.name_to_zone(state.zone_name)
++                if pinned_zone.zone_id > 7:
++                    # The globe opens centered on the previous local zone.
++                    # Its native plane point owns unpin before reanchoring.
++                    semantic_adapter.operation_siren_globe_map_projection(pinned_zone.area_pos)
+                 semantic_adapter.operation_siren_globe_unpin()
+             for attempt in range(3):
+                 self.globe_in_sight(zone)
+diff --git a/module/device/control.py b/module/device/control.py
+--- a/module/device/control.py
++++ b/module/device/control.py
+@@ -207,14 +207,22 @@
+                 distance_check=distance_check,
+             )
+         try:
+-            p1, p2 = random_rectangle_vector_opted(
+-                vector,
+-                box=box,
+-                random_range=random_range,
+-                padding=padding,
+-                whitelist_area=whitelist_area,
+-                blacklist_area=blacklist_area
+-            )
++            for _ in range(8 if semantic_adapter is not None and name.startswith('GLOBE_SWIPE_') else 1):
++                p1, p2 = random_rectangle_vector_opted(
++                    vector,
++                    box=box,
++                    random_range=random_range,
++                    padding=padding,
++                    whitelist_area=whitelist_area,
++                    blacklist_area=blacklist_area
++                )
++                if (semantic_adapter is None or not name.startswith('GLOBE_SWIPE_')
++                        or semantic_adapter.operation_siren_globe_drag_owned(p1,p2)):
++                    break
++                logger.info('Original ALAS swipe candidate is outside native globe Plane; resample before input')
++            else:
++                from alas_headless import SemanticGateClosed
++                raise SemanticGateClosed('original ALAS sampler found no owned globe drag path')
+             return self.swipe(
+                 p1, p2, duration=duration, name=name,
+                 distance_check=distance_check)
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -206,7 +206,8 @@
+                 if 0 <= zone.zone_id <= 7:
+                     return semantic_adapter.operation_siren_globe_port_projection(zone.zone_id)
+                 return semantic_adapter.operation_siren_globe_map_projection(zone.area_pos)
+-            for _ in range(6):
++            # Keep ALAS centering until sight entry; each swipe must move the target.
++            while True:
+                 point = project()
+                 if point_in_area((point.x, point.y), area=sight, threshold=0):
+                     self.device.sleep(0.5)
+@@ -221,7 +222,6 @@
+                 after = project()
+                 if np.linalg.norm(np.array((after.x-point.x, after.y-point.y))) < 10:
+                     raise GameStuckError('Semantic globe port did not move after camera swipe')
+-            raise GameStuckError('Semantic globe port did not enter the map sight')
+ 
+         while 1:
+             if point_in_area(self.globe2screen([zone.location])[0], area=sight):
+diff --git a/module/device/control.py b/module/device/control.py
+--- a/module/device/control.py
++++ b/module/device/control.py
+@@ -221,8 +221,8 @@
+                     break
+                 logger.info('Original ALAS swipe candidate is outside native globe Plane; resample before input')
+             else:
+-                from alas_headless import SemanticGateClosed
+-                raise SemanticGateClosed('original ALAS sampler found no owned globe drag path')
++                from alas_headless.oracle.errors import SemanticGlobeDragPathUnavailable
++                raise SemanticGlobeDragPathUnavailable('original ALAS sampler found no owned globe drag path')
+             return self.swipe(
+                 p1, p2, duration=duration, name=name,
+                 distance_check=distance_check)
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -10,7 +10,7 @@
+ from module.os_handler.assets import ACTION_POINT_CANCEL, ACTION_POINT_USE, AUTO_SEARCH_REWARD
+ 
+ from alas_headless import SemanticGateClosed
+-from alas_headless.oracle.errors import SemanticViewportReanchorRequired
++from alas_headless.oracle.errors import SemanticViewportReanchorRequired, SemanticGlobeDragPathUnavailable
+ 
+ 
+ class GlobeCamera(GlobeOperation, ZoneManager):
+@@ -217,7 +217,13 @@
+                         return
+                     continue
+                 vector = np.clip(np.array((500.0 - point.x, 420.0 - point.y)), -300, 300)
+-                self.device.swipe_vector(tuple(vector), name=f'GLOBE_SWIPE_{int(vector[0])}_{int(vector[1])}', box=sight)
++                try:
++                    self.device.swipe_vector(tuple(vector), name=f'GLOBE_SWIPE_{int(vector[0])}_{int(vector[1])}', box=sight)
++                except SemanticGlobeDragPathUnavailable:
++                    # Native proofs rejected all candidates before any input.
++                    # ALAS samples one shorter leg, retaining the same target.
++                    vector = vector * 0.5
++                    self.device.swipe_vector(tuple(vector), name=f'GLOBE_SWIPE_{int(vector[0])}_{int(vector[1])}', box=sight)
+                 self.device.sleep(1)
+                 after = project()
+                 if np.linalg.norm(np.array((after.x-point.x, after.y-point.y))) < 10:
+diff --git a/module/os_ash/meta.py b/module/os_ash/meta.py
+--- a/module/os_ash/meta.py
++++ b/module/os_ash/meta.py
+@@ -466,6 +466,9 @@
+     def _check_dossier_point(self) -> bool:
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
++            if self.appear(DOSSIER_LIST, offset=(20, 20)):
++                current, _ = semantic_adapter.meta_dossier_empty_points()
++                return current >= 100
+             state = semantic_adapter.meta_entrance_state()
+             return state.dossier_points >= state.consume_points
+         if self.appear(META_DOSSIER_FLAG, offset=(180, 20)):
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -314,6 +314,9 @@
+                 semantic_adapter.operation_siren_globe_unpin()
+             for attempt in range(3):
+                 self.globe_in_sight(zone)
++                # Centering reads may outlive the frame borrowed on entry.
++                # Refresh ALAS' immutable semantic frame before selection.
++                self.device.screenshot()
+                 try:
+                     if 0 <= zone.zone_id <= 7:
+                         semantic_adapter.click_operation_siren_globe_port(zone.cn, zone.zone_id)
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -206,7 +206,9 @@
+                 if 0 <= zone.zone_id <= 7:
+                     return semantic_adapter.operation_siren_globe_port_projection(zone.zone_id)
+                 return semantic_adapter.operation_siren_globe_map_projection(zone.area_pos)
+-            # Keep ALAS centering until sight entry; each swipe must move the target.
++            # Keep ALAS centering until sight entry, inspecting a missed drag
++            # before one bounded retry through the original path sampler.
++            missed_swipes = 0
+             while True:
+                 point = project()
+                 if point_in_area((point.x, point.y), area=sight, threshold=0):
+@@ -227,7 +229,17 @@
+                 self.device.sleep(1)
+                 after = project()
+                 if np.linalg.norm(np.array((after.x-point.x, after.y-point.y))) < 10:
+-                    raise GameStuckError('Semantic globe port did not move after camera swipe')
++                    if missed_swipes:
++                        raise GameStuckError('Semantic globe target did not move after inspected camera retry')
++                    self.device.screenshot()
++                    if not semantic_adapter.operation_siren_globe_visible():
++                        raise SemanticGateClosed('Semantic globe disappeared while inspecting missed camera drag')
++                    inspected = project()
++                    if np.linalg.norm(np.array((inspected.x-point.x, inspected.y-point.y))) < 10:
++                        missed_swipes = 1
++                        logger.info('Fresh globe projection confirms missed drag; resample original path once')
++                else:
++                    missed_swipes = 0
+ 
+         while 1:
+             if point_in_area(self.globe2screen([zone.location])[0], area=sight):
+diff --git a/module/reward/reward.py b/module/reward/reward.py
+--- a/module/reward/reward.py
++++ b/module/reward/reward.py
+@@ -219,10 +219,6 @@
+             return False
+ 
+         self.reward_side_navbar_ensure(upper=5)
+-        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+-        if semantic_adapter is not None:
+-            logger.info('Weekly mission progress through semantic task flow')
+-            return bool(semantic_adapter.claim_weekly_mission_progress_once())
+         return self._reward_mission_collect()
+ 
+     def reward_mission_notice(self):
+diff --git a/module/reward/reward.py b/module/reward/reward.py
+--- a/module/reward/reward.py
++++ b/module/reward/reward.py
+@@ -91,8 +91,8 @@
+                     and not semantic_adapter.mission_claim_allowed()
+                 ):
+                     logger.info(
+-                        'Mission claim submitted; semantic claim budget is now zero')
+-                    return clicked
++                        'Mission claim submitted; wait for original popup transition without another claim')
++                    continue
+                 if self.appear_then_click(MISSION_MULTI, offset=(20, 20)):
+                     click_interval.reset()
+                     clicked = True
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -10,7 +10,7 @@
+ from module.os_handler.assets import ACTION_POINT_CANCEL, ACTION_POINT_USE, AUTO_SEARCH_REWARD
+ 
+ from alas_headless import SemanticGateClosed
+-from alas_headless.oracle.errors import SemanticViewportReanchorRequired, SemanticGlobeDragPathUnavailable
++from alas_headless.oracle.errors import SemanticViewportReanchorRequired, SemanticGlobeDragPathUnavailable, SemanticGlobeSelectionMissed
+ 
+ 
+ class GlobeCamera(GlobeOperation, ZoneManager):
+@@ -334,10 +334,10 @@
+                         semantic_adapter.click_operation_siren_globe_port(zone.cn, zone.zone_id)
+                     else:
+                         semantic_adapter.click_operation_siren_globe_map_zone(zone.cn, zone.area_pos)
+-                except SemanticViewportReanchorRequired:
++                except (SemanticViewportReanchorRequired, SemanticGlobeSelectionMissed) as exc:
+                     if attempt == 2:
+                         raise
+-                    logger.info('Native globe target moved before input; reanchor original camera')
++                    logger.info('Native globe selection needs another original focus attempt: ' + str(exc))
+                     continue
+                 # Match the original loop's next screenshot after pin input.
+                 # Zone type/switch checks must see the newly selected panel.
+diff --git a/module/ui/navbar.py b/module/ui/navbar.py
+--- a/module/ui/navbar.py
++++ b/module/ui/navbar.py
+@@ -122,6 +122,14 @@
+         Returns:
+             bool:
+         """
++        # Gacha acquisition rewards can mount after queue-empty was read.
++        # Keep their handling in ALAS' existing navigation loop and reuse its
++        # original ship-item handler before inspecting or clicking the tab.
++        if self.name == 'GACHA_SIDE_NAVBAR':
++            from alas_headless import current_semantic_session
++            if current_semantic_session() is not None:
++                return main.handle_get_items_ship()
++
+         # Check name, identifies if NavBar
+         # instance belongs to shop module
+         if self.name not in ['SHOP_BOTTOM_NAVBAR', 'GUILD_SIDE_NAVBAR']:
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -223,9 +223,11 @@
+                     self.device.swipe_vector(tuple(vector), name=f'GLOBE_SWIPE_{int(vector[0])}_{int(vector[1])}', box=sight)
+                 except SemanticGlobeDragPathUnavailable:
+                     # Native proofs rejected all candidates before any input.
+-                    # ALAS samples one shorter leg, retaining the same target.
++                    # ALAS samples one shorter leg in its existing right-side
++                    # globe box, avoiding the left WorldUI background. The
++                    # original sampler still requires a complete native proof.
+                     vector = vector * 0.5
+-                    self.device.swipe_vector(tuple(vector), name=f'GLOBE_SWIPE_{int(vector[0])}_{int(vector[1])}', box=sight)
++                    self.device.swipe_vector(tuple(vector), name=f'GLOBE_SWIPE_{int(vector[0])}_{int(vector[1])}', box=(600, 220, 980, 620))
+                 self.device.sleep(1)
+                 after = project()
+                 if np.linalg.norm(np.array((after.x-point.x, after.y-point.y))) < 10:
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -543,6 +543,13 @@
+             self.disable_raid_on_event()
+             self.handle_commission_notice()
+ 
++            if (semantic_adapter is not None
++                    and self.config.Campaign_Name.lower() == 'sp'
++                    and semantic_adapter.campaign_remaining_attempts() == 0):
++                logger.info('SP attempts are exhausted, delay task to next day')
++                self.config.task_delay(server_update=True)
++                break
++
+             # if in hard mode, check remain times
+             if self.ui_page_appear(page_campaign) and MODE_SWITCH_1.get(main=self) == 'normal':
+                 if semantic_adapter is not None:
+diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
+--- a/module/campaign/campaign_base.py
++++ b/module/campaign/campaign_base.py
+@@ -304,9 +304,11 @@
+         # quit and continuation; the observer only detects the interruption.
+         self.device.screenshot()
+         handled = self.handle_retirement()
+-        if handled and self.is_in_map():
+-            self.device.screenshot()
+-            self.handle_auto_search_map_option()
++        # Retirement navigation invalidates the old observation frame.
++        # The original map-option handler also owns a retained paused map.
++        self.device.screenshot()
++        if self.is_in_map():
++            return self.handle_auto_search_map_option() or handled
+         return handled
+ 
+     def auto_search_execute_a_battle(self):
+diff --git a/module/os/camera.py b/module/os/camera.py
+--- a/module/os/camera.py
++++ b/module/os/camera.py
+@@ -20,6 +20,10 @@
+         return super()._map_swipe(vector, box=box)
+ 
+     def _update_view(self):
++        # Original Camera owns outside-map recovery and its existing retries.
++        return super()._update_view()
++
++    def _load_semantic_os_view(self):
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is None:
+             return super()._update_view()
+diff --git a/module/map/camera.py b/module/map/camera.py
+--- a/module/map/camera.py
++++ b/module/map/camera.py
+@@ -139,7 +139,8 @@
+             install_alas_campaign_camera_view,
+         )
+         semantic_session = current_semantic_session()
+-        if semantic_session is not None:
++        os_view_loader = getattr(self, '_load_semantic_os_view', None)
++        if semantic_session is not None and not callable(os_view_loader):
+             state = semantic_session.campaign_camera_state()
+             observation = install_alas_campaign_camera_view(
+                 self,
+@@ -153,15 +154,19 @@
+                 f'generation={observation.generation}'
+             )
+             return True
+-        self._view_init()
++        if semantic_session is None:
++            self._view_init()
+         try:
+-            if not self.is_in_map() \
+-                    and not self.is_in_strategy_submarine_move() \
+-                    and not self.is_in_strategy_mob_move() \
+-                    and not self.is_in_strategy_air_strike():
+-                logger.warning('Image to detect is not in_map')
+-                raise MapDetectionError('Image to detect is not in_map')
+-            self.view.load(self.device.image)
++            if semantic_session is not None and callable(os_view_loader):
++                os_view_loader()
++            else:
++                if not self.is_in_map() \
++                        and not self.is_in_strategy_submarine_move() \
++                        and not self.is_in_strategy_mob_move() \
++                        and not self.is_in_strategy_air_strike():
++                    logger.warning('Image to detect is not in_map')
++                    raise MapDetectionError('Image to detect is not in_map')
++                self.view.load(self.device.image)
+         except MapDetectionError as e:
+             if self.info_bar_count():
+                 logger.warning('Perspective error caused by info bar')
+@@ -321,7 +326,8 @@
+ 
+         def is_still_prev():
+             # Still the same as prev view
+-            return np.linalg.norm(self.view.center_offset - prev_center_offset) < 0.001
++            return (prev_center_offset is not None
++                    and np.linalg.norm(self.view.center_offset - prev_center_offset) < 0.001)
+ 
+         while 1:
+             # Camera.update() has no skip_first_screenshot
+diff --git a/module/os/tasks/voucher.py b/module/os/tasks/voucher.py
+--- a/module/os/tasks/voucher.py
++++ b/module/os/tasks/voucher.py
+@@ -30,13 +30,7 @@
+         self._os_voucher_enter()
+         VoucherShop(self.config, self.device).run()
+         self._os_voucher_exit()
+-        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+-        if semantic_adapter is not None and not semantic_adapter.shop_purchase_allowed():
+-            logger.info(
+-                'Skip Operation Siren storage logger use; mutation budget is 0'
+-            )
+-        else:
+-            self.logger_use()
++        self.logger_use()
+ 
+         next_reset = get_os_next_reset()
+         logger.info('OS voucher finished, delay to next reset')
+--- a/module/minigame/new_year_challenge.py
++++ b/module/minigame/new_year_challenge.py
+@@ -162,11 +162,6 @@
+                 last_attack = time.time()
+ 
+     def exit_game(self, skip_first_screenshot=True):
+-        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+-        if semantic_adapter is not None:
+-            receipts = semantic_adapter.minigame_exit_new_year()
+-            logger.info(f"New year challenge exit receipts: {receipts}")
+-            return
+         while 1:
+             if skip_first_screenshot:
+                 skip_first_screenshot = False
+--- a/module/minigame/minigame.py
++++ b/module/minigame/minigame.py
+@@ -194,6 +194,11 @@
+             in: Any page
+             out: page_game_room
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and semantic_adapter.minigame_result() is not None:
++            from module.minigame.new_year_challenge import NewYearChallenge
++            NewYearChallenge(config=self.config, device=self.device).exit_game(skip_first_screenshot=False)
++
+         # TEMP: 2026.02.18 separate self.ui_ensure(page_game_room) into 2 steps
+         # EN has different page_academy detection, to use ui_ensure(page_game_room),
+         # ui_goto must use `if self.ui_page_appear(page)` instead of `if self.appear(page.check_button)`
+--- a/module/minigame/new_year_challenge.py
++++ b/module/minigame/new_year_challenge.py
+@@ -68,11 +68,6 @@
+         if semantic_adapter is not None and not semantic_adapter.minigame_play_allowed():
+             logger.info('Minigame play budget is zero, skip spending game tickets')
+             return False
+-        if semantic_adapter is not None:
+-            coin_cost_after_add = semantic_adapter.minigame_prepare_default_ticket()
+-            self.device.screenshot()
+-            logger.info(f"coin cost after add : {coin_cost_after_add}")
+-            return coin_cost_after_add == 1
+         return self.use_coin_new_year_challenge(count=5)
+ 
+     def play_game(self, skip_first_screenshot=True):
+@@ -192,6 +187,11 @@
+                 # add coins
+                 if count > 1:
+                     for i in range(count - 1):
++                        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++                        if semantic_adapter is not None:
++                            selected, owned = semantic_adapter.minigame_ticket_selection()
++                            if selected == 0 or selected >= min(count, owned):
++                                break
+                         self.device.click(NEW_YEAR_CHALLENGE_ADD_COIN)
+                     self.device.screenshot()
+                 # spend no coins for test
+--- a/module/daily/daily.py
++++ b/module/daily/daily.py
+@@ -376,7 +376,7 @@
+         while 1:
+             if self.daily_current > 7:
+                 break
+-            if self.daily_current == self.empty_index:
++            if semantic_adapter is None and self.daily_current == self.empty_index:
+                 logger.info('This daily is not open now')
+                 self.daily_check()
+                 self.next()
+--- a/module/dorm/dorm.py
++++ b/module/dorm/dorm.py
+@@ -1,5 +1,7 @@
+ import time
+ import typing as t
++
++from alas_headless.oracle.errors import SemanticTargetNotActionable
+ 
+ from module.base.button import ButtonGrid
+ from module.base.decorator import Config, cached_property
+@@ -412,6 +414,21 @@
+             in: DORM_CHECK
+             out: DORM_FEED_CHECK
+         """
++        def click_feed():
++            try:
++                self.device.click(DORM_FEED_ENTER)
++            except SemanticTargetNotActionable as exc:
++                adapter = getattr(self.device, 'semantic_adapter', None)
++                if adapter is None or exc.semantic_id != 'dorm/feed':
++                    raise
++                oracle = adapter.open().oracle
++                if (oracle.read_state().generation < exc.generation
++                        or not oracle.enabled('dorm/statistics/confirm')):
++                    raise
++                # No feed input was dispatched. The next original loop frame
++                # lets ui_additional handle the newly mounted statistics.
++                logger.info('Dorm statistics mounted before feed input; refresh original loop')
++
+         self.interval_clear(DORM_CHECK)
+         for _ in self.loop(skip_first=False):
+             # End
+@@ -429,13 +446,13 @@
+                 semantic_adapter is not None
+                 and semantic_adapter.open().oracle.enabled("dorm/feed")
+             ):
+-                self.device.click(DORM_FEED_ENTER)
++                click_feed()
+                 continue
+             if self.ui_additional(get_ship=False):
+                 self.interval_clear(DORM_CHECK)
+                 continue
+             if self.appear(DORM_CHECK, offset=(20, 20), interval=5):
+-                self.device.click(DORM_FEED_ENTER)
++                click_feed()
+                 continue
+             if self.appear(DORM_MANAGE_CHECK, offset=(20, 20), interval=5):
+                 self.device.click(DORM_FURNITURE_SHOP_QUIT)
+--- a/module/dorm/dorm.py
++++ b/module/dorm/dorm.py
+@@ -302,8 +302,19 @@
+         semantic_session = current_semantic_session()
+         if semantic_session is not None:
+             index = self._dorm_food.buttons.index(button)
+-            semantic_session.dorm_feed_food(index, count)
+-            return
++            for _ in self.loop(skip_first=True):
++                try:
++                    semantic_session.dorm_feed_food(index, count)
++                    return
++                except SemanticTargetNotActionable as exc:
++                    oracle = semantic_session.open().oracle
++                    if (exc.semantic_id != f'dorm/feed/item/{50001 + index}'
++                            or oracle.read_state().generation < exc.generation
++                            or not oracle.dorm_empty_food_cancel_available()):
++                        raise
++                    # The entire card batch was refused before any food input.
++                    # Reuse ALAS' existing entry loop and popup cancel owner.
++                    self.dorm_feed_enter()
+         logger.info(f'Dorm feed {button} x {count}')
+         if count <= 3:
+             for _ in range(count):
+--- a/module/guild/logistics.py
++++ b/module/guild/logistics.py
+@@ -478,8 +478,18 @@
+                     if target is None:
+                         self.device.sleep(0.2)
+                         continue
+-                    adapter.oracle.click(target)
+-                    return
++                    # Preserve normal ALAS input pacing while the reward
++                    # layer installs its native continuation listener.
++                    self.device.sleep(0.5)
++                    receipt = adapter.oracle.click(target)
++                    for _ in range(30):
++                        state = adapter.oracle.read_state()
++                        if (state.generation > receipt.generation
++                                and not adapter.oracle.award_info_page_visible()):
++                            return
++                        self.device.sleep(0.2)
++                    raise RuntimeError('Guild award close did not dismiss the reward')
++                raise RuntimeError('Guild award close did not become actionable')
+ 
+             if state.supply_claimable:
+                 adapter.claim_guild_supply()
+--- a/module/meowfficer/buy.py
++++ b/module/meowfficer/buy.py
+@@ -55,7 +55,13 @@
+             total = BUY_MAX
+             bought = total - remain
+ 
+-        return self._meow_get_buy_count(bought, total, coins, buy_amount, overflow_th)
++        count = self._meow_get_buy_count(bought, total, coins, buy_amount, overflow_th)
++        if semantic_adapter is not None and bought == 0:
++            # The current native free-box panel permits only one box. Keep
++            # purchase batching in ALAS' existing three-pass buy loop, which
++            # reads today's quota and affordability again after the free box.
++            return min(count, 1)
++        return count
+ 
+     @staticmethod
+     def _meow_get_buy_count(bought, total, coins, buy_amount, overflow_th):
+--- a/module/os_handler/map_event.py
++++ b/module/os_handler/map_event.py
+@@ -135,9 +135,9 @@
+             # that reviewed overlay and keep the current exploration loop.
+             from module.handler.assets import POPUP_CONFIRM
+             if semantic_adapter.appear(POPUP_CONFIRM):
+-                logger.info('Operation Siren network reconnect')
++                logger.info('Operation Siren map confirmation')
+                 self.device.click(POPUP_CONFIRM)
+-                return 'network_reconnect'
++                return 'map_confirmation'
+         if self.handle_map_get_items(drop=drop):
+             return 'map_get_items'
+         if self.handle_os_game_tips():
+--- a/module/os/globe_operation.py
++++ b/module/os/globe_operation.py
+@@ -398,6 +398,9 @@
+             entry_name = zone.cn if pinned in ('SAFE', 'DANGEROUS') else None
+             if semantic_adapter.open().oracle.operation_siren_globe_zone_locked():
+                 logger.warning(f'Zone {zone} locked, neighbouring zones may not have been explored')
++                if pinned == 'STRONGHOLD':
++                    from alas_headless.oracle.errors import SemanticStrongholdEntryLocked
++                    raise SemanticStrongholdEntryLocked(zone.zone_id)
+                 raise OSExploreError
+             semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
+             for attempt in range(80):
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -403,6 +403,28 @@
+             from alas_headless import SemanticGateClosed
+             self.device.stuck_record_clear()
+             for _ in self.loop(skip_first=skip_first_screenshot):
++                # Preserve ALAS' map-event owner while typed state replaces
++                # pixel/homography movement observations. Story choices and
++                # ordinary rewards can interrupt the same walk.
++                event = self.handle_map_event(drop=drop)
++                if event:
++                    confirm_timer.reset()
++                    stuck_timer.reset()
++                    result.add('event')
++                    if event == 'story_skip':
++                        clicked_story = True
++                    elif event == 'map_get_items':
++                        if clicked_story:
++                            logger.info('Got items from story')
++                            self.device.click_record_clear()
++                            clicked_story = False
++                    else:
++                        clicked_story = False
++                    continue
++                if self.handle_popup_confirm('WALK_UNTIL_STABLE'):
++                    confirm_timer.reset()
++                    stuck_timer.reset()
++                    continue
+                 if semantic_session.operation_siren_low_resolve_prompt_visible():
+                     semantic_session.click_operation_siren_low_resolve_cancel()
+                     result.add('fleet_unavailable')
+diff --git a/module/handler/login.py b/module/handler/login.py
+--- a/module/handler/login.py
++++ b/module/handler/login.py
+@@ -75,7 +75,17 @@
+ 
+             # Login
+             if self.match_template_color(LOGIN_CHECK, offset=(30, 30), interval=5):
+-                self.device.click(LOGIN_CHECK)
++                if semantic_adapter is not None:
++                    from alas_headless.oracle.errors import SemanticTargetNotActionable
++                    try:
++                        self.device.click(LOGIN_CHECK)
++                    except SemanticTargetNotActionable as exc:
++                        if exc.semantic_id != 'login/enter':
++                            raise
++                        logger.info('Login entry raycast is settling; wait for next screenshot')
++                        continue
++                else:
++                    self.device.click(LOGIN_CHECK)
+                 if not login_success:
+                     logger.info('Login success')
+                     login_success = True
+diff --git a/module/os/camera.py b/module/os/camera.py
+--- a/module/os/camera.py
++++ b/module/os/camera.py
+@@ -27,6 +27,10 @@
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is None:
+             return super()._update_view()
++        from module.os_handler.assets import AUTO_SEARCH_REWARD
++        if self.appear(AUTO_SEARCH_REWARD, offset=(50, 50)):
++            # Camera._update_view owns reward dismissal and the next refresh.
++            raise MapDetectionError('AUTO_SEARCH_REWARD covers the semantic map')
+         from alas_headless.alas_opsi_camera_view import install_alas_opsi_camera_view
+         shape = location_ensure(self.zone.shape)
+         geometry = semantic_adapter.operation_siren_map_geometry(
+diff --git a/module/os_handler/map_event.py b/module/os_handler/map_event.py
+--- a/module/os_handler/map_event.py
++++ b/module/os_handler/map_event.py
+@@ -267,7 +267,10 @@
+             self.os_auto_search_quit(drop=drop)
+             raise CampaignEnd
+ 
+-        if semantic_adapter is not None:
++        if (semantic_adapter is not None
++                and not self.appear(AUTO_SEARCH_REWARD, offset=(50, 50))):
++            # The existing reward branch below owns the foreground result.
++            # Do not require its covered map switch before that branch runs.
+             # During an active battle the local-map shell and its back button
+             # are intentionally unmounted.  The exact combat UI owns this
+             # frame; leave the map-option switch untouched until map return.
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -223,11 +223,17 @@
+                     self.device.swipe_vector(tuple(vector), name=f'GLOBE_SWIPE_{int(vector[0])}_{int(vector[1])}', box=sight)
+                 except SemanticGlobeDragPathUnavailable:
+                     # Native proofs rejected all candidates before any input.
+-                    # ALAS samples one shorter leg in its existing right-side
+-                    # globe box, avoiding the left WorldUI background. The
+-                    # original sampler still requires a complete native proof.
+-                    vector = vector * 0.5
+-                    self.device.swipe_vector(tuple(vector), name=f'GLOBE_SWIPE_{int(vector[0])}_{int(vector[1])}', box=(600, 220, 980, 620))
++                    # Two shorter legs let the original sampler fit the visible
++                    # Plane without crossing the WorldUI background. Each leg
++                    # still needs its complete native proof before input.
++                    for shorter_leg in range(2):
++                        vector = vector * 0.5
++                        try:
++                            self.device.swipe_vector(tuple(vector), name=f'GLOBE_SWIPE_{int(vector[0])}_{int(vector[1])}', box=(600, 220, 980, 620))
++                            break
++                        except SemanticGlobeDragPathUnavailable:
++                            if shorter_leg == 1:
++                                raise
+                 self.device.sleep(1)
+                 after = project()
+                 if np.linalg.norm(np.array((after.x-point.x, after.y-point.y))) < 10:
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -338,9 +338,13 @@
+                 # Refresh ALAS' immutable semantic frame before selection.
+                 self.device.screenshot()
+                 try:
+-                    if 0 <= zone.zone_id <= 7:
++                    if 0 <= zone.zone_id <= 7 and attempt == 0:
+                         semantic_adapter.click_operation_siren_globe_port(zone.cn, zone.zone_id)
+                     else:
++                        # After a proven missed port-root input, reuse ALAS'
++                        # own logical zone intent and Unity's native projection.
++                        # The same fresh Plane proof and named pin postcondition
++                        # apply; no color alias, pixel search or offset is used.
+                         semantic_adapter.click_operation_siren_globe_map_zone(zone.cn, zone.area_pos)
+                 except (SemanticViewportReanchorRequired, SemanticGlobeSelectionMissed) as exc:
+                     if attempt == 2:

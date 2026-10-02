@@ -18,6 +18,59 @@ from .errors import SemanticGateClosed
 class BuildOracle:
     """Build operations sharing the oracle frame and input boundary."""
 
+    def _build_origin_queue_shell(self, buttons: OracleState, ui: UiState) -> bool:
+        """Prove the queue's reviewed UIOrigin canvas without a raycast report."""
+        backs = self._matches(buttons, "build/page/back")
+        if len(backs) != 1:
+            return False
+        back = backs[0]
+        if not (
+            back.path.endswith("UIOrigin/blur_panel/adapt/top/back_btn")
+            and back.active_in_hierarchy and back.active_and_enabled
+            and back.interactable and back.raycast_top is None
+            and back.point is not None and back.bounds is not None
+            and back.bounds.contains(back.point)
+        ):
+            return False
+        tabs = self._toggle_matches(ui, "build/nav/queue")
+        if not (len(tabs) == 1 and tabs[0].checked
+                and tabs[0].active_in_hierarchy and tabs[0].active_and_enabled
+                and tabs[0].path.endswith(
+                    "UIOrigin/blur_panel/adapt/left_length/frame/tagRoot/queue_btn")):
+            return False
+        capacities = tuple(t for t in ui.texts
+            if t.path.endswith("BuildShipDetailUI1(Clone)/title/value")
+            and t.active_in_hierarchy and t.active_and_enabled
+            and not t.truncated and t.bounds is not None)
+        images = tuple(i for i in ui.images
+            if i.path == back.path + "/mask/Image" and i.sprite == "back_btn"
+            and i.active_in_hierarchy and i.active_and_enabled
+            and i.raycast_target and i.raycast_top is None
+            and not i.truncated and i.bounds is not None
+            and i.bounds.contains(back.point))
+        return bool(len(capacities) == 1 and capacities[0].text.strip() == "2"
+                    and len(images) == 1 and not ui.image_truncated)
+
+    def _build_origin_pool_navigation_proven(self, buttons, ui, semantic_id, matches):
+        if (semantic_id != "build/nav/pools" or len(matches) != 1
+                or not self._build_origin_queue_shell(buttons, ui)):
+            return False
+        toggle = matches[0]
+        if not (toggle.path.endswith(
+                    "UIOrigin/blur_panel/adapt/left_length/frame/tagRoot/build_btn")
+                and not toggle.checked and toggle.active_in_hierarchy
+                and toggle.active_and_enabled and toggle.interactable
+                and toggle.raycast_top is None and toggle.point is not None
+                and toggle.bounds is not None and toggle.bounds.contains(toggle.point)):
+            return False
+        images = tuple(i for i in ui.images
+            if i.path == toggle.path and i.sprite == "build_unsel"
+            and i.active_in_hierarchy and i.active_and_enabled
+            and i.raycast_target and i.raycast_top is None
+            and not i.truncated and i.bounds is not None
+            and i.bounds.contains(toggle.point))
+        return len(images) == 1
+
     def build_selected_pool(self) -> BuildPool:
         """Return the selected construction pool from exact Unity Toggles."""
 
@@ -195,7 +248,7 @@ class BuildOracle:
     def _build_queue_timers_once(self) -> Tuple[str, ...]:
         button_state = self.read_state()
         back = self._unique(button_state, "build/page/back")
-        if not back.actionable or self._blocking_rules(button_state, "build/nav/queue"):
+        if self._blocking_rules(button_state, "build/nav/queue"):
             raise SemanticGateClosed("construction queue page identity is not proven")
         ui_state = self.read_ui_state()
         # On the pinned CN client, a read of the unchanged queue Button tree
@@ -208,6 +261,8 @@ class BuildOracle:
             or ui_state.generation > button_state.generation + 4
         ):
             raise SemanticGateClosed("construction queue snapshots are not coherent")
+        if not back.actionable and not self._build_origin_queue_shell(button_state, ui_state):
+            raise SemanticGateClosed("construction queue page identity is not proven")
         selected_tabs = self._toggle_matches(ui_state, "build/nav/queue")
         if len(selected_tabs) != 1 or not selected_tabs[0].checked:
             raise SemanticGateClosed("construction queue tab is not selected")
@@ -353,10 +408,10 @@ class BuildOracle:
             raise SemanticGateClosed("construction quick-finish prompt is not actionable")
         return self._build_queue_finish_prompt_cost(state)
 
-    def build_queue_all_launch_available(self) -> bool:
+    def build_queue_all_launch_available(self, *, allow_empty: bool = False) -> bool:
         """Prove the exact batch-finish control on a nonempty build queue."""
 
-        if self.build_queue_empty():
+        if self.build_queue_empty() != allow_empty:
             return False
         state = self.read_state()
         control = self._unique(state, "build/queue/all-launch")
@@ -390,10 +445,40 @@ class BuildOracle:
             raise SemanticGateClosed("construction batch-finish Image is ambiguous")
         return len(images) == 1
 
-    def click_build_queue_all_launch(self) -> ActionReceipt:
+    def build_queue_all_launch_visible(self) -> bool:
+        """Observe the batch button also when an empty queue disables its input."""
+        self.build_queue_timers()
+        state = self.read_state()
+        controls = self._matches(state, "build/queue/all-launch")
+        if len(controls) != 1:
+            raise SemanticGateClosed("construction batch-finish control is absent or ambiguous")
+        control = controls[0]
+        if (not control.active_in_hierarchy or not control.active_and_enabled
+                or control.point is None or control.bounds is None
+                or not control.bounds.contains(control.point)
+                or self._blocking_rules(state, "build/queue/all-launch")):
+            return False
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 4:
+            raise SemanticGateClosed("construction queue snapshots are not coherent")
+        images = tuple(i for i in ui.images
+            if i.path == control.path and i.name == "all_launch" and i.sprite == "btn_batch"
+            and i.active_in_hierarchy and i.active_and_enabled and not i.truncated
+            and i.bounds is not None and i.bounds.contains(control.point))
+        if len(images) > 1:
+            raise SemanticGateClosed("construction batch-finish Image is ambiguous")
+        return len(images) == 1
+
+    def click_build_empty_queue_return(self) -> ActionReceipt:
+        """Use the native empty batch-button edge to return to construction."""
+        if not self.build_queue_empty():
+            raise SemanticGateClosed("construction empty-queue return requires an empty queue")
+        return self.click_build_queue_all_launch(allow_empty=True)
+
+    def click_build_queue_all_launch(self, *, allow_empty: bool = False) -> ActionReceipt:
         """Click the proven queue batch-finish control without pixel fallback."""
 
-        if not self.build_queue_all_launch_available():
+        if not self.build_queue_all_launch_available(allow_empty=allow_empty):
             raise SemanticGateClosed("construction batch-finish control is not proven")
         state = self.read_state()
         control = self._unique(state, "build/queue/all-launch")

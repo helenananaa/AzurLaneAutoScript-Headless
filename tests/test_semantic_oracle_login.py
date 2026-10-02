@@ -1,6 +1,7 @@
 """Login regression cases for the oracle."""
 
 import unittest
+from unittest.mock import Mock
 from alas_headless.semantic_oracle import SemanticGateClosed
 from tests.semantic_support.observer_fixtures import (
     FakeBackend,
@@ -14,6 +15,23 @@ from tests.semantic_support.oracle_cases import SemanticOracleTestsSupport
 
 
 class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
+    def test_maintenance_probe_does_not_bind_absent_modal_to_previous_scene(self):
+        backend = FakeBackend([])
+        oracle = make_oracle(backend)
+        oracle._stable_msgbox_ui_state = Mock(side_effect=SemanticGateClosed('Msgbox snapshots are not coherent'))
+        self.assertFalse(oracle.server_maintenance_visible())
+        oracle._stable_msgbox_ui_state.assert_not_called()
+        self.assertEqual(backend.taps, [])
+
+    def test_present_maintenance_control_still_requires_coherent_modal(self):
+        backend = FakeBackend([make_button('custom_button_1(Clone)',
+            'root/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)')])
+        oracle = make_oracle(backend)
+        oracle._stable_msgbox_ui_state = Mock(side_effect=SemanticGateClosed('Msgbox snapshots are not coherent'))
+        with self.assertRaises(SemanticGateClosed):
+            oracle.server_maintenance_visible()
+        self.assertEqual(backend.taps, [])
+
     def test_login_data_expired_confirm_requires_exact_single_button_prompt(self):
         popup = "root/Overlay/UIMain/Msgbox(Clone)/window/"
         backend = FakeBackend(

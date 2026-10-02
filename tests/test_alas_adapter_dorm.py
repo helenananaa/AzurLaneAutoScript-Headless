@@ -15,6 +15,27 @@ from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_observed_feed_panel_waits_for_close_without_opening_underlay(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_dorm()
+        adapter._dorm_context.feed_panel_observed = True
+        oracle.enabled = Mock(side_effect=[False, True, True])
+        with patch("alas_headless.adapter.semantic.dorm.time.sleep") as sleep:
+            receipt = adapter.click(NamedButton("DORM_FEED_ENTER"))
+        sleep.assert_called_once_with(0.25)
+        self.assertEqual(receipt.semantic_id, "dorm/feed/close")
+
+    def test_observed_feed_panel_with_persistently_blocked_close_fails_closed(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_dorm()
+        adapter._dorm_context.feed_panel_observed = True
+        oracle.enabled = Mock(return_value=False)
+        oracle.click = Mock()
+        with patch("alas_headless.adapter.semantic.dorm.time.sleep"):
+            with self.assertRaisesRegex(SemanticGateClosed, "close is not actionable"):
+                adapter.click(NamedButton("DORM_FEED_ENTER"))
+        oracle.click.assert_not_called()
+
     def test_build_dorm_and_menu_page_checks_are_presence_only(self):
         cases = (
             ("build/page/start", "BUILD_CHECK"),
@@ -27,6 +48,8 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
             with self.subTest(resource=resource):
                 adapter, oracle, _ = self.make_adapter()
                 oracle.exists_values[semantic_id] = True
+                if resource == "DORM_CHECK":
+                    oracle.enabled_values["dorm/feed/close"] = False
                 if resource == "RESEARCH_CHECK":
                     # Research requires the native five-card inventory, not
                     # just a back button in an otherwise empty fake page.
@@ -48,6 +71,40 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         adapter, oracle, _ = self.make_adapter()
         oracle.exists_values["research/page/back"] = True
         self.assertFalse(adapter.appear(NamedButton("RESEARCH_CHECK")))
+
+    def test_retained_dorm_summary_classifies_next_task_page_sweep(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values["dorm/page/manage"] = True
+        oracle.enabled_values["dorm/feed/close"] = False
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("DORM_CHECK")))
+        oracle.dorm_state = Mock(side_effect=SemanticGateClosed("foreign blocker"))
+        self.assertFalse(adapter.appear(NamedButton("DORM_CHECK")))
+        with self.assertRaises(AlasSemanticUnmapped):
+            adapter.click(NamedButton("FLEET_CHECK"))
+
+    def test_navigation_main_withdraw_confirmation_probe_is_absent(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.main_page_visible_value = True
+        self.assertFalse(adapter.appear(NamedButton("CAMPAIGN_WITHDRAW_CONFIRM")))
+        oracle.main_page_visible_value = False
+        with self.assertRaises(AlasSemanticUnmapped):
+            adapter.appear(NamedButton("CAMPAIGN_WITHDRAW_CONFIRM"))
+
+    def test_meow_return_withdraw_probe_keeps_foreign_blocker_closed(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter._meowfficer_return_transition_until = time.monotonic() + 12
+        oracle._blocking_rules = Mock(return_value=[SimpleNamespace(blocker_id="meowfficer-dock")])
+        self.assertFalse(adapter.appear(NamedButton("CAMPAIGN_WITHDRAW_CONFIRM")))
+        self.assertFalse(adapter.appear(NamedButton("GET_ITEMS_1")))
+        for name in ("MAP_PREPARATION", "FLEET_PREPARATION", "RAID_FLEET_PREPARATION",
+                     "AUTO_SEARCH_MENU_EXIT", "AUTO_SEARCH_REWARD", "WITHDRAW"):
+            self.assertFalse(adapter.appear(NamedButton(name)))
+        oracle._blocking_rules = Mock(return_value=[SimpleNamespace(blocker_id="msgbox")])
+        with self.assertRaises(AlasSemanticUnmapped):
+            adapter.appear(NamedButton("CAMPAIGN_WITHDRAW_CONFIRM"))
+        with self.assertRaises(AlasSemanticUnmapped):
+            adapter.appear(NamedButton("GET_ITEMS_1"))
 
     def test_dorm_page_check_keeps_owned_page_visible_under_empty_food_modal(self):
         adapter, oracle, _ = self.make_adapter()
@@ -75,6 +132,20 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
 
         self.assertTrue(adapter.appear(NamedButton("DORM_CHECK")))
         self.assertFalse(adapter.appear(NamedButton("DORM_FEED_CANCEL")))
+
+    def test_dorm_page_check_yields_to_statistics_confirm(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_dorm()
+        oracle.exists_values["dorm/page/manage"] = True
+        oracle.exists_values["dorm/statistics/confirm"] = True
+        oracle.enabled_values["dorm/feed/close"] = False
+        oracle.enabled_values["dorm/statistics/confirm"] = True
+        self.assertFalse(adapter.appear(NamedButton("DORM_CHECK")))
+        for name in ("GOTO_MAIN", "GOTO_MAIN_WHITE", "RPG_HOME"):
+            self.assertFalse(adapter.appear(NamedButton(name)))
+        self.assertTrue(adapter.appear(NamedButton("DORM_INFO")))
+        receipt = adapter.click(NamedButton("DORM_INFO"))
+        self.assertEqual(receipt.semantic_id, "dorm/statistics/confirm")
 
     def test_dorm_page_check_yields_to_feed_panel_close(self):
         adapter, oracle, _ = self.make_adapter()
@@ -179,6 +250,35 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         )
         self.assertEqual(oracle.dorm_feed_state_value.food, 2000)
         self.assertEqual(oracle.dorm_feed_state_value.items[0].count, 3)
+
+    def test_fresh_feed_waits_for_panel_identity_without_input(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_dorm()
+        refresh = Mock()
+        adapter._input_frame_refresher = refresh
+        adapter._frame_observation_oracle = lambda: oracle
+        oracle.dorm_feed_state = Mock(side_effect=[
+            SemanticGateClosed("dorm feed panel identity is not proven"),
+            oracle.dorm_feed_state_value,
+        ])
+        oracle.click = Mock()
+        with patch("alas_headless.adapter.semantic.dorm.time.sleep"):
+            self.assertEqual(adapter._fresh_dorm_feed_state(), oracle.dorm_feed_state_value)
+        self.assertEqual(refresh.call_count, 2)
+        oracle.click.assert_not_called()
+
+    def test_fresh_feed_keeps_other_errors_and_persistent_cover_closed(self):
+        for message in ("dorm feed capacity is malformed", "dorm feed panel identity is not proven"):
+            adapter, oracle, _ = self.make_adapter()
+            adapter.begin_dorm()
+            adapter._input_frame_refresher = Mock()
+            adapter._frame_observation_oracle = lambda: oracle
+            oracle.dorm_feed_state = Mock(side_effect=SemanticGateClosed(message))
+            oracle.click = Mock()
+            with patch("alas_headless.adapter.semantic.dorm.time.monotonic", side_effect=[0, 6]):
+                with self.assertRaisesRegex(SemanticGateClosed, message):
+                    adapter._fresh_dorm_feed_state()
+            oracle.click.assert_not_called()
 
     def test_dorm_feed_postcondition_tolerates_transient_card_animation(self):
         oracle = FakeOracle()

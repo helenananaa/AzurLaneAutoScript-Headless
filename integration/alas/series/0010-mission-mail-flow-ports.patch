@@ -44,7 +44,7 @@ index 6d9e42f4..d25882e3 100644
 +        try:
 +            # Must using white UI
 +            self.ui_ensure(
-+                page_main_white if semantic_adapter is not None else page_main
++                page_main
 +            )
 +            if self.appear(page_main_white.check_button, offset=(30, 30)):
 +                logger.info('At page_main_white')

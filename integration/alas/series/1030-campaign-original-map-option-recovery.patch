@@ -1,0 +1,18 @@
+diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
+--- a/module/campaign/campaign_base.py
++++ b/module/campaign/campaign_base.py
+@@ -304,9 +304,11 @@
+         # quit and continuation; the observer only detects the interruption.
+         self.device.screenshot()
+         handled = self.handle_retirement()
+-        if handled and self.is_in_map():
+-            self.device.screenshot()
+-            self.handle_auto_search_map_option()
++        # Retirement navigation invalidates the old observation frame.
++        # The original map-option handler also owns a retained paused map.
++        self.device.screenshot()
++        if self.is_in_map():
++            return self.handle_auto_search_map_option() or handled
+         return handled
+ 
+     def auto_search_execute_a_battle(self):

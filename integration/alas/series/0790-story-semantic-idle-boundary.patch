@@ -1,0 +1,14 @@
+diff --git a/module/handler/info_handler.py b/module/handler/info_handler.py
+--- a/module/handler/info_handler.py
++++ b/module/handler/info_handler.py
+@@ -476,6 +476,10 @@
+                     semantic_adapter.click_event_story_skip()
+                     self.story_popup_timeout.reset()
+                     return True
++                return False
++            # Native story observations own the semantic boundary. A proven
++            # idle branch must not continue into legacy image probes.
++            if oracle.event_story_surface_absent():
+                 return False
+         if self.story_popup_timeout.started() and not self.story_popup_timeout.reached():
+             if self.handle_popup_confirm('STORY_SKIP'):

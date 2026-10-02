@@ -258,7 +258,10 @@ class CampaignNavigationOracle:
             or not (retreat_variant_matches or deployment_proven)
             or not grid_button_paths
             or any(
-                len(matches) != 1 or matches[0].sprite not in allowed_sprites
+                len(matches) != 1 or not (
+                    matches[0].sprite in allowed_sprites
+                    or re.fullmatch(r"sea_[A-Za-z0-9_]+", matches[0].sprite)
+                )
                 for allowed_sprites, matches in required_image_matches
             )
         ):
