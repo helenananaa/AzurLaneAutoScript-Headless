@@ -371,6 +371,14 @@ G2 示例：
 .\scripts\windows\start-android-image-foundation-avd.ps1 -CreateIfMissing
 ```
 
+Windows 启动脚本默认在检测到 WHPX 时查询本机 TSC 频率，自动附加
+`tsc_early_khz` 与 `clocksource=tsc`，避免已观察到的启动校准失败及 HPET
+退化。其他加速后端不附加这些参数；`-ClockMode Off` 可显式关闭该绕过。
+现有 AVD 可以先用 `-PlanOnly` 查看参数而不启动。此实现的离线测试和本机
+预览已完成，新入口的真实冷启动验证尚未完成，不能将启动回执视为客体
+时钟验证通过。主游戏 AVD 使用单独入口 `start-alas-avd.ps1`，详情见
+[WHPX 时钟调查与使用说明](whpx-clocksource-investigation-20261008.zh-CN.md#后续实现自动生成启动参数)。
+
 再执行更新资格门。合成 HTTP 载荷通过 ADB reverse 进入设备；Android 重启后脚本会重建该测试传输，它不代表生产游戏下载网络：
 
 ```powershell
