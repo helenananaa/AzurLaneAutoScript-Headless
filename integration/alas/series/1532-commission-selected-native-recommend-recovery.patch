@@ -1,0 +1,14 @@
+diff --git a/module/commission/commission.py b/module/commission/commission.py
+--- a/module/commission/commission.py
++++ b/module/commission/commission.py
+@@ -401,6 +401,10 @@
+                     self.ui_ensure(page_commission)
+                     break
+                 if semantic_adapter.commission_selection_active():
++                    # Keep original ALAS' recommendation-bug recovery reachable.
++                    if count >= 3:
++                        logger.warning('Triggered commission list flashing bug')
++                        raise GameStuckError('Triggered commission list flashing bug')
+                     if self.handle_popup_confirm('COMMISSION_START'):
+                         continue
+                     if self.appear(COMMISSION_ADVICE, offset=(5, 20), interval=7):

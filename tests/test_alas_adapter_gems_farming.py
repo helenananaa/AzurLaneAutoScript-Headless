@@ -5,6 +5,7 @@ from alas_headless import AlasSemanticAdapter, SemanticGateClosed
 from tests.semantic_support.adapter_cases import AlasSemanticAdapterTestsSupport
 from tests.semantic_support.adapter_fixtures import FakeOracle, NamedButton
 from types import SimpleNamespace
+from alas_headless.adapter.semantic.contracts import AlasSemanticActionDeferred
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
@@ -35,7 +36,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
 
     def test_gems_farming_hard_unmount_consumes_one_mutation_unit(self):
         denied, denied_oracle, _ = self.make_adapter()
-        with self.assertRaisesRegex(SemanticGateClosed, "mutation budget"):
+        with self.assertRaisesRegex(AlasSemanticActionDeferred, "campaign.fleet_mutation"):
             denied.gems_farming_hard_unmount("11-4", 1, "flagship")
         self.assertEqual(denied_oracle.gems_calls, [])
 
@@ -113,7 +114,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         for role in ("flagship", "vanguard"):
             with self.subTest(role=role):
                 denied, denied_oracle, _ = self.make_adapter()
-                with self.assertRaisesRegex(SemanticGateClosed, "budget"):
+                with self.assertRaisesRegex(AlasSemanticActionDeferred, "campaign.fleet_mutation"):
                     denied.gems_farming_equipment_take_off(role)
                 self.assertEqual(denied_oracle.gems_calls, [])
 
@@ -241,7 +242,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
     def test_gems_farming_confirmation_requires_campaign_fleet_budget(self):
         candidate = SimpleNamespace(ship_id=106014)
         denied, denied_oracle, _ = self.make_adapter()
-        with self.assertRaisesRegex(SemanticGateClosed, "budget"):
+        with self.assertRaisesRegex(AlasSemanticActionDeferred, "campaign.fleet_mutation"):
             denied.gems_farming_confirm_candidate_selection(candidate, "flagship")
         self.assertEqual(denied_oracle.gems_calls, [])
 

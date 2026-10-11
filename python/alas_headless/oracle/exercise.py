@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from typing import List, Tuple
 from .contracts import ActionReceipt, Point
-from .errors import SemanticGateClosed
+from .errors import SemanticGateClosed, SemanticTargetMissing, SemanticExerciseHpNotReady
 
 
 class ExerciseOracle:
@@ -41,6 +41,10 @@ class ExerciseOracle:
     def exercise_page_visible(self) -> bool:
         state = self.read_state()
         back = self._matches(state, "exercise/page/back")
+        if not back:
+            # An absent Exercise page needs no counter/text endpoint. Keep
+            # failures in that optional capability out of other page probes.
+            return False
         rivals = tuple(
             button
             for button in state.buttons
@@ -55,7 +59,7 @@ class ExerciseOracle:
             and button.interactable
             and button.bounds is not None
         )
-        ui_state = self.read_ui_state()
+        ui_state = self.read_text_state()
         counts = tuple(
             text
             for text in ui_state.texts
@@ -229,10 +233,16 @@ class ExerciseOracle:
     def click_exercise_award_info_close(self) -> ActionReceipt:
         """Close the exact standalone Exercise AwardInfo result popup."""
 
-        if not self.award_info_page_visible():
-            raise SemanticGateClosed("exercise award-info page is absent")
         state = self.read_state()
+        if not any(button.active_in_hierarchy and button.active_and_enabled
+                   and '/AwardInfoUI(Clone)/' in button.path
+                   for button in state.buttons):
+            # The preceding presence read can describe a departing reward.
+            # Classify absence before input, using this one current snapshot.
+            raise SemanticTargetMissing("exercise award-info page is absent")
         matches = self._matches(state, "reward/award-info/close")
+        if not matches:
+            raise SemanticTargetMissing("exercise award-info close target is absent")
         if len(matches) != 1:
             raise SemanticGateClosed("exercise award-info close target is ambiguous")
         target = matches[0]
@@ -310,8 +320,11 @@ class ExerciseOracle:
 
         state = self.read_state()
         pauses = self._matches(state, "exercise/combat/pause")
+        if len(pauses) != 1:
+            raise SemanticGateClosed("exercise combat identity is not proven")
         ui_state = self.read_ui_state()
         values = []
+        pending = False
         for side in ("leftDamageBar", "rightDamageBar"):
             suffix = (
                 "CombatUIStandard(Clone)/DuelDamageRate/{0}/bar/progress"
@@ -320,13 +333,17 @@ class ExerciseOracle:
                 image for image in ui_state.images
                 if image.path.endswith(suffix)
                 and image.active_in_hierarchy and image.active_and_enabled
-                and image.bounds is not None
             )
-            if len(matches) != 1 or not 0.0 <= matches[0].fill_amount <= 1.0:
+            if not matches:
+                pending = True
+                continue
+            if (len(matches) != 1 or matches[0].bounds is None
+                    or matches[0].truncated
+                    or not 0.0 <= matches[0].fill_amount <= 1.0):
                 raise SemanticGateClosed("exercise duel HP bar is ambiguous")
             values.append(float(matches[0].fill_amount))
-        if len(pauses) != 1:
-            raise SemanticGateClosed("exercise combat identity is not proven")
+        if pending:
+            raise SemanticExerciseHpNotReady("exercise duel HP bars have not mounted")
         return (values[0], values[1])
 
     def click_exercise_combat_pause(self) -> ActionReceipt:
@@ -337,6 +354,8 @@ class ExerciseOracle:
             not target.active_in_hierarchy or not target.active_and_enabled
             or not target.interactable or target.raycast_top is not None
             or target.point is None or target.bounds is None
+            or not target.bounds.contains(target.point)
+            or self._blocking_rules(state, 'exercise/combat/pause')
         ):
             raise SemanticGateClosed("exercise pause target is invalid")
         self._tap(int(round(target.point.x)), int(round(target.point.y)))

@@ -1,0 +1,23 @@
+diff --git a/module/handler/info_handler.py b/module/handler/info_handler.py
+--- a/module/handler/info_handler.py
++++ b/module/handler/info_handler.py
+@@ -467,7 +467,18 @@
+                 if option_count:
+                     logger.attr('Story_options', option_count)
+                     semantic_adapter.refresh_frame()
+-                    semantic_adapter.click_event_story_option(self.config.STORY_OPTION)
++                    from alas_headless import SemanticGateClosed
++                    dispatch_count = oracle.input_dispatch_count
++                    try:
++                        semantic_adapter.click_event_story_option(self.config.STORY_OPTION)
++                    except SemanticGateClosed:
++                        # Auto-search can advance a story between observation
++                        # and input. Only a proven zero-input, absent surface
++                        # may return to the original map-event loop.
++                        if (oracle.input_dispatch_count == dispatch_count
++                                and oracle.event_story_surface_absent()):
++                            return False
++                        raise
+                     self.story_popup_timeout.reset()
+                     return True
+                 if self.config.STORY_ALLOW_SKIP:

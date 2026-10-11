@@ -17,6 +17,7 @@ from ...semantic_oracle import (
     SemanticGateClosed,
 )
 from .contracts import (
+    AlasSemanticActionDeferred,
     CampaignAutoSearchEvidenceBundle,
     CampaignFleetPreparationProof,
     CampaignPreSortieProof,
@@ -24,6 +25,7 @@ from .contracts import (
     _CampaignFlowContext,
 )
 from .resources import CAMPAIGN_SHARED_HARD_STAGE_ENTRANCES
+from ...oracle.errors import SemanticTargetNotActionable
 
 
 class CampaignPreparationAdapterPorts:
@@ -442,7 +444,8 @@ class CampaignPreparationAdapterPorts:
             context.expected_fleet_mutations = tuple(operations)
             remaining = self._action_ledger.remaining("campaign.fleet_mutation")
             if operations and remaining < len(operations):
-                raise SemanticGateClosed(
+                self._require_action_grant("campaign.fleet_mutation")
+                raise AlasSemanticActionDeferred(
                     "campaign fleet mutation budget is below the hard fleet "
                     "recommendation requirement: {0} < {1}".format(
                         remaining, len(operations)
@@ -517,7 +520,8 @@ class CampaignPreparationAdapterPorts:
         context.expected_fleet_mutations = tuple(operations)
         remaining = self._action_ledger.remaining("campaign.fleet_mutation")
         if operations and remaining < len(operations):
-            raise SemanticGateClosed(
+            self._require_action_grant("campaign.fleet_mutation")
+            raise AlasSemanticActionDeferred(
                 "campaign fleet mutation budget is below the preflight requirement: "
                 "{0} < {1}".format(remaining, len(operations))
             )
@@ -726,6 +730,33 @@ class CampaignPreparationAdapterPorts:
                     # Refresh observation only; retain every original input gate.
                     time.sleep(0.2)
 
+        def click_role_tab(*, mutation: bool) -> ActionReceipt:
+            # The same bounded settling window used by the role rows also
+            # covers the tab's raycast mount. Retry only a classified refusal
+            # before input; unknown state and accepted-input failures escape.
+            deadline = time.monotonic() + 5.0
+            while True:
+                if self._input_frame_refresher is not None:
+                    self._input_frame_refresher()
+                dispatch_count = getattr(self.oracle, 'input_dispatch_count', None)
+                try:
+                    if mutation:
+                        return self._dispatch_mutation(
+                            'campaign.fleet_mutation',
+                            lambda: self.oracle.click_toggle(
+                                'campaign/fleet-preparation/roles/tab'))
+                    return self.oracle.click_toggle('campaign/fleet-preparation/roles/tab')
+                except SemanticTargetNotActionable as exc:
+                    if (exc.semantic_id != 'campaign/fleet-preparation/roles/tab'
+                            or dispatch_count is None
+                            or self.oracle.input_dispatch_count != dispatch_count):
+                        raise
+                    if time.monotonic() >= deadline:
+                        raise AlasSemanticActionDeferred(
+                            'campaign duty tab remains covered; no tab input submitted; '
+                            're-enter when the typed fleet duty tab becomes actionable') from exc
+                    time.sleep(0.2)
+
         self._package_gate()
         context = self._require_campaign_context()
         if context.prepared_fleet_state is None or context.requested_fleets is None:
@@ -834,11 +865,7 @@ class CampaignPreparationAdapterPorts:
                 # is required before a zero-mutation no-op can be proven.  Keep
                 # this exception scoped to a typed hard event surface and
                 # never use it to authorize either of the role controls.
-                if self._input_frame_refresher is not None:
-                    self._input_frame_refresher()
-                receipt = self.oracle.click_toggle(
-                    "campaign/fleet-preparation/roles/tab"
-                )
+                receipt = click_role_tab(mutation=False)
                 context.auto_search_role_receipts.append(receipt)
                 context.passive_transition_until = time.monotonic() + 3.0
                 deadline = time.monotonic() + 5.0
@@ -864,14 +891,7 @@ class CampaignPreparationAdapterPorts:
         if not role_oracle.toggle_selected(
             "campaign/fleet-preparation/roles/tab"
         ):
-            if self._input_frame_refresher is not None:
-                self._input_frame_refresher()
-            receipt = self._dispatch_mutation(
-                "campaign.fleet_mutation",
-                lambda: self.oracle.click_toggle(
-                    "campaign/fleet-preparation/roles/tab"
-                ),
-            )
+            receipt = click_role_tab(mutation=True)
             context.auto_search_role_receipts.append(receipt)
             context.passive_transition_until = time.monotonic() + 3.0
 

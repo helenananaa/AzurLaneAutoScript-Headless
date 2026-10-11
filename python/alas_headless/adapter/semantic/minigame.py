@@ -64,8 +64,6 @@ class MinigameAdapterPorts:
 
         self._package_gate()
         context = self._require_minigame_context()
-        if not self._action_ledger.allowed("minigame.play"):
-            raise SemanticGateClosed("minigame play requires a positive budget")
         selected, counter_owned = self.oracle.new_year_challenge_ticket_count()
         observed_owned = context.coins_owned
         if observed_owned is None:
@@ -96,8 +94,6 @@ class MinigameAdapterPorts:
         """Bind the native ALAS coin selection to this play's typed inventory."""
         self._package_gate()
         context = self._require_minigame_context()
-        if not self._action_ledger.allowed('minigame.play'):
-            raise SemanticGateClosed('minigame play requires a positive budget')
         selected, owned = self.oracle.new_year_challenge_ticket_count()
         if context.coins_owned != owned or not 0 <= selected <= owned:
             raise SemanticGateClosed('native minigame ticket selection does not match inventory')
@@ -243,8 +239,9 @@ class MinigameAdapterPorts:
                     time.sleep(0.1)
                 raise SemanticGateClosed('new-year entry did not reach its exact prepare page')
             if name == "NEW_YEAR_CHALLENGE_ADD_COIN":
-                if context.play_receipt is not None or not self._action_ledger.allowed('minigame.play'):
-                    raise SemanticGateClosed('minigame coin selection requires an unstarted budgeted play')
+                if context.play_receipt is not None:
+                    raise SemanticGateClosed('minigame coin selection requires an unstarted play')
+                self._require_action_grant('minigame.play')
                 oracle = self._fresh_input_oracle()
                 selected, owned = oracle.new_year_challenge_ticket_count()
                 if context.coins_owned != owned or not 0 < selected < owned:

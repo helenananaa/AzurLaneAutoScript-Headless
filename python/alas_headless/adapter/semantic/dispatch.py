@@ -35,6 +35,9 @@ class DispatchAdapterPorts:
         result = self._appear_priority(name)
         if result is not UNHANDLED:
             return result
+        result = self._appear_guild(name)
+        if result is not UNHANDLED:
+            return result
         campaign_stage_code = getattr(
             button, "semantic_campaign_stage_code", None
         )
@@ -184,6 +187,9 @@ class DispatchAdapterPorts:
         result = self._click_daily(name)
         if result is not UNHANDLED:
             return result
+        result = self._click_guild(name)
+        if result is not UNHANDLED:
+            return result
         result = self._click_admission(name, semantic_id, campaign_stage_code, navbar_match, commission_row_match, build_side_navbar_match, build_pool_navbar_match)
         if result is not UNHANDLED:
             return result
@@ -231,9 +237,6 @@ class DispatchAdapterPorts:
         if result is not UNHANDLED:
             return result
         result = self._click_reward_navigation(name, navbar_match)
-        if result is not UNHANDLED:
-            return result
-        result = self._click_guild(name)
         if result is not UNHANDLED:
             return result
         result = self._click_mission(name)

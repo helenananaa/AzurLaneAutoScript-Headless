@@ -31,8 +31,9 @@ from .contracts import (
     ToggleState,
     UI_SCHEMA,
     UiState,
+    _DeferredUiValue,
 )
-from .errors import ObserverTransportError, SemanticGateClosed, SemanticOracleError
+from .errors import ObserverTransportError, SemanticGateClosed, SemanticOracleError, SemanticSnapshotStale
 from .surfaces import ObservationSurface, observation_surface_present, observation_prompt_kind
 from .transport import observer_snapshot_semantic_ready, request_observer_state
 from .ui_targets import (
@@ -99,14 +100,22 @@ class CoreOracle:
 
     def _dispatch_tap(self, x: float, y: float) -> None:
         self._mark_input_dispatched()
-        self._tap_backend(x, y)
+        try:
+            self._tap_backend(x, y)
+        except SemanticSnapshotStale as exc:
+            exc.input_outcome_uncertain = True
+            raise
 
     def _dispatch_swipe(
         self, x1: int, y1: int, x2: int, y2: int, duration_ms: int
     ) -> None:
         self._mark_input_dispatched()
         assert self._swipe_backend is not None
-        self._swipe_backend(x1, y1, x2, y2, duration_ms)
+        try:
+            self._swipe_backend(x1, y1, x2, y2, duration_ms)
+        except SemanticSnapshotStale as exc:
+            exc.input_outcome_uncertain = True
+            raise
 
     def _retry_transition_read(
         self,
@@ -264,7 +273,7 @@ class CoreOracle:
             and self._integer(value.get("age_ms"), "age_ms")
             > self.fingerprint.max_age_ms
         ):
-            raise SemanticGateClosed("observer snapshot is stale")
+            raise SemanticSnapshotStale(value["age_ms"], self.fingerprint.max_age_ms)
 
     def _parse_button(self, raw: Any) -> ButtonState:
         if not isinstance(raw, Mapping):
@@ -500,137 +509,133 @@ class CoreOracle:
             buttons=buttons,
         )
 
-    def read_ui_state(self, *, check_foreground: bool = True,
-                      _preserve_partial_toggles: bool = False) -> UiState:
-        """Read UI; frame capture may retain, but never clear, a partial flag.
-
-        Ordinary observation/input consumers retain the strict default. A
-        capability-local reader must independently prove its complete slice.
-        """
-        if (
-            check_foreground
-            and self._foreground_component() != self.fingerprint.component
+    def _ui_error_counts(self, snapshot: Mapping[str, Any]) -> Dict[str, int]:
+        total = self._integer(snapshot.get("error_count"), "UI error_count")
+        if total < 0:
+            raise SemanticGateClosed("UI error_count is negative")
+        counts = snapshot.get("error_counts")
+        if "error_counts" not in snapshot:
+            # Older publishers cannot attribute an extraction error safely.
+            if total:
+                raise SemanticGateClosed("UI snapshot contains unscoped extraction errors")
+            return {"toggle": 0, "text": 0, "image": 0, "shared": 0}
+        if not isinstance(counts, Mapping) or not {
+            "toggle", "text", "image", "shared"
+        } <= counts.keys():
+            raise SemanticGateClosed("UI error attribution is incomplete")
+        parsed = {
+            key: self._integer(value, "UI error_counts." + str(key))
+            for key, value in counts.items()
+        }
+        if any(value < 0 for value in parsed.values()) or sum(parsed.values()) != total:
+            raise SemanticGateClosed("UI error attribution is inconsistent")
+        if parsed["shared"] or any(
+            value for key, value in parsed.items()
+            if key not in {"toggle", "text", "image", "shared"}
         ):
+            raise SemanticGateClosed("UI snapshot contains unscoped extraction errors")
+        return parsed
+
+    def read_ui_snapshot(self, *, check_foreground: bool = True) -> Mapping[str, Any]:
+        """Capture the shared UI envelope without consuming any field family."""
+        if check_foreground and self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("game activity is not top-resumed")
-        ui_snapshot = self._request("GET /v1/ui\n")
-        if not isinstance(ui_snapshot, Mapping):
+        snapshot = self._request("GET /v1/ui\n")
+        if not isinstance(snapshot, Mapping):
             raise ObserverTransportError("UI observer response is not a mapping")
-        self._validate_identity(ui_snapshot, UI_SCHEMA)
-        if ui_snapshot.get("schema") != 1:
+        self._validate_identity(snapshot, UI_SCHEMA)
+        if snapshot.get("schema") != 1:
             raise SemanticGateClosed("UI snapshot schema mismatch")
-        if (ui_snapshot.get("toggle_truncated") is not False
-                and not (_preserve_partial_toggles is True
-                         and ui_snapshot.get("toggle_truncated") is True)):
-            raise SemanticGateClosed("toggle snapshot is truncated")
-        if ui_snapshot.get("text_truncated") is not False:
-            raise SemanticGateClosed("text snapshot is truncated")
-        if self._integer(ui_snapshot.get("error_count"), "UI error_count") != 0:
-            raise SemanticGateClosed("UI snapshot contains extraction errors")
-
-        image_truncated = ui_snapshot.get("image_truncated")
-        if not isinstance(image_truncated, bool):
-            raise SemanticGateClosed("image truncation state is malformed")
-        image_source_count = ui_snapshot.get("image_source_count")
-        image_source_capacity = ui_snapshot.get("image_source_capacity")
-        if (image_source_count is None) != (image_source_capacity is None):
-            raise SemanticGateClosed("image source metadata is incomplete")
-        if image_source_count is not None:
-            image_source_count = self._integer(image_source_count, "image_source_count")
-            image_source_capacity = self._integer(
-                image_source_capacity, "image_source_capacity"
-            )
-            if (
-                image_source_count < 0
-                or image_source_capacity <= 0
-                or (not image_truncated and image_source_count > image_source_capacity)
-            ):
-                raise SemanticGateClosed("image source metadata is inconsistent")
-        raw_toggles = ui_snapshot.get("toggles")
-        raw_texts = ui_snapshot.get("texts")
-        raw_images = ui_snapshot.get("images")
-        if (
-            not isinstance(raw_toggles, (list, tuple))
-            or not isinstance(raw_texts, (list, tuple))
-            or not isinstance(raw_images, (list, tuple))
-        ):
-            raise SemanticGateClosed("UI record lists are malformed")
-        if self._integer(ui_snapshot.get("toggle_count"), "toggle_count") != len(
-            raw_toggles
-        ):
-            raise SemanticGateClosed("toggle count does not match the record list")
-        if self._integer(ui_snapshot.get("text_count"), "text_count") != len(raw_texts):
-            raise SemanticGateClosed("text count does not match the record list")
-        if self._integer(ui_snapshot.get("image_count"), "image_count") != len(
-            raw_images
-        ):
-            raise SemanticGateClosed("image count does not match the record list")
-        method_mask = self._integer(ui_snapshot.get("method_mask"), "UI method_mask")
-        skipped_count = self._integer(
-            ui_snapshot.get("skipped_count"), "UI skipped_count"
-        )
+        self._ui_error_counts(snapshot)
+        method_mask = self._integer(snapshot.get("method_mask"), "UI method_mask")
+        if not 0 <= method_mask <= 0xFFFFFFFF:
+            raise SemanticGateClosed("UI method_mask is out of range")
+        skipped_count = self._integer(snapshot.get("skipped_count"), "UI skipped_count")
         if skipped_count < 0:
             raise SemanticGateClosed("UI skipped_count is negative")
-        if method_mask & 0x6 == 0:
-            raise SemanticGateClosed("no typed Unity text accessor is available")
-        generation = self._integer(ui_snapshot.get("generation"), "UI generation")
+        generation = self._integer(snapshot.get("generation"), "UI generation")
         if self._last_generation is not None and generation < self._last_generation:
             raise SemanticGateClosed("observer generation moved backwards")
         self._last_generation = generation
+        return snapshot
+
+    def read_ui_state(self, *, check_foreground: bool = True,
+                      _preserve_partial_toggles: bool = False) -> UiState:
+        """Parse each typed family when consumed, from this one captured endpoint.
+
+        Package, PID, protocol, freshness, generation and unscoped extraction
+        errors are shared prerequisites. A missing or malformed family closes
+        only consumers of that family; it is never represented as empty state.
+        """
+        snapshot = self.read_ui_snapshot(check_foreground=check_foreground)
+        error_counts = self._ui_error_counts(snapshot)
+        method_mask = snapshot["method_mask"]
+        families: Dict[str, Dict[str, Any]] = {}
+
+        def records(family: str, parser: Callable[[Any], Any], mask: int) -> tuple:
+            if error_counts[family]:
+                raise SemanticGateClosed(family + " snapshot contains extraction errors")
+            if method_mask & mask == 0:
+                raise SemanticGateClosed("typed Unity " + family + " accessor is unavailable")
+            raw = snapshot.get(family + "s")
+            if not isinstance(raw, (list, tuple)):
+                raise SemanticGateClosed(family + " record list is malformed")
+            if self._integer(snapshot.get(family + "_count"), family + "_count") != len(raw):
+                raise SemanticGateClosed(family + " count does not match the record list")
+            return tuple(parser(item) for item in raw)
+
+        def family_values(family: str) -> Dict[str, Any]:
+            if family in families:
+                return families[family]
+            truncated = snapshot.get(family + "_truncated")
+            if family == "image":
+                if not isinstance(truncated, bool):
+                    raise SemanticGateClosed("image truncation state is malformed")
+                count = snapshot.get("image_source_count")
+                capacity = snapshot.get("image_source_capacity")
+                if (count is None) != (capacity is None):
+                    raise SemanticGateClosed("image source metadata is incomplete")
+                if count is not None:
+                    count = self._integer(count, "image_source_count")
+                    capacity = self._integer(capacity, "image_source_capacity")
+                    if count < 0 or capacity <= 0 or (not truncated and count > capacity):
+                        raise SemanticGateClosed("image source metadata is inconsistent")
+                value = {
+                    "images": records("image", self._parse_image, 0x8),
+                    "image_truncated": truncated,
+                    "image_source_count": count,
+                    "image_source_capacity": capacity,
+                }
+            else:
+                preserve = family == "toggle" and _preserve_partial_toggles is True
+                if truncated is not False and not (preserve and truncated is True):
+                    raise SemanticGateClosed(family + " snapshot is truncated")
+                parser, mask = (self._parse_toggle, 0x1) if family == "toggle" else (self._parse_text, 0x6)
+                value = {family + "s": records(family, parser, mask)}
+            families[family] = value
+            return value
+
+        def deferred(family: str, field: str) -> _DeferredUiValue:
+            return _DeferredUiValue(lambda: family_values(family)[field])
+
         return UiState(
-            generation=generation,
+            generation=snapshot["generation"],
             method_mask=method_mask,
-            skipped_count=skipped_count,
-            image_truncated=image_truncated,
-            snapshot=ui_snapshot,
-            toggles=tuple(self._parse_toggle(raw) for raw in raw_toggles),
-            texts=tuple(self._parse_text(raw) for raw in raw_texts),
-            images=tuple(self._parse_image(raw) for raw in raw_images),
-            image_source_count=image_source_count,
-            image_source_capacity=image_source_capacity,
+            skipped_count=snapshot["skipped_count"],
+            image_truncated=deferred("image", "image_truncated"),
+            snapshot=snapshot,
+            toggles=deferred("toggle", "toggles"),
+            texts=deferred("text", "texts"),
+            images=deferred("image", "images"),
+            image_source_count=deferred("image", "image_source_count"),
+            image_source_capacity=deferred("image", "image_source_capacity"),
         )
 
     def read_text_state(self) -> UiState:
-        """Read a complete text slice while ignoring unrelated UI-type caps."""
-
-        if self._foreground_component() != self.fingerprint.component:
-            raise SemanticGateClosed("game activity is not top-resumed")
-        ui_snapshot = self._request("GET /v1/ui\n")
-        if not isinstance(ui_snapshot, Mapping):
-            raise ObserverTransportError("UI observer response is not a mapping")
-        self._validate_identity(ui_snapshot, UI_SCHEMA)
-        if ui_snapshot.get("schema") != 1:
-            raise SemanticGateClosed("UI snapshot schema mismatch")
-        if ui_snapshot.get("text_truncated") is not False:
-            raise SemanticGateClosed("text snapshot is truncated")
-        if self._integer(ui_snapshot.get("error_count"), "UI error_count") != 0:
-            raise SemanticGateClosed("UI snapshot contains extraction errors")
-        raw_texts = ui_snapshot.get("texts")
-        if not isinstance(raw_texts, (list, tuple)) or self._integer(
-            ui_snapshot.get("text_count"), "text_count"
-        ) != len(raw_texts):
-            raise SemanticGateClosed("text record list is malformed")
-        method_mask = self._integer(ui_snapshot.get("method_mask"), "UI method_mask")
-        if method_mask & 0x6 == 0:
-            raise SemanticGateClosed("no typed Unity text accessor is available")
-        generation = self._integer(ui_snapshot.get("generation"), "UI generation")
-        if self._last_generation is not None and generation < self._last_generation:
-            raise SemanticGateClosed("observer generation moved backwards")
-        self._last_generation = generation
-        skipped_count = self._integer(
-            ui_snapshot.get("skipped_count"), "UI skipped_count"
-        )
-        if skipped_count < 0:
-            raise SemanticGateClosed("UI skipped_count is negative")
-        return UiState(
-            generation=generation,
-            method_mask=method_mask,
-            skipped_count=skipped_count,
-            image_truncated=bool(ui_snapshot.get("image_truncated")),
-            snapshot=ui_snapshot,
-            toggles=(),
-            texts=tuple(self._parse_text(raw) for raw in raw_texts),
-            images=(),
-        )
+        """Require the text family without consuming unrelated UI families."""
+        state = self.read_ui_state()
+        _ = state.texts
+        return state
 
     @staticmethod
     def _bounds_overlap(left: Bounds, right: Bounds) -> float:
@@ -857,6 +862,11 @@ class CoreOracle:
 
     def main_page_visible(self) -> bool:
         state = self.read_state()
+        if any(button.active_in_hierarchy and button.active_and_enabled
+               for target in ('settings/back', 'player/profile/back')
+               for button in self._matches(state, target)):
+            # Inherited owning pages can retain Main controls underneath.
+            return False
         battle = self._matches(state, "main/battle")
         formation = self._matches(state, "main/formation")
         return bool(
@@ -885,12 +895,6 @@ class CoreOracle:
         """Identify the exact Naval Academy map and its reviewed landmarks."""
 
         state = self.read_state()
-        ui_state = self.read_ui_state()
-        if (
-            ui_state.generation < state.generation
-            or ui_state.generation > state.generation + 2
-        ):
-            raise SemanticGateClosed("academy snapshots are not coherent")
         required_buttons = {
             "back": "NavalAcademyUI/blur_container/adapt/top/title/back",
             "supplyShop": "NavalAcademyUI/academyMap/map/supplyShop",
@@ -909,6 +913,15 @@ class CoreOracle:
             )
             if len(matches) != 1:
                 return False
+        # Page discovery runs this probe on every task's current surface.
+        # An absent Academy must not depend on optional text/image export;
+        # its existing button landmarks already establish the passive miss.
+        ui_state = self.read_text_state()
+        if (
+            ui_state.generation < state.generation
+            or ui_state.generation > state.generation + 2
+        ):
+            raise SemanticGateClosed("academy snapshots are not coherent")
         required_text = {
             "NavalAcademyUI/academyMap/map/supplyShop/name/Text": "补给商店",
             "NavalAcademyUI/academyMap/map/tacticRoom/name/Text": "战术学院",

@@ -30,7 +30,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
     BlockerRule(
         "award-info",
         "/AwardInfoUI(Clone)/",
-        ("reward/award-info/close", "retirement/reward/close"),
+        ("reward/award-info/close", "retirement/reward/close", "reward/item-info/close"),
     ),
     BlockerRule(
         "award-info1",
@@ -82,6 +82,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "reward-page",
         "/CommissionInfoUI4Mellow(Clone)/",
         (
+            "overlay/guild-message/close",
             "reward/page/back",
             "reward/meta/enter",
             "reward/battle-pass/enter",
@@ -100,6 +101,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "reward/award-info/close",
             "reward/award-info1/close",
             "reward/ship-exp/close",
+            "reward/item-info/close",
         ),
     ),
     BlockerRule(
@@ -287,6 +289,9 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "operation-siren-map",
         "/top/adapt/top_stage/resources/WorldResPanel(Clone)/",
         (
+            # WorldResPanel stays mounted below this global notice. Its exact
+            # top-raycast close belongs to the overlay, not the covered map.
+            "overlay/guild-message/close",
             "os/auto-search/reward/close",
             "campaign/dock-full/organize",
             "campaign/dock-full/enhance",
@@ -335,6 +340,9 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "os/help/close",
             "reward/award-info/close",
             "reward/award-info1/close",
+            # The complete single-item parser proves the foreground Msgbox;
+            # its description close is independent of the map underneath.
+            "reward/item-info/close",
             "os/exit/confirm",
             "os/exit/cancel",
         ),
@@ -497,7 +505,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
     BlockerRule(
         "academy-page",
         "/NavalAcademyUI/",
-        ("academy/munitions", "academy/game-room"),
+        ("academy/page/back", "academy/munitions", "academy/game-room"),
     ),
     BlockerRule(
         "dorm-statistics",
@@ -693,6 +701,10 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "dorm/feed/item/50005",
             "dorm/feed/item/50006",
             "dorm/feed/shop/cancel",
+            "dorm/feed/shop/open",
+            "dorm/feed/shop/plus",
+            "dorm/feed/shop/minus",
+            "dorm/feed/shop/confirm",
             "dorm/empty-food/cancel",
         ),
     ),
@@ -704,13 +716,18 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
     BlockerRule(
         "dorm-feed-shop",
         "/BackYardFeedShopPanel(Clone)/",
-        ("dorm/feed/shop/cancel",),
+        ("dorm/feed/shop/cancel", "dorm/feed/shop/plus", "dorm/feed/shop/minus", "dorm/feed/shop/confirm"),
     ),
     BlockerRule(
         "dorm-feed",
         "/BackYardFeedUI(Clone)/",
         (
             "dorm/feed/close",
+            "dorm/feed/shop/cancel",
+            "dorm/feed/shop/open",
+            "dorm/feed/shop/plus",
+            "dorm/feed/shop/minus",
+            "dorm/feed/shop/confirm",
             "dorm/feed/item/50001",
             "dorm/feed/item/50002",
             "dorm/feed/item/50003",
@@ -761,6 +778,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "tactical-continue",
         "/Msgbox(Clone)/",
         (
+            "reward/item-info/close",
             "retirement/equipment/preserve/confirm",
             "enhancement/equipment/preserve/confirm",
             "campaign/map/submarine/oil/confirm",
@@ -854,6 +872,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "tactical/slot/2",
             "tactical/slot/3",
             "tactical/slot/4",
+            "tactical/slot/first-empty",
             "tactical/dock/back",
             "tactical/dock/confirm",
             "tactical/dock/cancel",

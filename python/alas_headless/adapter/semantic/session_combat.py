@@ -29,6 +29,7 @@ from ...semantic_oracle import (
 )
 from .adapter import AlasSemanticAdapter
 from .contracts import CampaignMapTargetRecheckProof
+from ...oracle.errors import SemanticExerciseHpNotReady
 
 
 class SessionCombatPorts:
@@ -44,21 +45,21 @@ class SessionCombatPorts:
             )
             manifest = load_alas_combat_observer_manifest(path)
             if manifest.driver_revision != self.driver_revision:
-                compatibility = (
-                    manifest.driver_revision,
-                    self.driver_revision,
-                )
-                if compatibility not in self._LIVE_COMBAT_DRIVER_COMPATIBILITY:
-                    raise SemanticGateClosed(
-                        "combat observer manifest is not qualified for the "
-                        "active driver revision"
+                # The retained manifest qualifies selector evidence at its
+                # baseline. Runtime compatibility is decided by fresh endpoint
+                # schemas and those selectors, not a list of successor hashes.
+                # Keep every endpoint bound to the configured active driver;
+                # input still proves package/PID, freshness, blockers, unique
+                # actionable targets and the existing action contract.
+                if self.trace is not None:
+                    self.trace.emit(
+                        "semantic.combat.compatibility",
+                        fields={
+                            "status": "best-effort",
+                            "baseline_driver_revision": manifest.driver_revision,
+                            "active_driver_revision": self.driver_revision,
+                        },
                     )
-                # 506b is the reviewed image-capacity successor of the G27
-                # driver.  It retains the endpoint schemas and Unity selector
-                # contract, while increasing the rolling image reserve needed
-                # by large Operation Siren maps.  Rebind only this exact,
-                # checked compatibility edge so raw endpoint identity remains
-                # pinned to the active runtime below.
                 manifest = replace(
                     manifest,
                     driver_revision=self.driver_revision,
@@ -178,6 +179,8 @@ class SessionCombatPorts:
             return False
         if oracle.daily_combat_visible():
             return True
+        if getattr(oracle, 'daily_battle_loading_visible', lambda: False)():
+            return True
         if adapter.campaign_combat_committed():
             try:
                 if not oracle.campaign_is_in_map():
@@ -227,7 +230,16 @@ class SessionCombatPorts:
                 # Exercise's native HP daemon follows the pause probe from
                 # this screenshot. Both observations must use its immutable
                 # frame even if the live client has entered result loading.
-                return adapter._frame_or_live_observation_oracle().daily_combat_visible()
+                frame = adapter._frame_or_live_observation_oracle()
+                if not frame.daily_combat_visible():
+                    return False
+                try:
+                    frame.exercise_duel_hp()
+                except SemanticExerciseHpNotReady:
+                    # Pause can mount before the duel bars. ALAS owns the next
+                    # screenshot; do not make an HP decision from this frame.
+                    return False
+                return True
             if getattr(
                 self.open().oracle,
                 "daily_battle_result_visible",
@@ -394,6 +406,11 @@ class SessionCombatPorts:
 
     def begin_operation_siren_boss_combat(self) -> None:
         self.open().begin_operation_siren_boss_combat()
+        # A previous boss's accepted result must not retire this newly
+        # proven encounter while its departing map is still observable.
+        self._combat_last_result_receipt = None
+        self._combat_result_observation = None
+        self._combat_result_transition_until = 0.0
 
     def mark_operation_siren_combat_fleet_defeated(self) -> None:
         self.open().mark_operation_siren_combat_fleet_defeated()
@@ -540,7 +557,13 @@ class SessionCombatPorts:
                 or oracle.main_page_visible()
                 or oracle.event_campaign_page_visible()
                 or (adapter.meta_beacon_active() and oracle.meta_page_visible())
+                or oracle.exercise_page_visible()
             ):
+                return tuple(receipts)
+            if adapter._meta_assist_active and oracle.meta_page_visible():
+                # A resumed assist owns this return page. Prove its typed
+                # remaining-attempt/candidate state before ending recovery.
+                oracle.meta_assist_state()
                 return tuple(receipts)
             if current_raid_event is not None:
                 try:

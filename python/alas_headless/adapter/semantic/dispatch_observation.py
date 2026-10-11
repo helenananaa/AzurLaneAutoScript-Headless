@@ -31,6 +31,14 @@ from .resources import (
 class DispatchObservationPorts:
     """Dispatch observation ports on the shared adapter context."""
 
+    def _inherited_exercise_precombat(self, oracle):
+        return (not self._exercise_pending and not self._exercise_execution_active
+                and self._daily_kind is None
+                and not self._meta_beacon_active and not self._meta_assist_active
+                and oracle.observation_target_present('daily/precombat/back')
+                and oracle.daily_precombat_visible() and oracle.exercise_page_visible()
+                and not oracle._blocking_rules(oracle.read_state(), 'daily/precombat/back'))
+
     @staticmethod
     def _reward_sidebar_ready(oracle):
         return (oracle.observation_target_present('reward/page/back')
@@ -70,6 +78,76 @@ class DispatchObservationPorts:
             raise
 
     def _appear_priority(self, name):
+        if (not self._login_flow.active and self._dorm_context is None
+                and name in UI_PAGE_CHECK_RESOURCES.union((
+                    'GOTO_MAIN', 'GOTO_MAIN_WHITE', 'RPG_HOME'))):
+            oracle = self._frame_or_live_observation_oracle()
+            if self._inherited_dorm_overlay_return(oracle) is not None:
+                # A task-local failure may leave its reviewed Feed panel.
+                # Native unknown-page recovery owns the same exact close;
+                # no underlay page or unrelated Home alias is declared present.
+                return name == 'GOTO_MAIN'
+        if (name in ('OIL_MAXED', 'REWARD_1', 'REWARD_1_WHITE')
+                and self._commission_context is not None
+                and self._commission_context.flow_kind == 'commission'):
+            oracle = self._frame_or_live_observation_oracle()
+            if getattr(oracle, 'commission_reward_oil_maxed', lambda: False)():
+                # Let native _commission_receive reach its OilMaxed handler
+                # instead of continuing another refused finish click.
+                return name == 'OIL_MAXED'
+        if (not self._login_flow.active and name in UI_PAGE_CHECK_RESOURCES.union((
+                'CAMPAIGN_WITHDRAW_CONFIRM', 'GAME_TIPS'))):
+            oracle = self._frame_or_live_observation_oracle()
+            if (oracle.observation_target_present('archive/activity-list/home')
+                    and getattr(oracle, '_activity_archive_home_proven',
+                                lambda state: False)(oracle.read_state())):
+                # This full-screen list has an existing reviewed Home port.
+                # Native unknown-page recovery owns it; unrelated page and
+                # withdrawal probes must not prevent reaching that recovery.
+                return False
+        if name in UI_PAGE_CHECK_RESOURCES:
+            oracle = self._frame_or_live_observation_oracle()
+            if any(oracle.observation_target_present(target)
+                   for target in ('settings/back', 'player/profile/back')):
+                # The inherited page has its own reviewed return.
+                # Native unknown-page recovery must precede covered page aliases.
+                return False
+        if name in UI_PAGE_CHECK_RESOURCES.union((
+                'GOTO_MAIN', 'GOTO_MAIN_WHITE', 'RPG_HOME', 'BATTLE_PREPARATION',
+                'FLEET_PREPARATION', 'MAP_PREPARATION', 'RAID_FLEET_PREPARATION',
+                'CAMPAIGN_WITHDRAW_CONFIRM', 'POPUP_SINGLE_WHITE', 'PLAYER_CHECK',
+                'GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'GET_SHIP', 'GET_MISSION',
+                'GAME_TIPS', 'DORM_INFO', 'DORM_FEED_CANCEL', 'DORM_TROPHY_CONFIRM',
+                'MEOWFFICER_INFO', 'MEOWFFICER_BUY')):
+            oracle = self._frame_or_live_observation_oracle()
+            if self._inherited_exercise_precombat(oracle):
+                # ALAS' existing ui_additional preparation cancellation owns
+                # this inherited page; its covered Exercise list is absent.
+                return name == 'FLEET_PREPARATION'
+        if (not self._login_flow.active and name in UI_PAGE_CHECK_RESOURCES.union((
+                'GOTO_MAIN', 'GOTO_MAIN_WHITE', 'RPG_HOME', 'GET_SHIP',
+                'GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'GET_MISSION',
+                'CAMPAIGN_WITHDRAW_CONFIRM', 'POPUP_SINGLE_WHITE', 'PLAYER_CHECK',
+                'AUTO_SEARCH_REWARD', 'AUTO_SEARCH_MENU_EXIT', 'WITHDRAW',
+                'MAP_PREPARATION', 'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION',
+                'EXERCISE_PREPARATION', 'GAME_TIPS', 'GAME_TIPS3', 'GAME_TIPS4',
+                'DORM_INFO', 'DORM_FEED_CANCEL', 'DORM_TROPHY_CONFIRM',
+                'MEOWFFICER_INFO', 'MEOWFFICER_BUY', 'LOGIN_RETURN_SIGN',
+                'MONTHLY_PASS_NOTICE', 'BATTLE_PASS_NOTICE', 'BATTLE_PASS_NEW_SEASON',
+                'MAINTENANCE_ANNOUNCE'))):
+            oracle = self._frame_or_live_observation_oracle()
+            if (oracle.observation_target_present('reward/new-ship/continue')
+                    and not oracle._blocking_rules(
+                        oracle.read_state(), 'reward/new-ship/continue')
+                    and oracle.new_ship_reward_page_visible()):
+                # Even a mounting popup hides its navigation underlay. ALAS
+                # owns waiting for the next screenshot; only the complete
+                # name/type/dialogue proof authorizes its GET_SHIP handler.
+                return name == 'GET_SHIP' and oracle.new_ship_reward_visible()
+        if name in ('GUILD_POPUP_CONFIRM', 'GUILD_POPUP_CANCEL'):
+            oracle = self._frame_or_live_observation_oracle()
+            if oracle.observation_target_present('overlay/guild-message/close'):
+                return oracle.enabled('overlay/guild-message/close')
         if (not self._login_flow.active and name in UI_PAGE_CHECK_RESOURCES.union((
                 'AUTO_SEARCH_REWARD', 'AUTO_SEARCH_MENU_EXIT', 'WITHDRAW',
                 'AUTO_SEARCH_OS_MAP_OPTION_OFF', 'AUTO_SEARCH_OS_MAP_OPTION_OFF_DISABLED',
@@ -88,15 +166,16 @@ class DispatchObservationPorts:
                 return name == 'AUTO_SEARCH_REWARD' and oracle.enabled('os/auto-search/reward/close')
         if (not self._login_flow.active
                 and name in UI_PAGE_CHECK_RESOURCES.union((
-                    'GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3',
-                    'GOTO_MAIN_WHITE', 'RPG_HOME'))):
+                    'GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'GET_SHIP', 'GET_MISSION',
+                    'GOTO_MAIN_WHITE', 'RPG_HOME', 'POPUP_SINGLE_WHITE', 'GAME_TIPS',
+                    'DORM_TROPHY_CONFIRM', 'PLAYER_CHECK'))):
             oracle = self._frame_or_live_observation_oracle()
             blockers = oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe')
             if (any(rule.blocker_id == 'loading' for rule in blockers)
                     and all(rule.blocker_id in (
-                        'loading', 'commission-page', 'tactical-page', 'dorm-page')
+                        'loading', 'commission-page', 'tactical-page', 'dorm-page', 'academy-page')
                             for rule in blockers)):
-                # A known loading layer covers these ordinary page and reward
+                # A known loading layer covers these page, reward and tutorial
                 # probes. ALAS owns waiting and the next screenshot boundary.
                 return False
         if not self._login_flow.active:
@@ -115,7 +194,21 @@ class DispatchObservationPorts:
                     # Earlier unrelated page and pixel-tip probes are absent;
                     # the existing ALAS Academy page graph selects its inputs.
                     return name == 'ACADEMY_CHECK'
-        if name == 'MONTHLY_PASS_NOTICE' and not self._login_flow.active:
+                if name == 'ACADEMY_CHECK':
+                    # Do not fall through to the unoccluded page identity
+                    # below when another modal owns the foreground.
+                    return False
+        if name in ('POPUP_SINGLE_WHITE', 'PLAYER_CHECK', 'GAME_TIPS') and not self._login_flow.active:
+            oracle = self._frame_or_live_observation_oracle()
+            if name != 'GAME_TIPS' and self._reward_sidebar_ready(oracle):
+                return False
+            if (oracle.observation_target_present('commission/page/back')
+                    and oracle.enabled('commission/page/back')):
+                # Native ui_additional probes these notices after the Commission
+                # back edge. Its unique uncovered page proves only absence;
+                # a real modal or ambiguous back target cannot pass enabled().
+                return False
+        if name in ('MONTHLY_PASS_NOTICE', 'BATTLE_PASS_NOTICE', 'BATTLE_PASS_NEW_SEASON') and not self._login_flow.active:
             oracle = self._frame_or_live_observation_oracle()
             if self._reward_sidebar_ready(oracle):
                 return False
@@ -129,9 +222,35 @@ class DispatchObservationPorts:
                 blockers = oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe')
                 if not any(rule.blocker_id not in ('meowfficer-dock', 'loading') for rule in blockers):
                     return False
+            if (oracle.observation_target_present('guild/page/back')
+                    and getattr(oracle, 'guild_page_mounted', lambda: False)()):
+                blockers = oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe')
+                if not any(rule.blocker_id not in ('guild-page', 'loading') for rule in blockers):
+                    # A complete Guild owner may retain its known loading
+                    # curtain while native navigation probes main-page notices.
+                    return False
+            if (oracle.observation_target_present('dorm/page/manage')
+                    and getattr(oracle, '_dorm_back_delegated_raycast_proven',
+                                lambda state: False)(oracle.read_state())):
+                # A complete uncovered CourtYard may be inherited by the next
+                # task. Its return proof excludes these main-page notices.
+                self._package_gate()
+                return False
         if name == 'GET_MISSION' and not self._login_flow.active:
             oracle = self._frame_or_live_observation_oracle()
             state = oracle.read_state()
+            if (oracle.observation_target_present('guild/page/back')
+                    and getattr(oracle, 'guild_page_mounted', lambda: False)()
+                    and not any(rule.blocker_id != 'guild-page' for rule in
+                                oracle._blocking_rules(state, 'ui/absence-probe'))):
+                # Native ui_ensure probes the urgent-mission notice after
+                # entering Guild. Its complete page/nav owner proves absence
+                # even after the short entry lease ends. This grants no input.
+                self._package_gate()
+                if getattr(oracle, '_campaign_urgent_notice_matches',
+                           lambda state: False)(state):
+                    raise SemanticGateClosed('urgent commission notice has no guild owner')
+                return False
             if (oracle.observation_target_present('dorm/page/manage')
                     and not any(rule.blocker_id != 'dorm-page' for rule in
                                 oracle._blocking_rules(state, 'ui/absence-probe'))
@@ -157,6 +276,11 @@ class DispatchObservationPorts:
             if oracle.award_info_page_visible():
                 # A reward canvas owns the foreground even before its close
                 # button becomes actionable. Native ui_additional owns it.
+                return False
+            if oracle.observation_target_present('reward/campaign-total/exit'):
+                # A prior run can leave its official result after a transport
+                # failure. Native AUTO_SEARCH_MENU_EXIT already owns recovery;
+                # covered home probes must not enter unrelated Mail dispatch.
                 return False
         if name in ('GOTO_MAIN', 'GOTO_MAIN_WHITE', 'RPG_HOME'):
             oracle = self._frame_or_live_observation_oracle()
@@ -184,9 +308,11 @@ class DispatchObservationPorts:
                 # absent; original ALAS still owns closing the sidebar.
                 return False
             if (oracle.observation_target_present('guild/page/back')
-                    and oracle.guild_page_visible()):
+                    and (oracle.guild_page_visible() or
+                         (callable(getattr(oracle, 'guild_page_mounted', None))
+                          and oracle.guild_page_mounted()))):
                 blockers = oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe')
-                if not any(rule.blocker_id != 'guild-page' for rule in blockers):
+                if not any(rule.blocker_id not in ('guild-page', 'loading') for rule in blockers):
                     # The mounted Guild page owns this passive absence even
                     # while a previous task retains its campaign context.
                     return False
@@ -233,8 +359,30 @@ class DispatchObservationPorts:
                 else:
                     # Original ui_additional already owns BUY -> BACK_ARROW.
                     return name == 'MEOWFFICER_BUY'
+        if name == 'GET_SHIP' and not self._login_flow.active:
+            oracle = self._frame_or_live_observation_oracle()
+            blockers = oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe')
+            if (((oracle.main_page_visible() and not blockers)
+                    or (oracle.observation_target_present('campaign-menu/page/back')
+                        and all(rule.blocker_id == 'campaign-menu' for rule in blockers))
+                    or (not blockers and (oracle.meta_character_page_visible()
+                        or oracle.meta_character_menu_visible() or oracle.meta_page_visible())))
+                    and not oracle.observation_target_present('reward/new-ship/continue')
+                    and not oracle.award_info_page_visible()):
+                # ui_additional scans this shared ship resource on ordinary
+                # navigation too. Its typed owner proves a passive absence;
+                # a real reward or foreign overlay keeps its existing handler.
+                return False
         if name in ('GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3') and not self._login_flow.active:
             oracle = self._frame_or_live_observation_oracle()
+            if (oracle.main_page_visible()
+                    and not oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe')
+                    and not any(oracle.enabled(target) for target in (
+                        'reward/award-info/close', 'reward/award-info1/close'))):
+                # Resolve the proven main-page absence before unrelated task
+                # readers. The next native screenshot owns any mounted reward;
+                # this grants no input or authority for an unknown layer.
+                return False
             if oracle.award_info_page_visible() and self._mission_context is None:
                 if self._build_context is not None and name in ('GET_ITEMS_1', 'GET_ITEMS_2'):
                     return self._award_close_target() is not None
@@ -247,9 +395,21 @@ class DispatchObservationPorts:
                 # its Mission context; no reward or resource input is granted.
                 return False
             blockers = oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe')
+            if (oracle.observation_target_present('campaign-menu/page/back')
+                    and all(rule.blocker_id == 'campaign-menu' for rule in blockers)):
+                # Original ui_additional probes rewards during ordinary
+                # chapter navigation too. The unobscured typed chapter owner
+                # proves absence without a Mission context or stage parsing.
+                # Award overlays were handled above; input authority is unchanged.
+                return False
             if blockers and all(rule.blocker_id == 'loading' for rule in blockers):
                 # A loading curtain proves reward controls unavailable, even
                 # when inherited from the preceding scheduler task.
+                return False
+            if getattr(oracle, 'daily_battle_loading_visible', lambda: False)():
+                # The native map-event loop checks rewards before handing a
+                # boss encounter to combat. CombatLoadUI also proves their
+                # absence when it has no generic Loading button or map shell.
                 return False
             if (self._minigame_context is not None and not blockers
                     and self._known_minigame_surface_exists()):
@@ -322,6 +482,22 @@ class DispatchObservationPorts:
         if (self._campaign_context is None and not self._login_flow.active
                 and name in ('MAP_PREPARATION', 'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION',
                              'AUTO_SEARCH_MENU_EXIT', 'AUTO_SEARCH_REWARD', 'WITHDRAW',
+                             'CAMPAIGN_WITHDRAW_CONFIRM', 'GET_MISSION',
+                             'GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'GET_SHIP')):
+            oracle = self._frame_or_live_observation_oracle()
+            if oracle.observation_target_present('dorm/page/manage'):
+                try:
+                    # Task-end clears the Dorm flow before goto_main scans
+                    # unrelated popups. Prove the retained summary from this
+                    # one immutable frame; do not retry that same frame.
+                    oracle._dorm_state_once()
+                except SemanticGateClosed:
+                    pass
+                else:
+                    return False
+        if (self._campaign_context is None and not self._login_flow.active
+                and name in ('MAP_PREPARATION', 'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION',
+                             'AUTO_SEARCH_MENU_EXIT', 'AUTO_SEARCH_REWARD', 'WITHDRAW',
                              'CAMPAIGN_WITHDRAW_CONFIRM')):
             oracle = self._frame_or_live_observation_oracle()
             if oracle.observation_target_present('meowfficer/page/back'):
@@ -331,7 +507,8 @@ class DispatchObservationPorts:
         if (self._campaign_context is None and not self._login_flow.active
                 and name in ('MAP_PREPARATION', 'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION',
                              'AUTO_SEARCH_MENU_EXIT', 'AUTO_SEARCH_REWARD', 'WITHDRAW',
-                             'CAMPAIGN_WITHDRAW_CONFIRM')
+                             'CAMPAIGN_WITHDRAW_CONFIRM', 'GET_ITEMS_1', 'GET_ITEMS_2',
+                             'GET_ITEMS_3', 'GET_SHIP')
                 and time.monotonic() <= self._dorm_return_transition_until):
             oracle = self._frame_or_live_observation_oracle()
             blockers = oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe')
@@ -426,18 +603,45 @@ class DispatchObservationPorts:
             # A retained manager owns the page sweep. ALAS' unknown-page
             # recovery closes this exact layer, then rediscovers MailUI.
             return False
-        if (name == 'CAMPAIGN_WITHDRAW_CONFIRM' and self._campaign_context is None
+        if (name in ('CAMPAIGN_WITHDRAW_CONFIRM', 'GET_MISSION') and self._campaign_context is None
                 and not self._login_flow.active):
             oracle = self._frame_or_live_observation_oracle()
-            if getattr(oracle, 'meta_character_menu_visible', lambda: False)():
+            if (name == 'CAMPAIGN_WITHDRAW_CONFIRM'
+                    and getattr(oracle, 'daily_entry_visible', lambda: False)()):
                 return False
-            if getattr(oracle, 'meta_character_sync_page_visible', lambda: False)():
+            if (name == 'CAMPAIGN_WITHDRAW_CONFIRM'
+                    and getattr(oracle, 'meta_character_menu_visible', lambda: False)()):
+                return False
+            if (name == 'CAMPAIGN_WITHDRAW_CONFIRM'
+                    and getattr(oracle, 'meta_character_sync_page_visible', lambda: False)()):
                 oracle.meta_character_sync_rewards()
                 return False
             state = oracle.read_state()
             if any(b.active_in_hierarchy and b.active_and_enabled and b.path ==
                    'OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/index_button'
                    for b in getattr(state, 'buttons', ())):
+                self._package_gate()
+                if (name == 'GET_MISSION' and getattr(
+                        oracle, '_campaign_urgent_notice_matches', lambda state: False)(state)):
+                    raise SemanticGateClosed('urgent commission notice has no dock owner')
+                context = self._commission_context
+                if (context is not None and context.flow_kind == 'tactical'
+                        and any(b.active_in_hierarchy and b.active_and_enabled
+                                and '/DockyardUI(Clone)/main/ship_container/' in b.path
+                                for b in state.buttons)):
+                    # Tactical owns a select-mode Dock, including its mounted
+                    # classroom underlay. Enhancement capacity/filter artwork
+                    # is unrelated to these passive popup probes. Prove the
+                    # existing select shell; actual ship/confirm input retains
+                    # its own complete identity and actionability checks.
+                    back = oracle._unique(state, 'tactical/dock/back')
+                    confirm = oracle._unique(state, 'tactical/dock/confirm')
+                    if (not all(b.active_in_hierarchy and b.active_and_enabled
+                                for b in (back, confirm))
+                            or any(rule.blocker_id not in ('tactical-dock', 'tactical-page', 'loading')
+                                   for rule in oracle._blocking_rules(state, 'ui/absence-probe'))):
+                        raise SemanticGateClosed('Tactical Dock passive surface is incomplete or obscured')
+                    return False
                 try:
                     oracle._enhancement_dock_records()
                 except SemanticGateClosed:
@@ -446,14 +650,19 @@ class DispatchObservationPorts:
                     if (receipt is not None
                             and time.monotonic() <= self._main_dock_transition_until
                             and state.generation > receipt.generation
-                            and not any(rule.blocker_id != 'loading' for rule in blockers)):
+                            and not any(rule.blocker_id not in ('loading', 'tactical-dock')
+                                        for rule in blockers)):
                         # This is an unrelated popup probe on the first Dock
                         # frame after our exact entry. Re-reading that leased
                         # screenshot cannot complete its mounting identity.
                         # Yield to ALAS' next screenshot; inputs remain closed.
                         return False
                     raise
-                if not oracle._blocking_rules(state, 'ui/absence-probe'):
+                if not any(rule.blocker_id not in ('loading', 'tactical-dock')
+                           for rule in oracle._blocking_rules(state, 'ui/absence-probe')):
+                    # Dockyard is itself labelled tactical-dock by the shared
+                    # blocker registry. Its proven page identity still owns
+                    # these unrelated passive probes; no input is admitted.
                     return False
         if (name in ('MAP_PREPARATION', 'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION',
                      'AUTO_SEARCH_MENU_EXIT', 'AUTO_SEARCH_REWARD', 'WITHDRAW',
@@ -596,16 +805,17 @@ class DispatchObservationPorts:
         if (name in UI_PAGE_CHECK_RESOURCES
                 and time.monotonic() <= self._mission_page_return_transition_until):
             self._package_gate()
-            blockers = self.oracle._blocking_rules(
-                self.oracle.read_state(), 'ui/absence-probe')
+            oracle = self._frame_or_live_observation_oracle()
+            blockers = oracle._blocking_rules(
+                oracle.read_state(), 'ui/absence-probe')
             if not any(rule.blocker_id != 'task-page' for rule in blockers):
                 # TaskScene may unmount before the main page becomes the
                 # current frame. An exact task back receipt permits only
                 # passive page checks through this bounded transition.
-                if (not self.oracle.exists('task/page/back')
-                        and not self.oracle.main_page_visible()):
+                if (not oracle.exists('task/page/back')
+                        and not oracle.main_page_visible()):
                     return False
-        if (name in UI_PAGE_CHECK_RESOURCES.union(('GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3'))
+        if (name in UI_PAGE_CHECK_RESOURCES.union(('GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'POPUP_SINGLE_WHITE', 'PLAYER_CHECK'))
                 and time.monotonic() <= self._commission_return_transition_until):
             oracle = self._frame_or_live_observation_oracle()
             blockers = oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe')
@@ -613,12 +823,18 @@ class DispatchObservationPorts:
                         for rule in blockers)
                     and not oracle.main_page_visible()
                     and (not oracle.enabled('commission/page/back')
-                         or name in ('GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3'))
+                         or name in ('GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'POPUP_SINGLE_WHITE', 'PLAYER_CHECK'))
                     and self._award_close_target() is None):
                 # The original back edge has dispatched. Rewards are absent
                 # on both the retained Commission page and its unmount; page
                 # enumeration still keeps the mounted Commission identity.
                 return False
+        if name in UI_PAGE_CHECK_RESOURCES.union(('GOTO_MAIN', 'GOTO_MAIN_WHITE', 'RPG_HOME')):
+            oracle = self._frame_or_live_observation_oracle()
+            if self._retained_commission_detail_visible(oracle):
+                # The detail is deliberately not reported as the list page.
+                # Preserve the native unknown-page loop's one reviewed exit.
+                return name == 'GOTO_MAIN'
         if (name in UI_PAGE_CHECK_RESOURCES
                 and self.oracle.observation_target_present('commission/page/back')
                 and self.oracle.enabled('commission/page/back')):
@@ -635,6 +851,16 @@ class DispatchObservationPorts:
         if (name in ('GOTO_MAIN_WHITE', 'RPG_HOME')
                 and not self._login_flow.active and self.oracle.main_page_visible()):
             return False
+        if (name in ('GOTO_MAIN_WHITE', 'RPG_HOME')
+                and not self._login_flow.active):
+            oracle = self._frame_or_live_observation_oracle()
+            if (oracle.exercise_page_visible()
+                    and not oracle._blocking_rules(
+                        oracle.read_state(), 'exercise/page/home')):
+                # Complete Exercise identity proves these unrelated aliases
+                # absent even while its optional Home control is unmounted.
+                # Native recovery still owns the reviewed Back/Home inputs.
+                return False
         if (name in ('GOTO_MAIN_WHITE', 'RPG_HOME')
                 and not self._login_flow.active
                 and self.oracle.observation_target_present('dorm/page/manage')
@@ -812,9 +1038,10 @@ class DispatchObservationPorts:
         if name == 'PRIVATE_QUARTERS_PAGE_LOCALE_LOFT':
             return self.oracle.private_quarters_loft_visible()
         if name in ("SHIPYARD_IN_DEV", "SHIPYARD_IN_FATE"):
-            if not self.oracle.shipyard_page_visible():
+            observation_oracle = self._frame_or_live_observation_oracle()
+            if not observation_oracle.shipyard_page_visible():
                 return False
-            phase = self.oracle.shipyard_selected_state().phase
+            phase = observation_oracle.shipyard_active_phase()
             return phase == ("dev" if name == "SHIPYARD_IN_DEV" else "fate")
         if (not self._login_flow.active
                 and name in ("GOTO_MAIN", "GOTO_MAIN_WHITE", "RPG_HOME")
@@ -849,10 +1076,12 @@ class DispatchObservationPorts:
                      or observation_oracle.observation_target_present('dorm-menu/page/root')
                      or getattr(observation_oracle, 'private_quarters_page_visible', lambda: False)()
                      or observation_oracle.campaign_menu_is_entry()
-                     or observation_oracle.campaign_page_is_normal())):
+                     or observation_oracle.campaign_page_is_normal()
+                     or (observation_oracle.observation_target_present('research-menu/page/back')
+                         and observation_oracle.enabled('research-menu/page/back')))):
             state = observation_oracle.read_state()
             blockers = observation_oracle._blocking_rules(state, 'ui/absence-probe')
-            if not any(rule.blocker_id != 'campaign-menu' for rule in blockers):
+            if not any(rule.blocker_id not in ('campaign-menu', 'research-menu') for rule in blockers):
                 # UI.ui_additional scans these Campaign resources without a
                 # Campaign task. An unobscured navigation page proves their
                 # absence; ignore only that navigation page's own blocker,
@@ -860,7 +1089,10 @@ class DispatchObservationPorts:
                 return False
         if (not self._login_flow.active and name in ('GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'GET_SHIP')
                 and self._mission_context is None
-                and (observation_oracle.main_page_visible() or observation_oracle.campaign_menu_is_entry()
+                and ((observation_oracle.main_page_visible()
+                      and not observation_oracle._blocking_rules(
+                          observation_oracle.read_state(), 'ui/absence-probe'))
+                     or observation_oracle.campaign_menu_is_entry()
                      or observation_oracle.enabled('reward/page/back')
                      or (observation_oracle.observation_target_present('commission/page/back')
                          and observation_oracle.enabled('commission/page/back'))
@@ -1001,15 +1233,17 @@ class DispatchObservationPorts:
         if (
             not self._login_flow.active
             and name in UI_PAGE_CHECK_RESOURCES
-            and (observation_oracle.enabled('reward/award-info/close')
-                 or observation_oracle.enabled('reward/award-info1/close')
-                 or observation_oracle.enabled('reward/ship-exp/close'))
+            and (observation_oracle.observation_target_present('reward/award-info/close')
+                 or observation_oracle.observation_target_present('reward/award-info1/close')
+                 or observation_oracle.observation_target_present('reward/ship-exp/close'))
             and any(rule.blocker_id in ('ship-exp', 'award-info', 'award-info1')
                     for rule in observation_oracle._blocking_rules(
                         observation_oracle.read_state(), 'ui/absence-probe'))
         ):
             # ALAS must reach ui_additional() to close the exact reward
             # overlay before its page graph can classify the underlying page.
+            # A mounted overlay still covers that page while its close is not
+            # yet actionable; input continues to require the full close proof.
             return False
         if (
             not self._login_flow.active
@@ -1023,12 +1257,22 @@ class DispatchObservationPorts:
             # ALAS' registry.  Classify it before unrelated task readers so a
             # page sweep cannot outlive the next server reconnect interval.
             return name in ("MAIN_GOTO_FLEET", "MAIN_GOTO_CAMPAIGN_WHITE")
-        mission_page_state = getattr(observation_oracle, "mission_page_state", None)
+        mission_probe = name in UI_PAGE_CHECK_RESOURCES.union((
+            'GET_MISSION', 'GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'GET_SHIP',
+            'MONTHLY_PASS_NOTICE', 'BATTLE_PASS_NOTICE', 'BATTLE_PASS_NEW_SEASON',
+            'LOGIN_RETURN_SIGN', 'PLAYER_CHECK', 'POPUP_SINGLE_WHITE',
+            'GAME_TIPS', 'GAME_TIPS3', 'GAME_TIPS4', 'DORM_INFO', 'DORM_FEED_CANCEL',
+            'DORM_TROPHY_CONFIRM', 'MEOWFFICER_INFO', 'MEOWFFICER_BUY',
+            'MAP_PREPARATION', 'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION',
+            'AUTO_SEARCH_MENU_EXIT', 'AUTO_SEARCH_REWARD', 'WITHDRAW',
+            'CAMPAIGN_WITHDRAW_CONFIRM', 'EXERCISE_PREPARATION', 'MAINTENANCE_ANNOUNCE'))
+        mission_oracle = self._frame_or_live_observation_oracle() if mission_probe else observation_oracle
+        mission_page_state = getattr(mission_oracle, "mission_page_state", None)
         if (
             not self._login_flow.active
-            and name in CURRENT_RAID_EARLIER_PAGE_CHECKS
+            and mission_probe
             and callable(mission_page_state)
-            and observation_oracle.exists("task/page/back")
+            and mission_oracle.exists("task/page/back")
         ):
             try:
                 mission_page_state()
@@ -1042,10 +1286,15 @@ class DispatchObservationPorts:
                 # Page.iter_pages() probes several unrelated legacy pages
                 # before MISSION_CHECK, so classify only the fully reviewed
                 # TaskScene identity and let ALAS use its normal page graph.
-                return name == "MISSION_CHECK"
+                notice_matches = getattr(mission_oracle, '_campaign_urgent_notice_matches', lambda state: False)
+                if name != 'GET_MISSION' or not notice_matches(mission_oracle.read_state()):
+                    # Generic reward handlers also enumerate on a complete
+                    # TaskScene after another task inherits it. A real reward
+                    # or foreign overlay prevents this page proof above.
+                    return name == "MISSION_CHECK"
         if (
             not self._login_flow.active
-            and name in CURRENT_RAID_EARLIER_PAGE_CHECKS
+            and name in CURRENT_RAID_EARLIER_PAGE_CHECKS.union(('DOCK_CHECK',))
             and observation_oracle.exists("event-list/page/back")
             and not any(
                 observation_oracle.exists(target)
@@ -1066,7 +1315,7 @@ class DispatchObservationPorts:
         if name == "RAID_CHECK":
             return (
                 observation_oracle.observation_surface_present(ObservationSurface.CURRENT_RAID)
-                and observation_oracle.raid_page_visible(event="raid_20260827")
+                and observation_oracle.raid_page_visible(event=observation_oracle.current_raid_event())
             )
         if (
             name in CURRENT_RAID_EARLIER_PAGE_CHECKS
@@ -1397,6 +1646,9 @@ class DispatchObservationPorts:
             and name not in BUILD_VIRTUAL_RESOURCES
             and name not in TACTICAL_VIRTUAL_RESOURCES
         ):
+            if (self._inherited_dorm_overlay_return() == 'dorm/feed/shop/cancel'
+                    or self._inherited_dorm_page_visible()):
+                return False
             if (getattr(self.oracle, 'private_quarters_page_visible', lambda: False)()
                     and self.oracle.enabled('private-quarters/home')
                     and not self.oracle._blocking_rules(self.oracle.read_state(), 'ui/absence-probe')):
@@ -2039,6 +2291,10 @@ class DispatchObservationPorts:
                     context = self._commission_context
                     if context.selected_signature is None:
                         return False
+                    if self._commission_selected_row_still_on_list():
+                        # ALAS' existing comm_timer owns re-entry after a row
+                        # click that left the exact pending list visible.
+                        return False
                     try:
                         detail = self.oracle.commission_detail_state()
                     except SemanticGateClosed:
@@ -2092,10 +2348,12 @@ class DispatchObservationPorts:
             )
         if name == "LOGIN_RETURN_SIGN":
             # ActivityMainUI's rollover/sign-in back button is observed below
-            # a decorative raycast layer on current clients.  Its exact path,
-            # uniqueness and absence of an award overlay are enforced by
-            # SemanticOracle.click().
-            return self.oracle.exists("event-list/page/back")
+            # a decorative raycast layer on current clients. A real reward
+            # overlay still owns input and must be handled by ALAS first.
+            oracle = self._frame_or_live_observation_oracle()
+            return (oracle.exists("event-list/page/back")
+                    and not oracle._blocking_rules(
+                        oracle.read_state(), "event-list/page/back"))
         # enabled() includes active/interactable/bounds and blocker checks.  A
         # Unity object hidden behind an overlay must not count as visible to ALAS.
         return self.oracle.enabled(semantic_id)

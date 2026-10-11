@@ -1,0 +1,13 @@
+diff --git a/module/device/control.py b/module/device/control.py
+--- a/module/device/control.py
++++ b/module/device/control.py
+@@ -58,6 +58,9 @@
+                     state
+                 )
+             receipt = semantic_adapter.click(button)
++            if receipt is None:
++                logger.info(f'Semantic click continued without input: {button}')
++                return None
+             logger.info(f'Semantic click {receipt.semantic_id} @ {receipt.path}')
+             return receipt
+         x, y = random_rectangle_point(button.button)

@@ -5,7 +5,7 @@ from alas_headless import AlasSemanticAdapter, AlasSemanticUnmapped
 from tests.semantic_support.observer_fixtures import FakeBackend, make_button, make_oracle
 
 
-@pytest.mark.parametrize('name', ['GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'GET_SHIP', 'MONTHLY_PASS_NOTICE'])
+@pytest.mark.parametrize('name', ['GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'GET_SHIP', 'MONTHLY_PASS_NOTICE', 'BATTLE_PASS_NOTICE', 'BATTLE_PASS_NEW_SEASON', 'POPUP_SINGLE_WHITE', 'PLAYER_CHECK'])
 @pytest.mark.parametrize('foreign', [False, True])
 def test_exact_commission_page_proves_only_uncovered_reward_absence(name, foreign):
     buttons = [make_button('back_btn', 'UICamera/Canvas/UIMain/EventUI(Clone)/blur_panel/adapt/top/back_btn')]

@@ -112,6 +112,9 @@ class CommissionTacticalLedgerTests(unittest.TestCase):
 
     def test_tactical_reward_receipt_owns_follow_up_and_duplicate_suppression(self):
         oracle = FakeOracle()
+        # This ledger fixture exposes the visible sidebar; offscreen recovery
+        # is covered separately by the typed sidebar tests.
+        oracle.reward_sidebar_control_offscreen = lambda _: False
         oracle.enabled_values["reward/ship-exp/close"] = True
         adapter = AlasSemanticAdapter(
             oracle,

@@ -467,15 +467,14 @@ class BuildAdapterPorts:
                     )
                 submit = self.oracle.build_submit_state()
                 if (
-                    not self._action_ledger.allowed("build.submit")
-                    or not 1 <= submit.count <= 10
+                    not 1 <= submit.count <= 10
                     or submit.cubes_owned < submit.cubes_required
                     or context.coins_owned is None
                     or context.coins_owned < submit.coins_required
                     or not context.prep_opened
                 ):
                     raise SemanticGateClosed(
-                        "construction submit requires 1..10 builds, sufficient resources, and a positive budget"
+                        "construction submit requires 1..10 builds, sufficient resources, and an open preparation"
                     )
                 receipt = self._dispatch_mutation(
                     "build.submit",

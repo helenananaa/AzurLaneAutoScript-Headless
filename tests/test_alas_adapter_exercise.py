@@ -37,6 +37,8 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertEqual(receipt.semantic_id, "exercise/page/back")
         self.assertEqual(oracle.click_calls, ["exercise/page/back"])
         self.assertFalse(adapter.appear(NamedButton("DOCK_CHECK")))
+        oracle.exercise_page_visible = lambda: False
+        oracle.exists_values["exercise/page/back"] = False
         oracle.campaign_menu_value = True
         self.assertTrue(adapter.appear(NamedButton("CAMPAIGN_MENU_CHECK")))
 

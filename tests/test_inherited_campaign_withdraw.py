@@ -1,11 +1,12 @@
 import json
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 import pytest
-from alas_headless import AlasSemanticAdapter
+from alas_headless import AlasSemanticAdapter, AlasSemanticSession
+from alas_headless.adapter.task_lifecycle import semantic_task_scope
 from alas_headless.semantic_oracle import SemanticGateClosed
-from tests.semantic_support.observer_fixtures import FakeBackend,make_ui,make_oracle
+from tests.semantic_support.observer_fixtures import FakeBackend,make_ui,make_oracle,DRIVER_REVISION
 from tests.semantic_support.adapter_fixtures import FakeOracle
 
 def retained_prompt():
@@ -67,6 +68,46 @@ def test_inherited_withdraw_rejects_missing_target_before_input():
     a=AlasSemanticAdapter(o,package_gate=lambda:None);a._fresh_input_oracle=lambda:o
     with pytest.raises(SemanticGateClosed,match='not actionable'):a._click_priority('WITHDRAW')
     o.click_campaign_withdraw.assert_not_called()
+
+
+@pytest.mark.parametrize('confirm', [False, True])
+def test_task_boundary_releases_completed_withdraw_without_allowing_same_task_repeat(confirm):
+    o = FakeOracle()
+    receipts = [SimpleNamespace(generation=10), SimpleNamespace(generation=20)]
+    o.inherited_campaign_withdraw_control = Mock(return_value=(object(), 10))
+    o.click_campaign_withdraw = Mock(side_effect=receipts)
+    o.read_state = Mock(side_effect=[SimpleNamespace(generation=11, buttons=()),
+                                   SimpleNamespace(generation=21, buttons=())])
+    o.campaign_withdraw_control = Mock(return_value=None if confirm else object())
+    a = AlasSemanticAdapter(o, package_gate=lambda: None)
+    a._fresh_input_oracle = lambda: o
+    session = AlasSemanticSession(serial='offline-test', driver_revision=DRIVER_REVISION)
+    session.adapter = a
+    name = 'CAMPAIGN_WITHDRAW_CONFIRM' if confirm else 'WITHDRAW'
+    for receipt in receipts:
+        with semantic_task_scope(session, 'goto_main'):
+            assert a._click_priority(name) is receipt
+            with pytest.raises(SemanticGateClosed, match='already submitted'):
+                a._click_priority(name)
+    assert o.click_campaign_withdraw.call_args_list == [call(confirm=confirm)] * 2
+
+
+def test_task_boundary_still_requires_new_actionable_withdraw_owner():
+    o = FakeOracle()
+    o.inherited_campaign_withdraw_control = Mock(side_effect=[(object(), 10), None])
+    o.click_campaign_withdraw = Mock(return_value=SimpleNamespace(generation=10))
+    o.read_state = Mock(return_value=SimpleNamespace(generation=11, buttons=()))
+    o.campaign_withdraw_control = Mock(return_value=None)
+    a = AlasSemanticAdapter(o, package_gate=lambda: None)
+    a._fresh_input_oracle = lambda: o
+    session = AlasSemanticSession(serial='offline-test', driver_revision=DRIVER_REVISION)
+    session.adapter = a
+    with semantic_task_scope(session, 'goto_main'):
+        a._click_priority('CAMPAIGN_WITHDRAW_CONFIRM')
+    with pytest.raises(SemanticGateClosed, match='not actionable'):
+        with semantic_task_scope(session, 'goto_main'):
+            a._click_priority('CAMPAIGN_WITHDRAW_CONFIRM')
+    o.click_campaign_withdraw.assert_called_once_with(confirm=True)
 
 def test_inherited_total_reward_keeps_original_exit_handler_visible():
     p=Path(__file__).resolve().parents[1]/'artifacts/semantic-cn-r33-readonly-20260930.json'

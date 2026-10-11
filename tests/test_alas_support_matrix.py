@@ -11,6 +11,7 @@ from scripts.python.verify_alas_support_matrix import (
     LEDGER,
     MATRIX,
     ROOT,
+    SERIES,
     SupportMatrixError,
     canonical_json,
     parse_args,
@@ -43,7 +44,8 @@ class AlasSupportMatrixTests(unittest.TestCase):
                 "declared_only": 0,
             },
         )
-        self.assertEqual(result["patch_series"]["member_count"], 119)
+        members = json.loads(SERIES.read_text(encoding="utf-8"))["members"]
+        self.assertEqual(result["patch_series"]["member_count"], len(members))
         ledger = validate_ledger()
         document = MATRIX.read_text(encoding="utf-8")
         self.assertEqual(render_matrix(ledger, document), document)

@@ -48,7 +48,8 @@ class BuildOracle:
             and i.raycast_target and i.raycast_top is None
             and not i.truncated and i.bounds is not None
             and i.bounds.contains(back.point))
-        return bool(len(capacities) == 1 and capacities[0].text.strip() == "2"
+        return bool(len(capacities) == 1
+                    and re.fullmatch(r"[1-9][0-9]*", capacities[0].text.strip())
                     and len(images) == 1 and not ui.image_truncated)
 
     def _build_origin_pool_navigation_proven(self, buttons, ui, semantic_id, matches):
@@ -241,7 +242,7 @@ class BuildOracle:
         )
 
     def build_queue_timers(self) -> Tuple[str, ...]:
-        """Read the pinned two-slot construction queue without mutating it."""
+        """Read every instantiated slot in the complete typed queue."""
 
         return self._retry_transition_read(self._build_queue_timers_once)
 
@@ -275,16 +276,33 @@ class BuildOracle:
             and not item.truncated
             and item.bounds is not None
         )
-        if len(capacity) != 1 or capacity[0].text.strip() != "2":
+        if len(capacity) != 1 or re.fullmatch(r"[1-9][0-9]*", capacity[0].text.strip()) is None:
             raise SemanticGateClosed("construction queue capacity is unexpected")
+        # The title's concurrency/capacity value is not the number of rendered
+        # queue rows (the baseline itself has value 2 with four queue rows).
+        # Enumerate all active row identities across the complete endpoint so
+        # a new slot cannot disappear from either timers or the empty proof.
+        row_pattern = re.compile(
+            r"BuildShipDetailUI1\(Clone\)/list_(single|mult)_line/"
+            r"content/project_([1-9][0-9]*)(?:/|$)"
+        )
+        rows = set()
+        for item in (*button_state.buttons, *ui_state.texts, *ui_state.images, *ui_state.toggles):
+            if not item.active_in_hierarchy or not item.active_and_enabled:
+                continue
+            if re.search(r"BuildShipDetailUI1\(Clone\)/list_(?:single|mult)_line/content/project_", item.path):
+                match = row_pattern.search(item.path)
+                if match is None:
+                    raise SemanticGateClosed("construction queue row identity is unsupported")
+                rows.add(("single" if match.group(1) == "single" else "multi", int(match.group(2))))
         timer_patterns = {
             "single": re.compile(
                 r"BuildShipDetailUI1\(Clone\)/list_single_line/content/"
-                r"project_([12])/frame/buiding/timer/Text$"
+                r"project_([1-9][0-9]*)/frame/buiding/timer/Text$"
             ),
             "multi": re.compile(
                 r"BuildShipDetailUI1\(Clone\)/list_mult_line/content/"
-                r"project_([1234])/frame/buiding/timer/Text$"
+                r"project_([1-9][0-9]*)/frame/buiding/timer/Text$"
             ),
         }
         timers_by_layout: Dict[str, Dict[int, str]] = {
@@ -326,18 +344,6 @@ class BuildOracle:
             (layout, timers) for layout, timers in timers_by_layout.items() if timers
         )
         if not observed:
-            project_rows = tuple(
-                button
-                for button in button_state.buttons
-                if button.active_in_hierarchy
-                and button.active_and_enabled
-                and re.search(
-                    r"BuildShipDetailUI1\(Clone\)/list_(?:single|mult)_line/"
-                    r"content/project_[1234](?:/|$)",
-                    button.path,
-                )
-                is not None
-            )
             quick_counts = tuple(
                 item
                 for item in ui_state.texts
@@ -348,15 +354,14 @@ class BuildOracle:
                 and item.bounds is not None
                 and re.fullmatch(r"[0-9]+", item.text.strip()) is not None
             )
-            if project_rows or len(quick_counts) != 1:
+            if rows or len(quick_counts) != 1:
                 raise SemanticGateClosed("construction queue timers are incomplete")
             return ()
         if len(observed) != 1:
             raise SemanticGateClosed("construction queue timers are incomplete")
         layout, timers = observed[0]
-        maximum = 2 if layout == "single" else 4
         expected = tuple(range(1, len(timers) + 1))
-        if len(timers) > maximum or tuple(sorted(timers)) != expected:
+        if tuple(sorted(timers)) != expected or rows != {(layout, index) for index in expected}:
             raise SemanticGateClosed("construction queue timers are incomplete")
         return tuple(timers[index] for index in expected)
 
@@ -373,7 +378,7 @@ class BuildOracle:
             and button.bounds is not None
             and re.search(
                 r"BuildShipDetailUI1\(Clone\)/list_(?:single|mult)_line/content/"
-                r"project_([1234])/frame/finished/launched_btn$",
+                r"project_([1-9][0-9]*)/frame/finished/launched_btn$",
                 button.path,
             )
             is not None

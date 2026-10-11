@@ -67,6 +67,28 @@ def test_reward_permission_and_task_context_are_required():
     with pytest.raises(SemanticGateClosed): a.click(button)
     assert not b.taps
 
+
+@pytest.mark.parametrize('valid', [True, False])
+def test_consumed_reward_receipt_still_requires_exact_live_completion(valid):
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    b = backend()
+    if not valid:
+        b.ui['texts'][0]['text'] = '是否购买教材？'
+    a = AlasSemanticAdapter(make_oracle(b), package_gate=lambda: None, allow_tactical_rewards=True)
+    a.begin_tactical()
+    a._commission_context.tactical_reward_receipt = a._dispatch_mutation(
+        'tactical.reward', lambda: FakeOracle().click_receipt('reward/tactical/finish'))
+    assert a._action_ledger.remaining('tactical.reward') == 0
+    button = SimpleNamespace(name='GET_MISSION')
+    assert a.appear(button) is valid
+    if valid:
+        assert a.click(button).semantic_id == 'tactical/completion/ack'
+        assert len(b.taps) == 1
+    else:
+        with pytest.raises(SemanticGateClosed):
+            a.click(button)
+        assert not b.taps
+
 def test_disappeared_course_waits_for_new_running_slot_without_input(monkeypatch):
     from tests.semantic_support.adapter_fixtures import FakeOracle, NamedButton
     o = FakeOracle()

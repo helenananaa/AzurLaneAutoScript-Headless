@@ -4,7 +4,8 @@ import math
 import numpy as np
 from .alas_camera_view import _fit_projective_camera
 from .oracle.errors import SemanticGateClosed
-from .oracle.opsi_map import OperationSirenMapGeometry, reviewed_logging_tower
+from .oracle.opsi_map import OperationSirenMapGeometry, reviewed_logging_tower, reviewed_akashi_merchant, reviewed_scanning_device
+from .adapter.semantic.contracts import AlasSemanticUnmapped
 
 
 @dataclass(frozen=True)
@@ -25,7 +26,7 @@ class AlasSemanticOpsiView:
         if not isinstance(state, OperationSirenMapGeometry):
             raise SemanticGateClosed('operation siren camera requires typed geometry')
         if state.unresolved_fog_images:
-            raise SemanticGateClosed('operation siren rescan visibility unavailable: native fog layer may hide attachments')
+            raise AlasSemanticUnmapped('operation siren rescan visibility unavailable: native fog layer may hide attachments')
         center, maximum, rms, self._projector = _fit_projective_camera(state, config.SCREEN_CENTER)
         camera = tuple(math.floor(v) for v in center)
         # This is the existing OS camera's viewport, used only for observation.
@@ -79,6 +80,8 @@ class AlasSemanticOpsiView:
                 # Event 1101 is the native information collection device.
                 # ALAS calls this LoggingTower and owns its interaction flow.
                 logging_tower=reviewed_logging_tower(attachment)
+                akashi_merchant=reviewed_akashi_merchant(attachment)
+                scanning_device=reviewed_scanning_device(attachment)
                 # Native event 10240202 is a chess-piece combat encounter
                 # displayed through expedition_icon=211011, not an inert tile.
                 reviewed_chess_enemy=(attachment.kind=='event' and attachment.object_id==10240202
@@ -95,6 +98,12 @@ class AlasSemanticOpsiView:
                     grid.is_logging_tower=True
                     grid.is_enemy=True
                     grid.enemy_genre='LoggingTower'
+                elif akashi_merchant:
+                    grid.is_akashi=True
+                elif scanning_device:
+                    grid.is_scanning_device=True
+                    grid.is_enemy=True
+                    grid.enemy_genre='ScanningDevice'
                 elif reviewed_damaged_control or reviewed_stopped_reinforcement:
                     # These stopped devices have no event_op, auto priority
                     # or compass event; obstacle 2 permits arrive/pass/leave.
@@ -103,7 +112,7 @@ class AlasSemanticOpsiView:
                     # any story actually opened by the game during movement.
                     grid.semantic_passable_decorations += (attachment,)
                 else:
-                    raise SemanticGateClosed('operation siren map attachment classification unavailable: '
+                    raise AlasSemanticUnmapped('operation siren map attachment classification unavailable: '
                                              + attachment.path)
             def project(points, _location=np.array((cell.column-1,cell.row-1))):
                 return self._projector.grid_to_screen(np.asarray(points,dtype=float)+_location)

@@ -29,9 +29,17 @@ def test_unproven_dorm_does_not_suppress_notice(change):
     if change=='stale':b.snapshot['age_ms']=b.buttons['age_ms']=99999
     if change=='foreground': b.foreground='com.android.settings/.Settings'
     if change=='disabled': b.buttons['buttons'][0]['interactable']=False
-    a=AlasSemanticAdapter(make_oracle(b),lambda:None)
-    with pytest.raises((AlasSemanticUnmapped,SemanticGateClosed)):
-        a._appear_once(SimpleNamespace(name='GET_MISSION'))
+    oracle=make_oracle(b)
+    a=AlasSemanticAdapter(oracle,lambda:None)
+    if change=='loading':
+        # Native ALAS waits for its next frame; a covered passive probe is
+        # false while the same loading layer still refuses return input.
+        assert a._appear_once(SimpleNamespace(name='GET_MISSION')) is False
+        with pytest.raises(SemanticGateClosed):
+            oracle.click('dorm/page/back')
+    else:
+        with pytest.raises((AlasSemanticUnmapped,SemanticGateClosed)):
+            a._appear_once(SimpleNamespace(name='GET_MISSION'))
     assert not b.taps
 
 def test_urgent_notice_is_not_hidden_by_dorm_underlay():

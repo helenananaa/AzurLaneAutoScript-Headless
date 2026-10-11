@@ -5,9 +5,12 @@ from __future__ import annotations
 from contextlib import contextmanager
 
 import time
+import sys
+from ...oracle.errors import SemanticSnapshotStale
 from dataclasses import replace
 from typing import Any, Callable, List, Mapping, Optional, Set, Tuple, Union
 from ...adapter import (
+    ActionGrantExhausted,
     ActionLedger,
     ActionNotDispatched,
     DEFAULT_CAPABILITY_INVENTORY,
@@ -32,6 +35,7 @@ from ...semantic_oracle import (
     SemanticOracle,
 )
 from .contracts import (
+    AlasSemanticActionDeferred,
     AlasSemanticUnmapped,
     CampaignAutoSearchCompletionProof,
     CampaignAutoSearchEvidenceBundle,
@@ -168,10 +172,6 @@ class CoreAdapterPorts:
                 raise ValueError(
                     "{0} budget must be a non-negative integer".format(label)
                 )
-        if campaign_camera_positioning_budget > 2:
-            raise ValueError(
-                "campaign camera positioning budget must be at most two"
-            )
         if action_ledger is None:
             grants = _legacy_action_grants(
                 allow_mission_claim_once=allow_mission_claim_once,
@@ -280,6 +280,7 @@ class CoreAdapterPorts:
         self._commission_context: Optional[_CommissionFlowContext] = None
         self._research_context: Optional[_ResearchFlowContext] = None
         self._dorm_context: Optional[_DormFlowContext] = None
+        self._dorm_parent_commission: Optional[_CommissionFlowContext] = None
         self._build_context: Optional[_BuildFlowContext] = None
         self._supply_pack_context: Optional[_SupplyPackFlowContext] = None
         self._battle_pass_context: Optional[_BattlePassFlowContext] = None
@@ -307,6 +308,8 @@ class CoreAdapterPorts:
         self._campaign_event_entry_transition_until = 0.0
         self._operation_siren_entry_transition_until = 0.0
         self._operation_siren_exit_receipt: Optional[ActionReceipt] = None
+        self._operation_siren_abyssal_entry_receipt: Optional[ActionReceipt] = None
+        self._operation_siren_abyssal_entry_input_count: Optional[int] = None
         self._operation_siren_page_remount_until = 0.0
         self._operation_siren_entry_receipt: Optional[ActionReceipt] = None
         self._campaign_archive_entry_receipt: Optional[ActionReceipt] = None
@@ -334,6 +337,7 @@ class CoreAdapterPorts:
         self._meowfficer_return_transition_until = 0.0
         self._build_return_transition_until = 0.0
         self._guild_return_transition_until = 0.0
+        self._guild_message_close_receipt = None
         self._dorm_return_transition_until = 0.0
         self._main_guild_entry_receipt = None
         self._main_guild_entry_until = 0.0
@@ -342,11 +346,16 @@ class CoreAdapterPorts:
         self._meta_entry_receipt = None
         self._meta_home_receipt = None
         self._research_back_receipt = None
+        self._inherited_home_return_receipt = None
+        self._inherited_home_return_until = 0.0
+        self._inherited_withdraw_open_receipt = None
+        self._inherited_withdraw_confirm_receipt = None
         self._research_progress_close_receipt = None
         self._research_progress_close_until = 0.0
         self._meta_current_entry_receipt = None
         self._meta_dossier_entry_receipt = None
         self._meta_reward_close_receipt = None
+        self._operation_siren_reward_close_receipt = None
         self._meta_character_entry_receipt = None
         self._daily_entry_receipt = None
         self._daily_entry_transition_until = 0.0
@@ -386,11 +395,22 @@ class CoreAdapterPorts:
         self._observer_stale_since: Optional[float] = None
         self._login_flow.end()
 
+    def _require_action_grant(self, capability: str) -> None:
+        try:
+            self._action_ledger.require_available(capability)
+        except ActionGrantExhausted as exc:
+            raise AlasSemanticActionDeferred(
+                "{0}: task action grant is exhausted".format(capability)
+            ) from exc
+
     def _dispatch_mutation(
         self,
         capability: str,
         operation: Callable[[], Any],
     ) -> Any:
+        # Only a refusal before entering the backend is task-local. Do not
+        # translate backend errors based on a grant already burned by input.
+        self._require_action_grant(capability)
         if isinstance(self.oracle, SemanticOracle):
             dispatch_count = self.oracle.input_dispatch_count
             backend_operation = operation
@@ -401,6 +421,8 @@ class CoreAdapterPorts:
                 except Exception as exc:
                     if self.oracle.input_dispatch_count == dispatch_count:
                         raise ActionNotDispatched(exc) from exc
+                    if isinstance(exc, SemanticSnapshotStale):
+                        exc.input_outcome_uncertain = True
                     raise
 
             operation = tracked_operation
@@ -500,9 +522,27 @@ class CoreAdapterPorts:
         name = button if isinstance(button, str) else getattr(button, "name", None)
         if not isinstance(name, str) or not name:
             raise AlasSemanticUnmapped("ALAS resource has no stable name")
+        # Native InfoHandler annotates these shared objects for logging. Their
+        # object identity, not the caller's arbitrary suffix, identifies the
+        # reviewed base resource. Do not import assets here (which could load
+        # pixel dependencies), or normalize an unrelated object/string merely
+        # because its name has the same prefix. Context and typed prompt checks
+        # remain in the normal observation/input dispatch below this seam.
+        if not isinstance(button, str):
+            assets = sys.modules.get("module.handler.assets")
+            if assets is not None:
+                for base in ("POPUP_CONFIRM", "POPUP_CONFIRM_WHITE", "POPUP_CANCEL"):
+                    if getattr(assets, base, None) is button:
+                        if base == "POPUP_CONFIRM" and name in (
+                            "POPUP_CONFIRM_GACHA_PREP", "POPUP_CONFIRM_GACHA_ORDER"
+                        ):
+                            # These reviewed native aliases distinguish warning
+                            # dismissal from resource-consuming order submission.
+                            return name
+                        return base
         # InfoHandler temporarily annotates this reviewed shared asset between
-        # its presence probe and click. Normalize only reviewed task suffixes;
-        # broad prefix stripping could admit unrelated popup inputs.
+        # its presence probe and click. Keep legacy string aliases for existing
+        # callers; newly annotated real shared assets use object identity above.
         if name in (
             "POPUP_CONFIRM_RESEARCH_START",
             "POPUP_CONFIRM_RESEARCH_QUEUE",

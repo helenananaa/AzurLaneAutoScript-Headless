@@ -9,6 +9,8 @@
 #include <cstddef>
 #include <cstdint>
 #include "libANGLE/renderer/null/NativeLuaGlobeProbe.h"
+#include "libANGLE/renderer/null/NativeLuaShipyardProbe.h"
+#include "libANGLE/renderer/null/NativeLuaActivityIdentity.h"
 
 namespace rx::alas {
 
@@ -189,6 +191,8 @@ struct ObserverGlobeObjectRecord {
   uint32_t preciseFlags = 0;
   int32_t precisePlaneInstanceId = 0;
   float preciseInputX = 0, preciseInputY = 0;
+  uint32_t inputEntrance = 0;
+  std::array<char, 7> inputMaskColor = {};
   std::array<float, 3> center = {}, extents = {}, screen = {};
 };
 
@@ -219,6 +223,9 @@ struct ObserverUiSnapshot {
   uint32_t textTruncated = 0;
   uint32_t imageTruncated = 0;
   uint32_t errorCount = 0;
+  uint32_t toggleErrorCount = 0;
+  uint32_t textErrorCount = 0;
+  uint32_t imageErrorCount = 0;
   uint32_t skippedCount = 0;
   uint32_t methodMask = 0;
   uint32_t imageSourceCount = 0;
@@ -230,6 +237,8 @@ struct ObserverUiSnapshot {
   std::array<char, kObserverPathBytes> globeCameraPath = {};
   std::array<ObserverGlobeObjectRecord, 512> globeObjects = {};
   NativeLuaGlobeDiagnostic luaGlobe = {};
+  NativeLuaShipyardState shipyard = {};
+  NativeLuaActivityIdentity activityIdentity = {};
   ObserverMapDragProof mapDrag = {};
   uint32_t privatePhysicsStatus = 0; // 0: outside room, 1: observed, 2: unavailable
   uint32_t colliderCount = 0;
@@ -254,6 +263,9 @@ bool GetLatestObserverUiSnapshot(ObserverUiSnapshot *snapshot);
 // Queue an ALAS-owned map coordinate for read-only projection on Unity's
 // main thread. This never invokes an input or map selection callback.
 bool RequestGlobeMapProjection(float x, float y);
+// Read the game's authored input mask, returning only exact entrance identity
+// and an independently raycast point. No rendered image or input is produced.
+bool RequestGlobePortInput(uint32_t entrance);
 
 // Observe the reviewed OS drag handler and EventSystem path; never dispatch input.
 bool RequestOperationSirenMapDrag(float x1, float y1, float x2, float y2, bool globe = false);

@@ -17,6 +17,9 @@ def setup_entry():
     def publish():
         b.snapshot = make_snapshot(generation=12)
         b.buttons = make_buttons(b.buttons['buttons'], generation=12)
+        # The native entry now also reads the typed leave prompt before the
+        # Globe panel. Publish its UI envelope with the same coherent frame.
+        b.ui['generation'] = 12
 
     b.on_tap = publish
     return b, o

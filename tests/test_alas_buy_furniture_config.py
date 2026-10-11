@@ -1,7 +1,9 @@
 import ast
+import textwrap
 import unittest
 from datetime import date, datetime, timezone
 from pathlib import Path
+from types import SimpleNamespace
 
 from alas_headless.alas_buy_furniture_config_contract import (
     BUY_FURNITURE_OPTIONS,
@@ -79,6 +81,42 @@ class AlasBuyFurnitureConfigTests(unittest.TestCase):
             "integration/alas/series/0030-research-dorm-build-flow-ports.patch"
         ).read_text(encoding="utf-8")
         self.assertEqual(patch.count("validate_alas_buy_furniture_config("), 2)
+
+    def test_dorm_disabled_purchase_does_not_validate_inactive_purchase_fields(self):
+        patch = ROOT.joinpath(
+            "integration/alas/series/0030-research-dorm-build-flow-ports.patch"
+        ).read_text(encoding="utf-8")
+        dorm_patch = patch.split("+++ b/module/dorm/dorm.py\n", 1)[1].split(
+            "diff --git ", 1
+        )[0]
+        # Execute the actual current wrapper; a retained ALAS checkout may
+        # predate this patch and must not decide current regression coverage.
+        added = "\n".join(
+            line[1:] for line in dorm_patch.splitlines() if line.startswith("+")
+        )
+        wrapper = textwrap.dedent("    def run(self):" + added.split("    def run(self):", 1)[1])
+        namespace = {}
+        exec(compile(wrapper, "<current-dorm-wrapper>", "exec"), namespace)
+        events = []
+        host = SimpleNamespace(
+            config=SimpleNamespace(
+                Dorm_Collect=True,
+                Dorm_Feed=False,
+                Dorm_FeedFilter=None,
+                BuyFurniture_Enable=False,
+                BuyFurniture_BuyOption="obsolete-option",
+                BuyFurniture_LastRun=None,
+            ),
+            device=SimpleNamespace(semantic_adapter=None),
+            _run_alas_state_machine=lambda: events.append("original-dorm"),
+        )
+        namespace["run"](host)
+        self.assertEqual(events, ["original-dorm"])
+        for enable in (True, None, 0, "false"):
+            host.config.BuyFurniture_Enable = enable
+            with self.subTest(enable=enable), self.assertRaises(SemanticGateClosed):
+                namespace["run"](host)
+        self.assertEqual(events, ["original-dorm"])
 
     def test_sources_compile(self):
         for relative in (

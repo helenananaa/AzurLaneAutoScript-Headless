@@ -58,15 +58,6 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
 
     _INITIAL_GAME_STARTUP_RETRY_ATTEMPTS = 799
 
-    _LIVE_COMBAT_DRIVER_COMPATIBILITY = frozenset(
-        {
-            (
-                "be80ce591a481c12d60c50d6040d40c035b40a2b",
-                "506b76f698b5089aaa29c4e7908b48edb8532a44",
-            ),
-        }
-    )
-
     def __init__(
         self,
         serial: Optional[str] = None,
@@ -212,10 +203,6 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                 raise ValueError(
                     "{0} budget must be a non-negative integer".format(label)
                 )
-        if campaign_camera_positioning_budget > 2:
-            raise ValueError(
-                "campaign camera positioning budget must be at most two"
-            )
         self.commission_reward_budget = commission_reward_budget
         self.tactical_assign_budget = tactical_assign_budget
         self.commission_start_budget = commission_start_budget
@@ -383,6 +370,7 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
         self._combat_result_observation = None
         self._combat_last_result_receipt = None
         self._combat_result_transition_until = 0.0
+        self._retirement_return_receipt = None
         self._daily_combat_seen_at = float("-inf")
         self._login_update_restart_performed = False
         self._game_manager_restart_pending = False
@@ -735,6 +723,20 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                     and attempt < 199
                 )
                 semantic_adapter = self.open()
+                tactical_context = getattr(semantic_adapter, "_commission_context", None)
+                tactical_transition_retry = bool(
+                    tactical_context is not None
+                    and tactical_context.flow_kind == "tactical"
+                    and time.monotonic() <= tactical_context.passive_transition_until
+                    and (
+                        isinstance(exc, StaleFrameError)
+                        or isinstance(exc, SemanticGateClosed) and message in (
+                            "observer snapshot is stale",
+                            "observer endpoints are not generation-coherent",
+                            "semantic frame mixes UI and state generations",
+                        )
+                    )
+                )
                 in_operation_siren_transition = bool(
                     time.monotonic()
                     <= max(
@@ -816,6 +818,7 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                     and not extended_combat_result_retry
                     and not extended_campaign_retry
                     and not extended_operation_siren_retry
+                    and not tactical_transition_retry
                     and not private_room_retry
                 ):
                     raise

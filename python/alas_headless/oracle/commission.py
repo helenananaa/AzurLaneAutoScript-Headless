@@ -24,6 +24,29 @@ from .errors import SemanticCommissionRowIncomplete, SemanticGateClosed
 class CommissionOracle:
     """Commission operations sharing the oracle frame and input boundary."""
 
+    def commission_reward_oil_maxed(self) -> bool:
+        """Expose the client's exact commission rejection to native ALAS."""
+        state = self.read_state()
+        targets = self._matches(state, 'reward/commission/finish')
+        if not targets:
+            return False
+        if len(targets) != 1:
+            raise SemanticGateClosed('commission finish owner is ambiguous')
+        if (not targets[0].active_in_hierarchy or not targets[0].active_and_enabled
+                or self._blocking_rules(state, 'reward/commission/finish')):
+            return False
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('commission oil rejection snapshots are incoherent')
+        tips = [t for t in ui.texts if t.path.endswith(
+            'UIOverlay/TipPanel(Clone)/Grid/toolTip(Clone)/Text')
+            and t.active_in_hierarchy and t.active_and_enabled]
+        if any(t.truncated for t in tips):
+            raise SemanticGateClosed('commission oil rejection text is incomplete')
+        messages = [re.sub(r'\s+', '', re.sub(r'<[^>]*>', '', t.text))
+                    for t in tips if t.bounds is not None]
+        return '石油已经达到上限无法领取委托奖励' in messages
+
     def commission_rows(self) -> Tuple[CommissionRowState, ...]:
         """Read visible commission rows without inferring hidden or unknown state.
 
@@ -605,6 +628,9 @@ class CommissionOracle:
     def commission_detail_state(self) -> CommissionDetailState:
         """Read the exact selected commission and ship-assignment state."""
 
+        return self._retry_transition_read(self._commission_detail_state_once)
+
+    def _commission_detail_state_once(self) -> CommissionDetailState:
         button_state = self.read_state()
         back = self._unique(button_state, "commission/detail/back")
         recommend = self._unique(button_state, "commission/detail/recommend")
@@ -741,6 +767,86 @@ class CommissionOracle:
             expected_signature,
             require_assigned_ships=True,
         )
+
+    def commission_start_oil_rejection_generation(
+        self, expected_signature, expected_oil_cost, input_generation
+    ):
+        """Classify a fresh client rejection without authorizing recovery input."""
+        state = self.read_state()
+        ui = self.read_ui_state()
+        tips = tuple(t for t in ui.texts if t.path.endswith(
+            'UIOverlay/TipPanel(Clone)/Grid/toolTip(Clone)/Text')
+            and t.active_in_hierarchy and t.active_and_enabled)
+        messages = tuple(re.sub(r'\s+', '', re.sub(r'<[^>]*>', '', t.text))
+                         for t in tips)
+        if '石油已经达到上限无法接受委托' not in messages:
+            return None
+        if len(tips) != 1 or tips[0].truncated:
+            raise SemanticGateClosed('commission start rejection text is incomplete or ambiguous')
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('commission start rejection snapshots are incoherent')
+        if min(state.generation, ui.generation) <= input_generation:
+            return None
+        pending = self.commission_start_pending_generation(expected_signature, expected_oil_cost)
+        return pending if pending is not None and pending > input_generation else None
+
+    def commission_start_pending_generation(self, expected_signature, expected_oil_cost):
+        """Read the exact healthy pending owner after an unproven start.
+
+        This permits only task-local failure, never success or another input.
+        A missing or changed owner keeps the original uncertainty fatal.
+        """
+        expected = tuple(expected_signature)
+        if len(expected) != 6 or expected[4] != CommissionStatus.PENDING.value:
+            raise SemanticGateClosed('commission pending signature is malformed')
+        state = self.read_state()
+        if self._matches(state, 'commission/page/back'):
+            return None
+        back = self._unique(state, 'commission/detail/back')
+        start = self._unique(state, 'commission/detail/start')
+        if (not back.actionable
+                or not start.active_in_hierarchy or not start.active_and_enabled
+                or not start.interactable or start.point is None or start.bounds is None
+                or start.raycast_top is False
+                or self._blocking_rules(state, 'commission/detail/back')
+                or self._blocking_rules(state, 'commission/detail/start')):
+            raise SemanticGateClosed('pending commission detail is blocked')
+        ui = self.read_ui_state()
+        if (ui.image_truncated or ui.method_mask & 0x8 == 0
+                or not state.generation <= ui.generation <= state.generation + 2):
+            raise SemanticGateClosed('pending commission detail snapshot is incomplete or incoherent')
+        root = 'Overlay/UIMain/blur_panel/scrollItem'
+
+        def active(records, suffix):
+            matches = tuple(item for item in records
+                            if item.path.endswith(root + suffix)
+                            and item.active_in_hierarchy and item.active_and_enabled)
+            if any(item.truncated for item in matches):
+                raise SemanticGateClosed('pending commission detail field is truncated')
+            return matches
+
+        def text(suffix):
+            matches = active(ui.texts, suffix)
+            if len(matches) != 1:
+                raise SemanticGateClosed('pending commission detail text is absent or ambiguous')
+            return re.sub(r'<[^<>]{1,128}>', '', matches[0].text).strip()
+
+        types = active(ui.images, '/iconType$')
+        pending = active(ui.images, '/iconState$/0')
+        if len(types) != 1 or len(pending) != 1:
+            return None
+        if (active(ui.images, '/iconState$/1')
+                or active(ui.texts, '/maskDetail/detailPanel/btn/giveup/text')):
+            return None
+        if (text('/labelName$') != expected[1]
+                or text('/level/labelLv$') != str(expected[2])
+                or self.parse_countdown_seconds(text('/labelTime$/Text')) != expected[3]
+                or types[0].sprite != expected[5]
+                or pending[0].sprite != 'kongxian_bg'
+                or text('/maskDetail/detailPanel/btn/start/text') != '开始'
+                or text('/maskDetail/detailPanel/consume/Text') != str(expected_oil_cost)):
+            raise SemanticGateClosed('pending commission detail identity changed')
+        return state.generation
 
     def commission_start_transition(
         self, expected_signature: Sequence[Union[int, str]]

@@ -8,6 +8,30 @@ from types import ModuleType, SimpleNamespace
 import pytest
 
 
+def test_task_copy_uses_native_run_count_contract_and_keeps_recovery():
+    root = Path(__file__).resolve().parents[1]
+    spec = importlib.util.spec_from_file_location('configured_task_copy',
+        root / 'scripts/python/run_alas_configured_task_live.py')
+    runner = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(runner)
+    seed = {
+        'Main2': {'Scheduler': {'Enable': True}, 'StopCondition': {'RunCount': 0}},
+        'Hard': {'Scheduler': {'Enable': True}},
+        'Alas': {'Error': {'HandleError': True, 'SaveError': True, 'OnePushConfig': 'provider'}},
+    }
+    config, override = runner.prepare_config(seed, 'Main2', 1)
+    assert config['Alas']['Error'] == {'HandleError': True, 'SaveError': False, 'OnePushConfig': ''}
+    assert override == {'original': 0, 'qualification': 1}
+    assert config['Main2']['StopCondition']['RunCount'] == 1
+    assert seed['Main2']['StopCondition']['RunCount'] == 0
+    assert seed['Alas']['Error']['SaveError'] is True
+    with pytest.raises(ValueError, match='Hard uses its native daily quota'):
+        runner.prepare_config(seed, 'Hard', 1)
+    assert runner.prepare_config(seed, 'Hard', None)[1] is None
+    seed['Alas']['Error']['HandleError'] = False
+    assert runner.prepare_config(seed, 'Hard', None)[0]['Alas']['Error']['HandleError'] is False
+
+
 def test_action_budget_parameters_use_runtime_grant_registry():
     root = Path(__file__).resolve().parents[1]
     spec = importlib.util.spec_from_file_location('configured_budget_runner',
@@ -58,11 +82,10 @@ def test_real_runner_keeps_receipt_and_removes_temp_config(monkeypatch,tmp_path,
         click=click,exists=lambda _:False,
         click_operation_siren_globe_port=lambda *a:None,
         click_operation_siren_globe_map=lambda *a:None,
-        operation_siren_globe_unpin=lambda *a:None,operation_siren_globe_swipe=lambda *a:None,
-        operation_siren_globe_drag_proof=lambda *a:None)
+        operation_siren_globe_unpin=lambda *a:None,operation_siren_globe_swipe=lambda *a:None)
     def close():
         if failure=='close':raise RuntimeError('forward removal failed')
-    session=SimpleNamespace(open=lambda:SimpleNamespace(oracle=oracle),close=close,
+    session=SimpleNamespace(open=lambda:SimpleNamespace(oracle=oracle),close=close, appear=lambda _: False,
         operation_siren_map_visible=lambda:False,
         last_task_outcome={'outcome':'raised' if failure=='native-task-end' else 'returned'})
     DockReceipt = make_dataclass('DockReceipt', [('retired_count', int)])

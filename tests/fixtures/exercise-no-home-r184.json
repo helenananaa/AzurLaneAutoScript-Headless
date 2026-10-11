@@ -1,0 +1,6900 @@
+{
+  "scope": "Unmodified failed-presence STATE/UI replay only; no live input authority",
+  "source": "goal-scheduler-r184.json Exercise.failed_presence",
+  "snapshot": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 12065,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "abi": "x86_64",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "snapshot_schema": 1,
+    "snapshot_struct_size": 104,
+    "generation": 27743,
+    "scene_generation": 10,
+    "semantic_generation": 2,
+    "snapshot_monotonic_ns": 4619314445368,
+    "response_monotonic_ns": 4619416326772,
+    "age_ms": 101,
+    "observer_tid": 12097,
+    "assembly_count": 129,
+    "semantic_code": 1,
+    "width": 1280,
+    "height": 720,
+    "flags": 15,
+    "observer_attached": false,
+    "main_thread": true,
+    "button_count": 430,
+    "active_button_count": 19,
+    "interactable_button_count": 430,
+    "scene_handle": -76,
+    "ui_stage": 100,
+    "ui_method_mask": 15
+  },
+  "buttons": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.buttons/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 12065,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 344104,
+    "generation": 27743,
+    "snapshot_monotonic_ns": 4619314445368,
+    "response_monotonic_ns": 4619416343479,
+    "age_ms": 101,
+    "button_count": 19,
+    "truncated": false,
+    "error_count": 0,
+    "buttons": [
+      {
+        "name": "option",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/blur_panel/adapt/top/option",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1558346,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 13.085,
+          "y": 7.116,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -46.0,
+          "y": -53.5,
+          "width": 92.0,
+          "height": 107.0
+        },
+        "screen_point": {
+          "x": 1228.841,
+          "y": 680.216
+        },
+        "adb_point": {
+          "x": 1228.841,
+          "y": 39.784
+        },
+        "screen_bounds": {
+          "left": 1198.184,
+          "bottom": 644.561,
+          "right": 1259.498,
+          "top": 715.871
+        },
+        "adb_bounds": {
+          "left": 1198.184,
+          "top": 4.129,
+          "right": 1259.498,
+          "bottom": 75.439
+        }
+      },
+      {
+        "name": "rivaltpl_4",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_4",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1557280,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 6.765,
+          "y": 2.759,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -173.0,
+          "y": -242.85,
+          "width": 346.0,
+          "height": 485.7
+        },
+        "screen_point": {
+          "x": 944.44,
+          "y": 484.167
+        },
+        "adb_point": {
+          "x": 944.44,
+          "y": 235.833
+        },
+        "screen_bounds": {
+          "left": 829.144,
+          "bottom": 322.319,
+          "right": 1059.736,
+          "top": 646.014
+        },
+        "adb_bounds": {
+          "left": 829.144,
+          "top": 73.986,
+          "right": 1059.736,
+          "bottom": 397.681
+        }
+      },
+      {
+        "name": "rivaltpl_3",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_3",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1557018,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 1.34,
+          "y": 2.759,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -173.0,
+          "y": -242.85,
+          "width": 346.0,
+          "height": 485.7
+        },
+        "screen_point": {
+          "x": 700.293,
+          "y": 484.167
+        },
+        "adb_point": {
+          "x": 700.293,
+          "y": 235.833
+        },
+        "screen_bounds": {
+          "left": 584.997,
+          "bottom": 322.319,
+          "right": 815.589,
+          "top": 646.014
+        },
+        "adb_bounds": {
+          "left": 584.997,
+          "top": 73.986,
+          "right": 815.589,
+          "bottom": 397.681
+        }
+      },
+      {
+        "name": "rivaltpl_2",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_2",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1556756,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -4.086,
+          "y": 2.759,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -173.0,
+          "y": -242.85,
+          "width": 346.0,
+          "height": 485.7
+        },
+        "screen_point": {
+          "x": 456.147,
+          "y": 484.167
+        },
+        "adb_point": {
+          "x": 456.147,
+          "y": 235.833
+        },
+        "screen_bounds": {
+          "left": 340.851,
+          "bottom": 322.319,
+          "right": 571.443,
+          "top": 646.014
+        },
+        "adb_bounds": {
+          "left": 340.851,
+          "top": 73.986,
+          "right": 571.443,
+          "bottom": 397.681
+        }
+      },
+      {
+        "name": "rivaltpl_1",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_1",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1556494,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -9.511,
+          "y": 2.759,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -173.0,
+          "y": -242.85,
+          "width": 346.0,
+          "height": 485.7
+        },
+        "screen_point": {
+          "x": 212.0,
+          "y": 484.167
+        },
+        "adb_point": {
+          "x": 212.0,
+          "y": 235.833
+        },
+        "screen_bounds": {
+          "left": 96.704,
+          "bottom": 322.319,
+          "right": 327.296,
+          "top": 646.014
+        },
+        "adb_bounds": {
+          "left": 96.704,
+          "top": 73.986,
+          "right": 327.296,
+          "bottom": 397.681
+        }
+      },
+      {
+        "name": "shiptpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1559770,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 11.422,
+          "y": -3.349,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -72.0,
+          "y": -72.0,
+          "width": 144.0,
+          "height": 144.0
+        },
+        "screen_point": {
+          "x": 1154.0,
+          "y": 209.317
+        },
+        "adb_point": {
+          "x": 1154.0,
+          "y": 510.683
+        },
+        "screen_bounds": {
+          "left": 1106.0,
+          "bottom": 161.317,
+          "right": 1202.0,
+          "top": 257.317
+        },
+        "adb_bounds": {
+          "left": 1106.0,
+          "top": 462.683,
+          "right": 1202.0,
+          "bottom": 558.683
+        }
+      },
+      {
+        "name": "shiptpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1559594,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 9.141,
+          "y": -3.349,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -72.0,
+          "y": -72.0,
+          "width": 144.0,
+          "height": 144.0
+        },
+        "screen_point": {
+          "x": 1051.333,
+          "y": 209.317
+        },
+        "adb_point": {
+          "x": 1051.333,
+          "y": 510.683
+        },
+        "screen_bounds": {
+          "left": 1003.333,
+          "bottom": 161.317,
+          "right": 1099.333,
+          "top": 257.317
+        },
+        "adb_bounds": {
+          "left": 1003.333,
+          "top": 462.683,
+          "right": 1099.333,
+          "bottom": 558.683
+        }
+      },
+      {
+        "name": "shiptpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1559418,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 6.859,
+          "y": -3.349,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -72.0,
+          "y": -72.0,
+          "width": 144.0,
+          "height": 144.0
+        },
+        "screen_point": {
+          "x": 948.667,
+          "y": 209.317
+        },
+        "adb_point": {
+          "x": 948.667,
+          "y": 510.683
+        },
+        "screen_bounds": {
+          "left": 900.667,
+          "bottom": 161.317,
+          "right": 996.667,
+          "top": 257.317
+        },
+        "adb_bounds": {
+          "left": 900.667,
+          "top": 462.683,
+          "right": 996.667,
+          "bottom": 558.683
+        }
+      },
+      {
+        "name": "shiptpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1559234,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 4.074,
+          "y": -3.349,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -72.0,
+          "y": -72.0,
+          "width": 144.0,
+          "height": 144.0
+        },
+        "screen_point": {
+          "x": 823.333,
+          "y": 209.317
+        },
+        "adb_point": {
+          "x": 823.333,
+          "y": 510.683
+        },
+        "screen_bounds": {
+          "left": 775.333,
+          "bottom": 161.317,
+          "right": 871.333,
+          "top": 257.317
+        },
+        "adb_bounds": {
+          "left": 775.333,
+          "top": 462.683,
+          "right": 871.333,
+          "bottom": 558.683
+        }
+      },
+      {
+        "name": "shiptpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1559058,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 1.793,
+          "y": -3.349,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -72.0,
+          "y": -72.0,
+          "width": 144.0,
+          "height": 144.0
+        },
+        "screen_point": {
+          "x": 720.667,
+          "y": 209.317
+        },
+        "adb_point": {
+          "x": 720.667,
+          "y": 510.683
+        },
+        "screen_bounds": {
+          "left": 672.667,
+          "bottom": 161.317,
+          "right": 768.667,
+          "top": 257.317
+        },
+        "adb_bounds": {
+          "left": 672.667,
+          "top": 462.683,
+          "right": 768.667,
+          "bottom": 558.683
+        }
+      },
+      {
+        "name": "shiptpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1558882,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -0.489,
+          "y": -3.349,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -72.0,
+          "y": -72.0,
+          "width": 144.0,
+          "height": 144.0
+        },
+        "screen_point": {
+          "x": 618.0,
+          "y": 209.317
+        },
+        "adb_point": {
+          "x": 618.0,
+          "y": 510.683
+        },
+        "screen_bounds": {
+          "left": 570.0,
+          "bottom": 161.317,
+          "right": 666.0,
+          "top": 257.317
+        },
+        "adb_bounds": {
+          "left": 570.0,
+          "top": 462.683,
+          "right": 666.0,
+          "bottom": 558.683
+        }
+      },
+      {
+        "name": "backBtn",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/blur_panel/adapt/top/backBtn",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1558386,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -12.944,
+          "y": 6.798,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -65.255,
+          "y": -55.7,
+          "width": 130.51,
+          "height": 111.4
+        },
+        "screen_point": {
+          "x": 57.523,
+          "y": 665.901
+        },
+        "adb_point": {
+          "x": 57.523,
+          "y": 54.099
+        },
+        "screen_bounds": {
+          "left": 0.523,
+          "bottom": 608.9,
+          "right": 114.523,
+          "top": 722.901
+        },
+        "adb_bounds": {
+          "left": 0.523,
+          "top": -2.901,
+          "right": 114.523,
+          "bottom": 111.1
+        }
+      },
+      {
+        "name": "shop_btn",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/buttons/shop_btn",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1558284,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 10.662,
+          "y": -6.618,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -134.5,
+          "y": -43.0,
+          "width": 269.0,
+          "height": 86.0
+        },
+        "screen_point": {
+          "x": 1119.8,
+          "y": 62.2
+        },
+        "adb_point": {
+          "x": 1119.8,
+          "y": 657.8
+        },
+        "screen_bounds": {
+          "left": 1030.133,
+          "bottom": 33.533,
+          "right": 1209.467,
+          "top": 90.867
+        },
+        "adb_bounds": {
+          "left": 1030.133,
+          "top": 629.133,
+          "right": 1209.467,
+          "bottom": 686.467
+        }
+      },
+      {
+        "name": "rank_btn",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/buttons/rank_btn",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1558274,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 5.818,
+          "y": -6.618,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -134.5,
+          "y": -43.0,
+          "width": 269.0,
+          "height": 86.0
+        },
+        "screen_point": {
+          "x": 901.8,
+          "y": 62.2
+        },
+        "adb_point": {
+          "x": 901.8,
+          "y": 657.8
+        },
+        "screen_bounds": {
+          "left": 812.133,
+          "bottom": 33.533,
+          "right": 991.467,
+          "top": 90.867
+        },
+        "adb_bounds": {
+          "left": 812.133,
+          "top": 629.133,
+          "right": 991.467,
+          "bottom": 686.467
+        }
+      },
+      {
+        "name": "award_btn",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/buttons/award_btn",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1558264,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 0.841,
+          "y": -6.618,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -134.5,
+          "y": -43.0,
+          "width": 269.0,
+          "height": 86.0
+        },
+        "screen_point": {
+          "x": 677.867,
+          "y": 62.2
+        },
+        "adb_point": {
+          "x": 677.867,
+          "y": 657.8
+        },
+        "screen_bounds": {
+          "left": 588.2,
+          "bottom": 33.533,
+          "right": 767.533,
+          "top": 90.867
+        },
+        "adb_bounds": {
+          "left": 588.2,
+          "top": 629.133,
+          "right": 767.533,
+          "bottom": 686.467
+        }
+      },
+      {
+        "name": "replace_rival_btn",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/replace_rival_btn",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1557686,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 10.996,
+          "y": -0.1,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -114.0,
+          "y": -41.5,
+          "width": 228.0,
+          "height": 83.0
+        },
+        "screen_point": {
+          "x": 1134.8,
+          "y": 355.5
+        },
+        "adb_point": {
+          "x": 1134.8,
+          "y": 364.5
+        },
+        "screen_bounds": {
+          "left": 1058.8,
+          "bottom": 327.833,
+          "right": 1210.8,
+          "top": 383.167
+        },
+        "adb_bounds": {
+          "left": 1058.8,
+          "top": 336.833,
+          "right": 1210.8,
+          "bottom": 392.167
+        }
+      },
+      {
+        "name": "gem",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem",
+        "canvas": "ResPanel(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -85808,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 11.915,
+          "y": 7.251,
+          "z": -389.985
+        },
+        "local_rect": {
+          "x": -275.7,
+          "y": -30.0,
+          "width": 275.7,
+          "height": 60.0
+        },
+        "screen_point": {
+          "x": 1176.167,
+          "y": 686.3
+        },
+        "adb_point": {
+          "x": 1176.167,
+          "y": 33.7
+        },
+        "screen_bounds": {
+          "left": 992.367,
+          "bottom": 666.3,
+          "right": 1176.167,
+          "top": 706.3
+        },
+        "adb_bounds": {
+          "left": 992.367,
+          "top": 13.7,
+          "right": 1176.167,
+          "bottom": 53.7
+        }
+      },
+      {
+        "name": "gold",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold",
+        "canvas": "ResPanel(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -85762,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 5.225,
+          "y": 7.251,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -137.85,
+          "y": -30.0,
+          "width": 275.7,
+          "height": 60.0
+        },
+        "screen_point": {
+          "x": 875.133,
+          "y": 686.3
+        },
+        "adb_point": {
+          "x": 875.133,
+          "y": 33.7
+        },
+        "screen_bounds": {
+          "left": 783.233,
+          "bottom": 666.3,
+          "right": 967.033,
+          "top": 706.3
+        },
+        "adb_bounds": {
+          "left": 783.233,
+          "top": 13.7,
+          "right": 967.033,
+          "bottom": 53.7
+        }
+      },
+      {
+        "name": "oil",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil",
+        "canvas": "ResPanel(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -85712,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 0.578,
+          "y": 7.251,
+          "z": -389.985
+        },
+        "local_rect": {
+          "x": -137.85,
+          "y": -30.0,
+          "width": 275.7,
+          "height": 60.0
+        },
+        "screen_point": {
+          "x": 666.0,
+          "y": 686.3
+        },
+        "adb_point": {
+          "x": 666.0,
+          "y": 33.7
+        },
+        "screen_bounds": {
+          "left": 574.1,
+          "bottom": 666.3,
+          "right": 757.9,
+          "top": 706.3
+        },
+        "adb_bounds": {
+          "left": 574.1,
+          "top": 13.7,
+          "right": 757.9,
+          "bottom": 53.7
+        }
+      }
+    ]
+  },
+  "ui": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.ui/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 12065,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 4466248,
+    "generation": 27743,
+    "snapshot_monotonic_ns": 4619314445368,
+    "response_monotonic_ns": 4619441540173,
+    "age_ms": 127,
+    "method_mask": 15,
+    "toggle_count": 0,
+    "text_count": 63,
+    "image_count": 154,
+    "toggle_truncated": false,
+    "text_truncated": false,
+    "image_truncated": false,
+    "error_count": 0,
+    "error_counts": {
+      "toggle": 0,
+      "text": 0,
+      "image": 0,
+      "shared": 0
+    },
+    "skipped_count": 0,
+    "image_source_count": 5055,
+    "image_source_capacity": 16384,
+    "toggles": [],
+    "texts": [
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/lv/Text",
+        "text": "125",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1169.742,
+          "top": 465.787,
+          "right": 1194.733,
+          "bottom": 490.779
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "lv_label",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/lv/lv_label",
+        "text": "LV.",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1151.747,
+          "top": 465.787,
+          "right": 1169.742,
+          "bottom": 490.779
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/lv/Text",
+        "text": "125",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1067.075,
+          "top": 465.787,
+          "right": 1092.067,
+          "bottom": 490.779
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "lv_label",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/lv/lv_label",
+        "text": "LV.",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1049.081,
+          "top": 465.787,
+          "right": 1067.075,
+          "bottom": 490.779
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/lv/Text",
+        "text": "125",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 964.408,
+          "top": 465.787,
+          "right": 989.4,
+          "bottom": 490.779
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "lv_label",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/lv/lv_label",
+        "text": "LV.",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 946.414,
+          "top": 465.787,
+          "right": 964.408,
+          "bottom": 490.779
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/lv/Text",
+        "text": "125",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 839.075,
+          "top": 465.787,
+          "right": 864.067,
+          "bottom": 490.779
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "lv_label",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/lv/lv_label",
+        "text": "LV.",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 821.081,
+          "top": 465.787,
+          "right": 839.075,
+          "bottom": 490.779
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/lv/Text",
+        "text": "125",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 736.408,
+          "top": 465.787,
+          "right": 761.4,
+          "bottom": 490.779
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "lv_label",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/lv/lv_label",
+        "text": "LV.",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 718.414,
+          "top": 465.787,
+          "right": 736.408,
+          "bottom": 490.779
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/lv/Text",
+        "text": "125",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 633.742,
+          "top": 465.787,
+          "right": 658.733,
+          "bottom": 490.779
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "lv_label",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/lv/lv_label",
+        "text": "LV.",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 615.747,
+          "top": 465.787,
+          "right": 633.742,
+          "bottom": 490.779
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text2",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/title_bg/Text2",
+        "text": "（点击更改）",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 679.247,
+          "top": 423.553,
+          "right": 770.95,
+          "bottom": 443.547
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text1",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/title_bg/Text1",
+        "text": "防守舰队",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 587.8,
+          "top": 409.483,
+          "right": 728.333,
+          "bottom": 443.883
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "level",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/upgrade_rank_tip/level",
+        "text": "1000",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 483.6,
+          "top": 661.867,
+          "right": 523.6,
+          "bottom": 684.533
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "tag",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/upgrade_rank_tip/tag",
+        "text": "所需排名:",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 410.267,
+          "top": 665.2,
+          "right": 478.267,
+          "bottom": 681.2
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "level",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/upgrade_score_tip/level",
+        "text": "1050",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 357.133,
+          "top": 661.867,
+          "right": 397.133,
+          "bottom": 684.533
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "tag",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/upgrade_score_tip/tag",
+        "text": "所需积分:",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 283.8,
+          "top": 665.2,
+          "right": 351.8,
+          "bottom": 681.2
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "level",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/upgrade_tip/level",
+        "text": "准将",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 376.4,
+          "top": 628.367,
+          "right": 410.4,
+          "bottom": 645.367
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "tag",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/upgrade_tip/tag",
+        "text": "下次晋升:",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 284.82,
+          "top": 627.367,
+          "right": 365.82,
+          "bottom": 646.367
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "tag",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/statistics_panel/exploit_bg/tag",
+        "text": "功勋值",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 336.629,
+          "top": 585.104,
+          "right": 417.07,
+          "bottom": 603.298
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "score",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/statistics_panel/exploit_bg/score",
+        "text": "396445",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 445.98,
+          "top": 580.549,
+          "right": 519.29,
+          "bottom": 607.853
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "tag",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/statistics_panel/rank_bg/tag",
+        "text": "当前排名",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 335.696,
+          "top": 539.237,
+          "right": 416.137,
+          "bottom": 557.431
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "score",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/statistics_panel/rank_bg/score",
+        "text": "2066",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 445.981,
+          "top": 534.682,
+          "right": 519.29,
+          "bottom": 561.986
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "tag",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/statistics_panel/score_bg/tag",
+        "text": "赛季积分",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 336.6,
+          "top": 495.433,
+          "right": 417.067,
+          "bottom": 513.633
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "score",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/statistics_panel/score_bg/score",
+        "text": "873",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 445.987,
+          "top": 490.877,
+          "right": 519.32,
+          "bottom": 518.19
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text (1)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/frame/Text (1)",
+        "text": "MY PROFILE",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 200.767,
+          "top": 437.473,
+          "right": 289.9,
+          "bottom": 447.66
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/frame/Text",
+        "text": "我的信息",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 106.14,
+          "top": 418.633,
+          "right": 206.807,
+          "bottom": 451.033
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "time",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/season_info/recover_container/time",
+        "text": "( <color=#92fc63>00:44:41</color> 后恢复)",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1060.733,
+          "top": 169.633,
+          "right": 1208.733,
+          "bottom": 193.633
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/season_info/count",
+        "text": "10/10",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1104.793,
+          "top": 140.1,
+          "right": 1204.793,
+          "bottom": 164.767
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text_en",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/season_info/count_bg/Text_en",
+        "text": "EXERCISE TIMES ",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1059.791,
+          "top": 163.63,
+          "right": 1169.022,
+          "bottom": 172.96
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/season_info/count_bg/Text",
+        "text": "演习次数",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1061.84,
+          "top": 137.676,
+          "right": 1164.44,
+          "bottom": 164.658
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "time",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/season_info/left_time_container/time",
+        "text": "12:44:40",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1135.6,
+          "top": 104.1,
+          "right": 1202.6,
+          "bottom": 128.1
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/season_info/left_time_container/Text",
+        "text": "天  ",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1107.6,
+          "top": 106.1,
+          "right": 1135.6,
+          "bottom": 126.1
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "day",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/season_info/left_time_container/day",
+        "text": "9",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1096.6,
+          "top": 104.1,
+          "right": 1107.6,
+          "bottom": 128.1
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text_en",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/season_info/season_time/Text_en",
+        "text": "SEASON DURATION",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1059.767,
+          "top": 98.967,
+          "right": 1169.033,
+          "bottom": 108.3
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/season_info/season_time/Text",
+        "text": "赛季时间",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1061.817,
+          "top": 73.004,
+          "right": 1164.45,
+          "bottom": 99.996
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "value",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_4/comprehensive_panel/comprehensive/vanguard_fleet/value",
+        "text": "14344",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 961.651,
+          "top": 290.635,
+          "right": 1022.631,
+          "bottom": 339.086
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "value",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_4/comprehensive_panel/comprehensive/main_fleet/value",
+        "text": "10602",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 961.651,
+          "top": 261.292,
+          "right": 1022.631,
+          "bottom": 309.743
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "lv",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_4/name_container/lv",
+        "text": "Lv.149",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 966.899,
+          "top": 76.019,
+          "right": 1040.209,
+          "bottom": 109.341
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_4/name_container/name",
+        "text": "骆芷寒",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 849.004,
+          "top": 77.052,
+          "right": 985.094,
+          "bottom": 107.375
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_4/rank_bg/rank_container/name",
+        "text": "1249",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 885.659,
+          "top": 303.851,
+          "right": 1048.606,
+          "bottom": 402.019
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "value",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_3/comprehensive_panel/comprehensive/vanguard_fleet/value",
+        "text": "16075",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 717.504,
+          "top": 290.635,
+          "right": 778.485,
+          "bottom": 339.086
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "value",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_3/comprehensive_panel/comprehensive/main_fleet/value",
+        "text": "14573",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 717.504,
+          "top": 261.292,
+          "right": 778.485,
+          "bottom": 309.743
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "lv",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_3/name_container/lv",
+        "text": "Lv.153",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 722.753,
+          "top": 76.019,
+          "right": 796.062,
+          "bottom": 109.341
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_3/name_container/name",
+        "text": "思命",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 604.858,
+          "top": 77.052,
+          "right": 740.947,
+          "bottom": 107.375
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_3/rank_bg/rank_container/name",
+        "text": "1084",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 641.512,
+          "top": 303.851,
+          "right": 804.459,
+          "bottom": 402.019
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "value",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_2/comprehensive_panel/comprehensive/vanguard_fleet/value",
+        "text": "13769",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 473.358,
+          "top": 290.635,
+          "right": 534.338,
+          "bottom": 339.086
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "value",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_2/comprehensive_panel/comprehensive/main_fleet/value",
+        "text": "18093",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 473.358,
+          "top": 261.292,
+          "right": 534.338,
+          "bottom": 309.743
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "lv",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_2/name_container/lv",
+        "text": "Lv.146",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 478.606,
+          "top": 76.019,
+          "right": 551.916,
+          "bottom": 109.341
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_2/name_container/name",
+        "text": "默尘",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 360.711,
+          "top": 77.052,
+          "right": 496.8,
+          "bottom": 107.375
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_2/rank_bg/rank_container/name",
+        "text": "290",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 397.366,
+          "top": 303.851,
+          "right": 560.313,
+          "bottom": 402.019
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "value",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_1/comprehensive_panel/comprehensive/vanguard_fleet/value",
+        "text": "12567",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 229.211,
+          "top": 290.635,
+          "right": 290.191,
+          "bottom": 339.086
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "value",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_1/comprehensive_panel/comprehensive/main_fleet/value",
+        "text": "16901",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 229.211,
+          "top": 261.292,
+          "right": 290.191,
+          "bottom": 309.743
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "lv",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_1/name_container/lv",
+        "text": "Lv.151",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 234.459,
+          "top": 76.019,
+          "right": 307.769,
+          "bottom": 109.341
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_1/name_container/name",
+        "text": "迷失之城",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 116.564,
+          "top": 77.052,
+          "right": 252.653,
+          "bottom": 107.375
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_1/rank_bg/rank_container/name",
+        "text": "116",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 153.219,
+          "top": 303.851,
+          "right": 316.166,
+          "bottom": 402.019
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "gem_value",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem/gem_value",
+        "text": "5070",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1048.174,
+          "top": 22.33,
+          "right": 1132.426,
+          "bottom": 43.07
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "gold_value",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/gold_value",
+        "text": "1449",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 832.057,
+          "top": 22.464,
+          "right": 921.409,
+          "bottom": 43.204
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "gold_max_value",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/gold_max_value",
+        "text": "MAX: 108300",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 834.945,
+          "top": -2.896,
+          "right": 941.433,
+          "bottom": 16.03
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "oil_value",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/oil_value",
+        "text": "25000",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 626.591,
+          "top": 22.997,
+          "right": 715.943,
+          "bottom": 43.737
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "oil_max_value",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/oil_max_value",
+        "text": "MAX: 17450",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 628.799,
+          "top": -2.549,
+          "right": 732.567,
+          "bottom": 15.017
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "FpsPanel",
+        "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+        "text": "",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 573.333,
+          "top": 0.0,
+          "right": 706.667,
+          "bottom": 34.667
+        }
+      }
+    ],
+    "images": [
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_4/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 912.75,
+          "top": 195.446,
+          "right": 936.243,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 924.496,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_4/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 898.255,
+          "top": 195.446,
+          "right": 921.747,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 910.001,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_4/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 883.76,
+          "top": 195.446,
+          "right": 907.252,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 895.506,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_4/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 869.265,
+          "top": 195.446,
+          "right": 892.757,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 881.011,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_4/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 854.769,
+          "top": 195.446,
+          "right": 878.262,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 866.515,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_4/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 840.274,
+          "top": 195.446,
+          "right": 863.766,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 852.02,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "specialFrame",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_4/shiptpl/icon_bg/frame/specialFrame",
+        "sprite": "frame_prop",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 834.776,
+          "top": 113.973,
+          "right": 943.24,
+          "bottom": 222.938
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 889.008,
+          "y": 168.455
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_3/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 668.604,
+          "top": 195.446,
+          "right": 692.096,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 680.35,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_3/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 654.108,
+          "top": 195.446,
+          "right": 677.601,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 665.855,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_3/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 639.613,
+          "top": 195.446,
+          "right": 663.105,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 651.359,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_3/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 625.118,
+          "top": 195.446,
+          "right": 648.61,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 636.864,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_3/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 610.622,
+          "top": 195.446,
+          "right": 634.115,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 622.369,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_3/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 596.127,
+          "top": 195.446,
+          "right": 619.62,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 607.873,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "specialFrame",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_3/shiptpl/icon_bg/frame/specialFrame",
+        "sprite": "frame_prop",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 590.629,
+          "top": 113.973,
+          "right": 699.094,
+          "bottom": 222.938
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 644.861,
+          "y": 168.455
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_2/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 395.466,
+          "top": 195.446,
+          "right": 418.959,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 407.213,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_2/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 380.971,
+          "top": 195.446,
+          "right": 404.463,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 392.717,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_2/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 366.476,
+          "top": 195.446,
+          "right": 389.968,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 378.222,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_2/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 351.981,
+          "top": 195.446,
+          "right": 375.473,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 363.727,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "specialFrame",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_2/shiptpl/icon_bg/frame/specialFrame",
+        "sprite": "frame5_0",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 347.982,
+          "top": 116.972,
+          "right": 451.948,
+          "bottom": 221.188
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 399.965,
+          "y": 169.08
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_1/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 180.31,
+          "top": 195.446,
+          "right": 203.803,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 192.056,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_1/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 165.815,
+          "top": 195.446,
+          "right": 189.307,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 177.561,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_1/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 151.32,
+          "top": 195.446,
+          "right": 174.812,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 163.066,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_1/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 136.824,
+          "top": 195.446,
+          "right": 160.317,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 148.571,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_1/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 122.329,
+          "top": 195.446,
+          "right": 145.822,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 134.075,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_1/shiptpl/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 107.834,
+          "top": 195.446,
+          "right": 131.326,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 119.58,
+          "y": 206.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "specialFrame",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_1/shiptpl/icon_bg/frame/specialFrame",
+        "sprite": "frame_prop",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 102.336,
+          "top": 113.973,
+          "right": 210.8,
+          "bottom": 222.938
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 156.568,
+          "y": 168.455
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1176.867,
+          "top": 535.417,
+          "right": 1198.8,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1187.833,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1163.333,
+          "top": 535.417,
+          "right": 1185.267,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1174.3,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1149.8,
+          "top": 535.417,
+          "right": 1171.733,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1160.767,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1136.267,
+          "top": 535.417,
+          "right": 1158.2,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1147.233,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1122.733,
+          "top": 535.417,
+          "right": 1144.667,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1133.7,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1109.2,
+          "top": 535.417,
+          "right": 1131.133,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1120.167,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "specialFrame",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/frame/specialFrame",
+        "sprite": "frame4_1",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1105.467,
+          "top": 462.15,
+          "right": 1202.533,
+          "bottom": 559.45
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1154.0,
+          "y": 510.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "lv_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/lv/lv_bg",
+        "sprite": "bg_lv",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1113.557,
+          "top": 468.083,
+          "right": 1196.863,
+          "bottom": 490.076
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1155.21,
+          "y": 479.08
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1109.2,
+          "top": 465.883,
+          "right": 1198.8,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1154.0,
+          "y": 510.683
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/icon",
+        "sprite": "shentong_alter",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1110.133,
+          "top": 466.817,
+          "right": 1197.867,
+          "bottom": 554.55
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1154.0,
+          "y": 510.683
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg",
+        "sprite": "bg4_1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1109.2,
+          "top": 465.883,
+          "right": 1198.8,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1154.0,
+          "y": 510.683
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1074.2,
+          "top": 535.417,
+          "right": 1096.133,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1085.167,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1060.667,
+          "top": 535.417,
+          "right": 1082.6,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1071.633,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1047.133,
+          "top": 535.417,
+          "right": 1069.067,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1058.1,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1033.6,
+          "top": 535.417,
+          "right": 1055.533,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1044.567,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1020.067,
+          "top": 535.417,
+          "right": 1042.0,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1031.033,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1006.533,
+          "top": 535.417,
+          "right": 1028.467,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1017.5,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "lv_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/lv/lv_bg",
+        "sprite": "bg_lv",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1010.891,
+          "top": 468.083,
+          "right": 1094.197,
+          "bottom": 490.076
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1052.544,
+          "y": 479.08
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1006.533,
+          "top": 465.883,
+          "right": 1096.133,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1051.333,
+          "y": 510.683
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/icon",
+        "sprite": "daofeng",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1007.467,
+          "top": 466.817,
+          "right": 1095.2,
+          "bottom": 554.55
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1051.333,
+          "y": 510.683
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg",
+        "sprite": "bg5",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1006.533,
+          "top": 465.883,
+          "right": 1096.133,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1051.333,
+          "y": 510.683
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 971.533,
+          "top": 535.417,
+          "right": 993.467,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 982.5,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 958.0,
+          "top": 535.417,
+          "right": 979.933,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 968.967,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 944.467,
+          "top": 535.417,
+          "right": 966.4,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 955.433,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 930.933,
+          "top": 535.417,
+          "right": 952.867,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 941.9,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 917.4,
+          "top": 535.417,
+          "right": 939.333,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 928.367,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 903.867,
+          "top": 535.417,
+          "right": 925.8,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 914.833,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "lv_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/lv/lv_bg",
+        "sprite": "bg_lv",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 908.224,
+          "top": 468.083,
+          "right": 991.53,
+          "bottom": 490.076
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 949.877,
+          "y": 479.08
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 903.867,
+          "top": 465.883,
+          "right": 993.467,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 948.667,
+          "y": 510.683
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg/icon",
+        "sprite": "aierdeliqi_g",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 904.8,
+          "top": 466.817,
+          "right": 992.533,
+          "bottom": 554.55
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 948.667,
+          "y": 510.683
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/vanguard/shiptpl(Clone)/icon_bg",
+        "sprite": "bg5",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 903.867,
+          "top": 465.883,
+          "right": 993.467,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 948.667,
+          "y": 510.683
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 846.2,
+          "top": 535.417,
+          "right": 868.133,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 857.167,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 832.667,
+          "top": 535.417,
+          "right": 854.6,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 843.633,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 819.133,
+          "top": 535.417,
+          "right": 841.067,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 830.1,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 805.6,
+          "top": 535.417,
+          "right": 827.533,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 816.567,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 792.067,
+          "top": 535.417,
+          "right": 814.0,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 803.033,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 778.533,
+          "top": 535.417,
+          "right": 800.467,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 789.5,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "specialFrame",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/frame/specialFrame",
+        "sprite": "frame5_0",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 774.8,
+          "top": 462.15,
+          "right": 871.867,
+          "bottom": 559.45
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 823.333,
+          "y": 510.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "lv_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/lv/lv_bg",
+        "sprite": "bg_lv",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 782.891,
+          "top": 468.083,
+          "right": 866.197,
+          "bottom": 490.076
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 824.544,
+          "y": 479.08
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 778.533,
+          "top": 465.883,
+          "right": 868.133,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 823.333,
+          "y": 510.683
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/icon",
+        "sprite": "meikelunbao_2",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 779.467,
+          "top": 466.817,
+          "right": 867.2,
+          "bottom": 554.55
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 823.333,
+          "y": 510.683
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg",
+        "sprite": "bg5_0",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 778.533,
+          "top": 465.883,
+          "right": 868.133,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 823.333,
+          "y": 510.683
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 743.533,
+          "top": 535.417,
+          "right": 765.467,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 754.5,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 730.0,
+          "top": 535.417,
+          "right": 751.933,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 740.967,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 716.467,
+          "top": 535.417,
+          "right": 738.4,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 727.433,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 702.933,
+          "top": 535.417,
+          "right": 724.867,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 713.9,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 689.4,
+          "top": 535.417,
+          "right": 711.333,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 700.367,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 675.867,
+          "top": 535.417,
+          "right": 697.8,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 686.833,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "lv_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/lv/lv_bg",
+        "sprite": "bg_lv",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 680.224,
+          "top": 468.083,
+          "right": 763.53,
+          "bottom": 490.076
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 721.877,
+          "y": 479.08
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 675.867,
+          "top": 465.883,
+          "right": 765.467,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 720.667,
+          "y": 510.683
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/icon",
+        "sprite": "shi",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 676.8,
+          "top": 466.817,
+          "right": 764.533,
+          "bottom": 554.55
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 720.667,
+          "y": 510.683
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg",
+        "sprite": "bg5",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 675.867,
+          "top": 465.883,
+          "right": 765.467,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 720.667,
+          "y": 510.683
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 640.867,
+          "top": 535.417,
+          "right": 662.8,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 651.833,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 627.333,
+          "top": 535.417,
+          "right": 649.267,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 638.3,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 613.8,
+          "top": 535.417,
+          "right": 635.733,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 624.767,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 600.267,
+          "top": 535.417,
+          "right": 622.2,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 611.233,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 586.733,
+          "top": 535.417,
+          "right": 608.667,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 597.7,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "startpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/stars/startpl(Clone)",
+        "sprite": "star",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 573.2,
+          "top": 535.417,
+          "right": 595.133,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 584.167,
+          "y": 545.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "lv_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/lv/lv_bg",
+        "sprite": "bg_lv",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 577.557,
+          "top": 468.083,
+          "right": 660.863,
+          "bottom": 490.076
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 619.21,
+          "y": 479.08
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 573.2,
+          "top": 465.883,
+          "right": 662.8,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 618.0,
+          "y": 510.683
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg/icon",
+        "sprite": "aersasi",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 574.133,
+          "top": 466.817,
+          "right": 661.867,
+          "bottom": 554.55
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 618.0,
+          "y": 510.683
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/main/shiptpl(Clone)/icon_bg",
+        "sprite": "bg5",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 573.2,
+          "top": 465.883,
+          "right": 662.8,
+          "bottom": 555.483
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 618.0,
+          "y": 510.683
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/blur_panel/adapt/top/backBtn/mask/Image",
+        "sprite": "back_btn",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 23.001,
+          "top": 18.778,
+          "right": 94.311,
+          "bottom": 88.755
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 58.656,
+          "y": 53.766
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "mask",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/blur_panel/adapt/top/backBtn/mask",
+        "sprite": "icon_bg_mask_1920",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.140138,
+          "green": 0.125541,
+          "blue": 0.198529,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 11.538,
+          "top": 8.114,
+          "right": 103.508,
+          "bottom": 100.085
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 57.523,
+          "y": 54.099
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "backBtn",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/blur_panel/adapt/top/backBtn",
+        "sprite": "icon_bg_front_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 0.523,
+          "top": -2.901,
+          "right": 114.523,
+          "bottom": 111.1
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 57.523,
+          "y": 54.099
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "en",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/blur_panel/adapt/top/title/en",
+        "sprite": "title_en",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 170.752,
+          "top": 22.243,
+          "right": 254.725,
+          "bottom": 48.901
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 212.739,
+          "y": 35.572
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "title",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/blur_panel/adapt/top/title",
+        "sprite": "title",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 110.372,
+          "top": 3.982,
+          "right": 183.682,
+          "bottom": 50.634
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 110.372,
+          "y": 3.982
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/blur_panel/adapt/top/line",
+        "sprite": "top_line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.588235
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -213.833,
+          "top": 53.45,
+          "right": 1493.833,
+          "bottom": 54.784
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 54.784
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "print",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/blur_panel/adapt/top/print",
+        "sprite": "player_info_bg1_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 99.014,
+          "top": 28.05,
+          "right": 364.166,
+          "bottom": 45.384
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 231.59,
+          "y": 36.717
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "option",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/blur_panel/adapt/top/option",
+        "sprite": "viewall_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1198.184,
+          "top": 4.129,
+          "right": 1259.498,
+          "bottom": 75.439
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1228.841,
+          "y": 39.784
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "print_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/blur_panel/adapt/top/print_bg",
+        "sprite": "player_info_bg2_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 94.398,
+          "top": 9.118,
+          "right": 413.048,
+          "bottom": 47.783
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 253.723,
+          "y": 28.45
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "print_top",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/blur_panel/adapt/top/print_top",
+        "sprite": "icon_bg_top_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 56.321,
+          "top": 0.116,
+          "right": 114.326,
+          "bottom": 25.451
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 85.324,
+          "y": 12.784
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "top_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/blur_panel/top_bg",
+        "sprite": "top_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 0.208,
+          "top": 0.0,
+          "right": 1279.792,
+          "bottom": 54.649
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 0.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "shop_btn",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/buttons/shop_btn",
+        "sprite": "chara_exploit_shop_sel",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1030.133,
+          "top": 629.133,
+          "right": 1209.467,
+          "bottom": 686.467
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1119.8,
+          "y": 657.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "rank_btn",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/buttons/rank_btn",
+        "sprite": "chara_rank_list_sel",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 812.133,
+          "top": 629.133,
+          "right": 991.467,
+          "bottom": 686.467
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 901.8,
+          "y": 657.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "award_btn",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/buttons/award_btn",
+        "sprite": "chara_rule_sel",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 588.2,
+          "top": 629.133,
+          "right": 767.533,
+          "bottom": 686.467
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 677.867,
+          "y": 657.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "GameObject (3)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/frame/GameObject (3)",
+        "sprite": "icon_front",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1203.927,
+          "top": 565.95,
+          "right": 1205.927,
+          "bottom": 567.95
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1204.927,
+          "y": 566.95
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "GameObject (2)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/frame/GameObject (2)",
+        "sprite": "icon_bg",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 563.267,
+          "top": 565.95,
+          "right": 565.266,
+          "bottom": 567.95
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 564.267,
+          "y": 566.95
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "GameObject (1)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/frame/GameObject (1)",
+        "sprite": "icon_bg",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1203.927,
+          "top": 454.617,
+          "right": 1205.927,
+          "bottom": 456.616
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1204.927,
+          "y": 455.617
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "GameObject",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/frame/GameObject",
+        "sprite": "icon_bg",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 563.267,
+          "top": 454.617,
+          "right": 565.267,
+          "bottom": 456.617
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 564.267,
+          "y": 455.617
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "halving_line_1",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/frame/halving_line_1",
+        "sprite": "decorate_line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 883.533,
+          "top": 464.557,
+          "right": 885.533,
+          "bottom": 560.557
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 884.533,
+          "y": 560.557
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/frame",
+        "sprite": "transparent_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 563.267,
+          "top": 454.617,
+          "right": 1205.934,
+          "bottom": 567.95
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 884.6,
+          "y": 511.283
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "title_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/fleet_info/title_bg",
+        "sprite": "defend_fleet",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 563.933,
+          "top": 417.883,
+          "right": 585.933,
+          "bottom": 439.883
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 574.933,
+          "y": 428.883
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "medal_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/medal_bg",
+        "sprite": "medal_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 117.4,
+          "top": 466.267,
+          "right": 263.4,
+          "bottom": 676.933
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 190.4,
+          "y": 571.6
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "exp_bar",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/exp_slider/exp_bar",
+        "sprite": "yellow_progress",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 287.907,
+          "top": 651.173,
+          "right": 480.346,
+          "bottom": 657.92
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 384.126,
+          "y": 654.547
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "exp_slider",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/exp_slider",
+        "sprite": "bar_with_brackets",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 284.7,
+          "top": 649.867,
+          "right": 523.3,
+          "bottom": 660.533
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 404.0,
+          "y": 655.2
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/statistics_panel/exploit_bg/icon",
+        "sprite": "exploit_icon",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 285.179,
+          "top": 577.406,
+          "right": 318.502,
+          "bottom": 611.395
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 301.841,
+          "y": 594.401
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "exploit_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/statistics_panel/exploit_bg",
+        "sprite": "score_bar",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 331.164,
+          "top": 580.605,
+          "right": 523.769,
+          "bottom": 613.261
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 427.467,
+          "y": 596.933
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/statistics_panel/rank_bg/icon",
+        "sprite": "rank_icon",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 286.846,
+          "top": 531.007,
+          "right": 316.836,
+          "bottom": 564.329
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 301.841,
+          "y": 547.668
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "rank_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/statistics_panel/rank_bg",
+        "sprite": "score_bar",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 331.165,
+          "top": 534.739,
+          "right": 523.769,
+          "bottom": 567.395
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 427.467,
+          "y": 551.067
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/statistics_panel/score_bg/icon",
+        "sprite": "score_icon",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 279.8,
+          "top": 481.268,
+          "right": 323.8,
+          "bottom": 522.602
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 301.8,
+          "y": 501.935
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "score_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/statistics_panel/score_bg",
+        "sprite": "score_bar",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 331.133,
+          "top": 490.933,
+          "right": 523.8,
+          "bottom": 523.6
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 427.467,
+          "y": 507.267
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "print",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/frame/print",
+        "sprite": "title_bar",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 100.473,
+          "top": 418.367,
+          "right": 536.727,
+          "bottom": 451.033
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 318.6,
+          "y": 418.367
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/bottom/player_info/frame",
+        "sprite": "transparent_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 100.473,
+          "top": 418.367,
+          "right": 536.727,
+          "bottom": 692.233
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 318.6,
+          "y": 555.3
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "GameObject (2)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/gizmos/GameObject (2)",
+        "sprite": "top_line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 93.666,
+          "top": -411.8,
+          "right": 94.333,
+          "bottom": 868.2
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 94.0,
+          "y": -411.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "GameObject (1)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/gizmos/GameObject (1)",
+        "sprite": "top_line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -1.987,
+          "top": 385.0,
+          "right": 2214.147,
+          "bottom": 385.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -1.987,
+          "y": 385.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "GameObject",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/gizmos/GameObject",
+        "sprite": "battle_rival",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 12.707,
+          "top": 377.333,
+          "right": 81.373,
+          "bottom": 382.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 47.04,
+          "y": 380.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "replace_rival_btn",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/replace_rival_btn",
+        "sprite": "chara_replace",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1058.8,
+          "top": 336.833,
+          "right": 1210.8,
+          "bottom": 392.167
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1134.8,
+          "y": 364.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "decorate",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/season_info/decorate",
+        "sprite": "decorate",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1060.133,
+          "top": 191.833,
+          "right": 1208.133,
+          "bottom": 325.833
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1134.133,
+          "y": 258.833
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/season_info/count_bg/Image",
+        "sprite": "label2",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1060.224,
+          "top": 145.169,
+          "right": 1175.386,
+          "bottom": 161.83
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1117.805,
+          "y": 153.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "count_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/season_info/count_bg",
+        "sprite": "duration_label",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1060.157,
+          "top": 139.971,
+          "right": 1208.776,
+          "bottom": 164.629
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1134.466,
+          "y": 152.3
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/season_info/season_time/Image",
+        "sprite": "label2",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1060.2,
+          "top": 80.5,
+          "right": 1175.4,
+          "bottom": 97.167
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1117.8,
+          "y": 88.833
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "season_time",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/season_info/season_time",
+        "sprite": "duration_label",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1060.133,
+          "top": 75.3,
+          "right": 1208.8,
+          "bottom": 99.967
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1134.467,
+          "y": 87.633
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_4/shiptpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 840.274,
+          "top": 120.971,
+          "right": 936.243,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 888.258,
+          "y": 168.955
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_4/shiptpl/icon_bg",
+        "sprite": "bg5",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 840.274,
+          "top": 120.971,
+          "right": 936.243,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 888.258,
+          "y": 168.955
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "rivaltpl_4",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_4",
+        "sprite": "rival_info_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 829.144,
+          "top": 73.986,
+          "right": 1059.736,
+          "bottom": 397.681
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 944.44,
+          "y": 235.833
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_3/shiptpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 596.127,
+          "top": 120.971,
+          "right": 692.096,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 644.112,
+          "y": 168.955
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_3/shiptpl/icon_bg",
+        "sprite": "bg5",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 596.127,
+          "top": 120.971,
+          "right": 692.096,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 644.112,
+          "y": 168.955
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "rivaltpl_3",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_3",
+        "sprite": "rival_info_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 584.997,
+          "top": 73.986,
+          "right": 815.589,
+          "bottom": 397.681
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 700.293,
+          "y": 235.833
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_2/shiptpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 351.981,
+          "top": 120.971,
+          "right": 447.949,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 399.965,
+          "y": 168.955
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_2/shiptpl/icon_bg",
+        "sprite": "bg5_0",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 351.981,
+          "top": 120.971,
+          "right": 447.949,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 399.965,
+          "y": 168.955
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "rivaltpl_2",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_2",
+        "sprite": "rival_info_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 340.851,
+          "top": 73.986,
+          "right": 571.443,
+          "bottom": 397.681
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 456.147,
+          "y": 235.833
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_1/shiptpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 107.834,
+          "top": 120.971,
+          "right": 203.803,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 155.818,
+          "y": 168.955
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_1/shiptpl/icon_bg",
+        "sprite": "bg5",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 107.834,
+          "top": 120.971,
+          "right": 203.803,
+          "bottom": 216.939
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 155.818,
+          "y": 168.955
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "rivaltpl_1",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)/center/rival_list/rivaltpl_1",
+        "sprite": "rival_info_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 96.704,
+          "top": 73.986,
+          "right": 327.296,
+          "bottom": 397.681
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 212.0,
+          "y": 235.833
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "MilitaryExerciseUI(Clone)",
+        "path": "UICamera/Canvas/UIMain/MilitaryExerciseUI(Clone)",
+        "sprite": "bg_duel",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem/icon",
+        "sprite": "res_diamond",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 975.533,
+          "top": 6.3,
+          "right": 1023.0,
+          "bottom": 61.1
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 999.267,
+          "y": 33.7
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "gem",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem",
+        "sprite": "res_bg_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 992.367,
+          "top": 13.7,
+          "right": 1176.167,
+          "bottom": 53.7
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1176.167,
+          "y": 33.7
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "max_bg2",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/max_bg2",
+        "sprite": "max_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 839.945,
+          "top": -2.564,
+          "right": 943.255,
+          "bottom": 16.098
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 891.6,
+          "y": 6.767
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/icon",
+        "sprite": "res_gold",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 769.1,
+          "top": 12.034,
+          "right": 813.1,
+          "bottom": 57.367
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 791.1,
+          "y": 34.7
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "gold",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold",
+        "sprite": "res_bg_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 783.233,
+          "top": 13.7,
+          "right": 967.033,
+          "bottom": 53.7
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 875.133,
+          "y": 33.7
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "max_bg",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/max_bg",
+        "sprite": "max_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 633.533,
+          "top": -2.566,
+          "right": 736.867,
+          "bottom": 16.1
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 685.2,
+          "y": 6.767
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/icon",
+        "sprite": "res_oil",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 555.213,
+          "top": 5.23,
+          "right": 609.254,
+          "bottom": 64.971
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 582.233,
+          "y": 35.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "oil",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil",
+        "sprite": "res_bg_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 574.1,
+          "top": 13.7,
+          "right": 757.9,
+          "bottom": 53.7
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 666.0,
+          "y": 33.7
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "top",
+        "path": "OverlayCamera/Adpter/top/top",
+        "sprite": "mask1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": -140.667,
+          "right": 1280.0,
+          "bottom": 0.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": -70.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "left",
+        "path": "OverlayCamera/Adpter/left/left",
+        "sprite": "mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -140.667,
+          "top": 0.0,
+          "right": -0.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -70.333,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bottom",
+        "path": "OverlayCamera/Adpter/bottom/bottom",
+        "sprite": "mask1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 720.0,
+          "right": 1280.0,
+          "bottom": 860.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 790.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "right",
+        "path": "OverlayCamera/Adpter/right/right",
+        "sprite": "mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1280.0,
+          "top": 0.0,
+          "right": 1420.667,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1350.333,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      }
+    ],
+    "globe_geometry": {
+      "schema": "alas-headless.globe-geometry/v1",
+      "status": 0,
+      "truncated": false,
+      "error_count": 0,
+      "camera_path": "",
+      "objects": []
+    },
+    "lua_globe_diagnostic": {
+      "schema": "alas-headless.lua-globe-diagnostic/v1",
+      "status": 0,
+      "stage": 0,
+      "truncated": false,
+      "stack_balanced": false,
+      "registry_visited": 0,
+      "inspection_count": 0,
+      "world_candidates": 0,
+      "drag_candidates": 0,
+      "colors": [],
+      "dragging": [],
+      "drag_pointer_instance_ids": [],
+      "drag_trigger_instance_ids": [],
+      "active_pointer_instance_id": 0
+    },
+    "shipyard_strengthen": {
+      "status": 0,
+      "stage": 0,
+      "truncated": false,
+      "stack_balanced": false,
+      "blueprint_id": 0,
+      "ship_id": 0,
+      "ship_index": 0,
+      "series": 0,
+      "rarity": 0,
+      "pursuing": false,
+      "purchased": 0,
+      "coins": 0,
+      "gems_known": false,
+      "paid_gems": 0,
+      "free_gems": 0,
+      "level": 0,
+      "fate_level": -1,
+      "exp": 0
+    },
+    "activity_identity": {
+      "status": 1,
+      "stack_balanced": true,
+      "archives": {
+        "status": 1,
+        "expected_count": 50,
+        "truncated": false,
+        "records": [
+          {
+            "id": 1,
+            "activity_type": 1,
+            "name": "红染常驻复刻",
+            "bg": "temp_hongran"
+          },
+          {
+            "id": 2,
+            "activity_type": 2,
+            "name": "Z舰队常驻复刻",
+            "bg": "temp_zjiandui"
+          },
+          {
+            "id": 4,
+            "activity_type": 1,
+            "name": "凛冬常驻复刻",
+            "bg": "temp_lingdong"
+          },
+          {
+            "id": 5,
+            "activity_type": 2,
+            "name": "围剿斯佩伯爵』常驻复刻",
+            "bg": "temp_sipei"
+          },
+          {
+            "id": 6,
+            "activity_type": 1,
+            "name": "异色格常驻复刻",
+            "bg": "temp_yisege"
+          },
+          {
+            "id": 7,
+            "activity_type": 1,
+            "name": "坠落之翼常驻复刻",
+            "bg": "temp_zhuiluo"
+          },
+          {
+            "id": 8,
+            "activity_type": 1,
+            "name": "鸢尾之华常驻复刻",
+            "bg": "temp_yuanwei"
+          },
+          {
+            "id": 9,
+            "activity_type": 1,
+            "name": "墨染的钢铁之花常驻复刻",
+            "bg": "temp_moran"
+          },
+          {
+            "id": 10,
+            "activity_type": 2,
+            "name": "光荣的一战常驻复刻",
+            "bg": "temp_guangrong"
+          },
+          {
+            "id": 11,
+            "activity_type": 1,
+            "name": "苍红的回响常驻复刻",
+            "bg": "temp_tiancheng"
+          },
+          {
+            "id": 12,
+            "activity_type": 2,
+            "name": "月光下的序曲常驻复刻",
+            "bg": "temp_xinaoerliang"
+          },
+          {
+            "id": 13,
+            "activity_type": 1,
+            "name": "俾斯麦常驻复刻",
+            "bg": "temp_bisimai"
+          },
+          {
+            "id": 14,
+            "activity_type": 2,
+            "name": "偶像一期常驻复刻",
+            "bg": "temp_ouxiang"
+          },
+          {
+            "id": 15,
+            "activity_type": 1,
+            "name": "神圣的悲喜剧常驻复刻",
+            "bg": "temp_beixiju"
+          },
+          {
+            "id": 16,
+            "activity_type": 2,
+            "name": "斯图尔特的硝烟常驻复刻",
+            "bg": "temp_longxiang"
+          },
+          {
+            "id": 17,
+            "activity_type": 1,
+            "name": "箱庭疗法常驻复刻",
+            "bg": "temp_xiangting"
+          },
+          {
+            "id": 18,
+            "activity_type": 1,
+            "name": "浮樱影华常驻复刻",
+            "bg": "temp_fuying"
+          },
+          {
+            "id": 19,
+            "activity_type": 2,
+            "name": "最珍贵的宝物常驻复刻",
+            "bg": "temp_u110"
+          },
+          {
+            "id": 20,
+            "activity_type": 2,
+            "name": "偶像二期常驻复刻",
+            "bg": "temp_ouxiang2"
+          },
+          {
+            "id": 21,
+            "activity_type": 1,
+            "name": "微层混合常驻复刻",
+            "bg": "temp_weiceng"
+          },
+          {
+            "id": 22,
+            "activity_type": 2,
+            "name": "峡湾间的星辰常驻复刻",
+            "bg": "temp_yonggan"
+          },
+          {
+            "id": 23,
+            "activity_type": 1,
+            "name": "穹顶下的圣咏曲常驻复刻",
+            "bg": "temp_zhende"
+          },
+          {
+            "id": 24,
+            "activity_type": 2,
+            "name": "夜幕下的归途常驻复刻",
+            "bg": "temp_taertu"
+          },
+          {
+            "id": 25,
+            "activity_type": 1,
+            "name": "北境序曲常驻复刻",
+            "bg": "temp_qiaba"
+          },
+          {
+            "id": 26,
+            "activity_type": 1,
+            "name": "永夜幻光常驻复刻",
+            "bg": "temp_hemin"
+          },
+          {
+            "id": 27,
+            "activity_type": 2,
+            "name": "峡湾间的反击常驻复刻",
+            "bg": "temp_aisijimoren"
+          },
+          {
+            "id": 28,
+            "activity_type": 1,
+            "name": "负象限作战常驻复刻",
+            "bg": "temp_u37"
+          },
+          {
+            "id": 29,
+            "activity_type": 1,
+            "name": "蝶海梦花常驻复刻",
+            "bg": "temp_xinnong"
+          },
+          {
+            "id": 30,
+            "activity_type": 1,
+            "name": "镜位螺旋常驻复刻",
+            "bg": "temp_xinzexi"
+          },
+          {
+            "id": 31,
+            "activity_type": 1,
+            "name": "破晓冰华常驻复刻",
+            "bg": "temp_talin"
+          },
+          {
+            "id": 32,
+            "activity_type": 2,
+            "name": "划破海空之翼常驻复刻",
+            "bg": "temp_pulinsidun"
+          },
+          {
+            "id": 33,
+            "activity_type": 2,
+            "name": "杰诺瓦的焰火常驻复刻",
+            "bg": "temp_fuxv"
+          },
+          {
+            "id": 34,
+            "activity_type": 1,
+            "name": "碧海光粼常驻复刻",
+            "bg": "temp_daofeng"
+          },
+          {
+            "id": 35,
+            "activity_type": 1,
+            "name": "复兴的赞美诗常驻复刻",
+            "bg": "temp_weineituo"
+          },
+          {
+            "id": 36,
+            "activity_type": 1,
+            "name": "逆转彩虹之塔常驻复刻",
+            "bg": "temp_huteng"
+          },
+          {
+            "id": 37,
+            "activity_type": 1,
+            "name": "深度回音常驻复刻",
+            "bg": "temp_kalangshitade"
+          },
+          {
+            "id": 38,
+            "activity_type": 2,
+            "name": "虚像构筑之塔常驻复刻",
+            "bg": "temp_diguo"
+          },
+          {
+            "id": 39,
+            "activity_type": 1,
+            "name": "泠誓光庭常驻复刻",
+            "bg": "temp_qianwei"
+          },
+          {
+            "id": 40,
+            "activity_type": 1,
+            "name": "雄鹰的叙事歌常驻复刻",
+            "bg": "temp_luoma"
+          },
+          {
+            "id": 41,
+            "activity_type": 1,
+            "name": "虹彩的终幕曲常驻复刻",
+            "bg": "temp_aimudeng"
+          },
+          {
+            "id": 42,
+            "activity_type": 2,
+            "name": "飓风与青春之泉常驻复刻",
+            "bg": "temp_fengfanv1"
+          },
+          {
+            "id": 43,
+            "activity_type": 1,
+            "name": "紫绛槿岚常驻复刻",
+            "bg": "temp_wuzang"
+          },
+          {
+            "id": 44,
+            "activity_type": 1,
+            "name": "定向折叠常驻复刻",
+            "bg": "temp_yuekechengII"
+          },
+          {
+            "id": 45,
+            "activity_type": 1,
+            "name": "湮烬尘墟常驻复刻",
+            "bg": "temp_yuanchou"
+          },
+          {
+            "id": 46,
+            "activity_type": 2,
+            "name": "远汇点作战常驻复刻",
+            "bg": "temp_bulunxierde"
+          },
+          {
+            "id": 47,
+            "activity_type": 2,
+            "name": "奏响鸢尾之歌常驻复刻",
+            "bg": "temp_masaiqu"
+          },
+          {
+            "id": 48,
+            "activity_type": 1,
+            "name": "空相交汇点常驻复刻",
+            "bg": "temp_bisimaiz"
+          },
+          {
+            "id": 49,
+            "activity_type": 2,
+            "name": "幻梦间奏曲常驻复刻",
+            "bg": "temp_sitelasibao"
+          },
+          {
+            "id": 50,
+            "activity_type": 3,
+            "name": "极地风暴常驻复刻",
+            "bg": "temp_kuersike"
+          },
+          {
+            "id": 51,
+            "activity_type": 3,
+            "name": "童心学院常驻复刻",
+            "bg": "temp_yaerweite"
+          }
+        ]
+      },
+      "raids": {
+        "status": 1,
+        "stage": 14,
+        "proxy_count": 28,
+        "matched_count": 28,
+        "failed_id": 0,
+        "expected_count": 0,
+        "truncated": false,
+        "records": []
+      }
+    },
+    "operation_siren_map_drag": {
+      "status": 0,
+      "handler_instance_id": 0,
+      "endpoints": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "handler_path": "",
+      "samples": []
+    },
+    "private_quarters_physics": {
+      "schema": "alas-headless.private-colliders/v1",
+      "status": 0,
+      "truncated": false,
+      "error_count": 0,
+      "camera_path": "",
+      "colliders": []
+    }
+  }
+}

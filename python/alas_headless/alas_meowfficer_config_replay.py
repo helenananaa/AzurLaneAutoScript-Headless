@@ -109,13 +109,13 @@ def _verify_contract() -> tuple[int, int]:
     for buy_amount in (0, 1, 15):
         for overflow_coins in (-1, 0, 999999):
             for mode in ("seamlessly", "once_a_day"):
-                snapshot = validate_alas_meowfficer_config(**_settings(buy_amount=buy_amount, overflow_coins=overflow_coins, train_mode=mode))
+                snapshot = validate_alas_meowfficer_config(**_settings(buy_amount=buy_amount, overflow_coins=overflow_coins, train_mode=mode, train_enable=True))
                 if snapshot.max_feed_level != 5 or snapshot.train_mode != mode:
                     raise AssertionError("Meowfficer snapshot drifted")
                 accepted += 1
-    for key, value in (("buy_amount", 16), ("overflow_coins", -2), ("fort_chore_meowfficer", 1), ("train_mode", "daily"), ("retain_talented_gold", "yes"), ("enhance_index", 13), ("max_feed_level", 31)):
+    for key, value in (("buy_amount", 16), ("overflow_coins", -2), ("fort_chore_meowfficer", 1), ("train_mode", "daily"), ("retain_talented_gold", "yes"), ("enhance_index", 13), ("max_feed_level", "31")):
         try:
-            validate_alas_meowfficer_config(**_settings(**{key: value}))
+            validate_alas_meowfficer_config(**_settings(train_enable=True, **{key: value}))
         except SemanticGateClosed:
             invalid += 1
         else:
@@ -166,9 +166,14 @@ def _verify_consumers(root: Path) -> tuple[dict[str, list[str]], bool, dict[str,
             "seamlessly": _run_entry(run_type, buy_amount=0, fort_chore_meowfficer=False, train_enable=True),
             "once_daily": _run_entry(run_type, buy_amount=0, fort_chore_meowfficer=False, train_enable=True, train_mode="once_a_day", sunday=False),
             "sunday": _run_entry(run_type, buy_amount=0, fort_chore_meowfficer=False, train_enable=True, train_mode="once_a_day", sunday=True),
-            "invalid": _run_entry(run_type, max_feed_level=31),
+            "invalid": _run_entry(run_type, train_enable=True, max_feed_level="31"),
+            "disabled_stale_training": _run_entry(
+                run_type, train_enable=False, train_mode="obsolete-mode",
+                retain_talented_gold=None, retain_talented_purple=None,
+                enhance_index=None, max_feed_level=999,
+            ),
         }
-        expected = {"none": ["stop"], "buy": ["ensure", "wait", "buy", "delay"], "fort": ["ensure", "wait", "fort", "delay"], "seamlessly": ["ensure", "wait", "train", "enhance", "delay"], "once_daily": ["ensure", "wait", "train", "delay"], "sunday": ["ensure", "wait", "train", "enhance", "delay"], "invalid": []}
+        expected = {"none": ["stop"], "buy": ["ensure", "wait", "buy", "delay"], "fort": ["ensure", "wait", "fort", "delay"], "seamlessly": ["ensure", "wait", "train", "enhance", "delay"], "once_daily": ["ensure", "wait", "train", "delay"], "sunday": ["ensure", "wait", "train", "enhance", "delay"], "invalid": [], "disabled_stale_training": ["ensure", "wait", "buy", "fort", "delay"]}
         if decisions != expected: raise AssertionError("Meowfficer task entry forwarding drifted")
     consumers = {field.replace("_", ".", 1): ["RewardMeowfficer.run"] + sorted(set(paths)) for field, paths in raw_reads.items()}
     return consumers, guarded, decisions

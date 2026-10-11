@@ -6,6 +6,12 @@ from alas_headless import SemanticGateClosed
 
 
 class FakeOpsiOracle:
+    def meta_character_page_visible(self):
+        return False
+
+    def meta_character_menu_visible(self):
+        return False
+
     def meta_page_visible(self):
         return self.meta_page_visible_value
 

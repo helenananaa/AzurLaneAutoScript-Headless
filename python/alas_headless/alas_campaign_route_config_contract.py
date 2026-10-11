@@ -12,7 +12,7 @@ from .semantic_oracle import SemanticGateClosed
 MAIN_TASKS = ("Main", "Main2", "Main3")
 MAIN_CAMPAIGN_EVENT = "campaign_main"
 MAIN_CAMPAIGN_MODES = ("normal",)
-_STAGE_PATTERN = re.compile(r"^([1-9]|1[0-6])-([1-4])$")
+_STAGE_PATTERN = re.compile(r"^([1-9][0-9]*)-([1-4])$")
 
 
 @dataclass(frozen=True)
@@ -34,7 +34,7 @@ def validate_alas_main_campaign_route_config(
     if task not in MAIN_TASKS:
         return None
     if not isinstance(stage, str) or _STAGE_PATTERN.fullmatch(stage) is None:
-        raise SemanticGateClosed("main campaign stage is not in the pinned catalog")
+        raise SemanticGateClosed("main campaign stage must be chapter-section with section 1 to 4")
     if event != MAIN_CAMPAIGN_EVENT:
         raise SemanticGateClosed("main task cannot route to a non-main campaign")
     if mode not in MAIN_CAMPAIGN_MODES:

@@ -1,0 +1,24 @@
+diff --git a/module/ui/ui.py b/module/ui/ui.py
+--- a/module/ui/ui.py
++++ b/module/ui/ui.py
+@@ -299,13 +299,14 @@
+                         try:
+                             self.device.click(button)
+                         except SemanticInputBlocked as exc:
+-                            if exc.blockers != ('bulletin',):
++                            if not (exc.blockers == ('bulletin',) or
++                                    (exc.semantic_id == 'os/page/back'
++                                     and exc.blockers == ('opsi-exit',))):
+                                 raise
+-                            # No navigation input was sent. The bulletin may
+-                            # mount after the screenshot that found this page.
+-                            # Refresh through the existing loop; ui_additional
+-                            # owns the reviewed announcement close action.
+-                            logger.info('Navigation covered by bulletin; refresh native UI loop')
++                            # No navigation input was sent. A reviewed overlay
++                            # may mount after the native screenshot. Refresh
++                            # this loop; ui_additional owns its handling.
++                            logger.info(f'Navigation covered by {exc.blockers[0]}; refresh native UI loop')
+                             self.device.screenshot()
+                             break
+                     else:

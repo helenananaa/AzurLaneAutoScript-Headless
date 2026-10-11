@@ -222,6 +222,7 @@ def verify_hp_control_config(alas_root: Path) -> dict[str, Any]:
     ):
         for value in values:
             config = _defaults()
+            config.update(use_hp_balance=True, use_emergency_repair=True, use_low_hp_retreat=True)
             config[field] = value
             validate_alas_hp_control_config(**config)
             accepted_cases.append(f"{field}:{value}")
@@ -250,6 +251,7 @@ def verify_hp_control_config(alas_root: Path) -> dict[str, Any]:
         ("hp_balance_weight", "1,inf,2"),
     ):
         config = _defaults()
+        config.update(use_hp_balance=True, use_emergency_repair=True, use_low_hp_retreat=True)
         config[field] = value
         try:
             validate_alas_hp_control_config(**config)

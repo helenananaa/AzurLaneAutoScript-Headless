@@ -149,9 +149,25 @@ def test_original_camera_uses_actual_semantic_swipe_delta_with_os_pixel_predicti
     assert host.camera==expected_camera and host._prev_view is None
 
 def test_unresolved_native_fog_cannot_become_an_empty_original_alas_rescan(native):
+    from alas_headless import AlasSemanticUnmapped
     state=replace(geometry(),unresolved_fog_images=('LevelGrid/plane/cells/fogs/fog/dark_fog',))
-    with pytest.raises(SemanticGateClosed,match='rescan visibility unavailable'):
+    with pytest.raises(AlasSemanticUnmapped,match='rescan visibility unavailable'):
         AlasSemanticOpsiView(state,SimpleNamespace(SCREEN_CENTER=(310,310)))
+
+
+def test_unknown_fog_releases_only_the_native_task_and_allows_the_next_task(native):
+    from unittest.mock import Mock
+    from alas_headless.adapter.task_lifecycle import semantic_task_scope, TaskCapabilityUnavailable
+    session=SimpleNamespace(discard_task_state=Mock(),trace=None)
+    state=replace(geometry(),unresolved_fog_images=('LevelGrid/plane/cells/fogs/fog/dark_fog',))
+    with pytest.raises(TaskCapabilityUnavailable,match='rescan visibility unavailable'):
+        with semantic_task_scope(session,'opsi_explore'):
+            AlasSemanticOpsiView(state,SimpleNamespace(SCREEN_CENTER=(310,310)))
+    assert session.last_task_outcome['outcome']=='capability-unavailable'
+    with semantic_task_scope(session,'research'):
+        pass
+    assert session.last_task_outcome['outcome']=='returned'
+    assert session.discard_task_state.call_count==2
 
 
 @pytest.mark.parametrize('event_id', [5103, 5204])

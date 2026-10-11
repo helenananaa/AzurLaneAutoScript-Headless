@@ -197,7 +197,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertEqual(receipt.semantic_id, "campaign/stage/12-4")
         self.assertFalse(adapter.campaign_stage_entry_allowed())
         self.assertEqual(oracle.click_calls, ["campaign/stage/12-4"])
-        with self.assertRaisesRegex(SemanticGateClosed, "remaining budget"):
+        with self.assertRaisesRegex(SemanticGateClosed, "already submitted"):
             adapter.click(button)
         adapter.end_campaign_pre_sortie()
 

@@ -1,11 +1,35 @@
 """Transport regression cases for the oracle."""
 
 import unittest
+import pytest
 from alas_headless.semantic_oracle import AdbObserverBridge, ObserverTransportError
 from tests.semantic_support.observer_fixtures import FakeBackend, PACKAGE, make_oracle
 from tests.semantic_support.oracle_cases import SemanticOracleTestsSupport
 from types import SimpleNamespace
 from unittest import mock
+
+
+@pytest.mark.parametrize('flags,methods', [(15, 15), (31, 15), (15, 31), (0x100F, 0x100F)])
+def test_state_read_accepts_additive_publisher_capabilities(flags, methods):
+    backend = FakeBackend([])
+    backend.snapshot.update(flags=flags, ui_method_mask=methods, future_metadata='ignored')
+    assert make_oracle(backend).read_state().generation == 10
+    assert backend.taps == []
+
+
+@pytest.mark.parametrize('field,value', [
+    ('flags', 7), ('flags', 0x8000000F), ('flags', -1), ('flags', True),
+    ('flags', 0x10000000F), ('ui_method_mask', 7), ('ui_method_mask', '15'),
+    ('ui_stage', 99), ('ui_stage', 100.0), ('main_thread', False),
+])
+def test_incomplete_or_failed_publisher_still_rejects_state(field, value):
+    from alas_headless.semantic_oracle import SemanticGateClosed
+
+    backend = FakeBackend([])
+    backend.snapshot[field] = value
+    with pytest.raises(SemanticGateClosed, match='typed main-thread UI probe is incomplete'):
+        make_oracle(backend).read_state()
+    assert backend.taps == []
 
 
 class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):

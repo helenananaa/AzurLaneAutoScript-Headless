@@ -141,6 +141,7 @@ def test_home_transition_allows_passive_preparation_probe_but_not_input(transiti
     from tests.semantic_support.adapter_fixtures import FakeOracle
     oracle = FakeOracle()
     oracle.operation_siren_world_overview_visible = lambda: False
+    oracle.inherited_campaign_withdraw_control = lambda **kwargs: None
     a = AlasSemanticAdapter(oracle, package_gate=lambda: None)
     button = SimpleNamespace(name=name)
     with pytest.raises(AlasSemanticUnmapped):

@@ -1,0 +1,38 @@
+diff --git a/module/guild/logistics.py b/module/guild/logistics.py
+--- a/module/guild/logistics.py
++++ b/module/guild/logistics.py
+@@ -1,4 +1,4 @@
+-from alas_headless import validate_alas_guild_config
++from alas_headless import validate_alas_guild_config, AlasSemanticUnmapped, SemanticGateClosed
+ 
+ import re
+ 
+@@ -465,10 +465,26 @@
+                 try:
+                     state = adapter.guild_logistics_state()
+                     break
+-                except Exception:
++                except SemanticGateClosed as exc:
++                    # These are read-only logistics parser failures. Keep
++                    # the existing mount retry, then let native ALAS defer
++                    # this task. Identity/input/transport failures propagate.
++                    if str(exc) not in (
++                        'guild logistics snapshots are not coherent',
++                        'guild logistics page identity is absent',
++                        'guild logistics text is absent or ambiguous',
++                        'guild logistics progress is malformed',
++                        'guild exchange remaining count is malformed',
++                        'guild exchange buttons are absent or ambiguous',
++                        'guild exchange row identity is ambiguous',
++                        'guild exchange row values are malformed',
++                        'guild amount is malformed',
++                    ):
++                        raise
++                    observation_error = str(exc)
+                     self.device.sleep(0.2)
+             else:
+-                raise RuntimeError('Guild logistics did not become observable')
++                raise AlasSemanticUnmapped('Guild logistics unavailable: ' + observation_error)
+ 
+             def close_awards():
+                 for _ in range(30):

@@ -27,6 +27,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         frame.enabled.return_value = False
         adapter.campaign_combat_committed.return_value = False
         adapter.operation_siren_combat_committed.return_value = False
+        adapter._operation_siren_reward_return_completed.return_value = None
         adapter.oracle.award_info_page_visible.return_value = True
         adapter.prepared_input_frame.side_effect = lambda provider: nullcontext()
         session = AlasSemanticSession.__new__(AlasSemanticSession)
@@ -76,7 +77,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertEqual(session.refresh_frame.call_count, 2)
         self.assertEqual(adapter.click.call_count, 2)
 
-    def test_live_combat_manifest_rebinds_only_reviewed_capacity_successor(self):
+    def test_live_combat_manifest_rebinds_capacity_successor_without_mutating_baseline(self):
         base_revision = "be80ce591a481c12d60c50d6040d40c035b40a2b"
         live_revision = "506b76f698b5089aaa29c4e7908b48edb8532a44"
         manifest = AlasCombatObserverManifest(
@@ -97,24 +98,31 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertEqual(manifest.driver_revision, base_revision)
         self.assertIs(session._live_combat_manifest(), rebound)
 
-    def test_live_combat_manifest_rejects_unknown_driver_transition(self):
+    def test_live_combat_manifest_reports_unknown_driver_as_best_effort(self):
         manifest = AlasCombatObserverManifest(
             package="com.bilibili.azurlane",
             driver_revision="be80ce591a481c12d60c50d6040d40c035b40a2b",
             game_fingerprint="reviewed-game",
             resources=(),
         )
-        session = AlasSemanticSession("emulator-test", "a" * 40)
+        trace = Mock()
+        session = AlasSemanticSession("emulator-test", "a" * 40, trace=trace)
 
         with patch(
             "alas_headless.adapter.semantic.session_combat.load_alas_combat_observer_manifest",
             return_value=manifest,
         ):
-            with self.assertRaisesRegex(
-                SemanticGateClosed,
-                "not qualified",
-            ):
-                session._live_combat_manifest()
+            rebound = session._live_combat_manifest()
+        self.assertEqual(rebound.driver_revision, "a" * 40)
+        self.assertEqual(manifest.driver_revision, "be80ce591a481c12d60c50d6040d40c035b40a2b")
+        trace.emit.assert_called_once_with(
+            "semantic.combat.compatibility",
+            fields={
+                "status": "best-effort",
+                "baseline_driver_revision": manifest.driver_revision,
+                "active_driver_revision": "a" * 40,
+            },
+        )
 
     def test_environment_factory_requires_explicit_opt_in(self):
         environment = {

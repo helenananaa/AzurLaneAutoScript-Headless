@@ -17,10 +17,7 @@ class OpsiShopAdapterPorts:
     ) -> ActionReceipt:
         """Purchase exactly one proven unified Operation Siren shop item."""
 
-        if not self._action_ledger.allowed("shop.purchase"):
-            raise SemanticGateClosed(
-                "Operation Siren shop purchase requires a positive transaction budget"
-            )
+        self._require_action_grant("shop.purchase")
         before_items = self.oracle._retry_transition_read(
             self.oracle.operation_siren_shop_items,
             attempts=8,
@@ -130,10 +127,7 @@ class OpsiShopAdapterPorts:
     ) -> ActionReceipt:
         """Resume an exact quantity-one dialog after an ambiguous item tap."""
 
-        if not self._action_ledger.allowed("shop.purchase"):
-            raise SemanticGateClosed(
-                "Operation Siren shop recovery requires a positive transaction budget"
-            )
+        self._require_action_grant("shop.purchase")
         if self.oracle.shop_purchase_dialog_quantity(expected_display_name) != 1:
             raise SemanticGateClosed(
                 "Operation Siren shop recovery dialog is absent or changed"
@@ -191,10 +185,7 @@ class OpsiShopAdapterPorts:
     ) -> ActionReceipt:
         """Exchange exactly one proven Operation Siren voucher item."""
 
-        if not self._action_ledger.allowed("shop.purchase"):
-            raise SemanticGateClosed(
-                "Operation Siren voucher exchange requires a positive transaction budget"
-            )
+        self._require_action_grant("shop.purchase")
         if expected_currency != "Voucher":
             raise SemanticGateClosed(
                 "Operation Siren voucher Oil exchange is not qualified"

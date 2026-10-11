@@ -18,6 +18,41 @@ from tests.semantic_support.oracle_cases import SemanticOracleTestsSupport
 
 
 class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
+    def test_queue_enumerates_added_slots_and_never_hides_a_new_unread_slot(self):
+        page = 'root/Overlay/UIMain/blur_panel/'
+        queue = 'root/UICamera/Canvas/UIMain/BuildShipDetailUI1(Clone)/'
+        backend = FakeBackend([make_button('back_btn', page + 'adapt/top/back_btn')])
+        backend.ui = make_ui([
+            make_text('3', queue + 'title/value'),
+            *[make_text('99:99:99', queue + f'list_mult_line/content/project_{i}/frame/buiding/timer/Text')
+              for i in range(1, 7)],
+        ], toggles=[make_toggle(page + 'adapt/left_length/frame/tagRoot/queue_btn', checked=True)])
+        oracle = make_oracle(backend)
+        self.assertEqual(oracle.build_queue_timers(), ('99:99:99',) * 6)
+        self.assertTrue(oracle.build_queue_empty())
+        finished = make_button('launched_btn', queue + 'list_mult_line/content/project_6/frame/finished/launched_btn')
+        finished['raycast_top'] = None
+        backend.buttons['buttons'].append(finished)
+        backend.buttons['button_count'] += 1
+        self.assertFalse(oracle.build_queue_empty())
+        backend.ui['texts'].pop()
+        backend.ui['text_count'] -= 1
+        with self.assertRaisesRegex(SemanticGateClosed, 'timers are incomplete'):
+            oracle.build_queue_timers()
+
+    def test_empty_queue_proof_rejects_unrecognized_active_slot(self):
+        page = 'root/Overlay/UIMain/blur_panel/'
+        queue = 'root/UICamera/Canvas/UIMain/BuildShipDetailUI1(Clone)/'
+        backend = FakeBackend([
+            make_button('back_btn', page + 'adapt/top/back_btn'),
+            make_button('launched_btn', queue + 'list_mult_line/content/project_future/frame/finished/launched_btn'),
+        ])
+        backend.ui = make_ui([
+            make_text('4', queue + 'title/value'), make_text('99', queue + 'quick_count/value'),
+        ], toggles=[make_toggle(page + 'adapt/left_length/frame/tagRoot/queue_btn', checked=True)])
+        with self.assertRaisesRegex(SemanticGateClosed, 'row identity is unsupported'):
+            make_oracle(backend).build_queue_empty()
+
     def test_empty_queue_batch_button_returns_to_pool_without_mutation_grant(self):
         from alas_headless import AlasSemanticAdapter
         from tests.semantic_support.adapter_fixtures import NamedButton

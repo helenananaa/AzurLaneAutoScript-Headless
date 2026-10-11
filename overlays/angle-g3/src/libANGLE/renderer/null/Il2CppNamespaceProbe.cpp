@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "libANGLE/renderer/null/Il2CppNamespaceProbe.h"
+#include "libANGLE/renderer/null/NativeUtf8Prefix.h"
 #include "libANGLE/renderer/null/PrivateQuartersRaycast.h"
 
 #include "common/platform.h"
@@ -38,6 +39,7 @@ namespace {
 std::mutex gGlobeProjectionMutex;
 bool gGlobeProjectionRequested = false;
 float gGlobeProjectionX = 0, gGlobeProjectionY = 0;
+uint32_t gGlobePortInputEntrance = 0;
 std::mutex gMapDragMutex;
 bool gMapDragRequested = false;
 uint32_t gMapDragScope = 1;
@@ -272,12 +274,14 @@ int FindAndResolveLua(dl_phdr_info *info, size_t, void *opaque) {
 }
 NativeLuaReadApi LoadedLuaReadApi() {
   static Il2CppDynamicProbe loaded;
-  if (loaded.symbolCount != kLuaReadSymbols.size()) {
+  if (!loaded.dynamicParsed) {
     loaded = {};
     dl_iterate_phdr(FindAndResolveLua, &loaded);
   }
   NativeLuaReadApi api;
-  if (!loaded.dynamicParsed || loaded.symbolCount != kLuaReadSymbols.size()) return api;
+  if (!loaded.dynamicParsed) return api;
+  // Readers declare their own required functions. A missing globe-only helper
+  // must not disable independent raw table readers or repeat symbol scans.
   api.getTop = reinterpret_cast<decltype(api.getTop)>(loaded.symbols[0]);
   api.setTop = reinterpret_cast<decltype(api.setTop)>(loaded.symbols[1]);
   api.type = reinterpret_cast<decltype(api.type)>(loaded.symbols[2]);
@@ -316,6 +320,9 @@ struct UiProbeResult {
   uint32_t imageSourceCount = 0;
   uint32_t imageSourceCapacity = 0;
   uint32_t uiRecordErrors = 0;
+  uint32_t toggleRecordErrors = 0;
+  uint32_t textRecordErrors = 0;
+  uint32_t imageRecordErrors = 0;
   uint32_t uiRecordSkipped = 0;
   uint32_t uiMethodMask = 0;
   std::array<ObserverToggleRecord, kMaxObserverToggles> toggles = {};
@@ -325,6 +332,8 @@ struct UiProbeResult {
   std::array<char, kObserverPathBytes> globeCameraPath = {};
   std::array<ObserverGlobeObjectRecord, 512> globeObjects = {};
   NativeLuaGlobeDiagnostic luaGlobe = {};
+  NativeLuaShipyardState shipyard = {};
+  NativeLuaActivityIdentity activityIdentity = {};
   ObserverMapDragProof mapDrag = {};
   uint32_t privatePhysicsStatus = 0;
   uint32_t colliderCount = 0;
@@ -341,7 +350,7 @@ bool CopyBoundedString(std::string_view source,
   if (destination == nullptr) {
     return false;
   }
-  const size_t copyLength = std::min(source.size(), Size - 1);
+  const size_t copyLength = NativeUtf8Prefix(source, Size - 1);
   if (copyLength > 0) {
     ANGLE_UNSAFE_TODO(
         std::memcpy(destination->data(), source.data(), copyLength));
@@ -437,7 +446,28 @@ bool IsMeowfficerPurchaseControl(std::string_view name, std::string_view path) {
   return name == "frame" && EndsWith(path, "CommanderReserveUI(Clone)/frame");
 }
 
+bool IsShipyardStrengthenControl(std::string_view name, std::string_view path) {
+  constexpr std::string_view root = "OverlayCamera/Overlay/UIMain/blur_panel/adapt/right_panel/";
+  if (path.substr(0, root.size()) != root) return false;
+  const auto relative = path.substr(root.size());
+  if (name == "fitting_btn" && relative == "mod_panel/desc/fitting_btn") return true;
+  for (const auto panel : {"mod_panel/desc/calc_panel/", "fitting_panel/desc/bottom/"}) {
+    if ((name == "plus" || name == "minus") &&
+        relative == std::string(panel) + "calc/base/" + std::string(name)) return true;
+    if (name == "confirm_btn" && relative == std::string(panel) + "confirm_btn") return true;
+  }
+  return false;
+}
+
+bool IsArchiveCardControl(std::string_view name, std::string_view path) {
+  constexpr std::string_view root = "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/";
+  return name == "icon" && path.substr(0, root.size()) == root &&
+      (path.substr(root.size()) == "item/bg/icon" ||
+       path.substr(root.size()) == "item(Clone)/bg/icon");
+}
+
 bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
+  if (IsShipyardStrengthenControl(name, path) || IsArchiveCardControl(name, path)) return true;
   if (IsMeowfficerPurchaseControl(name, path)) return true;
   if (IsShipyardSeriesControl(name, path)) return true;
   if (name == "mouseChild" && IsCampaignScoutControl(path)) {
@@ -1140,11 +1170,16 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
   result.globeObjectStatus = result.globeObjectCount = result.globeObjectTruncated = result.globeObjectErrors = 0;
   result.globeCameraPath.fill(0);
   result.luaGlobe = {};
+  result.shipyard = {};
+  result.activityIdentity = {};
   result.colliderCount = 0;
   result.colliderTruncated = 0;
   result.colliderErrors = 0;
   result.physicsCameraPath.fill(0);
   result.uiRecordErrors = 0;
+  result.toggleRecordErrors = 0;
+  result.textRecordErrors = 0;
+  result.imageRecordErrors = 0;
   result.uiRecordSkipped = 0;
   result.uiMethodMask = 0;
   result.diagnosticStage = 10;
@@ -2047,6 +2082,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
           IsRetirementControl(path) || IsSubmarineCallControl(path) ||
           IsCampaignStrategyDetailsControl(path) || IsCampaignDeploymentControl(path) ||
           IsCampaignScoutControl(path) || IsShipyardSeriesControl(objectName, path) ||
+          IsShipyardStrengthenControl(objectName, path) || IsArchiveCardControl(objectName, path) ||
           (EndsWith(path, "Dorm3dMainUI(Clone)/UI/base/btn_back") ||
           EndsWith(path, "Dorm3dMainUI(Clone)/UI/watch/btn_back") ||
           EndsWith(path, "Dorm3dMainUI(Clone)/UI/ik/btn_back")) ||
@@ -2068,6 +2104,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
         }
       }
       if (IsShipyardSeriesControl(objectName, path) ||
+          IsShipyardStrengthenControl(objectName, path) || IsArchiveCardControl(objectName, path) ||
           (EndsWith(path, "Dorm3dMainUI(Clone)/UI/base/btn_back") ||
           EndsWith(path, "Dorm3dMainUI(Clone)/UI/watch/btn_back") ||
           EndsWith(path, "Dorm3dMainUI(Clone)/UI/ik/btn_back")) ||
@@ -2212,6 +2249,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
     LoadedObjectCollector toggleCollector;
     if (!collectLoadedInstances(toggleClass, &toggleCollector)) {
       ++result.uiRecordErrors;
+      ++result.toggleRecordErrors;
     } else {
       result.toggleRecordTruncated |= toggleCollector.truncated ? 1u : 0u;
       for (size_t index = 0; index < toggleCollector.count; ++index) {
@@ -2219,14 +2257,22 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
         bool active = false;
         bool interactable = false;
         bool isOn = false;
-        if (toggle == nullptr ||
-            !invokeBoolean(getToggleActiveAndEnabled, toggle, &active) ||
-            !invokeBoolean(getToggleInteractable, toggle, &interactable) ||
-            !invokeBoolean(getToggleIsOn, toggle, &isOn)) {
+        if (toggle == nullptr) {
           ++result.uiRecordSkipped;
           continue;
         }
+        if (!invokeBoolean(getToggleActiveAndEnabled, toggle, &active)) {
+          ++result.uiRecordErrors;
+          ++result.toggleRecordErrors;
+          continue;
+        }
         if (!active) {
+          continue;
+        }
+        if (!invokeBoolean(getToggleInteractable, toggle, &interactable) ||
+            !invokeBoolean(getToggleIsOn, toggle, &isOn)) {
+          ++result.uiRecordErrors;
+          ++result.toggleRecordErrors;
           continue;
         }
         if (result.toggleRecordCount >= result.toggles.size()) {
@@ -2236,6 +2282,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
         ObserverToggleRecord &record = result.toggles[result.toggleRecordCount];
         if (!populateControlRecord(toggle, interactable, &record.control)) {
           ++result.uiRecordErrors;
+          ++result.toggleRecordErrors;
           continue;
         }
         const std::string_view toggleName(
@@ -2293,15 +2340,20 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
     LoadedObjectCollector textCollector;
     if (!collectLoadedInstances(textClass, &textCollector)) {
       ++result.uiRecordErrors;
+      ++result.textRecordErrors;
       return;
     }
     result.textRecordTruncated |= textCollector.truncated ? 1u : 0u;
     for (size_t index = 0; index < textCollector.count; ++index) {
       void *textComponent = textCollector.objects[index];
       bool active = false;
-      if (textComponent == nullptr ||
-          !invokeBoolean(getTextActiveAndEnabled, textComponent, &active)) {
+      if (textComponent == nullptr) {
         ++result.uiRecordSkipped;
+        continue;
+      }
+      if (!invokeBoolean(getTextActiveAndEnabled, textComponent, &active)) {
+        ++result.uiRecordErrors;
+        ++result.textRecordErrors;
         continue;
       }
       if (!active) {
@@ -2315,11 +2367,13 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
       ObserverButtonRecord geometry;
       if (!populateControlRecord(textComponent, false, &geometry)) {
         ++result.uiRecordErrors;
+        ++result.textRecordErrors;
         continue;
       }
       void *textObject = invokeObject(getText, textComponent);
       if (textObject == nullptr) {
         ++result.uiRecordErrors;
+        ++result.textRecordErrors;
         continue;
       }
 
@@ -2358,6 +2412,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
     static thread_local LoadedImageObjectCollector imageCollector;
     if (!collectLoadedInstances(imageClass, &imageCollector)) {
       ++result.uiRecordErrors;
+      ++result.imageRecordErrors;
     } else {
       result.imageSourceCount = static_cast<uint32_t>(
           std::min(imageCollector.sourceCount,
@@ -2389,6 +2444,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
         ObserverButtonRecord geometry;
         if (!populateControlRecord(image, false, &geometry, allowInactive)) {
           ++result.uiRecordErrors;
+          ++result.imageRecordErrors;
           return;
         }
         bool raycastTarget = false;
@@ -2402,6 +2458,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
             !invokeValue(getImageFillAmount, image, nullptr, &fillAmount,
                          sizeof(fillAmount))) {
           ++result.uiRecordErrors;
+          ++result.imageRecordErrors;
           return;
         }
 
@@ -2501,9 +2558,13 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
       for (size_t index = 0; index < imageCollector.count; ++index) {
         void *image = imageCollector.objects[index];
         bool active = false;
-        if (image == nullptr ||
-            !invokeBoolean(getImageActiveAndEnabled, image, &active)) {
+        if (image == nullptr) {
           ++result.uiRecordSkipped;
+          continue;
+        }
+        if (!invokeBoolean(getImageActiveAndEnabled, image, &active)) {
+          ++result.uiRecordErrors;
+          ++result.imageRecordErrors;
           continue;
         }
         if (!active) {
@@ -2697,39 +2758,33 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
     }
   }
 
-  // Optional globe geometry is observation only; projected renderer centers
-  // do not authorize input or identify a zone without a reviewed game mapping.
-  bool globeVisible = false;
-  for (size_t i = 0; i < result.recordCount; ++i) {
-    globeVisible |= EndsWith(std::string(result.records[i].path.data()),
-        "top/adapt/top_chapter/back_button");
-  }
-  if (globeVisible) {
-    result.globeObjectStatus = 2;
-    // Unity main-thread, raw scalar diagnostics only. GetMainState is a typed
-    // managed getter; no Lua function, callback, metamethod or workflow is run.
-    result.luaGlobe.status = 2;
-    result.luaGlobe.stage = 10;
+  // Reuse the typed managed LuaState getter for optional, page-owned raw
+  // observations. A missing field disables only that observation family.
+  void *nativeState = nullptr, *stateClass = nullptr, *luaPointerClass = nullptr;
+  uint32_t luaStateStage = 10;
+  bool luaStateRead = false;
+  auto readNativeLuaState = [&]() {
+    if (luaStateRead) return nativeState;
+    luaStateRead = true;
     if (gameImage && systemImage && optionalFieldGetType) {
       void *client = classFromName(gameImage, "", "LuaClient");
       const void *getter = client ? classGetMethodFromName(client, "GetMainState", 0) : nullptr;
-      void *stateClass = getter ? classFromType(methodGetReturnType(getter)) : nullptr;
-      void *pointerClass = classFromName(systemImage, "System", "IntPtr");
+      stateClass = getter ? classFromType(methodGetReturnType(getter)) : nullptr;
+      luaPointerClass = classFromName(systemImage, "System", "IntPtr");
       void *field = nullptr;
       for (void *owner = stateClass; owner && !field; owner = classGetParent(owner))
         field = classGetFieldFromName(owner, "L");
-      result.luaGlobe.stage = 11;
-      if (field && pointerClass && classFromType(optionalFieldGetType(field)) == pointerClass) {
+      luaStateStage = 11;
+      if (field && luaPointerClass && classFromType(optionalFieldGetType(field)) == luaPointerClass) {
         void *getterException = nullptr;
         void *stateObject = runtimeInvoke(getter, nullptr, nullptr, &getterException);
-        void *nativeState = nullptr;
         if (getterException) {
-          result.luaGlobe.stage = 13; // Getter threw; no field or Lua access.
+          luaStateStage = 13; // Getter threw; no field or Lua access.
         } else if (!stateObject) {
-          result.luaGlobe.stage = 14; // Getter returned no managed state.
+          luaStateStage = 14; // Getter returned no managed state.
         } else {
           fieldGetValue(stateObject, field, &nativeState);
-          result.luaGlobe.stage = nativeState ? 12u : 15u;
+          luaStateStage = nativeState ? 12u : 15u;
         }
         if (!nativeState && probe.optionalFieldGetFlags && probe.optionalFieldStaticGetValue) {
           // Some clients do not own LuaClient.Instance. Read the actual typed
@@ -2739,75 +2794,109 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
           const auto flags = reinterpret_cast<FieldGetFlags>(probe.optionalFieldGetFlags);
           const auto staticValue = reinterpret_cast<FieldStaticGetValue>(probe.optionalFieldStaticGetValue);
           void *mainField = classGetFieldFromName(stateClass, "mainState");
-          result.luaGlobe.stage = 16;
+          luaStateStage = 16;
           if (mainField && (flags(mainField) & 0x10u) && !(flags(field) & 0x10u)
               && classFromType(optionalFieldGetType(mainField)) == stateClass) {
             void *mainState = nullptr;
             staticValue(mainField, &mainState);
-            result.luaGlobe.stage = 17;
+            luaStateStage = 17;
             if (mainState) {
               fieldGetValue(mainState, field, &nativeState);
-              result.luaGlobe.stage = nativeState ? 19u : 18u;
+              luaStateStage = nativeState ? 19u : 18u;
             }
           }
-        }
-        if (nativeState) {
-          const NativeLuaReadApi api = LoadedLuaReadApi();
-          // ToLua.ToObject reads the userdata's existing translator entry.
-          // This optional path never runs a Lua function or metamethod.
-          using MethodFlags = uint32_t (*)(const void *, uint32_t *);
-          using ObjectClass = void *(*)(void *);
-          struct IdentityContext {
-            RuntimeInvoke invoke;
-            ObjectUnbox unbox;
-            ObjectClass objectClass;
-            ClassGetParent parent;
-            void *unityObject;
-            const void *toObject, *instanceId;
-          } identity{runtimeInvoke, objectUnbox,
-              reinterpret_cast<ObjectClass>(probe.optionalObjectGetClass),
-              classGetParent, classFromName(coreImage, "UnityEngine", "Object"), nullptr, getInstanceId};
-          NativeLuaUnityObjectApi objects;
-          if (probe.optionalMethodGetFlags && probe.optionalClassGetImage
-              && identity.objectClass && identity.unityObject && getInstanceId) {
-            using ClassImage = const void *(*)(void *);
-            const auto classImage = reinterpret_cast<ClassImage>(probe.optionalClassGetImage);
-            const void *luaImage = stateClass ? classImage(stateClass) : nullptr;
-            void *toLua = luaImage ? classFromName(luaImage, "LuaInterface", "ToLua") : nullptr;
-            const void *method = toLua ? classGetMethodFromName(toLua, "ToObject", 2) : nullptr;
-            void *intClass = classFromName(systemImage, "System", "Int32");
-            void *objectClass = classFromName(systemImage, "System", "Object");
-            const auto flags = reinterpret_cast<MethodFlags>(probe.optionalMethodGetFlags);
-            uint32_t implementationFlags = 0;
-            if (method && intClass && objectClass && pointerClass && (flags(method, &implementationFlags) & 0x10u)
-                && classFromType(methodGetParam(method, 0)) == pointerClass
-                && classFromType(methodGetParam(method, 1)) == intClass
-                && classFromType(methodGetReturnType(method)) == objectClass) {
-              identity.toObject = method;
-              objects.context = &identity;
-              objects.instanceId = +[](void *opaque, void *lua, int index) -> int32_t {
-                auto &context = *static_cast<IdentityContext *>(opaque);
-                void *args[] = {&lua, &index};
-                void *exception = nullptr;
-                void *object = context.invoke(context.toObject, nullptr, args, &exception);
-                if (!object || exception) return 0;
-                bool unityObject = false;
-                for (void *klass = context.objectClass(object); klass; klass = context.parent(klass)) {
-                  if (klass == context.unityObject) { unityObject = true; break; }
-                }
-                if (!unityObject) return 0;
-                void *boxed = context.invoke(context.instanceId, object, nullptr, &exception);
-                if (!boxed || exception) return 0;
-                const void *value = context.unbox(boxed);
-                int32_t id = 0;
-                if (value) std::memcpy(&id, value, sizeof(id));
-                return id;
-              };
-            }
-          }
-          NativeLuaGlobeReader(api, nativeState, result.luaGlobe, objects).read();
         }
       }
+    }
+    return nativeState;
+  };
+  bool shipyardVisible = false;
+  for (size_t i = 0; i < result.recordCount; ++i) {
+    shipyardVisible |= std::string(result.records[i].path.data()).find(
+        "ShipBluePrintUI(Clone)/") != std::string::npos;
+  }
+  if (shipyardVisible) {
+    NativeLuaShipyardReader(LoadedLuaReadApi(), readNativeLuaState(), result.shipyard).read();
+    if (!nativeState) result.shipyard.stage = luaStateStage;
+  }
+  // Activity configuration is read-only and each catalog reports its own
+  // availability. It neither changes UI error counts nor blocks other tasks.
+  if (result.recordCount) {
+    NativeLuaActivityIdentityReader(LoadedLuaReadApi(), readNativeLuaState(),
+                                   result.activityIdentity).read();
+  }
+
+  // Optional globe geometry is observation only; projected renderer centers
+  // do not authorize input or identify a zone without a reviewed game mapping.
+  bool globeVisible = false;
+  for (size_t i = 0; i < result.recordCount; ++i) {
+    globeVisible |= EndsWith(std::string(result.records[i].path.data()),
+        "top/adapt/top_chapter/back_button");
+  }
+  if (globeVisible) {
+    void *inputTexture = nullptr, *inputCamera = nullptr;
+    size_t inputPointerCount = 0;
+    result.globeObjectStatus = 2;
+    // Unity main-thread, raw scalar diagnostics only. GetMainState is a typed
+    // managed getter; no Lua function, callback, metamethod or workflow is run.
+    result.luaGlobe.status = 2;
+    result.luaGlobe.stage = 10;
+    if (readNativeLuaState()) {
+      result.luaGlobe.stage = luaStateStage;
+      const NativeLuaReadApi api = LoadedLuaReadApi();
+      // ToLua.ToObject reads the userdata's existing translator entry.
+      // This optional path never runs a Lua function or metamethod.
+      using MethodFlags = uint32_t (*)(const void *, uint32_t *);
+      using ObjectClass = void *(*)(void *);
+      struct IdentityContext {
+        RuntimeInvoke invoke;
+        ObjectUnbox unbox;
+        ObjectClass objectClass;
+        ClassGetParent parent;
+        void *unityObject;
+        const void *toObject, *instanceId;
+      } identity{runtimeInvoke, objectUnbox,
+          reinterpret_cast<ObjectClass>(probe.optionalObjectGetClass),
+          classGetParent, classFromName(coreImage, "UnityEngine", "Object"), nullptr, getInstanceId};
+      NativeLuaUnityObjectApi objects;
+      if (probe.optionalMethodGetFlags && probe.optionalClassGetImage
+          && identity.objectClass && identity.unityObject && getInstanceId) {
+        using ClassImage = const void *(*)(void *);
+        const auto classImage = reinterpret_cast<ClassImage>(probe.optionalClassGetImage);
+        const void *luaImage = stateClass ? classImage(stateClass) : nullptr;
+        void *toLua = luaImage ? classFromName(luaImage, "LuaInterface", "ToLua") : nullptr;
+        const void *method = toLua ? classGetMethodFromName(toLua, "ToObject", 2) : nullptr;
+        void *intClass = classFromName(systemImage, "System", "Int32");
+        void *objectClass = classFromName(systemImage, "System", "Object");
+        const auto flags = reinterpret_cast<MethodFlags>(probe.optionalMethodGetFlags);
+        uint32_t implementationFlags = 0;
+        if (method && intClass && objectClass && luaPointerClass && (flags(method, &implementationFlags) & 0x10u)
+            && classFromType(methodGetParam(method, 0)) == luaPointerClass
+            && classFromType(methodGetParam(method, 1)) == intClass
+            && classFromType(methodGetReturnType(method)) == objectClass) {
+          identity.toObject = method;
+          objects.context = &identity;
+          objects.instanceId = +[](void *opaque, void *lua, int index) -> int32_t {
+            auto &context = *static_cast<IdentityContext *>(opaque);
+            void *args[] = {&lua, &index};
+            void *exception = nullptr;
+            void *object = context.invoke(context.toObject, nullptr, args, &exception);
+            if (!object || exception) return 0;
+            bool unityObject = false;
+            for (void *klass = context.objectClass(object); klass; klass = context.parent(klass)) {
+              if (klass == context.unityObject) { unityObject = true; break; }
+            }
+            if (!unityObject) return 0;
+            void *boxed = context.invoke(context.instanceId, object, nullptr, &exception);
+            if (!boxed || exception) return 0;
+            const void *value = context.unbox(boxed);
+            int32_t id = 0;
+            if (value) std::memcpy(&id, value, sizeof(id));
+            return id;
+          };
+        }
+      }
+      NativeLuaGlobeReader(api, nativeState, result.luaGlobe, objects).read();
     }
     // Read-only native metadata for the game's actual plane input component.
     // Diagnostic records never carry an input point or authorize a gesture.
@@ -2866,6 +2955,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
           void *nativeCamera = nullptr, *texture = nullptr;
           if (camField) fieldGetValue(pointer, camField, &nativeCamera);
           if (texField) fieldGetValue(pointer, texField, &texture);
+          inputTexture = texture; inputCamera = nativeCamera; ++inputPointerCount;
           float mapX = 0, mapY = 0;
           bool projectionRequested = false;
           {
@@ -3188,6 +3278,109 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
               if (uiHit) fieldGetValue(uiHit, raycastGameObjectField, &go);
               if (go && sample == 0) CopyBoundedString(pathOf(invokeObject(getTransform, go)), &record.uiTopPath);
             }
+          }
+        }
+      }
+      // PointerInfo's installed method reads this CPU-side colormask through
+      // RaycastHit.textureCoord -> Texture2D.GetPixel -> World.colorDic. This
+      // is the game's input identity data, not a framebuffer or ALAS image.
+      // The normal entrance anchor can land on an ASTC value absent from the
+      // dictionary. Locate an exact dictionary-owned point within the live
+      // marker bounds; never round a color to a nearby entrance or change it.
+      uint32_t entrance = 0;
+      { std::lock_guard<std::mutex> lock(gGlobeProjectionMutex); entrance = gGlobePortInputEntrance; }
+      void *textureClass = classFromName(coreImage, "UnityEngine", "Texture2D");
+      void *vector2Class = classFromName(coreImage, "UnityEngine", "Vector2");
+      void *colorClass = classFromName(coreImage, "UnityEngine", "Color");
+      const void *widthGetter = textureClass ? findMethodInHierarchy(textureClass, "get_width", 0) : nullptr;
+      const void *heightGetter = textureClass ? findMethodInHierarchy(textureClass, "get_height", 0) : nullptr;
+      const void *pixelGetter = textureClass ? findMethodInHierarchy(textureClass, "GetPixel", 2) : nullptr;
+      const void *uvGetter = hitClass ? findMethodInHierarchy(hitClass, "get_textureCoord", 0) : nullptr;
+      std::array<char, 7> expectedColor = {};
+      size_t colorMatches = 0;
+      for (size_t i = 0; i < result.luaGlobe.colorCount; ++i) {
+        const auto &entry = result.luaGlobe.colors[i];
+        if (entry.entrance == entrance && entry.owner == 1) { expectedColor = entry.hex; ++colorMatches; }
+      }
+      int32_t textureWidth = 0, textureHeight = 0;
+      if (entrance && inputPointerCount == 1 && inputTexture && inputCamera == camera &&
+          result.luaGlobe.status == 1 && result.luaGlobe.worldCandidates == 1 &&
+          result.luaGlobe.colorTableComplete && colorMatches == 1 &&
+          pixelGetter && uvGetter && widthGetter && heightGetter && vector2Class && colorClass &&
+          classFromType(methodGetReturnType(pixelGetter)) == colorClass &&
+          classFromType(methodGetReturnType(uvGetter)) == vector2Class &&
+          invokeValue(widthGetter, inputTexture, nullptr, &textureWidth, sizeof(textureWidth)) &&
+          invokeValue(heightGetter, inputTexture, nullptr, &textureHeight, sizeof(textureHeight)) &&
+          textureWidth > 0 && textureHeight > 0) {
+        const std::string prefix = "WorldMap3D/entity/sprite_scene/port_" + std::to_string(entrance) + "/";
+        size_t markerCount = 0, markerIndex = 0;
+        for (size_t i = 0; i < result.globeObjectCount; ++i) {
+          const auto &record = result.globeObjects[i];
+          if (std::string(record.name.data()) == "port" && std::string(record.path.data()).rfind(prefix, 0) == 0 &&
+              (record.flags & 19u) == 19u) { ++markerCount; markerIndex = i; }
+        }
+        if (markerCount == 1 && result.globeObjectCount < result.globeObjects.size()) {
+          const auto marker = result.globeObjects[markerIndex];
+          float left = screenWidth, right = 0, top = screenHeight, bottom = 0;
+          bool projected = true;
+          for (int corner = 0; corner < 8; ++corner) {
+            Vector3 world{marker.center[0] + ((corner & 1) ? 1 : -1) * marker.extents[0],
+                          marker.center[1] + ((corner & 2) ? 1 : -1) * marker.extents[1],
+                          marker.center[2] + ((corner & 4) ? 1 : -1) * marker.extents[2]}, p{};
+            void *args[] = {&world};
+            if (!invokeValue(worldToScreenPoint, camera, args, &p, sizeof(p)) ||
+                !std::isfinite(p.x) || !std::isfinite(p.y) || !std::isfinite(p.z) || p.z <= 0) { projected = false; break; }
+            left = std::min(left, p.x); right = std::max(right, p.x);
+            top = std::min(top, static_cast<float>(screenHeight) - p.y);
+            bottom = std::max(bottom, static_cast<float>(screenHeight) - p.y);
+          }
+          bool found = false;
+          constexpr std::array<float, 7> positions = {0.5f, 0.35f, 0.65f, 0.2f, 0.8f, 0.05f, 0.95f};
+          for (float vertical : positions) {
+            for (float horizontal : positions) {
+              if (!projected || found) break;
+              const float x = std::round(left + (right - left) * horizontal);
+              const float y = std::round(top + (bottom - top) * vertical);
+              if (x < 0 || y < 0 || x >= screenWidth || y >= screenHeight) continue;
+              Vector3 screenPoint{x, static_cast<float>(screenHeight) - y, 0};
+              void *rayArgs[] = {&screenPoint};
+              void *ray = invokeObject(makeRay, camera, rayArgs);
+              void *hit = objectNew(hitClass); float distance = 10000; uint8_t hitValue = 0;
+              if (!ray || !hit || !objectUnbox(ray) || !objectUnbox(hit)) continue;
+              if (privateCast) {
+                void *castArgs[] = {objectUnbox(ray), &distance, &hitValue};
+                void *boxed = invokeObject(cast, plane, castArgs);
+                if (!boxed || !objectUnbox(boxed)) continue;
+                hit = boxed;
+              } else {
+                void *castArgs[] = {objectUnbox(ray), objectUnbox(hit), &distance};
+                if (!invokeValue(cast, plane, castArgs, &hitValue, sizeof(hitValue))) continue;
+              }
+              Vector2 uv{};
+              if (!hitValue || !invokeValue(uvGetter, objectUnbox(hit), nullptr, &uv, sizeof(uv)) ||
+                  !std::isfinite(uv.x) || !std::isfinite(uv.y) || uv.x < 0 || uv.x >= 1 || uv.y < 0 || uv.y >= 1) continue;
+              int32_t pixelX = static_cast<int32_t>(uv.x * textureWidth), pixelY = static_cast<int32_t>(uv.y * textureHeight);
+              struct MaskColor { float r, g, b, a; } color{};
+              void *pixelArgs[] = {&pixelX, &pixelY};
+              if (!invokeValue(pixelGetter, inputTexture, pixelArgs, &color, sizeof(color))) continue;
+              std::array<char, 7> hex = {};
+              if (!GlobeInputMaskHex(color.r, color.g, color.b, hex)) continue;
+              if (hex != expectedColor) continue;
+              bool evaluated = false;
+              const bool same = topRaycastMatches(invokeObject(getTransform, invokeObject(getGameObject, plane)), Vector2{screenPoint.x, screenPoint.y}, &evaluated);
+              int32_t uiHits = -1;
+              if (!evaluated || !invokeValue(getRaycastCount, raycastResults, nullptr, &uiHits, sizeof(uiHits)) ||
+                  uiHits < 0 || (uiHits != 0 && !same)) continue;
+              auto &record = result.globeObjects[result.globeObjectCount++]; record = marker;
+              CopyBoundedString("port-mask-input", &record.name);
+              record.flags = 31u; record.preciseFlags = 13u;
+              record.inputX = record.preciseInputX = x; record.inputY = record.preciseInputY = y;
+              invokeValue(getInstanceId, plane, nullptr, &record.planeInstanceId, sizeof(record.planeInstanceId));
+              record.precisePlaneInstanceId = record.planeInstanceId;
+              record.inputEntrance = entrance; record.inputMaskColor = hex;
+              found = true;
+            }
+            if (found) break;
           }
         }
       }
@@ -3581,6 +3774,9 @@ int32_t ObserverMainThreadTick(uint64_t requestGeneration,
     uiSnapshot.textTruncated = ui.textRecordTruncated;
     uiSnapshot.imageTruncated = ui.imageRecordTruncated;
     uiSnapshot.errorCount = ui.uiRecordErrors;
+    uiSnapshot.toggleErrorCount = ui.toggleRecordErrors;
+    uiSnapshot.textErrorCount = ui.textRecordErrors;
+    uiSnapshot.imageErrorCount = ui.imageRecordErrors;
     uiSnapshot.skippedCount = ui.uiRecordSkipped;
     uiSnapshot.methodMask = ui.uiMethodMask;
     uiSnapshot.imageSourceCount = ui.imageSourceCount;
@@ -3597,6 +3793,8 @@ int32_t ObserverMainThreadTick(uint64_t requestGeneration,
     uiSnapshot.globeCameraPath = ui.globeCameraPath;
     uiSnapshot.globeObjects = ui.globeObjects;
     uiSnapshot.luaGlobe = ui.luaGlobe;
+    uiSnapshot.shipyard = ui.shipyard;
+    uiSnapshot.activityIdentity = ui.activityIdentity;
     uiSnapshot.colliderCount = ui.colliderCount;
     uiSnapshot.colliderTruncated = ui.colliderTruncated;
     uiSnapshot.colliderErrors = ui.colliderErrors;
@@ -3768,6 +3966,17 @@ bool RequestGlobeMapProjection(float x, float y) {
   std::lock_guard<std::mutex> lock(gGlobeProjectionMutex);
   gGlobeProjectionX = x; gGlobeProjectionY = y;
   gGlobeProjectionRequested = true;
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool RequestGlobePortInput(uint32_t entrance) {
+#if defined(ANGLE_PLATFORM_ANDROID)
+  if (entrance < 1 || entrance > 8) return false;
+  std::lock_guard<std::mutex> lock(gGlobeProjectionMutex);
+  gGlobePortInputEntrance = entrance;
   return true;
 #else
   return false;

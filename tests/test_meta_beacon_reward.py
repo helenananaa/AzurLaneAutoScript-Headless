@@ -107,7 +107,11 @@ def test_meta_home_recovery_closes_only_the_reviewed_reward_overlay():
     a = AlasSemanticAdapter(o, package_gate=lambda: None)
     a._award_close_target = Mock(return_value='reward/award-info/close')
     for name in ('GOTO_MAIN', 'GOTO_MAIN_WHITE', 'RPG_HOME'):
-        assert a._appear_priority(name) is True
+        assert a._appear_priority(name) is False
+    # The foreground AwardInfo belongs to ALAS' ordinary reward handler;
+    # its underlying page is absent until that handler closes it.
+    o.enabled = lambda target: target == 'reward/award-info/close'
+    assert a._appear_priority('GET_ITEMS_1') is True
     assert o.click_calls == []
     a._click_main('GOTO_MAIN', None)
     assert o.click_calls == ['reward/award-info/close']

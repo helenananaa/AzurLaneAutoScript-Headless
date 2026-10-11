@@ -9,13 +9,15 @@ import math
 import re
 from typing import Optional, Tuple
 from .contracts import ActionReceipt, ButtonState, Point
-from .errors import SemanticGateClosed, SemanticOracleError, SemanticTargetNotActionable
+from .errors import SemanticGateClosed, SemanticOracleError, SemanticTargetNotActionable, SemanticInputBlocked, SemanticTargetMissing, SemanticInputTargetMissing, SemanticGuildFormationUnavailable
 
 
 class ActionsOracle:
     """Actions operations sharing the oracle frame and input boundary."""
 
     def click(self, semantic_id: str) -> Union[ActionReceipt, PrivateQuartersPhysicsReceipt]:
+        if semantic_id == 'reward/item-info/close':
+            return self.click_reward_item_info_close()
         if semantic_id in ('meowfficer/buy/add', 'meowfficer/buy/min'):
             matches = self._matches(self.read_state(), semantic_id)
             if not matches:
@@ -115,7 +117,14 @@ class ActionsOracle:
             "minigame/tickets/confirm",
         ) and not self._minigame_ticket_prompt_matches(state):
             raise SemanticGateClosed("minigame ticket prompt identity is not proven")
-        target = self._unique(state, semantic_id)
+        try:
+            target = self._unique(state, semantic_id)
+        except SemanticTargetMissing as exc:
+            if semantic_id == 'guild/formation/go':
+                # A missing pre-input dispatch control is local compatibility
+                # failure, not a failed or uncertain dispatch. ALAS owns retry.
+                raise SemanticGuildFormationUnavailable(state.generation) from exc
+            raise SemanticInputTargetMissing(semantic_id, state.generation) from exc
         delegated_operation_siren_reward = semantic_id == 'os/auto-search/reward/close'
         if (delegated_operation_siren_reward
                 and not self._operation_siren_auto_search_reward_control_proven(state)):
@@ -375,6 +384,19 @@ class ActionsOracle:
                     and target.bounds is not None
                     and target.bounds.contains(target.point)
                 )
+        operation_siren_header_control = semantic_id in (
+            "os/map/auto-search/off", "os/map/auto-search/on",
+            "os/map/strategic-search/off", "os/map/strategic-search/on",
+            "os/map/mission-list", "os/map/storage", "os/port/enter",
+        )
+        delegated_activity_archive_home = bool(
+            semantic_id == 'archive/activity-list/home'
+            and self._activity_archive_home_proven(state)
+        )
+        delegated_player_profile_back = bool(
+            semantic_id == 'player/profile/back'
+            and self._player_profile_back_proven(state)
+        )
         delegated_operation_siren_control = bool(
             semantic_id
             in (
@@ -413,18 +435,35 @@ class ActionsOracle:
             and target.bounds.contains(target.point)
             and (
                 self.operation_siren_state()
-                if semantic_id
-                in (
-                    "os/map/auto-search/off",
-                    "os/map/auto-search/on",
-                    "os/map/strategic-search/off",
-                    "os/map/strategic-search/on",
-                    "os/map/mission-list",
-                    "os/map/storage",
-                    "os/port/enter",
-                )
+                if operation_siren_header_control
                 else True
             )
+        )
+        if operation_siren_header_control and delegated_operation_siren_control:
+            # The complete header can require read-only publication settling.
+            # Re-acquire the requested Button before input, rather than using
+            # the target retained before that read. Final blockers, screen
+            # bounds and exact foreground checks below use this same state.
+            state = self.read_state()
+            target = self._unique(state, semantic_id)
+            back = self._unique(state, 'os/page/back')
+            delegated_operation_siren_control = bool(
+                back.active_in_hierarchy and back.active_and_enabled
+                and target.active_in_hierarchy and target.active_and_enabled
+                and target.interactable and target.raycast_top is None
+                and target.point is not None and target.bounds is not None
+                and target.bounds.contains(target.point)
+            )
+        delegated_academy_back = bool(
+            semantic_id == 'academy/page/back'
+            and self.academy_page_visible()
+            and target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.raycast_top is not False
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
         )
         delegated_operation_siren_boss_start = bool(
             semantic_id == "os/boss/start"
@@ -515,6 +554,10 @@ class ActionsOracle:
             semantic_id == "mail/manage/back"
             and self._mail_manager_back_delegated_raycast_proven(state)
         )
+        dorm_food_control = (semantic_id in ('dorm/feed/shop/open', 'dorm/feed/shop/plus',
+                                             'dorm/feed/shop/minus', 'dorm/feed/shop/cancel', 'dorm/feed/shop/confirm')
+                             and not target.actionable
+                             and self._dorm_food_shop_control_proven(state, semantic_id))
         if (
             semantic_id == "tactical/continue/cancel"
             and not self._tactical_continue_prompt_matches(state)
@@ -595,6 +638,8 @@ class ActionsOracle:
                 and not delegated_login_update
                 and not delegated_login_restart
                 and not delegated_activity_main_back
+                and not delegated_activity_archive_home
+                and not delegated_player_profile_back
                 and not delegated_shop_home
                 and not delegated_mail_confirmation
                 and not delegated_exercise_opponent
@@ -603,6 +648,7 @@ class ActionsOracle:
                 and not delegated_exercise_back
                 and not delegated_academy_munitions
                 and not delegated_academy_game_room
+                and not delegated_academy_back
                 and not delegated_game_room_list
                 and not delegated_game_room_home
                 and not delegated_game_room_free
@@ -615,6 +661,7 @@ class ActionsOracle:
                 and not dorm_back_delegated
                 and not dorm_empty_food_cancel
                 and not dorm_page_control
+                and not dorm_food_control
                 and not mail_manager_back_delegated
                 and not delegated_new_ship_reward
                 and not delegated_meowfficer_dock_control
@@ -641,19 +688,19 @@ class ActionsOracle:
             or target.point is None
             or target.bounds is None
         ):
-            if semantic_id == 'dorm/feed':
-                raise SemanticTargetNotActionable(semantic_id, state.generation)
-            if (semantic_id == 'login/enter' and target.active_in_hierarchy
-                    and target.active_and_enabled and target.interactable
-                    and target.raycast_top is False and target.point is not None
-                    and target.bounds is not None and target.bounds.contains(target.point)
-                    and all(rule.blocker_id == 'loading' for rule in
-                            self._blocking_rules(state, semantic_id))):
-                # Authentication can briefly take the login root's raycast
-                # after a positive ALAS observation, including its known
-                # loading curtain. No input was submitted.
-                raise SemanticTargetNotActionable(semantic_id, state.generation)
-            raise SemanticGateClosed("semantic target is not actionable")
+            # A bulletin can also remove the underlying button's raycast.
+            # Preserve its typed reason for native popup reentry, including any
+            # other simultaneous blockers. Other refusals retain the same
+            # message so their existing readiness handling still applies.
+            disallowed = tuple(
+                rule.blocker_id for rule in self._blocking_rules(state, semantic_id)
+            )
+            if 'bulletin' in disallowed:
+                raise SemanticInputBlocked(semantic_id, state.generation, disallowed)
+            # This admission branch always precedes dispatch, for every
+            # mapped target. Preserve the refusal and let the original task
+            # failure interval own re-entry instead of terminating ALAS.
+            raise SemanticTargetNotActionable(semantic_id, state.generation)
         point = target.point
         if delegated_game_room_back:
             ui_state = self.read_ui_state()
@@ -789,9 +836,7 @@ class ActionsOracle:
             rule.blocker_id for rule in self._blocking_rules(state, semantic_id)
         )
         if disallowed:
-            raise SemanticGateClosed(
-                "semantic input is blocked by: {0}".format(", ".join(disallowed))
-            )
+            raise SemanticInputBlocked(semantic_id, state.generation, disallowed)
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed immediately before input")
 

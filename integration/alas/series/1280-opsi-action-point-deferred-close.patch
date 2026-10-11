@@ -1,0 +1,45 @@
+diff --git a/module/os_handler/action_point.py b/module/os_handler/action_point.py
+--- a/module/os_handler/action_point.py
++++ b/module/os_handler/action_point.py
+@@ -1,6 +1,7 @@
+ from datetime import datetime
+ 
+ from alas_headless import SemanticOracleError, validate_alas_opsi_action_point_purchase
++from alas_headless.adapter.semantic.contracts import AlasSemanticActionDeferred
+ 
+ import module.config.server as server
+ from module.base.button import ButtonGrid
+@@ -389,6 +390,15 @@
+                 semantic_adapter.click_operation_siren_action_point_control(False)
+                 raise ActionPointLimit
+ 
++            def consume_selected():
++                try:
++                    return semantic_adapter.click_operation_siren_action_point_control(True)
++                except AlasSemanticActionDeferred:
++                    # This handler owns the open panel. Leave a supported page
++                    # before ALAS delays this task and selects an unrelated one.
++                    semantic_adapter.click_operation_siren_action_point_control(False)
++                    raise
++
+             buy_checked = False
+             for _ in range(12):
+                 if state.current >= cost:
+@@ -420,7 +430,7 @@
+                         >= state.oil_purchase_cost + purchase_config.oil_limit
+                     ):
+                         before = state
+-                        semantic_adapter.click_operation_siren_action_point_control(True)
++                        consume_selected()
+                         for _ in range(20):
+                             self.device.sleep(0.25)
+                             state = semantic_adapter.operation_siren_action_point_state()
+@@ -467,7 +477,7 @@
+                     semantic_adapter.click_operation_siren_action_point_item(selected)
+                     state = semantic_adapter.operation_siren_action_point_state()
+                 before = state
+-                semantic_adapter.click_operation_siren_action_point_control(True)
++                consume_selected()
+                 for _ in range(20):
+                     self.device.sleep(0.25)
+                     state = semantic_adapter.operation_siren_action_point_state()

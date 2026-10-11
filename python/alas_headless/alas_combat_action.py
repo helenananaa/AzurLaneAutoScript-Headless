@@ -16,7 +16,7 @@ from .alas_combat_observer import (
     AlasCombatActionMapping,
     AlasCombatObserverManifest,
     AlasCombatObserverSnapshot,
-    alas_combat_unity_selector_present,
+    alas_combat_unity_selectors_present,
     prepare_alas_combat_resource_action,
 )
 from .alas_combat_state_replay import ALAS_COMBAT_RESOURCE_ACTION_TARGETS
@@ -100,10 +100,7 @@ def _action_variant_evidence(
             selector.require_top_raycast and selector.path == path
             for selector in variant.selectors
         )
-        and all(
-            alas_combat_unity_selector_present(snapshot, selector)
-            for selector in variant.selectors
-        )
+        and alas_combat_unity_selectors_present(snapshot, variant.selectors)
     )
     if len(matches) != 1 or not matches[0].qualified:
         raise SemanticGateClosed(

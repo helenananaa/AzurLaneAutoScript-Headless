@@ -456,6 +456,7 @@ def verify_tactical_config(alas_root: Path) -> dict[str, Any]:
             accepted += 1
     for value in ("1", "125"):
         values = _defaults()
+        values["add_new_student_enable"] = True
         values["add_new_student_min_level"] = value
         validate_alas_tactical_config(**values)
         accepted += 1
@@ -502,6 +503,7 @@ def verify_tactical_config(alas_root: Path) -> dict[str, Any]:
     )
     for field, value in invalids:
         values = _defaults()
+        values["add_new_student_enable"] = True
         values[field] = value
         try:
             validate_alas_tactical_config(**values)

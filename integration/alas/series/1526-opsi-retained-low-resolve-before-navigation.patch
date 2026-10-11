@@ -1,0 +1,29 @@
+diff --git a/module/os/map.py b/module/os/map.py
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -87,6 +87,13 @@
+             **kwargs
+         )
+ 
++        if semantic_adapter is not None:
++            if semantic_adapter.operation_siren_low_resolve_prompt_visible():
++                logger.info('Recover retained Operation Siren low-resolve prompt')
++                semantic_adapter.click_operation_siren_low_resolve_cancel()
++                self.device.sleep(0.5)
++                semantic_adapter.refresh_frame()
++
+         # UI switching
+         if (
+             semantic_adapter is not None
+@@ -133,11 +140,6 @@
+             self.ui_ensure(page_os)
+ 
+         if semantic_adapter is not None:
+-            if semantic_adapter.operation_siren_low_resolve_prompt_visible():
+-                logger.info('Recover retained Operation Siren low-resolve prompt')
+-                semantic_adapter.click_operation_siren_low_resolve_cancel()
+-                self.device.sleep(0.5)
+-                semantic_adapter.refresh_frame()
+             for _ in range(8):
+                 if not semantic_adapter.operation_siren_reward_visible():
+                     break

@@ -7,7 +7,7 @@ from ...alas_mail_config_contract import (
     AlasMailConfigSnapshot,
     validate_alas_mail_config,
 )
-from ...semantic_oracle import SemanticGateClosed
+from ...semantic_oracle import SemanticGateClosed, SemanticTargetMissing
 from .contracts import AlasSemanticUnmapped, _MailFlowContext
 from .dispatch_result import UNHANDLED
 from .resources import (
@@ -115,8 +115,9 @@ class MailAdapterPorts:
 
     def _appear_mail(self, name):
         if (self._mail_context is None and name == "GOTO_MAIN_WHITE"
-                and self.oracle.observation_target_present("mail/manage/back")
-                and self.oracle.enabled("mail/manage/back")):
+                and any(self.oracle.observation_target_present(target)
+                        and self.oracle.enabled(target)
+                        for target in ('mail/manage/back', 'mail/page/back'))):
             # Other tasks can inherit this overlay. The native page recovery
             # owns its exact back edge, then rediscovers the underlying MailUI.
             return True
@@ -207,6 +208,11 @@ class MailAdapterPorts:
             and name in MAIL_VIRTUAL_RESOURCES
             and name not in MISSION_VIRTUAL_RESOURCES
         ):
+            if self._inherited_login_allows_passive_probe():
+                # Native page discovery can inherit LoginUI2 while another
+                # task still owns the adapter. This is only a mail absence
+                # probe; the reviewed login input port keeps its own checks.
+                return False
             if (
                 self.oracle.daily_page_visible()
                 or self.oracle.daily_precombat_visible()
@@ -253,7 +259,12 @@ class MailAdapterPorts:
             # reconnect confirmation.
             context = self._mail_context
             kind = self.oracle.mail_confirmation_kind()
-            if kind is None or not (
+            if kind is None:
+                # The positive screenshot may precede an already accepted
+                # confirmation producing its reward. No current prompt means
+                # no input; native click_if_present returns to its own loop.
+                raise SemanticTargetMissing('mail confirmation disappeared before input')
+            if not (
                 kind == context.pending_confirmation
                 or (
                     kind == "empty"
@@ -321,10 +332,6 @@ class MailAdapterPorts:
                     award_target = self._award_close_target()
                     if award_target is not None:
                         return self.oracle.click(award_target)
-                if not self._action_ledger.allowed("mail.mutation"):
-                    raise SemanticGateClosed(
-                        "mail mutation requires the separate explicit opt-in"
-                    )
                 receipt = self._dispatch_mutation(
                     "mail.mutation",
                     lambda: self.oracle.click(target),

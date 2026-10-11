@@ -20,6 +20,59 @@ from .errors import SemanticGateClosed, SemanticTargetMissing
 class EventOracle:
     """Event operations sharing the oracle frame and input boundary."""
 
+    def _player_profile_back_proven(self, state: OracleState) -> bool:
+        buttons = self._matches(state, 'player/profile/back')
+        if len(buttons) > 1:
+            raise SemanticGateClosed('player profile Back is ambiguous')
+        if not buttons:
+            return False
+        button = buttons[0]
+        if not (button.active_in_hierarchy and button.active_and_enabled
+                and button.interactable and button.raycast_top is not False
+                and button.point is not None and button.bounds is not None
+                and button.bounds.contains(button.point)):
+            return False
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('player profile Back snapshots are not coherent')
+        if ui.image_truncated:
+            raise SemanticGateClosed('player profile Back image snapshot is incomplete')
+        images = [image for image in ui.images
+                  if image.path == button.path + '/mask/Image']
+        return bool(len(images) == 1 and images[0].sprite == 'back_btn'
+                    and images[0].active_in_hierarchy and images[0].active_and_enabled
+                    and not images[0].truncated and images[0].raycast_top is not False
+                    and images[0].bounds is not None
+                    and 0 <= images[0].bounds.left < images[0].bounds.right <= self.fingerprint.width
+                    and 0 <= images[0].bounds.top < images[0].bounds.bottom <= self.fingerprint.height
+                    and images[0].bounds.contains(button.point))
+
+    def _activity_archive_home_proven(self, state: OracleState) -> bool:
+        target_id = 'archive/activity-list/home'
+        buttons = self._matches(state, target_id)
+        if len(buttons) > 1:
+            raise SemanticGateClosed('activity archive Home is ambiguous')
+        if not buttons:
+            return False
+        button = buttons[0]
+        if not (button.active_in_hierarchy and button.active_and_enabled
+                and button.interactable and button.raycast_top is not False
+                and button.point is not None and button.bounds is not None
+                and button.bounds.contains(button.point)):
+            return False
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('activity archive Home snapshots are not coherent')
+        if ui.image_truncated:
+            raise SemanticGateClosed('activity archive Home image snapshot is incomplete')
+        images = tuple(image for image in ui.images if image.path == button.path
+                       and image.active_in_hierarchy and image.active_and_enabled)
+        return bool(len(images) == 1 and not images[0].truncated
+                    and images[0].sprite == 'btn_home'
+                    and images[0].raycast_target and images[0].raycast_top is not False
+                    and images[0].color[3] > 0 and images[0].bounds == button.bounds
+                    and not self._blocking_rules(state, target_id))
+
     def campaign_event_entrance_available(self) -> bool:
         """Report whether the proven campaign menu exposes an event card."""
 

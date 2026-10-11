@@ -84,6 +84,21 @@ class ResearchConfigReplayTests(unittest.TestCase):
                     with self.assertRaises(SemanticGateClosed):
                         validate_alas_research_selector_config(**candidate)
 
+    def test_presets_do_not_validate_the_inactive_custom_expression(self):
+        for preset in ("series_9_blueprint_only", "future-upstream-preset"):
+            for custom_filter in (None, "", "obsolete-filter", []):
+                with self.subTest(preset=preset, custom_filter=custom_filter):
+                    snapshot = validate_alas_research_selector_config(
+                        preset_filter=preset,
+                        custom_filter=custom_filter,
+                        allow_delay=False,
+                        use_coin="always_use",
+                        use_cube="do_not_use",
+                        use_part="do_not_use",
+                    )
+                    self.assertEqual(snapshot.preset_filter, preset)
+                    self.assertIsNone(snapshot.custom_filter)
+
     def test_exact_live_patched_tree_when_available(self):
         if not LIVE_ALAS.joinpath("module/research/selector.py").is_file():
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")

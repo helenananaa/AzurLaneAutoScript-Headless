@@ -13,6 +13,7 @@ from alas_headless.adapter import (
     compatibility_policy_sha256,
 )
 from alas_headless.alas_adapter import AlasSemanticAdapter
+from alas_headless.adapter.semantic.contracts import AlasSemanticActionDeferred
 from alas_headless.semantic_oracle import (
     OracleFingerprint,
     SemanticGateClosed,
@@ -126,10 +127,10 @@ class ActionLedgerTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(len(first), 64)
 
-    def test_adapter_default_refuses_mutation_before_calling_oracle_backend(self):
+    def test_adapter_default_defers_mutation_before_calling_oracle_backend(self):
         adapter = AlasSemanticAdapter(object(), lambda: None)
         called = []
-        with self.assertRaises(ActionLeaseError):
+        with self.assertRaises(AlasSemanticActionDeferred):
             adapter._dispatch_mutation(
                 "campaign.grid_click",
                 lambda: called.append(True),
@@ -149,7 +150,7 @@ class ActionLedgerTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             adapter._dispatch_mutation("dorm.collect", fail)
         self.assertEqual(adapter._action_ledger.remaining("dorm.collect"), 0)
-        with self.assertRaises(ActionLeaseError):
+        with self.assertRaises(AlasSemanticActionDeferred):
             adapter._dispatch_mutation("dorm.collect", lambda: None)
 
     @staticmethod
@@ -191,15 +192,29 @@ class ActionLedgerTests(unittest.TestCase):
         self.assertEqual(adapter._action_ledger.remaining("dorm.collect"), 0)
 
     def test_minigame_play_budget_does_not_admit_a_second_start(self):
+        state = SimpleNamespace(generation=7, buttons=())
+        oracle = SimpleNamespace(
+            read_state=lambda: state,
+            game_room_page_visible=lambda: True,
+            game_room_list_visible=lambda: False,
+            _blocking_rules=lambda _state, _target: (),
+        )
         adapter = AlasSemanticAdapter(
-            object(),
+            oracle,
             lambda: None,
             minigame_play_budget=1,
         )
         adapter.begin_minigame()
         self.assertTrue(adapter.minigame_play_allowed())
-        adapter._minigame_context.play_receipt = object()
+        adapter._minigame_context.play_receipt = adapter._dispatch_mutation(
+            "minigame.play", lambda: SimpleNamespace(generation=7)
+        )
         self.assertFalse(adapter.minigame_play_allowed())
+        # Returning to the room releases the play lease, not the spent grant.
+        state.generation = 8
+        self.assertFalse(adapter.minigame_play_allowed())
+        self.assertIsNone(adapter._minigame_context.play_receipt)
+        self.assertEqual(adapter._action_ledger.remaining("minigame.play"), 0)
 
     def test_minigame_ignores_the_unrelated_opsi_reset_ticket_probe(self):
         class NoSurfaceOracle:

@@ -12,6 +12,23 @@ from .errors import ObserverTransportError, SemanticGateClosed
 class LoginOracle:
     """Login operations sharing the oracle frame and input boundary."""
 
+    def client_version_update_required(self) -> bool:
+        """Classify the exact version warning for native ALAS restart recovery."""
+        state = self.read_state()
+        if not self._matches(state, 'login/update/restart-msgbox'):
+            return False
+        ui = self.read_text_state()
+        content = tuple(text for text in ui.texts
+                        if text.path.endswith('Msgbox(Clone)/window/msg_panel/content')
+                        and text.active_in_hierarchy and text.active_and_enabled
+                        and not text.truncated and text.bounds is not None)
+        warning = '指挥官，当前客户端的游戏版本不是最新的，推荐您重新打开游戏进行更新'
+        if not any(''.join(text.text.split()) == warning for text in content):
+            return False
+        # This passive recovery classification does not authorize the shared
+        # affirmative button. Its raycast state remains mandatory for input.
+        return self._login_update_restart_prompt_target(state) == 'login/update/restart-msgbox'
+
     def _login_data_expired_prompt_matches(self, state: OracleState) -> bool:
         ui_state = self._stable_msgbox_ui_state(state)
 
@@ -241,6 +258,14 @@ class LoginOracle:
             cancel = self._matches(state, cancel_id) if cancel_id is not None else ()
             if not content and not label and not button:
                 continue
+            if not content and not any(
+                "".join(item.text.split()) in ("重启", "重启游戏", "重新启动")
+                for item in label
+            ):
+                # A shared affirmative Button (including an item description)
+                # does not identify an update/restart prompt. Its actual owner
+                # keeps handling it; no restart action is admitted here.
+                continue
             # DialogPanel is shared by download confirmation and many other
             # login notices.  It is a restart candidate only when its exact
             # content says so; unrelated complete dialogs belong to their own
@@ -398,7 +423,9 @@ class LoginOracle:
         it admits no frame, records no update transition, and exposes no
         actionable control. It exists only so the GameManager-owned cold-start
         wait can remain fail-closed while Unity has left a same-process,
-        identity-valid UpdatePanel snapshot stale during update checking. The
+        identity-valid UpdatePanel snapshot during update checking. The UI
+        endpoint may already be fresh while the state endpoint remains stale;
+        its age cannot make this passive wait unsafe. The
         stale wait does not interpret status text: some pre-login Unity text is
         emitted lossily, and this method never converts the observation into an
         action or an update-completion latch.
@@ -415,10 +442,6 @@ class LoginOracle:
                 UI_SCHEMA,
                 allow_stale=True,
             )
-            if self._integer(ui_snapshot.get("age_ms"), "UI age_ms") <= (
-                self.fingerprint.max_age_ms
-            ):
-                return False
             if (
                 ui_snapshot.get("schema") != 1
                 or ui_snapshot.get("text_truncated") is not False

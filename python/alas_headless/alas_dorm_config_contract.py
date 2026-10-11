@@ -63,5 +63,7 @@ def validate_alas_dorm_config(
     return AlasDormConfigSnapshot(
         collect=collect,
         feed=feed,
-        feed_order=parse_alas_dorm_feed_filter(feed_filter),
+        # ALAS does not consume this filter when feeding is disabled.  An old
+        # saved filter must not prevent collection or furniture handling.
+        feed_order=parse_alas_dorm_feed_filter(feed_filter) if feed else (),
     )

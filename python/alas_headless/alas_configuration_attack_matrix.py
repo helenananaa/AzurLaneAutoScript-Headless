@@ -519,8 +519,10 @@ def _invalid_cases() -> int:
             ("campaign-switch", "fleet"),
         ),
         (
-            "hp-nan",
-            lambda values: values["hp"].update(repair_use_multi_threshold=float("nan")),
+            "active-hp-nan",
+            lambda values: values["hp"].update(
+                use_emergency_repair=True, repair_use_multi_threshold=float("nan")
+            ),
             ("campaign-switch", "fleet", "hp-control"),
         ),
         (
@@ -586,6 +588,9 @@ def _seeded_sequences() -> int:
         elif offset % 4 == 1:
             invalid["fleet"]["fleet1"] = True
         elif offset % 4 == 2:
+            # Disabled thresholds are intentionally not consumed. Exercise the
+            # unsafe active branch instead of reviving a global config gate.
+            invalid["hp"]["use_low_hp_retreat"] = True
             invalid["hp"]["low_hp_retreat_threshold"] = float("nan")
         else:
             invalid["submarine"]["fleet"] = 3

@@ -34,7 +34,7 @@ def test_retained_dock_all_observed_unrelated_probes_are_absent(committed):
             assert session.appear(SimpleNamespace(name=name)) is False
         assert session.appear(SimpleNamespace(name='IN_RETIREMENT_CHECK'))
         with pytest.raises(SemanticGateClosed):
-            oracle.read_ui_state()
+            _ = oracle.read_ui_state().toggles
         assert runtime.actions == []
     finally:
         session.close()

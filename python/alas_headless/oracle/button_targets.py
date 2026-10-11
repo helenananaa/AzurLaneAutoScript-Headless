@@ -207,6 +207,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "MainLiveAreaUI(Clone)/dorm_btn",
     ),
     SemanticTarget(
+        "academy/page/back",
+        "back",
+        "NavalAcademyUI/blur_container/adapt/top/title/back",
+    ),
+    SemanticTarget(
         "academy/munitions",
         "supplyShop",
         "NavalAcademyUI/academyMap/map/supplyShop",
@@ -305,6 +310,26 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "dorm/feed/shop/cancel",
         "cancel_btn",
         "BackYardFeedUI(Clone)/BackYardFeedShopPanel(Clone)/frame/cancel_btn",
+    ),
+    SemanticTarget(
+        "dorm/feed/shop/confirm",
+        "ok_btn",
+        "BackYardFeedUI(Clone)/BackYardFeedShopPanel(Clone)/frame/ok_btn",
+    ),
+    SemanticTarget(
+        "dorm/feed/shop/open",
+        "add",
+        "BackYardFeedUI(Clone)/frame/food_50004/add",
+    ),
+    SemanticTarget(
+        "dorm/feed/shop/plus",
+        "add_btn",
+        "BackYardFeedUI(Clone)/BackYardFeedShopPanel(Clone)/frame/cal_panel/add_btn",
+    ),
+    SemanticTarget(
+        "dorm/feed/shop/minus",
+        "minus_btn",
+        "BackYardFeedUI(Clone)/BackYardFeedShopPanel(Clone)/frame/cal_panel/minus_btn",
     ),
     SemanticTarget(
         "dorm/empty-food/cancel",
@@ -916,6 +941,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "Overlay/UIMain/LevelRemasterView(Clone)/bg",
     ),
     SemanticTarget(
+        "archive/activity-list/home",
+        "homeBtn",
+        "ActivityRemasterUI(Clone)/top/homeBtn",
+    ),
+    SemanticTarget(
         "exercise/page/back",
         "backBtn",
         "MilitaryExerciseUI(Clone)/blur_panel/adapt/top/backBtn",
@@ -1462,6 +1492,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "NewSettingsUI(Clone)/blur_panel/adapt/top/back_btn",
     ),
     SemanticTarget(
+        "player/profile/back",
+        "back",
+        "PlayerVitaeUI(Clone)/top/frame/back",
+    ),
+    SemanticTarget(
         "task/page/back",
         "back_btn",
         "TaskScene(Clone)/blur_panel/adapt/top/back_btn",
@@ -1540,6 +1575,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "reward/item-info/cancel",
         "custom_button_2(Clone)",
         "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
+    ),
+    SemanticTarget(
+        "reward/item-info/close",
+        "btnBack",
+        "Msgbox(Clone)/window/top/btnBack",
     ),
     SemanticTarget(
         "exercise/merit-shop/close",

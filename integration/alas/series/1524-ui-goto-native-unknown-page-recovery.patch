@@ -1,0 +1,17 @@
+diff --git a/module/ui/ui.py b/module/ui/ui.py
+--- a/module/ui/ui.py
++++ b/module/ui/ui.py
+@@ -328,6 +328,13 @@
+             if clicked:
+                 continue
+ 
++            if (semantic_adapter is not None
++                    and self.appear(GOTO_MAIN, offset=offset, interval=2)):
++                # A popup can reveal a reviewed page outside Page.iter_pages().
++                # Reuse native unknown-page recovery and its typed Home port.
++                self.ui_get_current_page()
++                continue
++
+             # Additional
+             if self.ui_additional(get_ship=get_ship):
+                 continue

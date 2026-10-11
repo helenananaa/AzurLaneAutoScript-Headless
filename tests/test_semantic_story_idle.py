@@ -1,4 +1,3 @@
-import ast
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -30,11 +29,34 @@ def test_story_collection_page_does_not_block_other_native_page_handlers():
 
 @pytest.mark.parametrize('unsupported', [False, True])
 def test_original_story_handler_never_falls_through_to_pixels(unsupported):
-    source = Path('artifacts/campaign-preparation/upstream/module/handler/info_handler.py')
-    tree = ast.parse(source.read_text(encoding='utf-8'))
-    method = next(n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name == 'story_skip')
+    # Exercise the shipped semantic hook without a mutable replay checkout.
+    # Other replay tests may legitimately create/clean that disposable tree.
+    source = Path(__file__).resolve().parents[1] / 'integration/alas/0001-semantic-oracle-hooks.patch'
+    patch = source.read_text(encoding='utf-8')
+    hunks = [part.splitlines()[1:] for part in patch.split('\n@@ ')[1:]]
+    inserted_hunks = [lines for lines in hunks
+                      if '+            if oracle.event_story_dialogue_visible():' in lines]
+    assert len(inserted_hunks) == 1
+    body = ''.join(line[1:] + '\n' for line in inserted_hunks[0]
+                   if line.startswith('+') and not line.startswith('+++'))
+    # The later series member completes the idle exit in that same block.
+    idle_hunks = [lines for lines in hunks
+                  if '+            if oracle.event_story_surface_absent():' in lines]
+    assert len(idle_hunks) == 1
+    before, after = [], []
+    for line in idle_hunks[0]:
+        if line[1:].startswith('        if self.story_popup_timeout.started()'):
+            break
+        if line.startswith((' ', '-')):
+            before.append(line[1:] + '\n')
+        if line.startswith((' ', '+')):
+            after.append(line[1:] + '\n')
+    old = ''.join(before)
+    assert body.count(old) == 1
+    body = body.replace(old, ''.join(after))
     namespace = {}
-    exec(compile(ast.fix_missing_locations(ast.Module(body=[method], type_ignores=[])),
+    exec(compile('def story_skip(self):\n' + body
+                 + "        raise AssertionError('semantic hook reached legacy pixel path')\n",
                  str(source), 'exec'), namespace)
 
     def absent():

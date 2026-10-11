@@ -1050,7 +1050,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         backend.ui["text_truncated"] = True
 
         with self.assertRaises(SemanticGateClosed):
-            make_oracle(backend).read_ui_state()
+            _ = make_oracle(backend).read_ui_state().texts
 
     def test_typed_image_exposes_sprite_color_and_bounds(self):
         backend = FakeBackend([])

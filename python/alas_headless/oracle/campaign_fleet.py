@@ -16,7 +16,7 @@ from .contracts import (
     UNCAPPED_CAMPAIGN_SORTIE_OIL_RESERVE,
     UiState,
 )
-from .errors import SemanticGateClosed
+from .errors import SemanticGateClosed, SemanticCampaignFleetIncomplete
 
 
 class CampaignFleetOracle:
@@ -603,6 +603,10 @@ class CampaignFleetOracle:
             )
             maximum_ships = 3 if row_kind == "submarine" else 6
             if len(icons) != len(level_texts) or len(icons) > maximum_ships:
+                if (len(icons) < len(level_texts) <= maximum_ships
+                        and all(1 <= int(text.text.strip()) <= 125 for text in level_texts)
+                        and not ui_state.skipped_count):
+                    raise SemanticCampaignFleetIncomplete(row_key, button_state.generation)
                 raise SemanticGateClosed(
                     "campaign fleet row ship identity is inconsistent: " + row_key
                 )
@@ -1038,6 +1042,17 @@ class CampaignFleetOracle:
                 self._sleep(0.1)
         if state is None or target is None:
             raise SemanticGateClosed("campaign stage is not actionable")
+        # The page reader has established LevelMainScene as this stage's
+        # owner. Recheck every other blocker on the actual input frame.
+        if any(rule.blocker_id != "campaign-menu" for rule in
+               self._blocking_rules(state, "campaign/stage/" + stage_code)):
+            raise SemanticGateClosed("campaign stage input is blocked")
+        if not (
+            target.bounds.contains(target.point)
+            and target.bounds.left <= round(target.point.x) <= target.bounds.right
+            and target.bounds.top <= round(target.point.y) <= target.bounds.bottom
+        ):
+            raise SemanticGateClosed("campaign stage point is outside its button")
         if not (
             0 <= target.point.x < self.fingerprint.width
             and 0 <= target.point.y < self.fingerprint.height

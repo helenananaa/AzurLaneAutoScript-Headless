@@ -1,0 +1,1856 @@
+{
+  "scope": "Actual frozen Tactical award-close source4262, snapshot/buttons retained; no original UI projection was retained or reconstructed",
+  "snapshot": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 1979,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "abi": "x86_64",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "snapshot_schema": 1,
+    "snapshot_struct_size": 104,
+    "generation": 4262,
+    "scene_generation": 2,
+    "semantic_generation": 2,
+    "snapshot_monotonic_ns": 559337972021,
+    "response_monotonic_ns": 559392839647,
+    "age_ms": 54,
+    "observer_tid": 2017,
+    "assembly_count": 129,
+    "semantic_code": 1,
+    "width": 1280,
+    "height": 720,
+    "flags": 15,
+    "observer_attached": false,
+    "main_thread": true,
+    "button_count": 182,
+    "active_button_count": 40,
+    "interactable_button_count": 182,
+    "scene_handle": -76,
+    "ui_stage": 100,
+    "ui_method_mask": 15
+  },
+  "buttons": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.buttons/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 1979,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 344104,
+    "generation": 4262,
+    "snapshot_monotonic_ns": 559337972021,
+    "response_monotonic_ns": 559392862358,
+    "age_ms": 54,
+    "button_count": 40,
+    "truncated": false,
+    "error_count": 0,
+    "buttons": [
+      {
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg",
+        "canvas": "AwardInfoUI(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -21540,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 0.0,
+          "y": 1.467,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -102.0,
+          "y": -206.0,
+          "width": 204.0,
+          "height": 206.0
+        },
+        "screen_point": {
+          "x": 640.0,
+          "y": 426.0
+        },
+        "adb_point": {
+          "x": 640.0,
+          "y": 294.0
+        },
+        "screen_bounds": {
+          "left": 589.0,
+          "bottom": 323.0,
+          "right": 691.0,
+          "top": 426.0
+        },
+        "adb_bounds": {
+          "left": 589.0,
+          "top": 294.0,
+          "right": 691.0,
+          "bottom": 397.0
+        }
+      },
+      {
+        "name": "close",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close",
+        "canvas": "AwardInfoUI(Clone)",
+        "flags": 7679,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "canvas_render_mode": 1,
+        "instance_id": -20234,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 0.0,
+          "y": -2.713,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -113.0,
+          "y": -25.0,
+          "width": 226.0,
+          "height": 50.0
+        },
+        "screen_point": {
+          "x": 640.0,
+          "y": 237.933
+        },
+        "adb_point": {
+          "x": 640.0,
+          "y": 482.067
+        },
+        "screen_bounds": {
+          "left": 564.667,
+          "bottom": 221.267,
+          "right": 715.333,
+          "top": 254.6
+        },
+        "adb_bounds": {
+          "left": 564.667,
+          "top": 465.4,
+          "right": 715.333,
+          "bottom": 498.733
+        }
+      },
+      {
+        "name": "AwardInfoUI(Clone)",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)",
+        "canvas": "AwardInfoUI(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -20128,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -960.0,
+          "y": -540.0,
+          "width": 1920.0,
+          "height": 1080.0
+        },
+        "screen_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "screen_bounds": {
+          "left": -0.0,
+          "bottom": 0.0,
+          "right": 1280.0,
+          "top": 720.0
+        },
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -19906,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 8.652,
+          "y": -2.474,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 1029.333,
+          "y": 248.667
+        },
+        "adb_point": {
+          "x": 1029.333,
+          "y": 471.333
+        },
+        "screen_bounds": {
+          "left": 985.333,
+          "bottom": 204.667,
+          "right": 1073.333,
+          "top": 292.667
+        },
+        "adb_bounds": {
+          "left": 985.333,
+          "top": 427.333,
+          "right": 1073.333,
+          "bottom": 515.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -19746,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 6.341,
+          "y": -2.474,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 925.333,
+          "y": 248.667
+        },
+        "adb_point": {
+          "x": 925.333,
+          "y": 471.333
+        },
+        "screen_bounds": {
+          "left": 881.333,
+          "bottom": 204.667,
+          "right": 969.333,
+          "top": 292.667
+        },
+        "adb_bounds": {
+          "left": 881.333,
+          "top": 427.333,
+          "right": 969.333,
+          "bottom": 515.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -19586,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 4.03,
+          "y": -2.474,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 821.333,
+          "y": 248.667
+        },
+        "adb_point": {
+          "x": 821.333,
+          "y": 471.333
+        },
+        "screen_bounds": {
+          "left": 777.333,
+          "bottom": 204.667,
+          "right": 865.333,
+          "top": 292.667
+        },
+        "adb_bounds": {
+          "left": 777.333,
+          "top": 427.333,
+          "right": 865.333,
+          "bottom": 515.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -19426,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 1.719,
+          "y": -2.474,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 717.333,
+          "y": 248.667
+        },
+        "adb_point": {
+          "x": 717.333,
+          "y": 471.333
+        },
+        "screen_bounds": {
+          "left": 673.333,
+          "bottom": 204.667,
+          "right": 761.333,
+          "top": 292.667
+        },
+        "adb_bounds": {
+          "left": 673.333,
+          "top": 427.333,
+          "right": 761.333,
+          "bottom": 515.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -19266,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -0.593,
+          "y": -2.474,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 613.333,
+          "y": 248.667
+        },
+        "adb_point": {
+          "x": 613.333,
+          "y": 471.333
+        },
+        "screen_bounds": {
+          "left": 569.333,
+          "bottom": 204.667,
+          "right": 657.333,
+          "top": 292.667
+        },
+        "adb_bounds": {
+          "left": 569.333,
+          "top": 427.333,
+          "right": 657.333,
+          "bottom": 515.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -19106,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -2.904,
+          "y": -2.474,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 509.333,
+          "y": 248.667
+        },
+        "adb_point": {
+          "x": 509.333,
+          "y": 471.333
+        },
+        "screen_bounds": {
+          "left": 465.333,
+          "bottom": 204.667,
+          "right": 553.333,
+          "top": 292.667
+        },
+        "adb_bounds": {
+          "left": 465.333,
+          "top": 427.333,
+          "right": 553.333,
+          "bottom": 515.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -18946,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -5.215,
+          "y": -2.474,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 405.333,
+          "y": 248.667
+        },
+        "adb_point": {
+          "x": 405.333,
+          "y": 471.333
+        },
+        "screen_bounds": {
+          "left": 361.333,
+          "bottom": 204.667,
+          "right": 449.333,
+          "top": 292.667
+        },
+        "adb_bounds": {
+          "left": 361.333,
+          "top": 427.333,
+          "right": 449.333,
+          "bottom": 515.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -18786,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 10.963,
+          "y": -0.163,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 1133.333,
+          "y": 352.667
+        },
+        "adb_point": {
+          "x": 1133.333,
+          "y": 367.333
+        },
+        "screen_bounds": {
+          "left": 1089.333,
+          "bottom": 308.667,
+          "right": 1177.333,
+          "top": 396.667
+        },
+        "adb_bounds": {
+          "left": 1089.333,
+          "top": 323.333,
+          "right": 1177.333,
+          "bottom": 411.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -18626,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 8.652,
+          "y": -0.163,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 1029.333,
+          "y": 352.667
+        },
+        "adb_point": {
+          "x": 1029.333,
+          "y": 367.333
+        },
+        "screen_bounds": {
+          "left": 985.333,
+          "bottom": 308.667,
+          "right": 1073.333,
+          "top": 396.667
+        },
+        "adb_bounds": {
+          "left": 985.333,
+          "top": 323.333,
+          "right": 1073.333,
+          "bottom": 411.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -18466,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 6.341,
+          "y": -0.163,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 925.333,
+          "y": 352.667
+        },
+        "adb_point": {
+          "x": 925.333,
+          "y": 367.333
+        },
+        "screen_bounds": {
+          "left": 881.333,
+          "bottom": 308.667,
+          "right": 969.333,
+          "top": 396.667
+        },
+        "adb_bounds": {
+          "left": 881.333,
+          "top": 323.333,
+          "right": 969.333,
+          "bottom": 411.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -18306,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 4.03,
+          "y": -0.163,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 821.333,
+          "y": 352.667
+        },
+        "adb_point": {
+          "x": 821.333,
+          "y": 367.333
+        },
+        "screen_bounds": {
+          "left": 777.333,
+          "bottom": 308.667,
+          "right": 865.333,
+          "top": 396.667
+        },
+        "adb_bounds": {
+          "left": 777.333,
+          "top": 323.333,
+          "right": 865.333,
+          "bottom": 411.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -18146,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 1.719,
+          "y": -0.163,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 717.333,
+          "y": 352.667
+        },
+        "adb_point": {
+          "x": 717.333,
+          "y": 367.333
+        },
+        "screen_bounds": {
+          "left": 673.333,
+          "bottom": 308.667,
+          "right": 761.333,
+          "top": 396.667
+        },
+        "adb_bounds": {
+          "left": 673.333,
+          "top": 323.333,
+          "right": 761.333,
+          "bottom": 411.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -17986,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -0.593,
+          "y": -0.163,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 613.333,
+          "y": 352.667
+        },
+        "adb_point": {
+          "x": 613.333,
+          "y": 367.333
+        },
+        "screen_bounds": {
+          "left": 569.333,
+          "bottom": 308.667,
+          "right": 657.333,
+          "top": 396.667
+        },
+        "adb_bounds": {
+          "left": 569.333,
+          "top": 323.333,
+          "right": 657.333,
+          "bottom": 411.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -17826,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -2.904,
+          "y": -0.163,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 509.333,
+          "y": 352.667
+        },
+        "adb_point": {
+          "x": 509.333,
+          "y": 367.333
+        },
+        "screen_bounds": {
+          "left": 465.333,
+          "bottom": 308.667,
+          "right": 553.333,
+          "top": 396.667
+        },
+        "adb_bounds": {
+          "left": 465.333,
+          "top": 323.333,
+          "right": 553.333,
+          "bottom": 411.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -17666,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -5.215,
+          "y": -0.163,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 405.333,
+          "y": 352.667
+        },
+        "adb_point": {
+          "x": 405.333,
+          "y": 367.333
+        },
+        "screen_bounds": {
+          "left": 361.333,
+          "bottom": 308.667,
+          "right": 449.333,
+          "top": 396.667
+        },
+        "adb_bounds": {
+          "left": 361.333,
+          "top": 323.333,
+          "right": 449.333,
+          "bottom": 411.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -17506,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 10.963,
+          "y": 2.148,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 1133.333,
+          "y": 456.667
+        },
+        "adb_point": {
+          "x": 1133.333,
+          "y": 263.333
+        },
+        "screen_bounds": {
+          "left": 1089.333,
+          "bottom": 412.667,
+          "right": 1177.333,
+          "top": 500.667
+        },
+        "adb_bounds": {
+          "left": 1089.333,
+          "top": 219.333,
+          "right": 1177.333,
+          "bottom": 307.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -17346,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 8.652,
+          "y": 2.148,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 1029.333,
+          "y": 456.667
+        },
+        "adb_point": {
+          "x": 1029.333,
+          "y": 263.333
+        },
+        "screen_bounds": {
+          "left": 985.333,
+          "bottom": 412.667,
+          "right": 1073.333,
+          "top": 500.667
+        },
+        "adb_bounds": {
+          "left": 985.333,
+          "top": 219.333,
+          "right": 1073.333,
+          "bottom": 307.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -17186,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 6.341,
+          "y": 2.148,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 925.333,
+          "y": 456.667
+        },
+        "adb_point": {
+          "x": 925.333,
+          "y": 263.333
+        },
+        "screen_bounds": {
+          "left": 881.333,
+          "bottom": 412.667,
+          "right": 969.333,
+          "top": 500.667
+        },
+        "adb_bounds": {
+          "left": 881.333,
+          "top": 219.333,
+          "right": 969.333,
+          "bottom": 307.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -17026,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 4.03,
+          "y": 2.148,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 821.333,
+          "y": 456.667
+        },
+        "adb_point": {
+          "x": 821.333,
+          "y": 263.333
+        },
+        "screen_bounds": {
+          "left": 777.333,
+          "bottom": 412.667,
+          "right": 865.333,
+          "top": 500.667
+        },
+        "adb_bounds": {
+          "left": 777.333,
+          "top": 219.333,
+          "right": 865.333,
+          "bottom": 307.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -16866,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 1.719,
+          "y": 2.148,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 717.333,
+          "y": 456.667
+        },
+        "adb_point": {
+          "x": 717.333,
+          "y": 263.333
+        },
+        "screen_bounds": {
+          "left": 673.333,
+          "bottom": 412.667,
+          "right": 761.333,
+          "top": 500.667
+        },
+        "adb_bounds": {
+          "left": 673.333,
+          "top": 219.333,
+          "right": 761.333,
+          "bottom": 307.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -16706,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -0.593,
+          "y": 2.148,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 613.333,
+          "y": 456.667
+        },
+        "adb_point": {
+          "x": 613.333,
+          "y": 263.333
+        },
+        "screen_bounds": {
+          "left": 569.333,
+          "bottom": 412.667,
+          "right": 657.333,
+          "top": 500.667
+        },
+        "adb_bounds": {
+          "left": 569.333,
+          "top": 219.333,
+          "right": 657.333,
+          "bottom": 307.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -16546,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -2.904,
+          "y": 2.148,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 509.333,
+          "y": 456.667
+        },
+        "adb_point": {
+          "x": 509.333,
+          "y": 263.333
+        },
+        "screen_bounds": {
+          "left": 465.333,
+          "bottom": 412.667,
+          "right": 553.333,
+          "top": 500.667
+        },
+        "adb_bounds": {
+          "left": 465.333,
+          "top": 219.333,
+          "right": 553.333,
+          "bottom": 307.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -16386,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -5.215,
+          "y": 2.148,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 405.333,
+          "y": 456.667
+        },
+        "adb_point": {
+          "x": 405.333,
+          "y": 263.333
+        },
+        "screen_bounds": {
+          "left": 361.333,
+          "bottom": 412.667,
+          "right": 449.333,
+          "top": 500.667
+        },
+        "adb_bounds": {
+          "left": 361.333,
+          "top": 219.333,
+          "right": 449.333,
+          "bottom": 307.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -16226,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 10.963,
+          "y": 4.459,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 1133.333,
+          "y": 560.667
+        },
+        "adb_point": {
+          "x": 1133.333,
+          "y": 159.333
+        },
+        "screen_bounds": {
+          "left": 1089.333,
+          "bottom": 516.667,
+          "right": 1177.333,
+          "top": 604.667
+        },
+        "adb_bounds": {
+          "left": 1089.333,
+          "top": 115.333,
+          "right": 1177.333,
+          "bottom": 203.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -16066,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 8.652,
+          "y": 4.459,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 1029.333,
+          "y": 560.667
+        },
+        "adb_point": {
+          "x": 1029.333,
+          "y": 159.333
+        },
+        "screen_bounds": {
+          "left": 985.333,
+          "bottom": 516.667,
+          "right": 1073.333,
+          "top": 604.667
+        },
+        "adb_bounds": {
+          "left": 985.333,
+          "top": 115.333,
+          "right": 1073.333,
+          "bottom": 203.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -15906,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 6.341,
+          "y": 4.459,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 925.333,
+          "y": 560.667
+        },
+        "adb_point": {
+          "x": 925.333,
+          "y": 159.333
+        },
+        "screen_bounds": {
+          "left": 881.333,
+          "bottom": 516.667,
+          "right": 969.333,
+          "top": 604.667
+        },
+        "adb_bounds": {
+          "left": 881.333,
+          "top": 115.333,
+          "right": 969.333,
+          "bottom": 203.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -15746,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 4.03,
+          "y": 4.459,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 821.333,
+          "y": 560.667
+        },
+        "adb_point": {
+          "x": 821.333,
+          "y": 159.333
+        },
+        "screen_bounds": {
+          "left": 777.333,
+          "bottom": 516.667,
+          "right": 865.333,
+          "top": 604.667
+        },
+        "adb_bounds": {
+          "left": 777.333,
+          "top": 115.333,
+          "right": 865.333,
+          "bottom": 203.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -15586,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 1.719,
+          "y": 4.459,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 717.333,
+          "y": 560.667
+        },
+        "adb_point": {
+          "x": 717.333,
+          "y": 159.333
+        },
+        "screen_bounds": {
+          "left": 673.333,
+          "bottom": 516.667,
+          "right": 761.333,
+          "top": 604.667
+        },
+        "adb_bounds": {
+          "left": 673.333,
+          "top": 115.333,
+          "right": 761.333,
+          "bottom": 203.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -15426,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -0.593,
+          "y": 4.459,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 613.333,
+          "y": 560.667
+        },
+        "adb_point": {
+          "x": 613.333,
+          "y": 159.333
+        },
+        "screen_bounds": {
+          "left": 569.333,
+          "bottom": 516.667,
+          "right": 657.333,
+          "top": 604.667
+        },
+        "adb_bounds": {
+          "left": 569.333,
+          "top": 115.333,
+          "right": 657.333,
+          "bottom": 203.333
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -15266,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -2.904,
+          "y": 4.459,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 509.333,
+          "y": 560.667
+        },
+        "adb_point": {
+          "x": 509.333,
+          "y": 159.333
+        },
+        "screen_bounds": {
+          "left": 465.333,
+          "bottom": 516.667,
+          "right": 553.333,
+          "top": 604.667
+        },
+        "adb_bounds": {
+          "left": 465.333,
+          "top": 115.333,
+          "right": 553.333,
+          "bottom": 203.333
+        }
+      },
+      {
+        "name": "item",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/pages/MonthSignPage(Clone)/items/item",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -14584,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -5.215,
+          "y": 4.459,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.0,
+          "y": -66.0,
+          "width": 132.0,
+          "height": 132.0
+        },
+        "screen_point": {
+          "x": 405.333,
+          "y": 560.667
+        },
+        "adb_point": {
+          "x": 405.333,
+          "y": 159.333
+        },
+        "screen_bounds": {
+          "left": 361.333,
+          "bottom": 516.667,
+          "right": 449.333,
+          "top": 604.667
+        },
+        "adb_bounds": {
+          "left": 361.333,
+          "top": 115.333,
+          "right": 449.333,
+          "bottom": 203.333
+        }
+      },
+      {
+        "name": "btn(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/enter/viewport/content/btn(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -14524,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 4.393,
+          "y": -6.51,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -165.5,
+          "y": -75.0,
+          "width": 331.0,
+          "height": 150.0
+        },
+        "screen_point": {
+          "x": 837.667,
+          "y": 67.043
+        },
+        "adb_point": {
+          "x": 837.667,
+          "y": 652.957
+        },
+        "screen_bounds": {
+          "left": 727.333,
+          "bottom": 17.043,
+          "right": 948.0,
+          "top": 117.043
+        },
+        "adb_bounds": {
+          "left": 727.333,
+          "top": 602.957,
+          "right": 948.0,
+          "bottom": 702.957
+        }
+      },
+      {
+        "name": "btn(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/enter/viewport/content/btn(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -14508,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -0.778,
+          "y": -6.51,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -165.5,
+          "y": -75.0,
+          "width": 331.0,
+          "height": 150.0
+        },
+        "screen_point": {
+          "x": 605.0,
+          "y": 67.043
+        },
+        "adb_point": {
+          "x": 605.0,
+          "y": 652.957
+        },
+        "screen_bounds": {
+          "left": 494.667,
+          "bottom": 17.043,
+          "right": 715.333,
+          "top": 117.043
+        },
+        "adb_bounds": {
+          "left": 494.667,
+          "top": 602.957,
+          "right": 715.333,
+          "bottom": 702.957
+        }
+      },
+      {
+        "name": "btn(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/enter/viewport/content/btn(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -14492,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -5.948,
+          "y": -6.51,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -165.5,
+          "y": -74.5,
+          "width": 331.0,
+          "height": 149.0
+        },
+        "screen_point": {
+          "x": 372.333,
+          "y": 67.043
+        },
+        "adb_point": {
+          "x": 372.333,
+          "y": 652.957
+        },
+        "screen_bounds": {
+          "left": 262.0,
+          "bottom": 17.377,
+          "right": 482.667,
+          "top": 116.71
+        },
+        "adb_bounds": {
+          "left": 262.0,
+          "top": 603.29,
+          "right": 482.667,
+          "bottom": 702.623
+        }
+      },
+      {
+        "name": "btn",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/enter/viewport/content/btn",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -14080,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -11.119,
+          "y": -6.51,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -165.5,
+          "y": -74.5,
+          "width": 331.0,
+          "height": 149.0
+        },
+        "screen_point": {
+          "x": 139.667,
+          "y": 67.043
+        },
+        "adb_point": {
+          "x": 139.667,
+          "y": 652.957
+        },
+        "screen_bounds": {
+          "left": 29.333,
+          "bottom": 17.377,
+          "right": 250.0,
+          "top": 116.71
+        },
+        "adb_bounds": {
+          "left": 29.333,
+          "top": 603.29,
+          "right": 250.0,
+          "bottom": 702.623
+        }
+      },
+      {
+        "name": "back_btn",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/blur_panel/adapt/top/back_btn",
+        "canvas": "Canvas",
+        "flags": 3583,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": false,
+        "canvas_render_mode": 1,
+        "instance_id": -14182,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -12.941,
+          "y": 6.8,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -65.255,
+          "y": -55.7,
+          "width": 130.51,
+          "height": 111.4
+        },
+        "screen_point": {
+          "x": 57.677,
+          "y": 666.0
+        },
+        "adb_point": {
+          "x": 57.677,
+          "y": 54.0
+        },
+        "screen_bounds": {
+          "left": 0.654,
+          "bottom": 608.977,
+          "right": 114.7,
+          "top": 723.023
+        },
+        "adb_bounds": {
+          "left": 0.654,
+          "top": -3.023,
+          "right": 114.7,
+          "bottom": 111.023
+        }
+      },
+      {
+        "name": "option",
+        "path": "UICamera/Canvas/UIMain/ActivityMainUI(Clone)/adapt/blur_panel/adapt/top/option",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -14206,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 13.348,
+          "y": 7.141,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -46.0,
+          "y": -53.5,
+          "width": 92.0,
+          "height": 107.0
+        },
+        "screen_point": {
+          "x": 1240.656,
+          "y": 681.333
+        },
+        "adb_point": {
+          "x": 1240.656,
+          "y": 38.667
+        },
+        "screen_bounds": {
+          "left": 1209.99,
+          "bottom": 645.667,
+          "right": 1271.323,
+          "top": 717.0
+        },
+        "adb_bounds": {
+          "left": 1209.99,
+          "top": 3.0,
+          "right": 1271.323,
+          "bottom": 74.333
+        }
+      }
+    ]
+  }
+}

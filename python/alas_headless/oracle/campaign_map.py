@@ -720,4 +720,10 @@ class CampaignMapOracle:
             # Freebies leaves the reviewed Shop shell mounted. The native
             # Campaign page graph owns leaving it before stage admission.
             return False
+        if (self.meta_character_page_visible() or self.meta_character_menu_visible()
+                or self.meta_page_visible()):
+            # A native Campaign run may inherit any already reviewed META
+            # page. This passive absence lets ALAS use its existing UI graph;
+            # it grants neither map entry nor an input to the inherited page.
+            return False
         raise SemanticGateClosed("campaign startup surface is not reviewed")

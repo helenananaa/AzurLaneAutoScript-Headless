@@ -1,0 +1,55 @@
+diff --git a/module/guild/operations.py b/module/guild/operations.py
+--- a/module/guild/operations.py
++++ b/module/guild/operations.py
+@@ -314,6 +314,9 @@
+         Pages:
+             in: page_guild, guild operation, operation dispatch preparation (GUILD_DISPATCH_RECOMMEND)
+         """
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            return semantic_session.open().guild_formation_switch_button()
+         # Fleet switch, for 4 situation
+         #          | 1 |
+         #       | 1 | | 2 |
+@@ -652,6 +655,11 @@
+                     self.device.sleep(0.2)
+             else:
+                 return False
++            self._guild_operations_dispatch_switch_fleet(skip_first_screenshot=False)
++            formation = adapter.guild_formation_state()
++            if formation.in_progress:
++                self._guild_operations_dispatch_exit(skip_first_screenshot=False)
++                return True
+             if formation.empty_slots:
+                 adapter.oracle.click('guild/formation/recommend')
+                 for _ in range(30):
+@@ -663,14 +671,23 @@
+                 if adapter.oracle.enabled('guild/dispatch/confirm'):
+                     break
+                 self.device.sleep(0.2)
+-            adapter.confirm_guild_dispatch()
++            dispatch_receipt = adapter.confirm_guild_dispatch()
+             for _ in range(30):
+-                if adapter.oracle.enabled('guild/dispatch-detail/close'):
+-                    adapter.oracle.click('guild/dispatch-detail/close')
+-                    logger.info('Guild operation run success: True (semantic)')
+-                    return True
++                try:
++                    dispatched_formation = adapter.guild_formation_state()
++                except SemanticGateClosed as exc:
++                    if str(exc) != 'guild formation snapshots are not coherent':
++                        raise
++                else:
++                    if (dispatched_formation.generation > dispatch_receipt.generation
++                            and dispatched_formation.in_progress):
++                        break
+                 self.device.sleep(0.2)
+-            return False
++            else:
++                raise SemanticGateClosed('Guild dispatch did not advance to in-progress state')
++            self._guild_operations_dispatch_exit(skip_first_screenshot=False)
++            logger.info('Guild operation run success: True (semantic)')
++            return True
+         self.guild_side_navbar_ensure(bottom=1)
+         entered = self._guild_operations_ensure()
+         if not entered:

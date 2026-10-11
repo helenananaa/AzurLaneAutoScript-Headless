@@ -49,7 +49,7 @@ class TacticalAdapterPorts:
 
     def tactical_remaining_seconds(self) -> Tuple[int, ...]:
         self._package_gate()
-        return self.oracle.tactical_remaining_seconds()
+        return self._frame_or_live_observation_oracle().tactical_remaining_seconds()
 
     def tactical_candidate_ships(self) -> Tuple[TacticalCandidateShipState, ...]:
         self._package_gate()
@@ -74,11 +74,8 @@ class TacticalAdapterPorts:
         self, favourite: bool, min_level: int, start_index: int
     ) -> bool:
         context = self._require_commission_context()
-        if (
-            context.flow_kind != "tactical"
-            or not self._action_ledger.allowed("tactical.assign")
-        ):
-            raise SemanticGateClosed("tactical assignment requires a positive budget")
+        if context.flow_kind != "tactical":
+            raise SemanticGateClosed("tactical ship selection requires the tactical flow")
         if (
             type(favourite) is not bool
             or type(min_level) is not int
@@ -87,6 +84,7 @@ class TacticalAdapterPorts:
             or start_index < 0
         ):
             raise ValueError("tactical ship selection bounds are invalid")
+        self._require_action_grant("tactical.assign")
         # Tactical and enhancement share the exact Dock favourite toggle.
         # The original ALAS Dock scan can wait for cards for longer than a
         # frame lease, while the favourite toggle itself may be an input.
@@ -122,17 +120,22 @@ class TacticalAdapterPorts:
 
     def tactical_select_first_trainable_skill(self) -> bool:
         context = self._require_commission_context()
-        if (
-            context.flow_kind != "tactical"
-            or not self._action_ledger.allowed("tactical.assign")
-        ):
-            raise SemanticGateClosed("tactical assignment requires a positive budget")
+        if context.flow_kind != "tactical":
+            raise SemanticGateClosed("tactical skill selection requires the tactical flow")
+        prior = context.tactical_skill_confirm_receipt
+        if (prior is not None
+                and self.oracle.enabled('tactical/book/start')
+                and self.oracle.read_state().generation > prior.generation):
+            # ALAS' positive skill screenshot can outlive the accepted confirm.
+            # The exact newer book page proves arrival; do not select again.
+            return True
         skill = next(
             (skill for skill in self.oracle.tactical_skills() if not skill.max_level),
             None,
         )
         if skill is None:
             return False
+        self._require_action_grant("tactical.assign")
         self._refresh_tactical_input_frame()
         receipt = self.oracle.click_tactical_skill(skill.position)
         self.oracle.wait_for(
@@ -141,22 +144,20 @@ class TacticalAdapterPorts:
             minimum_generation=receipt.generation,
         )
         self._refresh_tactical_input_frame()
-        self.oracle.click("tactical/skill/confirm")
+        context.tactical_skill_confirm_receipt = self._record_mission_transition(
+            self.oracle.click("tactical/skill/confirm"))
         return True
 
     def tactical_books(self) -> Tuple[TacticalBookState, ...]:
         context = self._require_commission_context()
         if context.flow_kind != "tactical":
             raise SemanticGateClosed("tactical books require the tactical flow")
-        return self.oracle.tactical_books()
+        return self._frame_or_live_observation_oracle().tactical_books()
 
     def tactical_select_book(self, position: int) -> ActionReceipt:
         context = self._require_commission_context()
-        if (
-            context.flow_kind != "tactical"
-            or not self._action_ledger.allowed("tactical.assign")
-        ):
-            raise SemanticGateClosed("tactical assignment requires a positive budget")
+        if context.flow_kind != "tactical":
+            raise SemanticGateClosed("tactical book selection requires the tactical flow")
         before = self.oracle.tactical_books()
         matches = tuple(book for book in before if book.position == position)
         if len(matches) != 1 or matches[0].count <= 0:
@@ -174,6 +175,7 @@ class TacticalAdapterPorts:
                 bounds=image.bounds,
                 path=image.path,
             )
+        self._require_action_grant("tactical.assign")
         self._refresh_tactical_input_frame()
         receipt = self.oracle.click_tactical_book(position)
         deadline = time.monotonic() + 5.0
@@ -201,16 +203,8 @@ class TacticalAdapterPorts:
         prompt = self.oracle.tactical_continue_prompt_text()
         if prompt is None:
             return False
-        if (
-            self._commission_context.flow_kind != "tactical"
-            or (
-                self._commission_context.tactical_reward_receipt is None
-                and not self._action_ledger.allowed("tactical.reward")
-            )
-        ):
-            raise SemanticGateClosed(
-                "tactical reward requires the separate explicit opt-in"
-            )
+        if self._commission_context.flow_kind != "tactical":
+            raise SemanticGateClosed("tactical continue cancellation requires the tactical flow")
         if prompt in self._commission_context.cancelled_tactical_prompts:
             return False
         self.oracle.click("tactical/continue/cancel")
@@ -228,12 +222,29 @@ class TacticalAdapterPorts:
         raise SemanticGateClosed("tactical continue cancellation was not observed")
 
     def _appear_tactical(self, name, semantic_id):
+        if name == 'LOGIN_CHECK':
+            # Original UI.ui_additional() owns returning from an inherited
+            # login page. Its canonical login probe must run before the
+            # Tactical context suppresses unrelated unmapped resources.
+            return UNHANDLED
+        if (name in ("POPUP_CONFIRM", "POPUP_CANCEL")
+                and self.oracle.observation_prompt_kind() == "opsi-exit"
+                and self.oracle.operation_siren_exit_prompt_visible()):
+            # Native navigation can inherit an OpSi exit before classroom
+            # entry. Its existing shared confirmation owns this prompt.
+            return UNHANDLED
         if (
             self._commission_context is not None
             and self._commission_context.flow_kind == "tactical"
         ):
+            if (semantic_id in ('reward/tactical/finish', 'reward/tactical/go')
+                    and self.oracle.reward_sidebar_control_offscreen(semantic_id)):
+                # The original receive loop requests this exact control. Its
+                # first click only brings it into view; no reward is claimed.
+                return True
             if name == "GET_MISSION":
-                return (self._action_ledger.allowed("tactical.reward")
+                return ((self._commission_context.tactical_reward_receipt is not None
+                         or self._action_ledger.allowed("tactical.reward"))
                         and self.oracle.enabled("tactical/completion/ack"))
             if name == "GOTO_MAIN":
                 # Another task can leave a detail panel that page enumeration
@@ -257,6 +268,11 @@ class TacticalAdapterPorts:
                 return False
             if name in TACTICAL_VIRTUAL_RESOURCES:
                 if name == "ADD_NEW_STUDENT":
+                    if self._commission_context.tactical_empty_slot_receipt is not None:
+                        if (self.oracle.exists('tactical/dock/back')
+                                or time.monotonic() <= self._commission_context.passive_transition_until):
+                            return False
+                        raise SemanticGateClosed("tactical empty-slot destination was not observed")
                     try:
                         if any(
                             self.oracle.enabled(target)
@@ -276,7 +292,11 @@ class TacticalAdapterPorts:
                         return False
                 if name == "DOCK_CHECK":
                     try:
-                        return bool(self.oracle.tactical_candidate_ships())
+                        visible = bool(self.oracle.tactical_candidate_ships())
+                        prior = self._commission_context.tactical_empty_slot_receipt
+                        if visible and prior is not None and self.oracle.read_state().generation > prior.generation:
+                            self._commission_context.tactical_empty_slot_receipt = None
+                        return visible
                     except SemanticGateClosed:
                         return False
                 if name == "SKILL_CONFIRM":
@@ -313,10 +333,20 @@ class TacticalAdapterPorts:
         return UNHANDLED
 
     def _click_tactical(self, name):
+        sidebar_target = self._mappings.get(name)
+        if (self._commission_context is not None
+                and self._commission_context.flow_kind == 'tactical'
+                and sidebar_target in ('reward/tactical/finish', 'reward/tactical/go')
+                and self.oracle.reward_sidebar_control_offscreen(sidebar_target)):
+            return self.oracle.scroll_reward_sidebar_control(sidebar_target)
+        if (name in ("POPUP_CONFIRM", "POPUP_CANCEL")
+                and self.oracle.observation_prompt_kind() == "opsi-exit"
+                and self.oracle.operation_siren_exit_prompt_visible()):
+            return UNHANDLED
         if (name == "GET_MISSION" and self._commission_context is not None
                 and self._commission_context.flow_kind == "tactical"):
-            if not self._action_ledger.allowed("tactical.reward"):
-                raise SemanticGateClosed("tactical reward acknowledgement is not authorized")
+            if self._commission_context.tactical_reward_receipt is None:
+                self._require_action_grant("tactical.reward")
             return self.oracle.click_tactical_completion_ack()
         if (
             self._commission_context is not None
@@ -325,10 +355,6 @@ class TacticalAdapterPorts:
         ):
             context = self._commission_context
             if name == "ADD_NEW_STUDENT":
-                if not self._action_ledger.allowed("tactical.assign"):
-                    raise SemanticGateClosed(
-                        "tactical assignment requires a positive budget"
-                    )
                 prior = context.tactical_empty_slot_receipt
                 if (prior is not None
                         and self.oracle.enabled('tactical/dock/back')
@@ -339,8 +365,14 @@ class TacticalAdapterPorts:
                     # original input completed; never tap the covered slot.
                     context.tactical_empty_slot_receipt = None
                     return prior
+                if prior is not None:
+                    if time.monotonic() <= context.passive_transition_until:
+                        return None
+                    raise SemanticGateClosed("tactical empty-slot destination was not observed")
+                self._require_action_grant("tactical.assign")
                 receipt = self.oracle.click_tactical_first_empty_slot()
-                context.tactical_empty_slot_receipt = receipt
+                context.tactical_skill_confirm_receipt = None
+                context.tactical_empty_slot_receipt = self._record_mission_transition(receipt)
                 return receipt
             if name == "BACK_ARROW":
                 targets = tuple(
@@ -363,17 +395,14 @@ class TacticalAdapterPorts:
                     context.tactical_back_receipt = receipt
                 return receipt
             if name == "TACTICAL_CLASS_START":
-                if not self._action_ledger.allowed("tactical.assign"):
-                    raise SemanticGateClosed(
-                        "tactical course start requires a positive budget"
-                    )
+                self._require_action_grant("tactical.assign")
                 books = self.oracle.tactical_books()
                 selected = tuple(book for book in books if book.selected)
                 if len(selected) != 1 or selected[0].count <= 0:
                     raise SemanticGateClosed(
                         "tactical course start requires one available selected book"
                     )
-                receipt = self.oracle.click("tactical/book/start")
+                receipt = self._record_mission_transition(self.oracle.click("tactical/book/start"))
                 return receipt
             if name == "TACTICAL_CLASS_CANCEL":
                 return self.oracle.click("tactical/book/cancel")
@@ -400,13 +429,11 @@ class TacticalAdapterPorts:
                         if time.monotonic() >= deadline:
                             raise SemanticGateClosed('confirmed tactical course has no new running slot')
                         time.sleep(.1)
-                if not self._action_ledger.allowed("tactical.assign"):
-                    raise SemanticGateClosed(
-                        "tactical course confirmation requires a positive budget"
-                    )
+                self._require_action_grant("tactical.assign")
+                input_reader = self._fresh_input_oracle()
                 try:
                     before_slots = {(slot.slot, slot.ship_id)
-                                    for slot in self.oracle.tactical_slots()
+                                    for slot in input_reader.tactical_slots()
                                     if getattr(slot.status, 'value', slot.status) == 'running'}
                 except SemanticGateClosed:
                     # An unavailable observation is not an empty classroom;
@@ -414,7 +441,7 @@ class TacticalAdapterPorts:
                     before_slots = None
                 receipt = self._dispatch_mutation(
                     "tactical.assign",
-                    lambda: self.oracle.click("tactical/course/confirm"),
+                    lambda: input_reader.click("tactical/course/confirm"),
                 )
                 context.tactical_confirm_before_slots = before_slots
                 context.tactical_confirm_receipt = receipt

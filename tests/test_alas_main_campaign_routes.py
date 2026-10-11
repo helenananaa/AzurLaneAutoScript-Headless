@@ -51,7 +51,7 @@ class AlasMainCampaignRouteTests(unittest.TestCase):
 
     def test_invalid_main_routes_fail_closed(self):
         for values in (
-            dict(task="Main", stage="17-1", event="campaign_main", mode="normal"),
+            dict(task="Main", stage="-1-1", event="campaign_main", mode="normal"),
             dict(task="Main2", stage="12-4", event="event_x", mode="normal"),
             dict(task="Main3", stage="12-4", event="campaign_main", mode="hard"),
         ):

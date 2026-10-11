@@ -328,6 +328,11 @@ class OpsiResourcesOracle:
         OperationSirenActionPointState,
         Tuple[ImageState, ...],
     ]:
+        return self._retry_transition_read(self._operation_siren_action_point_read_once)
+
+    def _operation_siren_action_point_read_once(
+        self,
+    ) -> Tuple[OracleState, OperationSirenActionPointState, Tuple[ImageState, ...]]:
         button_state = self.read_state()
         use = self._unique(button_state, "os/action-point/use")
         cancel = self._unique(button_state, "os/action-point/cancel")
@@ -531,9 +536,7 @@ class OpsiResourcesOracle:
     def operation_siren_action_point_state(
         self,
     ) -> OperationSirenActionPointState:
-        return self._retry_transition_read(
-            lambda: self._operation_siren_action_point_read()[1]
-        )
+        return self._operation_siren_action_point_read()[1]
 
     def operation_siren_action_point_visible(self) -> bool:
         state = self.read_state()
@@ -814,6 +817,7 @@ class OpsiResourcesOracle:
                     "需要暂时离开大型作战么？",
                     "当前海域无法通过边界区域离开。是否继续？",
                     "离开当前海域后，潜艇舰队会自动返回我方港口待命，是否离开？",
+                    "正在进行搜寻作业的指挥喵将被强制召回！\n是否结束搜寻并离开当前海域？",
                     "是否确定从该处隐秘海域离开？\n"
                     "（离开后将无法再次返回）",
                     "是否确定从深渊海域离开？\n"
@@ -825,6 +829,7 @@ class OpsiResourcesOracle:
         )
         return state if (
             len(prompt) == 1
+            and state.generation <= ui_state.generation <= state.generation + 2
             and len(self._matches(state, "os/exit/confirm")) == 1
             and len(self._matches(state, "os/exit/cancel")) == 1
         ) else None

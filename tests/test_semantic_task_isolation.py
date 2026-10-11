@@ -87,14 +87,16 @@ def test_campaign_menu_owner_is_not_treated_as_an_overlay_for_absence_probes(mon
     assert backend.taps == []
 
 
-def test_main_underlay_does_not_hide_a_present_new_ship_panel():
-    from alas_headless.adapter.semantic.dispatch_result import UNHANDLED
+def test_mounting_new_ship_panel_hides_main_until_complete_typed_proof():
     backend = FakeBackend(main_buttons())
     adapter, oracle = real_adapter(backend)
     target = oracle._targets['reward/new-ship/continue']
     backend.buttons['buttons'].append(make_button(target.name, 'root/' + target.path_suffix))
     backend.buttons['button_count'] += 1
-    assert adapter._appear_priority('GET_SHIP') is UNHANDLED
+    assert adapter._appear_priority('GET_SHIP') is False
+    assert adapter._appear_priority('MAIN_GOTO_FLEET') is False
+    with pytest.raises(SemanticGateClosed):
+        oracle.click('reward/new-ship/continue')
     assert backend.taps == []
 
 

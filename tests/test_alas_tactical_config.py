@@ -88,6 +88,7 @@ class AlasTacticalConfigTests(unittest.TestCase):
     def test_valid_boundaries_and_min_level_text_are_normalized(self):
         for min_level, expected in ((1, 1), (125, 125), (" 50 ", 50)):
             values = defaults()
+            values["add_new_student_enable"] = True
             values["add_new_student_min_level"] = min_level
             snapshot = validate_alas_tactical_config(**values)
             self.assertEqual(snapshot.add_new_student_min_level, expected)
@@ -130,11 +131,34 @@ class AlasTacticalConfigTests(unittest.TestCase):
             ("tactical_filter", None),
         ):
             values = defaults()
+            values["add_new_student_enable"] = True
             values[field] = value
             with self.subTest(field=field, value=value), self.assertRaises(
                 SemanticGateClosed
             ):
                 validate_alas_tactical_config(**values)
+
+    def test_inactive_overflow_and_student_values_do_not_block_tactical(self):
+        values = defaults()
+        values.update(
+            control_exp_overflow_enable=False,
+            t1_allow=None,
+            t2_allow="obsolete",
+            t3_allow=-1,
+            t4_allow=[],
+            add_new_student_favorite=None,
+            add_new_student_min_level="obsolete",
+        )
+        snapshot = validate_alas_tactical_config(**values)
+        self.assertFalse(snapshot.control_exp_overflow_enable)
+        self.assertFalse(snapshot.add_new_student_enable)
+        for field in ("t1_allow", "t2_allow", "t3_allow", "t4_allow",
+                      "add_new_student_favorite", "add_new_student_min_level"):
+            self.assertIsNone(getattr(snapshot, field))
+        # Re-enabling either original branch restores its validation.
+        for flag in ("control_exp_overflow_enable", "add_new_student_enable"):
+            with self.subTest(flag=flag), self.assertRaises(SemanticGateClosed):
+                validate_alas_tactical_config(**{**values, flag: True})
 
     def test_favorite_filter_is_forwarded_before_candidate_selection(self):
         oracle = TacticalOracle()

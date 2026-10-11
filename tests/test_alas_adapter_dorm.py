@@ -15,6 +15,36 @@ from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_accepted_statistics_dismissal_releases_intercepted_feed_entry(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_dorm()
+        oracle.enabled_values['dorm/feed/close'] = False
+        first = adapter.click(NamedButton('DORM_FEED_ENTER'))
+        self.assertEqual(adapter.click(NamedButton('DORM_FEED_ENTER')), first)
+        self.assertEqual(oracle.click_calls, ['dorm/feed'])
+        adapter.click(NamedButton('DORM_INFO'))
+        self.assertIsNone(adapter._dorm_context.feed_entry_receipt)
+        adapter.click(NamedButton('DORM_FEED_ENTER'))
+        self.assertEqual(oracle.click_calls,
+                         ['dorm/feed', 'dorm/statistics/confirm', 'dorm/feed'])
+
+    def test_refused_statistics_input_preserves_feed_entry_suppression(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_dorm()
+        oracle.enabled_values['dorm/feed/close'] = False
+        first = adapter.click(NamedButton('DORM_FEED_ENTER'))
+        original = oracle.click
+        def guarded_click(target):
+            if target == 'dorm/statistics/confirm':
+                raise SemanticGateClosed('statistics target is covered')
+            return original(target)
+        oracle.click = guarded_click
+        with self.assertRaises(SemanticGateClosed):
+            adapter.click(NamedButton('DORM_INFO'))
+        self.assertIs(adapter._dorm_context.feed_entry_receipt, first)
+        self.assertIs(adapter.click(NamedButton('DORM_FEED_ENTER')), first)
+        self.assertEqual(oracle.click_calls, ['dorm/feed'])
+
     def test_observed_feed_panel_waits_for_close_without_opening_underlay(self):
         adapter, oracle, _ = self.make_adapter()
         adapter.begin_dorm()

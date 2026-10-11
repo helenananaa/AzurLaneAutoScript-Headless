@@ -349,6 +349,7 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
       ",\"method_mask\":%u,\"toggle_count\":%u,\"text_count\":%u,"
       "\"image_count\":%u,\"toggle_truncated\":%s,\"text_truncated\":%s,"
       "\"image_truncated\":%s,\"error_count\":%u,"
+      "\"error_counts\":{\"toggle\":%u,\"text\":%u,\"image\":%u,\"shared\":%u},"
       "\"skipped_count\":%u,\"image_source_count\":%u,"
       "\"image_source_capacity\":%u,"
       "\"toggles\":[",
@@ -359,6 +360,9 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
       snapshot.imageCount, snapshot.toggleTruncated != 0 ? "true" : "false",
       snapshot.textTruncated != 0 ? "true" : "false",
       snapshot.imageTruncated != 0 ? "true" : "false", snapshot.errorCount,
+      snapshot.toggleErrorCount, snapshot.textErrorCount, snapshot.imageErrorCount,
+      snapshot.errorCount - snapshot.toggleErrorCount - snapshot.textErrorCount -
+          snapshot.imageErrorCount,
       snapshot.skippedCount, snapshot.imageSourceCount,
       snapshot.imageSourceCapacity));
   if (headerCount <= 0 || static_cast<size_t>(headerCount) >= sizeof(header)) {
@@ -621,6 +625,13 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
         response.append(values, static_cast<size_t>(n));
       } else response.append("null");
     }
+    if (record.inputEntrance) {
+      const int n = ANGLE_UNSAFE_TODO(std::snprintf(values, sizeof(values),
+          ",\"game_input\":{\"entrance_id\":%u,\"mask_color\":\"%s\"}",
+          record.inputEntrance, record.inputMaskColor.data()));
+      if (n <= 0 || static_cast<size_t>(n) >= sizeof(values)) return {};
+      response.append(values, static_cast<size_t>(n));
+    }
     response.push_back('}');
   }
   response.append("]},\"lua_globe_diagnostic\":{");
@@ -658,6 +669,53 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
   }
   response.append("],\"active_pointer_instance_id\":");
   response.append(std::to_string(lua.activePointerId));
+  response.append("},\"shipyard_strengthen\":{");
+  const auto &shipyard = snapshot.shipyard;
+  char shipyardFields[768];
+  const int shipyardCount = ANGLE_UNSAFE_TODO(std::snprintf(shipyardFields, sizeof(shipyardFields),
+      "\"status\":%u,\"stage\":%u,\"truncated\":%s,\"stack_balanced\":%s,\"blueprint_id\":%u,\"ship_id\":%u,\"ship_index\":%u,\"series\":%u,\"rarity\":%u,\"pursuing\":%s,\"purchased\":%u,\"coins\":%u,\"gems_known\":%s,\"paid_gems\":%u,\"free_gems\":%u,\"level\":%u,\"fate_level\":%d,\"exp\":%u",
+      shipyard.status, shipyard.stage, shipyard.truncated ? "true" : "false",
+      shipyard.stackBalanced ? "true" : "false", shipyard.blueprintId, shipyard.shipId,
+      shipyard.shipIndex, shipyard.series, shipyard.rarity, shipyard.pursuing ? "true" : "false",
+      shipyard.purchased, shipyard.coins, shipyard.gemsKnown ? "true" : "false",
+      shipyard.paidGems, shipyard.freeGems, shipyard.level, shipyard.fateLevel, shipyard.exp));
+  if (shipyardCount <= 0 || static_cast<size_t>(shipyardCount) >= sizeof(shipyardFields)) return {};
+  response.append(shipyardFields, static_cast<size_t>(shipyardCount));
+  response.append("},\"activity_identity\":{");
+  const auto &activity = snapshot.activityIdentity;
+  response.append("\"status\":"); response.append(std::to_string(activity.status));
+  response.append(",\"stack_balanced\":"); response.append(activity.stackBalanced ? "true" : "false");
+  response.append(",\"archives\":{\"status\":"); response.append(std::to_string(activity.archives.status));
+  response.append(",\"expected_count\":"); response.append(std::to_string(activity.archives.expectedCount));
+  response.append(",\"truncated\":"); response.append(activity.archives.truncated ? "true" : "false");
+  response.append(",\"records\":[");
+  for (size_t i = 0; i < std::min(static_cast<size_t>(activity.archives.count), activity.archives.records.size()); ++i) {
+    if (i) response.push_back(',');
+    const auto &record = activity.archives.records[i];
+    response.append("{\"id\":"); response.append(std::to_string(record.id));
+    response.append(",\"activity_type\":"); response.append(std::to_string(record.activityType));
+    response.append(",\"name\":"); AppendJsonString(&response, BoundedStringView(record.name));
+    response.append(",\"bg\":"); AppendJsonString(&response, BoundedStringView(record.bg));
+    response.push_back('}');
+  }
+  response.append("]},\"raids\":{\"status\":"); response.append(std::to_string(activity.raids.status));
+  response.append(",\"stage\":"); response.append(std::to_string(activity.raids.stage));
+  response.append(",\"proxy_count\":"); response.append(std::to_string(activity.raids.proxyCount));
+  response.append(",\"matched_count\":"); response.append(std::to_string(activity.raids.matchedCount));
+  response.append(",\"failed_id\":"); response.append(std::to_string(activity.raids.failedId));
+  response.append(",\"expected_count\":"); response.append(std::to_string(activity.raids.expectedCount));
+  response.append(",\"truncated\":"); response.append(activity.raids.truncated ? "true" : "false");
+  response.append(",\"records\":[");
+  for (size_t i = 0; i < std::min(static_cast<size_t>(activity.raids.count), activity.raids.records.size()); ++i) {
+    if (i) response.push_back(',');
+    const auto &record = activity.raids.records[i];
+    response.append("{\"id\":"); response.append(std::to_string(record.id));
+    response.append(",\"mark\":"); response.append(std::to_string(record.mark));
+    response.append(",\"activity_type\":"); response.append(std::to_string(record.activityType));
+    response.append(",\"page_core\":"); AppendJsonString(&response, BoundedStringView(record.pageCore));
+    response.push_back('}');
+  }
+  response.append("]}");
   const auto &drag = snapshot.mapDrag;
   response.append(drag.scope == 2 ? "},\"operation_siren_globe_drag\":{"
                                   : "},\"operation_siren_map_drag\":{");
@@ -866,6 +924,10 @@ void ServeObserver() {
     const bool projectionRequest =
         ANGLE_UNSAFE_BUFFERS(sscanf(requestBuffer, "GET /v1/globe-projection %f %f%n", &mapX, &mapY, &projectionEnd)) == 2 &&
         (request.substr(projectionEnd) == "\n" || request.substr(projectionEnd) == "\r\n");
+    unsigned int portEntrance = 0; int portInputEnd = 0;
+    const bool portInputRequest =
+        ANGLE_UNSAFE_BUFFERS(sscanf(requestBuffer, "GET /v1/globe-port-input %u%n", &portEntrance, &portInputEnd)) == 1 &&
+        (request.substr(portInputEnd) == "\n" || request.substr(portInputEnd) == "\r\n");
     if (dragRequest && RequestOperationSirenMapDrag(dragX1, dragY1, dragX2, dragY2)) {
       SendAll(client, "{\"protocol_schema\":\"alas-headless.observer/v1\","
                       "\"status\":\"ok\",\"scope\":\"read-only-os-map-drag\"}\n");
@@ -875,6 +937,9 @@ void ServeObserver() {
     } else if (projectionRequest && RequestGlobeMapProjection(mapX, mapY)) {
       SendAll(client, "{\"protocol_schema\":\"alas-headless.observer/v1\","
                       "\"status\":\"ok\",\"scope\":\"read-only-map-projection\"}\n");
+    } else if (portInputRequest && RequestGlobePortInput(portEntrance)) {
+      SendAll(client, "{\"protocol_schema\":\"alas-headless.observer/v1\","
+                      "\"status\":\"ok\",\"scope\":\"read-only-port-input\"}\n");
     } else if (!snapshotRequest && !semanticRequest && !uiRequest && !stateRequest) {
       SendAll(client, "{\"protocol_schema\":\"alas-headless.observer/v1\","
                       "\"status\":\"bad-request\"}\n");

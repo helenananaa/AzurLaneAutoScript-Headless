@@ -67,6 +67,30 @@ def test_unknown_auto_result_hides_underlay_but_never_allows_confirmation():
     assert b.taps == []
 
 
+@pytest.mark.parametrize('valid', [True, False])
+def test_assist_reuses_original_completed_dossier_result_handler(valid):
+    b = backend()
+    if not valid:
+        b.ui['texts'][3]['text'] = '其他'
+    a = AlasSemanticAdapter(make_oracle(b), package_gate=lambda: None)
+    a.begin_meta_assist()
+    assert not a.appear(SimpleNamespace(name='DOSSIER_LIST'))
+    if not valid:
+        with pytest.raises(SemanticGateClosed, match='identity'):
+            a.appear(SimpleNamespace(name='META_AUTO_CONFIRM'))
+        assert not b.taps
+        return
+    assert a.appear(SimpleNamespace(name='META_AUTO_CONFIRM'))
+    def close_result():
+        b.snapshot['generation'] = 11
+        b.buttons = make_buttons(b.buttons['buttons'][:2], generation=11)
+        b.ui['generation'] = 11
+    b.on_tap = close_result
+    assert a.click(SimpleNamespace(name='META_AUTO_CONFIRM')).semantic_id == 'meta/dossier/auto/result/confirm'
+    assert len(b.taps) == 1
+    assert a.appear(SimpleNamespace(name='DOSSIER_LIST'))
+
+
 def test_result_root_mount_hides_detail_until_confirm_child_is_published():
     b = backend()
     b.buttons = make_buttons(b.buttons['buttons'][:2] + [

@@ -187,6 +187,14 @@ class RewardsAdapterPorts:
                 )
         if self._supply_pack_context is not None:
             context = self._supply_pack_context
+            if name == "SUPPLY_PACK_CHECK":
+                # The original fallback probes this page check again after
+                # its first negative read. If the tab became selected in
+                # between, there is no navigation left to submit; its next
+                # screenshot owns the page check. Never click a legacy rect.
+                if self.oracle.gift_pack_page_visible():
+                    raise SemanticTargetMissing("gift pack page is already selected")
+                raise SemanticGateClosed("gift pack page check is not an input target")
             if name == "SHOP_GOTO_SUPPLY_PACK":
                 if self.oracle.gift_pack_page_visible():
                     raise SemanticTargetMissing("gift pack tab is already selected")

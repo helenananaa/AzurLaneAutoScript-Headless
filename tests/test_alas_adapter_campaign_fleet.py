@@ -517,6 +517,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
                 adapter.end_campaign_pre_sortie()
 
         backend = make_event_preparation_backend("sp", kind="fleet")
+        self._add_complete_real_fleet_state(backend, submarine_in_use=False)
         adapter = AlasSemanticAdapter(make_real_oracle(backend), lambda: None)
         adapter.begin_campaign_pre_sortie("sp")
         context = adapter._campaign_context

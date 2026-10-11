@@ -1,0 +1,16 @@
+diff --git a/module/handler/info_handler.py b/module/handler/info_handler.py
+--- a/module/handler/info_handler.py
++++ b/module/handler/info_handler.py
+@@ -298,12 +298,6 @@
+         return False
+ 
+     def handle_guild_popup_cancel(self):
+-        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+-        if (
+-            semantic_adapter is not None
+-            and semantic_adapter.campaign_combat_active()
+-        ):
+-            return False
+         if self.appear(GUILD_POPUP_CONFIRM, offset=self._popup_offset) \
+                 and self.appear(GUILD_POPUP_CANCEL, offset=self._popup_offset, interval=2):
+             self.device.click(GUILD_POPUP_CANCEL)

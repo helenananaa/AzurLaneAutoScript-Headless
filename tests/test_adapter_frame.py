@@ -195,21 +195,32 @@ class SemanticFrameTests(unittest.TestCase):
         reader = SemanticFrameReader(clock, clock._oracle).oracle()
         self.assertEqual(reader.retirement_selection_state().capacity_used, 833)
         with self.assertRaisesRegex(SemanticGateClosed, 'toggle snapshot is truncated'):
-            reader.read_ui_state()
+            _ = reader.read_ui_state().toggles
         handle.ui['text_truncated'] = True
+        clock.acquire(include_ui=True)
+        reader = SemanticFrameReader(clock, clock._oracle).oracle()
         with self.assertRaisesRegex(SemanticGateClosed, 'text snapshot is truncated'):
-            clock.acquire(include_ui=True)
+            reader.read_text_state()
 
-    def test_single_ui_capture_rejects_malformed_truncation_and_extraction_errors(self):
-        for field, value in (("toggle_truncated", None), ("toggle_truncated", 1),
-                             ("toggle_truncated", "true"), ("error_count", 1)):
-            with self.subTest(field=field, value=value):
+    def test_single_ui_capture_retains_malformed_family_flags_for_local_rejection(self):
+        for value in (None, 1, "true"):
+            with self.subTest(value=value):
                 handle, _, clock = make_clock()
-                handle.ui[field] = value
+                handle.ui["toggle_truncated"] = value
+                clock.acquire(include_ui=True)
+                reader = SemanticFrameReader(clock, clock._oracle).oracle()
+                self.assertTrue(reader.enabled("login/enter"))
+                self.assertEqual(reader.read_text_state().texts, ())
                 with self.assertRaises(SemanticGateClosed):
-                    clock.acquire(include_ui=True)
+                    _ = reader.read_ui_state().toggles
                 self.assertEqual(handle.requests, ["GET /v1/state\n", "GET /v1/ui\n"])
-                self.assertIsNone(clock.current_frame_id)
+
+    def test_single_ui_capture_rejects_unscoped_extraction_errors(self):
+        handle, _, clock = make_clock()
+        handle.ui["error_count"] = 1
+        with self.assertRaises(SemanticGateClosed):
+            clock.acquire(include_ui=True)
+        self.assertIsNone(clock.current_frame_id)
 
     def test_acquire_builds_one_immutable_atomic_frame(self):
         handle, monotonic, clock = make_clock()
@@ -333,7 +344,7 @@ class SemanticFrameTests(unittest.TestCase):
                 self.assertIs(reader.read_ui_state(), first_ui)
                 self.assertIs(reader.read_text_state(), first_text)
                 self.assertTrue(reader.observation_target_present("login/enter"))
-            self.assertEqual(request.call_count, 3)
+            self.assertEqual(request.call_count, 2)
         with self.assertRaises(TypeError):
             first.snapshot["pid"] = 0
         with self.assertRaises(TypeError):
@@ -386,7 +397,7 @@ class SemanticFrameTests(unittest.TestCase):
         reader.read_ui_state(_preserve_partial_toggles=True)
         for _ in range(2):
             with self.assertRaisesRegex(SemanticGateClosed, "toggle snapshot is truncated"):
-                reader.read_ui_state()
+                _ = reader.read_ui_state().toggles
 
     def test_frozen_map_and_physics_payloads_keep_typed_readers_compatible(self):
         from tests.semantic_support.campaign_fixtures import make_campaign_map_backend
@@ -446,6 +457,55 @@ class SemanticFrameTests(unittest.TestCase):
             clock.acquire(include_ui=True)
 
         self.assertIsNone(clock.current_frame_id)
+
+    def test_stable_state_sandwich_accepts_only_button_enumeration_drift(self):
+        handle, _, clock = make_clock()
+        extra = copy.deepcopy(handle.buttons['buttons'][0])
+        extra.update(name='decoration', path='unrelated/decoration')
+        handle.buttons['buttons'].append(extra)
+        handle.buttons['button_count'] = 2
+        handle.ui['generation'] = 11
+
+        def reorder_after_ui():
+            if handle.requests[-1] == 'GET /v1/ui\n':
+                handle.snapshot['generation'] = 12
+                handle.buttons['generation'] = 12
+                handle.buttons['buttons'].reverse()
+
+        handle.after_request = reorder_after_ui
+        frame = clock.acquire(include_ui=True)
+        self.assertEqual(handle.requests, ['GET /v1/state\n', 'GET /v1/ui\n', 'GET /v1/state\n'])
+        self.assertEqual(frame.generation, 12)
+        self.assertEqual(frame.projections['buttons']['buttons'][0]['name'], 'decoration')
+        reader = SemanticFrameReader(clock, clock._oracle).oracle()
+        self.assertTrue(reader.enabled('login/enter'))
+        self.assertEqual(handle.taps, [])
+
+    def test_button_order_normalization_keeps_ambiguity_and_actionability(self):
+        from alas_headless.adapter.frame import _stable_observer_projection
+
+        for field, value in (
+            ('name', 'different'), ('path', 'different/path'),
+            ('raycast_top', False), ('interactable', False),
+        ):
+            with self.subTest(field=field):
+                handle, _, clock = make_clock()
+                before = clock._oracle.read_state()
+                handle.buttons['buttons'][0][field] = value
+                after = clock._oracle.read_state()
+                self.assertNotEqual(_stable_observer_projection(before), _stable_observer_projection(after))
+        handle, _, clock = make_clock()
+        before = clock._oracle.read_state()
+        handle.buttons['buttons'].append(copy.deepcopy(handle.buttons['buttons'][0]))
+        handle.buttons['button_count'] = 2
+        after = clock._oracle.read_state()
+        self.assertNotEqual(_stable_observer_projection(before), _stable_observer_projection(after))
+        # Normalization must not deduplicate ambiguous targets in a saved frame.
+        clock.acquire()
+        reader = SemanticFrameReader(clock, clock._oracle).oracle()
+        with self.assertRaises(SemanticGateClosed):
+            reader.enabled('login/enter')
+        self.assertEqual(handle.taps, [])
 
     def test_combined_state_cannot_mix_generations(self):
         handle, _, clock = make_clock()

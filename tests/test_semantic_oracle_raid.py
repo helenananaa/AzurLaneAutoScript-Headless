@@ -21,6 +21,26 @@ from tests.semantic_support.oracle_cases import SemanticOracleTestsSupport
 
 
 class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
+    def test_unknown_event_mapping_failure_does_not_poison_independent_capabilities(self):
+        backend = make_current_raid_backend()
+        oracle = make_oracle(backend)
+        for operation, event in (
+            (lambda value: oracle.click_raid_stage(value, "easy"), "raid_future"),
+            (oracle.war_archives_campaign_identity, "war_archives_future"),
+        ):
+            with self.subTest(event=event), self.assertRaises(SemanticGateClosed) as raised:
+                operation(event)
+            self.assertIn(event, str(raised.exception))
+            self.assertIn("mapping", str(raised.exception))
+            # A task-local mapping gap does not disable the shared oracle or
+            # mark another known activity unavailable, and dispatches no input.
+            self.assertEqual(oracle.raid_remain("raid_20260827", "easy"), 15)
+            self.assertEqual(
+                oracle.war_archives_campaign_identity("war_archives_20220915_cn"),
+                ("ex", "temp_wuzang"),
+            )
+        self.assertEqual(backend.taps, [])
+
     def test_raid_remain_reads_all_pinned_modes_from_typed_nodes(self):
         root = "UICamera/Canvas/UIMain/BossRushVerSardiniaSPUI(Clone)"
         buttons = [
@@ -150,7 +170,8 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         backend.ui["text_count"] = len(backend.ui["texts"])
         stable_first = dict(copy.deepcopy(backend.ui), generation=10)
         stable_second = dict(copy.deepcopy(backend.ui), generation=11)
-        backend.ui_sequence = [stable_first, stable_second]
+        # Identity lookup precedes the two independent hidden-zero observations.
+        backend.ui_sequence = [stable_first, stable_first, stable_second]
 
         state = make_oracle(backend).raid_remain_state("raid_20260827", "hard")
 

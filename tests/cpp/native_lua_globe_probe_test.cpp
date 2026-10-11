@@ -72,9 +72,17 @@ static NativeLuaGlobeDiagnostic read(State &st, NativeLuaReadApi a=api(), Native
   return d;
 }
 int main() {
+  std::array<char, 7> mask{};
+  assert(GlobeInputMaskHex(0, 199.0f / 255, 199.0f / 255, mask));
+  assert(std::string(mask.data()) == "00C7C7");
+  assert(GlobeInputMaskHex(0, 200.0f / 255, 200.0f / 255, mask));
+  assert(std::string(mask.data()) == "00C8C8");
+  assert(!GlobeInputMaskHex(-0.01f, 0, 0, mask));
+  assert(!GlobeInputMaskHex(1.01f, 0, 0, mask));
+  assert(!GlobeInputMaskHex(std::nanf(""), 0, 0, mask));
   auto st=world(); auto d=read(st);
   assert(d.status==1 && d.stackBalanced && d.worldCandidates==1 && d.dragCandidates==1 && d.dragging[0]==1);
-  assert(d.colorCount==2 && !d.truncated);
+  assert(d.colorCount==2 && !d.truncated && d.colorTableComplete);
   assert(std::string(d.colors[0].hex.data())=="00C7C7" && d.colors[0].entrance==77);
   int identityCalls=0;
   NativeLuaUnityObjectApi objects{&identityCalls,+[](void *opaque,void *lua,int index)->int32_t {
@@ -114,7 +122,7 @@ int main() {
   st.registry.assign(4097,{}); d=read(st); assert(d.truncated && d.registryVisited==4096 && d.stackBalanced);
   st=world(); st.tables[3].clear();
   for (int n=1;n<=257;++n) { char key[7]; std::snprintf(key,sizeof(key),"%06X",n); st.tables[3][key]=Value::numeric(n); }
-  d=read(st); assert(d.colorCount==256 && d.truncated && d.stackBalanced);
+  d=read(st); assert(d.colorCount==256 && d.truncated && d.stackBalanced && !d.colorTableComplete);
   st=world();
   for (int n=100;n<400;++n) st.registry.insert(st.registry.end()-1,Value::table(n));
   d=read(st); assert(d.worldCandidates==1 && d.dragCandidates==1 && d.colorCount==2 && !d.truncated);

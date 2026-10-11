@@ -130,12 +130,40 @@ def test_new_blocker_after_native_proof_prevents_input():
     from tests.semantic_support.observer_fixtures import make_button,make_buttons
     backend,oracle=fixture();back=backend.buttons['buttons'][0]
     def accepted(*args):
-        backend.buttons=make_buttons([back,make_button('Loading(Clone)','root/Overlay/UIOverlay/Loading(Clone)')],generation=11)
+        backend.buttons=make_buttons([back,make_button('custom_button_1(Clone)',
+            'root/Msgbox(Clone)/window/button_container/custom_button_1(Clone)')],generation=11)
         return True
     oracle.operation_siren_globe_drag_owned=accepted
     with pytest.raises(SemanticGateClosed,match='changed after camera drag proof'):
         oracle.operation_siren_globe_swipe(START,END,300)
     assert backend.swipes==[]
+
+
+def test_loading_after_final_camera_proof_reproves_before_single_input():
+    from tests.semantic_support.observer_fixtures import make_buttons
+    backend, oracle = fixture()
+    oracle._sleep = lambda _: None
+    loading = (SimpleNamespace(blocker_id='loading'),)
+    oracle._blocking_rules = Mock(side_effect=[(), loading, (), ()])
+    oracle.operation_siren_globe_drag_owned = Mock(return_value=True)
+    backend.on_swipe = lambda: setattr(backend, 'buttons',
+        make_buttons(backend.buttons['buttons'], generation=13))
+    receipt = oracle.operation_siren_globe_swipe(START, END, 300)
+    assert oracle.operation_siren_globe_drag_owned.call_count == 2
+    assert backend.swipes == [(*START, *END, 2000)]
+    assert receipt.post_generation > receipt.pre_generation
+
+
+def test_persistent_loading_after_camera_proof_still_sends_no_input():
+    backend, oracle = fixture()
+    oracle._sleep = lambda _: None
+    loading = (SimpleNamespace(blocker_id='loading'),)
+    oracle._blocking_rules = Mock(side_effect=[()] + [loading] * 30)
+    oracle.operation_siren_globe_drag_owned = Mock(return_value=True)
+    with pytest.raises(SemanticGateClosed, match='obscured before swipe'):
+        oracle.operation_siren_globe_swipe(START, END, 300)
+    oracle.operation_siren_globe_drag_owned.assert_called_once_with(START, END)
+    assert not backend.swipes
 
 
 def test_loading_between_sample_and_final_proof_waits_without_input():

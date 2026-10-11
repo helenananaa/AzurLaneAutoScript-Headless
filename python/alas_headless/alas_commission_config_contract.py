@@ -57,12 +57,19 @@ def validate_alas_commission_config(
 ) -> AlasCommissionConfigSnapshot:
     """Validate Commission fields before scope entry, rewards, or dispatch."""
 
-    if type(preset_filter) is not str or preset_filter not in COMMISSION_PRESETS:
-        raise SemanticGateClosed("Commission.PresetFilter is unsupported")
+    # The installed ALAS owns preset resolution, including new preset names and
+    # its existing fallback to the generated default.  The baseline catalog is
+    # qualification metadata, not a runtime allowlist.
+    if type(preset_filter) is not str or not preset_filter.strip():
+        raise SemanticGateClosed("Commission.PresetFilter must be non-empty text")
     if type(do_major_commission) is not bool:
         raise SemanticGateClosed("Commission.DoMajorCommission must be a bool")
     return AlasCommissionConfigSnapshot(
         preset_filter=preset_filter,
-        custom_tokens=parse_alas_commission_custom_filter(custom_filter),
+        custom_tokens=(
+            parse_alas_commission_custom_filter(custom_filter)
+            if preset_filter == "custom"
+            else ()
+        ),
         do_major_commission=do_major_commission,
     )

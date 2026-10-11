@@ -95,15 +95,14 @@ class AdbRuntimeHandleTests(unittest.TestCase):
 
     def test_foreground_tap_and_swipe_preserve_exact_bridge_calls(self):
         bridge, handle = self.make_handle()
-        with mock.patch.object(
-            bridge,
-            "_run",
-            side_effect=(
-                "topResumedActivity: ActivityRecord u0 com.example.game/.Main",
-                "",
-                "",
-            ),
-        ) as run:
+        # The handle delegates reviewed points to the bridge. The bridge may
+        # encode a press as a same-point down/up gesture for Unity's input loop;
+        # that transport detail is not the handle's contract.
+        with (
+            mock.patch.object(bridge, 'foreground_component', return_value='com.example.game/.Main') as foreground,
+            mock.patch.object(bridge, 'tap') as tap,
+            mock.patch.object(bridge, 'swipe') as swipe,
+        ):
             self.assertEqual(
                 handle.foreground_component(),
                 "com.example.game/.Main",
@@ -111,35 +110,9 @@ class AdbRuntimeHandleTests(unittest.TestCase):
             handle.tap(12, 34)
             handle.swipe(1, 2, 3, 4, 500)
 
-        self.assertEqual(
-            run.call_args_list,
-            [
-                mock.call(
-                    ("shell", "dumpsys", "activity", "activities"),
-                    timeout_seconds=30.0,
-                ),
-                mock.call(("shell", "input", "tap", "12", "34")),
-                mock.call(
-                    (
-                        "shell",
-                        "input",
-                        "swipe",
-                        "1",
-                        "2",
-                        "3",
-                        "4",
-                        "500",
-                    )
-                ),
-            ],
-        )
-        self.assertEqual(
-            [
-                bridge._classify_adb_operation(call.args[0])
-                for call in run.call_args_list
-            ],
-            ["foreground-activity", "input-tap", "input-swipe"],
-        )
+        foreground.assert_called_once_with()
+        tap.assert_called_once_with(12, 34)
+        swipe.assert_called_once_with(1, 2, 3, 4, 500)
 
     def test_bridge_errors_propagate_without_translation(self):
         bridge, handle = self.make_handle()

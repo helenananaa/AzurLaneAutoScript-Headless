@@ -14,6 +14,10 @@ from ...semantic_oracle import (
 class RaidAdapterPorts:
     """Raid ports on the shared adapter context."""
 
+    def supports_raid_layout(self, event: str) -> bool:
+        self._package_gate()
+        return self._frame_or_live_observation_oracle().supports_raid_layout(event)
+
     def current_raid_result_active(self) -> bool:
         """Return whether an exact current-Raid sortie owns the result stack."""
 
@@ -59,7 +63,7 @@ class RaidAdapterPorts:
     def enter_raid_page(self, event: str) -> ActionReceipt:
         self._package_gate()
         input_oracle = self._fresh_input_oracle()
-        if event != "raid_20260827" or not input_oracle.main_page_visible():
+        if not input_oracle.supports_raid_layout(event) or not input_oracle.main_page_visible():
             raise SemanticGateClosed("current Raid entry requires the reviewed main page")
         receipt = input_oracle.click("main/raid")
         deadline = time.monotonic() + 10.0

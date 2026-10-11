@@ -1,0 +1,27 @@
+diff --git a/module/os/globe_operation.py b/module/os/globe_operation.py
+--- a/module/os/globe_operation.py
++++ b/module/os/globe_operation.py
+@@ -405,6 +405,7 @@
+             semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
+             for attempt in range(80):
+                 self.device.sleep(0.25)
++                self.device.screenshot()
+                 if semantic_adapter.operation_siren_map_visible():
+                     return
+                 if self.handle_action_point(zone=zone, pinned=pinned):
+@@ -436,6 +437,15 @@
+                     self.globe_focus_to(zone)
+                     semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
+                     continue
++                # Reuse the same native event/popup handlers as the pixel
++                # branch. A first-visit story can cover an already-entered
++                # map; absence of the unobstructed map is not a failed tap.
++                if self.handle_map_event():
++                    continue
++                if self.handle_popup_confirm('GLOBE_ENTER'):
++                    continue
++                if self.appear_then_click(AUTO_SEARCH_REWARD, offset=(50, 50), interval=3):
++                    continue
+                 if attempt and attempt % 20 == 0:
+                     # The client can swallow the first exact entrance click
+                     # while closing the previous special-zone transition.

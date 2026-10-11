@@ -79,3 +79,36 @@ def test_tech_home_return_waits_for_actionability_without_dispatch(monkeypatch, 
             adapter._click_main_ready(target)
         assert oracle.input_dispatch_count == int(dispatched)
         assert len(calls) == 1
+
+
+@pytest.mark.parametrize('failure', [SemanticTargetMissing, SemanticGateClosed])
+@pytest.mark.parametrize('case', ['arrives', 'no_receipt', 'dispatched', 'never_arrives', 'old_generation'])
+def test_submitted_tech_entry_waits_for_destination_without_repeating_input(monkeypatch, failure, case):
+    from alas_headless.adapter.semantic import dispatch_actions
+    clock = [0.0]
+    monkeypatch.setattr(dispatch_actions.time, 'monotonic', lambda: clock[0])
+    monkeypatch.setattr(dispatch_actions.time, 'sleep', lambda seconds: clock.__setitem__(0, clock[0] + seconds))
+    oracle = FakeOracle()
+    oracle.input_dispatch_count = 0
+    oracle.main_page_visible = lambda: False
+    oracle.observation_target_present = lambda target: target == 'research-menu/page/back' and clock[0] >= .4
+    oracle.enabled = lambda target: target == 'research-menu/page/back' and case != 'never_arrives'
+    oracle.read_state = lambda: SimpleNamespace(generation=10 if case == 'old_generation' else 11)
+    calls = []
+    def click(target):
+        calls.append(target)
+        oracle.input_dispatch_count += int(case == 'dispatched')
+        raise failure('semantic target is absent: main/tech' if failure is SemanticTargetMissing
+                      else 'semantic target is not actionable')
+    oracle.click = click
+    adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    prior = SimpleNamespace(generation=10)
+    if case != 'no_receipt':
+        adapter._main_tech_entry_receipt = prior
+    if case == 'arrives':
+        assert adapter._click_mapped('MAIN_GOTO_RESHMENU', 'main/tech') is prior
+    else:
+        with pytest.raises(failure):
+            adapter._click_mapped('MAIN_GOTO_RESHMENU', 'main/tech')
+    assert calls == ['main/tech']
+    assert oracle.input_dispatch_count == int(case == 'dispatched')

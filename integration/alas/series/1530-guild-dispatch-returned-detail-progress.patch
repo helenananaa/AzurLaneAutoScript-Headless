@@ -1,0 +1,48 @@
+diff --git a/module/guild/operations.py b/module/guild/operations.py
+--- a/module/guild/operations.py
++++ b/module/guild/operations.py
+@@ -689,13 +689,15 @@
+             dispatch_receipt = adapter.confirm_guild_dispatch()
+             for _ in range(30):
+                 try:
+-                    dispatched_formation = adapter.guild_formation_state()
++                    progress_generation = adapter.guild_dispatch_in_progress_generation()
+                 except SemanticGateClosed as exc:
+-                    if str(exc) != 'guild formation snapshots are not coherent':
++                    if str(exc) not in ('guild formation snapshots are not coherent',
++                                        'guild formation page identity is absent',
++                                        'guild dispatch progress snapshots are not coherent'):
+                         raise
+                 else:
+-                    if (dispatched_formation.generation > dispatch_receipt.generation
+-                            and dispatched_formation.in_progress):
++                    if (progress_generation is not None
++                            and progress_generation > dispatch_receipt.generation):
+                         break
+                 self.device.sleep(0.2)
+             else:
+diff --git a/module/guild/guild_reward.py b/module/guild/guild_reward.py
+--- a/module/guild/guild_reward.py
++++ b/module/guild/guild_reward.py
+@@ -3,6 +3,7 @@
+ from module.guild.lobby import GuildLobby
+ from module.guild.logistics import GuildLogistics
+ from module.guild.operations import GuildOperations
++from module.guild.assets import GUILD_DISPATCH_QUICK, GUILD_DISPATCH_RECOMMEND
+ from module.ui.page import page_guild, page_main
+ 
+ 
+@@ -33,6 +34,13 @@
+             self.config.Scheduler_Enable = False
+             self.config.task_stop()
+ 
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            self.device.screenshot()
++            # Reuse native dispatch exit when recovery inherits its Detail
++            # or Formation page, before normal page navigation resumes.
++            if (self.appear(GUILD_DISPATCH_QUICK) or
++                    self.appear(GUILD_DISPATCH_RECOMMEND)):
++                self._guild_operations_dispatch_exit(skip_first_screenshot=False)
+         self.ui_ensure(page_guild)
+         success = True
+ 

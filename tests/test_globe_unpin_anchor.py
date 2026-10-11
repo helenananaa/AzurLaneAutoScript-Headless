@@ -71,8 +71,42 @@ def test_unpin_all_native_paths_obscured_has_no_input():
             o, 'operation_siren_globe_drag_owned', return_value=False) as proof:
         with pytest.raises(SemanticGateClosed, match='outside the owned plane'):
             o.operation_siren_globe_unpin()
-    assert proof.call_count == 2
+    assert proof.call_count == 4
     assert b.swipes == []
+
+
+def test_selected_panel_covers_default_end_reverse_native_path_sends_one_drag():
+    b, o = setup_unpin()
+    b.ui['globe_geometry']['objects'] = b.ui['globe_geometry']['objects'][:1]
+    with patch.object(o, 'operation_siren_globe_state'), patch.object(
+            o, 'operation_siren_globe_drag_owned', side_effect=[False, True]) as proof:
+        receipt = o.operation_siren_globe_unpin()
+    assert proof.call_args_list[0].args == ((558,375), (608,325))
+    assert proof.call_args_list[1].args == ((458,475), (408,525))
+    assert receipt.end == (408,525)
+    assert b.swipes == [(458,475,408,525,2000)]
+
+
+def test_only_native_anchor_inside_pin_uses_proven_next_drag_segment():
+    b, o = setup_unpin()
+    b.ui['globe_geometry']['objects'] = b.ui['globe_geometry']['objects'][:1]
+    with patch.object(o, 'operation_siren_globe_state'), patch.object(
+            o, 'operation_siren_globe_drag_owned', return_value=True) as proof:
+        receipt = o.operation_siren_globe_unpin()
+    proof.assert_called_once_with((558,375), (608,325))
+    assert receipt.start == (558,375)
+    assert b.swipes == [(558,375,608,325,2000)]
+
+
+def test_all_inside_pin_segments_obscured_remain_zero_input():
+    b, o = setup_unpin()
+    b.ui['globe_geometry']['objects'] = b.ui['globe_geometry']['objects'][:1]
+    with patch.object(o, 'operation_siren_globe_state'), patch.object(
+            o, 'operation_siren_globe_drag_owned', return_value=False) as proof:
+        with pytest.raises(SemanticGateClosed, match='outside the owned plane'):
+            o.operation_siren_globe_unpin()
+    assert proof.call_count == 4
+    assert not b.swipes
 
 
 def test_unpin_unknown_proof_stops_without_trying_another_anchor():
@@ -105,4 +139,40 @@ def test_persistent_absent_anchors_remain_closed_without_input():
         with pytest.raises(SemanticGateClosed,match='no unobscured typed plane target'):
             o.operation_siren_globe_unpin()
     proof.assert_not_called()
+    assert not b.swipes
+
+
+def test_loading_after_anchor_read_reproves_whole_preparation_before_one_input():
+    b, o = setup_unpin()
+    from alas_headless.oracle.blockers import DEFAULT_BLOCKERS
+    loading = next(rule for rule in DEFAULT_BLOCKERS if rule.blocker_id == 'loading')
+    with patch.object(o, 'operation_siren_globe_state'), patch.object(
+            o, '_blocking_rules', side_effect=[[loading], [], [], []]), patch.object(
+            o, 'operation_siren_globe_drag_owned', return_value=True) as proof:
+        receipt = o.operation_siren_globe_unpin()
+    assert receipt.start == (693, 535)
+    proof.assert_called_once()
+    assert len(b.swipes) == 1
+
+
+def test_persistent_foreign_foreground_preparation_never_proves_path_or_inputs():
+    b, o = setup_unpin()
+    with patch.object(o, 'operation_siren_globe_state'), patch.object(
+            o, '_foreground_component', return_value='unrelated.package/Activity'), patch.object(
+            o, 'operation_siren_globe_drag_owned') as proof:
+        with pytest.raises(SemanticGateClosed, match='top-resumed'):
+            o.operation_siren_globe_unpin()
+    proof.assert_not_called()
+    assert not b.swipes
+
+
+def test_loading_after_complete_drag_proof_remains_zero_input():
+    b, o = setup_unpin()
+    from alas_headless.oracle.blockers import DEFAULT_BLOCKERS
+    loading = next(rule for rule in DEFAULT_BLOCKERS if rule.blocker_id == 'loading')
+    with patch.object(o, 'operation_siren_globe_state'), patch.object(
+            o, '_blocking_rules', side_effect=[[], [loading]]), patch.object(
+            o, 'operation_siren_globe_drag_owned', return_value=True):
+        with pytest.raises(SemanticGateClosed, match='changed after unpin drag proof'):
+            o.operation_siren_globe_unpin()
     assert not b.swipes

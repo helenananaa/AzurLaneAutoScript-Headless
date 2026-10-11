@@ -2,22 +2,7 @@ diff --git a/module/config/config.py b/module/config/config.py
 index 97631fca..6b26dd61 100644
 --- a/module/config/config.py
 +++ b/module/config/config.py
-@@ -203,6 +203,14 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
-         """
-         Calculate tasks, set pending_task and waiting_task
-         """
-+        from alas_headless import (
-+            validate_alas_scheduler_config,
-+            validate_alas_task_hoarding_config,
-+        )
-+
-+        validate_alas_task_hoarding_config(self.data)
-+        validate_alas_scheduler_config(self.data)
-+
-         pending = []
-         waiting = []
-         error = []
-@@ -452,6 +460,11 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
+@@ -452,6 +452,11 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
          """
          if not recon_scan and not submarine_call and not ap_limit and not cl1_preserve:
              return None
@@ -29,7 +14,7 @@ index 97631fca..6b26dd61 100644
          kv = dict_to_kv(
              {
                  "recon_scan": recon_scan,
-@@ -473,32 +486,46 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
+@@ -473,32 +478,46 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
                      self.modified[keys] = next_run
  
          def is_submarine_call(task):

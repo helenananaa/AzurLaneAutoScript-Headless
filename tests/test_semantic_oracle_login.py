@@ -261,7 +261,11 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         self.assertFalse(oracle.stale_login_update_in_progress())
         backend.ui["texts"][0]["text"] = "正在检查更新..."
         backend.ui["age_ms"] = 20
-        self.assertFalse(oracle.stale_login_update_in_progress())
+        # A fresh UpdatePanel cannot make passive waiting unsafe when the
+        # separately published state frame is stale. It admits no input.
+        self.assertTrue(oracle.stale_login_update_in_progress())
+        self.assertFalse(oracle._login_update_seen)
+        self.assertEqual(backend.taps, [])
 
     def test_login_update_download_prompt_wins_over_background_check_status(self):
         dialog = "root/Overlay/UIMain/DialogPanel/dialog/"

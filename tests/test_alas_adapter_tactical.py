@@ -234,16 +234,17 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         )
         self.assertEqual(oracle.click_calls, ["tactical/continue/cancel"])
 
-    def test_tactical_passive_continue_probe_is_false_without_prompt_or_opt_in(self):
+    def test_tactical_continue_cancel_requires_prompt_but_no_reward_grant(self):
         oracle = FakeOracle()
         adapter = AlasSemanticAdapter(oracle, lambda: None)
         adapter.begin_tactical()
 
         self.assertFalse(adapter.cancel_tactical_continue_if_present())
 
-        oracle.tactical_prompt_text = "舰船学习完成，是否继续学习该技能？"
-        with self.assertRaises(SemanticGateClosed):
-            adapter.cancel_tactical_continue_if_present()
+        oracle.tactical_prompt_text = "「舰船」学习完成，「技能」技能获得450点经验是否继续学习该技能？"
+        self.assertTrue(adapter.cancel_tactical_continue_if_present())
+        self.assertEqual(oracle.click_calls, ["tactical/continue/cancel"])
+        self.assertEqual(adapter._action_ledger.remaining("tactical.reward"), 0)
 
     def test_tactical_book_progress_ocr_strips_only_the_selected_book_bonus(self):
         adapter, oracle, _ = self.make_adapter()

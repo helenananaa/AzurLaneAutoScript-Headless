@@ -2,7 +2,17 @@
 
 Status terms are deliberately strict. A build passing does not imply a later gate has passed.
 
-Current status: G1-G4, G5a, controlled G5b, scoped G6-G8, the G9 bounded
+This document records qualification milestones and their historical evidence.
+It is not the current task support table or a checklist to rerun after every
+edit. Current ALAS support comes from
+[the support ledger](../integration/alas/support-matrix-ledger.json) and
+[its generated matrix](alas-config-support-matrix.md). Runtime compatibility
+and focused development validation follow
+[the integration guide](../integration/alas/README.md).
+
+## Historical milestone snapshot
+
+At the milestones recorded below: G1-G4, G5a, controlled G5b, scoped G6-G8, the G9 bounded
 adapter slices, and the G10-G13 campaign slices passed. G14 has a pinned
 native-object pass while its fresh same-process live replay is network-blocked.
 G15 adds a live passive fleet-identity pass and pinned indexed projection; its

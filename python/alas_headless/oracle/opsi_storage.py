@@ -22,6 +22,13 @@ class OpsiStorageOracle:
     def operation_siren_storage_loggers_absent(self) -> bool:
         """Prove the complete current inventory contains only reviewed non-loggers."""
 
+        # Inventory Buttons can mount before their item Image identity even
+        # within the same generation. Re-read the complete view using the
+        # existing bounded helper; never turn a missing icon into absence.
+        # Immutable screenshot leases remain a single read-only attempt.
+        return self._retry_transition_read(self._operation_siren_storage_loggers_absent_once)
+
+    def _operation_siren_storage_loggers_absent_once(self) -> bool:
         state = self.read_state()
         back = self._unique(state, "os/storage/back")
         if not (back.active_in_hierarchy and back.active_and_enabled):
@@ -51,18 +58,19 @@ class OpsiStorageOracle:
             if len(icons) != 1:
                 raise SemanticGateClosed("operation siren inventory icon is missing or ambiguous")
             if icons[0].sprite not in nonlogger_sprites:
-                # Activated obscure coordinates belong to coordinate checkout,
+                # Activated coordinates belong to coordinate checkout,
                 # not the original logger activation flow. Require the same
                 # typed name identity used by operation_siren_storage_state;
                 # the sprite alone must not admit an unopened logger.
-                if icons[0].sprite == "Wluopanjihuo2":
-                    names = [text for text in ui.texts
-                             if text.path == root + str(item_id) + "/bg/name"
-                             and text.active_in_hierarchy and text.active_and_enabled
-                             and not text.truncated and text.bounds is not None]
-                    if (len(names) == 1 and re.sub(r"<[^>]*>", "", names[0].text)
-                            .strip().startswith("海域坐标:")):
-                        continue
+                names = [text for text in ui.texts
+                         if text.path == root + str(item_id) + "/bg/name"
+                         and text.active_in_hierarchy and text.active_and_enabled
+                         and not text.truncated and text.bounds is not None]
+                if (len(names) == 1 and re.sub(r"<[^>]*>", "", names[0].text)
+                        .strip().startswith(("海域坐标:", "塞壬坐标:"))):
+                    # Reuse storage_state's typed category identity. Visual
+                    # variants do not turn an activated coordinate into a logger.
+                    continue
                 raise SemanticGateClosed("operation siren logger inventory requires typed use support")
         return True
 
@@ -88,7 +96,9 @@ class OpsiStorageOracle:
         from ..opsi_monthstart import select_sample
         return select_sample(self, selected)
 
-    def operation_siren_storage_state(self) -> OperationSirenStorageState:
+    def operation_siren_storage_state(
+        self, *, visible_only: bool = False
+    ) -> OperationSirenStorageState:
         """Read visible coordinate records from the typed inventory hierarchy."""
 
         button_state = self.read_state()
@@ -122,6 +132,15 @@ class OpsiStorageOracle:
 
         items = []
         for item_id, button in sorted(item_buttons.items()):
+            if (visible_only and button.bounds is not None
+                    and (button.bounds.bottom <= 80
+                         or button.bounds.top >= 602
+                         or button.bounds.right <= 0
+                         or button.bounds.left >= 1230)):
+                # ScrollRect can retain an active clipped card while its
+                # text projection disappears. The scroll postcondition only
+                # needs the positive fully visible destination, not that row.
+                continue
             root = button.path + "/bg/"
             names = tuple(
                 text
@@ -218,7 +237,7 @@ class OpsiStorageOracle:
 
         if item_type not in ("OBSCURE", "ABYSSAL"):
             raise ValueError("operation siren storage item type is invalid")
-        storage = self.operation_siren_storage_state()
+        storage = self.operation_siren_storage_state(visible_only=True)
         candidates = tuple(
             item
             for item in storage.items
@@ -276,44 +295,80 @@ class OpsiStorageOracle:
 
     def operation_siren_storage_scroll_for_abyssal(
         self, timeout_seconds: float = 5.0
-    ) -> OperationSirenStorageScrollReceipt:
+    ) -> Optional[OperationSirenStorageScrollReceipt]:
         """Move the inventory viewport until an abyssal coordinate is fully visible."""
 
         if self._swipe is None:
             raise SemanticGateClosed("operation siren storage swipe backend is absent")
-        before = self.operation_siren_storage_state()
+        before = self._retry_transition_read(self.operation_siren_storage_state)
         if any(
             item.item_type == "ABYSSAL" and item.actionable for item in before.items
         ):
-            raise SemanticGateClosed(
-                "operation siren abyssal coordinate already actionable"
-            )
+            # A fresh read can find the native requested destination already
+            # visible. Continue without a gesture or a manufactured receipt.
+            return None
         if not any(item.item_type == "ABYSSAL" for item in before.items):
             raise SemanticTargetMissing("operation siren abyssal coordinate is absent")
-        start = (640, 560)
-        end = (640, 260)
+        input_state, start, end = self._retry_transition_read(self._operation_siren_storage_scrollbar_plan)
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("game activity changed before storage scroll")
         self._swipe(start[0], start[1], end[0], end[1], 450)
         deadline = self._monotonic() + timeout_seconds
         while self._monotonic() < deadline:
             self._sleep(0.25)
-            after = self.operation_siren_storage_state()
+            after = self.operation_siren_storage_state(visible_only=True)
             actionable = tuple(
                 item
                 for item in after.items
                 if item.item_type == "ABYSSAL" and item.actionable
             )
-            if after.generation > before.generation and actionable:
+            if after.generation > input_state.generation and actionable:
                 return OperationSirenStorageScrollReceipt(
                     semantic_id="os/storage/scroll/abyssal",
-                    pre_generation=before.generation,
+                    pre_generation=input_state.generation,
                     post_generation=after.generation,
                     start=start,
                     end=end,
                     visible_abyssal_count=len(actionable),
                 )
         raise SemanticGateClosed("operation siren storage scroll was not proven")
+
+    def _operation_siren_storage_scrollbar_plan(self):
+        """Resolve one drag to the lower endpoint of the owned Unity scrollbar."""
+        state = self.read_state()
+        back = self._unique(state, 'os/storage/back')
+        if (not back.active_in_hierarchy or not back.active_and_enabled
+                or self._blocking_rules(state, 'os/storage/back')):
+            raise SemanticGateClosed('operation siren storage scrollbar owner is not proven')
+        ui = self.read_ui_state()
+        if (not state.generation <= ui.generation <= state.generation + 2
+                or ui.image_truncated or ui.skipped_count or not ui.method_mask & 8):
+            raise SemanticGateClosed('operation siren storage scrollbar images are incomplete')
+        path = 'OverlayCamera/Overlay/UIMain/WorldInventoryUI(Clone)/adapt/item_scrollview/Scrollbar'
+        def control(control_path):
+            matches = tuple(image for image in ui.images if image.path == control_path
+                and image.active_in_hierarchy and image.active_and_enabled
+                and not image.truncated and image.raycast_target
+                and image.raycast_top is not False and image.bounds is not None)
+            if len(matches) != 1:
+                raise SemanticGateClosed('operation siren storage scrollbar is absent or ambiguous')
+            return matches[0].bounds
+        track, handle = control(path), control(path + '/Handle')
+        if not (0 <= track.left < track.right <= self.fingerprint.width
+                and 0 <= track.top < track.bottom <= self.fingerprint.height
+                and 0 <= handle.left < handle.right <= self.fingerprint.width
+                and 0 <= handle.top < handle.bottom <= self.fingerprint.height):
+            raise SemanticGateClosed('operation siren storage scrollbar geometry is invalid')
+        left, right = max(track.left, handle.left), min(track.right, handle.right)
+        if left >= right:
+            raise SemanticGateClosed('operation siren storage scrollbar handle is detached')
+        x = (left + right) / 2
+        start = (round(x), round((handle.top + handle.bottom) / 2))
+        end = (round(x), round(track.bottom - (handle.bottom - handle.top) / 2))
+        if (not handle.contains(Point(*start)) or not track.contains(Point(*start))
+                or not track.contains(Point(*end)) or end[1] <= start[1]):
+            raise SemanticGateClosed('operation siren storage scrollbar cannot move downward')
+        return state, start, end
 
     def click_operation_siren_storage_back(self) -> ActionReceipt:
         """Leave the proven Operation Siren inventory through its exact back control."""

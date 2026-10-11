@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Mapping, Optional, Tuple, Union
+from typing import Any, Callable, Mapping, Optional, Tuple, Union
 
 
 OBSERVER_SCHEMA = "alas-headless.observer/v1"
@@ -17,12 +17,9 @@ BUTTON_SCHEMA = "alas-headless.buttons/v1"
 UI_SCHEMA = "alas-headless.ui/v1"
 
 
-# Reviewed from the game's ``re_map_template`` identity table.  The folder is
-# ALAS's stable campaign module key; the pair is the Unity archive category
-# and the exact activity-banner sprite mounted on that card.  Three newer ALAS
-# folders (20230525, 20230803 and 20240725) are intentionally absent because
-# the pinned CN game exposes no corresponding re-map record.  They therefore
-# fail only the requested archive instead of being guessed by list position.
+# Reviewed legacy identities for older observers without an activity catalog.
+# New observers join installed ALAS titles to current game re_map_template
+# records; absence from this fallback table does not disable a newer archive.
 WAR_ARCHIVES_CAMPAIGN_CARDS: Mapping[str, Tuple[str, str]] = {
     "war_archives_20190321_en": ("ex", "temp_hongran"),
     "war_archives_20181020_en": ("sp", "temp_zjiandui"),
@@ -295,6 +292,85 @@ class ShipyardState:
 
 
 @dataclass(frozen=True)
+class ShipyardStrengthenPanel:
+    """One selected ship's visible native DEV/FATE quantity panel."""
+
+    generation: int
+    series: int
+    ship_index: int
+    ship_name: str
+    phase: str
+    quantity: int
+    blueprint_count: int
+    currency: str
+    resource_count: int
+    total_price: Optional[int]
+    panel_path: str
+
+
+@dataclass(frozen=True)
+class ShipyardPurchaseState:
+    """UI quote paired with the game's selected blueprint and purchase counter."""
+
+    panel: ShipyardStrengthenPanel
+    blueprint_id: int
+    rarity: str
+    purchased: int
+    coins: int
+    level: int
+    fate_level: int
+    exp: int
+
+    @property
+    def identity(self) -> tuple:
+        return (self.panel.series, self.panel.ship_index, self.panel.ship_name,
+                self.blueprint_id, self.rarity)
+
+
+@dataclass(frozen=True)
+class ShipyardPurchaseResult:
+    """Authoritative completion remains readable during the native UI animation."""
+
+    generation: int
+    blueprint_id: int
+    series: int
+    ship_index: int
+    rarity: str
+    purchased: int
+    coins: int
+    level: int
+    fate_level: int
+    exp: int
+
+
+@dataclass(frozen=True)
+class ShipyardBlueprintUseState:
+    """Stored-item request; no gold or premium-currency debit is authorized."""
+
+    panel: ShipyardStrengthenPanel
+    native: ShipyardPurchaseResult
+    paid_gems: int
+    free_gems: int
+
+
+@dataclass(frozen=True)
+class ShipyardBlueprintUseResult:
+    """Selected blueprint inventory and native progress after an item input."""
+
+    native: ShipyardPurchaseResult
+    blueprint_count: int
+    paid_gems: int
+    free_gems: int
+
+
+@dataclass(frozen=True)
+class _DeferredUiValue:
+    """An internal field parser over one already captured UI snapshot."""
+
+    read: Callable[[], Any]
+
+
+@dataclass(frozen=True)
 class UiState:
     generation: int
     method_mask: int
@@ -306,6 +382,15 @@ class UiState:
     images: Tuple[ImageState, ...]
     image_source_count: Optional[int] = None
     image_source_capacity: Optional[int] = None
+
+    def __getattribute__(self, name: str) -> Any:
+        value = object.__getattribute__(self, name)
+        if isinstance(value, _DeferredUiValue):
+            # Resolve only the field family actually consumed. Cache successful
+            # immutable values, never an empty substitute for a failed parse.
+            value = value.read()
+            object.__setattr__(self, name, value)
+        return value
 
 
 @dataclass(frozen=True)
@@ -328,8 +413,8 @@ class GuildLogisticsState:
     supply_remaining: int
     supply_total: int
     supply_claimable: bool
-    mission_current: int
-    mission_total: int
+    mission_current: Optional[int]
+    mission_total: Optional[int]
     mission_claimable: bool
     mission_finished: bool
     exchange_remaining: int
@@ -343,6 +428,7 @@ class GuildOperationsState:
     active_node: Optional[str]
     active_node_path: Optional[str]
     report_available: bool
+    active_nodes: Tuple[ButtonState, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -352,6 +438,7 @@ class GuildFormationState:
     score_addition: int
     effect_addition: int
     empty_slots: int
+    in_progress: bool = False
 
 
 @dataclass(frozen=True)
@@ -1566,6 +1653,17 @@ class DormFeedState:
     food: int
     capacity: int
     items: Tuple[DormFoodState, ...]
+
+
+@dataclass(frozen=True)
+class DormFoodShopState:
+    """Current food purchase proposal; reading it does not submit a purchase."""
+    generation: int
+    food_name: str
+    quantity: int
+    total_cost: int
+    currency_sprite: str
+    item_sprite: str
 
 
 @dataclass(frozen=True)

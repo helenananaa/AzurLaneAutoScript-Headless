@@ -1,0 +1,16 @@
+diff --git a/module/device/device.py b/module/device/device.py
+--- a/module/device/device.py
++++ b/module/device/device.py
+@@ -353,7 +353,11 @@
+             logger.critical('No app stop/start, because HandleError disabled')
+             logger.critical('Please enable Alas.Error.HandleError or manually login to AzurLane')
+             raise RequestHumanTakeover
+-        super().app_start()
++        semantic_adapter = getattr(self, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.restart_game_for_manager()
++        else:
++            super().app_start()
+         self.stuck_record_clear()
+         self.click_record_clear()
+ 

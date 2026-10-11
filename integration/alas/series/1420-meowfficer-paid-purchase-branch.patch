@@ -1,0 +1,19 @@
+diff --git a/module/meowfficer/buy.py b/module/meowfficer/buy.py
+--- a/module/meowfficer/buy.py
++++ b/module/meowfficer/buy.py
+@@ -207,7 +207,14 @@
+             if count <= 0:
+                 return
+             if semantic_adapter is not None:
+-                semantic_adapter.buy_meowfficer_boxes(count)
++                from alas_headless.adapter.semantic.contracts import AlasSemanticActionDeferred
++                try:
++                    semantic_adapter.buy_meowfficer_boxes(count)
++                except AlasSemanticActionDeferred as exc:
++                    # This no-input purchase refusal ends only this optional
++                    # branch. Original run() still owns Fort and training.
++                    logger.info(f'Meowfficer paid purchase deferred: {exc}')
++                    return
+             else:
+                 self.meow_choose(count)
+                 self.meow_confirm()

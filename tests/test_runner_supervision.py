@@ -1,5 +1,4 @@
 import hashlib
-import base64
 import errno
 import json
 import os
@@ -31,6 +30,7 @@ from alas_headless.runner_supervision import (
     WORKER_CONTROL_ENV,
     WORKER_CONTROL_HANDLE_ENV,
     WORKER_CONTROL_SCHEMA,
+    WORKER_ACTIVATION_SCHEMA,
     WORKER_LEASE_HANDLE_ENV,
     WORKER_RESULT_HANDLE_ENV,
     WORKER_ROLE_ENV,
@@ -45,7 +45,6 @@ from alas_headless.runner_supervision import (
     WorkerControl,
     WorkerHandles,
     WorkerTerminal,
-    _activation_control_digest,
     _read_activation_handle,
     build_config_ownership,
     bind_record,
@@ -61,10 +60,8 @@ from alas_headless.runner_supervision import (
     parse_forward_inventory,
     public_exception_descriptor,
     read_owned_file,
-    redact_secret_representations,
     select_forward_cleanup,
     send_activation,
-    ensure_secret_free_payload,
     strict_json_mapping_bytes,
     supervise_process,
     validate_total_deadline,
@@ -78,7 +75,6 @@ from alas_headless.runner_supervision import (
     write_owned_file,
 )
 
-TEST_TOKEN = b"alas-headless-test-token-32byte!"[:32]
 TEST_TEMPLATE_SHA256 = (
     "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced"
 )
@@ -178,12 +174,10 @@ class FakeJob:
 
 def make_control(root: Path, *, worker_pid=None, parent_pid=None) -> WorkerControl:
     run_id = uuid.uuid4().hex
-    token = os.urandom(32)
     parent_pid = parent_pid or os.getppid()
     worker_pid = worker_pid or os.getpid()
     binding = RunBinding(
         run_id=run_id,
-        token_digest=hashlib.sha256(token).hexdigest(),
         task="EventSp",
         stage="SP",
         event="event_20260813_cn",
@@ -215,7 +209,6 @@ def make_control(root: Path, *, worker_pid=None, parent_pid=None) -> WorkerContr
         materialization_control=make_materialization_control(binding),
         execution_budgets=TEST_BUDGETS,
     )
-    control.bind_activation_token(token, verified=False)
     return control
 
 
@@ -225,7 +218,6 @@ def make_owned_control(root: Path):
     config_root.mkdir(parents=True)
     control_root.mkdir()
     run_id = uuid.uuid4().hex
-    token = os.urandom(32)
     paths = {
         "config": config_root / ("_codex_event_live_eventsp_" + run_id + ".json"),
         "control": control_root / "worker-control.json",
@@ -239,7 +231,6 @@ def make_owned_control(root: Path):
     }
     binding = RunBinding(
         run_id=run_id,
-        token_digest=hashlib.sha256(token).hexdigest(),
         task="EventSp",
         stage="SP",
         event="event_20260813_cn",
@@ -271,7 +262,6 @@ def make_owned_control(root: Path):
         materialization_control=make_materialization_control(binding),
         execution_budgets=TEST_BUDGETS,
     )
-    control.bind_activation_token(token, verified=False)
     write_owned_file(owned["control"], canonical_json_bytes(control.to_mapping()))
     return control, owned
 
@@ -285,51 +275,11 @@ def close_owned_files(owned):
 
 
 class RunnerSupervisionTests(unittest.TestCase):
-    def test_public_error_and_recursive_scan_remove_all_token_representations(self):
-        class FatalProbe(BaseException):
-            pass
-
-        token = TEST_TOKEN
-        representations = {
-            token.decode("ascii"),
-            token.hex(),
-            token.hex().upper(),
-            base64.b64encode(token).decode("ascii"),
-            base64.b64encode(token).decode("ascii").rstrip("="),
-            base64.urlsafe_b64encode(token).decode("ascii"),
-            base64.urlsafe_b64encode(token).decode("ascii").rstrip("="),
-        }
-        payload = {
-            "fatal": list(representations),
-            "nested": {next(iter(representations)): tuple(representations)},
-        }
-        redacted = redact_secret_representations(payload, token)
-        serialized = json.dumps(redacted, sort_keys=True)
-        for representation in representations:
-            self.assertNotIn(representation, serialized)
-        with self.assertRaisesRegex(RuntimeError, "private runner capability"):
-            ensure_secret_free_payload(payload, token)
-
-        for index, failure in enumerate(
-            (
-                SystemExit(next(iter(representations))),
-                FatalProbe(token.hex().upper()),
-                RuntimeError(base64.b64encode(token).decode("ascii")),
-            )
-        ):
-            descriptor = public_exception_descriptor(
-                failure, "secret_probe_{0}".format(index)
-            )
-            encoded = json.dumps(descriptor, sort_keys=True)
-            self.assertEqual(
-                set(descriptor), {"type", "message_digest", "traceback_digest"}
-            )
-            self.assertIn(
-                descriptor["type"],
-                {"SystemExit", "BaseException", "RuntimeError"},
-            )
-            for representation in representations:
-                self.assertNotIn(representation, encoded)
+    def test_public_error_does_not_copy_exception_text(self):
+        descriptor = public_exception_descriptor(RuntimeError("account-private-data"), "probe")
+        self.assertEqual(set(descriptor), {"type", "message_digest", "traceback_digest"})
+        self.assertEqual(descriptor["type"], "RuntimeError")
+        self.assertNotIn("account-private-data", json.dumps(descriptor))
 
     def test_strict_json_rejects_nonfinite_duplicate_nonutf8_and_oversize(self):
         invalid = (
@@ -348,7 +298,7 @@ class RunnerSupervisionTests(unittest.TestCase):
             {"value": 1},
         )
 
-    def test_bound_record_is_secret_free_purpose_scoped_and_run_scoped(self):
+    def test_bound_record_is_purpose_scoped_and_run_scoped_without_secret(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory).resolve()
             control = make_control(root)
@@ -358,11 +308,7 @@ class RunnerSupervisionTests(unittest.TestCase):
                 "field": {"nested": [1, 2, 3]},
             }
             record = bind_record(control, RECORD_RESULT, body)
-            serialized = canonical_json_bytes(record)
-            secret = control.activation_token
-            self.assertNotIn(secret, serialized)
-            self.assertNotIn(secret.hex().encode("ascii"), serialized)
-            self.assertNotIn("token", control.binding.to_mapping())
+            self.assertNotIn("token_digest", control.binding.to_mapping())
             self.assertEqual(record["payload"], body)
             self.assertEqual(
                 verify_bound_record(control, RECORD_RESULT, record), body
@@ -378,10 +324,10 @@ class RunnerSupervisionTests(unittest.TestCase):
             replay_control = make_control(root)
             with self.assertRaises(ValueError):
                 verify_bound_record(replay_control, RECORD_RESULT, record)
-            for malformed in (None, "", "0" * 63, "0" * 65, "g" * 64):
+            for malformed in (None, "", "0" * 31, "0" * 33, "g" * 32):
                 candidate = dict(record)
-                candidate["binding_digest"] = malformed
-                with self.subTest(binding_digest=malformed), self.assertRaises(ValueError):
+                candidate["run_id"] = malformed
+                with self.subTest(run_id=malformed), self.assertRaises(ValueError):
                     verify_bound_record(control, RECORD_RESULT, candidate)
 
             for purpose in (RECORD_TERMINAL, RECORD_FORWARD_LEASE):
@@ -589,6 +535,20 @@ class RunnerSupervisionTests(unittest.TestCase):
                     pipe.close_parent_read()
                     pipe.close_parent_write()
 
+    def test_activation_reader_rejects_malformed_public_run_ids(self):
+        for suffix in (b"z" * 32, b"\xff" * 32):
+            with self.subTest(suffix=suffix[:1]):
+                pipe = create_activation_pipe()
+                try:
+                    os.write(pipe.write_fd, WORKER_ACTIVATION_SCHEMA.encode("ascii") + suffix)
+                    pipe.close_parent_write()
+                    with self.assertRaisesRegex(RuntimeError, "run ID is malformed"):
+                        _read_activation_handle(pipe.read_handle)
+                    pipe.read_fd = -1
+                finally:
+                    pipe.close_parent_read()
+                    pipe.close_parent_write()
+
     def test_activation_saturated_and_broken_pipe_fail_once_without_retry(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory).resolve()
@@ -716,7 +676,7 @@ class RunnerSupervisionTests(unittest.TestCase):
                 worker_control_from_activation(environment)
 
     @unittest.skipUnless(os.name == "nt", "Windows exact-handle activation contract")
-    def test_one_shot_activation_binds_parent_identity_and_paths(self):
+    def test_one_shot_activation_binds_run_identity_and_accepts_json_formatting(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory).resolve()
             result_file = exclusive_create(root / "result.json", inheritable=True)
@@ -730,10 +690,8 @@ class RunnerSupervisionTests(unittest.TestCase):
             control_file = exclusive_create(root / "control.json", inheritable=False)
             seed_file = exclusive_create(root / "template.json", inheritable=False)
             parent_pid = os.getppid()
-            token = os.urandom(32)
             binding = RunBinding(
                 run_id=run_id,
-                token_digest=hashlib.sha256(token).hexdigest(),
                 task="EventSp",
                 stage="SP",
                 event="event_20260813_cn",
@@ -781,8 +739,7 @@ class RunnerSupervisionTests(unittest.TestCase):
                 make_materialization_control(binding),
                 TEST_BUDGETS,
             )
-            control.bind_activation_token(token, verified=False)
-            write_owned_file(control_file, canonical_json_bytes(control.to_mapping()))
+            write_owned_file(control_file, json.dumps(control.to_mapping(), indent=2).encode("utf-8"))
             pipe = create_activation_pipe()
             environment = {
                 WORKER_ROLE_ENV: "worker",
@@ -840,7 +797,6 @@ class RunnerSupervisionTests(unittest.TestCase):
             control = make_control(Path(directory).resolve())
             baseline = dict(control.binding.to_mapping())
             mutations = {
-                "token_digest": "bad",
                 "task": "EventB",
                 "stage": "A1",
                 "event": "",
@@ -864,10 +820,7 @@ class RunnerSupervisionTests(unittest.TestCase):
             control_path = root / "control.json"
             payload = canonical_json_bytes(control.to_mapping())
             control_path.write_bytes(payload)
-            activation = (
-                control.activation_token,
-                _activation_control_digest(control_path, payload),
-            )
+            activation = control.binding.run_id
             environment = {
                 WORKER_ROLE_ENV: "worker",
                 WORKER_CONTROL_ENV: str(control_path),
@@ -905,7 +858,7 @@ class RunnerSupervisionTests(unittest.TestCase):
                         get_process_identity=lambda _pid: "1:999",
                     )
 
-    def test_activation_digest_binds_exact_control_path_and_token(self):
+    def test_activation_correlates_control_path_and_public_run_id(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory).resolve()
             control = make_control(root)
@@ -925,11 +878,10 @@ class RunnerSupervisionTests(unittest.TestCase):
                 WORKER_LEASE_HANDLE_ENV: "104",
                 WORKER_SEED_HANDLE_ENV: "105",
             }
-            digest = _activation_control_digest(original, payload)
             with (
                 mock.patch(
                     "alas_headless.runner_supervision._read_activation_handle",
-                    return_value=(control.activation_token, digest),
+                    return_value=control.binding.run_id,
                 ),
                 mock.patch(
                     "alas_headless.runner_supervision.read_bytes_handle",
@@ -939,15 +891,14 @@ class RunnerSupervisionTests(unittest.TestCase):
                     ),
                 ),
             ):
-                with self.assertRaisesRegex(RuntimeError, "control digest"):
+                with self.assertRaisesRegex(RuntimeError, "control path"):
                     worker_control_from_activation(environment)
 
             environment[WORKER_CONTROL_ENV] = str(original)
-            correct_digest = _activation_control_digest(original, payload)
             with (
                 mock.patch(
                     "alas_headless.runner_supervision._read_activation_handle",
-                    return_value=(b"x" * 32, correct_digest),
+                    return_value=uuid.uuid4().hex,
                 ),
                 mock.patch(
                     "alas_headless.runner_supervision.read_bytes_handle",
@@ -957,10 +908,10 @@ class RunnerSupervisionTests(unittest.TestCase):
                     ),
                 ),
             ):
-                with self.assertRaisesRegex(RuntimeError, "token.*changed"):
+                with self.assertRaisesRegex(RuntimeError, "another run"):
                     worker_control_from_activation(environment)
 
-    def test_control_binding_rejects_wrong_purpose_token_replay_and_malformed_digest(self):
+    def test_control_binding_rejects_wrong_purpose_and_malformed_records(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory).resolve()
             control = make_control(root)
@@ -970,18 +921,12 @@ class RunnerSupervisionTests(unittest.TestCase):
             wrong_purpose = bind_record(control, RECORD_RESULT, body)
             with self.assertRaises(ValueError):
                 WorkerControl.from_mapping(
-                    wrong_purpose, activation_token=control.activation_token
+                    wrong_purpose
                 )
 
-            replay = make_control(root)
-            with self.assertRaises(ValueError):
-                WorkerControl.from_mapping(
-                    bound, activation_token=replay.activation_token
-                )
-
-            wrong_token = b"x" * 32
-            with self.assertRaises(ValueError):
-                WorkerControl.from_mapping(bound, activation_token=wrong_token)
+            restored = WorkerControl.from_mapping(bound)
+            self.assertEqual(restored.binding, control.binding)
+            self.assertFalse(restored.activation_verified)
 
             partial = bind_record(
                 control,
@@ -990,15 +935,15 @@ class RunnerSupervisionTests(unittest.TestCase):
             )
             with self.assertRaises(ValueError):
                 WorkerControl.from_mapping(
-                    partial, activation_token=control.activation_token
+                    partial
                 )
 
-            for malformed in (None, "", "0" * 63, "0" * 65, "g" * 64):
+            for malformed in (None, "", "0" * 31, "0" * 33, "g" * 32):
                 candidate = dict(bound)
-                candidate["binding_digest"] = malformed
+                candidate["run_id"] = malformed
                 with self.subTest(digest=malformed), self.assertRaises(ValueError):
                     WorkerControl.from_mapping(
-                        candidate, activation_token=control.activation_token
+                        candidate
                     )
 
     def test_worker_control_strict_bytes_precede_binding_and_object_construction(self):
@@ -1019,8 +964,8 @@ class RunnerSupervisionTests(unittest.TestCase):
             }
             valid = canonical_json_bytes(control.to_mapping())
             duplicate = valid.replace(
-                b'{"binding_digest":',
-                b'{"binding_digest":"0","binding_digest":',
+                b'"run_id":',
+                b'"run_id":"0","run_id":',
                 1,
             )
             cases = {
@@ -1030,15 +975,9 @@ class RunnerSupervisionTests(unittest.TestCase):
                 "duplicate": duplicate,
                 "nonfinite": b'{"value":NaN}\n',
                 "non_utf8": b'{"value":"\xff"}\n',
-                "alternate_encoding": json.dumps(
-                    control.to_mapping(), indent=2, sort_keys=False
-                ).encode("utf-8"),
             }
             for label, payload in cases.items():
-                activation = (
-                    control.activation_token,
-                    _activation_control_digest(control_path, payload),
-                )
+                activation = control.binding.run_id
                 with (
                     self.subTest(label=label),
                     mock.patch(
@@ -1095,10 +1034,7 @@ class RunnerSupervisionTests(unittest.TestCase):
             control = make_control(root)
             control_path = control.binding.control_path
             payload = canonical_json_bytes(control.to_mapping())
-            activation = (
-                control.activation_token,
-                _activation_control_digest(control_path, payload),
-            )
+            activation = control.binding.run_id
             original = parent / "config-original"
             root.rename(original)
             root.mkdir()
@@ -1317,7 +1253,7 @@ class RunnerSupervisionTests(unittest.TestCase):
         alas_root = Path(
             os.environ.get(
                 "ALAS_PINNED_ROOT",
-                "E:/Disk0Merged/H/program/AzurLaneAutoScript-alas-topdown-live-r5-20260824",
+                str(Path(__file__).resolve().parents[2] / "AzurLaneAutoScript-upstream-readonly"),
             )
         )
         if not (alas_root / "module" / "config" / "config_updater.py").is_file():

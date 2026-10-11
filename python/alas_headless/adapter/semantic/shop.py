@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import time
 from ...semantic_oracle import ActionReceipt, ObserverTransportError, SemanticGateClosed
-from .contracts import AlasSemanticActionDeferred
 
 
 class ShopAdapterPorts:
@@ -17,10 +16,7 @@ class ShopAdapterPorts:
         expected_cost: str,
         expected_price: int,
     ) -> ActionReceipt:
-        if not self._action_ledger.allowed("shop.purchase"):
-            raise AlasSemanticActionDeferred(
-                "shop purchase requires a positive transaction budget"
-            )
+        self._require_action_grant("shop.purchase")
         items = self.oracle.general_shop_items()
         matches = tuple(item for item in items if item.index == index)
         if len(matches) != 1:
@@ -106,10 +102,7 @@ class ShopAdapterPorts:
     def refresh_shop_once(self) -> ActionReceipt:
         """Spend one bounded grant on the exact current GuildShop refresh."""
 
-        if not self._action_ledger.allowed("shop.purchase"):
-            raise AlasSemanticActionDeferred(
-                "shop refresh requires a positive transaction budget"
-            )
+        self._require_action_grant("shop.purchase")
         if self.oracle.shop_selected_nav_label() != "补给商店":
             raise SemanticGateClosed("shop refresh navigation changed")
         if self.oracle.shop_selected_tab_label() != "舰队":

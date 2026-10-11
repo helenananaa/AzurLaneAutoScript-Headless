@@ -16,6 +16,27 @@ from unittest import mock
 
 
 class OperationSirenSemanticOracleTests(OperationSirenSemanticOracleTestsSupport, unittest.TestCase):
+    def test_globe_entry_returns_to_native_loop_when_meow_confirmation_mounts(self):
+        path = 'LevelCamera/Canvas/LevelOrigin/top/adapt/right_stage/btn_list/dock/transport_button'
+        backend = FakeBackend([make_button('transport_button', path, raycast_top=None)])
+        oracle = make_oracle(backend)
+        oracle.operation_siren_state = mock.Mock()
+        root = 'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window'
+        def mount_prompt(*_):
+            backend.snapshot['generation'] = 11
+            backend.buttons = make_buttons([
+                make_button('custom_button_1(Clone)', root + '/button_container/custom_button_1(Clone)'),
+                make_button('custom_button_2(Clone)', root + '/button_container/custom_button_2(Clone)'),
+            ], generation=11)
+            backend.ui = make_ui([make_text(
+                '正在进行搜寻作业的指挥喵将被强制召回！\n是否结束搜寻并离开当前海域？',
+                root + '/msg_panel/content')], generation=11)
+        backend.on_tap = mount_prompt
+        receipt = oracle.click_operation_siren_globe()
+        self.assertEqual(receipt.semantic_id, 'os/map/globe')
+        self.assertEqual(len(backend.taps), 1)
+        self.assertTrue(oracle.operation_siren_exit_prompt_visible())
+
     def test_globe_unpin_drags_one_unobscured_typed_plane_point(self):
         backend = FakeBackend(
             [
@@ -50,7 +71,7 @@ class OperationSirenSemanticOracleTests(OperationSirenSemanticOracleTestsSupport
             receipt = oracle.operation_siren_globe_unpin()
 
         self.assertEqual(receipt.semantic_id, "os/globe/zone/unpin")
-        self.assertEqual(backend.swipes, [(508, 426, 558, 376, 2000)])
+        self.assertEqual(backend.swipes, [(558, 376, 608, 326, 2000)])
 
     def test_globe_unpin_stops_after_one_unproven_drag(self):
         backend = FakeBackend(

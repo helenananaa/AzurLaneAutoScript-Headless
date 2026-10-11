@@ -108,11 +108,18 @@ class MailOracle:
         """Classify empty mail only from the explicit typed counter."""
 
         state = self.read_state()
-        if (self._mail_manager_back_delegated_raycast_proven(state)
-                and not self._blocking_rules(state, "mail/manage/back")):
-            # The manager can mount after ALAS' preceding batch-claim probe.
-            # It owns this screenshot's foreground, so the empty-page sentinel
-            # is absent. Do not parse its covered MailUI counter or grant input.
+        blockers = self._blocking_rules(state, "mail/page/back")
+        if blockers and all(rule.blocker_id == "loading" for rule in blockers):
+            # A presence sentinel may see MailUI during its native load.
+            # Do not read the covered counter or authorize a mail action.
+            self._unique(state, "mail/page/back")
+            return False
+        if blockers and all(rule.blocker_id == "mail-manager" for rule in blockers):
+            # A mounting manager already covers MailUI before its back or
+            # claim control becomes actionable. This passive empty sentinel
+            # must yield to ALAS' next frame, without reading the underlay.
+            if len(self._matches(state, "mail/manage/back")) > 1:
+                raise SemanticGateClosed("mail manager back target is ambiguous")
             return False
         used, _ = self._mail_count_from_state(state)
         return used == 0

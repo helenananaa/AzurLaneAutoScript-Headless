@@ -104,7 +104,7 @@ def verify_main_campaign_routes(alas_root: Path) -> Mapping[str, object]:
 
     invalid_values = (
         ("Main", "0-1", "campaign_main", "normal"),
-        ("Main", "17-1", "campaign_main", "normal"),
+        ("Main", "-1-1", "campaign_main", "normal"),
         ("Main2", "12-5", "campaign_main", "normal"),
         ("Main3", "campaign_12_4", "campaign_main", "normal"),
         ("Main", "12-4", "event_20260813_cn", "normal"),

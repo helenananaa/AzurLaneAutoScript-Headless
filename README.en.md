@@ -134,15 +134,20 @@ Headless mode is deliberately fail-closed:
   rectangles while a semantic session is active;
 - no generic click, swipe, drag, or confirmation path without an explicit
   reviewed mapping;
-- mutation-capable qualifications use bounded, default-zero input budgets;
+- live execution uses resource budgets appropriate to the requested task;
+  closed-by-default qualification experiments do not impose zero input on every task;
 - stale, incomplete, incoherent, covered, or ambiguous UI state is rejected;
-- task support is scoped to an exact game, runtime, ALAS, and evidence lock;
+- fully qualified support is scoped to exact game, runtime, ALAS, and evidence
+  identities; runtime compatibility is attempted through capability and semantic contracts;
+- fail-closed behavior is being narrowed to the affected capability or task, retaining exact
+  package, foreground/PID, freshness, and input-target checks;
 - a successful offline replay does not promote a path to live support.
 
-This design reduces accidental input. It does not remove the operational risk
-of running automation against a real game account. Review the support matrix,
-use a controlled environment, and understand every enabled budget before a
-live run.
+Review the support matrix and configure the requested task's resource budget
+before a live run. Revision drift alone does not make the adapter unusable,
+and passing current runtime contracts does not establish fully qualified
+support. See the [ALAS robustness audit](docs/alas-robustness-audit-20261002.zh-CN.md)
+for the reviewed restrictions and remaining work.
 
 ## Start here
 

@@ -10,6 +10,22 @@
 #include <string_view>
 
 namespace rx::alas {
+// Matches Lua's integer conversion for Color.ToHex; no nearest-color alias.
+inline bool GlobeInputMaskHex(float red, float green, float blue,
+                             std::array<char, 7> &out) {
+  const std::array<float, 3> channels = {red, green, blue};
+  constexpr std::string_view digits = "0123456789ABCDEF";
+  for (size_t i = 0; i < 3; ++i) {
+    const float value = channels[i];
+    if (!std::isfinite(value) || value < 0 || value > 1) return false;
+    const int channel = static_cast<int>(static_cast<double>(value) * 255);
+    out[i * 2] = digits[channel >> 4];
+    out[i * 2 + 1] = digits[channel & 15];
+  }
+  out[6] = '\0';
+  return true;
+}
+
 struct NativeLuaReadApi {
   int (*getTop)(void *) = nullptr;
   void (*setTop)(void *, int) = nullptr;
@@ -40,6 +56,7 @@ struct NativeLuaGlobeDiagnostic {
   uint32_t status = 0, stage = 0, registryVisited = 0, truncated = 0;
   uint32_t worldCandidates = 0, dragCandidates = 0, colorCount = 0;
   uint32_t stackBalanced = 0;
+  uint32_t colorTableComplete = 0;
   uint32_t inspectionCount = 0;
   std::array<NativeLuaColorEntry, 256> colors = {};
   std::array<uint32_t, 16> dragging = {};
@@ -139,6 +156,7 @@ class NativeLuaGlobeReader {
         const int map = a.getTop(l);
         a.pushNil(l);
         size_t count = 0;
+        bool complete = true;
         while (count < 512 && a.next(l, map)) {
           ++count;
           if (a.type(l, -2) == 4 && a.type(l, -1) == 3) {
@@ -147,7 +165,7 @@ class NativeLuaGlobeReader {
             const bool hex = key && length == 6 &&
                 std::string_view(key, length).find_first_not_of("0123456789ABCDEF") == std::string_view::npos;
             if (hex && std::isfinite(value) && value >= 1 && value <= 100000 && std::floor(value) == value) {
-              if (d.colorCount == d.colors.size()) d.truncated = 1;
+              if (d.colorCount == d.colors.size()) { d.truncated = 1; complete = false; }
               else {
                 auto &entry = d.colors[d.colorCount++];
                 std::memcpy(entry.hex.data(), key, 6);
@@ -158,6 +176,7 @@ class NativeLuaGlobeReader {
           a.setTop(l, a.getTop(l) - 1);
         }
         if (count == 512) d.truncated = 1;
+        d.colorTableComplete = complete && count < 512;
       }
       a.setTop(l, top);
     }

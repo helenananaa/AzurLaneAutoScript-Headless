@@ -69,10 +69,6 @@ class MissionAdapterPorts:
             raise SemanticGateClosed("weekly mission claim is not configured")
         if not self.oracle.weekly_mission_progress_claim_available():
             return None
-        if not self._action_ledger.allowed("mission.claim"):
-            raise SemanticGateClosed(
-                "mission claim input requires the separate one-claim opt-in"
-            )
         receipt = self._dispatch_mutation(
             "mission.claim", self.oracle.click_weekly_mission_progress_claim
         )
@@ -132,12 +128,18 @@ class MissionAdapterPorts:
         )
 
     def _record_mission_transition(self, receipt: ActionReceipt) -> ActionReceipt:
+        if receipt.semantic_id == 'research-menu/page/back':
+            self._research_back_receipt = receipt
         if receipt.semantic_id == "task/page/back":
             self._mission_page_return_transition_until = time.monotonic() + 15.0
         if receipt.semantic_id == "meowfficer/page/back":
             self._meowfficer_return_transition_until = time.monotonic() + 12.0
         if receipt.semantic_id == "guild/page/back":
             self._guild_return_transition_until = time.monotonic() + 12.0
+        if receipt.semantic_id == "dorm/page/back":
+            # GOTO_MAIN can inherit CourtYard without a Dorm task context.
+            # Record the same passive return window as the mapped back edge.
+            self._dorm_return_transition_until = time.monotonic() + 8.0
         if receipt.semantic_id == "research/page/back":
             # Keep the passive ALAS page scan scoped to an actual reviewed
             # Research back input, including the original queue_quit path.
@@ -157,6 +159,8 @@ class MissionAdapterPorts:
             "reward/page/back",
             "reward/commission/finish",
             "reward/commission/go",
+            "reward/tactical/finish",
+            "reward/tactical/go",
             "reward/ship-exp/close",
             "reward/award-info/close",
             "reward/award-info1/close",
@@ -164,6 +168,9 @@ class MissionAdapterPorts:
             "commission/detail/back",
             "build/page/back",
             "tactical/page/back",
+            "tactical/slot/first-empty",
+            "tactical/skill/confirm",
+            "tactical/book/start",
         ):
             commission_context.passive_transition_until = time.monotonic() + 12.0
         research_context = self._research_context

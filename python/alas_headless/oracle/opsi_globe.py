@@ -55,6 +55,13 @@ class OpsiGlobeOracle:
             raise SemanticGateClosed("game activity changed after globe entry")
 
         def ready_globe():
+            if self.operation_siren_exit_prompt_visible():
+                if self.read_state().generation <= state.generation:
+                    raise SemanticGateClosed("globe entry prompt is not newer than input")
+                # Native navigation handles the expected leave confirmation
+                # on its next screenshot; this port must not wait for that
+                # loop to confirm while blocking inside its first click.
+                return
             # The back Button can mount before its selected-zone panel. ALAS'
             # subsequent globe_update requires that complete typed panel.
             self.operation_siren_globe_state()
@@ -271,21 +278,34 @@ class OpsiGlobeOracle:
         # Camera/panel easing can briefly cover every exported native anchor.
         # Retry only complete observation before input. The gesture and its
         # postcondition stay outside this read helper and are not repeated.
-        ui_state, candidates = self._retry_transition_read(
-            self._operation_siren_globe_unpin_targets)
-        pin_path = "SVFloatPanel(Clone)/point"
-        # A clear anchor can still cross the selected panel's extended line.
-        # Inspect the complete path of each existing native candidate before
-        # choosing one. Unknown proofs propagate; no input has occurred yet.
+        def prepare():
+            ui_state, candidates = self._operation_siren_globe_unpin_targets()
+            # Re-read the complete native proof if foreground or easing changes
+            # during preparation. No gesture has been dispatched at this point.
+            foreground = self._foreground_component()
+            blockers = self._blocking_rules(self.read_state(), 'os/globe/map')
+            if foreground != self.fingerprint.component or blockers:
+                raise SemanticGateClosed(
+                    'operation siren globe is obscured before unpin: foreground='
+                    + foreground + '; blockers='
+                    + ','.join(rule.blocker_id for rule in blockers))
+            return ui_state, candidates
+
+        ui_state, candidates = self._retry_transition_read(prepare)
+        # Unknown path proofs remain outside the read retry. Each native
+        # candidate must still own its complete segment before one gesture.
         for start, end in candidates:
-            if self._foreground_component() != self.fingerprint.component or self._blocking_rules(self.read_state(), "os/globe/map"):
-                raise SemanticGateClosed("operation siren globe is obscured before unpin")
             if self.operation_siren_globe_drag_owned(start, end):
                 break
         else:
             raise SemanticGateClosed('globe unpin path is outside the owned plane')
-        if self._foreground_component() != self.fingerprint.component or self._blocking_rules(self.read_state(), 'os/globe/map'):
-            raise SemanticGateClosed('globe changed after unpin drag proof')
+        pin_path = "SVFloatPanel(Clone)/point"
+        foreground = self._foreground_component()
+        blockers = self._blocking_rules(self.read_state(), 'os/globe/map')
+        if foreground != self.fingerprint.component or blockers:
+            raise SemanticGateClosed(
+                'globe changed after unpin drag proof: foreground=' + foreground
+                + '; blockers=' + ','.join(rule.blocker_id for rule in blockers))
         # Let the Unity input loop observe movement across multiple frames.
         # A 600ms gesture has also selected its anchor instead of dragging.
         duration_ms = 2000
@@ -364,6 +384,27 @@ class OpsiGlobeOracle:
         # exported anchors remain subject to the same complete drag proof.
         candidates.sort(key=lambda pair: any(
             pins[0].bounds.contains(Point(*point)) for point in pair))
+        # A selected panel can cover the default gesture's end while the
+        # native anchor itself remains clear. Keep every default path first,
+        # then review the same-length reverse drag from those exact anchors.
+        # The caller proves the full native path and sends at most one drag.
+        for start, _ in tuple(candidates):
+            end = (start[0] - 50, start[1] + 50)
+            if Bounds(20, 220, 980, 620).contains(Point(*end)):
+                candidates.append((start, end))
+        if all(pins[0].bounds.contains(Point(*start)) for start, _ in candidates):
+            # Recentering can leave the only native anchor inside the selected
+            # marker. A short gesture there can reselect it (live r8). Move
+            # the same reviewed 50/-50 gesture to its next segment, and prove
+            # every input sample on the native plane before sending it. This
+            # changes neither the original ALAS intent nor the one-drag limit.
+            outside = []
+            for start, end in candidates:
+                next_end = tuple(2 * b - a for a, b in zip(start, end))
+                if (all(Bounds(20, 220, 980, 620).contains(Point(*p))
+                        and not pins[0].bounds.contains(Point(*p)) for p in (end, next_end))):
+                    outside.append((end, next_end))
+            candidates = outside + candidates
         return ui_state, candidates
 
     def click_operation_siren_globe_map(self) -> ActionReceipt:
@@ -540,12 +581,20 @@ class OpsiGlobeOracle:
             previous = candidate.generation
         return previous
 
-    def click_operation_siren_globe_port(self, expected_zone_name: str, zone_id: int) -> ActionReceipt:
+    def click_operation_siren_globe_port(self, expected_zone_name: str, zone_id: int, *, native_mask=False) -> ActionReceipt:
         """Select an ALAS-owned port ID through its exact live game marker."""
         if isinstance(zone_id, bool) or not isinstance(zone_id, int) or not 0 <= zone_id <= 7:
             raise SemanticGateClosed("operation siren port mapping is unavailable for this zone")
         if not expected_zone_name or not self.operation_siren_globe_visible():
             raise SemanticGateClosed("operation siren globe identity or port intent is absent")
+        minimum_generation = 0
+        if native_mask:
+            minimum_generation = self.read_ui_state().generation
+            ack = self._request('GET /v1/globe-port-input %d\n' % (zone_id + 1))
+            if ack.get('status') != 'ok' or ack.get('scope') != 'read-only-port-input':
+                self._prove_unselected_globe_after_input(minimum_generation)
+                raise SemanticGlobeSelectionMissed('native port input identity capability is unavailable')
+            self._sleep(0.1)
         state = self.read_state()
         ui = self.read_ui_state(check_foreground=False)
         if not state.generation <= ui.generation <= state.generation + 2:
@@ -560,10 +609,22 @@ class OpsiGlobeOracle:
         # use one-based IDs. ALAS retains the canonical name/map metadata.
         prefix = f"WorldMap3D/entity/sprite_scene/port_{zone_id + 1}/"
         markers = [row for row in geometry.get("objects", [])
-                   if row.get("name") == "port" and row.get("path", "").startswith(prefix)]
+                   if row.get("name") == ("port-mask-input" if native_mask else "port")
+                   and row.get("path", "").startswith(prefix)]
+        if native_mask and not markers:
+            self._prove_unselected_globe_after_input(minimum_generation)
+            raise SemanticGlobeSelectionMissed('no exact game-owned port input point is available')
         if len(markers) != 1:
             raise SemanticGateClosed("operation siren port marker is absent or ambiguous")
         marker = markers[0]
+        if native_mask:
+            identity = marker.get('game_input')
+            if (ui.generation <= minimum_generation or not isinstance(identity, dict)
+                    or type(identity.get('entrance_id')) is not int
+                    or identity['entrance_id'] != zone_id + 1
+                    or not isinstance(identity.get('mask_color'), str)
+                    or re.fullmatch('[0-9A-F]{6}', identity['mask_color']) is None):
+                raise SemanticGateClosed('native port input does not prove the requested entrance')
         anchor = marker.get("port_anchor")
         if (not isinstance(anchor, list) or len(anchor) != 3
                 or any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) for v in anchor)):
@@ -718,28 +779,31 @@ class OpsiGlobeOracle:
         for attempt in range(30):
             state = self.read_state()
             blockers = self._blocking_rules(state, 'os/globe/map')
+            if blockers:
+                if attempt == 29 or any(rule.blocker_id != 'loading' for rule in blockers):
+                    raise SemanticGateClosed('operation siren globe is obscured before swipe: '
+                                             + ','.join(rule.blocker_id for rule in blockers))
+                self._sleep(0.1)
+                continue
+            back = self._unique(state, "os/globe/map")
+            if not (back.active_in_hierarchy and back.active_and_enabled and back.bounds is not None):
+                raise SemanticGateClosed("operation siren globe identity is absent")
+            if self._foreground_component() != self.fingerprint.component:
+                raise SemanticGateClosed("foreground changed before operation siren globe swipe")
+            if not self.operation_siren_globe_drag_owned(start,end):
+                raise SemanticGateClosed('globe camera path is outside the owned plane')
+            if self._foreground_component() != self.fingerprint.component:
+                raise SemanticGateClosed('globe changed after camera drag proof')
+            blockers = self._blocking_rules(self.read_state(), 'os/globe/map')
             if not blockers:
                 break
             if attempt == 29 or any(rule.blocker_id != 'loading' for rule in blockers):
-                raise SemanticGateClosed('operation siren globe is obscured before swipe: '
-                                         + ','.join(rule.blocker_id for rule in blockers))
+                raise SemanticGateClosed('globe changed after camera drag proof')
+            # The same bounded loading wait also covers a layer mounting
+            # during proof. No input occurred; re-prove the entire path after
+            # it clears rather than using the earlier proof through a loader.
             self._sleep(0.1)
-        back = self._unique(state, "os/globe/map")
-        if not (
-            back.active_in_hierarchy
-            and back.active_and_enabled
-            and back.bounds is not None
-        ):
-            raise SemanticGateClosed("operation siren globe identity is absent")
         pre_generation = self._last_generation or 0
-        if self._foreground_component() != self.fingerprint.component:
-            raise SemanticGateClosed(
-                "foreground changed before operation siren globe swipe"
-            )
-        if not self.operation_siren_globe_drag_owned(start,end):
-            raise SemanticGateClosed('globe camera path is outside the owned plane')
-        if self._foreground_component() != self.fingerprint.component or self._blocking_rules(self.read_state(), 'os/globe/map'):
-            raise SemanticGateClosed('globe changed after camera drag proof')
         # Retain ALAS' exact path while giving Unity the same input-frame
         # exposure as the reviewed unpin gesture on this headless runtime.
         duration_ms = max(duration_ms, 2000)

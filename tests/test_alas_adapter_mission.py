@@ -130,6 +130,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
 
         self.assertFalse(adapter.appear(NamedButton("EXERCISE_CHECK")))
         adapter._mission_context.passive_transition_until = time.monotonic() - 1.0
+        adapter._mission_page_return_transition_until = time.monotonic() - 1.0
         with self.assertRaises(AlasSemanticUnmapped):
             adapter.appear(NamedButton("EXERCISE_CHECK"))
 

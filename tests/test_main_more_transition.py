@@ -129,12 +129,28 @@ def test_more_repeated_during_fresh_mount_does_not_send_second_input(blocker, ex
     ('ship-exp', False), ('award-info', False), (None, True),
 ])
 def test_commission_reward_overlay_hides_main_page_from_alas(blocker, main_visible):
-    oracle = FakeOracle()
-    oracle.main_page_visible = lambda: True
-    oracle._blocking_rules = lambda state, target: (
-        [SimpleNamespace(blocker_id=blocker)] if blocker else [])
+    from tests.semantic_support.observer_fixtures import FakeBackend, make_button, make_oracle
+
+    backend = FakeBackend([
+        make_button('battle', 'UICamera/Canvas/UIMain/MainUI/frame/right/1/battle'),
+        make_button('formation', 'UICamera/Canvas/UIMain/MainUI/frame/right/1/formation'),
+    ])
+    oracle = make_oracle(backend)
+    if blocker:
+        target = oracle._targets['reward/' + blocker + '/close']
+        # Publish a real foreground hierarchy, including its blocker. Even
+        # while its close is not actionable, the underlying main action is
+        # blocked. The old fake enabled() always returned True for that action.
+        backend.buttons['buttons'].append(make_button(
+            target.name, 'root/' + target.path_suffix, raycast_top=False,
+        ))
+        backend.buttons['button_count'] += 1
     host = AlasSemanticAdapter(oracle, package_gate=lambda: None)
     assert host.appear(NamedButton('MAIN_GOTO_FLEET')) is main_visible
+    if blocker:
+        with pytest.raises(SemanticGateClosed):
+            host.click(NamedButton('GET_ITEMS_1'))
+    assert backend.taps == []
 
 
 def test_interrupted_commission_closes_only_exact_ship_exp_overlay():
@@ -213,11 +229,12 @@ def test_meowfficer_back_transition_skips_unowned_reward_probe():
         host.appear(NamedButton('GET_ITEMS_1'))
 
 
-def test_main_guild_duplicate_during_loading_reuses_first_receipt():
+@pytest.mark.parametrize('source_enabled', [False, True])
+def test_main_guild_duplicate_during_loading_reuses_first_receipt(source_enabled):
     oracle = FakeOracle()
     host = AlasSemanticAdapter(oracle, package_gate=lambda: None)
     receipt = host.click(NamedButton('MAIN_GOTO_GUILD'))
-    oracle.enabled_values['main/guild'] = False
+    oracle.enabled_values['main/guild'] = source_enabled
     oracle.read_state = lambda: SimpleNamespace(generation=receipt.generation + 1)
     oracle._blocking_rules = lambda state, target: [SimpleNamespace(blocker_id='loading')]
     assert host.click(NamedButton('MAIN_GOTO_GUILD')) is receipt

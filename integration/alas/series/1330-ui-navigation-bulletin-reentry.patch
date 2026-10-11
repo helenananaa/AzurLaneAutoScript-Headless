@@ -1,0 +1,27 @@
+diff --git a/module/ui/ui.py b/module/ui/ui.py
+--- a/module/ui/ui.py
++++ b/module/ui/ui.py
+@@ -294,7 +294,22 @@
+                 if self.appear(page.check_button, offset=offset, interval=5):
+                     logger.info(f'Page switch: {page} -> {page.parent}')
+                     button = page.links[page.parent]
+-                    self.device.click(button)
++                    if semantic_adapter is not None:
++                        from alas_headless.oracle.errors import SemanticInputBlocked
++                        try:
++                            self.device.click(button)
++                        except SemanticInputBlocked as exc:
++                            if exc.blockers != ('bulletin',):
++                                raise
++                            # No navigation input was sent. The bulletin may
++                            # mount after the screenshot that found this page.
++                            # Refresh through the existing loop; ui_additional
++                            # owns the reviewed announcement close action.
++                            logger.info('Navigation covered by bulletin; refresh native UI loop')
++                            self.device.screenshot()
++                            break
++                    else:
++                        self.device.click(button)
+                     self.ui_button_interval_reset(button)
+                     clicked = True
+                     break

@@ -93,7 +93,8 @@ class AlasRaidConfigTests(unittest.TestCase):
     def test_current_raid_patch_is_scoped_and_single_dispatch(self):
         patch = CURRENT_RAID_PATCH.read_text(encoding="utf-8")
 
-        self.assertIn("raid == 'raid_20260827'", patch)
+        self.assertIn("semantic_adapter.supports_raid_layout(raid)", patch)
+        self.assertNotIn("raid == 'raid_20260827'", patch)
         self.assertIn("else raid_entrance(raid=raid, mode=mode)", patch)
         self.assertEqual(patch.count("+                        semantic_adapter.click_raid_stage("), 1)
         self.assertEqual(

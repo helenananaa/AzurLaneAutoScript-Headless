@@ -22,11 +22,13 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
             adapter.click(NamedButton("SUPPLY_PACK_CHECK"))
 
         oracle.recommendation_shop_visible_value = False
-        self.assertFalse(adapter.appear(NamedButton("SUPPLY_PACK_CHECK")))
+        with self.assertRaises(AlasSemanticUnmapped):
+            adapter.appear(NamedButton("SUPPLY_PACK_CHECK"))
 
         oracle.recommendation_shop_visible_value = True
         oracle.enabled_values["shop/home"] = False
-        self.assertFalse(adapter.appear(NamedButton("SUPPLY_PACK_CHECK")))
+        with self.assertRaises(AlasSemanticUnmapped):
+            adapter.appear(NamedButton("SUPPLY_PACK_CHECK"))
 
     def test_regular_shop_purchase_is_atomic_and_postconditioned(self):
         oracle = FakeOracle()

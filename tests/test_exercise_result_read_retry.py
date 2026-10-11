@@ -2,6 +2,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 import pytest
 from alas_headless import AlasSemanticSession, SemanticGateClosed
+from alas_headless.oracle.errors import SemanticTargetMissing
 
 
 def session():
@@ -37,6 +38,138 @@ def test_input_failure_is_not_retried_even_if_it_reports_stale():
     o.click_daily_battle_result.side_effect = SemanticGateClosed('observer snapshot is stale')
     with pytest.raises(SemanticGateClosed): s.complete_exercise_battle_result()
     o.click_daily_battle_result.assert_called_once()
+
+
+def test_departing_award_reobserves_without_repeating_accepted_input(monkeypatch):
+    monkeypatch.setattr('alas_headless.adapter.semantic.session_tasks.time.sleep', lambda _: None)
+    s, o = session()
+    o.exercise_page_visible.side_effect = [False, False, False, True]
+    o.award_info_page_visible.side_effect = [True, True, False]
+    o.daily_battle_result_visible.return_value = True
+    o.input_dispatch_count = 0
+    reward, statistics = object(), object()
+
+    def close_award():
+        if o.input_dispatch_count == 0:
+            o.input_dispatch_count += 1
+            return reward
+        raise SemanticTargetMissing('exercise award-info page is absent')
+
+    def close_statistics():
+        o.input_dispatch_count += 1
+        return statistics
+
+    o.click_exercise_award_info_close.side_effect = close_award
+    o.click_daily_battle_result.side_effect = close_statistics
+    assert s.complete_exercise_battle_result() == (reward, statistics)
+    assert o.input_dispatch_count == 2
+    assert o.click_exercise_award_info_close.call_count == 2
+    o.click_daily_battle_result.assert_called_once()
+
+
+@pytest.mark.parametrize('failure', [SemanticGateClosed('ambiguous target'),
+                                    SemanticGateClosed('wrong package'),
+                                    SemanticGateClosed('observer snapshot is stale')])
+def test_award_nonabsence_failures_remain_closed(failure):
+    s, o = session()
+    o.award_info_page_visible.return_value = True
+    o.input_dispatch_count = 0
+    o.click_exercise_award_info_close.side_effect = failure
+    with pytest.raises(SemanticGateClosed, match=str(failure)):
+        s.complete_exercise_battle_result()
+    o.click_exercise_award_info_close.assert_called_once()
+
+
+@pytest.mark.parametrize('count_known', [True, False])
+def test_award_missing_after_dispatch_or_unknown_count_is_not_retried(count_known):
+    s, o = session()
+    o.award_info_page_visible.return_value = True
+    if count_known:
+        o.input_dispatch_count = 0
+
+    def uncertain_close():
+        if count_known:
+            o.input_dispatch_count += 1
+        raise SemanticTargetMissing('uncertain close')
+
+    o.click_exercise_award_info_close.side_effect = uncertain_close
+    with pytest.raises(SemanticTargetMissing, match='uncertain close'):
+        s.complete_exercise_battle_result()
+    o.click_exercise_award_info_close.assert_called_once()
+
+
+@pytest.mark.parametrize('presence, action', [
+    ('exercise_merit_shop_visible', 'click_exercise_merit_shop_close'),
+    ('exercise_reward_item_info_visible', 'click_exercise_reward_item_info_cancel'),
+    ('daily_battle_result_visible', 'click_daily_battle_result'),
+])
+def test_other_result_action_missing_is_not_retried(presence, action):
+    s, o = session()
+    getattr(o, presence).return_value = True
+    o.input_dispatch_count = 0
+    getattr(o, action).side_effect = SemanticTargetMissing('other target absent')
+    with pytest.raises(SemanticTargetMissing):
+        s.complete_exercise_battle_result()
+    getattr(o, action).assert_called_once()
+
+
+def test_exercise_award_absence_uses_one_current_snapshot_without_input():
+    from tests.semantic_support.observer_fixtures import FakeBackend, make_oracle
+    backend = FakeBackend([])
+    oracle = make_oracle(backend)
+    original_read = oracle.read_state
+    oracle.read_state = Mock(wraps=original_read)
+    with pytest.raises(SemanticTargetMissing, match='page is absent'):
+        oracle.click_exercise_award_info_close()
+    oracle.read_state.assert_called_once()
+    assert backend.taps == []
+    assert oracle.input_dispatch_count == 0
+
+
+@pytest.mark.parametrize('variant', ['missing', 'duplicate', 'covered', 'foreign', 'stale'])
+def test_exercise_award_close_keeps_identity_and_actionability(variant):
+    from tests.semantic_support.observer_fixtures import FakeBackend, make_button, make_oracle
+    root = 'root/OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/'
+    button = make_button('close', root + 'items/close')
+    if variant == 'covered':
+        button['raycast_top'] = False
+    buttons = [button]
+    if variant == 'missing':
+        buttons = [make_button('icon', root + 'icon')]
+    elif variant == 'duplicate':
+        buttons.append(make_button('close', 'other/' + root + 'items/close'))
+    backend = FakeBackend(buttons)
+    if variant == 'foreign':
+        backend.snapshot['package'] = 'unrelated.package'
+    elif variant == 'stale':
+        backend.snapshot['age_ms'] = 100000
+    oracle = make_oracle(backend)
+    with pytest.raises(SemanticGateClosed) as raised:
+        oracle.click_exercise_award_info_close()
+    assert isinstance(raised.value, SemanticTargetMissing) is (variant == 'missing')
+    assert backend.taps == []
+
+
+def test_real_award_dispatch_counter_precedes_uncertain_backend_failure():
+    from tests.semantic_support.observer_fixtures import FakeBackend, make_button, make_oracle
+    backend = FakeBackend([make_button('close',
+        'root/OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close')])
+    oracle = make_oracle(backend)
+
+    def uncertain_backend(*args):
+        assert oracle.input_dispatch_count == 1
+        raise SemanticTargetMissing('backend result uncertain')
+
+    oracle._tap_backend = uncertain_backend
+    s, o = session()
+    o.award_info_page_visible.return_value = True
+    s.open = lambda: SimpleNamespace(oracle=oracle)
+    oracle.exercise_page_visible = Mock(return_value=False)
+    oracle.exercise_merit_shop_visible = Mock(return_value=False)
+    oracle.exercise_reward_item_info_visible = Mock(return_value=False)
+    with pytest.raises(SemanticTargetMissing, match='backend result uncertain'):
+        s.complete_exercise_battle_result()
+    assert oracle.input_dispatch_count == 1
 
 
 @pytest.mark.parametrize('pause_present', [True, False])

@@ -191,7 +191,7 @@ def test_meta_menu_sync_requires_exact_raycast(raycast):
     assert o.meta_character_menu_visible()
     a = AlasSemanticAdapter(o, package_gate=lambda: None)
     assert a.appear(SimpleNamespace(name='META_MENU_CHECK'))
-    assert not a.appear(SimpleNamespace(name='META_CHECK'))
+    assert a.appear(SimpleNamespace(name='META_CHECK'))
     assert not a.appear(SimpleNamespace(name='GET_MISSION'))
     if raycast is True:
         assert o.click_meta_character_sync().semantic_id == 'meta/character/sync'

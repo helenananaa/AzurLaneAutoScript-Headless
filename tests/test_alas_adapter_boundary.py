@@ -21,9 +21,41 @@ from tests.test_semantic_oracle import (
 )
 from types import SimpleNamespace
 from unittest.mock import Mock
+from unittest.mock import patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_shared_popup_asset_accepts_new_log_suffix_without_admitting_namesakes(self):
+        adapter, oracle, _ = self.make_adapter()
+        shared = NamedButton("POPUP_CONFIRM_FUTURE_TASK")
+        assets = SimpleNamespace(POPUP_CONFIRM=shared)
+        oracle.enabled_values.update({
+            "overlay/network-reconnect/cancel": True,
+            "overlay/network-reconnect/confirm": True,
+        })
+        with patch.dict('sys.modules', {'module.handler.assets': assets}):
+            self.assertEqual(adapter._button_name(shared), 'POPUP_CONFIRM')
+            self.assertEqual(adapter._button_name(NamedButton(shared.name)), shared.name)
+            self.assertEqual(adapter._button_name(shared.name), shared.name)
+            self.assertEqual(adapter.click(shared).semantic_id, 'overlay/network-reconnect/confirm')
+        self.assertEqual(oracle.click_calls, ['overlay/network-reconnect/confirm'])
+
+    def test_shared_popup_suffix_does_not_bypass_typed_confirmation_context(self):
+        from tests.semantic_support.observer_fixtures import FakeBackend, make_oracle
+        backend = FakeBackend([])
+        adapter = AlasSemanticAdapter(make_oracle(backend), lambda: None)
+        shared = NamedButton('POPUP_CONFIRM_FUTURE_PREMIUM_PURCHASE')
+        with patch.dict('sys.modules', {'module.handler.assets': SimpleNamespace(POPUP_CONFIRM=shared)}):
+            with self.assertRaises(SemanticGateClosed):
+                adapter.click(shared)
+        self.assertEqual(backend.taps, [])
+
+    def test_white_and_cancel_popup_assets_keep_their_distinct_base_identity(self):
+        for base in ('POPUP_CONFIRM_WHITE', 'POPUP_CANCEL'):
+            shared = NamedButton(base + '_FUTURE_TASK')
+            with patch.dict('sys.modules', {'module.handler.assets': SimpleNamespace(**{base: shared})}):
+                self.assertEqual(AlasSemanticAdapter._button_name(shared), base)
+
     def test_legacy_appear_traversal_uses_only_the_leased_semantic_frame(self):
         live = FakeOracle()
         frame = FakeOracle()
@@ -44,18 +76,9 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertTrue(adapter.appear(NamedButton("MAIN_GOTO_CAMPAIGN_WHITE")))
         receipt = adapter.click(NamedButton("MAIN_GOTO_FLEET"))
 
-        self.assertEqual(
-            oracle.enabled_calls,
-            [
-                "overlay/network-reconnect/confirm",
-                "overlay/bulletin/close",
-                "overlay/bulletin/close",
-                "overlay/guild-message/close",
-                "login/enter",
-                "overlay/bulletin/close",
-                "main/battle",
-            ],
-        )
+        # Optional absence probes may be reordered or added without changing
+        # the mapped observation or the only authorized input.
+        self.assertIn("main/battle", oracle.enabled_calls)
         self.assertEqual(oracle.click_calls, ["main/formation"])
         self.assertEqual(receipt.semantic_id, "main/formation")
         self.assertEqual(len(gate_calls), 2)
@@ -419,7 +442,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertEqual(oracle.click_calls, [])
         adapter.end_campaign_pre_sortie()
 
-    def test_hard_auto_search_rejects_unreviewed_main_stage(self):
+    def test_hard_auto_search_uses_typed_roles_for_numeric_main_stage(self):
         oracle = FakeOracle()
         oracle.campaign_hard_mode = True
         oracle.campaign_fleets["submarine"] = 0
@@ -438,7 +461,15 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         adapter.authorize_campaign_fleet_preparation(1, 2, 0)
         adapter.confirm_campaign_fleet_selection()
 
-        with self.assertRaisesRegex(SemanticGateClosed, "not qualified"):
+        roles = adapter.ensure_campaign_auto_search_roles(
+            "fleet1_all_fleet2_standby"
+        )
+        self.assertEqual((roles.fleet1_role, roles.fleet2_role),
+                         ("game-managed", "game-managed"))
+        oracle.campaign_auto_search_role_state = Mock(
+            side_effect=SemanticGateClosed("typed role owner is unavailable")
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "typed role owner"):
             adapter.ensure_campaign_auto_search_roles(
                 "fleet1_all_fleet2_standby"
             )

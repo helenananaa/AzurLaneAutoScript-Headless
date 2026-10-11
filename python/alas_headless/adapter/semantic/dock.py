@@ -38,10 +38,7 @@ class DockAdapterPorts:
             raise TypeError("awaken favourite must be boolean")
         if self._awaken_flow_active:
             raise SemanticGateClosed("awaken flow is already active")
-        if not self.awaken_allowed():
-            raise SemanticGateClosed(
-                "awaken requires a positive transaction budget"
-            )
+        self._require_action_grant('awaken.execute')
         self._package_gate()
         self._awaken_receipts = []
         self._awaken_cost_observations = []
@@ -74,8 +71,12 @@ class DockAdapterPorts:
         candidates = self.oracle.awaken_dock_candidates()
         if not candidates:
             return "finish"
-        if not self.awaken_allowed():
-            raise AlasSemanticActionDeferred('awaken execution budget exhausted with remaining candidates; task completion is unproven')
+        try:
+            self._require_action_grant('awaken.execute')
+        except AlasSemanticActionDeferred as exc:
+            raise AlasSemanticActionDeferred(
+                'awaken execution budget exhausted with remaining candidates; task completion is unproven'
+            ) from exc
         candidate = candidates[0]
         detail, _ = self.oracle.open_awaken_dock_candidate(
             candidate.position,
@@ -122,10 +123,7 @@ class DockAdapterPorts:
         enhancement_config_policy(
             ship_to_enhance, check_per_category, filter_expression
         )
-        if not self.enhancement_allowed():
-            raise SemanticGateClosed(
-                "enhancement requires a positive transaction budget"
-            )
+        self._require_action_grant('enhancement.execute')
         self._package_gate()
         self.oracle._enhancement_dock_records()
         self._enhancement_receipts = []
@@ -230,10 +228,7 @@ class DockAdapterPorts:
 
         if not isinstance(keep_limit_break, bool):
             raise TypeError("retirement limit-break policy must be boolean")
-        if not self._action_ledger.allowed("retirement.execute"):
-            raise SemanticGateClosed(
-                "one-click retirement requires a positive transaction budget"
-            )
+        self._require_action_grant('retirement.execute')
         self._package_gate()
         receipt = self._dispatch_mutation(
             "retirement.execute",

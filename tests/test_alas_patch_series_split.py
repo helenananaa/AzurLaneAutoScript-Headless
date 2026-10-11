@@ -60,6 +60,7 @@ FLOW_PATHS = {
         "module/campaign/campaign_base.py",
         "module/campaign/run.py",
         "module/combat/combat.py",
+        "module/combat/combat_auto.py",
         "module/combat/hp_balancer.py",
         "module/exercise/combat.py",
         "module/exercise/exercise.py",
@@ -277,6 +278,9 @@ FLOW_PATHS = {
         "campaign/campaign_war_archives/campaign_base.py",
         "module/map/map_operation.py",
         "module/war_archives/war_archives.py",
+    },
+    "0750-meta-reward-menu-entry.patch": {
+        "module/meta_reward/meta_reward.py",
     },
 }
 

@@ -34,6 +34,16 @@ class MetaAdapterPorts:
         self._meta_assist_entry_receipt = None
         self._meta_assist_entry_until = 0.0
 
+    def complete_meta_assist_combat(self) -> None:
+        self._package_gate()
+        summary = self.oracle.meta_assist_state()
+        if (summary.remaining_attempts != 0 or self.oracle.daily_precombat_visible()
+                or self.oracle.daily_combat_visible() or self.oracle.daily_battle_result_visible()):
+            raise SemanticGateClosed('META assist combat has no proven exhausted return')
+        self._operation_siren_combat_active = False
+        self._meta_precombat_start_receipt = None
+        self._meta_precombat_start_until = 0.0
+
     def click_meta_assist_entry(self) -> ActionReceipt:
         self._package_gate()
         prior = self._meta_assist_entry_receipt
@@ -53,9 +63,11 @@ class MetaAdapterPorts:
 
         self._package_gate()
         self._meta_beacon_active = True
+        self._meta_dossier_sync_open_receipt = None
 
     def end_meta_beacon(self) -> None:
         self._meta_beacon_active = False
+        self._meta_dossier_sync_open_receipt = None
         self._meta_reward_close_receipt = None
         self._meta_precombat_start_receipt = None
         self._meta_precombat_start_until = 0.0
@@ -143,8 +155,8 @@ class MetaAdapterPorts:
                 f'generation={state.generation}, start={prior.generation}, '
                 f'blockers={[b.blocker_id for b in blockers]}'
             )
-        if self._meta_assist_active and not self._action_ledger.allowed('meta.assist'):
-            raise SemanticGateClosed('META assist requires remaining sortie budget')
+        if self._meta_assist_active:
+            self._require_action_grant('meta.assist')
         if not self.oracle.meta_precombat_fleet_ready():
             raise SemanticGateClosed(
                 "META precombat requires non-empty main and vanguard fleets"
@@ -168,18 +180,26 @@ class MetaAdapterPorts:
         return receipt
 
     def _appear_meta(self, name, semantic_id):
-        if (self._meta_beacon_active
+        if ((self._meta_beacon_active or self._meta_assist_active)
                 and name in ('ASH_SHOWDOWN', 'BEACON_LIST', 'DOSSIER_LIST',
                              'HELP_ENTER', 'BEACON_REWARD', 'BATTLE_START',
                              'META_AUTO_CONFIRM', 'META_AUTO_ATTACK_START',
                              'META_AUTO_ATTACKING', 'META_AUTO_ATTACK_CONFIRM')):
+            loading_probe_target = 'meta/home'
+            if (name == 'META_AUTO_CONFIRM'
+                    and self.oracle.observation_target_present('meta/dossier/auto/result/confirm')):
+                # The completed result is itself a foreground blocker for
+                # meta/home. Its reviewed confirm owns this passive probe.
+                loading_probe_target = 'meta/dossier/auto/result/confirm'
             blockers = self.oracle._blocking_rules(
-                self.oracle.read_state(), 'ui/absence-probe')
+                self.oracle.read_state(), loading_probe_target)
             if blockers and all(rule.blocker_id == 'loading' for rule in blockers):
                 # The original META loop must take its next screenshot before
                 # classifying a detail page covered by the loading curtain.
+                # META's own page markers allow meta/home; they protect other
+                # tasks and must not turn this passive loading yield fatal.
                 return False
-        if (self._meta_beacon_active
+        if ((self._meta_beacon_active or self._meta_assist_active)
                 and name in ('ASH_SHOWDOWN', 'BEACON_LIST', 'DOSSIER_LIST',
                              'HELP_ENTER', 'BEACON_REWARD', 'BATTLE_START',
                              'META_AUTO_ATTACK_START', 'META_AUTO_ATTACKING',
@@ -193,7 +213,7 @@ class MetaAdapterPorts:
             # Its root can mount before the confirm child is published; the
             # full result reader still owns confirmation on a later frame.
             return False
-        if self._meta_beacon_active and name == 'META_AUTO_CONFIRM':
+        if (self._meta_beacon_active or self._meta_assist_active) and name == 'META_AUTO_CONFIRM':
             return self.oracle.meta_dossier_auto_result() is not None
         if self._meta_beacon_active and name in ('META_AUTO_ATTACK_START', 'META_AUTO_ATTACKING', 'META_AUTO_ATTACK_CONFIRM'):
             prompt = self.oracle.meta_dossier_auto_prompt() is not None

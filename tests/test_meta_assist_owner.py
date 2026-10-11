@@ -1,5 +1,7 @@
 import pytest
+from types import SimpleNamespace
 from alas_headless import AlasSemanticAdapter, AlasSemanticSession, SemanticGateClosed
+from alas_headless.adapter.semantic.contracts import AlasSemanticActionDeferred
 from tests.semantic_support.adapter_fixtures import FakeOracle
 
 
@@ -23,6 +25,26 @@ def test_assist_counter_retries_only_incoherent_observation():
     assert oracle.click_calls == []
 
 
+@pytest.mark.parametrize('attempts, covered', [(0, False), (1, False), (0, True)])
+def test_assist_releases_combat_owner_only_after_exhausted_uncovered_return(attempts, covered):
+    o = FakeOracle()
+    o.meta_assist_state = lambda: SimpleNamespace(remaining_attempts=attempts)
+    o.daily_precombat_visible = lambda: covered
+    o.daily_combat_visible = lambda: False
+    o.daily_battle_result_visible = lambda: False
+    a = AlasSemanticAdapter(o, package_gate=lambda: None)
+    a.begin_meta_assist()
+    a._operation_siren_combat_active = True
+    if attempts or covered:
+        with pytest.raises(SemanticGateClosed): a.complete_meta_assist_combat()
+        assert a._operation_siren_combat_active
+    else:
+        a.complete_meta_assist_combat()
+        assert not a._operation_siren_combat_active
+        assert a._meta_assist_active
+    assert not o.click_calls
+
+
 def test_assist_start_consumes_once_and_pending_transition_never_reclicks():
     oracle = FakeOracle()
     calls = []
@@ -41,10 +63,29 @@ def test_assist_start_consumes_once_and_pending_transition_never_reclicks():
     assert calls == ['start', 'confirm']
     assert adapter._action_ledger.remaining('meta.assist') == 0
     adapter._meta_precombat_start_until = 0
-    with pytest.raises(SemanticGateClosed, match='remaining sortie budget'):
+    with pytest.raises(AlasSemanticActionDeferred, match='meta.assist'):
         adapter.click_meta_precombat_start()
     adapter.end_meta_assist()
     assert adapter._meta_precombat_start_receipt is None
+
+
+def test_meta_reward_acquired_ship_uses_shared_typed_acknowledgement():
+    from unittest.mock import Mock
+    from tests.semantic_support.adapter_fixtures import NamedButton
+    o = FakeOracle()
+    o.new_ship_reward_visible = lambda: True
+    a = AlasSemanticAdapter(o, package_gate=lambda: None)
+    a.begin_meta_assist()
+    s = AlasSemanticSession.__new__(AlasSemanticSession)
+    s.adapter = a
+    s.open = lambda: a
+    s._combat_result_action_oracle = lambda _: o
+    s._arm_combat_result_transition = Mock()
+    assert s.click(NamedButton('GET_SHIP')).semantic_id == 'reward/new-ship/continue'
+    assert o.click_calls == ['reward/new-ship/continue']
+    o.new_ship_reward_visible = lambda: False
+    with pytest.raises(SemanticGateClosed): s.click(NamedButton('GET_SHIP'))
+    assert o.click_calls == ['reward/new-ship/continue']
 
 
 def test_assist_scope_does_not_grant_beacon_bypass_or_leak_combat_owner():
@@ -74,7 +115,7 @@ def test_session_rebind_restores_assist_scope_and_enforces_budget_before_start()
     session.open = lambda: adapter
     session.refresh_tactical_input_frame = lambda: None
     session._meta_assist_active = True
-    with pytest.raises(SemanticGateClosed, match='remaining sortie budget'):
+    with pytest.raises(AlasSemanticActionDeferred, match='meta.assist'):
         session.click_daily_precombat_start()
     assert adapter._meta_assist_active
     assert adapter.oracle.click_calls == []

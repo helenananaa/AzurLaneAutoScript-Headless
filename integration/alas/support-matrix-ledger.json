@@ -8539,7 +8539,7 @@
         "DropRecord"
       ],
       "name": "Alas",
-      "note": "三项 Optimization 运行字段和 TaskHoardingDuration 已离线等价；语义截图仍不执行 Dedithering，传统方法/包名矩阵、错误截图、掉落上传与通知未完整验收",
+      "note": "三项 Optimization 运行字段和 TaskHoardingDuration 已离线等价；语义截图仍不执行 Dedithering，传统方法/包名矩阵、错误截图、掉落上传与通知未完整验收 2026-10-04：持久原调度r4单进程Tactical/Research/Exercise/Dorm返回True，Meowfficer和Guild局部不可用后继续选任务，Gacha确认别名错误终止；整批未通过。已补连续导航边界，原生NextRun不重置，跨日继续观察。见 docs/alas-continuity-development-20261004.zh-CN.md。 2026-10-04：持久原调度r5同进程8项中7项返回True：Commission/Research/Meowfficer/Guild/Gacha/Reward/ShopOnce；ShopFrequent局部不可用后调度继续。该批仍记passed=False，旧失败不覆盖。TaskScene返回曾混用live和冻结帧，已统一为当前不可变帧，100项相关检查通过，后续原任务实机另记。",
       "status": "P"
     },
     {
@@ -8597,7 +8597,7 @@
         "Commission"
       ],
       "name": "Commission",
-      "note": "六预设、custom、重大委托双值、动态多页、奖励、零油/非零油开始、1200 油确认、取消、补位和最早完成调度均已闭环",
+      "note": "六预设、custom、重大委托双值、动态多页、奖励、零油/非零油开始、1200 油确认、取消、补位和最早完成调度均已闭环 2026-10-04：持久原调度r1自然完工领取并重新派遣后，独立新进程r5又真实领取自然完工奖励、继续派遣；原NextRun从15:26:52更新到16:27:18，没有重置Storage或剩余次数。",
       "status": "F"
     },
     {
@@ -8787,7 +8787,7 @@
         "Gacha"
       ],
       "name": "Gacha",
-      "note": "四配置字段已离线等价；Event/Special 各两单已实机提交并核对资源与队列，UseDrill 两值均已完成原任务闭环；票券、祈愿池、其余卡池和数量仍未闭环",
+      "note": "四配置字段已离线等价；Event/Special 各两单已实机提交并核对资源与队列，UseDrill 两值均已完成原任务闭环；票券、祈愿池、其余卡池和数量仍未闭环 2026-10-04：持久原调度r4原共享确认对象的GACHA_ORDER别名被合并，准备页提交安全停止。已保留原生阶段别名，提交资源和单次额度检查保留；未把旧失败改写通过，修复后原任务实机另验。 2026-10-04：保留确认阶段别名后的持久原调度r5中Gacha返回True，NextRun次日00:00；原阶段/单次额度/资源证明保留，通用商店购买额度仍0。",
       "status": "L"
     },
     {
@@ -8831,7 +8831,7 @@
         "GuildOperation"
       ],
       "name": "Guild",
-      "note": "普通成员实机主路径已闭环：大厅 20/20 报告全领、后勤补给领取与 3 次按过滤器兑换、7-1 推荐编队并派遣；新任务选择、加入阈值、新行动创建、Boss 攻击与 Boss 推荐仍待对应角色和页面状态验证",
+      "note": "普通成员实机主路径已闭环：大厅 20/20 报告全领、后勤补给领取与 3 次按过滤器兑换、7-1 推荐编队并派遣；新任务选择、加入阈值、新行动创建、Boss 攻击与 Boss 推荐仍待对应角色和页面状态验证 2026-10-04：持久原调度r4完成大厅和后勤后，行动页返回读到旧冻结帧而局部退出，调度器继续Gacha。新增原返回前语义截图刷新和公会通知精确关闭边界，固定补丁完整应用及针对性检查通过；新边界整任务实机结果另记。 2026-10-04：修复后的持久原调度r5中Guild完整返回True，NextRun18:00；没有覆盖r4冻结帧失败，未提升全配置支持。",
       "status": "L"
     },
     {
@@ -8945,7 +8945,7 @@
         "OpsiAshAssist"
       ],
       "name": "OpsiAshAssist",
-      "note": "Tier候选选择、档案到当前列表、任务上下文及真实次数已接通。2026-09-12实耗三次支援，最后一场1→0的原生战斗、结算与返回单进程通过。同步页已纠正，1830/2000的原生无奖励分支通过。实际同步奖励领取、支援到奖励的完整任务、无目标和舰队不可用分支仍未完整验收。见 docs/daily-meta-live-20260912.zh-CN.md、docs/meta-reward-page-20260912.zh-CN.md。 2026-09-26：游戏9.7.394实耗Tier15支援3→2→1→0，前两场分段恢复；修复后末场1→0、结算、返回及MetaReward启动在同进程完成。当前MetaCharacterUI进入列表形态且PTPanel缺失，重复科研菜单入口被拒绝；实际同步奖励和完整任务未通过，保持B。见 docs/meta-assist-continuity-20260926.zh-CN.md。 同日继续：0730将新版META菜单加入原ALAS页面图；原MetaReward在支援上下文、零战斗额度下完成主页→菜单→MetaCharacterSynUI→主页。9926同步值、22/22已达门槛均已领取，无奖励分支通过；出现未领取奖励仍明确拒绝，实际领取及三场完整任务保持未验收。见 docs/meta-character-navigation-20260926.zh-CN.md。",
+      "note": "Tier候选选择、档案到当前列表、任务上下文及真实次数已接通。2026-09-12实耗三次支援，最后一场1→0的原生战斗、结算与返回单进程通过。同步页已纠正，1830/2000的原生无奖励分支通过。实际同步奖励领取、支援到奖励的完整任务、无目标和舰队不可用分支仍未完整验收。见 docs/daily-meta-live-20260912.zh-CN.md、docs/meta-reward-page-20260912.zh-CN.md。 2026-09-26：游戏9.7.394实耗Tier15支援3→2→1→0，前两场分段恢复；修复后末场1→0、结算、返回及MetaReward启动在同进程完成。当前MetaCharacterUI进入列表形态且PTPanel缺失，重复科研菜单入口被拒绝；实际同步奖励和完整任务未通过，保持B。见 docs/meta-assist-continuity-20260926.zh-CN.md。 同日继续：0730将新版META菜单加入原ALAS页面图；原MetaReward在支援上下文、零战斗额度下完成主页→菜单→MetaCharacterSynUI→主页。9926同步值、22/22已达门槛均已领取，无奖励分支通过；出现未领取奖励仍明确拒绝，实际领取及三场完整任务保持未验收。见 docs/meta-character-navigation-20260926.zh-CN.md。 2026-10-04：实耗三次支援3→2→1→0，中途保留ADB失联及收尾失败收据；原META同步奖励产生萨拉托加·META获得提示。修复说明弹窗和战斗归属收尾后，原任务返回True并写回次日00:00。三场与首次奖励领取未在单个未中断进程闭环；r11旧WorldBoss结束页断言为False，保持原收据。见 docs/alas-continuity-development-20261004.zh-CN.md。",
       "status": "B"
     },
     {
@@ -8980,7 +8980,7 @@
         "OpsiFleet"
       ],
       "name": "OpsiDaily",
-      "note": "DoMission/UseTuningSample 四组合已在同一最终 oracle 版本逐项实机闭环：DoMission=false 精确跳过总览，true 可在无海域选中时进入总览并排除月度 Boss；UseTuningSample=true 读取 0 样本并安全空操作，false 精确跳过仓库；四组合均延迟到次日 00:00。2026-08-31 又由原 os_mission_enter 状态机完成一次精确任务列表入口提交，typed 列表仅有标题、无任务按钮，随后成功退出并排到次日；入口冷却避免无状态推进时重复输入。真实每日任务清除、非零样本消费、Fleet 2-4 与 Submarine=true 仍未闭环",
+      "note": "DoMission/UseTuningSample 四组合已在同一最终 oracle 版本逐项实机闭环：DoMission=false 精确跳过总览，true 可在无海域选中时进入总览并排除月度 Boss；UseTuningSample=true 读取 0 样本并安全空操作，false 精确跳过仓库；四组合均延迟到次日 00:00。2026-08-31 又由原 os_mission_enter 状态机完成一次精确任务列表入口提交，typed 列表仅有标题、无任务按钮，随后成功退出并排到次日；入口冷却避免无状态推进时重复输入。真实每日任务清除、非零样本消费、Fleet 2-4 与 Submarine=true 仍未闭环 2026-10-04：修复塔伦托精确游戏输入颜色身份后，原OpsiDaily完成探索阶段八港访问并写回次日00:00；未据此补齐普通日常委托、非零样本或其他舰队配置。见 docs/alas-continuity-development-20261004.zh-CN.md。",
       "status": "B"
     },
     {
@@ -9057,7 +9057,7 @@
         "OpsiFleetFilter"
       ],
       "name": "OpsiStronghold",
-      "note": "默认值实机以精确世界地图标题、塞壬要塞类型和专属标记识别 93/121 区；93 区闭环进入、侦察、自律、潜艇离场、不可用舰队跳过、轮换及 100→20→0% 清场，121 区再次闭环进入、0% 收束、回港大修和四队低士气复查；ForceRun 两值与完整舰队过滤仍未逐值实机覆盖",
+      "note": "默认值实机以精确世界地图标题、塞壬要塞类型和专属标记识别 93/121 区；93 区闭环进入、侦察、自律、潜艇离场、不可用舰队跳过、轮换及 100→20→0% 清场，121 区再次闭环进入、0% 收束、回港大修和四队低士气复查；ForceRun 两值与完整舰队过滤仍未逐值实机覆盖 2026-10-04：原任务续推83区真实进度100→60→20→0%，原失败恢复和纽约修理共2150世界币；原任务最终阴性搜索与NextRun仍待最新收据。保留自动搜索失败结算、结果页卸载、选区拖动阻挡及不推进的独立失败。完整路径证明及实际选区关闭后置条件不放宽。见 docs/alas-continuity-development-20261004.zh-CN.md。 2026-10-04：83区真实进度0%后，stronghold-r10原任务扫描前三区域并发现第二个51据点；六个20点道具用尽6次预算，局部action-deferred，独立typed观察当前139。不是预算传递故障。r11遗留补给面板重入失败，精确取消后r12有限24次道具额度续推。专用动作及剩余额度已补收据，最终清场/NextRun以最新收据为准，不提升支持。 2026-10-04：83区0%后原搜索发现51据点；r10六个20点道具用尽6次额度，预算传递正常。r12补20/50点箱各一进入51并真实战斗，随后剧情观察/输入之间页面消失而停止，独立typed见80%。1280原补给处理器精确关闭额度暂停面板、1290仅零输入且证明剧情消失时继续原循环；21/61项定向和177成员完整应用通过。r13/r14重入遇游戏自律战斗失败，原冷启动PID28088→13034保留数据回主页后r15续跑。专用动作/剩余额度留证，最终清场/NextRun以最新收据为准，分段不升支持。",
       "status": "L"
     },
     {
@@ -9075,7 +9075,7 @@
         "PrivateQuarters"
       ],
       "name": "PrivateQuarters",
-      "note": "选房页、真实次数、原生全部关闭分支与次日调度已验证；新泽西物理点击、原生三次触摸及IK/watch/base返回有实机证据。好感升3级弹窗阻断最终退出，原任务超时；重启恢复后确认0/3并回主页，属于分段清空。升级弹窗自动关闭、完整TargetInteract=true、自动选角色/地点、其他角色、礼物和商店仍未资格化。见 docs/private-quarters-physics-20260912.zh-CN.md。 2026-09-13原pq_run已完成新泽西选房入房、对话及三次互动；最后退出触发旧按钮别名循环误报。控件身份修复及离线保护回放通过，实机恢复另记，仍非单进程完整成功。见 docs/private-quarters-native-20260913.zh-CN.md。 恢复后全关闭原任务确认0/3、次日调度及主页通过（final-overview-r15），仍为分段证据。 2026-09-26：修复选房入场旧主页别名及无关被动探针，实机相关ALAS文件同步现有补丁。新泽西原任务从3/3执行三次互动，到等级4、20/800后被真实LevelUpWindow阻挡；背景和房间返回均非顶层命中，原任务超时，未形成连续闭环。保持P，升级关闭仍待可验证输入目标。见 docs/private-quarters-continuity-20260926.zh-CN.md。 同日冷启动后独立全关闭恢复验证0/3、次日调度和回主页通过，不与三次互动失败拼接。 升级关闭候选代码已补：真实Button矩形内整数点原生命中搜索、原ROOM_BACK输入分发和一次输入后的弹窗消失/房间返回后置条件；仅离线通过，未构建安装新观察器或实机关闭，见 docs/private-quarters-level-up-candidate-20260926.zh-CN.md。 同日后续已完成x86_64增量观察器构建安装、冷启动、五帧健康、原登录及0/3零互动往返；升级关闭仍未实机验证，见 docs/private-quarters-observer-deployment-20260926.zh-CN.md。",
+      "note": "选房页、真实次数、原生全部关闭分支与次日调度已验证；新泽西物理点击、原生三次触摸及IK/watch/base返回有实机证据。好感升3级弹窗阻断最终退出，原任务超时；重启恢复后确认0/3并回主页，属于分段清空。升级弹窗自动关闭、完整TargetInteract=true、自动选角色/地点、其他角色、礼物和商店仍未资格化。见 docs/private-quarters-physics-20260912.zh-CN.md。 2026-09-13原pq_run已完成新泽西选房入房、对话及三次互动；最后退出触发旧按钮别名循环误报。控件身份修复及离线保护回放通过，实机恢复另记，仍非单进程完整成功。见 docs/private-quarters-native-20260913.zh-CN.md。 恢复后全关闭原任务确认0/3、次日调度及主页通过（final-overview-r15），仍为分段证据。 2026-09-26：修复选房入场旧主页别名及无关被动探针，实机相关ALAS文件同步现有补丁。新泽西原任务从3/3执行三次互动，到等级4、20/800后被真实LevelUpWindow阻挡；背景和房间返回均非顶层命中，原任务超时，未形成连续闭环。保持P，升级关闭仍待可验证输入目标。见 docs/private-quarters-continuity-20260926.zh-CN.md。 同日冷启动后独立全关闭恢复验证0/3、次日调度和回主页通过，不与三次互动失败拼接。 升级关闭候选代码已补：真实Button矩形内整数点原生命中搜索、原ROOM_BACK输入分发和一次输入后的弹窗消失/房间返回后置条件；仅离线通过，未构建安装新观察器或实机关闭，见 docs/private-quarters-level-up-candidate-20260926.zh-CN.md。 同日后续已完成x86_64增量观察器构建安装、冷启动、五帧健康、原登录及0/3零互动往返；升级关闭仍未实机验证，见 docs/private-quarters-observer-deployment-20260926.zh-CN.md。 2026-10-04：private-quarters-r1原任务同进程3次互动至0、返回主页并排次日，continuous_interaction_passed=True；未自然触发升级弹窗，不提升全配置支持。",
       "status": "P"
     },
     {
@@ -9108,7 +9108,7 @@
         "Research"
       ],
       "name": "Research",
-      "note": "Original bounded tasks now pass cube only_05_hour enforcement fallback (3 cubes) and part only_no_project (20 T1 anti-aircraft parts), queueing and scheduling. Natural half-hour paths, multi-resource confirmation, reset, all presets and unattended cross-round operation remain unqualified. See docs/research-continuation-20260912.zh-CN.md. Original UI progress-notice confirmation, Shipyard navigation and unobscured main return also passed in notice-recovery-r5.json; no strengthening or purchase. Part only_05_hour enforcement fallback also passed (Q-202-MI, 20 T2 general parts); the natural half-hour branch remains unqualified. A bounded UseCoin=only_no_project natural-completion continuation passed: one finished project, G-412-MI, 1500 gold, queueing and scheduling; subsequent context-free return to main also passed. See docs/shipyard-series-20260912.zh-CN.md. Multi-resource confirmation now compares the complete cost set and rechecks a fresh input frame; original start/queue methods passed offline contract replay. No selectable dual-resource card was available in the bounded live navigation/read, which returned to main without spending. Actual multi-resource confirmation remains live-unqualified. See docs/research-dual-resource-20260913.zh-CN.md. On 2026-09-26, original Research queue filling completed without the one-start harness truncation: two reward claims, five queued projects plus a sixth waiting, six gold-only starts (10500 gold), queue re-entry and scheduling at 11:08:01 in one 145.031-second run. Two queue navigation round trips and a separate context-free home return also passed. Game 9.7.394 on the local AVD only; no reset, cubes, parts or purchases. See docs/research-native-continuity-20260926.zh-CN.md and integration/alas/research-native-continuity-live-validation-receipt-20260926.json. Status remains L; natural half-hour, dual-resource, reset and unattended cross-round coverage remain unqualified.",
+      "note": "Original bounded tasks now pass cube only_05_hour enforcement fallback (3 cubes) and part only_no_project (20 T1 anti-aircraft parts), queueing and scheduling. Natural half-hour paths, multi-resource confirmation, reset, all presets and unattended cross-round operation remain unqualified. See docs/research-continuation-20260912.zh-CN.md. Original UI progress-notice confirmation, Shipyard navigation and unobscured main return also passed in notice-recovery-r5.json; no strengthening or purchase. Part only_05_hour enforcement fallback also passed (Q-202-MI, 20 T2 general parts); the natural half-hour branch remains unqualified. A bounded UseCoin=only_no_project natural-completion continuation passed: one finished project, G-412-MI, 1500 gold, queueing and scheduling; subsequent context-free return to main also passed. See docs/shipyard-series-20260912.zh-CN.md. Multi-resource confirmation now compares the complete cost set and rechecks a fresh input frame; original start/queue methods passed offline contract replay. No selectable dual-resource card was available in the bounded live navigation/read, which returned to main without spending. Actual multi-resource confirmation remains live-unqualified. See docs/research-dual-resource-20260913.zh-CN.md. On 2026-09-26, original Research queue filling completed without the one-start harness truncation: two reward claims, five queued projects plus a sixth waiting, six gold-only starts (10500 gold), queue re-entry and scheduling at 11:08:01 in one 145.031-second run. Two queue navigation round trips and a separate context-free home return also passed. Game 9.7.394 on the local AVD only; no reset, cubes, parts or purchases. See docs/research-native-continuity-20260926.zh-CN.md and integration/alas/research-native-continuity-live-validation-receipt-20260926.json. Status remains L; natural half-hour, dual-resource, reset and unattended cross-round coverage remain unqualified. 2026-10-04：持久原调度r4领取两项自然完成研究并继续入队，原任务返回True、NextRun15:11:51；原生配置保留跨进程计时，后续自然再轮与跨日仍继续验收。 2026-10-04：持久原调度r4后，r5独立进程真实领取自然完工队列并继续原研究调度，返回True、NextRun20:11:52；跨进程原配置计时保留，未伪造时间。",
       "status": "L"
     },
     {
@@ -9135,7 +9135,7 @@
         "Shipyard"
       ],
       "name": "Shipyard",
-      "note": "Original typed UI passed series 9 to 1 to 9 with exact top hits and selected-series postconditions, Neptune DEV 30/30 with separate fate-stage V (8 blueprints), restoration of Takahashi and main return. Earlier Duncan/Valparaiso DEV reads remain scoped. Navbar fate badges no longer select FATE controls on a DEV pane. Actual FATE-pane actions, other series, purchases, strengthening and full task remain unqualified. See docs/shipyard-series-20260912.zh-CN.md. 2026-09-13原helper读取二期六艘、七期五艘DEV满级并恢复九期原选船和主页通过；未找到实际FATE面板。开发等级支持无害字号变化，未知内容仍拒绝，保持B。见docs/shipyard-fate-survey-20260913.zh-CN.md。 2026-09-26第三期五舰DEV30/30与独立天运V读取、恢复九期第4艘及主页通过；修复观察帧被更新探测刷新和切船详情等待，249项定向测试通过。实际FATE操作仍未资格化，保持B。见docs/shipyard-series3-20260926.zh-CN.md。",
+      "note": "Original typed UI passed series 9 to 1 to 9 with exact top hits and selected-series postconditions, Neptune DEV 30/30 with separate fate-stage V (8 blueprints), restoration of Takahashi and main return. Earlier Duncan/Valparaiso DEV reads remain scoped. Navbar fate badges no longer select FATE controls on a DEV pane. Actual FATE-pane actions, other series, purchases, strengthening and full task remain unqualified. See docs/shipyard-series-20260912.zh-CN.md. 2026-09-13原helper读取二期六艘、七期五艘DEV满级并恢复九期原选船和主页通过；未找到实际FATE面板。开发等级支持无害字号变化，未知内容仍拒绝，保持B。见docs/shipyard-fate-survey-20260913.zh-CN.md。 2026-09-26第三期五舰DEV30/30与独立天运V读取、恢复九期第4艘及主页通过；修复观察帧被更新探测刷新和切船详情等待，249项定向测试通过。实际FATE操作仍未资格化，保持B。见docs/shipyard-series3-20260926.zh-CN.md。 2026-10-04：FATE首开说明窗的期号观察与可点击身份已分离；原冷启动保留userdata恢复主页。fate-survey-r3原ShipyardUI前两期12艘实际FATE切船观察及回主页通过，均阶段V、开发等级30。读取同帧期号/选中卡片/原生船身份，不编造DEV等级上限；非满级强化和首开说明关窗仍未资格化。 2026-10-04：fate-original-task-max-r2一期1号海王星阶段V/MAX原Shipyard任务返回True、不能强化=True、次日04:00，零购买和零强化，隔离配置未改变持久Shipyard禁用状态。r1验收脚本异常且passed矛盾原样保留，不作为合格验收。非满级和首次说明关窗仍未资格化。",
       "status": "B"
     },
     {
@@ -9144,7 +9144,7 @@
         "GeneralShop"
       ],
       "name": "ShopFrequent",
-      "note": "原 ShopFrequent 已实机完成当前过滤器的十卡读取、金币/钻石余额与零购买安全退出；普通商店共用单件购买事务已有真实余额/库存后置条件，General 正向金币购买仍因触控重连在点击前失败关闭，刷新、钻石与自定义消费未逐值",
+      "note": "原 ShopFrequent 已实机完成当前过滤器的十卡读取、金币/钻石余额与零购买安全退出；普通商店共用单件购买事务已有真实余额/库存后置条件，General 正向金币购买仍因触控重连在点击前失败关闭，刷新、钻石与自定义消费未逐值 2026-10-04：原Reward→ShopFrequent的TaskScene/页面探针适配已在实际导航通过，shop-frequent-postfix-r7到达学院真实商店。后续购买因交易预算0返回AlasSemanticActionDeferred，零购物消耗；此收据passed=False，不声称整任务或交易成功。",
       "status": "L"
     },
     {
@@ -9167,7 +9167,7 @@
         "AddNewStudent"
       ],
       "name": "Tactical",
-      "note": "新学员、选书过滤与经验溢出均已实机闭环；快速学习因当前非活动期仍未闭环",
+      "note": "新学员、选书过滤与经验溢出均已实机闭环；快速学习因当前非活动期仍未闭环 2026-10-04：原持久调度恢复读到七位ID1299012的已开课程，原任务返回True并写回22:41:37；运行槽位六至八位ID与候选Dock一致，长文本字节截断保留完整UTF-8。场景返回和全局公会通知边界另有窄修复，未提升全配置支持。",
       "status": "L"
     },
     {
@@ -12446,9 +12446,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "35d16cea840454ffe7935c667abe0fca40f853f4552ca71c88de8da6621aacb6",
-      "manifest_sha256": "161369bfb1b97bef16e6a863dd75a261c359b6e2cd6a62126645b50ea0af2b8f",
-      "member_count": 169
+      "combined_sha256": "f527dbe9041f3d1c10f114a4e9a4cf784c4bfafecf11882b74b967da8f16c94b",
+      "manifest_sha256": "4320614f25faecd28bbd3a5aa94422ab0aa10ede251805885533250e514d4686",
+      "member_count": 212
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

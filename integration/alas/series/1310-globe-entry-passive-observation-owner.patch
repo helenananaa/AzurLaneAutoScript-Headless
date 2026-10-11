@@ -1,0 +1,39 @@
+diff --git a/module/os/globe_operation.py b/module/os/globe_operation.py
+--- a/module/os/globe_operation.py
++++ b/module/os/globe_operation.py
+@@ -402,7 +402,7 @@
+                     from alas_headless.oracle.errors import SemanticStrongholdEntryLocked
+                     raise SemanticStrongholdEntryLocked(zone.zone_id)
+                 raise OSExploreError
+-            semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
++            semantic_adapter.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
+             for attempt in range(80):
+                 self.device.sleep(0.25)
+                 self.device.screenshot()
+@@ -425,7 +425,7 @@
+                             except SemanticOracleError:
+                                 continue
+                             if state.zone_type == special_types[pinned]:
+-                                semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
++                                semantic_adapter.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
+                                 break
+                         else:
+                             raise OSExploreError(
+@@ -435,7 +435,7 @@
+                     # Normal zones can be selected again through the modeled
+                     # globe camera after the AP panel closes.
+                     self.globe_focus_to(zone)
+-                    semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
++                    semantic_adapter.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
+                     continue
+                 # Reuse the same native event/popup handlers as the pixel
+                 # branch. A first-visit story can cover an already-entered
+@@ -452,7 +452,7 @@
+                     # Match the bounded retry semantics of the legacy path,
+                     # but re-prove the pinned typed control before every tap.
+                     logger.info('Retry exact typed zone entrance')
+-                    semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
++                    semantic_adapter.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
+             raise OSExploreError(f'Unable to enter typed zone {zone}')
+ 
+         click_timer = Timer(10)

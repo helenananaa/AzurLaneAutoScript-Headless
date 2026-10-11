@@ -37,6 +37,12 @@ class FakeCampaignOracle:
             raise SemanticTargetMissing("event campaign page is absent")
         return self.campaign_state_value
 
+    def current_raid_event(self):
+        return "raid_20260827"
+
+    def supports_raid_layout(self, event):
+        return event == "raid_20260827"
+
     def raid_page_visible(self, event):
         if event != "raid_20260827":
             raise SemanticGateClosed("Raid page event is unsupported")

@@ -1,0 +1,42 @@
+diff --git a/module/ui/ui.py b/module/ui/ui.py
+--- a/module/ui/ui.py
++++ b/module/ui/ui.py
+@@ -149,6 +149,12 @@
+         else:
+             return self.appear(check_button, offset=offset)
+ 
++    def _check_semantic_client_version(self):
++        semantic_adapter = getattr(self.device, "semantic_adapter", None)
++        if semantic_adapter is not None and semantic_adapter.client_version_update_required():
++            from module.exception import GameBugError
++            raise GameBugError("Client version warning requires native Restart/update")
++
+     def ui_get_current_page(self, skip_first_screenshot=True):
+         """
+         Args:
+@@ -183,6 +189,8 @@
+             # End
+             if timeout.reached():
+                 break
++
++            self._check_semantic_client_version()
+ 
+             # Known pages
+             semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+@@ -262,6 +270,8 @@
+                 skip_first_screenshot = False
+             else:
+                 self.device.screenshot()
++
++            self._check_semantic_client_version()
+ 
+             # Destination page
+             if self.ui_page_appear(page=destination, offset=offset):
+@@ -524,6 +534,7 @@
+         Args:
+             get_ship:
+         """
++        self._check_semantic_client_version()
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None and semantic_adapter.server_maintenance_visible():
+             logger.warning('Game server is under maintenance')

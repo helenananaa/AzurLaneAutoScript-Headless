@@ -733,6 +733,11 @@ DORM_VIRTUAL_RESOURCES = frozenset(
         "DORM_FEED_CHECK",
         "DORM_FEED_ENTER",
         "DORM_FEED_CANCEL",
+        "DORM_BUY_FOOD_CHECK",
+        "DORM_BUY_FOOD_ENTER",
+        "DORM_BUY_FOOD_CONFIRM",
+        "FOOD_PLUS",
+        "FOOD_MINUS",
         "POPUP_CANCEL",
     }
 )

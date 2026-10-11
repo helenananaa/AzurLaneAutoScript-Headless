@@ -36,6 +36,7 @@ from .contracts import (
 )
 from .dispatch_result import UNHANDLED
 from .campaign_health import CampaignHealthAdapterPorts
+from ...oracle.errors import SemanticCampaignFleetIncomplete
 from .resources import (
     CAMPAIGN_AUTO_SEARCH_ON_RESOURCES,
     CAMPAIGN_AUTO_SEARCH_RESOURCES,
@@ -103,9 +104,26 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         for _ in range(32):
             position = self.oracle.war_archives_campaign_card_position(event)
             if position == "visible":
-                if self._input_frame_refresher is not None:
-                    self._input_frame_refresher()
-                receipt = self.oracle.click_war_archives_campaign(event)
+                settle_deadline = time.monotonic() + 10.0
+                while True:
+                    if self._input_frame_refresher is not None:
+                        self._input_frame_refresher()
+                    try:
+                        receipt = self.oracle.click_war_archives_campaign(event)
+                        break
+                    except SemanticGateClosed as exc:
+                        # Scrolling publishes button/image geometry across
+                        # frames. This exact error is raised before any tap;
+                        # wait for the unchanged strict input proof to succeed.
+                        # Duplicate controls, blockers and dispatch errors are
+                        # not a settling condition and propagate immediately.
+                        if str(exc) != "war archives campaign control is not aligned":
+                            raise
+                        if time.monotonic() >= settle_deadline:
+                            raise SemanticGateClosed(
+                                "war archives campaign control did not stabilize"
+                            ) from exc
+                        time.sleep(0.2)
                 deadline = time.monotonic() + 30.0
                 while True:
                     if self.oracle.war_archives_campaign_page_visible():
@@ -897,9 +915,8 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         if context.mode == 'hard':
             return True  # Existing hard Continue owns its separate contract.
         if (context.auto_search_completion is None or context.sortie_proof is None
-                or context.prepared_fleet_state is None or context.auto_search_role_state is None
-                or not self._action_ledger.allowed('campaign.sortie')):
-            raise SemanticGateClosed('campaign Continue requires a completed owned sortie and remaining budget')
+                or context.prepared_fleet_state is None or context.auto_search_role_state is None):
+            raise SemanticGateClosed('campaign Continue requires a completed owned sortie and preparation')
         roles = {'fleet1_mob_fleet2_boss': ('mob', 'boss'),
                  'fleet1_boss_fleet2_mob': ('boss', 'mob'),
                  'fleet1_all_fleet2_standby': ('all', 'standby'),
@@ -920,6 +937,7 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         required = context.prepared_fleet_state.required_sortie_oil * (2 if use_2x_book else 1)
         if oil < required:
             raise SemanticGateClosed('campaign Continue oil precondition failed')
+        self._require_action_grant('campaign.sortie')
         context.oil_before_sortie = oil
         context.use_2x_book = use_2x_book
         context.sortie_budget_before = self._action_ledger.remaining('campaign.sortie')
@@ -966,10 +984,6 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         if context.auto_search_completion is None:
             raise SemanticGateClosed(
                 "campaign auto-search continue requires a proven result"
-            )
-        if not self._action_ledger.allowed("campaign.sortie"):
-            raise SemanticGateClosed(
-                "campaign auto-search continue requires a remaining sortie budget"
             )
         receipt = self._dispatch_mutation(
             "campaign.sortie",
@@ -1473,27 +1487,20 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                         "campaign preparation kind is not reviewed"
                     )
                 if all(owned_receipts):
-                    if context.mode == "hard":
-                        # ALAS will inspect the fleet rows again in this same
-                        # screenshot frame. A live input preflight may already
-                        # see a fully mounted panel while this immutable frame
-                        # still contains levels whose ship sprites are loading.
-                        # Let the original preparation loop take its next
-                        # screenshot instead of entering it with partial rows.
-                        try:
-                            self.oracle.campaign_fleet_selection_state(
-                                _resolved_stage_code,
-                                fallback_oil_cost=context.map_preparation_oil_cost,
-                            )
-                        except SemanticGateClosed as exc:
-                            if (
-                                str(exc).startswith(
-                                    "campaign fleet row ship identity is inconsistent: "
-                                )
-                                and time.monotonic() <= context.passive_transition_until
-                            ):
-                                return False
-                            raise
+                    # Both normal and hard panels load portraits after levels.
+                    # Check the native screenshot once before ALAS enters its
+                    # fleet operators; retrying an immutable reader cannot
+                    # reveal a newly mounted portrait. Input reads stay strict.
+                    oracle = self._frame_or_live_observation_oracle()
+                    try:
+                        oracle.campaign_fleet_selection_state(
+                            _resolved_stage_code,
+                            fallback_oil_cost=context.map_preparation_oil_cost)
+                    except SemanticGateClosed as exc:
+                        if (isinstance(exc, SemanticCampaignFleetIncomplete)
+                                and time.monotonic() <= context.passive_transition_until):
+                            return False
+                        raise
                     return True
                 if any(owned_receipts):
                     raise SemanticGateClosed(
@@ -1711,12 +1718,9 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                 not in (context.stage_code, shared_hard_entrance)
             ):
                 raise SemanticGateClosed("campaign stage identity changed")
-            if (
-                not self._action_ledger.allowed("campaign.stage_entry")
-                or context.entry_receipt is not None
-            ):
+            if context.entry_receipt is not None:
                 raise SemanticGateClosed(
-                    "campaign stage entry requires one remaining budget unit"
+                    "campaign stage entry was already submitted"
                 )
             context.oil_before_sortie = self.oracle.campaign_oil()
             receipt = self._dispatch_mutation(
@@ -1775,12 +1779,9 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                 raise SemanticGateClosed(
                     "campaign map fleet switch target is already displayed"
                 )
-            if (
-                not self._action_ledger.allowed("campaign.fleet_mutation")
-                or len(context.map_fleet_switch_receipts) >= 1
-            ):
+            if len(context.map_fleet_switch_receipts) >= 1:
                 raise SemanticGateClosed(
-                    "campaign map fleet switch requires one mutation budget unit"
+                    "campaign map fleet switch was already submitted for this combat decision"
                 )
             receipt = self._dispatch_mutation(
                 "campaign.fleet_mutation",
@@ -1932,12 +1933,11 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                     path=clear_button.path,
                 )
             if (
-                not self._action_ledger.allowed("campaign.fleet_mutation")
-                or len(context.fleet_mutation_receipts)
+                len(context.fleet_mutation_receipts)
                 >= context.required_fleet_mutations
             ):
                 raise SemanticGateClosed(
-                    "campaign fleet clear requires a remaining mutation budget"
+                    "campaign fleet clear exceeds the preflight mutation plan"
                 )
             receipt = self._dispatch_mutation(
                 "campaign.fleet_mutation",
@@ -1967,12 +1967,11 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                     "campaign fleet option is absent or already selected"
                 )
             if (
-                not self._action_ledger.allowed("campaign.fleet_mutation")
-                or len(context.fleet_mutation_receipts)
+                len(context.fleet_mutation_receipts)
                 >= context.required_fleet_mutations
             ):
                 raise SemanticGateClosed(
-                    "campaign fleet selection requires a remaining mutation budget"
+                    "campaign fleet selection exceeds the preflight mutation plan"
                 )
             receipt = self._dispatch_mutation(
                 "campaign.fleet_mutation",

@@ -16,6 +16,25 @@ from unittest import mock
 
 
 class OperationSirenSemanticOracleTests(OperationSirenSemanticOracleTestsSupport, unittest.TestCase):
+    def test_meow_search_recall_prompt_is_exact_and_input_remains_actionable_only(self):
+        root = 'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window'
+        backend = FakeBackend([
+            make_button('custom_button_1(Clone)', root + '/button_container/custom_button_1(Clone)'),
+            make_button('custom_button_2(Clone)', root + '/button_container/custom_button_2(Clone)'),
+        ])
+        backend.ui = make_ui([make_text(
+            '正在进行搜寻作业的指挥喵将被强制召回！\n是否结束搜寻并离开当前海域？',
+            root + '/msg_panel/content')])
+        oracle = make_oracle(backend)
+        self.assertEqual(oracle.observation_prompt_kind(), 'opsi-exit')
+        self.assertTrue(oracle.operation_siren_exit_prompt_visible())
+        backend.buttons['buttons'][0]['raycast_top'] = False
+        with self.assertRaises(SemanticGateClosed):
+            oracle.click_operation_siren_exit(True)
+        self.assertEqual(backend.taps, [])
+        backend.ui['texts'][0]['text'] += '购买'
+        self.assertFalse(oracle.operation_siren_exit_prompt_visible())
+
     def test_action_point_entry_uses_exact_stamina_resource_and_proves_popup(self):
         backend = FakeBackend(
             [

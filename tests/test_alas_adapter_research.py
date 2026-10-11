@@ -13,6 +13,7 @@ from tests.semantic_support.adapter_cases import AlasSemanticAdapterTestsSupport
 from tests.semantic_support.adapter_fixtures import FakeOracle, NamedButton
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
+from alas_headless.adapter.semantic.contracts import AlasSemanticActionDeferred
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
@@ -126,7 +127,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
 
         self.assertFalse(adapter.appear(NamedButton("RESEARCH_CHECK")))
 
-    def test_research_decision_input_requires_complete_known_five_cards(self):
+    def test_research_decision_preserves_native_unknown_card_and_complete_snapshot(self):
         adapter, oracle, _ = self.make_adapter()
         adapter.begin_research()
         oracle.research_project_values = [
@@ -146,8 +147,8 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
                 self.series = series
                 self.valid = name != "Q-003"
 
-        with self.assertRaisesRegex(SemanticGateClosed, "unknown to pinned ALAS"):
-            adapter.research_projects_for_alas(Project)
+        projects = adapter.research_projects_for_alas(Project)
+        self.assertEqual([project.valid for project in projects], [True, True, False, True, True])
         self.assertEqual(oracle.click_calls, [])
 
         oracle.research_project_values[2].code = "Q-103"
@@ -728,7 +729,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
                 gated = AlasSemanticAdapter(oracle, lambda: None)
                 gated.begin_research()
                 gated.click(NamedButton("ENTRANCE_1"))
-                with self.assertRaisesRegex(SemanticGateClosed, "budgeted running project"):
+                with self.assertRaisesRegex(AlasSemanticActionDeferred, "research.start"):
                     gated.click(NamedButton("RESEARCH_QUEUE_ADD"))
 
                 oracle.enabled_values["research/detail/stop"] = False
@@ -832,14 +833,13 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         oracle.enabled_values['main/tech'] = False
         oracle.exists_values['research-menu/page/back'] = False
         oracle.enabled_values['research-menu/page/back'] = False
-        oracle.click = Mock(side_effect=SemanticGateClosed('semantic target is not actionable'))
-
-        def mount_menu():
+        def source_not_actionable(target):
             oracle.exists_values['research-menu/page/back'] = True
             oracle.enabled_values['research-menu/page/back'] = True
-            return SimpleNamespace(generation=first.generation + 1)
+            raise SemanticGateClosed('semantic target is not actionable')
 
-        oracle.read_state = Mock(side_effect=mount_menu)
+        oracle.click = Mock(side_effect=source_not_actionable)
+        oracle.read_state = Mock(return_value=SimpleNamespace(generation=first.generation + 1))
         repeated = adapter.click(NamedButton('MAIN_GOTO_RESHMENU_WHITE'))
 
         self.assertIs(repeated, first)

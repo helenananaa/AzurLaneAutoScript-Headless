@@ -74,19 +74,12 @@ class AlasSchedulerContractTests(unittest.TestCase):
         with self.assertRaisesRegex(SemanticGateClosed, "six-field"):
             validate_alas_scheduler_config(value)
 
-    def test_patch_calls_scheduler_gate_before_queueing(self):
+    def test_patch_preserves_upstream_queue_without_global_qualification_gates(self):
         patch = ROOT.joinpath(
             "integration/alas/series/0140-scheduler-contract.patch"
         ).read_text(encoding="utf-8")
-        self.assertIn("validate_alas_scheduler_config(self.data)", patch)
-        self.assertLess(
-            patch.index("validate_alas_scheduler_config(self.data)"),
-            patch.index("pending = []"),
-        )
-        self.assertLess(
-            patch.index("validate_alas_task_hoarding_config(self.data)"),
-            patch.index("pending = []"),
-        )
+        self.assertNotIn("validate_alas_scheduler_config(self.data)", patch)
+        self.assertNotIn("validate_alas_task_hoarding_config(self.data)", patch)
 
     def test_task_hoarding_is_bounded_before_scheduler_time_math(self):
         for minutes in (0, 1, 15, 1440):

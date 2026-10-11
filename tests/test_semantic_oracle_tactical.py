@@ -1,7 +1,7 @@
 """Tactical regression cases for the oracle."""
 
 import unittest
-from alas_headless.semantic_oracle import TacticalSlotStatus
+from alas_headless.semantic_oracle import TacticalSlotStatus, SemanticGateClosed
 from tests.semantic_support.observer_fixtures import (
     FakeBackend,
     make_button,
@@ -159,7 +159,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         self.assertTrue(books[0].exp_bonus)
         self.assertEqual(book_receipt.semantic_id, "tactical/book/0")
 
-    def test_tactical_empty_slots_ready_requires_complete_current_slot_columns(self):
+    def test_first_empty_observation_is_independent_of_numbered_slot_columns(self):
         page = "root/UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/"
         root = page + "NewNavalTacticsStudentsPage(Clone)/"
         buttons = [
@@ -171,7 +171,9 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
 
         self.assertTrue(oracle.tactical_empty_slots_ready())
         backend.buttons = make_buttons(buttons[:3])
-        self.assertFalse(oracle.tactical_empty_slots_ready())
+        self.assertTrue(oracle.tactical_empty_slots_ready())
+        with self.assertRaises(SemanticGateClosed):
+            oracle.click_tactical_empty_slot(2)
         occupied = make_button("403994", root + "info/403994", x=200, y=400)
         backend.buttons = make_buttons([occupied, *buttons[1:]])
 

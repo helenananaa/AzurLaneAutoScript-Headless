@@ -1,3 +1,4 @@
+import re
 import unittest
 from pathlib import Path
 
@@ -62,7 +63,9 @@ class RuntimeObserverContractTests(unittest.TestCase):
         self.assertIn("image_source_capacity", self.server)
 
     def test_opsi_overlay_images_survive_large_stronghold_maps(self):
-        self.assertIn("kMaxObserverImages = 1408", self.probe_header)
+        capacity = re.search(r"kMaxObserverImages = ([0-9]+)", self.probe_header)
+        self.assertIsNotNone(capacity)
+        self.assertGreaterEqual(int(capacity[1]), 1024 + 384)
         self.assertIn("kReservedMapGridImages = 384", self.probe_source)
         self.assertIn('invokeString(candidateTransform) == "walk_quad"', self.probe_source)
         self.assertIn(

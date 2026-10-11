@@ -1,0 +1,13 @@
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -434,7 +434,8 @@
+ 
+         for _ in self.loop():
+ 
+-            if not confirm_timer.reached():
++            if (not confirm_timer.reached()
++                    or getattr(self.device, 'semantic_adapter', None) is not None):
+                 if self.handle_combat_automation_confirm():
+                     continue
+ 

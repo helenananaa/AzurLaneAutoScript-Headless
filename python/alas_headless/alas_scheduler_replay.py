@@ -345,9 +345,9 @@ def verify_scheduler_contract(alas_root: Path) -> Mapping[str, object]:
     try:
         validate_alas_scheduler_config(invalid)
     except Exception as exc:
-        check("invalid-datetime-fails-before-queue", "datetime" in str(exc))
+        check("offline-invalid-datetime-diagnostic", "datetime" in str(exc))
     else:
-        raise AssertionError("invalid-datetime-fails-before-queue")
+        raise AssertionError("offline-invalid-datetime-diagnostic")
 
     def delay_sandbox(
         *, success_interval: object = 30, failure_interval: object = 60, server_update: object = "00:00"

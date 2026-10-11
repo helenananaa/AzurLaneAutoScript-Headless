@@ -3,7 +3,8 @@
 import time
 import unittest
 from alas_headless import AlasSemanticAdapter, AlasSemanticSession, SemanticGateClosed
-from alas_headless.adapter import ActionLeaseError, StaleFrameError
+from alas_headless.adapter import StaleFrameError
+from alas_headless.adapter.semantic.contracts import AlasSemanticActionDeferred
 from tests.semantic_support.adapter_cases import AlasSemanticAdapterTestsSupport
 from tests.semantic_support.adapter_fixtures import FakeOracle, NamedButton
 from unittest.mock import Mock, patch
@@ -82,7 +83,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         )
         self.assertEqual(adapter._current_raid_result_event, "raid_20260827")
         self.assertEqual(gate_calls, [True])
-        with self.assertRaises(ActionLeaseError):
+        with self.assertRaises(AlasSemanticActionDeferred):
             adapter.click_raid_precombat_start("raid_20260827")
         self.assertEqual(
             oracle.click_calls, ["raid/precombat/start:raid_20260827"]
@@ -127,7 +128,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
             oracle.click_calls, ["raid/fleet/recommend:raid_20260827"]
         )
         self.assertEqual(gate_calls, [True])
-        with self.assertRaises(ActionLeaseError):
+        with self.assertRaises(AlasSemanticActionDeferred):
             adapter.click_raid_fleet_recommend("raid_20260827")
         self.assertEqual(
             oracle.click_calls, ["raid/fleet/recommend:raid_20260827"]

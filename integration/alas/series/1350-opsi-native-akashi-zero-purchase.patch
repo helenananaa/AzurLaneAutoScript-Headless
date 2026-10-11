@@ -1,0 +1,18 @@
+diff --git a/module/os/map.py b/module/os/map.py
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -1148,6 +1148,14 @@
+         if 'is_akashi' not in self._solved_map_event and grids and grids[0].is_akashi:
+             grid = grids[0]
+             logger.info(f'Found Akashi on {grid}')
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if semantic_adapter is not None and not semantic_adapter.shop_purchase_allowed():
++                # The native rescan owns this optional visit. A zero purchase
++                # grant means nothing can be bought; keep other map events
++                # running without opening an unused merchant shop.
++                logger.info('Skip Akashi purchase: no shop transaction grant')
++                self._solved_map_event.add('is_akashi')
++                return True
+             fleet = self.convert_radar_to_local((0, 0))
+             if fleet.distance_to(grid) > 1:
+                 self.device.click(grid)

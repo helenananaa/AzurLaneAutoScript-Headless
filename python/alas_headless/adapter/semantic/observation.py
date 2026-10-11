@@ -38,12 +38,32 @@ from .resources import (
 class ObservationAdapterPorts:
     """Observation ports on the shared adapter context."""
 
+    def _inherited_login_allows_passive_probe(self) -> bool:
+        oracle = self._frame_or_live_observation_oracle()
+        if not oracle.observation_target_present('login/enter'):
+            return False
+        blockers = oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe')
+        if any(rule.blocker_id != 'loading' for rule in blockers):
+            return False
+        # Generic ALAS navigation can inherit LoginUI2 after a cold start or
+        # an accepted SDK login, without an explicit LoginHandler context.
+        # Only unrelated presence probes become absent. The existing login
+        # input port still owns actionable targets and loading rejection.
+        return bool(blockers) or oracle.enabled('login/enter')
+
     def _meta_dossier_allows_passive_page_probe(self):
-        if self.oracle.observation_target_present('meta/dossier/sync/back'):
-            return self.oracle.meta_dossier_sync_page_visible()
-        return (self.oracle.observation_target_present('meta/dossier/list')
-                and self.oracle.meta_dossier_detail_visible()
-                and not self.oracle._blocking_rules(self.oracle.read_state(), 'ui/absence-probe'))
+        oracle = self._frame_or_live_observation_oracle()
+        if oracle.observation_target_present('meta/dossier/sync/back'):
+            return oracle.meta_dossier_sync_page_visible()
+        if oracle.observation_target_present('meta/dossier/empty/list'):
+            # A completed beacon can leave the empty archive page for the next
+            # task. Its existing full counter/control parser identifies that
+            # page without borrowing the ended META task's ownership flags.
+            oracle.meta_dossier_empty_points()
+            return not oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe')
+        return (oracle.observation_target_present('meta/dossier/list')
+                and oracle.meta_dossier_detail_visible()
+                and not oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe'))
 
     def _new_year_challenge_surface_visible(self) -> bool:
         try:
@@ -59,6 +79,12 @@ class ObservationAdapterPorts:
 
     def _active_flow_allows_passive_probe(self) -> bool:
         now = time.monotonic()
+        if (self._inherited_dorm_overlay_return() == 'dorm/feed/shop/cancel'
+                or self._inherited_dorm_page_visible()):
+            # The original UI graph can inherit CourtYard after another task.
+            # Its exact unobscured identity owns unrelated passive probes,
+            # while optional task inputs retain their own context and grants.
+            return True
         if now <= self._research_menu_return_transition_until:
             self._package_gate()
             blockers = self.oracle._blocking_rules(
@@ -70,6 +96,8 @@ class ObservationAdapterPorts:
         if self._operation_siren_allows_passive_probe():
             return True
         if self._login_flow.allows_passive_probe():
+            return True
+        if self._inherited_login_allows_passive_probe():
             return True
         if (
             self._mission_context is not None
@@ -163,8 +191,34 @@ class ObservationAdapterPorts:
             raise SemanticGateClosed("reward popup close target is ambiguous")
         return targets[0] if targets else None
 
+    def _retained_commission_detail_visible(self, oracle) -> bool:
+        context = self._commission_context
+        if context is not None and context.selected_signature is not None:
+            # A current native selection owns this detail. Generic recovery
+            # must not discard it or repeat a submitted start.
+            return False
+        if not oracle.observation_target_present('commission/detail/back'):
+            return False
+        # Several unrelated pages share this generic blur-panel back path.
+        # Dispatch the Commission parser only for its distinctive detail controls.
+        if not any(oracle.observation_target_present(target) for target in (
+                'commission/detail/recommend', 'commission/detail/start')):
+            return False
+        oracle.commission_detail_state()
+        return oracle.enabled('commission/detail/back')
+
     def _goto_main_target(self) -> Optional[str]:
         oracle = self._frame_or_live_observation_oracle()
+        if self._retained_commission_detail_visible(oracle):
+            # Use ALAS' unknown-page recovery edge to dismiss one inherited
+            # detail, then let its page graph rediscover the Commission list.
+            return 'commission/detail/back'
+        if (oracle.observation_target_present('tactical/book/cancel')
+                and oracle.enabled('tactical/book/cancel')):
+            # A retained lesson dialog covers its classroom back button.
+            # Original unknown-page recovery closes this reviewed cancel
+            # target first, then ALAS rediscovers the underlying page.
+            return 'tactical/book/cancel'
         if (oracle.observation_target_present('mail/manage/back')
                 and oracle.enabled('mail/manage/back')):
             return 'mail/manage/back'
@@ -175,8 +229,9 @@ class ObservationAdapterPorts:
         # Discover only atomic mapped anchors first. A failure in an absent
         # shop, guild or combat parser must not break another page's exit.
         readers = (
+            ("academy/page/back", lambda: oracle.academy_page_visible()),
             ("daily/page/back", lambda: oracle.daily_page_visible()),
-            ("raid/page/home", lambda: oracle.raid_page_visible(event="raid_20260827")),
+            ("raid/page/home", lambda: oracle.raid_page_visible(event=oracle.current_raid_event())),
             ("guild/page/back", lambda: oracle.guild_page_visible()),
             ("os/page/back", lambda: oracle.operation_siren_page_visible()),
             ("os/globe/map", lambda: oracle.operation_siren_globe_visible()),
@@ -201,10 +256,14 @@ class ObservationAdapterPorts:
             if reader():
                 targets.append(target)
         for identity, target in (
+            ("settings/back", "settings/back"),
+            ("player/profile/back", "player/profile/back"),
+            ("archive/activity-list/home", "archive/activity-list/home"),
             ("event-list/page/back", "event-list/page/back"),
             ("campaign-menu/page/back", "campaign-menu/page/back"),
             ("task/page/back", "task/page/back"),
             ("commission/page/back", "commission/page/back"),
+            ("tactical/page/back", "tactical/page/back"),
             ("build/page/back", "build/page/back"),
             ("research-menu/page/back", "research-menu/page/back"),
             ("research/page/back", "research/page/back"),
@@ -308,6 +367,13 @@ class ObservationAdapterPorts:
 
         self._package_gate()
         bounds = self._ocr_bounds(areas)
+        if (self._dorm_context is not None and len(bounds) == 1
+                and bounds[0] == Bounds(653.0, 374.0, 706.0, 395.0)
+                and self._frame_or_live_observation_oracle().dorm_food_shop_visible()):
+            value = str(self._frame_or_live_observation_oracle().dorm_food_shop_state().quantity)
+            if alphabet is not None and any(character not in alphabet for character in value):
+                raise SemanticGateClosed('typed text violates the ALAS OCR alphabet contract')
+            return value
         if (
             len(bounds) == 1
             and bounds[0] == Bounds(1153.0, 140.0, 1178.0, 165.0)
@@ -653,23 +719,11 @@ class ObservationAdapterPorts:
             raise SemanticGateClosed("campaign map viewport lease is incomplete")
 
         if positioning is not None:
-            if (
-                not self._action_ledger.allowed("campaign.camera_positioning")
-                or not 1
-                <= self._action_ledger.remaining("campaign.camera_positioning")
-                <= 2
-            ):
-                raise SemanticGateClosed(
-                    "campaign camera positioning lease is incomplete"
-                )
+            self._require_action_grant("campaign.camera_positioning")
             capability = "campaign.camera_positioning"
             target_node = positioning.target_node
         else:
-            if (
-                not self._action_ledger.allowed("campaign.viewport_swipe")
-                or self._action_ledger.remaining("campaign.viewport_swipe") < 1
-            ):
-                raise SemanticGateClosed("campaign map viewport lease is incomplete")
+            self._require_action_grant("campaign.viewport_swipe")
             assert combat is not None
             capability = "campaign.viewport_swipe"
             if context.submarine_move_entry is not None:

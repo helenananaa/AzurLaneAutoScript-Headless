@@ -12,7 +12,7 @@ from tests.semantic_support.observer_fixtures import FakeBackend, make_button, m
 
 
 @pytest.mark.parametrize('case', ['settling', 'loading', 'loading-covered', 'ready', 'disabled', 'covered', 'ambiguous'])
-def test_login_input_classifies_only_unique_unobscured_raycast_remount(case):
+def test_login_input_classifies_preinput_readiness_without_dispatch(case):
     root = 'UICamera/Canvas/UIMain/LoginUI2(Clone)'
     buttons = [make_button('LoginUI2(Clone)', root, raycast_top=case == 'ready')]
     if case == 'disabled':
@@ -33,7 +33,9 @@ def test_login_input_classifies_only_unique_unobscured_raycast_remount(case):
     else:
         with pytest.raises(SemanticGateClosed) as error:
             oracle.click('login/enter')
-        assert isinstance(error.value, SemanticTargetNotActionable) == (case in ('settling', 'loading'))
+        # All unique non-actionable targets are pre-input refusals. Duplicate
+        # targets retain the fatal ambiguity classification.
+        assert isinstance(error.value, SemanticTargetNotActionable) == (case != 'ambiguous')
         assert backend.taps == []
 
 

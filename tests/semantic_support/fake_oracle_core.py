@@ -43,6 +43,8 @@ class FakeCoreOracle:
             "overlay/network-reconnect/confirm": False,
             "reward/award-info/close": False,
             "reward/award-info1/close": False,
+            "reward/ship-exp/close": False,
+            "meowfficer/page/back": False,
         }
         self.operation_siren_order_confirmation_visible_value = True
         self.operation_siren_page_visible_value = False
@@ -300,6 +302,10 @@ class FakeCoreOracle:
             "overlay/network-reconnect/confirm",
             "reward/page/back",
             "reward/meta/enter",
+            "reward/award-info/close",
+            "reward/award-info1/close",
+            "reward/ship-exp/close",
+            "meowfficer/page/back",
         ):
             return False
         return True

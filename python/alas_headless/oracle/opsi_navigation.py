@@ -16,6 +16,19 @@ from .contracts import (
 from .errors import SemanticGateClosed
 
 
+def _native_grid_projection_point(item):
+    raw = item.raw.get("adb_point")
+    if not isinstance(raw, dict):
+        raise SemanticGateClosed("operation siren native grid projection is absent")
+    values = (raw.get("x"), raw.get("y"))
+    if any(type(v) not in (int, float) or not math.isfinite(v) for v in values):
+        raise SemanticGateClosed("operation siren native grid projection is malformed")
+    point = Point(*values)
+    if item.bounds is None or not item.bounds.contains(point):
+        raise SemanticGateClosed("operation siren native grid projection is outside bounds")
+    return point
+
+
 class OpsiNavigationOracle:
     """Opsi navigation operations sharing the oracle frame and input boundary."""
 
@@ -593,8 +606,9 @@ class OpsiNavigationOracle:
         *,
         prefer_adjacent_event: bool = False,
         expected_path: Optional[str] = None,
+        fleet_relative: bool = False,
     ) -> ActionReceipt:
-        """Click one exact typed world grid relative to the camera center."""
+        """Click a typed world grid in the caller's explicit reference frame."""
 
         if (
             not isinstance(relative_position, tuple)
@@ -629,13 +643,29 @@ class OpsiNavigationOracle:
             ):
                 continue
             grids.append((int(match.group(1)), int(match.group(2)), item))
-        centers = tuple(
-            (row, column, item)
-            for row, column, item in grids
-            if item.bounds is not None
-            and item.bounds.contains(Point(640.0, 360.0))
-        )
-        if not centers:
+        if fleet_relative:
+            fleet = self._operation_siren_current_fleet_from_ui_state(state)
+            fleet_path = f'/LevelGrid/DragLayer/plane/cells/fleet_{fleet}/shadow'
+            fleet_anchors = [item for item in state.images
+                if item.path.endswith(fleet_path) and item.name == 'shadow'
+                and item.sprite == 'shadow' and item.active_in_hierarchy
+                and item.active_and_enabled and not item.truncated
+                and item.bounds is not None]
+            if len(fleet_anchors) != 1:
+                raise SemanticGateClosed('operation siren relative-grid fleet anchor is absent or ambiguous')
+            fleet_point = _native_grid_projection_point(fleet_anchors[0])
+            centers = tuple((row, column, item) for row, column, item in grids
+                if item.bounds.contains(fleet_point)
+                and math.hypot(_native_grid_projection_point(item).x-fleet_point.x,
+                              _native_grid_projection_point(item).y-fleet_point.y) <= .05)
+        else:
+            centers = tuple(
+                (row, column, item)
+                for row, column, item in grids
+                if item.bounds is not None
+                and item.bounds.contains(Point(640.0, 360.0))
+            )
+        if not centers and not fleet_relative:
             occupied_center_pattern = re.compile(
                 r"LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
                 r"cell_([0-9]+)_([0-9]+)/attachments/event_[0-9]+/"
@@ -782,17 +812,7 @@ class OpsiNavigationOracle:
             raise SemanticGateClosed(
                 "operation siren selected-fleet guidepost anchor is ambiguous"
             )
-        def native_point(item):
-            raw = item.raw.get("adb_point")
-            if not isinstance(raw, dict):
-                raise SemanticGateClosed("operation siren guidepost native projection is absent")
-            values = (raw.get("x"), raw.get("y"))
-            if any(type(v) not in (int, float) or not math.isfinite(v) for v in values):
-                raise SemanticGateClosed("operation siren guidepost native projection is malformed")
-            point = Point(*values)
-            if item.bounds is None or not item.bounds.contains(point):
-                raise SemanticGateClosed("operation siren guidepost native projection is outside bounds")
-            return point
+        native_point = _native_grid_projection_point
 
         # Unity's own grid projections join the selected fleet to one cell.
         # WSMapCell hides attachment models in fog; a positive radar target

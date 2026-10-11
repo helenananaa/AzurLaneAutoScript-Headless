@@ -15,6 +15,61 @@ from types import SimpleNamespace
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_closed_global_notice_ack_requires_previous_receipt_newer_absence(self):
+        for owned, newer, present in ((True, True, False), (False, True, False),
+                                     (True, False, False), (True, True, True)):
+            adapter, oracle, _ = self.make_adapter()
+            prior = SimpleNamespace(generation=10)
+            adapter._guild_message_close_receipt = prior if owned else None
+            oracle.enabled_values['overlay/guild-message/close'] = False
+            oracle.read_state = Mock(return_value=SimpleNamespace(generation=11 if newer else 10))
+            oracle.observation_target_present = Mock(return_value=present)
+            oracle.main_page_visible = Mock(side_effect=AssertionError('underlay is not the close outcome'))
+            if owned and newer and not present:
+                self.assertIsNone(adapter.click(NamedButton('GUILD_POPUP_CANCEL')))
+            else:
+                with self.assertRaisesRegex(SemanticGateClosed, 'close is absent'):
+                    adapter.click(NamedButton('GUILD_POPUP_CANCEL'))
+            self.assertEqual(oracle.click_calls, [])
+            adapter.reset_task_state()
+            self.assertIsNone(adapter._guild_message_close_receipt)
+
+    def test_logistics_tab_receipt_uses_existing_panel_transition_read(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.toggle_selected = lambda _: False
+        receipt = SimpleNamespace(generation=10)
+        oracle.click_toggle = lambda _: receipt
+        stable = SimpleNamespace(generation=11)
+        oracle.guild_logistics_state = Mock(side_effect=[
+            SemanticGateClosed('guild logistics page identity is absent'), stable])
+        self.assertIs(adapter.ensure_guild_section('logistics'), receipt)
+        with patch('alas_headless.adapter.semantic.guild.time.sleep'):
+            self.assertIs(adapter.guild_logistics_state(), stable)
+        self.assertEqual(oracle.guild_logistics_state.call_count, 2)
+
+    def test_rejected_logistics_tab_does_not_arm_transition(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.toggle_selected = lambda _: False
+        oracle.click_toggle = Mock(side_effect=SemanticGateClosed('tab covered'))
+        before = adapter._guild_logistics_transition_until
+        with self.assertRaises(SemanticGateClosed):
+            adapter.ensure_guild_section('logistics')
+        self.assertEqual(adapter._guild_logistics_transition_until, before)
+
+    def test_global_guild_notice_is_not_hidden_by_tactical_passive_probes(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_tactical()
+        oracle.observation_target_present = lambda target: target == 'overlay/guild-message/close'
+        oracle.enabled_values['overlay/guild-message/close'] = True
+        self.assertTrue(adapter.appear(NamedButton('GUILD_POPUP_CONFIRM')))
+        self.assertTrue(adapter.appear(NamedButton('GUILD_POPUP_CANCEL')))
+        self.assertEqual(adapter.click(NamedButton('GUILD_POPUP_CANCEL')).semantic_id, 'overlay/guild-message/close')
+        oracle.enabled_values['overlay/guild-message/close'] = False
+        self.assertFalse(adapter.appear(NamedButton('GUILD_POPUP_CANCEL')))
+        with self.assertRaises(SemanticGateClosed):
+            adapter.click(NamedButton('GUILD_POPUP_CANCEL'))
+        self.assertEqual(oracle.click_calls, ['overlay/guild-message/close'])
+
     def test_inherited_loading_hides_reward_probe_but_foreign_modal_does_not(self):
         adapter, oracle, _ = self.make_adapter()
         oracle._blocking_rules = lambda *_: [SimpleNamespace(blocker_id='loading')]

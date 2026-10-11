@@ -15,9 +15,11 @@ from ...semantic_oracle import (
     SemanticGateClosed,
     SemanticTargetMissing,
 )
-from .contracts import _CommissionFlowContext
+from .contracts import _CommissionFlowContext, AlasSemanticCommissionStartUnproven
 from .dispatch_result import UNHANDLED
 from .resources import COMMISSION_CLICK_RESOURCES, COMMISSION_TAB_TARGETS
+from ...oracle.errors import SemanticSnapshotStale
+from ...oracle.input_outcome import input_result_scope
 
 
 class CommissionAdapterPorts:
@@ -132,12 +134,36 @@ class CommissionAdapterPorts:
             and context.reward_claim_receipt is None
         )
 
+    def _commission_next_reward_cycle_ready(self) -> bool:
+        context = self._require_commission_context()
+        claim = context.reward_claim_receipt
+        if claim is None:
+            return False
+        previous_generation = claim.generation
+        if context.reward_close_receipts:
+            close = context.reward_close_receipts[-1]
+            if not hasattr(close, 'generation') or close.generation <= claim.generation:
+                return False
+            previous_generation = close.generation
+        # ALAS owns the receive loop and click interval. A fresh, uncovered
+        # sidebar may still offer a finished commission when the last input
+        # produced no popup, or after a previous popup chain closed. Recheck
+        # that actual surface and consume a new grant instead of pretending
+        # the old receipt represents another input.
+        state = self.oracle.read_state()
+        return (state.generation > previous_generation
+                and self._reward_sidebar_ready(self.oracle)
+                and self.oracle.enabled('reward/commission/finish')
+                and self._award_close_target() is None
+                and not self.oracle.enabled('reward/ship-exp/close')
+                and not self.oracle.new_ship_reward_page_visible())
+
     def commission_reward_claimed(self) -> bool:
         context = self._require_commission_context()
         return context.reward_claim_receipt is not None
 
     def confirm_commission_reward(self) -> CommissionRewardProof:
-        """Prove one finish input drained all observed finished rows to zero."""
+        """Prove the final native claim drained its observed finished rows."""
 
         context = self._require_commission_context()
         if context.flow_kind != "commission":
@@ -194,7 +220,22 @@ class CommissionAdapterPorts:
 
     def commission_selection_active(self) -> bool:
         context = self._require_commission_context()
-        return context.selected_signature is not None
+        return (context.selected_signature is not None
+                and not self._commission_selected_row_still_on_list())
+
+    def _commission_selected_row_still_on_list(self) -> bool:
+        """A row click owns an intent, not proof that its detail has opened."""
+        context = self._require_commission_context()
+        if context.selected_signature is None or context.start_receipt is not None:
+            return False
+        self._package_gate()
+        oracle = self._frame_or_live_observation_oracle()
+        if (oracle.observation_target_present('commission/detail/back')
+                or not oracle.enabled('commission/page/back')):
+            return False
+        rows = oracle.commission_rows()
+        matches = tuple(row for row in rows if row.signature == context.selected_signature)
+        return len(matches) == 1
 
     def commission_detail_state(self) -> CommissionDetailState:
         self._package_gate()
@@ -207,19 +248,39 @@ class CommissionAdapterPorts:
             return False
         if context.start_proof is not None:
             return True
-        prompt_cost = self.oracle.commission_start_prompt_cost()
-        if prompt_cost is not None:
-            if context.selected_oil_cost != prompt_cost:
-                raise SemanticGateClosed("commission start oil cost changed")
-            return False
-        try:
-            context.start_proof = self.oracle.commission_start_transition(
-                context.selected_signature
-            )
-        except SemanticGateClosed:
-            if time.monotonic() - context.start_clicked_at <= 15.0:
+        with input_result_scope():
+            prompt_cost = self.oracle.commission_start_prompt_cost()
+            if prompt_cost is not None:
+                if context.selected_oil_cost != prompt_cost:
+                    raise SemanticGateClosed("commission start oil cost changed")
                 return False
-            raise
+            try:
+                context.start_proof = self.oracle.commission_start_transition(
+                    context.selected_signature
+                )
+            except SemanticSnapshotStale:
+                raise
+            except SemanticGateClosed:
+                rejected = self.oracle.commission_start_oil_rejection_generation(
+                    context.selected_signature, context.selected_oil_cost,
+                    context.start_receipt.generation)
+                if rejected is not None:
+                    raise AlasSemanticCommissionStartUnproven(
+                        context.start_receipt, rejected, context.selected_signature,
+                        rejection='client oil capacity')
+                if time.monotonic() - context.start_clicked_at <= 15.0:
+                    return False
+                pending_generation = self.oracle.commission_start_pending_generation(
+                    context.selected_signature, context.selected_oil_cost)
+                if (pending_generation is not None
+                        and pending_generation > context.start_receipt.generation):
+                    # ALAS keeps its failure interval and later reselects from a
+                    # fresh queue. Preserve the consumed grant and stop this start;
+                    # do not acknowledge success or replay the accepted input.
+                    raise AlasSemanticCommissionStartUnproven(
+                        context.start_receipt, pending_generation,
+                        context.selected_signature)
+                raise
         return True
 
     def commission_start_proof(self) -> CommissionStartProof:
@@ -273,11 +334,10 @@ class CommissionAdapterPorts:
                 time.sleep(0.1)
         raise SemanticGateClosed('commission reward did not close after one input')
 
-    def _commission_ship_exp_completed_transition(self):
+    def _commission_ship_exp_completed_transition(self, *, wait=False):
         """Acknowledge an observed EXP page already closed by our last input."""
         context = self._require_commission_context()
         observed = context.ship_exp_observation_generation
-        context.ship_exp_observation_generation = None
         if (context.flow_kind != 'commission' or observed is None
                 or context.reward_claim_receipt is None
                 or not context.reward_close_receipts
@@ -287,20 +347,39 @@ class CommissionAdapterPorts:
         if (previous.semantic_id != 'reward/ship-exp/close'
                 or observed < previous.generation):
             return None
-        state = self.oracle.read_state()
-        if (state.generation <= observed
-                or any(button.active_in_hierarchy and '/ShipExpUI(Clone)/' in button.path
-                       for button in state.buttons)):
-            return None
-        # The next native award is the concrete postcondition of the recorded
-        # EXP close. No alternate input or reward completion is manufactured.
-        if self._award_close_target() is None:
-            return None
-        blockers = self.oracle._blocking_rules(state, 'ui/absence-probe')
-        if any(rule.blocker_id not in ('award-info', 'award-info1', 'commission-page')
-               for rule in blockers):
-            return None
-        return previous
+        while True:
+            state = self.oracle.read_state()
+            awards = tuple(button for target in ('reward/award-info/close', 'reward/award-info1/close')
+                           for button in self.oracle._matches(state, target)
+                           if button.active_in_hierarchy and button.active_and_enabled)
+            if len(awards) > 1:
+                raise SemanticGateClosed('commission EXP return award is ambiguous')
+            blockers = self.oracle._blocking_rules(state, 'ui/absence-probe')
+            if any(rule.blocker_id not in ('award-info', 'award-info1', 'commission-page', 'reward-page', 'loading', 'ship-exp')
+                   for rule in blockers):
+                return None
+            sidebar = self.oracle._matches(state, 'reward/page/back')
+            if len(sidebar) > 1:
+                raise SemanticGateClosed('commission EXP return sidebar is ambiguous')
+            returned_sidebar = bool(
+                len(sidebar) == 1 and sidebar[0].actionable
+                and not self.oracle._blocking_rules(state, 'reward/page/back')
+            )
+            if (state.generation > observed and (len(awards) == 1 or returned_sidebar)
+                    and not any(button.active_in_hierarchy and '/ShipExpUI(Clone)/' in button.path
+                                for button in state.buttons)
+                    and not any(rule.blocker_id in ('loading', 'ship-exp') for rule in blockers)):
+                # This acknowledges the already accepted EXP close. The next
+                # award can still be fading in, or the final EXP can return
+                # directly to the actual reward sidebar. Native ALAS owns
+                # the next reward/page edge; no new close input is sent.
+                context.ship_exp_observation_generation = None
+                return previous
+            if not wait or time.monotonic() >= context.passive_transition_until:
+                return None
+            # Only the no-input refusal caller waits, within the existing
+            # accepted-close transition window. No additional input is sent.
+            time.sleep(.1)
 
     def _click_commission(self, name, button, semantic_id, commission_row_match):
         if (
@@ -320,10 +399,7 @@ class CommissionAdapterPorts:
                     )
                 if context.start_receipt is not None:
                     return context.start_receipt
-                if not self._action_ledger.allowed("commission.start"):
-                    raise SemanticGateClosed(
-                        "commission start input requires a positive independent budget"
-                    )
+                self._require_action_grant("commission.start")
                 detail = self.oracle.commission_detail_state()
                 expected = context.selected_signature
                 if detail.signature != (expected[1], expected[2], expected[3]):
@@ -345,19 +421,28 @@ class CommissionAdapterPorts:
                 context.start_clicked_at = time.monotonic()
                 return receipt
             if name == "BACK_ARROW":
+                input_oracle = self._fresh_input_oracle()
                 targets = tuple(
                     semantic_id
                     for semantic_id in (
                         "tactical/page/back",
                         "commission/page/back",
                     )
-                    if self.oracle.enabled(semantic_id)
+                    if input_oracle.enabled(semantic_id)
                 )
+                previous = self._commission_context.navigation_back_receipt
+                if (not targets and previous is not None
+                        and time.monotonic() <= self._commission_context.passive_transition_until
+                        and input_oracle.read_state().generation > previous.generation
+                        and not input_oracle.observation_target_present(previous.semantic_id)):
+                    return previous
                 if len(targets) != 1:
                     raise SemanticGateClosed(
                         "contextual ALAS back target is absent or ambiguous"
                     )
-                return self.oracle.click(targets[0])
+                receipt = self._record_mission_transition(input_oracle.click(targets[0]))
+                self._commission_context.navigation_back_receipt = receipt
+                return receipt
             if name in ("EXP_INFO_S_REWARD", "REWARD_SAVE_CLICK"):
                 context = self._commission_context
                 if context.flow_kind == "commission":
@@ -382,8 +467,9 @@ class CommissionAdapterPorts:
                     if (context.flow_kind == 'commission'
                             and type(input_count) is int
                             and self.oracle.input_dispatch_count == input_count):
-                        completed = self._commission_ship_exp_completed_transition()
-                        if completed is not None:
+                        completed = self._commission_ship_exp_completed_transition(wait=True)
+                        if (completed is not None
+                                and self.oracle.input_dispatch_count == input_count):
                             return completed
                     raise
                 context.ship_exp_observation_generation = None

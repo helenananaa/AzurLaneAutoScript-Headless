@@ -1,0 +1,15 @@
+diff --git a/module/exercise/combat.py b/module/exercise/combat.py
+--- a/module/exercise/combat.py
++++ b/module/exercise/combat.py
+@@ -126,7 +126,10 @@
+                 ):
+                     logger.info('Exercise quit')
+                     if semantic_adapter is not None:
+-                        semantic_adapter.exercise_quit_low_hp()
++                        if not semantic_adapter.exercise_quit_low_hp():
++                            # The exact result superseded the fresh pause input.
++                            # Original result handlers own the next screenshot.
++                            continue
+                         success = False
+                         end = True
+                         continue

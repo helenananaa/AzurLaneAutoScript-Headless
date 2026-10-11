@@ -51,9 +51,19 @@ class AlasDormConfigTests(unittest.TestCase):
                         feed=feed,
                         feed_filter=text,
                     )
-                    self.assertEqual(snapshot.feed_order, order)
+                    self.assertEqual(snapshot.feed_order, order if feed else ())
                 order_count += 1
         self.assertEqual(order_count, 1956)
+
+    def test_disabled_feeding_does_not_block_collection_with_inactive_filter(self):
+        for feed_filter in (None, "", "obsolete-food", []):
+            with self.subTest(feed_filter=feed_filter):
+                snapshot = validate_alas_dorm_config(
+                    collect=True, feed=False, feed_filter=feed_filter
+                )
+                self.assertTrue(snapshot.collect)
+                self.assertFalse(snapshot.feed)
+                self.assertEqual(snapshot.feed_order, ())
 
     def test_single_numeric_filter_survives_original_config_canonicalization(self):
         self.assertEqual(parse_alas_dorm_feed_filter(1000), (1000,))

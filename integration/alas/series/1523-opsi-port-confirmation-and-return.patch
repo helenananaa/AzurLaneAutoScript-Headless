@@ -1,0 +1,108 @@
+diff --git a/module/os_handler/port.py b/module/os_handler/port.py
+--- a/module/os_handler/port.py
++++ b/module/os_handler/port.py
+@@ -23,12 +23,19 @@
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
+             semantic_adapter.refresh_frame()
+-            semantic_adapter.open().oracle.click('os/port/enter')
++            receipt = semantic_adapter.open().oracle.click('os/port/enter')
+             for _ in range(24):
+                 self.device.sleep(0.5)
+                 semantic_adapter.refresh_frame()
+                 if semantic_adapter.open().oracle.exists('os/port/supply'):
+                     return
++            oracle = semantic_adapter.open().oracle
++            if oracle.operation_siren_local_map_visible():
++                from alas_headless.oracle.errors import SemanticNavigationPending
++                raise SemanticNavigationPending(
++                    'os/port/enter', receipt, oracle.read_state().generation,
++                    'Typed port entrance did not settle; current local map remains healthy',
++                )
+             raise RuntimeError('Typed Operation Siren port did not open')
+         for _ in self.loop():
+             if self.appear(PORT_SUPPLY_CHECK, offset=(20, 20)):
+@@ -166,43 +173,57 @@
+                 oracle.click('os/port/dock')
+                 self.device.sleep(0.5)
+ 
+-            attempted = False
++            attempted = None
+             repaired = False
+             for _ in range(24):
++                self.device.screenshot()
+                 cost = semantic_adapter.operation_siren_port_repair_cost()
+                 if cost is not None:
+-                    logger.attr('PortRepairCost', cost)
+-                    semantic_adapter.click_operation_siren_port_repair(True)
+-                    repaired = True
++                    if not repaired:
++                        logger.attr('PortRepairCost', cost)
++                        semantic_adapter.click_operation_siren_port_repair(True)
++                        repaired = True
+                     self.device.sleep(0.5)
+                     continue
++                # Preserve ALAS' repair-completion decisions. An accepted
++                # repair-all entrance is not a completed repair confirmation.
++                if attempted is not None and self.info_bar_count():
++                    break
+                 if oracle.enabled('os/port/dock/repair-all'):
+-                    if attempted or repaired:
++                    if repaired:
+                         break
+-                    oracle.click('os/port/dock/repair-all')
+-                    attempted = True
++                    if attempted is None:
++                        attempted = oracle.click('os/port/dock/repair-all')
++                        self.device.sleep(0.5)
++                        continue
++                self.device.sleep(0.25)
++            else:
++                if not repaired and attempted is not None and oracle.enabled('os/port/dock/repair-all'):
++                    from alas_headless.oracle.errors import SemanticNavigationPending
++                    raise SemanticNavigationPending(
++                        'os/port/dock/repair-all', attempted, oracle.read_state().generation,
++                        'Typed repair entrance did not settle; current dock remains healthy',
++                    )
++                raise RuntimeError('Typed port repair did not settle')
++
++            back = None
++            for _ in range(24):
++                self.device.screenshot()
++                if oracle.enabled('os/port/supply'):
++                    return
++                # One accepted return owns its animation. Do not submit the
++                # same old dock control repeatedly into a changing underlay.
++                if back is None and oracle.enabled('os/port/dock/back'):
++                    back = oracle.click('os/port/dock/back')
+                     self.device.sleep(0.5)
+                     continue
+                 self.device.sleep(0.25)
+-            else:
+-                raise RuntimeError('Typed port repair did not settle')
+-
+-            for _ in range(24):
+-                if oracle.enabled('os/port/supply'):
+-                    return
+-                # The dock back control can remain mounted while its first
+-                # click is swallowed by the repair-panel closing animation.
+-                # Re-read the exact control and retry until the port buttons
+-                # are positively visible.
+-                if oracle.exists('os/port/dock/back'):
+-                    try:
+-                        oracle.click('os/port/dock/back')
+-                    except SemanticGateClosed:
+-                        self.device.sleep(0.25)
+-                        continue
+-                    self.device.sleep(0.5)
+-                    continue
+-                self.device.sleep(0.25)
++            if back is not None and oracle.enabled('os/port/dock/repair-all'):
++                from alas_headless.oracle.errors import SemanticNavigationPending
++                raise SemanticNavigationPending(
++                    'os/port/dock/back', back, oracle.read_state().generation,
++                    'Typed dock return did not settle; current dock remains healthy',
++                )
+             raise RuntimeError('Typed port repair did not return to port')
+ 
+         self.ui_click(PORT_GOTO_DOCK, appear_button=PORT_CHECK, check_button=PORT_DOCK_CHECK,

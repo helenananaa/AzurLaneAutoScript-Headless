@@ -16,6 +16,11 @@ def test_exact_award_overlay_defers_unrelated_page_enumeration():
 
 
 def test_unknown_page_without_award_overlay_remains_unmapped():
-    adapter = AlasSemanticAdapter(make_oracle(FakeBackend([])), package_gate=lambda: None)
+    backend = FakeBackend([])
+    adapter = AlasSemanticAdapter(make_oracle(backend), package_gate=lambda: None)
+    # Private Quarters now has a typed page identity, so its absent owner is
+    # a passive miss. An actually unreviewed resource still remains closed.
+    assert not adapter.appear(SimpleNamespace(name='PRIVATE_QUARTERS_CHECK'))
     with pytest.raises(AlasSemanticUnmapped):
-        adapter.appear(SimpleNamespace(name='PRIVATE_QUARTERS_CHECK'))
+        adapter.appear(SimpleNamespace(name='UNREVIEWED_NEW_PAGE_CHECK'))
+    assert backend.taps == []

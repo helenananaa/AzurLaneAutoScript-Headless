@@ -25,19 +25,27 @@ def encode_adb_shell_string_extra(value: str) -> str:
 def observer_snapshot_semantic_ready(snapshot: Mapping[str, Any]) -> bool:
     """Return whether the main-thread typed UI publisher is fully ready."""
 
-    def exact_integer(name: str, expected: int) -> bool:
+    def contains_required_bits(name: str, required: int) -> bool:
         value = snapshot.get(name)
         return (
             isinstance(value, int)
             and not isinstance(value, bool)
-            and value == expected
+            and 0 <= value <= 0xFFFFFFFF
+            and value & required == required
         )
 
+    # These are capability bitmasks, not version identifiers. Additive bits in
+    # the same protocol must not hide the existing ready publisher. The native
+    # probe reserves the high flags bit for failure, even if low bits are set.
+    stage = snapshot.get("ui_stage")
     return bool(
         snapshot.get("main_thread") is True
-        and exact_integer("flags", 15)
-        and exact_integer("ui_stage", 100)
-        and exact_integer("ui_method_mask", 15)
+        and contains_required_bits("flags", 0xF)
+        and snapshot["flags"] & 0x80000000 == 0
+        and isinstance(stage, int)
+        and not isinstance(stage, bool)
+        and stage == 100
+        and contains_required_bits("ui_method_mask", 0xF)
     )
 
 
@@ -96,12 +104,13 @@ class TcpObserverTransport:
         projection_request = projection is not None and all(math.isfinite(float(v)) for v in projection.groups())
         drag = re.fullmatch(r'GET /v1/(?:os-map-drag|globe-map-drag) ' + ' '.join(['(' + number + ')'] * 4) + r'\n', request_line)
         drag_request = drag is not None and all(math.isfinite(float(v)) for v in drag.groups())
+        port_input_request = re.fullmatch(r'GET /v1/globe-port-input [1-8]\n', request_line) is not None
         if request_line not in (
             "GET /v1/snapshot\n",
             "GET /v1/buttons\n",
             "GET /v1/ui\n",
             "GET /v1/state\n",
-        ) and not projection_request and not drag_request:
+        ) and not projection_request and not drag_request and not port_input_request:
             raise ObserverTransportError(
                 "client refused an unsupported observer request"
             )
@@ -455,13 +464,75 @@ class AdbObserverBridge:
     def request(self, request_line: str) -> Mapping[str, Any]:
         if self.transport is None:
             raise ObserverTransportError("ADB observer bridge is not open")
-        return self.transport.request(request_line)
+        try:
+            return self.transport.request(request_line)
+        except ObserverTransportError as exc:
+            # Another ADB client can restart the shared daemon and discard
+            # our forward while Unity keeps running. Only recover a refused
+            # connection before a read was sent, never replay native input.
+            if (
+                request_line not in (
+                    "GET /v1/snapshot\n", "GET /v1/buttons\n",
+                    "GET /v1/ui\n", "GET /v1/state\n",
+                )
+                or not isinstance(exc.__cause__, ConnectionRefusedError)
+                or not self._restore_missing_observer_forward()
+            ):
+                raise
+            return self.transport.request(request_line)
+
+    def _restore_missing_observer_forward(self) -> bool:
+        if self.pid is None or self.port is None or self.transport is None:
+            return False
+        old_local = "tcp:{0}".format(self.port)
+        forwards = self._run(("forward", "--list"))
+        if any(
+            len(parts) == 3 and parts[1] == old_local
+            for parts in (line.split() for line in forwards.splitlines())
+        ):
+            # A still-listed or reassigned listener is a different failure.
+            return False
+        if self._run(("shell", "pidof", self.package)) != str(self.pid):
+            raise ObserverTransportError("game PID changed while restoring observer forward")
+        port_text = self._run((
+            "forward", "tcp:0", "localabstract:alas.g3.{0}".format(self.pid),
+        ))
+        if not port_text.isdigit():
+            raise ObserverTransportError("ADB did not return a forwarding port")
+        previous = self.transport
+        self.port = int(port_text)
+        self.transport = TcpObserverTransport(
+            "127.0.0.1", self.port,
+            timeout_seconds=previous._timeout_seconds,
+            maximum_response_bytes=previous._maximum_response_bytes,
+            trace=self.trace,
+        )
+        if self.trace is not None:
+            self.trace.emit("adb.observer-forward-restored", fields={"pid": self.pid})
+        return True
 
     def foreground_component(self) -> str:
-        output = self._run(
-            ("shell", "dumpsys", "activity", "activities"),
-            timeout_seconds=max(self.command_timeout_seconds, 30.0),
-        )
+        for attempt in range(2):
+            try:
+                output = self._run(
+                    ("shell", "dumpsys", "activity", "activities"),
+                    timeout_seconds=max(self.command_timeout_seconds, 30.0),
+                )
+                break
+            except ObserverTransportError as exc:
+                cause = exc.__cause__
+                stderr = getattr(cause, 'stderr', b'') or b''
+                if isinstance(stderr, bytes):
+                    stderr = stderr.decode('utf-8', errors='replace')
+                retryable = (isinstance(cause, subprocess.TimeoutExpired)
+                    or isinstance(cause, subprocess.CalledProcessError)
+                    and 'cannot connect to daemon' in stderr.lower())
+                if attempt or not retryable:
+                    raise
+                # This query has no input outcome to duplicate. Re-query the
+                # same device/server after transient daemon recovery, keeping
+                # the failed command trace and every final foreground gate.
+                time.sleep(0.25)
         match = self._FOREGROUND_PATTERN.search(output)
         return match.group(1) if match else ""
 

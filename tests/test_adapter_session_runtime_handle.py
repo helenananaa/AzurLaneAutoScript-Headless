@@ -1,6 +1,7 @@
 import copy
 from contextlib import nullcontext
 import unittest
+import pytest
 from types import SimpleNamespace
 from unittest import mock
 
@@ -442,7 +443,13 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         )
         adapter = mock.Mock(spec=AlasSemanticAdapter)
         adapter._require_frame_observation_oracle.return_value = result_oracle
+        adapter._meta_assist_active = False
+        adapter.meta_beacon_active.return_value = False
         adapter._campaign_context = None
+
+        adapter._commission_context = None
+        # This fixture describes the combat result stack, not ItemInfoUI.
+        adapter.oracle.award_info_page_visible.return_value = False
 
         with mock.patch.object(session, "open", return_value=adapter), mock.patch(
             "alas_headless.alas_adapter.time.monotonic",
@@ -489,6 +496,8 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         )
         context = SimpleNamespace(passive_transition_until=0.0)
         session.adapter = SimpleNamespace(
+            _meta_assist_active=False,
+            meta_beacon_active=lambda: False,
             oracle=oracle,
             _frame_or_live_observation_oracle=lambda: oracle,
             campaign_combat_committed=lambda: True,
@@ -517,6 +526,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
             _mail_context=None,
             _minigame_context=None,
             _build_context=object(),
+            _frame_or_live_observation_oracle=lambda: SimpleNamespace(),
             appear=mock.Mock(return_value=True),
         )
         session.adapter = adapter
@@ -545,6 +555,8 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         adapter._require_frame_observation_oracle.return_value = result_oracle
         adapter.campaign_combat_committed.return_value = True
         adapter._campaign_context = SimpleNamespace(passive_transition_until=0.0)
+        adapter._meta_assist_active = False
+        adapter.meta_beacon_active.return_value = False
         session.adapter = adapter
 
         with mock.patch.object(session, "open", return_value=adapter), mock.patch(
@@ -1625,3 +1637,35 @@ class SessionRuntimeHandleTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_maintenance_presence_uses_native_screenshot_frame_without_extra_live_reads():
+    handle = FrameRuntimeHandle()
+    session = AlasSemanticSession(driver_revision=REVISION, runtime_handle=handle)
+    try:
+        adapter = session.open()
+        session.refresh_frame()
+        request_count = len(handle.requests)
+        failure = SemanticGateClosed("observer snapshot is stale")
+        with mock.patch.object(adapter._live_oracle, "enabled", side_effect=failure), mock.patch.object(
+            adapter._live_oracle, "server_maintenance_visible", side_effect=failure
+        ):
+            assert session.server_maintenance_visible() is False
+        assert len(handle.requests) == request_count
+        assert handle.taps == []
+    finally:
+        session.close()
+
+
+def test_maintenance_presence_without_native_frame_keeps_live_failure_closed():
+    handle = FrameRuntimeHandle()
+    session = AlasSemanticSession(driver_revision=REVISION, runtime_handle=handle)
+    try:
+        adapter = session.open()
+        failure = SemanticGateClosed("observer snapshot is stale")
+        with mock.patch.object(adapter._live_oracle, "enabled", side_effect=failure):
+            with pytest.raises(SemanticGateClosed, match="snapshot is stale"):
+                session.server_maintenance_visible()
+        assert handle.taps == []
+    finally:
+        session.close()

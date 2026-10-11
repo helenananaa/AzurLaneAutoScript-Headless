@@ -54,6 +54,7 @@ from .oracle.button_targets import DEFAULT_TARGETS as DEFAULT_TARGETS
 from .oracle.ui_targets import DEFAULT_TEXT_TARGETS as DEFAULT_TEXT_TARGETS
 from .oracle.ui_targets import DEFAULT_TOGGLE_TARGETS as DEFAULT_TOGGLE_TARGETS
 from .oracle.contracts import DormFeedState as DormFeedState
+from .oracle.contracts import DormFoodShopState as DormFoodShopState
 from .oracle.contracts import DormFoodState as DormFoodState
 from .oracle.contracts import DormFurniturePurchaseState as DormFurniturePurchaseState
 from .oracle.contracts import DormFurnitureShopBalance as DormFurnitureShopBalance
@@ -128,6 +129,11 @@ from .oracle.errors import SemanticTargetMissing as SemanticTargetMissing
 from .oracle.contracts import SemanticTextTarget as SemanticTextTarget
 from .oracle.contracts import SemanticToggleTarget as SemanticToggleTarget
 from .oracle.contracts import ShipyardState as ShipyardState
+from .oracle.contracts import ShipyardStrengthenPanel as ShipyardStrengthenPanel
+from .oracle.contracts import ShipyardPurchaseState as ShipyardPurchaseState
+from .oracle.contracts import ShipyardPurchaseResult as ShipyardPurchaseResult
+from .oracle.contracts import ShipyardBlueprintUseState as ShipyardBlueprintUseState
+from .oracle.contracts import ShipyardBlueprintUseResult as ShipyardBlueprintUseResult
 from .oracle.contracts import TacticalBookState as TacticalBookState
 from .oracle.contracts import TacticalCandidateShipState as TacticalCandidateShipState
 from .oracle.contracts import TacticalSkillState as TacticalSkillState

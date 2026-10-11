@@ -23,7 +23,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         self.assertFalse(oracle.daily_battle_result_visible())
         self.assertFalse(oracle.enabled('overlay/login-data-expired/confirm'))
         with self.assertRaisesRegex(SemanticGateClosed, 'toggle snapshot'):
-            oracle.read_ui_state()
+            _ = oracle.read_ui_state().toggles
         backend.ui['text_truncated'] = True
         with self.assertRaisesRegex(SemanticGateClosed, 'text snapshot'):
             oracle.daily_battle_result_visible()

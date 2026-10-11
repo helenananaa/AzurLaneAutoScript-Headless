@@ -9,6 +9,21 @@ from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_original_shared_popup_keeps_order_phase_and_submit_budget(self):
+        oracle = FakeOracle()
+        oracle.enabled_values.update({'build/warning/confirm': False, 'build/prep/confirm': True})
+        adapter = AlasSemanticAdapter(oracle, lambda: None, build_submit_budget=1)
+        adapter.begin_build()
+        adapter.click(NamedButton('MAIN_GOTO_BUILD'))
+        adapter.click(NamedButton('BUILD_SUBMIT_ORDERS'))
+        shared = NamedButton('POPUP_CONFIRM_GACHA_ORDER')
+        with patch.dict('sys.modules', {'module.handler.assets': SimpleNamespace(POPUP_CONFIRM=shared)}):
+            self.assertEqual(adapter._button_name(shared), 'POPUP_CONFIRM_GACHA_ORDER')
+            self.assertEqual(adapter.click(shared).semantic_id, 'build/prep/confirm')
+            with self.assertRaises(SemanticGateClosed):
+                adapter.click(shared)
+        self.assertEqual(oracle.click_calls.count('build/prep/confirm'), 1)
+
     def test_absent_seasonal_pool_is_not_selected_or_inactive(self):
         from alas_headless.adapter.semantic.resources import BUILD_POOL_NAVBAR_ACTIVE_COLOR, BUILD_POOL_NAVBAR_INACTIVE_COLOR
         adapter, oracle, _ = self.make_adapter()

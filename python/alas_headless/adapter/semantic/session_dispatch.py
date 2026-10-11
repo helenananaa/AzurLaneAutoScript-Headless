@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Union
+from typing import Optional, Union
 from ...oracle.private_quarters import PrivateQuartersPhysicsReceipt
 
 import time
+import re
 from dataclasses import replace
 from typing import Any, Tuple
 from ...adapter.flows import LOGIN_ACTION_TARGETS
@@ -76,6 +77,20 @@ class SessionDispatchPorts:
                 # boundary before the page sweep instead of polling live state
                 # separately for every candidate. Valid frames remain frozen.
                 self.refresh_frame()
+        if name in ('GUILD_POPUP_CONFIRM', 'GUILD_POPUP_CANCEL'):
+            oracle = adapter._frame_or_live_observation_oracle()
+            if oracle.observation_target_present('overlay/guild-message/close'):
+                # The reviewed global notice can mount after combat returns
+                # to its map. Its existing owner precedes optional combat
+                # selectors so original InfoHandler can dismiss it.
+                return adapter.appear(button)
+        if name in ('GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3'):
+            oracle = adapter._frame_or_live_observation_oracle()
+            if (oracle.award_info_page_visible()
+                    and getattr(oracle, 'reward_item_info_visible', lambda: False)()):
+                # The exact item description may remain over a reward across
+                # task changes. ALAS' existing reward handler owns dismissal.
+                return name == 'GET_ITEMS_1'
         if name in ('RETIRE_APPEAR_1', 'RETIRE_APPEAR_2', 'RETIRE_APPEAR_3'):
             # The shared dock modal must precede combat defensive probes in
             # both campaign and OS. Its dedicated parser proves all choices.
@@ -131,6 +146,12 @@ class SessionDispatchPorts:
             # exact popup inventory. Do not run unrelated daily-combat probes
             # first while Unity is still mounting the main scene.
             return adapter.appear(button)
+        loading_oracle = adapter._frame_or_live_observation_oracle()
+        if getattr(loading_oracle, 'daily_battle_loading_visible', lambda: False)():
+            # CombatLoadUI has no actionable controls. As for the exact
+            # CombatUI below, native popup/page probes are absent here; the
+            # separate combat_is_loading observation owns the positive state.
+            return False
         if adapter._mail_context is not None:
             # MailMgrMsgboxUI is a legitimate overlay above MailUI.  Let the
             # mail flow's own virtual-resource handlers classify it before
@@ -147,6 +168,11 @@ class SessionDispatchPorts:
             # before the generic AwardInfo fallback aliases only GET_ITEMS_1.
             return adapter.appear(button)
         observation_oracle = adapter._frame_or_live_observation_oracle()
+        if name in ('AUTOMATION_CONFIRM_CHECK', 'AUTOMATION_CONFIRM') and (
+                adapter._meta_assist_active or adapter.meta_beacon_active()
+                or adapter.daily_execution_active()
+                or adapter.operation_siren_combat_committed()):
+            return observation_oracle.combat_automation_info_visible()
         if observation_oracle.enabled("overlay/network-reconnect/confirm"):
             # NetworkDown is a global exact overlay and may mount over any
             # owned page. Observe it in ALAS' current screenshot frame; input
@@ -172,8 +198,8 @@ class SessionDispatchPorts:
             return adapter.appear(button)
         if (
             name == "GET_SHIP"
-            and adapter._campaign_context is not None
-            and adapter.campaign_combat_committed()
+            and (adapter._meta_assist_active or adapter.meta_beacon_active()
+                 or (adapter._campaign_context is not None and adapter.campaign_combat_committed()))
         ):
             # NewShipUI is a generic acquisition page; its identity and input
             # do not depend on which event stage produced the drop.  Keep the
@@ -196,20 +222,60 @@ class SessionDispatchPorts:
             # combat observer's empty visible-resource set masks the restored
             # stage page forever.
             return adapter.appear(button)
+        result_receipt = getattr(self, '_combat_last_result_receipt', None)
+        if (result_receipt is not None
+                and (getattr(adapter, '_meta_beacon_active', False)
+                     or getattr(adapter, '_meta_assist_active', False))
+                and adapter.operation_siren_combat_committed()
+                and observation_oracle.read_state().generation > result_receipt.generation
+                and not observation_oracle.daily_battle_result_visible()
+                and not observation_oracle.daily_combat_visible()
+                and observation_oracle.meta_page_visible()):
+            # The accepted result has returned to a reviewed META page.
+            # Release the old combat observation owner before probing optional
+            # combat controls; ALAS still decides its expected_end and next step.
+            adapter._operation_siren_combat_active = False
+            self._combat_last_result_receipt = None
+            self._combat_result_transition_until = 0.0
         if getattr(
             adapter, "operation_siren_combat_committed", lambda: False
-        )():
+        )() and getattr(self, '_combat_last_result_receipt', None) is not None:
             adapter.complete_operation_siren_combat_if_map_restored()
+        opsi_result_owner = bool(
+            not (getattr(adapter, '_meta_beacon_active', False)
+                 or getattr(adapter, '_meta_assist_active', False))
+            and (getattr(adapter, "operation_siren_combat_committed", lambda: False)()
+                 or (getattr(adapter, '_operation_siren_auto_search_active', False)
+                     and not getattr(adapter, '_operation_siren_startup_search_provisional', False)))
+        )
         if (
-            getattr(adapter, "operation_siren_combat_committed", lambda: False)()
-            and adapter.oracle.operation_siren_battle_result_visible()
+            opsi_result_owner
+            and observation_oracle.operation_siren_battle_result_visible()
         ):
-            grade = adapter.oracle.operation_siren_battle_result_grade()
+            # Native auto-search fights have no manually committed boss cell.
+            # Their accepted search still owns the exact VICTORY/DEFEAT page;
+            # expose its grade to ALAS' existing failure/result handlers.
+            grade = observation_oracle.operation_siren_battle_result_grade()
             observed = (
                 "BATTLE_STATUS_S" if grade == "VICTORY" else "BATTLE_STATUS_D"
             )
             self._combat_result_observation = (observed, time.monotonic())
             return name == observed
+        if (opsi_result_owner and getattr(observation_oracle,
+                'operation_siren_battle_statistics_visible', lambda: False)()):
+            if name not in ('EXP_INFO_S', 'EXP_INFO_A', 'EXP_INFO_B', 'EXP_INFO_C', 'EXP_INFO_D'):
+                # The exact result layer hides unrelated map/combat probes.
+                # Its grade is consumed only by the native EXP_INFO handler;
+                # an icon mounting between frames must not gate a reward probe.
+                return False
+            grade = getattr(observation_oracle,
+                            'operation_siren_battle_statistics_grade', lambda: None)()
+            if grade is not None:
+                # OS auto-search explicitly handles EXP_INFO_C/D after a
+                # failed fight. The retained CombatUI and the campaign's old
+                # EXP_INFO_B selector must not mask the native statistics grade.
+                return name == 'EXP_INFO_' + grade
+            return False
         result_owner_active = bool(
             getattr(adapter, "daily_execution_active", lambda: False)()
             or getattr(adapter, "current_raid_result_active", lambda: False)()
@@ -323,6 +389,41 @@ class SessionDispatchPorts:
             # sentinel remains the only positive probe.
             self.refresh_frame()
             oracle = self.open().oracle
+            if self.open()._reward_sidebar_ready(
+                    self.open()._frame_or_live_observation_oracle()):
+                # Commission can finish returning to the Reward sidebar on
+                # this existing refresh. Its normal classifier owns the new
+                # frame; do not rethrow the preceding transition's error.
+                return self.open().appear(button)
+            if self.open()._inherited_dorm_overlay_return() is not None:
+                # The existing refresh may finish shop cancellation and expose
+                # its Feed owner. Reclassify on that immutable screenshot.
+                return self.open().appear(button)
+            if (name == 'CAMPAIGN_WITHDRAW_CONFIRM'
+                    and self.open()._frame_or_live_observation_oracle().observation_target_present('dorm/page/manage')
+                    and self.open()._frame_or_live_observation_oracle().enabled('dorm/page/back')):
+                # The same existing refresh can finish Feed panel unmount.
+                # The normal CourtYard classifier already proves this unrelated
+                # campaign confirmation absent; do not rethrow its old frame.
+                return self.open().appear(button)
+            if self.open()._frame_or_live_observation_oracle().operation_siren_local_map_visible():
+                # The existing single refresh can finish a combat-to-map
+                # return. Reclassify optional probes on that proven frame;
+                # the adapter still rejects unknown input and malformed owners.
+                return self.open().appear(button)
+            if self.open()._frame_or_live_observation_oracle().main_page_visible():
+                # The existing single refresh can finish a native page return.
+                # Let the normal classifier inspect that new screenshot rather
+                # than rethrowing an unmapped probe from the preceding frame.
+                # Unknown resources and covered owners retain their errors.
+                return self.open().appear(button)
+            if (name == 'GOTO_MAIN_WHITE'
+                    and self.open()._frame_or_live_observation_oracle().exercise_page_visible()):
+                # The existing refresh can complete Exercise entry after the
+                # first screenshot contained no mounted page controls. Let
+                # the normal classifier inspect that new immutable frame;
+                # its blocker and target checks still own the decision.
+                return self.open().appear(button)
             if (name in UI_PAGE_CHECK_RESOURCES
                     and self.open()._frame_or_live_observation_oracle().exists('research-menu/page/back')):
                 # The existing refresh may have caught the completed Shipyard
@@ -341,7 +442,7 @@ class SessionDispatchPorts:
                 return name == "AUTOMATION_ON"
             if (name == "RAID_REWARDS"
                     and oracle.observation_surface_present(ObservationSurface.CURRENT_RAID)
-                    and oracle.raid_page_visible(event="raid_20260827")):
+                    and oracle.raid_page_visible(event=oracle.current_raid_event())):
                 # The exact current Raid page has no legacy rewards overlay.
                 # A malformed present owner still raises its classified error.
                 return False
@@ -366,7 +467,7 @@ class SessionDispatchPorts:
     ) -> bool:
         return self.open().image_color_count(button, color, threshold, count)
 
-    def click(self, button: Any) -> Union[ActionReceipt, PrivateQuartersPhysicsReceipt]:
+    def click(self, button: Any, *, require_present: bool = False) -> Optional[Union[ActionReceipt, PrivateQuartersPhysicsReceipt]]:
         if AlasSemanticAdapter._operation_siren_camera_grid(button):
             self.refresh_frame()
             return self.open().click_operation_siren_camera_grid(button)
@@ -377,6 +478,30 @@ class SessionDispatchPorts:
                 return self.open().click_campaign_submarine_grid(button)
             return self.open().click_campaign_combat_grid(button)
         name = AlasSemanticAdapter._button_name(button)
+        if (name in ('POPUP_CONFIRM', 'POPUP_CANCEL')
+                and not self.open()._login_flow.active):
+            target = ('overlay/network-reconnect/confirm' if name == 'POPUP_CONFIRM'
+                      else 'overlay/network-reconnect/cancel')
+            if self.open()._frame_or_live_observation_oracle().enabled(target):
+                self.refresh_frame()
+                # This global owner was already proved by ALAS' screenshot.
+                # Bind its exact input before the unrelated combat table;
+                # Oracle.click rechecks the prompt after refresh and cannot
+                # fall through to another task's colliding Msgbox control.
+                return self.open().click_network_reconnect(name == 'POPUP_CONFIRM')
+        if name == 'AUTOMATION_CONFIRM' and (
+                self.open()._meta_assist_active or self.open().meta_beacon_active()
+                or self.open().daily_execution_active()
+                or self.open().operation_siren_combat_committed()):
+            self.refresh_frame()
+            return self.open().oracle.click_combat_automation_info()
+        if (name == 'GUILD_POPUP_CANCEL'
+                and self.open()._frame_or_live_observation_oracle().observation_target_present(
+                    'overlay/guild-message/close')):
+            self.refresh_frame()
+            # Reuse the reviewed close port and its independent live input
+            # checks, rather than the combat table's unrelated pair selectors.
+            return self.open().click(button)
         if name in ('SYNC_ENTER', 'SYNC_ENTER2', 'SYNC_TAP'):
             self.refresh_frame()
             return self.open().click(button)
@@ -465,6 +590,21 @@ class SessionDispatchPorts:
         if name in shop_tab_labels:
             self.refresh_frame()
             return self.open().oracle.click_shop_tab(shop_tab_labels[name])
+        if name in ('EXP_INFO_S', 'EXP_INFO_A', 'EXP_INFO_B', 'EXP_INFO_C', 'EXP_INFO_D'):
+            adapter = self.open()
+            if (not (getattr(adapter, '_meta_beacon_active', False)
+                     or getattr(adapter, '_meta_assist_active', False))
+                    and (adapter.operation_siren_combat_committed()
+                         or (getattr(adapter, '_operation_siren_auto_search_active', False)
+                             and not getattr(adapter, '_operation_siren_startup_search_provisional', False)))):
+                result_oracle = self._combat_result_action_oracle(adapter)
+                grade = result_oracle.operation_siren_battle_statistics_grade()
+                if grade is None or name != 'EXP_INFO_' + grade:
+                    raise SemanticGateClosed('operation siren statistics grade changed before input')
+                receipt = result_oracle.click_daily_battle_result()
+                self._combat_last_result_receipt = receipt
+                self._arm_combat_result_transition(adapter)
+                return receipt
         if name in ("BATTLE_STATUS_S", "BATTLE_STATUS_D", "CLICK_SAFE_AREA"):
             adapter = self.open()
             # Reuse the immutable ALAS frame that authorized this click.  A
@@ -553,6 +693,16 @@ class SessionDispatchPorts:
                     )
         if name in ("GET_ITEMS_1", "GET_ITEMS_2", "GET_ITEMS_3"):
             adapter = self.open()
+            if (adapter.oracle.award_info_page_visible()
+                    and adapter.oracle.observation_target_present('reward/item-info/close')):
+                self.refresh_frame()
+                adapter = self.open()
+                adapter._package_gate()
+                if (adapter.oracle.award_info_page_visible()
+                        and adapter.oracle.reward_item_info_visible()):
+                    # Close this exact foreground description; ALAS' reward
+                    # loop observes and closes the still-pending award next.
+                    return adapter.oracle.click('reward/item-info/close')
             result_oracle = self._combat_result_action_oracle(adapter)
             if (
                 getattr(adapter, "_exercise_execution_active", False)
@@ -575,12 +725,18 @@ class SessionDispatchPorts:
                 )
                 receipt = result_oracle.click(target)
                 self._combat_last_result_receipt = receipt
+                if adapter._meta_assist_active or adapter.meta_beacon_active():
+                    # Shared AwardInfo dispatch can close a synchronization
+                    # reward too. Hand the accepted receipt to the META port
+                    # so a delayed native probe cannot submit another input.
+                    adapter._meta_reward_close_receipt = receipt
                 self._arm_combat_result_transition(adapter)
                 return receipt
         if (
             name == "GET_SHIP"
             and self.adapter is not None
-            and self.adapter.campaign_combat_committed()
+            and (self.adapter._meta_assist_active or self.adapter.meta_beacon_active()
+                 or self.adapter.campaign_combat_committed())
         ):
             adapter = self.open()
             result_oracle = self._combat_result_action_oracle(adapter)
@@ -593,6 +749,10 @@ class SessionDispatchPorts:
         if name in ("CLICK_SAFE_AREA", "GOTO_MAIN"):
             navigation_frame = navigation_frame or self.refresh_frame()
             navigation_oracle = self.open()._require_frame_observation_oracle()
+            if name == 'CLICK_SAFE_AREA':
+                completed = self.open()._operation_siren_reward_return_completed(navigation_oracle)
+                if completed is not None:
+                    return completed
             if name == "CLICK_SAFE_AREA" and navigation_oracle.enabled("reward/award-info/close"):
                 return navigation_oracle.click("reward/award-info/close")
             tactical_context = self.open()._commission_context
@@ -698,6 +858,9 @@ class SessionDispatchPorts:
             and name not in MISSION_CLICK_RESOURCES
             and name not in MAIL_CLICK_RESOURCES
             and name not in CAMPAIGN_CLICK_RESOURCES
+            and not (self.adapter is not None and name == 'GUILD_DISPATCH_CLOSE')
+            and not (self.adapter is not None
+                     and re.fullmatch(r'GUILD_FORMATION_FLEET_([1-9][0-9]*|add)', name))
             and not (
                 self.adapter is not None
                 and name in RESEARCH_CLICK_RESOURCES
@@ -764,7 +927,21 @@ class SessionDispatchPorts:
             return adapter._require_frame_observation_oracle()
 
         with adapter.prepared_input_frame(prepared_oracle):
-            receipt = adapter.click(button)
+            if require_present and not adapter.appear(button):
+                # ALAS' earlier positive screenshot can outlive an overlay.
+                # Recheck the same fresh frame used for generic dispatch; an
+                # absent target returns to its existing loop with no input.
+                raise SemanticTargetMissing("ALAS target disappeared before input")
+            try:
+                receipt = adapter.click(button)
+            except SemanticTargetMissing:
+                if require_present or name != 'POPUP_CONFIRM' or adapter._mail_context is None:
+                    raise
+                # InfoHandler's original mail popup path calls Device.click
+                # directly after a positive screenshot. The prompt may have
+                # disappeared meanwhile; let its next screenshot handle the
+                # reward without sending input or fabricating a receipt.
+                return None
         if frame_oracle is not None and frame_oracle._login_update_retry_attempted:
             adapter.oracle._login_update_retry_attempted = True
         return receipt

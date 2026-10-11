@@ -85,6 +85,8 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         adapter.begin_mission_reward(daily=True, weekly=False)
 
         first = adapter.click(NamedButton("MAIN_GOTO_REWARD"))
+        oracle.enabled_values["reward/page/back"] = True
+        oracle.read_state = lambda: SimpleNamespace(generation=first.generation + 1)
         duplicate = adapter.click(NamedButton("MAIN_GOTO_REWARD_WHITE"))
 
         self.assertEqual(first, duplicate)
@@ -162,7 +164,8 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         adapter.begin_supply_pack()
 
         self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
-        self.assertTrue(adapter.appear(NamedButton("SHOP_CHECK")))
+        self.assertFalse(adapter.appear(NamedButton("SHOP_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("SUPPLY_PACK_CHECK")))
         self.assertTrue(adapter.appear(NamedButton("FREE_SUPPLY_PACK")))
         receipt = adapter.click(NamedButton("FREE_SUPPLY_PACK"))
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from typing import Optional, Sequence, Tuple
 from .contracts import ActionReceipt, ButtonState, OperationSirenState, Point, UiState
-from .errors import SemanticGateClosed
+from .errors import SemanticGateClosed, SemanticInputBlocked
 
 
 class OpsiStateOracle:
@@ -91,6 +91,9 @@ class OpsiStateOracle:
     def operation_siren_state(self) -> OperationSirenState:
         """Read the stable local-map header without mutating Operation Siren."""
 
+        return self._retry_transition_read(self._operation_siren_state_once)
+
+    def _operation_siren_state_once(self) -> OperationSirenState:
         button_state = self.read_state()
         back = self._unique(button_state, "os/page/back")
         if not (
@@ -636,7 +639,13 @@ class OpsiStateOracle:
             and not image.truncated
             and image.bounds is not None
         )
-        if len(anchors) != 1:
+        if len(anchors) > 1:
+            raise SemanticGateClosed(
+                "operation siren selected-fleet map anchor is ambiguous"
+            )
+        if not anchors:
+            # Retain the native initialization's existing offscreen recovery
+            # wording only for absence; duplicates must not take that branch.
             raise SemanticGateClosed(
                 "operation siren selected-fleet map anchor is absent or ambiguous"
             )
@@ -1081,9 +1090,21 @@ class OpsiStateOracle:
         # attempts the map edge; never click its covered underlying back.
         if self.operation_siren_storage_visible():
             return self.click_operation_siren_storage_back()
+        exit_state = self._operation_siren_exit_prompt_state()
+        if exit_state is not None:
+            # The native screenshot may predate this modal. No map input has
+            # been sent; let the original UI loop refresh and handle it.
+            raise SemanticInputBlocked('os/page/back', exit_state.generation, ('opsi-exit',))
         self.operation_siren_state()
         state = self.read_state()
         target = self._unique(state, "os/page/back")
+        blockers = self._blocking_rules(state, "os/page/back")
+        if len(blockers) == 1 and blockers[0].blocker_id in ('award-info', 'award-info1', 'ship-exp'):
+            # A reward may mount after ALAS selected the page graph edge.
+            # Its native UI loop can refresh and run the owning popup handler;
+            # classify the no-input refusal without weakening admission.
+            raise SemanticInputBlocked('os/page/back', state.generation,
+                                       tuple(rule.blocker_id for rule in blockers))
         if not (
             target.active_in_hierarchy
             and target.active_and_enabled
@@ -1092,7 +1113,7 @@ class OpsiStateOracle:
             and target.point is not None
             and target.bounds is not None
             and target.bounds.contains(target.point)
-            and not self._blocking_rules(state, "os/page/back")
+            and not blockers
         ):
             raise SemanticGateClosed("operation siren back is not actionable")
         if self._foreground_component() != self.fingerprint.component:

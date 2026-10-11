@@ -17,6 +17,46 @@ def fixture():
     return backend, make_oracle(backend)
 
 
+def native_mask_fixture(change=lambda marker: None):
+    backend, oracle = fixture()
+    request = oracle._request
+    def query(line):
+        if line == 'GET /v1/globe-port-input 3\n':
+            marker = copy.deepcopy(backend.ui['globe_geometry']['objects'][0])
+            marker.update(name='port-mask-input', game_input=dict(entrance_id=3, mask_color='C8C800'))
+            change(marker)
+            backend.ui['globe_geometry']['objects'].append(marker)
+            backend.ui['generation'] = 11
+            return dict(status='ok', scope='read-only-port-input')
+        return request(line)
+    oracle._request = query
+    backend.on_tap = lambda: setattr(backend, 'ui', make_ui([make_text('Gibraltar-safe',
+        'root/SVFloatPanel(Clone)/point/line/bg/title/name/subText')], generation=12))
+    return backend, oracle
+
+
+def test_game_owned_mask_point_requires_new_frame_and_named_postcondition():
+    backend, oracle = native_mask_fixture()
+    receipt = oracle.click_operation_siren_globe_port('Gibraltar', 2, native_mask=True)
+    assert backend.taps == [(528, 289)]
+    assert receipt.generation == 11
+
+
+@pytest.mark.parametrize('case', ['other-port', 'boolean-id', 'missing-identity', 'malformed-color', 'obscured', 'no-hit'])
+def test_unproven_native_mask_input_is_rejected_without_a_tap(case):
+    def change(marker):
+        if case == 'other-port': marker['game_input']['entrance_id'] = 6
+        elif case == 'boolean-id': marker['game_input']['entrance_id'] = True
+        elif case == 'missing-identity': marker.pop('game_input')
+        elif case == 'malformed-color': marker['game_input']['mask_color'] = 'nearest color'
+        elif case == 'obscured': marker['ui_clear'] = False
+        else: marker['plane_hit'] = False
+    backend, oracle = native_mask_fixture(change)
+    with pytest.raises(SemanticGateClosed):
+        oracle.click_operation_siren_globe_port('Gibraltar', 2, native_mask=True)
+    assert backend.taps == []
+
+
 def test_exact_port_marker_and_newer_named_postcondition():
     backend, oracle = fixture()
     def selected():

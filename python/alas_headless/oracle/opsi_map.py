@@ -7,7 +7,7 @@ import re
 from typing import Tuple
 
 from .contracts import CampaignMapCellState, Point
-from .errors import SemanticGateClosed, SemanticViewportReanchorRequired
+from .errors import SemanticGateClosed, SemanticInputBlocked, SemanticViewportReanchorRequired
 
 
 @dataclass(frozen=True)
@@ -28,6 +28,23 @@ def reviewed_logging_tower(attachment: OperationSirenMapAttachment) -> bool:
                 (model, 'xinxita1'), (model+'/0', 'xinxita'),
                 (model+'/2', 'xinxita2'), (model+'/3', 'xinxita3'),
                 (model+'/4', 'xinxita4'))))
+
+
+def reviewed_akashi_merchant(attachment: OperationSirenMapAttachment) -> bool:
+    # Native events 1901/1902/1904/1905 share the mysterious merchant
+    # identity (mingshi). Event 1903 is a different, stopped object.
+    # Its skeletal character is not a Unity Image; the typed attachment
+    # exports its shadow rather than the character's rendered appearance.
+    return (attachment.kind == 'event' and attachment.object_id in (1901, 1902, 1904, 1905)
+            and attachment.sprites == ((attachment.path+'/char/shadow', 'shadow'),))
+
+
+def reviewed_scanning_device(attachment: OperationSirenMapAttachment) -> bool:
+    # Native event 1401 is the Siren scanning device. Its original ALAS
+    # ScanningDevice flow owns the ensuing story and resource choices.
+    model = attachment.path + '/icon/model/laohuji(Clone)'
+    return (attachment.kind == 'event' and attachment.object_id == 1401
+            and attachment.sprites == ((model, 'laohuji'),))
 
 
 @dataclass(frozen=True)
@@ -83,7 +100,9 @@ class OpsiMapOracle:
             raise SemanticGateClosed('operation siren map images are incomplete or incoherent')
         titles = [t for t in ui.texts if t.path.endswith('/top_stage/title/name')
                   and t.active_in_hierarchy and t.active_and_enabled and not t.truncated]
-        if len(titles) != 1 or titles[0].text.strip() != zone_name:
+        # ALAS' native CN get_zone_name removes the displayed zone-type
+        # suffix. Compare that same identity, not its presentation decoration.
+        if len(titles) != 1 or titles[0].text.strip().split('-', 1)[0].strip() != zone_name:
             raise SemanticGateClosed('operation siren map zone does not match ALAS')
         root = 'LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/'
         pattern = re.compile(re.escape(root) + r'quads/world_quad_([0-9]+)_([0-9]+)/walk_quad$')
@@ -186,6 +205,7 @@ class OpsiMapOracle:
             if not isinstance(samples,list) or len(samples)!=33:
                 raise SemanticGateClosed('operation siren drag path proof is incomplete')
             reward_obscured = False
+            loading_obscured = False
             for index,sample in enumerate(samples):
                 if not isinstance(sample,Mapping):raise SemanticGateClosed('operation siren drag sample is malformed')
                 fraction=index/32
@@ -198,12 +218,21 @@ class OpsiMapOracle:
                 path = sample['top_path']
                 reward_roots = ('WorldAutoFightRewardUI(Clone)',
                                 'OverlayCamera/Overlay/UIMain/WorldAutoFightRewardUI(Clone)')
-                if sample.get('owned') is False and any(
+                loading_root = 'OverlayCamera/Overlay/UIOverlay/Loading(Clone)'
+                if sample.get('owned') is False and (
+                        path == loading_root or path.startswith(loading_root+'/')):
+                    loading_obscured = True
+                elif sample.get('owned') is False and any(
                         path == root or path.startswith(root+'/') for root in reward_roots):
                     reward_obscured = True
                 elif (sample.get('owned') is not True
                         or not (path == handler or path.startswith(handler+'/'))):
                     raise SemanticGateClosed('operation siren drag path is obscured or unowned')
+            if loading_obscured:
+                # This proof is unusable even if a later blocker frame has
+                # already cleared. Reuse the caller's no-input loading wait;
+                # it rechecks the logical map and requests a new path proof.
+                raise SemanticInputBlocked('os/map/camera-swipe', ui.generation, ('loading',))
             if reward_obscured:
                 # No gesture: refresh through original Camera recovery so its
                 # existing os_auto_search_quit owns this late reward popup.
@@ -231,7 +260,13 @@ class OpsiMapOracle:
             before=self.operation_siren_map_geometry(expected.zone_name,rows=expected.rows,columns=expected.columns)
             if identity(before)!=identity(expected):
                 raise SemanticGateClosed('operation siren logical map changed before camera swipe')
-            proof_generation,proof=self.operation_siren_map_drag_proof(start,end)
+            try:
+                proof_generation,proof=self.operation_siren_map_drag_proof(start,end)
+            except SemanticInputBlocked as exc:
+                if exc.semantic_id!='os/map/camera-swipe' or exc.blockers!=('loading',):
+                    raise
+                self._sleep(0.1)
+                continue
             blocked=self._blocking_rules(self.read_state(),'os/map/camera-swipe')
             if not blocked:break
             if any(r.blocker_id!='loading' for r in blocked):

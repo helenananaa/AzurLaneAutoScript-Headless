@@ -107,7 +107,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
     def test_awaken_is_default_denied_before_navigation(self):
         adapter, oracle, _ = self.make_adapter()
 
-        with self.assertRaisesRegex(SemanticGateClosed, "positive transaction budget"):
+        with self.assertRaises(AlasSemanticActionDeferred):
             adapter.begin_awaken_task(False)
 
         self.assertEqual(oracle.awaken_calls, [])

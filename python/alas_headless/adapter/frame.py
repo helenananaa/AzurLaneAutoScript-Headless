@@ -86,8 +86,14 @@ def _stable_observer_projection(state: Any) -> tuple[Mapping[str, Any], Mapping[
     buttons = without_clock(state.buttons_snapshot)
     stable_buttons = dict(buttons)
     raw_buttons = buttons.get("buttons")
-    if isinstance(raw_buttons, list):
-        stable_buttons["buttons"] = [stable_button(button) for button in raw_buttons]
+    if isinstance(raw_buttons, (list, tuple)):
+        # Unity object enumeration order is not target identity. Compare the
+        # complete multiset, retaining duplicate identities and every existing
+        # actionability/blocker field. The saved frame keeps the raw order.
+        stable_buttons["buttons"] = sorted(
+            (stable_button(button) for button in raw_buttons),
+            key=lambda button: json.dumps(button, sort_keys=True, ensure_ascii=True),
+        )
     return without_clock(state.snapshot), stable_buttons
 
 
@@ -215,29 +221,27 @@ class SemanticFrameClock:
                 # rebasing its clock metadata onto the closing state.
                 for attempt in range(30):
                     before = state
-                    # Capture the actual truncation flag in one request. The
-                    # consuming capability owns whether that slice is usable;
-                    # strict readers still reject incomplete Toggle data.
-                    candidate_ui = self._oracle.read_ui_state(
-                        check_foreground=False,
-                        _preserve_partial_toggles=True
-                    )
-                    if candidate_ui.generation == before.generation:
+                    # Freeze the raw endpoint once. Family extraction errors,
+                    # missing lists and truncation remain attached to this
+                    # frame and fail only when that family is consumed.
+                    candidate_ui = self._oracle.read_ui_snapshot(check_foreground=False)
+                    candidate_generation = candidate_ui["generation"]
+                    if candidate_generation == before.generation:
                         ui_state = candidate_ui
-                        ui_snapshot = dict(candidate_ui.snapshot)
-                        ui_source_generation = candidate_ui.generation
+                        ui_snapshot = dict(candidate_ui)
+                        ui_source_generation = candidate_generation
                         break
                     after = self._oracle.read_state(check_foreground=False)
                     if (
-                        before.generation <= candidate_ui.generation <= after.generation
+                        before.generation <= candidate_generation <= after.generation
                         and before.scene_handle == after.scene_handle
                         and _stable_observer_projection(before)
                         == _stable_observer_projection(after)
                     ):
                         state = after
                         ui_state = candidate_ui
-                        ui_snapshot = dict(candidate_ui.snapshot)
-                        ui_source_generation = candidate_ui.generation
+                        ui_snapshot = dict(candidate_ui)
+                        ui_source_generation = candidate_generation
                         ui_snapshot["generation"] = after.generation
                         break
                     state = after

@@ -12,6 +12,8 @@ from tests.semantic_support.adapter_fixtures import NamedButton
 def fixture():
     adapter = SimpleNamespace(_login_flow=SimpleNamespace(active=False),
                               _mail_context=object(), appear=Mock(return_value=True))
+    adapter._frame_or_live_observation_oracle = lambda: SimpleNamespace(
+        daily_battle_loading_visible=lambda: False)
     session = AlasSemanticSession.__new__(AlasSemanticSession)
     session.open = lambda: adapter
     session._frame_clock = Mock()

@@ -1,0 +1,4775 @@
+{
+  "scope": "Original frozen entry for Exercise inherited Mail GOTO_MAIN_WHITE presence failure",
+  "source": "goal-r145-exercise-inherited-mail-return-gap-r1.json",
+  "entry_generation": 3319,
+  "snapshot": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 17531,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "abi": "x86_64",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "snapshot_schema": 1,
+    "snapshot_struct_size": 104,
+    "generation": 3319,
+    "scene_generation": 2,
+    "semantic_generation": 2,
+    "snapshot_monotonic_ns": 5422058081122,
+    "response_monotonic_ns": 5422384448522,
+    "age_ms": 326,
+    "observer_tid": 17562,
+    "assembly_count": 129,
+    "semantic_code": 1,
+    "width": 1280,
+    "height": 720,
+    "flags": 15,
+    "observer_attached": false,
+    "main_thread": true,
+    "button_count": 159,
+    "active_button_count": 11,
+    "interactable_button_count": 159,
+    "scene_handle": -76,
+    "ui_stage": 100,
+    "ui_method_mask": 15
+  },
+  "buttons": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.buttons/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 17531,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 344104,
+    "generation": 3319,
+    "snapshot_monotonic_ns": 5422058081122,
+    "response_monotonic_ns": 5422384459247,
+    "age_ms": 326,
+    "button_count": 11,
+    "truncated": false,
+    "error_count": 0,
+    "buttons": [
+      {
+        "name": "IconTpl",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/view/content/attachment/content/IconTpl",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -94376,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 6.111,
+          "y": -3.067,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -102.0,
+          "y": -103.0,
+          "width": 204.0,
+          "height": 206.0
+        },
+        "screen_point": {
+          "x": 915.0,
+          "y": 222.0
+        },
+        "adb_point": {
+          "x": 915.0,
+          "y": 498.0
+        },
+        "screen_bounds": {
+          "left": 869.667,
+          "bottom": 176.222,
+          "right": 960.333,
+          "top": 267.778
+        },
+        "adb_bounds": {
+          "left": 869.667,
+          "top": 452.222,
+          "right": 960.333,
+          "bottom": 543.778
+        }
+      },
+      {
+        "name": "option",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/option",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -95432,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 12.993,
+          "y": 7.108,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -76.5,
+          "y": -47.0,
+          "width": 153.0,
+          "height": 94.0
+        },
+        "screen_point": {
+          "x": 1224.667,
+          "y": 679.867
+        },
+        "adb_point": {
+          "x": 1224.667,
+          "y": 40.133
+        },
+        "screen_bounds": {
+          "left": 1173.667,
+          "bottom": 648.533,
+          "right": 1275.667,
+          "top": 711.2
+        },
+        "adb_bounds": {
+          "left": 1173.667,
+          "top": 8.8,
+          "right": 1275.667,
+          "bottom": 71.467
+        }
+      },
+      {
+        "name": "btn_delete",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/bottom/btn_delete",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -94572,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 8.341,
+          "y": -6.489,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -135.5,
+          "y": -37.0,
+          "width": 271.0,
+          "height": 74.0
+        },
+        "screen_point": {
+          "x": 1015.333,
+          "y": 68.0
+        },
+        "adb_point": {
+          "x": 1015.333,
+          "y": 652.0
+        },
+        "screen_bounds": {
+          "left": 925.0,
+          "bottom": 43.333,
+          "right": 1105.667,
+          "top": 92.667
+        },
+        "adb_bounds": {
+          "left": 925.0,
+          "top": 627.333,
+          "right": 1105.667,
+          "bottom": 676.667
+        }
+      },
+      {
+        "name": "btn_move",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/bottom/btn_move",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -94540,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 4.03,
+          "y": -6.489,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -135.5,
+          "y": -37.0,
+          "width": 271.0,
+          "height": 74.0
+        },
+        "screen_point": {
+          "x": 821.333,
+          "y": 68.0
+        },
+        "adb_point": {
+          "x": 821.333,
+          "y": 652.0
+        },
+        "screen_bounds": {
+          "left": 731.0,
+          "bottom": 43.333,
+          "right": 911.667,
+          "top": 92.667
+        },
+        "adb_bounds": {
+          "left": 731.0,
+          "top": 627.333,
+          "right": 911.667,
+          "bottom": 676.667
+        }
+      },
+      {
+        "name": "btn_deleteMail",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/bottom/btn_deleteMail",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -93802,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -8.489,
+          "y": -6.499,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -135.5,
+          "y": -37.0,
+          "width": 271.0,
+          "height": 74.0
+        },
+        "screen_point": {
+          "x": 258.0,
+          "y": 67.556
+        },
+        "adb_point": {
+          "x": 258.0,
+          "y": 652.444
+        },
+        "screen_bounds": {
+          "left": 167.667,
+          "bottom": 42.889,
+          "right": 348.333,
+          "top": 92.222
+        },
+        "adb_bounds": {
+          "left": 167.667,
+          "top": 627.778,
+          "right": 348.333,
+          "bottom": 677.111
+        }
+      },
+      {
+        "name": "btn_managerMail",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/bottom/btn_managerMail",
+        "canvas": "Canvas",
+        "flags": 7679,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "canvas_render_mode": 1,
+        "instance_id": -93818,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -4.222,
+          "y": -6.499,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -135.5,
+          "y": -37.0,
+          "width": 271.0,
+          "height": 74.0
+        },
+        "screen_point": {
+          "x": 450.0,
+          "y": 67.556
+        },
+        "adb_point": {
+          "x": 450.0,
+          "y": 652.444
+        },
+        "screen_bounds": {
+          "left": 359.667,
+          "bottom": 42.889,
+          "right": 540.333,
+          "top": 92.222
+        },
+        "adb_bounds": {
+          "left": 359.667,
+          "top": 627.778,
+          "right": 540.333,
+          "bottom": 677.111
+        }
+      },
+      {
+        "name": "help",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/help",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -95424,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -3.585,
+          "y": 7.313,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -0.0,
+          "y": -20.0,
+          "width": 41.0,
+          "height": 40.0
+        },
+        "screen_point": {
+          "x": 478.667,
+          "y": 689.067
+        },
+        "adb_point": {
+          "x": 478.667,
+          "y": 30.933
+        },
+        "screen_bounds": {
+          "left": 478.667,
+          "bottom": 675.733,
+          "right": 506.0,
+          "top": 702.4
+        },
+        "adb_bounds": {
+          "left": 478.667,
+          "top": 17.6,
+          "right": 506.0,
+          "bottom": 44.267
+        }
+      },
+      {
+        "name": "back_btn",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/CommonTitleAndBack/back_btn",
+        "canvas": "Canvas",
+        "flags": 7679,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "canvas_render_mode": 1,
+        "instance_id": -95456,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -13.089,
+          "y": 6.906,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -102.5,
+          "y": -54.0,
+          "width": 205.0,
+          "height": 108.0
+        },
+        "screen_point": {
+          "x": 50.995,
+          "y": 670.787
+        },
+        "adb_point": {
+          "x": 50.995,
+          "y": 49.213
+        },
+        "screen_bounds": {
+          "left": -17.323,
+          "bottom": 634.795,
+          "right": 119.314,
+          "top": 706.779
+        },
+        "adb_bounds": {
+          "left": -17.323,
+          "top": 13.221,
+          "right": 119.314,
+          "bottom": 85.205
+        }
+      },
+      {
+        "name": "gem",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/res/gem",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -95326,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 9.432,
+          "y": 7.185,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -128.235,
+          "y": -18.47,
+          "width": 256.47,
+          "height": 36.94
+        },
+        "screen_point": {
+          "x": 1064.421,
+          "y": 683.333
+        },
+        "adb_point": {
+          "x": 1064.421,
+          "y": 36.667
+        },
+        "screen_bounds": {
+          "left": 978.959,
+          "bottom": 671.024,
+          "right": 1149.883,
+          "top": 695.643
+        },
+        "adb_bounds": {
+          "left": 978.959,
+          "top": 24.357,
+          "right": 1149.883,
+          "bottom": 48.976
+        }
+      },
+      {
+        "name": "oil",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/res/oil",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -95278,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 1.785,
+          "y": 7.185,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -128.235,
+          "y": -18.47,
+          "width": 256.47,
+          "height": 36.94
+        },
+        "screen_point": {
+          "x": 720.333,
+          "y": 683.333
+        },
+        "adb_point": {
+          "x": 720.333,
+          "y": 36.667
+        },
+        "screen_bounds": {
+          "left": 634.87,
+          "bottom": 671.024,
+          "right": 805.795,
+          "top": 695.643
+        },
+        "adb_bounds": {
+          "left": 634.87,
+          "top": 24.357,
+          "right": 805.795,
+          "bottom": 48.976
+        }
+      },
+      {
+        "name": "gold",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/res/gold",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -95230,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 5.619,
+          "y": 7.185,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -128.235,
+          "y": -18.47,
+          "width": 256.47,
+          "height": 36.94
+        },
+        "screen_point": {
+          "x": 892.87,
+          "y": 683.333
+        },
+        "adb_point": {
+          "x": 892.87,
+          "y": 36.667
+        },
+        "screen_bounds": {
+          "left": 807.408,
+          "bottom": 671.024,
+          "right": 978.332,
+          "top": 695.643
+        },
+        "adb_bounds": {
+          "left": 807.408,
+          "top": 24.357,
+          "right": 978.332,
+          "bottom": 48.976
+        }
+      }
+    ]
+  },
+  "ui": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.ui/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 17531,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 4466248,
+    "generation": 3319,
+    "snapshot_monotonic_ns": 5422058081122,
+    "response_monotonic_ns": 5422414551073,
+    "age_ms": 356,
+    "method_mask": 15,
+    "toggle_count": 13,
+    "text_count": 49,
+    "image_count": 93,
+    "toggle_truncated": false,
+    "text_truncated": false,
+    "image_truncated": false,
+    "error_count": 0,
+    "error_counts": {
+      "toggle": 0,
+      "text": 0,
+      "image": 0,
+      "shared": 0
+    },
+    "skipped_count": 0,
+    "image_source_count": 1565,
+    "image_source_capacity": 16384,
+    "toggles": [
+      {
+        "kind": "toggle",
+        "name": "5",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/5",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 354.0,
+          "y": 659.889
+        },
+        "adb_bounds": {
+          "left": 172.667,
+          "top": 618.222,
+          "right": 535.333,
+          "bottom": 701.556
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "4",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/4",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 354.0,
+          "y": 570.556
+        },
+        "adb_bounds": {
+          "left": 172.667,
+          "top": 528.889,
+          "right": 535.333,
+          "bottom": 612.222
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "3",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/3",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 354.0,
+          "y": 481.222
+        },
+        "adb_bounds": {
+          "left": 172.667,
+          "top": 439.556,
+          "right": 535.333,
+          "bottom": 522.889
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "2",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/2",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 354.0,
+          "y": 391.889
+        },
+        "adb_bounds": {
+          "left": 172.667,
+          "top": 350.222,
+          "right": 535.333,
+          "bottom": 433.556
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "1",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/1",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 354.0,
+          "y": 302.556
+        },
+        "adb_bounds": {
+          "left": 172.667,
+          "top": 260.889,
+          "right": 535.333,
+          "bottom": 344.222
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "0",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/0",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": true,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 354.0,
+          "y": 213.222
+        },
+        "adb_bounds": {
+          "left": 172.667,
+          "top": 171.556,
+          "right": 535.333,
+          "bottom": 254.889
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "collection",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/left_length/frame/tagRoot/collection",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 71.0,
+          "y": 338.167
+        },
+        "adb_bounds": {
+          "left": 15.333,
+          "top": 308.833,
+          "right": 126.667,
+          "bottom": 367.5
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "store",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/left_length/frame/tagRoot/store",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 71.0,
+          "y": 245.5
+        },
+        "adb_bounds": {
+          "left": 15.333,
+          "top": 216.167,
+          "right": 126.667,
+          "bottom": 274.833
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "mail",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/left_length/frame/tagRoot/mail",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": true,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 71.0,
+          "y": 152.833
+        },
+        "adb_bounds": {
+          "left": 15.333,
+          "top": 123.5,
+          "right": 126.667,
+          "bottom": 182.167
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "matter",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/title/matter",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 1253.667,
+          "y": 109.333
+        },
+        "adb_bounds": {
+          "left": 1167.008,
+          "top": 96.001,
+          "right": 1253.667,
+          "bottom": 122.665
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "btn_rare",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/head/rightSelect/toggle/btn_rare",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 493.333,
+          "y": 96.333
+        },
+        "adb_bounds": {
+          "left": 426.0,
+          "top": 72.0,
+          "right": 560.667,
+          "bottom": 120.667
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "btn_important",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/head/rightSelect/toggle/btn_important",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 358.667,
+          "y": 96.333
+        },
+        "adb_bounds": {
+          "left": 291.333,
+          "top": 72.0,
+          "right": 426.0,
+          "bottom": 120.667
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "btn_all",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/head/rightSelect/toggle/btn_all",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": true,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 224.0,
+          "y": 96.333
+        },
+        "adb_bounds": {
+          "left": 156.667,
+          "top": 72.0,
+          "right": 291.333,
+          "bottom": 120.667
+        }
+      }
+    ],
+    "texts": [
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/5/content/info/time/Text",
+        "text": "2026-09-04",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 264.012,
+          "top": 661.89,
+          "right": 525.322,
+          "bottom": 695.221
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/5/content/info/title/Text",
+        "text": "9月4日维护补偿",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 264.0,
+          "top": 624.556,
+          "right": 500.0,
+          "bottom": 658.556
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/5/content/icon/IconTpl/icon_bg/count",
+        "text": "1500",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 221.0,
+          "top": 677.389,
+          "right": 245.0,
+          "bottom": 691.889
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/4/content/info/time/Text",
+        "text": "2026-09-08",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 264.012,
+          "top": 572.557,
+          "right": 525.322,
+          "bottom": 605.887
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/4/content/info/title/Text",
+        "text": "9月8日维护补偿",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 264.0,
+          "top": 535.222,
+          "right": 500.0,
+          "bottom": 569.222
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/4/content/icon/IconTpl/icon_bg/count",
+        "text": "2000",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 219.5,
+          "top": 588.056,
+          "right": 245.0,
+          "bottom": 602.556
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/3/content/info/time/Text",
+        "text": "2026-09-17",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 264.012,
+          "top": 483.224,
+          "right": 525.322,
+          "bottom": 516.554
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/3/content/info/title/Text",
+        "text": "作战委托熟练度收益异..",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 264.0,
+          "top": 445.889,
+          "right": 500.0,
+          "bottom": 479.889
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/3/content/icon/IconTpl/icon_bg/count",
+        "text": "600",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 225.5,
+          "top": 498.722,
+          "right": 245.0,
+          "bottom": 513.222
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/2/content/info/time/Text",
+        "text": "2026-09-17",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 264.012,
+          "top": 393.89,
+          "right": 525.322,
+          "bottom": 427.221
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/2/content/info/title/Text",
+        "text": "9月17日维护补偿",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 264.0,
+          "top": 356.556,
+          "right": 500.0,
+          "bottom": 390.556
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/2/content/icon/IconTpl/icon_bg/count",
+        "text": "1500",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 221.0,
+          "top": 409.389,
+          "right": 245.0,
+          "bottom": 423.889
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/1/content/info/time/Text",
+        "text": "2026-09-24",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 264.012,
+          "top": 304.557,
+          "right": 525.322,
+          "bottom": 337.887
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/1/content/info/title/Text",
+        "text": "9月24日维护补偿",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 264.0,
+          "top": 267.222,
+          "right": 500.0,
+          "bottom": 301.222
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/1/content/icon/IconTpl/icon_bg/count",
+        "text": "2000",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 219.5,
+          "top": 320.056,
+          "right": 245.0,
+          "bottom": 334.556
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "got_text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/0/got_mark/got_text",
+        "text": "已领取",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 173.0,
+          "top": 201.222,
+          "right": 259.667,
+          "bottom": 225.222
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/0/content/info/time/Text",
+        "text": "2026-10-07",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 264.012,
+          "top": 215.224,
+          "right": 525.322,
+          "bottom": 248.554
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/0/content/info/title/Text",
+        "text": "段位奖励-中校",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 264.0,
+          "top": 177.889,
+          "right": 500.0,
+          "bottom": 211.889
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/0/content/icon/IconTpl/icon_bg/count",
+        "text": "1000",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 221.0,
+          "top": 230.722,
+          "right": 245.0,
+          "bottom": 245.222
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "subText",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/title/info/Text/subText",
+        "text": "段位奖励-中校",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 589.667,
+          "top": 86.0,
+          "right": 1047.0,
+          "bottom": 132.667
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "en",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/CommonTitleAndBack/title/en",
+        "text": "MAIL BOX",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 176.276,
+          "top": 28.69,
+          "right": 282.92,
+          "bottom": 48.685
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "title",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/CommonTitleAndBack/title",
+        "text": "邮箱",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 125.62,
+          "top": 10.027,
+          "right": 169.611,
+          "bottom": 56.684
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "max",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/res/gem/max",
+        "text": "",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1031.098,
+          "top": 10.462,
+          "right": 1118.99,
+          "bottom": 24.357
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/res/gem/Text",
+        "text": "5070",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1031.098,
+          "top": 24.357,
+          "right": 1118.99,
+          "bottom": 48.976
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "max",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/res/oil/max",
+        "text": "MAX: 17450",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 687.01,
+          "top": 10.462,
+          "right": 774.902,
+          "bottom": 24.357
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/res/oil/Text",
+        "text": "24853",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 687.01,
+          "top": 24.357,
+          "right": 774.902,
+          "bottom": 48.976
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "max",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/res/gold/max",
+        "text": "MAX: 108300",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 859.547,
+          "top": 10.462,
+          "right": 947.439,
+          "bottom": 24.357
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/res/gold/Text",
+        "text": "2324",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 859.547,
+          "top": 24.357,
+          "right": 947.439,
+          "bottom": 48.976
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/left_length/frame/tagRoot/collection/unSelect/Text",
+        "text": "收藏室",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 51.353,
+          "top": 320.833,
+          "right": 126.087,
+          "bottom": 355.5
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/left_length/frame/tagRoot/store/unSelect/Text",
+        "text": "储藏室",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 51.353,
+          "top": 228.167,
+          "right": 126.087,
+          "bottom": 262.833
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/left_length/frame/tagRoot/mail/selected/Text",
+        "text": "邮件",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 70.0,
+          "top": 136.167,
+          "right": 144.733,
+          "bottom": 170.833
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/bottom/btn_delete/Text",
+        "text": "删除邮件",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 925.0,
+          "top": 619.333,
+          "right": 1105.667,
+          "bottom": 676.667
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/bottom/btn_move/Text",
+        "text": "邮件转移",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 731.0,
+          "top": 619.333,
+          "right": 911.667,
+          "bottom": 676.667
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/view/content/attachment/got/Text",
+        "text": "附件已领取",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 606.333,
+          "top": 483.0,
+          "right": 1230.333,
+          "bottom": 513.0
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/view/content/attachment/content/IconTpl/icon_bg/count",
+        "text": "1000",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 921.222,
+          "top": 521.333,
+          "right": 953.222,
+          "bottom": 540.667
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/view/content/text/Text",
+        "text": "本赛季首次达到段位中校的奖励",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 597.0,
+          "top": 246.0,
+          "right": 849.0,
+          "bottom": 264.0
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/time/Text",
+        "text": "2026-10-07",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 649.667,
+          "top": 177.333,
+          "right": 719.667,
+          "bottom": 199.333
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/time/name",
+        "text": "Time:",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 590.333,
+          "top": 178.333,
+          "right": 646.333,
+          "bottom": 199.333
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/from/Text",
+        "text": "演习管理委员会",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 643.667,
+          "top": 148.0,
+          "right": 769.667,
+          "bottom": 166.0
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/from/name",
+        "text": "From:",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 590.333,
+          "top": 148.0,
+          "right": 640.333,
+          "bottom": 166.0
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/title/matter/off/Text",
+        "text": "OFF",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1207.404,
+          "top": 99.334,
+          "right": 1253.667,
+          "bottom": 119.332
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/head/rightSelect/toggle/btn_rare/unselect/Text",
+        "text": "特殊附件",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 440.0,
+          "top": 81.667,
+          "right": 546.667,
+          "bottom": 111.0
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/head/rightSelect/toggle/btn_important/unselect/Text",
+        "text": "重要",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 305.333,
+          "top": 81.667,
+          "right": 412.0,
+          "bottom": 111.0
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/head/rightSelect/toggle/btn_all/select/Text",
+        "text": "全部",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 170.667,
+          "top": 81.667,
+          "right": 277.333,
+          "bottom": 111.0
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/bottom/btn_managerMail/Text",
+        "text": "邮件管理",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 359.667,
+          "top": 619.778,
+          "right": 540.333,
+          "bottom": 677.111
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/bottom/btn_deleteMail/Text",
+        "text": "删除已读",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 167.667,
+          "top": 619.778,
+          "right": 348.333,
+          "bottom": 677.111
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "tip",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/top/tip",
+        "text": "※达到上限后无法收到新邮件",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 299.0,
+          "top": 146.333,
+          "right": 542.333,
+          "bottom": 163.333
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/top/count",
+        "text": "<color=#FFFFFFFF>53</color>/<color=#181E32>100</color>",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 206.667,
+          "top": 135.827,
+          "right": 271.667,
+          "bottom": 163.333
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "FpsPanel",
+        "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+        "text": "",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 573.333,
+          "top": 0.0,
+          "right": 706.667,
+          "bottom": 34.667
+        }
+      }
+    ],
+    "images": [
+      {
+        "kind": "image",
+        "name": "selected",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/5/selected",
+        "sprite": "selecting_new",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 168.667,
+          "top": 605.556,
+          "right": 546.667,
+          "bottom": 705.556
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 357.667,
+          "y": 655.556
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/5/content/icon/IconTpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.741176,
+          "green": 0.741176,
+          "blue": 0.741176,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 184.333,
+          "top": 627.889,
+          "right": 248.333,
+          "bottom": 691.889
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 659.889
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/5/content/icon/IconTpl/icon_bg/icon",
+        "sprite": "oil",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 185.0,
+          "top": 628.556,
+          "right": 247.667,
+          "bottom": 691.222
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 659.889
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/5/content/icon/IconTpl/icon_bg",
+        "sprite": "bg1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 184.333,
+          "top": 627.889,
+          "right": 248.333,
+          "bottom": 691.889
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 659.889
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/5/content/icon/IconTpl/bg",
+        "sprite": "white_dot",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.101961,
+          "green": 0.117647,
+          "blue": 0.192157,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 183.667,
+          "top": 627.222,
+          "right": 249.0,
+          "bottom": 692.556
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 659.889
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "IconTpl",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/5/content/icon/IconTpl",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 182.333,
+          "top": 625.556,
+          "right": 250.333,
+          "bottom": 694.222
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 659.889
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "hasread_bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/5/hasread_bg",
+        "sprite": "left_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 0.2
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 172.667,
+          "top": 618.222,
+          "right": 535.333,
+          "bottom": 701.556
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 354.0,
+          "y": 659.889
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "selected",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/4/selected",
+        "sprite": "selecting_new",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 168.667,
+          "top": 516.222,
+          "right": 546.667,
+          "bottom": 616.222
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 357.667,
+          "y": 566.222
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/4/content/icon/IconTpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.741176,
+          "green": 0.741176,
+          "blue": 0.741176,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 184.333,
+          "top": 538.556,
+          "right": 248.333,
+          "bottom": 602.556
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 570.556
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/4/content/icon/IconTpl/icon_bg/icon",
+        "sprite": "oil",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 185.0,
+          "top": 539.222,
+          "right": 247.667,
+          "bottom": 601.889
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 570.556
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/4/content/icon/IconTpl/icon_bg",
+        "sprite": "bg1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 184.333,
+          "top": 538.556,
+          "right": 248.333,
+          "bottom": 602.556
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 570.556
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/4/content/icon/IconTpl/bg",
+        "sprite": "white_dot",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.101961,
+          "green": 0.117647,
+          "blue": 0.192157,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 183.667,
+          "top": 537.889,
+          "right": 249.0,
+          "bottom": 603.222
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 570.556
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "IconTpl",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/4/content/icon/IconTpl",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 182.333,
+          "top": 536.222,
+          "right": 250.333,
+          "bottom": 604.889
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 570.556
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "hasread_bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/4/hasread_bg",
+        "sprite": "left_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 0.2
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 172.667,
+          "top": 528.889,
+          "right": 535.333,
+          "bottom": 612.222
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 354.0,
+          "y": 570.556
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "selected",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/3/selected",
+        "sprite": "selecting_new",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 168.667,
+          "top": 426.889,
+          "right": 546.667,
+          "bottom": 526.889
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 357.667,
+          "y": 476.889
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/3/content/icon/IconTpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.396078,
+          "green": 0.780392,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 184.333,
+          "top": 449.222,
+          "right": 248.333,
+          "bottom": 513.222
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 481.222
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/3/content/icon/IconTpl/icon_bg/icon",
+        "sprite": "16501",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 185.0,
+          "top": 449.889,
+          "right": 247.667,
+          "bottom": 512.556
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 481.222
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/3/content/icon/IconTpl/icon_bg",
+        "sprite": "bg2",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 184.333,
+          "top": 449.222,
+          "right": 248.333,
+          "bottom": 513.222
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 481.222
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/3/content/icon/IconTpl/bg",
+        "sprite": "white_dot",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.101961,
+          "green": 0.117647,
+          "blue": 0.192157,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 183.667,
+          "top": 448.556,
+          "right": 249.0,
+          "bottom": 513.889
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 481.222
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "IconTpl",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/3/content/icon/IconTpl",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 182.333,
+          "top": 446.889,
+          "right": 250.333,
+          "bottom": 515.556
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 481.222
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "hasread_bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/3/hasread_bg",
+        "sprite": "left_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 0.2
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 172.667,
+          "top": 439.556,
+          "right": 535.333,
+          "bottom": 522.889
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 354.0,
+          "y": 481.222
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "selected",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/2/selected",
+        "sprite": "selecting_new",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 168.667,
+          "top": 337.556,
+          "right": 546.667,
+          "bottom": 437.556
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 357.667,
+          "y": 387.556
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/2/content/icon/IconTpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.741176,
+          "green": 0.741176,
+          "blue": 0.741176,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 184.333,
+          "top": 359.889,
+          "right": 248.333,
+          "bottom": 423.889
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 391.889
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/2/content/icon/IconTpl/icon_bg/icon",
+        "sprite": "oil",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 185.0,
+          "top": 360.556,
+          "right": 247.667,
+          "bottom": 423.222
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 391.889
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/2/content/icon/IconTpl/icon_bg",
+        "sprite": "bg1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 184.333,
+          "top": 359.889,
+          "right": 248.333,
+          "bottom": 423.889
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 391.889
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/2/content/icon/IconTpl/bg",
+        "sprite": "white_dot",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.101961,
+          "green": 0.117647,
+          "blue": 0.192157,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 183.667,
+          "top": 359.222,
+          "right": 249.0,
+          "bottom": 424.556
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 391.889
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "IconTpl",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/2/content/icon/IconTpl",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 182.333,
+          "top": 357.556,
+          "right": 250.333,
+          "bottom": 426.222
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 391.889
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "hasread_bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/2/hasread_bg",
+        "sprite": "left_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 0.2
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 172.667,
+          "top": 350.222,
+          "right": 535.333,
+          "bottom": 433.556
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 354.0,
+          "y": 391.889
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "selected",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/1/selected",
+        "sprite": "selecting_new",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 168.667,
+          "top": 248.222,
+          "right": 546.667,
+          "bottom": 348.222
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 357.667,
+          "y": 298.222
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/1/content/icon/IconTpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.741176,
+          "green": 0.741176,
+          "blue": 0.741176,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 184.333,
+          "top": 270.556,
+          "right": 248.333,
+          "bottom": 334.556
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 302.556
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/1/content/icon/IconTpl/icon_bg/icon",
+        "sprite": "oil",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 185.0,
+          "top": 271.222,
+          "right": 247.667,
+          "bottom": 333.889
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 302.556
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/1/content/icon/IconTpl/icon_bg",
+        "sprite": "bg1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 184.333,
+          "top": 270.556,
+          "right": 248.333,
+          "bottom": 334.556
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 302.556
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/1/content/icon/IconTpl/bg",
+        "sprite": "white_dot",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.101961,
+          "green": 0.117647,
+          "blue": 0.192157,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 183.667,
+          "top": 269.889,
+          "right": 249.0,
+          "bottom": 335.222
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 302.556
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "IconTpl",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/1/content/icon/IconTpl",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 182.333,
+          "top": 268.222,
+          "right": 250.333,
+          "bottom": 336.889
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 302.556
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "hasread_bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/1/hasread_bg",
+        "sprite": "left_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 0.2
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 172.667,
+          "top": 260.889,
+          "right": 535.333,
+          "bottom": 344.222
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 354.0,
+          "y": 302.556
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "selected",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/0/selected",
+        "sprite": "selecting_new",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 168.667,
+          "top": 158.889,
+          "right": 546.667,
+          "bottom": 258.889
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 357.667,
+          "y": 208.889
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "got_mask_bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/0/got_mark/got_mask_bg",
+        "sprite": "has_recived_new",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 186.667,
+          "top": 200.556,
+          "right": 246.0,
+          "bottom": 225.889
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 213.222
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "got_mask_bg_1",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/0/got_mark/got_mask_bg_1",
+        "sprite": "frame",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 0.501961
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 182.667,
+          "top": 179.556,
+          "right": 250.0,
+          "bottom": 246.889
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 213.222
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/0/content/icon/IconTpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.741176,
+          "green": 0.741176,
+          "blue": 0.741176,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 184.333,
+          "top": 181.222,
+          "right": 248.333,
+          "bottom": 245.222
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 213.222
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/0/content/icon/IconTpl/icon_bg/icon",
+        "sprite": "exploit",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 185.0,
+          "top": 181.889,
+          "right": 247.667,
+          "bottom": 244.556
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 213.222
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/0/content/icon/IconTpl/icon_bg",
+        "sprite": "bg1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 184.333,
+          "top": 181.222,
+          "right": 248.333,
+          "bottom": 245.222
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 213.222
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/0/content/icon/IconTpl/bg",
+        "sprite": "white_dot",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.101961,
+          "green": 0.117647,
+          "blue": 0.192157,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 183.667,
+          "top": 180.556,
+          "right": 249.0,
+          "bottom": 245.889
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 213.222
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "IconTpl",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/0/content/icon/IconTpl",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 182.333,
+          "top": 178.889,
+          "right": 250.333,
+          "bottom": 247.556
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 216.333,
+          "y": 213.222
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "hasread_bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/container/0/hasread_bg",
+        "sprite": "left_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 0.2
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 172.667,
+          "top": 171.556,
+          "right": 535.333,
+          "bottom": 254.889
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 354.0,
+          "y": 213.222
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "back_btn",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/CommonTitleAndBack/back_btn",
+        "sprite": "back_new",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -17.323,
+          "top": 13.221,
+          "right": 119.314,
+          "bottom": 85.205
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 50.995,
+          "y": 49.213
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "print_bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/CommonTitleAndBack/print_bg",
+        "sprite": "title_bg_new",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -28.36,
+          "top": 6.56,
+          "right": 370.221,
+          "bottom": 66.547
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -28.36,
+          "y": 36.553
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "option",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/option",
+        "sprite": "home_new",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1173.667,
+          "top": 8.8,
+          "right": 1275.667,
+          "bottom": 71.467
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1224.667,
+          "y": 40.133
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "help",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/help",
+        "sprite": "help_new",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 478.667,
+          "top": 17.6,
+          "right": 506.0,
+          "bottom": 44.267
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 478.667,
+          "y": 30.933
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "add",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/res/gem/add",
+        "sprite": "res_add",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1123.868,
+          "top": 23.338,
+          "right": 1150.526,
+          "bottom": 49.996
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1137.197,
+          "y": 36.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/res/gem/icon",
+        "sprite": "gem",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1000.775,
+          "top": 20.005,
+          "right": 1034.097,
+          "bottom": 53.328
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1017.436,
+          "y": 36.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "add",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/res/oil/add",
+        "sprite": "res_add",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 779.78,
+          "top": 23.338,
+          "right": 806.438,
+          "bottom": 49.996
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 793.109,
+          "y": 36.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/res/oil/bg",
+        "sprite": "resource_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 671.149,
+          "top": 2.678,
+          "right": 779.78,
+          "bottom": 25.337
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 725.464,
+          "y": 14.007
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/res/oil/icon",
+        "sprite": "oil",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 652.222,
+          "top": 20.005,
+          "right": 685.544,
+          "bottom": 53.328
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 668.883,
+          "y": 36.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "add",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/res/gold/add",
+        "sprite": "res_add",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 952.317,
+          "top": 23.338,
+          "right": 978.975,
+          "bottom": 49.996
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 965.646,
+          "y": 36.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/res/gold/bg",
+        "sprite": "resource_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 843.686,
+          "top": 2.678,
+          "right": 952.317,
+          "bottom": 25.337
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 898.002,
+          "y": 14.007
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/res/gold/icon",
+        "sprite": "gold",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 824.759,
+          "top": 20.005,
+          "right": 858.081,
+          "bottom": 53.328
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 841.42,
+          "y": 36.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "res",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top/res",
+        "sprite": "left_bg",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 0.298039
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 668.723,
+          "top": 24.357,
+          "right": 1177.944,
+          "bottom": 48.976
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 923.333,
+          "y": 36.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "top",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/top",
+        "sprite": "top_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 54.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 0.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/left_length/frame/tagRoot/collection/unSelect/Image",
+        "sprite": "icon_boxroom_new",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 24.667,
+          "top": 329.833,
+          "right": 46.0,
+          "bottom": 346.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 35.333,
+          "y": 338.167
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/left_length/frame/tagRoot/store/unSelect/Image",
+        "sprite": "icon_storeroom_new",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 23.667,
+          "top": 236.5,
+          "right": 47.0,
+          "bottom": 254.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 35.333,
+          "y": 245.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/left_length/frame/tagRoot/mail/selected/Image",
+        "sprite": "icon_mail_new",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 43.333,
+          "top": 143.167,
+          "right": 64.667,
+          "bottom": 163.833
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 54.0,
+          "y": 153.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/left_length/frame/tagRoot/mail/selected/Image",
+        "sprite": "left_select_new",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 127.5,
+          "right": 152.0,
+          "bottom": 186.167
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 76.0,
+          "y": 156.833
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/left_length/bg",
+        "sprite": "left_togle_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 15.333,
+          "top": 75.333,
+          "right": 126.667,
+          "bottom": 694.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 71.0,
+          "y": 384.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "btn_delete",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/bottom/btn_delete",
+        "sprite": "red_button",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 925.0,
+          "top": 627.333,
+          "right": 1105.667,
+          "bottom": 676.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1015.333,
+          "y": 652.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "btn_move",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/bottom/btn_move",
+        "sprite": "blue_button",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 731.0,
+          "top": 627.333,
+          "right": 911.667,
+          "bottom": 676.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 821.333,
+          "y": 652.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "got",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/view/content/attachment/got",
+        "sprite": "attach_got",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 606.333,
+          "top": 483.0,
+          "right": 1230.333,
+          "bottom": 513.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 918.333,
+          "y": 498.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/view/content/attachment/content/IconTpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.741176,
+          "green": 0.741176,
+          "blue": 0.741176,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 872.333,
+          "top": 455.333,
+          "right": 957.667,
+          "bottom": 540.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 915.0,
+          "y": 498.0
+        },
+        "inherited_alpha": 0.5
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/view/content/attachment/content/IconTpl/icon_bg/icon",
+        "sprite": "exploit",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 873.222,
+          "top": 456.222,
+          "right": 956.778,
+          "bottom": 539.778
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 915.0,
+          "y": 498.0
+        },
+        "inherited_alpha": 0.5
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/view/content/attachment/content/IconTpl/icon_bg",
+        "sprite": "bg1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 872.333,
+          "top": 455.333,
+          "right": 957.667,
+          "bottom": 540.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 915.0,
+          "y": 498.0
+        },
+        "inherited_alpha": 0.5
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/view/content/attachment/content/IconTpl/bg",
+        "sprite": "white_dot",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.101961,
+          "green": 0.117647,
+          "blue": 0.192157,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 871.444,
+          "top": 454.444,
+          "right": 958.556,
+          "bottom": 541.556
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 915.0,
+          "y": 498.0
+        },
+        "inherited_alpha": 0.5
+      },
+      {
+        "kind": "image",
+        "name": "IconTpl",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/view/content/attachment/content/IconTpl",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 869.667,
+          "top": 452.222,
+          "right": 960.333,
+          "bottom": 543.778
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 915.0,
+          "y": 498.0
+        },
+        "inherited_alpha": 0.5
+      },
+      {
+        "kind": "image",
+        "name": "attachment",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/view/content/attachment",
+        "sprite": "normal_bg_new",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.101961
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 590.333,
+          "top": 429.333,
+          "right": 1246.333,
+          "bottom": 566.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 918.333,
+          "y": 498.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "GameObject",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/line/GameObject",
+        "sprite": "deco_line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.298039
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 590.333,
+          "top": 222.333,
+          "right": 1246.333,
+          "bottom": 223.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 918.333,
+          "y": 222.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/title/matter/Image",
+        "sprite": "important_mark",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1050.185,
+          "top": 98.668,
+          "right": 1156.175,
+          "bottom": 119.999
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1103.18,
+          "y": 109.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/title/matter/off/Image",
+        "sprite": "toggle_on_off",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1174.74,
+          "top": 101.001,
+          "right": 1207.404,
+          "bottom": 117.666
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1191.072,
+          "y": 109.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "off",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/title/matter/off",
+        "sprite": "toggle_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1167.008,
+          "top": 96.001,
+          "right": 1253.667,
+          "bottom": 122.665
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1210.337,
+          "y": 109.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right/main/title/bg",
+        "sprite": "mail_title_new",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.035294,
+          "green": 0.05098,
+          "blue": 0.090196,
+          "alpha": 0.501961
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 583.0,
+          "top": 86.0,
+          "right": 1253.667,
+          "bottom": 132.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 918.333,
+          "y": 109.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "right",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/right",
+        "sprite": "left_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 0.501961
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 570.0,
+          "top": 75.333,
+          "right": 1266.667,
+          "bottom": 694.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 918.333,
+          "y": 384.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/head/rightSelect/toggle/btn_important/line",
+        "sprite": "pageline_new",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 424.667,
+          "top": 83.671,
+          "right": 426.0,
+          "bottom": 108.996
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 425.333,
+          "y": 96.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/head/rightSelect/toggle/btn_all/line",
+        "sprite": "pageline_new",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 290.667,
+          "top": 83.667,
+          "right": 292.0,
+          "bottom": 109.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 291.333,
+          "y": 96.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/head/rightSelect/toggle/btn_all/select/Image",
+        "sprite": "top_toggleselect_new",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 167.0,
+          "top": 80.667,
+          "right": 281.0,
+          "bottom": 112.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 224.0,
+          "y": 96.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "right_select_bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/head/rightSelect/right_select_bg",
+        "sprite": "righttogglebg_new",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 146.1,
+          "top": 70.0,
+          "right": 571.72,
+          "bottom": 128.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 358.91,
+          "y": 99.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "btn_managerMail",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/bottom/btn_managerMail",
+        "sprite": "blue_button",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 359.667,
+          "top": 627.778,
+          "right": 540.333,
+          "bottom": 677.111
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 450.0,
+          "y": 652.444
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "btn_deleteMail",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/bottom/btn_deleteMail",
+        "sprite": "gray_button",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 167.667,
+          "top": 627.778,
+          "right": 348.333,
+          "bottom": 677.111
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 258.0,
+          "y": 652.444
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Handle",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/Scrollbar/Sliding Area/Handle",
+        "sprite": "slider_new",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 548.0,
+          "top": 171.628,
+          "right": 550.666,
+          "bottom": 216.147
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 549.333,
+          "y": 193.887
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Scrollbar",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/middle/Scrollbar",
+        "sprite": "gem",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.2
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 548.0,
+          "top": 171.628,
+          "right": 550.666,
+          "bottom": 616.817
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 549.333,
+          "y": 394.222
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "mail_icon",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/top/mail_icon",
+        "sprite": "mail_",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 173.333,
+          "top": 154.667,
+          "right": 206.667,
+          "bottom": 163.333
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 190.0,
+          "y": 159.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/adapt/main/content/left/left_content/Image",
+        "sprite": "left_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.2
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 156.667,
+          "top": 75.333,
+          "right": 562.667,
+          "bottom": 694.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 359.667,
+          "y": 384.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/MailUI(Clone)/bg",
+        "sprite": "technology_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "top",
+        "path": "OverlayCamera/Adpter/top/top",
+        "sprite": "mask1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": -140.667,
+          "right": 1280.0,
+          "bottom": 0.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": -70.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "left",
+        "path": "OverlayCamera/Adpter/left/left",
+        "sprite": "mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -140.667,
+          "top": 0.0,
+          "right": -0.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -70.333,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bottom",
+        "path": "OverlayCamera/Adpter/bottom/bottom",
+        "sprite": "mask1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 720.0,
+          "right": 1280.0,
+          "bottom": 860.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 790.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "right",
+        "path": "OverlayCamera/Adpter/right/right",
+        "sprite": "mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1280.0,
+          "top": 0.0,
+          "right": 1420.667,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1350.333,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      }
+    ],
+    "globe_geometry": {
+      "schema": "alas-headless.globe-geometry/v1",
+      "status": 0,
+      "truncated": false,
+      "error_count": 0,
+      "camera_path": "",
+      "objects": []
+    },
+    "lua_globe_diagnostic": {
+      "schema": "alas-headless.lua-globe-diagnostic/v1",
+      "status": 0,
+      "stage": 0,
+      "truncated": false,
+      "stack_balanced": false,
+      "registry_visited": 0,
+      "inspection_count": 0,
+      "world_candidates": 0,
+      "drag_candidates": 0,
+      "colors": [],
+      "dragging": [],
+      "drag_pointer_instance_ids": [],
+      "drag_trigger_instance_ids": [],
+      "active_pointer_instance_id": 0
+    },
+    "shipyard_strengthen": {
+      "status": 0,
+      "stage": 0,
+      "truncated": false,
+      "stack_balanced": false,
+      "blueprint_id": 0,
+      "ship_id": 0,
+      "ship_index": 0,
+      "series": 0,
+      "rarity": 0,
+      "pursuing": false,
+      "purchased": 0,
+      "coins": 0,
+      "gems_known": false,
+      "paid_gems": 0,
+      "free_gems": 0,
+      "level": 0,
+      "fate_level": -1,
+      "exp": 0
+    },
+    "activity_identity": {
+      "status": 1,
+      "stack_balanced": true,
+      "archives": {
+        "status": 1,
+        "expected_count": 50,
+        "truncated": false,
+        "records": [
+          {
+            "id": 1,
+            "activity_type": 1,
+            "name": "红染常驻复刻",
+            "bg": "temp_hongran"
+          },
+          {
+            "id": 2,
+            "activity_type": 2,
+            "name": "Z舰队常驻复刻",
+            "bg": "temp_zjiandui"
+          },
+          {
+            "id": 4,
+            "activity_type": 1,
+            "name": "凛冬常驻复刻",
+            "bg": "temp_lingdong"
+          },
+          {
+            "id": 5,
+            "activity_type": 2,
+            "name": "围剿斯佩伯爵』常驻复刻",
+            "bg": "temp_sipei"
+          },
+          {
+            "id": 6,
+            "activity_type": 1,
+            "name": "异色格常驻复刻",
+            "bg": "temp_yisege"
+          },
+          {
+            "id": 7,
+            "activity_type": 1,
+            "name": "坠落之翼常驻复刻",
+            "bg": "temp_zhuiluo"
+          },
+          {
+            "id": 8,
+            "activity_type": 1,
+            "name": "鸢尾之华常驻复刻",
+            "bg": "temp_yuanwei"
+          },
+          {
+            "id": 9,
+            "activity_type": 1,
+            "name": "墨染的钢铁之花常驻复刻",
+            "bg": "temp_moran"
+          },
+          {
+            "id": 10,
+            "activity_type": 2,
+            "name": "光荣的一战常驻复刻",
+            "bg": "temp_guangrong"
+          },
+          {
+            "id": 11,
+            "activity_type": 1,
+            "name": "苍红的回响常驻复刻",
+            "bg": "temp_tiancheng"
+          },
+          {
+            "id": 12,
+            "activity_type": 2,
+            "name": "月光下的序曲常驻复刻",
+            "bg": "temp_xinaoerliang"
+          },
+          {
+            "id": 13,
+            "activity_type": 1,
+            "name": "俾斯麦常驻复刻",
+            "bg": "temp_bisimai"
+          },
+          {
+            "id": 14,
+            "activity_type": 2,
+            "name": "偶像一期常驻复刻",
+            "bg": "temp_ouxiang"
+          },
+          {
+            "id": 15,
+            "activity_type": 1,
+            "name": "神圣的悲喜剧常驻复刻",
+            "bg": "temp_beixiju"
+          },
+          {
+            "id": 16,
+            "activity_type": 2,
+            "name": "斯图尔特的硝烟常驻复刻",
+            "bg": "temp_longxiang"
+          },
+          {
+            "id": 17,
+            "activity_type": 1,
+            "name": "箱庭疗法常驻复刻",
+            "bg": "temp_xiangting"
+          },
+          {
+            "id": 18,
+            "activity_type": 1,
+            "name": "浮樱影华常驻复刻",
+            "bg": "temp_fuying"
+          },
+          {
+            "id": 19,
+            "activity_type": 2,
+            "name": "最珍贵的宝物常驻复刻",
+            "bg": "temp_u110"
+          },
+          {
+            "id": 20,
+            "activity_type": 2,
+            "name": "偶像二期常驻复刻",
+            "bg": "temp_ouxiang2"
+          },
+          {
+            "id": 21,
+            "activity_type": 1,
+            "name": "微层混合常驻复刻",
+            "bg": "temp_weiceng"
+          },
+          {
+            "id": 22,
+            "activity_type": 2,
+            "name": "峡湾间的星辰常驻复刻",
+            "bg": "temp_yonggan"
+          },
+          {
+            "id": 23,
+            "activity_type": 1,
+            "name": "穹顶下的圣咏曲常驻复刻",
+            "bg": "temp_zhende"
+          },
+          {
+            "id": 24,
+            "activity_type": 2,
+            "name": "夜幕下的归途常驻复刻",
+            "bg": "temp_taertu"
+          },
+          {
+            "id": 25,
+            "activity_type": 1,
+            "name": "北境序曲常驻复刻",
+            "bg": "temp_qiaba"
+          },
+          {
+            "id": 26,
+            "activity_type": 1,
+            "name": "永夜幻光常驻复刻",
+            "bg": "temp_hemin"
+          },
+          {
+            "id": 27,
+            "activity_type": 2,
+            "name": "峡湾间的反击常驻复刻",
+            "bg": "temp_aisijimoren"
+          },
+          {
+            "id": 28,
+            "activity_type": 1,
+            "name": "负象限作战常驻复刻",
+            "bg": "temp_u37"
+          },
+          {
+            "id": 29,
+            "activity_type": 1,
+            "name": "蝶海梦花常驻复刻",
+            "bg": "temp_xinnong"
+          },
+          {
+            "id": 30,
+            "activity_type": 1,
+            "name": "镜位螺旋常驻复刻",
+            "bg": "temp_xinzexi"
+          },
+          {
+            "id": 31,
+            "activity_type": 1,
+            "name": "破晓冰华常驻复刻",
+            "bg": "temp_talin"
+          },
+          {
+            "id": 32,
+            "activity_type": 2,
+            "name": "划破海空之翼常驻复刻",
+            "bg": "temp_pulinsidun"
+          },
+          {
+            "id": 33,
+            "activity_type": 2,
+            "name": "杰诺瓦的焰火常驻复刻",
+            "bg": "temp_fuxv"
+          },
+          {
+            "id": 34,
+            "activity_type": 1,
+            "name": "碧海光粼常驻复刻",
+            "bg": "temp_daofeng"
+          },
+          {
+            "id": 35,
+            "activity_type": 1,
+            "name": "复兴的赞美诗常驻复刻",
+            "bg": "temp_weineituo"
+          },
+          {
+            "id": 36,
+            "activity_type": 1,
+            "name": "逆转彩虹之塔常驻复刻",
+            "bg": "temp_huteng"
+          },
+          {
+            "id": 37,
+            "activity_type": 1,
+            "name": "深度回音常驻复刻",
+            "bg": "temp_kalangshitade"
+          },
+          {
+            "id": 38,
+            "activity_type": 2,
+            "name": "虚像构筑之塔常驻复刻",
+            "bg": "temp_diguo"
+          },
+          {
+            "id": 39,
+            "activity_type": 1,
+            "name": "泠誓光庭常驻复刻",
+            "bg": "temp_qianwei"
+          },
+          {
+            "id": 40,
+            "activity_type": 1,
+            "name": "雄鹰的叙事歌常驻复刻",
+            "bg": "temp_luoma"
+          },
+          {
+            "id": 41,
+            "activity_type": 1,
+            "name": "虹彩的终幕曲常驻复刻",
+            "bg": "temp_aimudeng"
+          },
+          {
+            "id": 42,
+            "activity_type": 2,
+            "name": "飓风与青春之泉常驻复刻",
+            "bg": "temp_fengfanv1"
+          },
+          {
+            "id": 43,
+            "activity_type": 1,
+            "name": "紫绛槿岚常驻复刻",
+            "bg": "temp_wuzang"
+          },
+          {
+            "id": 44,
+            "activity_type": 1,
+            "name": "定向折叠常驻复刻",
+            "bg": "temp_yuekechengII"
+          },
+          {
+            "id": 45,
+            "activity_type": 1,
+            "name": "湮烬尘墟常驻复刻",
+            "bg": "temp_yuanchou"
+          },
+          {
+            "id": 46,
+            "activity_type": 2,
+            "name": "远汇点作战常驻复刻",
+            "bg": "temp_bulunxierde"
+          },
+          {
+            "id": 47,
+            "activity_type": 2,
+            "name": "奏响鸢尾之歌常驻复刻",
+            "bg": "temp_masaiqu"
+          },
+          {
+            "id": 48,
+            "activity_type": 1,
+            "name": "空相交汇点常驻复刻",
+            "bg": "temp_bisimaiz"
+          },
+          {
+            "id": 49,
+            "activity_type": 2,
+            "name": "幻梦间奏曲常驻复刻",
+            "bg": "temp_sitelasibao"
+          },
+          {
+            "id": 50,
+            "activity_type": 3,
+            "name": "极地风暴常驻复刻",
+            "bg": "temp_kuersike"
+          },
+          {
+            "id": 51,
+            "activity_type": 3,
+            "name": "童心学院常驻复刻",
+            "bg": "temp_yaerweite"
+          }
+        ]
+      },
+      "raids": {
+        "status": 1,
+        "stage": 14,
+        "proxy_count": 29,
+        "matched_count": 29,
+        "failed_id": 0,
+        "expected_count": 0,
+        "truncated": false,
+        "records": []
+      }
+    },
+    "operation_siren_map_drag": {
+      "status": 0,
+      "handler_instance_id": 0,
+      "endpoints": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "handler_path": "",
+      "samples": []
+    },
+    "private_quarters_physics": {
+      "schema": "alas-headless.private-colliders/v1",
+      "status": 0,
+      "truncated": false,
+      "error_count": 0,
+      "camera_path": "",
+      "colliders": []
+    }
+  }
+}

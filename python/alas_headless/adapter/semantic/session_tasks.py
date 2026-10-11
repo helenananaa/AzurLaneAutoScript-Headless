@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from ...oracle.errors import SemanticInputBlocked
 from typing import Any, Callable, List, Optional, Sequence, Tuple, Union
 from ...adapter import SemanticFrame
 from ...alas_enemy_priority_config_contract import AlasEnemyPriorityConfigSnapshot
@@ -383,6 +384,60 @@ class SessionTasksPorts:
     def shipyard_state(self, index: int) -> ShipyardState:
         return self.open().shipyard_state(index)
 
+    def shipyard_strengthen_panel(self, index):
+        return self.open().shipyard_strengthen_panel(index)
+
+    def shipyard_active_phase(self):
+        return self.open().shipyard_active_phase()
+
+    def shipyard_cannot_strengthen(self, index):
+        return self.open().shipyard_cannot_strengthen(index)
+
+    def shipyard_fate_available(self):
+        return self.open().shipyard_fate_available()
+
+    def shipyard_enter_fate(self, index):
+        return self.open().shipyard_enter_fate(index)
+
+    def shipyard_change_quantity(self, index, delta):
+        return self.open().shipyard_change_quantity(index, delta)
+
+    def begin_shipyard_purchase(self, index, rarity, quantity, maximum_cost):
+        return self.open().begin_shipyard_purchase(index, rarity, quantity, maximum_cost)
+
+    def end_shipyard_purchase(self):
+        self.open().end_shipyard_purchase()
+
+    def shipyard_blueprint_count(self, index):
+        return self.open().shipyard_blueprint_count(index)
+
+    def begin_shipyard_blueprint_use(self, index, quantity):
+        return self.open().begin_shipyard_blueprint_use(index, quantity)
+
+    def end_shipyard_blueprint_use(self):
+        self.open().end_shipyard_blueprint_use()
+
+    def shipyard_blueprint_use_submit(self):
+        return self.open().shipyard_blueprint_use_submit()
+
+    def shipyard_blueprint_use_completed(self):
+        return self.open().shipyard_blueprint_use_completed()
+
+    def verify_shipyard_blueprint_use(self):
+        return self.open().verify_shipyard_blueprint_use()
+
+    def shipyard_purchase_submit(self):
+        return self.open().shipyard_purchase_submit()
+
+    def shipyard_purchase_confirm(self, text):
+        return self.open().shipyard_purchase_confirm(text)
+
+    def shipyard_purchase_completed(self):
+        return self.open().shipyard_purchase_completed()
+
+    def verify_shipyard_purchase(self):
+        return self.open().verify_shipyard_purchase()
+
     def research_detail_state(self) -> ResearchDetailState:
         return self.open().research_detail_state()
 
@@ -511,6 +566,10 @@ class SessionTasksPorts:
         self._meta_assist_active = False
         if self.adapter is not None:
             self.adapter.end_meta_assist()
+
+    def complete_meta_assist_combat(self) -> None:
+        self.refresh_frame()
+        self.open().complete_meta_assist_combat()
 
     def end_meta_beacon(self) -> None:
         self._meta_beacon_active = False
@@ -1076,7 +1135,7 @@ class SessionTasksPorts:
         """Dispatch a presence-driven ALAS click only if its target remains."""
 
         try:
-            return self.click(button)
+            return self.click(button, require_present=True)
         except SemanticTargetMissing:
             return None
 
@@ -1142,7 +1201,24 @@ class SessionTasksPorts:
         oracle = self.open().oracle
         receipts = []
         if not oracle.exercise_combat_pause_menu_visible():
-            receipts.append(oracle.click_exercise_combat_pause())
+            before_inputs = oracle.input_dispatch_count
+            try:
+                receipts.append(oracle.click_exercise_combat_pause())
+            except SemanticGateClosed as exc:
+                if (str(exc) != 'exercise combat identity is not proven'
+                        or oracle.input_dispatch_count != before_inputs
+                        or oracle._matches(oracle.read_state(), 'exercise/combat/pause')):
+                    raise
+                # A duel can finish between native ALAS' leased HP read and
+                # this fresh pause input. Await only the exact result within
+                # the existing pause deadline; do not submit another action
+                # or decide victory here. Native ALAS reads the next frame.
+                deadline = time.monotonic() + 10.0
+                while time.monotonic() < deadline:
+                    if oracle.daily_battle_result_visible():
+                        return ()
+                    time.sleep(0.2)
+                raise exc
         deadline = time.monotonic() + 10.0
         while time.monotonic() < deadline:
             if oracle.exercise_combat_pause_menu_visible():
@@ -1200,9 +1276,25 @@ class SessionTasksPorts:
             raise SemanticGateClosed("Exercise rival powers did not stabilize")
         result = []
         for index, power in enumerate(powers, start=1):
-            self.refresh_frame()
-            receipt = self.open().oracle.click("exercise/opponent/{0}".format(index))
             deadline = time.monotonic() + 20.0
+            target = "exercise/opponent/{0}".format(index)
+            while True:
+                self.refresh_frame()
+                before_inputs = getattr(oracle, 'input_dispatch_count', None)
+                try:
+                    receipt = oracle.click(target)
+                    break
+                except SemanticInputBlocked as exc:
+                    # The preceding rival's return can briefly mount Loading
+                    # over the overview. Re-read within the existing detail
+                    # deadline only after a classified no-input refusal.
+                    if (exc.semantic_id != target or exc.blockers != ('loading',)
+                            or type(before_inputs) is not int
+                            or oracle.input_dispatch_count != before_inputs
+                            or time.monotonic() >= deadline
+                            or not oracle.exercise_page_visible()):
+                        raise
+                    time.sleep(0.25)
             while time.monotonic() < deadline:
                 try:
                     if oracle.exercise_opponent_detail_visible():
@@ -1233,6 +1325,7 @@ class SessionTasksPorts:
         receipts: List[ActionReceipt] = []
         while time.monotonic() < deadline:
             oracle = self.open().oracle
+            award_action = False
             try:
                 if oracle.exercise_page_visible():
                     return tuple(receipts)
@@ -1242,6 +1335,7 @@ class SessionTasksPorts:
                     action = oracle.click_exercise_reward_item_info_cancel
                 elif oracle.award_info_page_visible():
                     action = oracle.click_exercise_award_info_close
+                    award_action = True
                 elif oracle.daily_battle_result_visible():
                     action = oracle.click_daily_battle_result
                 else:
@@ -1256,7 +1350,18 @@ class SessionTasksPorts:
             if action is None:
                 time.sleep(0.25)
                 continue
-            receipts.append(action())
+            before_inputs = getattr(oracle, 'input_dispatch_count', None)
+            try:
+                receipts.append(action())
+            except SemanticTargetMissing:
+                # A reward layer may unmount between the presence read and
+                # its guarded click. Re-observe inside the same deadline;
+                # never turn a dispatched/uncertain input into a retry.
+                if (not award_action or not isinstance(before_inputs, int)
+                        or oracle.input_dispatch_count != before_inputs):
+                    raise
+                time.sleep(0.25)
+                continue
             time.sleep(1.0)
         raise SemanticGateClosed("Exercise result stack did not return to overview")
 
@@ -1463,8 +1568,8 @@ class SessionTasksPorts:
         if self.adapter is not None:
             self.adapter.end_research()
 
-    def begin_dorm(self) -> None:
-        self.open().begin_dorm()
+    def begin_dorm(self, *, commission_recovery: bool = False) -> None:
+        self.open().begin_dorm(commission_recovery=commission_recovery)
 
     def end_dorm(self) -> None:
         if self.adapter is not None:
@@ -1520,6 +1625,9 @@ class SessionTasksPorts:
 
     def campaign_hard_remain(self) -> int:
         return self.open().campaign_hard_remain()
+
+    def supports_raid_layout(self, event: str) -> bool:
+        return self.open().supports_raid_layout(event)
 
     def raid_remain(self, event: str, mode: str) -> int:
         return self.open().raid_remain(event=event, mode=mode)
@@ -1593,7 +1701,7 @@ class SessionTasksPorts:
     def server_maintenance_visible(self) -> bool:
         adapter = self.open()
         try:
-            if adapter.oracle.enabled("overlay/network-reconnect/confirm"):
+            if adapter._frame_or_live_observation_oracle().enabled("overlay/network-reconnect/confirm"):
                 # This passive owner probe shares the login boot grace with
                 # maintenance; a transient SDK activity can hide Unity here.
                 # ui_additional still owns actual NetworkDown input.
@@ -1603,6 +1711,9 @@ class SessionTasksPorts:
             if self._login_probe_is_transient(adapter, exc):
                 return False
             raise
+
+    def client_version_update_required(self) -> bool:
+        return self.open()._frame_or_live_observation_oracle().client_version_update_required()
 
     def login_update_in_progress(self) -> bool:
         adapter = self.open()

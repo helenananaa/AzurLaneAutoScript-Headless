@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from numbers import Real
 import re
 import time
 from dataclasses import replace
@@ -19,10 +20,10 @@ from ...semantic_oracle import (
     SemanticGateClosed,
     SemanticTargetMissing,
 )
-from .contracts import _OperationSirenGlobeSwipeIntent, AlasSemanticActionDeferred
+from .contracts import _OperationSirenGlobeSwipeIntent, AlasSemanticActionDeferred, AlasSemanticUnmapped
 from .dispatch_result import UNHANDLED
 from ...oracle.opsi_map import OperationSirenMapSwipeIntent
-from ...oracle.opsi_map import reviewed_logging_tower
+from ...oracle.opsi_map import reviewed_logging_tower, reviewed_scanning_device
 from ...oracle.contracts import Point
 
 
@@ -32,25 +33,28 @@ class OpsiAdapterPorts:
     @staticmethod
     def _operation_siren_camera_grid(button):
         return (getattr(button, 'semantic_os_cell', None) is not None
-                and getattr(button, 'is_logging_tower', False) is True)
+                and (getattr(button, 'is_logging_tower', False) is True
+                     or getattr(button, 'is_scanning_device', False) is True))
 
     def click_operation_siren_camera_grid(self, grid):
-        """Adapt the original LoggingTower click, preserving its native wait loop."""
+        """Adapt original reviewed map-event clicks, preserving native wait loops."""
         self._package_gate()
         cell = getattr(grid, 'semantic_os_cell', None)
         dimensions = getattr(grid, 'semantic_os_dimensions', None)
         if (not isinstance(cell, tuple) or len(cell) != 2
                 or any(type(v) is not int or v < 0 for v in cell)
                 or not isinstance(dimensions, tuple) or len(dimensions) != 2
-                or getattr(grid, 'is_logging_tower', False) is not True):
+                or not self._operation_siren_camera_grid(grid)):
             raise SemanticGateClosed('operation siren camera grid has no reviewed event input')
         state = self.oracle.operation_siren_map_geometry(
             getattr(grid, 'semantic_os_zone', None), rows=dimensions[0], columns=dimensions[1])
         targets = [c for c in state.cells if (c.column-1, c.row-1) == cell]
         attachments = [a for a in state.attachments if (a.column-1, a.row-1) == cell]
+        reviewed_event = (reviewed_logging_tower if getattr(grid, 'is_logging_tower', False) is True
+                          else reviewed_scanning_device)
         if (len(targets) != 1 or targets[0].button_path != getattr(grid, 'semantic_path', None)
-                or len(attachments) != 1 or not reviewed_logging_tower(attachments[0])):
-            raise SemanticGateClosed('operation siren logging tower identity changed before input')
+                or len(attachments) != 1 or not reviewed_event(attachments[0])):
+            raise SemanticGateClosed('operation siren camera event identity changed before input')
         centers = [c for c in state.cells if c.bounds.contains(Point(640.0, 360.0))]
         if len(centers) != 1:
             raise SemanticGateClosed('operation siren camera center is absent or ambiguous')
@@ -81,10 +85,21 @@ class OpsiAdapterPorts:
         timing=self._campaign_swipe_pair(duration,'operation siren camera duration')
         self._campaign_swipe_areas(whitelist_area,'operation siren preferred areas')
         blacklist=self._campaign_swipe_areas(blacklist_area,'operation siren forbidden areas')
-        if (tuple(random_range)!=(0,0,0,0) or padding!=15 or timing!=(0.1,0.2)
-                or distance_check is not True
-                or not 0<=bounds[0]<bounds[2]<=1280 or not 0<=bounds[1]<bounds[3]<=720):
-            raise SemanticGateClosed('operation siren camera selection arguments are unsupported')
+        # Padding chooses the original sampler's placement, not the input
+        # target. Final endpoints still must match this intent, remain in its
+        # box and pass the Oracle's fresh typed drag/movement proof. Likewise,
+        # keep the original call's duration range instead of a baseline tuple.
+        if (isinstance(padding,bool) or not isinstance(padding,Real)
+                or not math.isfinite(padding) or padding<0
+                or not 0<timing[0]<=timing[1]):
+            raise SemanticGateClosed('operation siren camera selection arguments are malformed')
+        if not 0<=bounds[0]<bounds[2]<=1280 or not 0<=bounds[1]<bounds[3]<=720:
+            raise SemanticGateClosed('operation siren camera box left the semantic screen')
+        if tuple(random_range)!=(0,0,0,0) or distance_check is not True:
+            # These sampler modes need a different final-vector relationship.
+            # No input has occurred; defer only this port's task until its mode
+            # is understood, rather than terminating unrelated native tasks.
+            raise AlasSemanticUnmapped('operation siren camera sampler mode is unsupported')
         intent=OperationSirenMapSwipeIntent(name,vector,bounds,timing,self._operation_siren_camera_geometry,blacklist)
         self._operation_siren_map_swipe_intent=intent
         return intent
@@ -106,18 +121,40 @@ class OpsiAdapterPorts:
         left,top,right,bottom=intent.box
         if any(not left<=x<=right or not top<=y<=bottom for x,y in (start,end)):
             raise SemanticGateClosed('operation siren camera endpoint left original ALAS box')
-        if tuple(b-a for a,b in zip(start,end))!=tuple(round(v) for v in intent.pixel_vector):
-            raise SemanticGateClosed('operation siren camera vector changed')
+        actual_vector=tuple(b-a for a,b in zip(start,end))
+        # ALAS random_rectangle_vector_opted applies point_limit to both
+        # endpoints. A requested vector can therefore shorten at the native
+        # box boundary; interior changes, reversal and extension still differ
+        # from that original gesture. The Oracle proves the actual drag path
+        # and resulting native map movement below.
+        for a,b,delta,requested,lower,upper in zip(
+                start,end,actual_vector,map(round,intent.pixel_vector),
+                (left,top),(right,bottom)):
+            if delta==requested:
+                continue
+            if not ((requested<0 and requested<=delta<=0 and (a==upper or b==lower))
+                    or (requested>0 and 0<=delta<=requested and (a==lower or b==upper))):
+                # No input was sent: an unrecognized native sampler result
+                # is a local port incompatibility. Reuse ALAS' task failure
+                # interval instead of terminating unrelated scheduled tasks.
+                raise AlasSemanticUnmapped('operation siren camera vector changed beyond native boundary clipping')
         if (isinstance(duration,bool) or not isinstance(duration,(int,float)) or not math.isfinite(duration)
                 or not (intent.duration_range[0]<=duration<=intent.duration_range[1]
                         or intent.duration_range[0]*2.5<=duration<=intent.duration_range[1]*2.5)):
             raise SemanticGateClosed('operation siren camera swipe duration changed')
-        # Preserve the original ALAS path sampler's blacklist checks.
-        count=int(math.hypot(*intent.pixel_vector)//70)+1
+        # ALAS tests continuous path samples with threshold=0: only the
+        # rectangle interior is forbidden. Rounding an intermediate point
+        # onto an edge invents an intersection the native sampler rejected.
+        count=int(math.hypot(*map(round,intent.pixel_vector))//70)+1
         for index in range(count+1):
-            point=tuple(round(b-v*index/count) for b,v in zip(end,intent.pixel_vector))
-            if any(self._campaign_point_in_area(point,area) for area in intent.blacklist_areas):
-                raise SemanticGateClosed('operation siren camera path entered an ALAS forbidden area')
+            x,y=(b-v*index/count for b,v in zip(end,actual_vector))
+            if any(area[0]<x<area[2] and area[1]<y<area[3]
+                    for area in intent.blacklist_areas):
+                # Native sampling can exhaust its bounded attempts and return
+                # a rejected candidate. No input occurred: defer this port's
+                # task while independent scheduled work remains usable.
+                raise AlasSemanticUnmapped(
+                    'operation siren camera sampler produced an ALAS forbidden path; no input submitted')
         return self.oracle.operation_siren_map_swipe(intent.geometry,start,end,round(duration*1000))
 
     def _operation_siren_allows_passive_probe(self) -> bool:
@@ -389,6 +426,8 @@ class OpsiAdapterPorts:
         # Do not release ownership until those exact result surfaces are gone.
         if self.oracle.daily_battle_result_visible():
             return False
+        if getattr(self.oracle, 'operation_siren_battle_statistics_visible', lambda: False)():
+            return False
         if self.oracle.award_info_page_visible():
             return False
         if not self.oracle.operation_siren_local_map_visible():
@@ -434,30 +473,72 @@ class OpsiAdapterPorts:
     def click_operation_siren_reward_close(self) -> ActionReceipt:
         """Close one exact standalone boss reward without pixel fallbacks."""
 
+        return self._click_operation_siren_reward_close(self._fresh_input_oracle())
+
+    def try_click_operation_siren_reward_close(self) -> Optional[ActionReceipt]:
+        """Let the native map loop re-observe an unmounted or mounting reward."""
+
+        return self._click_operation_siren_reward_close(
+            self._fresh_input_oracle(), allow_passive=True
+        )
+
+    def _click_operation_siren_reward_close(self, reader, allow_passive=False):
         self._package_gate()
         if not self._operation_siren_allows_passive_probe():
             raise SemanticGateClosed("operation siren reward owner is absent")
-        if not self.oracle.award_info_page_visible():
+        if not reader.award_info_page_visible():
+            if allow_passive:
+                return None
             raise SemanticGateClosed("operation siren reward page is absent")
+        if (allow_passive
+                and getattr(reader, 'reward_item_info_visible', lambda: False)()):
+            # A map event can expose an item's description above AwardInfo.
+            # Reuse its complete existing live action/postcondition parser;
+            # this is only the description close, not an award completion.
+            return self.oracle.click('reward/item-info/close')
         targets = tuple(
             semantic_id
             for semantic_id in (
                 "reward/award-info/close",
                 "reward/award-info1/close",
             )
-            if self.oracle.enabled(semantic_id)
+            if reader.enabled(semantic_id)
         )
+        if not targets and allow_passive:
+            # AwardInfo ownership can precede its actionable close Button.
+            # No input or completion receipt is produced; ALAS owns polling.
+            return None
         if len(targets) != 1:
             raise SemanticGateClosed(
                 "operation siren reward close target is absent or ambiguous"
             )
         receipt = replace(
-            self.oracle.click(targets[0]),
+            reader.click(targets[0]),
             semantic_id="os/combat/reward/close",
         )
         if self._meta_beacon_active or self._meta_assist_active:
             self._meta_reward_close_receipt = receipt
+        else:
+            self._operation_siren_reward_close_receipt = receipt
         return receipt
+
+    def _operation_siren_reward_return_completed(self, reader):
+        previous = self._operation_siren_reward_close_receipt
+        if (previous is None
+                or reader.observation_target_present('reward/award-info/close')
+                or reader.observation_target_present('reward/award-info1/close')
+                or not reader.operation_siren_local_map_visible()
+                or reader.operation_siren_map_overlay_present()):
+            return None
+        state = reader.read_state()
+        if state.generation <= previous.generation:
+            return None
+        # Original ALAS can repeat GET_ITEMS from its retained screenshot
+        # after our exact reward close has returned to the map. Hand off the
+        # accepted edge once; this acknowledgement sends no second input.
+        self._package_gate()
+        self._operation_siren_reward_close_receipt = None
+        return previous
 
     def operation_siren_radar_targets(
         self, target_kind: str
@@ -515,11 +596,13 @@ class OpsiAdapterPorts:
         relative_position: Tuple[int, int],
         *,
         prefer_adjacent_event: bool = False,
+        fleet_relative: bool = False,
     ) -> ActionReceipt:
         self._package_gate()
         return self.oracle.click_operation_siren_relative_grid(
             relative_position,
             prefer_adjacent_event=prefer_adjacent_event,
+            fleet_relative=fleet_relative,
         )
 
     def operation_siren_daemon_move_allowed(self) -> bool:
@@ -535,10 +618,6 @@ class OpsiAdapterPorts:
         self, expected: OperationSirenDaemonTarget
     ) -> ActionReceipt:
         self._package_gate()
-        if not self.operation_siren_daemon_move_allowed():
-            raise SemanticGateClosed(
-                "Operation Siren daemon movement requires a positive action budget"
-            )
         return self._dispatch_mutation(
             "operation_siren.daemon_move",
             lambda: self.oracle.click_operation_siren_daemon_target(expected),
@@ -557,6 +636,14 @@ class OpsiAdapterPorts:
     ) -> ActionReceipt:
         self._package_gate()
         return self.oracle.click_operation_siren_fleet_selector(fleet_index)
+
+    def click_operation_siren_globe_zone_enter(self, expected_zone_name=None) -> ActionReceipt:
+        """Keep passive map-event probes owned after the exact zone input."""
+        self._package_gate()
+        receipt = self.oracle.click_operation_siren_globe_zone_enter(expected_zone_name)
+        self._operation_siren_entry_receipt = receipt
+        self._operation_siren_entry_transition_until = time.monotonic() + 30.0
+        return receipt
 
     def operation_siren_map_visible(self) -> bool:
         self._package_gate()
@@ -624,7 +711,7 @@ class OpsiAdapterPorts:
 
     def operation_siren_storage_scroll_for_abyssal(
         self,
-    ) -> OperationSirenStorageScrollReceipt:
+    ) -> Optional[OperationSirenStorageScrollReceipt]:
         self._package_gate()
         return self.oracle.operation_siren_storage_scroll_for_abyssal()
 
@@ -697,7 +784,9 @@ class OpsiAdapterPorts:
         self._package_gate()
         return self.oracle.click_operation_siren_globe_map_zone(expected_zone_name, area_pos)
 
-    def click_operation_siren_globe_port(self, expected_zone_name: str, zone_id: int) -> ActionReceipt:
+    def click_operation_siren_globe_port(self, expected_zone_name: str, zone_id: int, *, native_mask=False) -> ActionReceipt:
+        if native_mask:
+            return self.oracle.click_operation_siren_globe_port(expected_zone_name, zone_id, native_mask=True)
         return self.oracle.click_operation_siren_globe_port(expected_zone_name, zone_id)
 
     def click_operation_siren_globe_zone(
@@ -751,14 +840,10 @@ class OpsiAdapterPorts:
     ) -> ActionReceipt:
         self._package_gate()
         if not use:
-            return self.oracle.click_operation_siren_action_point_control(False)
-        if not self.operation_siren_action_point_use_allowed():
-            raise AlasSemanticActionDeferred(
-                "Operation Siren action point use requires a positive action budget"
-            )
+            return self._fresh_input_oracle().click_operation_siren_action_point_control(False)
         return self._dispatch_mutation(
             "operation_siren.action_point_use",
-            lambda: self.oracle.click_operation_siren_action_point_control(True),
+            lambda: self._fresh_input_oracle().click_operation_siren_action_point_control(True),
         )
 
     def operation_siren_action_point_use_allowed(self) -> bool:
@@ -774,10 +859,6 @@ class OpsiAdapterPorts:
         self._package_gate()
         if not confirm:
             return self.oracle.click_operation_siren_port_repair(False)
-        if not self.operation_siren_port_repair_allowed():
-            raise SemanticGateClosed(
-                "Operation Siren port repair requires a positive action budget"
-            )
         return self._dispatch_mutation(
             "operation_siren.port_repair",
             lambda: self.oracle.click_operation_siren_port_repair(True),
@@ -806,8 +887,13 @@ class OpsiAdapterPorts:
         """Authorize one camera-only swipe selected by ALAS's globe logic."""
 
         self._package_gate()
-        if not self.oracle.operation_siren_globe_visible():
-            raise SemanticGateClosed("operation siren globe identity is absent")
+        # Preparing an intent has not dispatched a gesture. A transient
+        # publisher/loading edge may settle during the existing read-only
+        # retry; retain the actual identity/blocker error if it does not.
+        # The sampler and final swipe still prove the complete native path.
+        self.oracle._retry_transition_read(
+            self.oracle._require_operation_siren_globe_visible
+        )
         if self._operation_siren_globe_swipe_intent is not None:
             raise SemanticGateClosed("operation siren globe swipe is already armed")
         if not isinstance(name, str) or re.fullmatch(
@@ -820,11 +906,12 @@ class OpsiAdapterPorts:
         if not 10.0 <= math.hypot(*pixel_vector) <= 1200.0:
             raise SemanticGateClosed("operation siren globe swipe vector is outside limits")
         exact_box = self._campaign_swipe_box(box, "operation siren globe swipe box")
-        if exact_box not in {
-            (20.0, 220.0, 980.0, 620.0),
-            (600.0, 220.0, 980.0, 620.0),
-        }:
-            raise SemanticGateClosed("operation siren globe swipe box changed")
+        # ALAS owns its sampling rectangle. Harmless upstream adjustments
+        # remain compatible; every actual sampled path still needs the native
+        # Plane proof, and final dispatch must stay inside this same box.
+        if not (0 <= exact_box[0] < exact_box[2] <= 1280
+                and 0 <= exact_box[1] < exact_box[3] <= 720):
+            raise SemanticGateClosed("operation siren globe swipe box is outside the screen")
         if tuple(random_range) != (0, 0, 0, 0) or padding != 15:
             raise SemanticGateClosed("operation siren globe swipe selection changed")
         if whitelist_area is not None or blacklist_area is not None:
@@ -837,7 +924,7 @@ class OpsiAdapterPorts:
         intent = _OperationSirenGlobeSwipeIntent(
             name=name,
             pixel_vector=pixel_vector,
-            box=tuple(int(item) for item in exact_box),
+            box=exact_box,
             duration_range=duration_range,
         )
         self._operation_siren_globe_swipe_intent = intent

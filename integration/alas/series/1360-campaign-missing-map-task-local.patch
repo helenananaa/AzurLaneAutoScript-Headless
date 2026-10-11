@@ -1,0 +1,21 @@
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -47,7 +47,16 @@
+ 
+         try:
+             self.module = importlib.import_module('.' + name, f'campaign.{folder}')
+-        except ModuleNotFoundError:
++        except ModuleNotFoundError as exc:
++            if (getattr(getattr(self, 'device', None), 'semantic_adapter', None) is not None
++                    and exc.name in (f'campaign.{folder}', f'campaign.{folder}.{name}')):
++                # The requested map is unavailable before any navigation or
++                # input. Defer only this native task; dependency/import bugs
++                # and the original rendered-mode recovery remain unchanged.
++                from alas_headless import AlasSemanticUnmapped
++                raise AlasSemanticUnmapped(
++                    f'Campaign map unavailable: campaign.{folder}.{name}; '
++                    'install compatible ALAS map data or select an existing map') from exc
+             logger.warning(f'Map file not found: campaign.{folder}.{name}')
+             if not os.path.exists(f'./campaign/{folder}'):
+                 logger.warning(f'Folder not exists: ./campaign/{folder}')

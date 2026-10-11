@@ -1,0 +1,47 @@
+diff --git a/module/guild/operations.py b/module/guild/operations.py
+--- a/module/guild/operations.py
++++ b/module/guild/operations.py
+@@ -197,6 +197,9 @@
+         Pages:
+             in: page_guild, guild operation, operation map (GUILD_OPERATIONS_ACTIVE_CHECK)
+         """
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            return semantic_session.open().guild_operation_visible_nodes(), ()
+         # Where whole operation mission chain is
+         detection_area = (152, 135, 1280, 630)
+         # Offset inside to avoid clicking on edge
+@@ -246,6 +249,10 @@
+             if len(entrance_1):
+                 return True
+ 
++            semantic_session = getattr(self.device, 'semantic_adapter', None)
++            if semantic_session is not None:
++                semantic_session.open().swipe_guild_operations(forward)
++                continue
+             p1, p2 = random_rectangle_vector(
+                 direction_vector, box=detection_area, random_range=(-50, -50, 50, 50), padding=20)
+             self.device.drag(p1, p2, segments=2, shake=(0, 25), point_random=(0, 0, 0, 0), shake_random=(0, -5, 0, 5))
+@@ -625,10 +632,18 @@
+                 return False
+             if not state.active_nodes:
+                 return True
+-            # Native dispatch consumes the first visible entrance. Preserve
+-            # that visual ordering while retaining each typed node identity.
+-            node = min(state.active_nodes, key=lambda node: (
+-                node.bounds.top, node.bounds.left, node.path))
++            # Keep native direction choice, screenshots and five-attempt
++            # scrolling; semantic ports supply only entrances and drag.
++            for forward in (True, False):
++                if self._guild_operations_dispatch_swipe(
++                        forward=forward, skip_first_screenshot=False):
++                    break
++            else:
++                return False
++            entrances, _ = self._guild_operations_get_entrance()
++            if not entrances:
++                return False
++            node = entrances[0]
+             adapter.oracle.click_guild_active_operation(node.path)
+             for _ in range(30):
+                 if adapter.oracle.enabled('guild/operations/dispatch/open'):

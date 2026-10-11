@@ -1,0 +1,16 @@
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -1188,9 +1188,10 @@
+                 # means this fleet already lost.  Map-chibi or stacked-fleet
+                 # HUD reads after a boss click must not skip the remaining
+                 # fleets before they fight.
+-                if is_month and 'fleet_unavailable' in str(walk_result):
++                if 'fleet_unavailable' in str(walk_result):
+                     logger.warning('Current fleet is unavailable; rotate to the next fleet')
+-                    self.semantic_month_boss_leave_boss_cell(drop=drop)
++                    if is_month:
++                        self.semantic_month_boss_leave_boss_cell(drop=drop)
+                     return
+             return
+ 

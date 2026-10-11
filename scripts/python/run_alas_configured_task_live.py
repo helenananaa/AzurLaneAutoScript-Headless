@@ -13,9 +13,22 @@ import sys
 import time
 import traceback
 import uuid
+from collections.abc import Mapping
 
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def encode_receipt_value(value):
+    """Copy immutable typed evidence without deepcopying mapping proxies."""
+    if dataclasses.is_dataclass(value):
+        return {field.name: encode_receipt_value(getattr(value, field.name))
+                for field in dataclasses.fields(value)}
+    if isinstance(value, Mapping):
+        return {key: encode_receipt_value(child) for key, child in value.items()}
+    if isinstance(value, (tuple, list)):
+        return [encode_receipt_value(child) for child in value]
+    return value
 
 
 def parse_action_budgets(items):
@@ -38,13 +51,31 @@ def encode_navigation_intent(values):
     return [dataclasses.asdict(value) if dataclasses.is_dataclass(value) else value for value in values]
 
 
+def prepare_config(seed, task, run_limit):
+    config = copy.deepcopy(seed)
+    if task not in config or not config[task].get('Scheduler', {}).get('Enable'):
+        raise ValueError(f'task is not enabled in imported config: {task}')
+    override = None
+    if run_limit is not None:
+        stop_condition = config[task].get('StopCondition')
+        if run_limit < 1 or not isinstance(stop_condition, dict) or 'RunCount' not in stop_condition:
+            raise ValueError('--run-limit requires a positive count and a task with StopCondition.RunCount; '
+                             'Hard uses its native daily quota')
+        override = {'original': stop_condition['RunCount'], 'qualification': run_limit}
+        stop_condition['RunCount'] = run_limit
+    # Retain ALAS recovery policy: HandleError also controls app stop/start.
+    # Error screenshots and outgoing notifications are not qualification data.
+    config['Alas']['Error'].update(SaveError=False, OnePushConfig='')
+    return config, override
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--alas-root', required=True, type=Path)
     parser.add_argument('--seed-config', required=True)
     parser.add_argument('--task', required=True)
     parser.add_argument('--expected-surface', choices=(
-        'main', 'commission', 'mission', 'research', 'tactical', 'meowfficer', 'shop', 'munitions', 'meta', 'meta-sync', 'os', 'globe', 'opsi', 'campaign', 'game-room', 'fushun-prepare', 'exercise', 'dorm', 'dock', 'daily', 'campaign-menu', 'build-queue',
+        'main', 'reward', 'commission', 'mission', 'research', 'tactical', 'meowfficer', 'shop', 'munitions', 'meta', 'meta-sync', 'os', 'globe', 'opsi', 'campaign', 'game-room', 'fushun-prepare', 'exercise', 'dorm', 'dock', 'daily', 'campaign-menu', 'build-queue', 'shipyard',
     ), default='main')
     parser.add_argument('--driver-revision', required=True)
     parser.add_argument('--output', required=True, type=Path)
@@ -62,19 +93,12 @@ def main() -> int:
         parser.error(f'output already exists: {output}')
     alas_root = args.alas_root.resolve()
     source = alas_root / 'config' / (args.seed_config + '.json')
-    config = copy.deepcopy(json.loads(source.read_text(encoding='utf-8')))
-    if args.task not in config or not config[args.task].get('Scheduler', {}).get('Enable'):
-        parser.error(f'task is not enabled in imported config: {args.task}')
-    run_limit_override = None
-    if args.run_limit is not None:
-        if args.run_limit < 1 or args.task not in ('Main', 'Event', 'EventSp', 'Hard'):
-            parser.error('--run-limit requires a positive campaign-task run count')
-        stop_condition = config[args.task]['StopCondition']
-        run_limit_override = {'original': stop_condition['RunCount'],
-                              'qualification': args.run_limit}
-        stop_condition['RunCount'] = args.run_limit
+    try:
+        config, run_limit_override = prepare_config(
+            json.loads(source.read_text(encoding='utf-8')), args.task, args.run_limit)
+    except ValueError as exc:
+        parser.error(str(exc))
     serial = config['Alas']['Emulator']['Serial']
-    config['Alas']['Error'].update(HandleError=False, SaveError=False)
     name = '_codex_configured_' + uuid.uuid4().hex
     temporary = alas_root / 'config' / (name + '.json')
     temporary.write_text(json.dumps(config, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
@@ -102,6 +126,20 @@ def main() -> int:
         session = app.device.semantic_adapter
         result['policy_grants'] = dict(getattr(session, 'policy_grants', {}))
         oracle = session.open().oracle
+        original_appear = session.appear
+        def record_presence(button):
+            try:
+                return original_appear(button)
+            except Exception:
+                result['failed_presence'] = {'name': getattr(button, 'name', str(button))}
+                try:
+                    frame_oracle = session.open()._frame_or_live_observation_oracle()
+                    result['failed_presence']['state'] = encode_receipt_value(frame_oracle.read_state())
+                    result['failed_presence']['ui'] = encode_receipt_value(frame_oracle.read_ui_state())
+                except Exception as exc:
+                    result['failed_presence']['record_error'] = str(exc)
+                raise
+        session.appear = record_presence
         original_read_state = oracle.read_state
         def record_state(*values, **options):
             nonlocal last_observed_state
@@ -239,6 +277,10 @@ def main() -> int:
             oracle.campaign_fleet_selection_state = record_fleet_state
         result['typed_navigation_actions'] = []
         for method_name in ('click_operation_siren_globe_port',
+                            'click_operation_siren_action_point_open',
+                            'click_operation_siren_action_point_item',
+                            'click_operation_siren_action_point_control',
+                            'click_operation_siren_port_repair',
                             'click_weekly_mission_progress_claim',
                             'click_mission_overflow_confirm',
                             'click_reward_resource',
@@ -287,13 +329,14 @@ def main() -> int:
             return rules
         if callable(original_blocking_rules):
             oracle._blocking_rules = record_blocking_rules
-        original_globe_proof = oracle.operation_siren_globe_drag_proof
+        original_globe_proof = getattr(oracle, 'operation_siren_globe_drag_proof', None)
         def record_globe_proof(start,end):
             generation,proof = original_globe_proof(start,end)
             result['globe_drag_proofs'].append({'generation':generation,'proof':proof})
             output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
             return generation,proof
-        oracle.operation_siren_globe_drag_proof = record_globe_proof
+        if callable(original_globe_proof):
+            oracle.operation_siren_globe_drag_proof = record_globe_proof
         result['globe_projection_observations'] = []
         original_projection = getattr(oracle, '_operation_siren_globe_map_projection_record', None)
         def record_projection(area_pos):
@@ -325,6 +368,7 @@ def main() -> int:
                            'main_visible': oracle.main_page_visible(),
                            'commission_back': oracle.exists('commission/page/back')}
         surface_targets = {
+            'reward': 'reward/page/back',
             'commission': 'commission/page/back',
             'mission': 'task/page/back',
             'research': 'research/page/back',
@@ -339,8 +383,24 @@ def main() -> int:
             args.task]['Scheduler']['NextRun']
         if outcome is not True:
             arrived = False
+        elif args.expected_surface == 'shipyard':
+            result['after']['shipyard_visible'] = oracle.shipyard_page_visible()
+            result['after']['shipyard_state'] = dataclasses.asdict(oracle.shipyard_selected_state())
+            result['after']['shipyard_cannot_strengthen'] = oracle.shipyard_cannot_strengthen(
+                result['after']['shipyard_state']['ship_index'])
+            arrived = result['after']['shipyard_visible']
         elif args.expected_surface == 'main':
             arrived = result['after']['main_visible']
+        elif args.expected_surface == 'reward':
+            # Tactical can return while its accepted Back is still mounting
+            # the reward sidebar. Prove the actual new actionable destination
+            # with the existing read-only wait instead of accepting the first
+            # transition frame or treating its temporary absence as failure.
+            oracle.wait_for('reward/page/back', timeout_seconds=5.0,
+                            minimum_generation=after.generation)
+            result['after']['expected_target_present'] = True
+            result['after']['reward_ready_generation'] = oracle.read_state().generation
+            arrived = True
         elif args.expected_surface == 'shop':
             arrived = oracle.gift_pack_page_visible()
             result['after']['gift_pack_visible'] = arrived
@@ -409,6 +469,7 @@ def main() -> int:
         # scope's "raised" diagnostic must not override that native outcome.
         result['passed'] = outcome is True and arrived
     except BaseException as exc:
+        result['passed'] = False
         result['error'] = {'type': type(exc).__name__, 'message': str(exc),
                            'traceback': traceback.format_exc()}
         if dataclasses.is_dataclass(last_observed_state):
@@ -431,6 +492,11 @@ def main() -> int:
         except Exception as config_error:
             result['final_task_config_error'] = str(config_error)
         if session is not None:
+            ledger = getattr(session, 'action_ledger', None)
+            if ledger is not None:
+                result['remaining_action_grants'] = {
+                    key: ledger.remaining(key) for key in ledger.initial_grants
+                }
             result.setdefault('task_outcome', dict(session.last_task_outcome))
             result.setdefault('native_error', getattr(session, 'last_task_error', None))
             # Preserve original ALAS dock recovery transactions before closing

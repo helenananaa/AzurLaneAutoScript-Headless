@@ -1,6 +1,7 @@
 """Stable kernel contracts for the ALAS semantic adaptation boundary."""
 
 from .errors import (
+    ActionGrantExhausted,
     ActionLeaseError,
     AdapterContractError,
     CapabilityClosureError,
@@ -132,6 +133,7 @@ __all__ = (
     "RECOVERY_MANUAL_TAKEOVER",
     "RECOVERY_QUALIFICATION_STOP",
     "ActionLeaseError",
+    "ActionGrantExhausted",
     "ActionGrantDispatch",
     "ActionIntent",
     "ActionLease",

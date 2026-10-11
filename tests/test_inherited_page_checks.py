@@ -5,6 +5,72 @@ from alas_headless.adapter.semantic.dispatch_result import UNHANDLED
 from tests.semantic_support.adapter_fixtures import FakeOracle
 
 
+def test_task_back_transition_uses_one_frame_even_after_live_main_arrives():
+    import time
+    from alas_headless import AlasSemanticUnmapped
+    live, frame = FakeOracle(), FakeOracle()
+    live.main_page_visible_value = True
+    host = AlasSemanticAdapter(live, package_gate=lambda: None,
+                              frame_observation_oracle=lambda: frame)
+    host._mission_page_return_transition_until = time.monotonic() + 15
+    assert host.appear(SimpleNamespace(name='GAME_ROOM_CHECK')) is False
+    assert live.click_calls == []
+    host._mission_page_return_transition_until = time.monotonic() - 1
+    with pytest.raises(AlasSemanticUnmapped):
+        host.appear(SimpleNamespace(name='GAME_ROOM_CHECK'))
+
+
+@pytest.mark.parametrize('probe', ['GAME_ROOM_CHECK', 'PRIVATE_QUARTERS_CHECK', 'SHIPYARD_CHECK',
+                                 'GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'GET_SHIP', 'GET_MISSION',
+                                 'MONTHLY_PASS_NOTICE', 'BATTLE_PASS_NOTICE', 'BATTLE_PASS_NEW_SEASON',
+                                 'LOGIN_RETURN_SIGN', 'PLAYER_CHECK', 'POPUP_SINGLE_WHITE',
+                                 'GAME_TIPS', 'DORM_INFO', 'MEOWFFICER_INFO', 'MEOWFFICER_BUY',
+                                 'MAP_PREPARATION', 'EXERCISE_PREPARATION', 'MAINTENANCE_ANNOUNCE'])
+def test_complete_inherited_task_scene_owns_all_registered_page_probes(probe):
+    live, frame = FakeOracle(), FakeOracle()
+    frame.exists_values['task/page/back'] = True
+    frame.mission_page_state = lambda: SimpleNamespace(disposition='unfinished')
+    host = AlasSemanticAdapter(live, package_gate=lambda: None,
+                              frame_observation_oracle=lambda: frame)
+    assert host.appear(SimpleNamespace(name=probe)) is False
+    assert host.appear(SimpleNamespace(name='MISSION_CHECK')) is True
+    assert live.click_calls == []
+
+
+def test_incomplete_inherited_task_scene_does_not_suppress_unknown_game_room():
+    from alas_headless import AlasSemanticUnmapped, SemanticGateClosed
+    live, frame = FakeOracle(), FakeOracle()
+    frame.exists_values['task/page/back'] = True
+    def obscured():
+        raise SemanticGateClosed('task page obscured')
+    frame.mission_page_state = obscured
+    host = AlasSemanticAdapter(live, package_gate=lambda: None,
+                              frame_observation_oracle=lambda: frame)
+    with pytest.raises(AlasSemanticUnmapped):
+        host.appear(SimpleNamespace(name='GAME_ROOM_CHECK'))
+    assert live.click_calls == []
+
+
+@pytest.mark.parametrize('notice,foreign,absent', [(False, False, True), (True, False, False),
+                                                  (False, True, False)])
+def test_task_scene_proves_absent_notice_without_hiding_a_present_owner(notice, foreign, absent):
+    frame = FakeOracle()
+    frame.observation_target_present = lambda target: target == 'task/page/back'
+    frame.exists_values['task/page/back'] = True
+    def page():
+        from alas_headless import SemanticGateClosed
+        if foreign:
+            raise SemanticGateClosed('foreign overlay')
+        return SimpleNamespace(disposition='unfinished')
+    frame.mission_page_state = page
+    frame._blocking_rules = lambda *args: [SimpleNamespace(blocker_id=
+        'unknown-overlay' if foreign else 'task-page')]
+    frame._campaign_urgent_notice_matches = lambda state: notice
+    host = AlasSemanticAdapter(frame, package_gate=lambda: None)
+    assert (host._appear_priority('GET_MISSION') is False) is absent
+    assert frame.click_calls == []
+
+
 @pytest.mark.parametrize('name', ['WITHDRAW', 'CAMPAIGN_WITHDRAW_CONFIRM', 'DOCK_CHECK'])
 @pytest.mark.parametrize('back, blockers, owned', [
     (True, [], True), (True, ['task-page'], True),

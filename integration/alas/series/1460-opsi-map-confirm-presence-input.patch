@@ -1,0 +1,14 @@
+diff --git a/module/os_handler/map_event.py b/module/os_handler/map_event.py
+--- a/module/os_handler/map_event.py
++++ b/module/os_handler/map_event.py
+@@ -134,9 +134,8 @@
+             # semantic oracle to the exact reconnect wording, so consume only
+             # that reviewed overlay and keep the current exploration loop.
+             from module.handler.assets import POPUP_CONFIRM
+-            if semantic_adapter.appear(POPUP_CONFIRM):
++            if self.appear_then_click(POPUP_CONFIRM):
+                 logger.info('Operation Siren map confirmation')
+-                self.device.click(POPUP_CONFIRM)
+                 return 'map_confirmation'
+         if self.handle_map_get_items(drop=drop):
+             return 'map_get_items'

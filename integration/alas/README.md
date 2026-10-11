@@ -1,11 +1,35 @@
 # ALAS integration overlay
 
-Target: upstream commit `81ccf63b4540f00241628c82a58c02c7a2bb11af`.
+Qualification baseline: upstream commit `81ccf63b4540f00241628c82a58c02c7a2bb11af`.
 
-The ordered integration source is described by `series/series.json`. G02
-separates core observation/final-input ports, session lifecycle, and the
-remaining legacy task hooks into three Git-commit-derived members. A
-deterministic combined patch can be built without modifying those members:
+## Runtime compatibility and validation
+
+ALAS owns task selection, scheduling, recovery and task state machines. The
+adapter replaces observation and reviewed input boundaries. The baseline
+commit, source hashes and exact patch series describe reproducible
+qualification; they are not a global runtime allowlist for installed ALAS or
+game updates. Existing typed capabilities may run on newer revisions as
+best-effort compatibility, without promoting their support status.
+
+Optional page readers must establish their own page before consuming its
+fields. Inactive configuration branches must not stop unrelated active work.
+The original ALAS scheduler handles its queue without a second whole-config
+semantic preflight. Scope missing capabilities to the affected task or branch;
+package/PID, foreground, freshness, coherence, blockers, unambiguous targets
+and action postconditions remain mandatory.
+
+The support authority is [support-matrix-ledger.json](support-matrix-ledger.json)
+and its [generated matrix](../../docs/alas-config-support-matrix.md). The
+[robustness audit](../../docs/alas-robustness-audit-20261002.zh-CN.md) separates
+current fixes, remaining restrictions and qualification-only checks.
+Run focused tests during development. Patch changes also need member hashes,
+combined-patch and patch-tree verification plus a support-metadata refresh;
+full device matrices belong at support promotion or release milestones.
+
+## Patch series
+
+The ordered integration source is `series/series.json`; it is the authority
+for the current member inventory. Build its deterministic combined patch with:
 
 ```powershell
 $env:PYTHONPATH = 'python'
@@ -14,13 +38,20 @@ python scripts/python/build_alas_patch_series.py `
 ```
 
 The builder requires consecutive order, the pinned upstream lock, safe
-repository-relative member paths, exact SHA-256 values, and LF-terminated
-bytes. The first two members apply and compile without claiming task coverage.
-G03 splits all task hooks into mission/mail, commission/tactical,
-research/dorm/build, campaign, and combat ownership groups; no legacy residual
-member remains. The complete series produces the same Git tree as the legacy
-combined patch. G04 will make generated combined output authoritative for
-validation and release tooling.
+repository-relative member paths, exact SHA-256 values and LF-terminated
+bytes. The checked-in `0001-semantic-oracle-hooks.patch` must match the
+generated output. These are patch integrity checks, not per-action runtime
+version checks.
+
+## Historical qualification notes
+
+The following notes record successive G/H/I milestones and bounded live
+experiments. Statements such as "production stops at G18", "claim disabled by
+default", old resource counts and a second environment-variable opt-in
+describe the respective experiment, not the current global runtime policy.
+They are retained to explain the linked historical receipts. Use the current
+ledger and runtime policy for present support and grants; do not replay this
+entire history as a gate after an ordinary development edit.
 
 The patch adds opt-in observation and action ports without changing default
 ALAS behavior:

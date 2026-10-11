@@ -90,12 +90,30 @@ def _git(repository: Path, *arguments: str) -> str:
 
 
 def validate_inventory(value: Mapping[str, Any]) -> None:
+    """Qualify an inventory against the current exact patch and manifest."""
+
+    validate_inventory_structure(value)
     try:
         check_generated_patch(SERIES_MANIFEST_PATH, PATCH_PATH, root=ROOT)
     except AlasPatchSeriesError as exc:
         raise PixelInventoryVerificationError(
             "generated combined patch differs from authoritative series"
         ) from exc
+    if value.get("combined_patch_sha256") != _sha256(PATCH_PATH):
+        raise PixelInventoryVerificationError("pixel inventory patch hash drifted")
+    if value.get("patch_series_manifest_sha256") != _sha256(SERIES_MANIFEST_PATH):
+        raise PixelInventoryVerificationError(
+            "pixel inventory patch series manifest hash drifted"
+        )
+
+
+def validate_inventory_structure(value: Mapping[str, Any]) -> None:
+    """Validate a retained E04 document without claiming current qualification.
+
+    Its recorded patch identities remain historical evidence. Only
+    ``validate_inventory`` may bind it to the current integration.
+    """
+
     expected_keys = {
         "schema",
         "upstream_commit",
@@ -109,12 +127,6 @@ def validate_inventory(value: Mapping[str, Any]) -> None:
     }
     if set(value) != expected_keys or value.get("schema") != SCHEMA:
         raise PixelInventoryVerificationError("pixel inventory fields are not exact")
-    if value.get("combined_patch_sha256") != _sha256(PATCH_PATH):
-        raise PixelInventoryVerificationError("pixel inventory patch hash drifted")
-    if value.get("patch_series_manifest_sha256") != _sha256(SERIES_MANIFEST_PATH):
-        raise PixelInventoryVerificationError(
-            "pixel inventory patch series manifest hash drifted"
-        )
     if value.get("android_input_injected") is not False:
         raise PixelInventoryVerificationError("pixel inventory injected Android input")
     if value.get("production_ready") is not False:

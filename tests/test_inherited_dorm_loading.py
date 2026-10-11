@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from alas_headless import AlasSemanticAdapter
+from alas_headless import AlasSemanticAdapter, SemanticGateClosed
 from alas_headless.adapter.semantic.dispatch_result import UNHANDLED
 from tests.semantic_support.fake_oracle import FakeOracle
 
@@ -36,6 +36,14 @@ def test_exact_inherited_dorm_proves_only_unobscured_withdraw_absence(name, fore
     oracle.observation_target_present = lambda target: target == 'dorm/page/manage'
     oracle._blocking_rules = lambda *_: [SimpleNamespace(blocker_id=key) for key in
                                        (['dorm-page', 'unknown-overlay'] if foreign else ['dorm-page'])]
+    def complete_dorm_summary():
+        # Model the existing typed Dorm reader used by the inherited passive
+        # path. Real-oracle blocker and incomplete-summary cases have separate
+        # coverage in test_inherited_dorm_passive_probes.
+        if foreign:
+            raise SemanticGateClosed('dorm page identity is not proven')
+        return oracle.dorm_state_value
+    oracle._dorm_state_once = complete_dorm_summary
     adapter = AlasSemanticAdapter(oracle, lambda: None)
     assert (adapter._appear_priority(name) is False) == (not foreign)
     assert oracle.click_calls == []

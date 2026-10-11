@@ -6,6 +6,7 @@ from alas_headless import AlasSemanticAdapter, SemanticGateClosed
 from alas_headless.adapter.semantic.dispatch_result import UNHANDLED
 from tests.semantic_support.adapter_fixtures import FakeOracle
 from tests.semantic_support.adapter_cases import AlasSemanticAdapterTestsSupport
+from alas_headless.oracle.errors import SemanticCampaignFleetIncomplete
 
 
 @pytest.mark.parametrize('owned,expired', [(True, False), (False, False), (True, True)])
@@ -72,18 +73,18 @@ def test_ordinary_fleet_indices_do_not_bypass_missing_hard_panel():
     assert not oracle.click_calls
 
 
-def test_owned_fleet_presence_waits_for_complete_rows_in_same_observation_frame():
+@pytest.mark.parametrize('mode', ['normal', 'hard'])
+def test_owned_fleet_presence_waits_for_complete_rows_in_same_observation_frame(mode):
     oracle = FakeOracle()
     host = AlasSemanticAdapter(oracle, package_gate=lambda: None)
-    host.begin_campaign_pre_sortie('12-4', mode='hard')
+    host.begin_campaign_pre_sortie('12-4', mode=mode)
     ctx = host._campaign_context
     ctx.entry_receipt = SimpleNamespace(generation=10)
     ctx.map_preparation_receipt = SimpleNamespace(generation=11)
     ctx.passive_transition_until = time.monotonic() + 20
     host._campaign_preparation_state_with_stage = Mock(
         return_value=(SimpleNamespace(kind='fleet'), '12-4'))
-    partial = SemanticGateClosed(
-        'campaign fleet row ship identity is inconsistent: fleet1')
+    partial = SemanticCampaignFleetIncomplete('fleet1', 12)
     oracle.campaign_fleet_selection_state = Mock(side_effect=partial)
     assert host._appear_campaign('FLEET_PREPARATION') is False
     assert ctx.initial_fleet_state is None
@@ -102,6 +103,6 @@ def test_owned_fleet_presence_waits_for_complete_rows_in_same_observation_frame(
 
     ctx.passive_transition_until = time.monotonic() - 1
     oracle.campaign_fleet_selection_state.side_effect = partial
-    with pytest.raises(SemanticGateClosed, match='ship identity is inconsistent'):
+    with pytest.raises(SemanticGateClosed, match='portraits are not ready'):
         host._appear_campaign('FLEET_PREPARATION')
     assert ctx.initial_fleet_state is None and not oracle.click_calls

@@ -18,7 +18,7 @@ from .contracts import (
     ToggleState,
     UiState,
 )
-from .errors import SemanticGateClosed, SemanticTargetMissing
+from .errors import SemanticGateClosed, SemanticTargetMissing, SemanticTargetNotActionable
 
 
 class TargetsOracle:
@@ -41,6 +41,11 @@ class TargetsOracle:
             ) from exc
 
     def _toggle_mapping(self, semantic_id: str) -> SemanticToggleTarget:
+        fleet = re.fullmatch(r'guild/formation/fleet/([1-9][0-9]*|add)', semantic_id)
+        if fleet:
+            name = fleet.group(1)
+            return SemanticToggleTarget(semantic_id, name,
+                'GuildMissionFormationPage(Clone)/frame/single/dot/' + name)
         try:
             return self._toggle_targets[semantic_id]
         except KeyError as exc:
@@ -151,6 +156,10 @@ class TargetsOracle:
             semantic_id,
             matches,
         )
+        delegated_guild_fleet = self._guild_formation_fleet_control_proven(
+            button_state, ui_state, semantic_id, matches)
+        if semantic_id.startswith('guild/formation/fleet/') and not delegated_guild_fleet:
+            raise SemanticGateClosed('guild formation fleet target changed or is not actionable')
         delegated_campaign_auto = False
         delegated_campaign_event_auto = False
         if semantic_id == "campaign/map-preparation/auto-search" and len(matches) == 1:
@@ -237,7 +246,19 @@ class TargetsOracle:
             and not delegated_operation_siren_strategic
             and not delegated_shop_nav
             and not delegated_guild_nav
+            and not delegated_guild_fleet
         ):
+            if (semantic_id == 'campaign/fleet-preparation/roles/tab'
+                    and len(matches) == 1
+                    and matches[0].active_in_hierarchy and matches[0].active_and_enabled
+                    and matches[0].interactable and matches[0].raycast_top is False
+                    and matches[0].point is not None and matches[0].bounds is not None
+                    and matches[0].bounds.contains(matches[0].point)
+                    and all(rule.blocker_id == 'loading' for rule in
+                            self._blocking_rules(button_state, semantic_id))):
+                # This unique duty tab is still covered while its fleet view
+                # mounts. Classify the existing refusal; no input is admitted.
+                raise SemanticTargetNotActionable(semantic_id, ui_state.generation)
             raise SemanticGateClosed("semantic toggle target is not actionable")
         toggle = matches[0]
         if self._blocking_rules(button_state, semantic_id):
@@ -403,7 +424,13 @@ class TargetsOracle:
         return tuple(
             button
             for button in state.buttons
-            if button.name == target.name and button.path.endswith(suffixes)
+            if (button.name == target.name and button.path.endswith(suffixes))
+            or (semantic_id == 'event-list/page/back'
+                and button.name == 'btnBack'
+                and button.path.endswith('ActivityMainUI(Clone)/adapt/blur_panel/adapt/top/btnBack'))
+            or (semantic_id == 'daily/page/back'
+                and button.name == 'back_btn'
+                and button.path.endswith('DailyLevelUI(Clone)/blur_panel/adapt/top/back_btn'))
         )
 
     def _unique(self, state: OracleState, semantic_id: str) -> ButtonState:
@@ -672,6 +699,11 @@ class TargetsOracle:
 
     def _enabled_once(self, semantic_id: str) -> bool:
         state = self.read_state()
+        if semantic_id == 'archive/activity-list/home':
+            return self._activity_archive_home_proven(state)
+        if semantic_id == 'player/profile/back':
+            return bool(self._player_profile_back_proven(state)
+                        and not self._blocking_rules(state, semantic_id))
         if semantic_id == 'os/auto-search/reward/close':
             return self._operation_siren_auto_search_reward_control_proven(state)
         if semantic_id in ("os/order/back", "os/order/scan", "os/order/submarine"):
@@ -923,6 +955,9 @@ class TargetsOracle:
             )
         if semantic_id == "dorm/empty-food/cancel":
             return self._dorm_empty_food_cancel_proven(state)
+        if semantic_id in ('dorm/feed/shop/open', 'dorm/feed/shop/plus',
+                           'dorm/feed/shop/minus', 'dorm/feed/shop/cancel', 'dorm/feed/shop/confirm'):
+            return self._dorm_food_shop_control_proven(state, semantic_id)
         if semantic_id in ("dorm/feed", "dorm/collect"):
             return self._dorm_page_control_proven(state, semantic_id)
         if semantic_id in (
@@ -1019,7 +1054,7 @@ class TargetsOracle:
             "guild/exchange/confirm",
         ) and not self._guild_exchange_prompt_matches(state):
             return False
-        if semantic_id in (
+        if semantic_id == 'event-list/page/back' or semantic_id in (
             "os/map/auto-search/off",
             "os/map/auto-search/on",
             "os/map/mission-list",
@@ -1046,7 +1081,7 @@ class TargetsOracle:
                 and matches[0].active_in_hierarchy
                 and matches[0].active_and_enabled
                 and matches[0].interactable
-                and matches[0].raycast_top is None
+                and matches[0].raycast_top is not False
                 and matches[0].point is not None
                 and matches[0].bounds is not None
                 and matches[0].bounds.contains(matches[0].point)
@@ -1058,7 +1093,7 @@ class TargetsOracle:
                 and matches[0].active_in_hierarchy
                 and matches[0].active_and_enabled
                 and matches[0].interactable
-                and matches[0].raycast_top is None
+                and matches[0].raycast_top is not False
                 and matches[0].point is not None
                 and matches[0].bounds is not None
                 and matches[0].bounds.contains(matches[0].point)

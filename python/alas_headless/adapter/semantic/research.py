@@ -18,6 +18,7 @@ from ...semantic_oracle import (
 from .contracts import _ResearchFlowContext, _research_detail_costs
 from .dispatch_result import UNHANDLED
 from .resources import RESEARCH_CLICK_RESOURCES, RESEARCH_VIRTUAL_RESOURCES
+from ...oracle.input_outcome import input_result_scope
 
 
 class ResearchAdapterPorts:
@@ -106,8 +107,9 @@ class ResearchAdapterPorts:
         """Convert one complete typed five-card snapshot into ALAS projects.
 
         The upstream ``ResearchProject`` remains the owner of project metadata
-        and consumption flags.  This boundary only rejects incomplete typed
-        snapshots and project codes which the pinned upstream cannot resolve.
+        and consumption flags.  Unknown metadata remains ``valid=False`` so
+        ALAS' selector can skip that card without losing the known projects.
+        This boundary still rejects incomplete or malformed typed snapshots.
         """
 
         states = self.research_projects()
@@ -130,9 +132,10 @@ class ResearchAdapterPorts:
             ):
                 raise SemanticGateClosed("research card decision input is malformed")
             project = project_factory(name=state.code, series=state.series)
-            if getattr(project, "valid", None) is not True:
+            validity = getattr(project, "valid", None)
+            if validity is not True and validity is not False:
                 raise SemanticGateClosed(
-                    "research project is unknown to pinned ALAS: " + state.code
+                    "research project validity is not classified by ALAS: " + state.code
                 )
             projects.append(project)
         return tuple(projects)
@@ -181,9 +184,15 @@ class ResearchAdapterPorts:
                 raise SemanticGateClosed("selected research project position is out of range")
             project = projects[position]
             if project.code != normalized:
-                raise SemanticGateClosed(
-                    "selected research project position no longer matches its code"
-                )
+                # Returning from another detail recenters the carousel. Keep
+                # ALAS' selected identity when exactly one current card has
+                # that code; a stale position cannot disambiguate duplicates.
+                matches = tuple(p for p in projects if p.code == normalized)
+                if len(matches) != 1:
+                    raise SemanticGateClosed(
+                        "selected research project position no longer matches its code"
+                    )
+                project = matches[0]
         if project.status == ResearchProjectStatus.FINISHED:
             raise SemanticGateClosed("research policy cannot select a finished project")
         receipt = input_oracle.click_research_project(
@@ -234,8 +243,7 @@ class ResearchAdapterPorts:
         if not detail.can_start:
             self.oracle.click("research/detail/root")
             return False
-        if not self._action_ledger.allowed("research.start"):
-            raise SemanticGateClosed("research start requires a positive budget")
+        self._require_action_grant("research.start")
 
         detail_costs = _research_detail_costs(detail)
         expected_costs = tuple(
@@ -340,21 +348,18 @@ class ResearchAdapterPorts:
 
     def shipyard_select_series(self, series: int) -> ActionReceipt:
         self._package_gate()
-        if not 1 <= series <= 9:
-            raise ValueError("shipyard series must be in [1, 9]")
+        if type(series) is not int or series < 1:
+            raise ValueError("shipyard series must be positive")
         self.oracle.click("shipyard/series/open")
         deadline = time.monotonic() + 8.0
-        target = "shipyard/series/{0}".format(series)
-        while not self.oracle.enabled(target):
+        while not self.oracle.shipyard_series_choice_available(series):
             if time.monotonic() >= deadline:
                 raise SemanticGateClosed("shipyard series choices did not become actionable")
             time.sleep(0.25)
-        receipt = self.oracle.click(target)
+        receipt = self.oracle.click_shipyard_series(series)
         deadline = time.monotonic() + 8.0
         while time.monotonic() < deadline:
-            if self._shipyard_page_visible() and not self.oracle.exists(
-                "shipyard/series/1"
-            ):
+            if self._shipyard_page_visible() and not self.oracle.shipyard_series_choices_visible():
                 try:
                     if self.oracle.shipyard_series() == series:
                         return receipt
@@ -392,6 +397,146 @@ class ResearchAdapterPorts:
     def shipyard_state(self, index: int) -> ShipyardState:
         self._package_gate()
         return self._frame_or_live_observation_oracle().shipyard_state(index)
+
+    def shipyard_strengthen_panel(self, index):
+        self._package_gate()
+        return self._frame_or_live_observation_oracle().shipyard_strengthen_panel(index)
+
+    def shipyard_active_phase(self):
+        self._package_gate()
+        return self._frame_or_live_observation_oracle().shipyard_active_phase()
+
+    def shipyard_cannot_strengthen(self, index):
+        self._package_gate()
+        return self._frame_or_live_observation_oracle().shipyard_cannot_strengthen(index)
+
+    def shipyard_fate_available(self):
+        self._package_gate()
+        return self._frame_or_live_observation_oracle().shipyard_fate_available()
+
+    def shipyard_enter_fate(self, index):
+        self._package_gate()
+        return self.oracle.click_shipyard_fate(index)
+
+    def shipyard_change_quantity(self, index, delta):
+        self._package_gate()
+        _receipt, advanced = self.oracle.click_shipyard_quantity(index, delta)
+        return advanced
+
+    def begin_shipyard_purchase(self, index, rarity, quantity, maximum_cost):
+        """Bind the quantity and ordinary-coin budget selected by original ALAS."""
+        self._package_gate()
+        if (type(quantity) is not int or quantity <= 0 or type(maximum_cost) is not int
+                or maximum_cost < 0 or rarity not in ('PR', 'DR')):
+            raise ValueError('shipyard purchase request is malformed')
+        before = self.oracle.shipyard_purchase_state(index)
+        if (before.rarity != rarity.lower() or before.panel.quantity != quantity
+                or before.panel.total_price is None
+                or not 0 <= before.panel.total_price <= maximum_cost
+                or before.panel.total_price > before.coins):
+            raise SemanticGateClosed('shipyard displayed purchase exceeds original ALAS request')
+        self._shipyard_purchase_context = dict(before=before, submit=None, confirm=None)
+        return before
+
+    def end_shipyard_purchase(self):
+        self._shipyard_purchase_context = None
+
+    def shipyard_blueprint_count(self, index):
+        self._package_gate()
+        return self._frame_or_live_observation_oracle().shipyard_blueprint_count(index)
+
+    def begin_shipyard_blueprint_use(self, index, quantity):
+        self._package_gate()
+        if type(quantity) is not int or quantity <= 0:
+            raise ValueError('shipyard inventory use quantity must be positive')
+        before = self.oracle.shipyard_blueprint_use_state(index)
+        if before.panel.quantity != quantity:
+            raise SemanticGateClosed('shipyard inventory selection differs from original ALAS request')
+        self._shipyard_blueprint_use_context = dict(before=before, submit=None)
+        return before
+
+    def end_shipyard_blueprint_use(self):
+        self._shipyard_blueprint_use_context = None
+
+    def _shipyard_blueprint_use_context_required(self):
+        context = getattr(self, '_shipyard_blueprint_use_context', None)
+        if context is None:
+            raise SemanticGateClosed('shipyard inventory use requires an original ALAS request')
+        return context
+
+    def shipyard_blueprint_use_submit(self):
+        self._package_gate()
+        context = self._shipyard_blueprint_use_context_required()
+        if context['submit'] is not None:
+            return False
+        context['submit'] = self.oracle.click_shipyard_blueprint_use(context['before'])
+        return True
+
+    def shipyard_blueprint_use_completed(self):
+        self._package_gate()
+        context = self._shipyard_blueprint_use_context_required()
+        if context['submit'] is None:
+            return False
+        before = context['before']
+        with input_result_scope(dispatched=not context.get('completed', False)):
+            after = self.oracle.shipyard_blueprint_use_result(before.panel.ship_index)
+            if after is None or after.blueprint_count == before.panel.blueprint_count:
+                return False
+            self.oracle.verify_shipyard_blueprint_use(before, after)
+        context['completed'] = True
+        return True
+
+    def verify_shipyard_blueprint_use(self):
+        if not self.shipyard_blueprint_use_completed():
+            raise SemanticGateClosed('shipyard inventory use has no exact consumption postcondition')
+
+    def _shipyard_purchase_context_required(self):
+        context = getattr(self, '_shipyard_purchase_context', None)
+        if context is None:
+            raise SemanticGateClosed('shipyard purchase requires an original ALAS request')
+        return context
+
+    def shipyard_purchase_submit(self):
+        self._package_gate()
+        context = self._shipyard_purchase_context_required()
+        if context['submit'] is not None:
+            return False
+        self._require_action_grant('shop.purchase')
+        context['submit'] = self.oracle.click_shipyard_purchase_submit(context['before'])
+        return True
+
+    def shipyard_purchase_confirm(self, text):
+        self._package_gate()
+        context = self._shipyard_purchase_context_required()
+        if text != 'BP_BUY':
+            raise SemanticGateClosed('shipyard inventory consumption is a separate operation')
+        if context['confirm'] is not None:
+            return False
+        with input_result_scope(dispatched=context['submit'] is not None):
+            if not self.oracle.shipyard_purchase_prompt(context['before']):
+                return False
+        if context['submit'] is None:
+            raise SemanticGateClosed('shipyard purchase prompt has no matching submit')
+        context['confirm'] = self._dispatch_mutation(
+            'shop.purchase', lambda: self.oracle.click_shipyard_purchase_confirm(context['before']))
+        return True
+
+    def shipyard_purchase_completed(self):
+        self._package_gate()
+        context = self._shipyard_purchase_context_required()
+        if context['confirm'] is None:
+            return False
+        with input_result_scope(dispatched=not context.get('completed', False)):
+            after = self.oracle.shipyard_purchase_result()
+            if after is None or after.purchased == context['before'].purchased:
+                return False
+            self.oracle.verify_shipyard_purchase(context['before'], after)
+        context['completed'] = True
+        return True
+
+    def verify_shipyard_purchase(self):
+        if not self.shipyard_purchase_completed():
+            raise SemanticGateClosed('shipyard purchase has no exact consumption postcondition')
 
     def research_detail_state(self) -> ResearchDetailState:
         self._package_gate()
@@ -710,15 +855,15 @@ class ResearchAdapterPorts:
             if name == "RESEARCH_START":
                 detail = self.oracle.research_detail_state()
                 if (
-                    not self._action_ledger.allowed("research.start")
-                    or context.start_receipt is not None
+                    context.start_receipt is not None
                     or not detail.can_start
                 ):
                     raise SemanticGateClosed(
-                        "research start requires sufficient resources and a positive budget"
+                        "research start requires sufficient resources and an unsubmitted project"
                     )
                 if context.selected_code is not None and detail.code != context.selected_code:
                     raise SemanticGateClosed("selected research project identity changed")
+                self._require_action_grant("research.start")
                 detail_costs = _research_detail_costs(detail)
                 expected_costs = tuple(
                     (resource_id, required)
@@ -740,13 +885,6 @@ class ResearchAdapterPorts:
                 if context.queue_add_receipt is not None:
                     if context.queue_confirm_receipt is not None:
                         return context.queue_confirm_receipt
-                    if (
-                        context.queue_add_requires_start_grant
-                        and not self._action_ledger.allowed("research.start")
-                    ):
-                        raise SemanticGateClosed(
-                            "research queue confirmation requires a positive budget"
-                        )
                     if context.queue_add_requires_start_grant:
                         receipt = self._dispatch_mutation(
                             "research.start",
@@ -762,7 +900,6 @@ class ResearchAdapterPorts:
                 if (
                     context.start_receipt is None
                     or context.start_confirm_receipt is not None
-                    or not self._action_ledger.allowed("research.start")
                     or self.oracle.research_start_prompt_costs() != expected
                 ):
                     raise SemanticGateClosed(
@@ -781,10 +918,10 @@ class ResearchAdapterPorts:
                     return context.queue_add_receipt
                 confirmed_start = context.start_confirm_receipt is not None
                 existing_running = (
-                    context.selected_status in (
+                    not confirmed_start
+                    and context.selected_status in (
                         ResearchProjectStatus.RUNNING, ResearchProjectStatus.WAITING
                     )
-                    and self._action_ledger.allowed("research.start")
                     and self.research_detail_is_running()
                     and self.research_detail_can_queue()
                 )
@@ -792,6 +929,8 @@ class ResearchAdapterPorts:
                     raise SemanticGateClosed(
                         "research queue add requires a confirmed start or one budgeted running project"
                     )
+                if existing_running:
+                    self._require_action_grant("research.start")
                 receipt = self.oracle.click_research_queue_add()
                 context.queue_add_receipt = receipt
                 context.queue_confirm_receipt = None
@@ -803,10 +942,8 @@ class ResearchAdapterPorts:
                 raise SemanticGateClosed("semantic research cancellation is not enabled")
             if name == "QUEUE_CLAIM_REWARD":
                 queue = self.oracle.research_queue_state()
-                if not queue.reward_claimable or not self._action_ledger.allowed(
-                    "research.reward"
-                ):
-                    raise SemanticGateClosed("research reward requires a positive budget")
+                if not queue.reward_claimable:
+                    raise SemanticGateClosed("research queue has no claimable reward")
                 receipt = self._dispatch_mutation(
                     "research.reward",
                     lambda: self.oracle.click("research/queue/claim"),

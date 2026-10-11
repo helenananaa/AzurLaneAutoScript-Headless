@@ -28,12 +28,47 @@ from ...semantic_oracle import (
 )
 
 
+@dataclass(frozen=True)
+class GuildFormationFleetButton:
+    """ALAS navigation button whose area comes from an observed Unity Toggle."""
+    name: str
+    area: Tuple[float, float, float, float]
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class AlasSemanticUnmapped(SemanticGateClosed):
     """An ALAS resource has no reviewed semantic mapping."""
 
 
 class AlasSemanticActionDeferred(SemanticGateClosed):
     """No input was dispatched because the task's action grant is exhausted."""
+
+
+class AlasSemanticDormFeedResultUnproven(SemanticGateClosed):
+    """Accepted food input, healthy typed panel, but its resource proof failed."""
+
+    def __init__(self, message, receipt, requested_count, consumed, food):
+        self.receipt = receipt
+        self.requested_count = requested_count
+        self.observed_consumed = consumed
+        self.observed_food = food
+        super().__init__(f'{message} (native request={requested_count}, inventory debit={consumed}, food={food})')
+
+
+class AlasSemanticCommissionStartUnproven(SemanticGateClosed):
+    """One start input stopped on a fresh, exact pending commission detail."""
+
+    def __init__(self, receipt, generation, signature, rejection=None):
+        self.receipt = receipt
+        self.generation = generation
+        self.signature = tuple(signature)
+        self.rejection = rejection
+        reason = (f'commission start rejected: {rejection}; ' if rejection is not None
+                  else 'commission start did not reach running state; ')
+        super().__init__(reason +
+                         'exact pending detail remains; no start input repeated')
 
 
 class MissionClaimableDetected(SemanticGateClosed):
@@ -161,6 +196,7 @@ class _CommissionFlowContext:
     reward_detected_count: Optional[int] = None
     reward_claim_receipt: Optional[ActionReceipt] = None
     reward_close_receipts: List[ActionReceipt] = field(default_factory=list)
+    reward_prior_claims: List[Tuple[ActionReceipt, Tuple[ActionReceipt, ...], Optional[int]]] = field(default_factory=list)
     ship_exp_observation_generation: Optional[int] = None
     reward_proof: Optional[CommissionRewardProof] = None
     selected_signature: Optional[Tuple[Union[int, str], ...]] = None
@@ -173,7 +209,9 @@ class _CommissionFlowContext:
     passive_transition_until: float = 0.0
     cancelled_tactical_prompts: Set[str] = field(default_factory=set)
     tactical_back_receipt: Optional[ActionReceipt] = None
+    navigation_back_receipt: Optional[ActionReceipt] = None
     tactical_empty_slot_receipt: Optional[ActionReceipt] = None
+    tactical_skill_confirm_receipt: Optional[ActionReceipt] = None
     tactical_reward_receipt: Optional[ActionReceipt] = None
     tactical_confirm_receipt: Optional[ActionReceipt] = None
     tactical_confirm_before_slots: Optional[Set[Tuple[int, int]]] = None
@@ -233,6 +271,7 @@ class _DormFlowContext:
     passive_transition_until: float = 0.0
     navigation_receipts: Dict[str, ActionReceipt] = field(default_factory=dict)
     feed_entry_receipt: Optional[ActionReceipt] = None
+    statistics_confirm_receipt: Optional[ActionReceipt] = None
     feed_panel_observed: bool = False
 
 
@@ -443,5 +482,5 @@ class _CampaignFlowContext:
 class _OperationSirenGlobeSwipeIntent:
     name: str
     pixel_vector: Tuple[float, float]
-    box: Tuple[int, int, int, int]
+    box: Tuple[float, float, float, float]
     duration_range: Tuple[float, float]

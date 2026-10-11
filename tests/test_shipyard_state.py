@@ -111,6 +111,7 @@ def test_shipyard_return_home_allows_only_passive_campaign_probe(name):
     from tests.semantic_support.adapter_fixtures import FakeOracle
     oracle = FakeOracle()
     oracle.main_page_visible = lambda: True
+    oracle.inherited_campaign_withdraw_control = lambda *, confirm: None
     adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
     button = SimpleNamespace(name=name)
     assert adapter.appear(button) is False
@@ -133,6 +134,25 @@ def test_shipyard_series_reads_exact_current_sprite():
     b.ui['images'][-1]['sprite'] = 'version_1'
     assert oracle.shipyard_series() == 1
     b.ui['images'][-1]['sprite'] = 'unknown'
+    with pytest.raises(SemanticGateClosed):
+        oracle.shipyard_series()
+
+
+def test_series_observation_survives_covered_back_without_input_authority():
+    b = backend()
+    b.buttons['buttons'][1]['raycast_top'] = False
+    b.ui['images'].append(make_image(
+        'OverlayCamera/Overlay/UIMain/blur_panel/adapt/bottom_panel/ships/bg/version/version_btn',
+        'version_1'))
+    b.ui['image_count'] += 1
+    oracle = make_oracle(b)
+    assert not oracle.shipyard_page_visible()
+    assert oracle.shipyard_series() == 1
+    with pytest.raises(SemanticGateClosed):
+        oracle.click('shipyard/page/back')
+    assert b.taps == []
+    b.buttons['buttons'] = b.buttons['buttons'][1:]
+    b.buttons['button_count'] = 1
     with pytest.raises(SemanticGateClosed):
         oracle.shipyard_series()
 
@@ -164,6 +184,73 @@ def test_fate_stage_is_separate_from_development_level():
     assert state.phase == 'dev'
     assert state.level == 30
     assert state.fate_stage == 5
+
+
+def fate_backend():
+    b = backend(False)
+    b.ui['texts'][-1] = make_text('MAX',
+        'OverlayCamera/Overlay/UIMain/blur_panel/adapt/right_panel/fitting_panel/desc/top/precent')
+    marker = next(i for i in b.ui['images'] if i['adb_bounds']['left'] == 460)
+    marker['path'], marker['name'] = CARD + '/state/fate', 'fate'
+    b.ui['images'].extend([
+        make_image(CARD + '/state/fate/Image', 'icon_phase_5',
+            bounds=dict(left=460, right=620, top=600, bottom=720)),
+        make_image('OverlayCamera/Overlay/UIMain/blur_panel/adapt/bottom_panel/ships/bg/version/version_btn',
+            'version_1')])
+    b.ui['image_count'] += 2
+    b.ui['shipyard_strengthen'] = dict(status=1, truncated=False, stack_balanced=True,
+        ship_id=4418, ship_index=3, series=1, level=30, fate_level=5)
+    return b
+
+
+def test_selected_ship_state_reads_active_fate_without_inventing_dev_maximum():
+    b = fate_backend()
+    oracle = make_oracle(b)
+    state = oracle.shipyard_state(3)
+    assert (state.phase, state.level, state.level_max, state.fate_stage) == ('fate', 30, None, 5)
+    assert oracle.shipyard_cannot_strengthen(3)
+    assert b.taps == []
+
+
+@pytest.mark.parametrize('change', ['missing', 'ship', 'index', 'series', 'stage', 'ambiguous', 'malformed'])
+def test_fate_state_rejects_missing_or_mismatched_selected_model(change):
+    b = fate_backend()
+    if change == 'missing':
+        del b.ui['shipyard_strengthen']
+    elif change == 'ambiguous':
+        b.ui['texts'].append(make_text('30/30',
+            'OverlayCamera/Overlay/UIMain/blur_panel/adapt/right_panel/mod_panel/title/level_bg/Text'))
+        b.ui['text_count'] += 1
+    elif change == 'malformed':
+        b.ui['texts'][-1]['text'] = 'unknown'
+    else:
+        key, value = {'ship': ('ship_id', 0), 'index': ('ship_index', 2),
+                      'series': ('series', 2), 'stage': ('fate_level', 4)}[change]
+        b.ui['shipyard_strengthen'][key] = value
+    with pytest.raises(SemanticGateClosed):
+        make_oracle(b).shipyard_state(3)
+    assert b.taps == []
+
+
+def test_dev_observation_does_not_require_optional_native_fate_model():
+    b = backend(False)
+    b.ui['shipyard_strengthen'] = dict(status=0)
+    assert make_oracle(b).shipyard_state(3).phase == 'dev'
+
+
+def test_initial_fate_with_dev_navbar_uses_matched_native_stage():
+    b = fate_backend()
+    b.ui['texts'][-1]['text'] = '12%'
+    b.ui['shipyard_strengthen']['fate_level'] = 0
+    b.ui['images'] = [i for i in b.ui['images'] if not i['path'].endswith('/state/fate/Image')]
+    marker = next(i for i in b.ui['images'] if i['adb_bounds']['left'] == 460)
+    marker['name'], marker['path'] = 'dev', CARD + '/state/dev'
+    b.ui['image_count'] -= 1
+    oracle = make_oracle(b)
+    state = oracle.shipyard_state(3)
+    assert (state.phase, state.fate_stage, state.level_max) == ('fate', 0, None)
+    assert not oracle.shipyard_cannot_strengthen(3)
+    assert not b.taps
 
 
 @pytest.mark.parametrize('name,menu,expected', [
@@ -217,7 +304,9 @@ def test_shipyard_series_waits_for_choice_and_verifies_selected_value(monkeypatc
     monkeypatch.setattr(ports.time, 'monotonic', lambda: next(clock))
     monkeypatch.setattr(ports.time, 'sleep', lambda _: None)
     oracle = FakeOracle()
-    oracle.enabled = Mock(side_effect=[False, True])
+    oracle.shipyard_series_choice_available = Mock(side_effect=[False, True])
+    oracle.click_shipyard_series = lambda series: oracle.click('shipyard/series/' + str(series))
+    oracle.shipyard_series_choices_visible = lambda: False
     oracle.shipyard_page_visible = lambda: True
     oracle.shipyard_series = lambda: series_result
     adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)

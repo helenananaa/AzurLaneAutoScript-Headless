@@ -217,11 +217,11 @@ class AlasSemanticAdapterMinigameTests(unittest.TestCase):
         with self.assertRaisesRegex(SemanticGateClosed, 'does not match inventory'):
             adapter.minigame_prepare_selected_tickets()
 
-    def test_native_selection_requires_play_budget(self):
+    def test_native_selection_can_be_observed_after_play_grant_is_spent(self):
         adapter, _ = self.make_adapter(selected=5, owned=36)
-        adapter._action_ledger.allowed = lambda _: False
-        with self.assertRaisesRegex(SemanticGateClosed, 'positive budget'):
-            adapter.minigame_prepare_selected_tickets()
+        adapter._action_ledger.dispatch('minigame.play', lambda: None)
+        self.assertEqual(adapter.minigame_prepare_selected_tickets(), 5)
+        self.assertEqual(adapter._action_ledger.remaining('minigame.play'), 0)
 
     def test_default_ticket_rejects_more_than_one_selected_ticket(self):
         adapter, _ = self.make_adapter(selected=2, owned=20)

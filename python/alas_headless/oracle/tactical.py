@@ -17,7 +17,7 @@ from .contracts import (
     TacticalSlotStatus,
     UiState,
 )
-from .errors import SemanticGateClosed
+from .errors import SemanticGateClosed, SemanticInputBlocked, SemanticTargetNotActionable
 
 
 class TacticalOracle:
@@ -90,25 +90,56 @@ class TacticalOracle:
     def click_tactical_first_empty_slot(self) -> ActionReceipt:
         """Click the leftmost current tactical empty slot."""
 
-        state = self.read_state()
-        targets = self._tactical_empty_slot_targets(state)
-        if not targets:
-            raise SemanticGateClosed("tactical class has no empty slot")
-        slot = min(targets)
-        target = targets[slot]
-        if self._blocking_rules(state, "tactical/slot/{0}".format(slot)):
-            raise SemanticGateClosed("tactical slot input is blocked")
+        semantic_id = 'tactical/slot/first-empty'
+        def read_target():
+            state = self.read_state()
+            blockers = self._blocking_rules(state, semantic_id)
+            if blockers:
+                raise SemanticInputBlocked(semantic_id, state.generation,
+                                           (rule.blocker_id for rule in blockers))
+            target = self._tactical_first_empty_slot_target(state)
+            if target is None:
+                raise SemanticGateClosed("tactical class has no empty slot")
+            if (not target.actionable
+                    or not (0 <= target.point.x < self.fingerprint.width
+                            and 0 <= target.point.y < self.fingerprint.height)):
+                raise SemanticTargetNotActionable(semantic_id, state.generation)
+            return state, target
+        # A positive empty control may still be mounting in ALAS's frozen
+        # screenshot. Re-observe only before input using the existing bounded
+        # transition helper; never retry the tap or its accepted result.
+        state, target = self._retry_transition_read(read_target)
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed immediately before input")
         assert target.point is not None and target.bounds is not None
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        # Return the accepted input immediately. The adapter retains it while
+        # ALAS' screenshot loop observes the select-Dock destination.
         return ActionReceipt(
-            semantic_id="tactical/slot/{0}".format(slot),
+            semantic_id=semantic_id,
             generation=state.generation,
             point=target.point,
             bounds=target.bounds,
             path=target.path,
         )
+
+    @staticmethod
+    def _tactical_first_empty_slot_target(state: OracleState) -> Optional[ButtonState]:
+        """Select a positive empty control without inventing a numbered slot."""
+        prefix = 'NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/'
+        targets = tuple(button for button in state.buttons
+                        if button.name in ('add', 'add(Clone)')
+                        and button.path.endswith(prefix + button.name)
+                        and button.active_in_hierarchy and button.active_and_enabled
+                        and button.interactable and button.point is not None
+                        and button.bounds is not None and button.bounds.contains(button.point))
+        if not targets:
+            return None
+        left = min(button.point.x for button in targets)
+        first = tuple(button for button in targets if button.point.x == left)
+        if len(first) != 1:
+            raise SemanticGateClosed('tactical first empty slot is ambiguous')
+        return first[0]
 
     def _tactical_empty_slot_targets(
         self, state: UiState
@@ -127,7 +158,7 @@ class TacticalOracle:
         occupied = tuple(
             button
             for button in state.buttons
-            if re.fullmatch(r"[1-9][0-9]{5}", button.name) is not None
+            if re.fullmatch(r"[1-9][0-9]{5,7}", button.name) is not None
             and prefix in button.path
             and button.path.endswith("/" + button.name)
             and button.active_in_hierarchy
@@ -144,11 +175,13 @@ class TacticalOracle:
         }
 
     def tactical_empty_slots_ready(self) -> bool:
-        """Report whether at least one complete current tactical empty slot exists."""
+        """Observe a positive empty control; actual input proves actionability."""
 
         state = self.read_state()
         try:
-            return bool(self._tactical_empty_slot_targets(state))
+            if self._blocking_rules(state, 'tactical/slot/first-empty'):
+                return False
+            return self._tactical_first_empty_slot_target(state) is not None
         except SemanticGateClosed:
             return False
 
@@ -370,6 +403,15 @@ class TacticalOracle:
     def tactical_books(self) -> Tuple[TacticalBookState, ...]:
         """Read visible tactical books in the same order as ALAS BOOKS_GRID."""
 
+        # Native book selection uses a live read outside an ALAS screenshot
+        # lease. Sequential Button/Image projections can straddle publication;
+        # re-read the complete view with the existing bounded read-only helper.
+        # Leased frames still get one immutable attempt and every check below
+        # must pass before a book can be clicked.
+        return self._retry_transition_read(self._tactical_books_once)
+
+    def _tactical_books_once(self) -> Tuple[TacticalBookState, ...]:
+
         button_state = self.read_state()
         start = self._unique(button_state, "tactical/book/start")
         cancel = self._unique(button_state, "tactical/book/cancel")
@@ -582,7 +624,7 @@ class TacticalOracle:
         raw_ship_buttons = tuple(
             button
             for button in button_state.buttons
-            if re.fullmatch(r"[1-9][0-9]{5}", button.name) is not None
+            if re.fullmatch(r"[1-9][0-9]{5,7}", button.name) is not None
             and prefix in button.path
             and button.path.endswith("/" + button.name)
             and button.active_in_hierarchy

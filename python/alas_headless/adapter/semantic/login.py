@@ -66,11 +66,24 @@ class LoginAdapterPorts:
 
     def server_maintenance_visible(self) -> bool:
         self._package_gate()
-        return self.oracle.server_maintenance_visible()
+        return self._frame_or_live_observation_oracle().server_maintenance_visible()
 
     def login_update_in_progress(self) -> bool:
         self._package_gate()
-        return self.oracle.login_update_in_progress()
+        reader = self._frame_or_live_observation_oracle()
+        reader._login_update_seen = self.oracle._login_update_seen
+        visible = reader.login_update_in_progress()
+        # ALAS' screenshot supplies a coherent immutable view. Keep the
+        # observed-update latch on the process oracle for the later native
+        # completion/restart probe; no input is admitted by this observation.
+        self.oracle._login_update_seen = reader._login_update_seen
+        if visible and self._login_flow.active:
+            # Updating and entering the client are native login transitions
+            # too. Reuse the existing passive grace after a fresh typed
+            # updater observation, so brief SDK foreground/state turnover
+            # cannot terminate the handler. Input still requires a fresh frame.
+            self._login_flow.extend_passive_transition(60.0)
+        return visible
 
     def login_update_restart_required(self) -> bool:
         self._package_gate()
@@ -118,6 +131,11 @@ class LoginAdapterPorts:
         return UNHANDLED
 
     def _click_login(self, name):
+        if name == 'POPUP_CANCEL' and not self._login_flow.active:
+            # This shared control also cancels reviewed task prompts. The
+            # global NetworkDown owner is handled before this dispatcher;
+            # an inactive login flow must not steal another task's choice.
+            return UNHANDLED
         if name in LOGIN_ACTION_TARGETS or (
             self._login_flow.active and name in ("POPUP_CONFIRM", "GOTO_MAIN")
         ):

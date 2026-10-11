@@ -236,6 +236,28 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         with self.assertRaisesRegex(SemanticGateClosed, 'did not return'):
             session.recover_orphan_combat_result(timeout_seconds=.001)
 
+    def test_assist_orphan_result_requires_typed_assist_return(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_meta_assist()
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.open = lambda: adapter
+        session.refresh_frame = lambda: None
+        session.orphan_combat_result_visible = lambda: True
+        session._combat_result_transition_until = 0.0
+        adapter._require_frame_observation_oracle = lambda: oracle
+        for name in ('daily_battle_result_visible', 'campaign_battle_reward_visible',
+                     'operation_siren_page_visible', 'daily_page_visible',
+                     'main_page_visible', 'event_campaign_page_visible'):
+            setattr(oracle, name, Mock(return_value=False))
+        oracle.meta_page_visible = Mock(return_value=True)
+        oracle.meta_assist_state = Mock(return_value=object())
+        self.assertEqual(session.recover_orphan_combat_result(), ())
+        oracle.meta_assist_state.assert_called_once()
+        oracle.meta_assist_state.side_effect = SemanticGateClosed('unknown assist state')
+        with self.assertRaisesRegex(SemanticGateClosed, 'unknown assist'):
+            session.recover_orphan_combat_result()
+        self.assertEqual(oracle.click_calls, [])
+
     def test_own_meta_start_ack_requires_newer_proven_transition(self):
         for newer, transitioned in ((True, True), (False, True), (True, False)):
             with self.subTest(newer=newer, transitioned=transitioned):

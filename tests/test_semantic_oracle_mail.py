@@ -15,6 +15,23 @@ from tests.semantic_support.oracle_cases import SemanticOracleTestsSupport
 
 
 class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
+    def test_empty_probe_yields_during_known_manager_mount_without_granting_input(self):
+        from unittest.mock import Mock
+        from alas_headless.semantic_oracle import SemanticGateClosed
+        page = make_button('back_btn', 'root/MailUI(Clone)/adapt/CommonTitleAndBack/back_btn', raycast_top=False)
+        # The real manager can cover MailUI before its controls are ready.
+        manager = make_button('btn_get', 'root/MailMgrMsgboxUI(Clone)/window/button_container/btn_get')
+        manager['interactable'] = False
+        backend = FakeBackend([page, manager])
+        oracle = make_oracle(backend)
+        oracle.read_text_state = Mock(side_effect=AssertionError('covered counter must not be read'))
+        self.assertFalse(oracle.mail_is_empty())
+        oracle.read_text_state.assert_not_called()
+        self.assertFalse(oracle.enabled('mail/manage/claim'))
+        with self.assertRaises(SemanticGateClosed):
+            oracle.click('mail/manage/claim')
+        self.assertEqual(backend.taps, [])
+
     def test_empty_probe_yields_to_manager_in_same_snapshot(self):
         from alas_headless.semantic_oracle import SemanticGateClosed
         from unittest.mock import Mock

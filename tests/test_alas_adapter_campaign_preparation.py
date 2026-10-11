@@ -14,6 +14,7 @@ from tests.semantic_support.adapter_cases import AlasSemanticAdapterTestsSupport
 from tests.semantic_support.adapter_fixtures import FakeOracle, NamedButton
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
+from alas_headless.adapter.semantic.contracts import AlasSemanticActionDeferred
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
@@ -144,7 +145,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
                 oracle.campaign_page_value = True
                 oracle.campaign_preparation_kind_value = None
             adapter.prepare_campaign_run()
-            with self.assertRaisesRegex(SemanticGateClosed, "budget"):
+            with self.assertRaisesRegex(AlasSemanticActionDeferred, "campaign.stage_entry"):
                 adapter.click(entrance)
 
     def test_campaign_check_short_circuits_restored_chapter_before_preparation(self):
@@ -191,7 +192,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
             self.assertFalse(adapter.appear(button))
             oracle.campaign_preparation_value = None
             self.assertFalse(adapter.appear(button))
-            with self.assertRaisesRegex(SemanticGateClosed, "budget"):
+            with self.assertRaisesRegex(SemanticGateClosed, "already submitted"):
                 adapter.click(button)
             adapter.end_campaign_pre_sortie()
             adapter.begin_campaign_pre_sortie("12-4")

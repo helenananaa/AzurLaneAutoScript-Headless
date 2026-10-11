@@ -1,0 +1,15 @@
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+index 272dbedcaaf6f694563d0d1aeaf97b3fc23ed5f9..389ad55d411ecac7dfba910540174c3881feda0a 100644
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -340,6 +340,10 @@
+                 try:
+                     if 0 <= zone.zone_id <= 7 and attempt == 0:
+                         semantic_adapter.click_operation_siren_globe_port(zone.cn, zone.zone_id)
++                    elif 0 <= zone.zone_id <= 7 and attempt == 1:
++                        # Ask for the game's exact input-mask entrance identity
++                        # after the root produced a proven unselected frame.
++                        semantic_adapter.click_operation_siren_globe_port(zone.cn, zone.zone_id, native_mask=True)
+                     else:
+                         # After a proven missed port-root input, reuse ALAS'
+                         # own logical zone intent and Unity's native projection.

@@ -16,10 +16,10 @@ index 6ffd45ee..145d4d11 100644
              if slot < 4:
                  return True
 diff --git a/module/research/selector.py b/module/research/selector.py
-index 05146c33..19327b62 100644
+index 26bebe918618b60bcaf3f760284f46c6002f936a..ad07f510ccbda3ed5e73e7dfb1c3a7c2fca049d2 100644
 --- a/module/research/selector.py
 +++ b/module/research/selector.py
-@@ -150,6 +150,16 @@ class ResearchSelector(ResearchUI):
+@@ -150,6 +150,17 @@ class ResearchSelector(ResearchUI):
              list: A list of ResearchProject objects and preset strings,
                  such as [object, object, object, 'reset']
          """
@@ -31,6 +31,7 @@ index 05146c33..19327b62 100644
 +            use_coin=self.config.Research_UseCoin,
 +            use_cube=self.config.Research_UseCube,
 +            use_part=self.config.Research_UsePart,
++            resource_options=getattr(self.config, 'args', {}).get('Research', {}).get('Research', {}),
 +        )
 +
          # Load filter string

@@ -75,6 +75,10 @@ class MeowfficerAdapterPorts:
             raise SemanticGateClosed("meowfficer purchase exceeds today's quota")
         free = 1 if before.purchased == 0 else 0
         maximum_cost = max(0, count - free) * 1500
+        if maximum_cost:
+            # Paid boxes use the same purchase authority as other shops.
+            # The daily free box remains an ordinary zero-price claim.
+            self._require_action_grant("shop.purchase")
 
         self.oracle.click("meowfficer/buy/enter")
         purchase = self.oracle._retry_transition_read(
@@ -121,7 +125,12 @@ class MeowfficerAdapterPorts:
         if before.coins < expected_cost:
             raise SemanticGateClosed("meowfficer purchase coins are insufficient")
 
-        self.oracle.click("meowfficer/buy/submit")
+        if expected_cost:
+            self._dispatch_mutation(
+                "shop.purchase", lambda: self.oracle.click("meowfficer/buy/submit")
+            )
+        else:
+            self.oracle.click("meowfficer/buy/submit")
         deadline = time.monotonic() + timeout_seconds
         confirmed = False
         skipped = False

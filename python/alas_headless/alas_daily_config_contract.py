@@ -15,18 +15,18 @@ TWO_STAGE_VALUES = ("skip", "first", "second")
 class AlasDailyConfigSnapshot:
     use_daily_skip: bool
     escort_mission: str
-    escort_mission_fleet: int
+    escort_mission_fleet: int | None
     advance_mission: str
-    advance_mission_fleet: int
+    advance_mission_fleet: int | None
     fierce_assault: str
-    fierce_assault_fleet: int
+    fierce_assault_fleet: int | None
     tactical_training: str
-    tactical_training_fleet: int
+    tactical_training_fleet: int | None
     supply_line_disruption: str
     module_development: str
-    module_development_fleet: int
+    module_development_fleet: int | None
     emergency_module_development: str
-    emergency_module_development_fleet: int
+    emergency_module_development_fleet: int | None
 
 
 def _bool(value: object, *, field: str) -> bool:
@@ -73,19 +73,19 @@ def validate_alas_daily_config(
         ),
         escort_mission_fleet=_fleet(
             escort_mission_fleet, field="Daily.EscortMissionFleet"
-        ),
+        ) if escort_mission != "skip" else None,
         advance_mission=_stage(
             advance_mission, field="Daily.AdvanceMission", allowed=THREE_STAGE_VALUES
         ),
         advance_mission_fleet=_fleet(
             advance_mission_fleet, field="Daily.AdvanceMissionFleet"
-        ),
+        ) if advance_mission != "skip" else None,
         fierce_assault=_stage(
             fierce_assault, field="Daily.FierceAssault", allowed=THREE_STAGE_VALUES
         ),
         fierce_assault_fleet=_fleet(
             fierce_assault_fleet, field="Daily.FierceAssaultFleet"
-        ),
+        ) if fierce_assault != "skip" else None,
         tactical_training=_stage(
             tactical_training,
             field="Daily.TacticalTraining",
@@ -93,7 +93,7 @@ def validate_alas_daily_config(
         ),
         tactical_training_fleet=_fleet(
             tactical_training_fleet, field="Daily.TacticalTrainingFleet"
-        ),
+        ) if tactical_training != "skip" else None,
         supply_line_disruption=_stage(
             supply_line_disruption,
             field="Daily.SupplyLineDisruption",
@@ -106,7 +106,7 @@ def validate_alas_daily_config(
         ),
         module_development_fleet=_fleet(
             module_development_fleet, field="Daily.ModuleDevelopmentFleet"
-        ),
+        ) if module_development != "skip" else None,
         emergency_module_development=_stage(
             emergency_module_development,
             field="Daily.EmergencyModuleDevelopment",
@@ -115,5 +115,5 @@ def validate_alas_daily_config(
         emergency_module_development_fleet=_fleet(
             emergency_module_development_fleet,
             field="Daily.EmergencyModuleDevelopmentFleet",
-        ),
+        ) if emergency_module_development != "skip" else None,
     )

@@ -95,7 +95,7 @@ diff --git a/module/raid/raid.py b/module/raid/raid.py
 -        entrance = raid_entrance(raid=raid, mode=mode)
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        semantic_current_raid = bool(
-+            semantic_adapter is not None and raid == 'raid_20260827'
++            semantic_adapter is not None and semantic_adapter.supports_raid_layout(raid)
 +        )
 +        semantic_use_ticket = (
 +            validate_alas_raid_use_ticket(self.config.Raid_UseTicket)
@@ -252,7 +252,7 @@ diff --git a/module/raid/run.py b/module/raid/run.py
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if (
 +            semantic_adapter is not None
-+            and name == 'raid_20260827'
++            and self.device.semantic_adapter.supports_raid_layout(name)
 +        ):
 +            if not semantic_adapter.raid_page_visible(event=name):
 +                self.ui_ensure(page_main)
@@ -269,7 +269,7 @@ diff --git a/module/raid/run.py b/module/raid/run.py
 -
 +        semantic_current_raid = bool(
 +            getattr(self.device, 'semantic_adapter', None) is not None
-+            and name == 'raid_20260827'
++            and self.device.semantic_adapter.supports_raid_layout(name)
 +        )
          self.run_count = 0
          self.run_limit = self.config.StopCondition_RunCount

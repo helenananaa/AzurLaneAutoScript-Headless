@@ -24,6 +24,7 @@ from ...semantic_oracle import (
     SemanticTargetMissing,
 )
 from .contracts import (
+    AlasSemanticActionDeferred,
     CampaignCameraPositioningAdmission,
     CampaignMapTargetRecheckProof,
     _CampaignFlowContext,
@@ -101,16 +102,6 @@ class CampaignMapAdapterPorts:
 
         self._package_gate()
         context = self._require_campaign_context()
-        camera_grants = self._action_ledger.remaining(
-            "campaign.camera_positioning"
-        )
-        if (
-            not self._action_ledger.allowed("campaign.camera_positioning")
-            or not 1 <= camera_grants <= 2
-        ):
-            raise SemanticGateClosed(
-                "campaign camera positioning requires one or two budget units"
-            )
         if (
             context.map_state is not state
             or context.camera_positioning_admission is not None
@@ -123,6 +114,7 @@ class CampaignMapAdapterPorts:
             raise SemanticGateClosed(
                 "campaign camera positioning is not available"
             )
+        self._require_action_grant("campaign.camera_positioning")
         cells = tuple(cell for cell in state.cells if cell.node == target_node)
         occupied = (
             set(state.land_nodes)
@@ -167,7 +159,9 @@ class CampaignMapAdapterPorts:
 
         self._package_gate()
         context = self._require_campaign_context()
-        if not self._action_ledger.allowed("campaign.grid_click"):
+        try:
+            self._require_action_grant('campaign.grid_click')
+        except AlasSemanticActionDeferred:
             return None
         has_submarine = (context.declared_submarine_fleet or
             (context.requested_fleets and context.requested_fleets[2]) or getattr(state, 'submarine', None) is not None)
@@ -199,18 +193,12 @@ class CampaignMapAdapterPorts:
             self.oracle.campaign_map_cell_viewport_target(state, node)
             for node in admission.input_nodes
         )
-        # Reserve at most one ALAS-owned viewport movement for every explicit
-        # goto input.  ALAS may skip a reservation when its fresh View already
-        # considers that waypoint in sight.
-        viewport_authorized = bool(
-            self._action_ledger.allowed("campaign.viewport_swipe")
-            and self._action_ledger.remaining("campaign.viewport_swipe")
-            >= len(admission.input_nodes)
-        )
-        if any(target.raycast_top is not True for target in targets) and not viewport_authorized:
-            raise SemanticGateClosed(
-                "campaign combat covered input requires viewport swipe budget"
-            )
+        # ALAS decides whether each fresh waypoint needs camera movement.
+        # Admit a currently covered route if one movement is available; every
+        # actual movement still checks and consumes its own grant. Reserving
+        # one for every click wrongly rejects routes with visible waypoints.
+        if any(target.raycast_top is not True for target in targets):
+            self._require_action_grant('campaign.viewport_swipe')
         target = targets[-1]
         if (
             target.path != admission.cell_path
@@ -340,28 +328,20 @@ class CampaignMapAdapterPorts:
         context = self._require_campaign_context()
         self._rebase_campaign_partial_route_if_proven(context)
         combat_ready = (
-            self._action_ledger.allowed("campaign.viewport_swipe")
-            and self._action_ledger.remaining("campaign.viewport_swipe") >= 1
-            and context.combat_admission is not None
+            context.combat_admission is not None
             and len(context.combat_route_receipts)
             < len(context.combat_admission.input_nodes)
             and context.camera_positioning_admission is None
             and context.combat_receipt is None
         )
         positioning_ready = (
-            self._action_ledger.allowed("campaign.camera_positioning")
-            and 1
-            <= self._action_ledger.remaining("campaign.camera_positioning")
-            <= 2
-            and context.camera_positioning_admission is not None
+            context.camera_positioning_admission is not None
             and context.combat_admission is None
             and not context.camera_positioning_completed
             and context.combat_receipt is None
         )
         post_combat_ready = (
-            self._action_ledger.allowed("campaign.viewport_swipe")
-            and self._action_ledger.remaining("campaign.viewport_swipe") >= 1
-            and context.combat_admission is not None
+            context.combat_admission is not None
             and context.combat_receipt is not None
             and len(context.combat_route_receipts)
             == len(context.combat_admission.input_nodes)
@@ -370,11 +350,7 @@ class CampaignMapAdapterPorts:
             and self._campaign_post_combat_state_proven(context, context.map_state)
         )
         retry_ready = (
-            self._action_ledger.allowed("campaign.viewport_swipe")
-            and self._action_ledger.remaining("campaign.viewport_swipe") >= 1
-            and self._action_ledger.allowed("campaign.grid_click")
-            and self._action_ledger.remaining("campaign.grid_click") >= 1
-            and context.combat_admission is not None
+            context.combat_admission is not None
             and context.combat_receipt is not None
             and len(context.combat_route_receipts)
             == len(context.combat_admission.input_nodes)
@@ -392,6 +368,11 @@ class CampaignMapAdapterPorts:
             or context.viewport_swipe_intent is not None
         ):
             raise SemanticGateClosed("campaign map viewport swipe is not authorized")
+        self._require_action_grant(
+            "campaign.camera_positioning" if positioning_ready else "campaign.viewport_swipe"
+        )
+        if retry_ready:
+            self._require_action_grant("campaign.grid_click")
         if not isinstance(name, str):
             raise SemanticGateClosed("campaign map viewport swipe name is malformed")
         match = re.fullmatch(r"MAP_SWIPE_(-?[0-9]+)_(-?[0-9]+)", name)
@@ -692,7 +673,7 @@ class CampaignMapAdapterPorts:
             admission is None
             or context.camera_positioning_completed
             or context.map_state is not state
-            or not 1 <= len(context.camera_positioning_proofs) <= 2
+            or not context.camera_positioning_proofs
             or state.signature != admission.map_signature
         ):
             raise SemanticGateClosed(
@@ -1058,7 +1039,13 @@ class CampaignMapAdapterPorts:
         """Prove that one committed destination tap had no game-side effect."""
 
         admission = context.combat_admission
-        if admission is None or state.signature != admission.map_signature:
+        receipt = context.combat_receipt
+        if (
+            admission is None
+            or receipt is None
+            or state.generation <= receipt.generation
+            or state.signature != admission.map_signature
+        ):
             return False
         fleets = tuple(
             fleet for fleet in state.fleets if fleet.marker == admission.fleet_marker
@@ -1115,11 +1102,8 @@ class CampaignMapAdapterPorts:
                 land_cells=context.map_land_cells,
                 expected_fleet_count=context.map_expected_fleet_count,
             )
-            if (
-                self._campaign_combat_input_retry_state_proven(context, post_state)
-                and self._action_ledger.allowed("campaign.grid_click")
-                and self._action_ledger.remaining("campaign.grid_click") >= 1
-            ):
+            if self._campaign_combat_input_retry_state_proven(context, post_state):
+                self._require_action_grant("campaign.grid_click")
                 target = self.oracle.campaign_map_cell_input(
                     post_state,
                     node,
@@ -1165,14 +1149,9 @@ class CampaignMapAdapterPorts:
         expected_node = admission.input_nodes[route_index]
         if node != expected_node:
             raise SemanticGateClosed("campaign combat grid target changed")
-        if (
-            not self._action_ledger.allowed("campaign.grid_click")
-            or self._action_ledger.remaining("campaign.grid_click") < 1
-            or context.combat_receipt is not None
-        ):
-            raise SemanticGateClosed(
-                "campaign combat grid requires remaining budget"
-            )
+        if context.combat_receipt is not None:
+            raise SemanticGateClosed("campaign combat grid input was already submitted")
+        self._require_action_grant("campaign.grid_click")
         if (
             context.map_columns is None
             or context.map_rows is None
@@ -1273,11 +1252,6 @@ class CampaignMapAdapterPorts:
         context = self._require_campaign_context()
         if not self.oracle.campaign_ambush_visible(evade=evade):
             return False
-        if (
-            not self._action_ledger.allowed("campaign.grid_click")
-            or self._action_ledger.remaining("campaign.grid_click") < 1
-        ):
-            raise SemanticGateClosed("campaign ambush requires remaining budget")
         if context.ambush_receipt is not None:
             raise SemanticGateClosed("campaign ambush input has not reached its postcondition")
         context.ambush_receipt = self._dispatch_mutation(

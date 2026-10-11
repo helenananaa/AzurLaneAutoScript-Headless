@@ -1681,7 +1681,7 @@ index c3c95459..870f5d96 100644
          """
          Pages:
              in: Any page
-@@ -627,3 +657,28 @@ class RewardDorm(UI):
+@@ -627,3 +657,29 @@ class RewardDorm(UI):
          delay = self.cal_dorm_delay(ships)
          logger.info(f'Ships in dorm: {ships}, task to delay: {delay}')
          self.config.task_delay(minute=delay)
@@ -1696,11 +1696,12 @@ index c3c95459..870f5d96 100644
 +            feed=self.config.Dorm_Feed,
 +            feed_filter=self.config.Dorm_FeedFilter,
 +        )
-+        validate_alas_buy_furniture_config(
-+            enable=self.config.BuyFurniture_Enable,
-+            buy_option=self.config.BuyFurniture_BuyOption,
-+            last_run=self.config.BuyFurniture_LastRun,
-+        )
++        if self.config.BuyFurniture_Enable is not False:
++            validate_alas_buy_furniture_config(
++                enable=self.config.BuyFurniture_Enable,
++                buy_option=self.config.BuyFurniture_BuyOption,
++                last_run=self.config.BuyFurniture_LastRun,
++            )
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if semantic_adapter is not None:
 +            semantic_adapter.begin_dorm()
@@ -2698,7 +2699,7 @@ index 57033308..c70ee57c 100644
              except ScriptEnd as e:
                  logger.hr('Script end')
 diff --git a/module/combat/combat.py b/module/combat/combat.py
-index fbc5fd3c..1e81a107 100644
+index fbc5fd3c6e1244fbcb4d9f2f99db87c5bcc5cd0b..2e86267f2372b0759f913951b472dec9abad1f03 100644
 --- a/module/combat/combat.py
 +++ b/module/combat/combat.py
 @@ -1,3 +1,5 @@
@@ -2743,7 +2744,12 @@ index fbc5fd3c..1e81a107 100644
          self.device.stuck_record_add(PAUSE)
          if self.config.SERVER in ['cn', 'en']:
              if PAUSE.match_luma(self.device.image, offset=(10, 10)):
-@@ -233,6 +250,7 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+@@ -231,8 +248,12 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+         logger.info('Combat preparation.')
++        if getattr(self.device, 'semantic_adapter', None) is not None and auto != 'combat_auto':
++            from alas_headless import AlasSemanticUnmapped
++            raise AlasSemanticUnmapped('Manual combat mode needs typed directional and weapon input')
+         self.device.stuck_record_clear()
          self.device.click_record_clear()
          skip_first_screenshot = True
          interval_set = False
@@ -3437,6 +3443,20 @@ diff --git a/module/combat/emotion.py b/module/combat/emotion.py
          self.fleet_1 = FleetEmotion(self.config, fleet=1)
          self.fleet_2 = FleetEmotion(self.config, fleet=2)
          self.fleets = [self.fleet_1, self.fleet_2]
+diff --git a/module/combat/combat_auto.py b/module/combat/combat_auto.py
+index 85540486b708b8d6029bd67f6f4c8ea465ca2b15..4f74e32f325392e04f7fef2cf03797f4889675c4 100644
+--- a/module/combat/combat_auto.py
++++ b/module/combat/combat_auto.py
+@@ -37,6 +37,9 @@
+         Returns:
+             bool: If executed
+         """
++        if getattr(self.device, 'semantic_adapter', None) is not None and auto != 'combat_auto':
++            from alas_headless import AlasSemanticUnmapped
++            raise AlasSemanticUnmapped('Manual combat mode needs typed directional and weapon input')
+         if self.auto_mode_checked:
+             return False
+         if self.auto_mode_click_timer.reached():
 diff --git a/module/shop/base.py b/module/shop/base.py
 index cadc42b9..7322cfdd 100644
 --- a/module/shop/base.py
@@ -3757,11 +3777,57 @@ index 48dff114..fe245758 100644
              success = self.shop_buy()
              if not success:
 diff --git a/module/shipyard/shipyard_reward.py b/module/shipyard/shipyard_reward.py
-index 9cb098b8..8f5fb97a 100644
+index 9cb098b888be87f98d56041a32a1035fca372201..c7553d48dbbb5382869904c6f6ff2842044f5c07 100644
 --- a/module/shipyard/shipyard_reward.py
 +++ b/module/shipyard/shipyard_reward.py
-@@ -218,7 +218,18 @@ class RewardShipyard(ShipyardUI):
-         Pages:
+@@ -130,12 +130,26 @@
+             if remain is None:
+                 break
+ 
++            from alas_headless import current_semantic_session
++            semantic_session = current_semantic_session()
++            if semantic_session is not None and count == remain:
++                break
++
+             if self._shipyard_bp_rarity == 'DR':
+                 self.config.ShipyardDr_LastRun = datetime.now().replace(microsecond=0)
+             else:
+                 self.config.Shipyard_LastRun = datetime.now().replace(microsecond=0)
+ 
+-            self._shipyard_buy_confirm('BP_BUY')
++            if semantic_session is not None:
++                semantic_session.begin_shipyard_purchase(
++                    self._shipyard_focus_index, self._shipyard_bp_rarity, count - remain,
++                    sum(self._shipyard_get_cost(i) for i in range(prev, prev + count - remain)),
++                )
++            try:
++                self._shipyard_buy_confirm('BP_BUY')
++            finally:
++                if semantic_session is not None:
++                    semantic_session.end_shipyard_purchase()
+ 
+             # Pay for actual amount bought based on 'remain'
+             # which also updates 'start' as a result
+@@ -160,7 +174,17 @@
+             remain = self._shipyard_ensure_index(count)
+             if remain is None:
+                 break
+-            self._shipyard_buy_confirm('BP_USE')
++            from alas_headless import current_semantic_session
++            semantic_session = current_semantic_session()
++            if semantic_session is not None and count == remain:
++                break
++            if semantic_session is not None:
++                semantic_session.begin_shipyard_blueprint_use(index, count - remain)
++            try:
++                self._shipyard_buy_confirm('BP_USE')
++            finally:
++                if semantic_session is not None:
++                    semantic_session.end_shipyard_blueprint_use()
+ 
+             count = self._shipyard_get_bp_count(index)
+ 
+@@ -221,6 +245,19 @@
              in: Any page
              out: page_shipyard
          """
@@ -3775,41 +3841,90 @@ index 9cb098b8..8f5fb97a 100644
 +            dr_index=self.config.ShipyardDr_ShipIndex,
 +            dr_buy_amount=self.config.ShipyardDr_BuyAmount,
 +            dr_last_run=self.config.ShipyardDr_LastRun,
++            pr_options=getattr(self.config, 'args', {}).get('Shipyard', {}).get('Shipyard', {}),
++            dr_options=getattr(self.config, 'args', {}).get('Shipyard', {}).get('ShipyardDr', {}),
 +        )
          if self.config.Shipyard_BuyAmount <= 0 and self.config.ShipyardDr_BuyAmount <= 0:
              self.config.Scheduler_Enable = False
              self.config.task_stop()
 diff --git a/module/shipyard/ui.py b/module/shipyard/ui.py
-index abb6c787..0978105f 100644
+index abb6c787726c33d0516d737508513b4b3dc66743..2fb9290cbb1a0d5698155a82f561c14d43388554 100644
 --- a/module/shipyard/ui.py
 +++ b/module/shipyard/ui.py
-@@ -31,6 +31,14 @@ class ShipyardUI(UI):
+@@ -31,6 +31,14 @@
          Returns:
              bool if appear
          """
 +        from alas_headless import current_semantic_session
 +        semantic_session = current_semantic_session()
 +        if semantic_session is not None:
-+            state = semantic_session.shipyard_state(self._shipyard_focus_index)
-+            if state.cannot_strengthen:
++            cannot_strengthen = semantic_session.shipyard_cannot_strengthen(self._shipyard_focus_index)
++            if cannot_strengthen:
 +                logger.info('Ship at full strength for current level, '
 +                            'no more BPs can be consumed')
-+            return state.cannot_strengthen
++            return cannot_strengthen
          if self.appear(SHIPYARD_PROGRESS_DEV, offset=(20, 20)) \
                  or self.appear(SHIPYARD_PROGRESS_FATE, offset=(20, 20)) \
                  or self.appear(SHIPYARD_LEVEL_NOT_ENOUGH_FATE, offset=(20, 20)) \
-@@ -131,6 +139,10 @@ class ShipyardUI(UI):
+@@ -47,6 +55,10 @@
+         Returns:
+             string 'FATE' or 'DEV'
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return semantic_session.shipyard_active_phase().upper()
+         if self.appear(SHIPYARD_IN_FATE, offset=(20, 20)):
+             return 'FATE'
+         else:
+@@ -61,6 +73,13 @@
+         Returns:
+             Button, Button, int (ocr read value)
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            panel = semantic_session.shipyard_strengthen_panel(self._shipyard_focus_index)
++            append = panel.phase.upper()
++            return (globals()[f'SHIPYARD_PLUS_{append}'],
++                    globals()[f'SHIPYARD_MINUS_{append}'], panel.quantity)
+         # Game UI is messy here. Situation varies with DEV/FATE and MAX button.
+         # Having a MAX button is like:
+         # | - |   0   | + | | MAX |
+@@ -110,7 +129,20 @@
+ 
+             diff = count - current
+             button = plus if diff > 0 else minus
+-            self.device.multi_click(button, n=diff, interval=(0.3, 0.5))
++            from alas_headless import current_semantic_session
++            semantic_session = current_semantic_session()
++            if semantic_session is not None:
++                for _ in range(abs(diff)):
++                    if not semantic_session.shipyard_change_quantity(
++                            self._shipyard_focus_index, 1 if diff > 0 else -1):
++                        self.device.screenshot()
++                        remaining = count - self._shipyard_get_total()[2]
++                        if remaining < 0:
++                            from alas_headless import SemanticGateClosed
++                            raise SemanticGateClosed('shipyard quantity could not be reduced to the ALAS request')
++                        return remaining
++            else:
++                self.device.multi_click(button, n=diff, interval=(0.3, 0.5))
+             self.device.sleep((0.3, 0.5))
+ 
+         logger.info(f'Current interface does not allow consumption of {count} BPs\n')
+@@ -131,6 +163,10 @@
              logger.warning(f'Cannot parse for count from index {index}')
              return -1
  
 +        from alas_headless import current_semantic_session
 +        semantic_session = current_semantic_session()
 +        if semantic_session is not None:
-+            return semantic_session.shipyard_state(index).blueprint_count
++            return semantic_session.shipyard_blueprint_count(index)
          result = OCR_SHIPYARD_BP_COUNT_GRID.ocr(self.device.image)
  
          return result[index - 1]
-@@ -163,6 +175,11 @@ class ShipyardUI(UI):
+@@ -163,6 +199,11 @@
              logger.warning(f'Research Series {series} is not selectable')
              return False
  
@@ -3821,7 +3936,7 @@ index abb6c787..0978105f 100644
          self.ui_click(SHIPYARD_SERIES_SELECT_ENTER, appear_button=self._shipyard_in_ui,
                        check_button=SHIPYARD_SERIES_SELECT_CHECK,
                        skip_first_screenshot=skip_first_screenshot)
-@@ -205,6 +222,14 @@ class ShipyardUI(UI):
+@@ -205,6 +246,14 @@
                  logger.warning(f'Index for bottom Navbar {left} is not selectable')
                  return False
  
@@ -3836,18 +3951,82 @@ index abb6c787..0978105f 100644
          ensured = False
          if self._shipyard_bottom_navbar.set(self, left=left, right=right, skip_first_screenshot=skip_first_screenshot):
              ensured = True
-@@ -359,6 +384,15 @@ class ShipyardUI(UI):
+@@ -291,6 +340,19 @@
+             text (str): for handle_popup_confirm
+             skip_first_screenshot (bool):
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        semantic_use = text == 'BP_USE'
++        if semantic_session is not None:
++            if text not in ('BP_USE', 'BP_BUY'):
++                from alas_headless import SemanticGateClosed
++                raise SemanticGateClosed('shipyard strengthening operation is unknown')
++            completed = (semantic_session.shipyard_blueprint_use_completed if semantic_use
++                         else semantic_session.shipyard_purchase_completed)
++            submit = (semantic_session.shipyard_blueprint_use_submit if semantic_use
++                      else semantic_session.shipyard_purchase_submit)
++            verify = (semantic_session.verify_shipyard_blueprint_use if semantic_use
++                      else semantic_session.verify_shipyard_purchase)
+         success = False
+         append = self._shipyard_get_append()
+         button = globals()[f'SHIPYARD_CONFIRM_{append}']
+@@ -304,7 +366,10 @@
+             else:
+                 self.device.screenshot()
+ 
+-            if ocr_timer.reached():
++            if semantic_session is not None and completed():
++                success = True
++
++            if semantic_session is None and ocr_timer.reached():
+                 logger.warning('Failed to detect for normal exit routine, resort to OCR check')
+                 _, _, current = self._shipyard_get_total()
+                 if not current:
+@@ -314,10 +379,13 @@
+                 ocr_timer.reset()
+                 continue
+ 
+-            if self.appear_then_click(button, offset=(20, 20), interval=3):
+-                continue
+-
+-            if self.handle_popup_confirm(text):
++            if (submit() if semantic_session is not None
++                    else self.appear_then_click(button, offset=(20, 20), interval=3)):
++                continue
++
++            if ((False if semantic_use else semantic_session.shipyard_purchase_confirm(text))
++                    if semantic_session is not None
++                    else self.handle_popup_confirm(text)):
+                 self.interval_reset(button)
+                 ocr_timer.reset()
+                 confirm_timer.reset()
+@@ -351,6 +419,8 @@
+                     break
+             else:
+                 confirm_timer.reset()
++        if semantic_session is not None:
++            verify()
+ 
+     def _shipyard_buy_enter(self):
+         """
+@@ -359,6 +429,20 @@
          Returns:
              bool whether entered
          """
 +        from alas_headless import current_semantic_session
 +        semantic_session = current_semantic_session()
 +        if semantic_session is not None:
++            if semantic_session.shipyard_active_phase() == 'fate':
++                return True
 +            state = semantic_session.shipyard_state(self._shipyard_focus_index)
 +            if state.research_status != 'complete':
 +                logger.warning('Cannot enter buy interface, focused '
 +                               'ship has not yet been fully researched')
 +                return False
++            if semantic_session.shipyard_fate_available():
++                semantic_session.shipyard_enter_fate(self._shipyard_focus_index)
++                self.device.screenshot()
 +            return True
          if self.appear(SHIPYARD_RESEARCH_INCOMPLETE, offset=(20, 20)) \
                  or self.appear(SHIPYARD_RESEARCH_IN_PROGRESS, offset=(20, 20)):
@@ -5129,7 +5308,7 @@ index d5528710..61c2bd1a 100644
                  self.campaign_set_chapter(name, mode)
                  self.ENTRANCE = self.campaign_get_entrance(name=name)
 diff --git a/module/daily/daily.py b/module/daily/daily.py
-index f9b86c33..a9434987 100644
+index f9b86c336a6d97570b43419ef4a0abd32f37f48a..19f8170d5bf7617993b41cbfac3296518a52ce1f 100644
 --- a/module/daily/daily.py
 +++ b/module/daily/daily.py
 @@ -1,5 +1,7 @@
@@ -5171,7 +5350,7 @@ index f9b86c33..a9434987 100644
          color = get_color(image=self.device.image, area=DAILY_ACTIVE.area)
          color = np.array(color).astype(float)
          color = (np.max(color) + np.min(color)) / 2
-@@ -49,6 +74,37 @@ class Daily(Combat):
+@@ -49,6 +74,39 @@ class Daily(Combat):
              int: Stage index, 0 to 3
              int: Fleet index, 1 to 6
          """
@@ -5205,10 +5384,21 @@ index f9b86c33..a9434987 100644
 +                ),
 +            }
 +            stage, fleet = mapping[kind]
-+            return {'skip': 0, 'first': 1, 'second': 2, 'third': 3}[stage], int(fleet)
++            if stage == 'skip':
++                return 0, 0
++            return {'first': 1, 'second': 2, 'third': 3}[stage], int(fleet)
          if self.emergency_module_development:
              # Meaning of daily_current
              # 1 Emergency Module Development 限时兵装训练
+@@ -136,6 +194,8 @@ class Daily(Combat):
+         if stage not in dic:
+             logger.warning(f'Unknown daily stage `{stage}` from daily_current={self.daily_current}')
+         stage = dic.get(stage, 0)
++        if stage == 0:
++            return 0, 0
+         return int(stage), int(fleet)
+ 
+     @property
 @@ -192,17 +247,35 @@ class Daily(Combat):
  
          button = DAILY_MISSION_LIST[stage - 1]
@@ -8010,22 +8200,7 @@ diff --git a/module/config/config.py b/module/config/config.py
 index 97631fca..6b26dd61 100644
 --- a/module/config/config.py
 +++ b/module/config/config.py
-@@ -203,6 +203,14 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
-         """
-         Calculate tasks, set pending_task and waiting_task
-         """
-+        from alas_headless import (
-+            validate_alas_scheduler_config,
-+            validate_alas_task_hoarding_config,
-+        )
-+
-+        validate_alas_task_hoarding_config(self.data)
-+        validate_alas_scheduler_config(self.data)
-+
-         pending = []
-         waiting = []
-         error = []
-@@ -452,6 +460,11 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
+@@ -452,6 +452,11 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
          """
          if not recon_scan and not submarine_call and not ap_limit and not cl1_preserve:
              return None
@@ -8037,7 +8212,7 @@ index 97631fca..6b26dd61 100644
          kv = dict_to_kv(
              {
                  "recon_scan": recon_scan,
-@@ -473,32 +486,46 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
+@@ -473,32 +478,46 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
                      self.modified[keys] = next_run
  
          def is_submarine_call(task):
@@ -14976,10 +15151,10 @@ index 6ffd45ee..145d4d11 100644
              if slot < 4:
                  return True
 diff --git a/module/research/selector.py b/module/research/selector.py
-index 05146c33..19327b62 100644
+index 26bebe918618b60bcaf3f760284f46c6002f936a..ad07f510ccbda3ed5e73e7dfb1c3a7c2fca049d2 100644
 --- a/module/research/selector.py
 +++ b/module/research/selector.py
-@@ -150,6 +150,16 @@ class ResearchSelector(ResearchUI):
+@@ -150,6 +150,17 @@ class ResearchSelector(ResearchUI):
              list: A list of ResearchProject objects and preset strings,
                  such as [object, object, object, 'reset']
          """
@@ -14991,6 +15166,7 @@ index 05146c33..19327b62 100644
 +            use_coin=self.config.Research_UseCoin,
 +            use_cube=self.config.Research_UseCube,
 +            use_part=self.config.Research_UsePart,
++            resource_options=getattr(self.config, 'args', {}).get('Research', {}).get('Research', {}),
 +        )
 +
          # Load filter string
@@ -15597,7 +15773,7 @@ diff --git a/module/raid/raid.py b/module/raid/raid.py
 -        entrance = raid_entrance(raid=raid, mode=mode)
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        semantic_current_raid = bool(
-+            semantic_adapter is not None and raid == 'raid_20260827'
++            semantic_adapter is not None and semantic_adapter.supports_raid_layout(raid)
 +        )
 +        semantic_use_ticket = (
 +            validate_alas_raid_use_ticket(self.config.Raid_UseTicket)
@@ -15754,7 +15930,7 @@ diff --git a/module/raid/run.py b/module/raid/run.py
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if (
 +            semantic_adapter is not None
-+            and name == 'raid_20260827'
++            and self.device.semantic_adapter.supports_raid_layout(name)
 +        ):
 +            if not semantic_adapter.raid_page_visible(event=name):
 +                self.ui_ensure(page_main)
@@ -15771,7 +15947,7 @@ diff --git a/module/raid/run.py b/module/raid/run.py
 -
 +        semantic_current_raid = bool(
 +            getattr(self.device, 'semantic_adapter', None) is not None
-+            and name == 'raid_20260827'
++            and self.device.semantic_adapter.supports_raid_layout(name)
 +        )
          self.run_count = 0
          self.run_limit = self.config.StopCondition_RunCount
@@ -18289,3 +18465,1240 @@ diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
                          semantic_adapter.click_operation_siren_globe_map_zone(zone.cn, zone.area_pos)
                  except (SemanticViewportReanchorRequired, SemanticGlobeSelectionMissed) as exc:
                      if attempt == 2:
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+index 272dbedcaaf6f694563d0d1aeaf97b3fc23ed5f9..389ad55d411ecac7dfba910540174c3881feda0a 100644
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -340,6 +340,10 @@
+                 try:
+                     if 0 <= zone.zone_id <= 7 and attempt == 0:
+                         semantic_adapter.click_operation_siren_globe_port(zone.cn, zone.zone_id)
++                    elif 0 <= zone.zone_id <= 7 and attempt == 1:
++                        # Ask for the game's exact input-mask entrance identity
++                        # after the root produced a proven unselected frame.
++                        semantic_adapter.click_operation_siren_globe_port(zone.cn, zone.zone_id, native_mask=True)
+                     else:
+                         # After a proven missed port-root input, reuse ALAS'
+                         # own logical zone intent and Unity's native projection.
+diff --git a/module/os_ash/meta.py b/module/os_ash/meta.py
+index 5bf9f4081c6d47b1655ba3e85f7b18bf8c6759ef..7dbbedfcb39b8da3cbc8e832bd0318861dfa9fc2 100644
+--- a/module/os_ash/meta.py
++++ b/module/os_ash/meta.py
+@@ -726,10 +726,19 @@
+         if semantic_adapter is not None:
+             semantic_adapter.begin_meta_assist()
+         try:
+-            if semantic_adapter is None or not self._in_meta_assist_page():
++            if semantic_adapter is None or not (
++                    self._in_meta_assist_page() or semantic_adapter.meta_page_visible()
++                    or semantic_adapter.meta_precombat_visible()):
+                 self.ui_ensure(page_reward)
+ 
++            if semantic_adapter is not None and semantic_adapter.meta_precombat_visible():
++                # Resume this task's selected assist using the original combat
++                # loop, as the own-beacon task already does after interruption.
++                self._make_an_attack()
++
+             if self._begin_meta_assist():
++                if semantic_adapter is not None:
++                    semantic_adapter.complete_meta_assist_combat()
+                 MetaReward(self.config, self.device).run()
+                 self.config.task_delay(server_update=True)
+             else:
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+index 8619601af386d7ff4258669045affee75fc3a447..1808d03393af05003e6afb95f9f484212ff5b9cb 100644
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -272,6 +272,8 @@
+                 if semantic_adapter.campaign_result_ready():
+                     return True
+                 oracle = semantic_adapter.open().oracle
++                if self.handle_combat_automation_confirm():
++                    continue
+                 if semantic_adapter.meta_beacon_active() \
+                         and oracle.meta_assist_sortie_prompt_visible():
+                     semantic_adapter.click_meta_beacon_sortie_confirm()
+diff --git a/module/device/device.py b/module/device/device.py
+--- a/module/device/device.py
++++ b/module/device/device.py
+@@ -353,7 +353,11 @@
+             logger.critical('No app stop/start, because HandleError disabled')
+             logger.critical('Please enable Alas.Error.HandleError or manually login to AzurLane')
+             raise RequestHumanTakeover
+-        super().app_start()
++        semantic_adapter = getattr(self, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.restart_game_for_manager()
++        else:
++            super().app_start()
+         self.stuck_record_clear()
+         self.click_record_clear()
+ 
+diff --git a/module/guild/guild_reward.py b/module/guild/guild_reward.py
+--- a/module/guild/guild_reward.py
++++ b/module/guild/guild_reward.py
+@@ -47,6 +47,8 @@
+         if guild_config.operation_enable:
+             success &= self.guild_operations()
+ 
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            self.device.screenshot()
+         self.ui_goto(page_main)
+ 
+         # Scheduler
+diff --git a/module/os/map_operation.py b/module/os/map_operation.py
+--- a/module/os/map_operation.py
++++ b/module/os/map_operation.py
+@@ -44,7 +44,9 @@
+     def get_zone_name(self):
+         # For EN only
+         ocr = Ocr(MAP_NAME, lang='cnocr', letter=(206, 223, 247), threshold=96, name='OCR_OS_MAP_NAME')
+-        name = ocr.ocr(self.device.image)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        name = (semantic_adapter.operation_siren_state().zone_name
++                if semantic_adapter is not None else ocr.ocr(self.device.image))
+         name = "".join(name.split())
+         name = name.lower()
+         name = name.strip('\\/-—–－')
+@@ -79,7 +81,9 @@
+     def get_zone_name(self):
+         # For JP only
+         ocr = Ocr(MAP_NAME, lang='jp', letter=(157, 173, 192), threshold=127, name='OCR_OS_MAP_NAME')
+-        name = ocr.ocr(self.device.image)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        name = (semantic_adapter.operation_siren_state().zone_name
++                if semantic_adapter is not None else ocr.ocr(self.device.image))
+         name = name.strip('\\/-—–－')
+         self.is_zone_name_hidden = '安全' in name
+         # Remove punctuations
+@@ -108,7 +112,9 @@
+     def get_zone_name(self):
+         # For TW only
+         ocr = Ocr(MAP_NAME, lang='tw', letter=(198, 215, 239), threshold=127, name='OCR_OS_MAP_NAME')
+-        name = ocr.ocr(self.device.image)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        name = (semantic_adapter.operation_siren_state().zone_name
++                if semantic_adapter is not None else ocr.ocr(self.device.image))
+         name = name.strip('\\/-—–－')
+         self.is_zone_name_hidden = '安全' in name
+         # Remove '塞壬要塞海域'
+@@ -122,7 +128,9 @@
+     def get_zone_name(self):
+         # For CN only
+         ocr = Ocr(MAP_NAME, lang='cnocr', letter=(214, 231, 255), threshold=127, name='OCR_OS_MAP_NAME')
+-        name = ocr.ocr(self.device.image)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        name = (semantic_adapter.operation_siren_state().zone_name
++                if semantic_adapter is not None else ocr.ocr(self.device.image))
+         name = name.strip('\\/-—–－')
+         self.is_zone_name_hidden = '安全' in name
+         if '-' in name:
+diff --git a/module/os_handler/action_point.py b/module/os_handler/action_point.py
+--- a/module/os_handler/action_point.py
++++ b/module/os_handler/action_point.py
+@@ -1,6 +1,7 @@
+ from datetime import datetime
+ 
+ from alas_headless import SemanticOracleError, validate_alas_opsi_action_point_purchase
++from alas_headless.adapter.semantic.contracts import AlasSemanticActionDeferred
+ 
+ import module.config.server as server
+ from module.base.button import ButtonGrid
+@@ -389,6 +390,15 @@
+                 semantic_adapter.click_operation_siren_action_point_control(False)
+                 raise ActionPointLimit
+ 
++            def consume_selected():
++                try:
++                    return semantic_adapter.click_operation_siren_action_point_control(True)
++                except AlasSemanticActionDeferred:
++                    # This handler owns the open panel. Leave a supported page
++                    # before ALAS delays this task and selects an unrelated one.
++                    semantic_adapter.click_operation_siren_action_point_control(False)
++                    raise
++
+             buy_checked = False
+             for _ in range(12):
+                 if state.current >= cost:
+@@ -420,7 +430,7 @@
+                         >= state.oil_purchase_cost + purchase_config.oil_limit
+                     ):
+                         before = state
+-                        semantic_adapter.click_operation_siren_action_point_control(True)
++                        consume_selected()
+                         for _ in range(20):
+                             self.device.sleep(0.25)
+                             state = semantic_adapter.operation_siren_action_point_state()
+@@ -467,7 +477,7 @@
+                     semantic_adapter.click_operation_siren_action_point_item(selected)
+                     state = semantic_adapter.operation_siren_action_point_state()
+                 before = state
+-                semantic_adapter.click_operation_siren_action_point_control(True)
++                consume_selected()
+                 for _ in range(20):
+                     self.device.sleep(0.25)
+                     state = semantic_adapter.operation_siren_action_point_state()
+diff --git a/module/handler/info_handler.py b/module/handler/info_handler.py
+--- a/module/handler/info_handler.py
++++ b/module/handler/info_handler.py
+@@ -467,7 +467,18 @@
+                 if option_count:
+                     logger.attr('Story_options', option_count)
+                     semantic_adapter.refresh_frame()
+-                    semantic_adapter.click_event_story_option(self.config.STORY_OPTION)
++                    from alas_headless import SemanticGateClosed
++                    dispatch_count = oracle.input_dispatch_count
++                    try:
++                        semantic_adapter.click_event_story_option(self.config.STORY_OPTION)
++                    except SemanticGateClosed:
++                        # Auto-search can advance a story between observation
++                        # and input. Only a proven zero-input, absent surface
++                        # may return to the original map-event loop.
++                        if (oracle.input_dispatch_count == dispatch_count
++                                and oracle.event_story_surface_absent()):
++                            return False
++                        raise
+                     self.story_popup_timeout.reset()
+                     return True
+                 if self.config.STORY_ALLOW_SKIP:
+diff --git a/module/os/globe_operation.py b/module/os/globe_operation.py
+--- a/module/os/globe_operation.py
++++ b/module/os/globe_operation.py
+@@ -405,6 +405,7 @@
+             semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
+             for attempt in range(80):
+                 self.device.sleep(0.25)
++                self.device.screenshot()
+                 if semantic_adapter.operation_siren_map_visible():
+                     return
+                 if self.handle_action_point(zone=zone, pinned=pinned):
+@@ -436,6 +437,15 @@
+                     self.globe_focus_to(zone)
+                     semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
+                     continue
++                # Reuse the same native event/popup handlers as the pixel
++                # branch. A first-visit story can cover an already-entered
++                # map; absence of the unobstructed map is not a failed tap.
++                if self.handle_map_event():
++                    continue
++                if self.handle_popup_confirm('GLOBE_ENTER'):
++                    continue
++                if self.appear_then_click(AUTO_SEARCH_REWARD, offset=(50, 50), interval=3):
++                    continue
+                 if attempt and attempt % 20 == 0:
+                     # The client can swallow the first exact entrance click
+                     # while closing the previous special-zone transition.
+diff --git a/module/os/globe_operation.py b/module/os/globe_operation.py
+--- a/module/os/globe_operation.py
++++ b/module/os/globe_operation.py
+@@ -402,7 +402,7 @@
+                     from alas_headless.oracle.errors import SemanticStrongholdEntryLocked
+                     raise SemanticStrongholdEntryLocked(zone.zone_id)
+                 raise OSExploreError
+-            semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
++            semantic_adapter.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
+             for attempt in range(80):
+                 self.device.sleep(0.25)
+                 self.device.screenshot()
+@@ -425,7 +425,7 @@
+                             except SemanticOracleError:
+                                 continue
+                             if state.zone_type == special_types[pinned]:
+-                                semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
++                                semantic_adapter.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
+                                 break
+                         else:
+                             raise OSExploreError(
+@@ -435,7 +435,7 @@
+                     # Normal zones can be selected again through the modeled
+                     # globe camera after the AP panel closes.
+                     self.globe_focus_to(zone)
+-                    semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
++                    semantic_adapter.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
+                     continue
+                 # Reuse the same native event/popup handlers as the pixel
+                 # branch. A first-visit story can cover an already-entered
+@@ -452,7 +452,7 @@
+                     # Match the bounded retry semantics of the legacy path,
+                     # but re-prove the pinned typed control before every tap.
+                     logger.info('Retry exact typed zone entrance')
+-                    semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
++                    semantic_adapter.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
+             raise OSExploreError(f'Unable to enter typed zone {zone}')
+ 
+         click_timer = Timer(10)
+diff --git a/module/guild/operations.py b/module/guild/operations.py
+--- a/module/guild/operations.py
++++ b/module/guild/operations.py
+@@ -1,4 +1,4 @@
+-from alas_headless import validate_alas_guild_config
++from alas_headless import validate_alas_guild_config, AlasSemanticUnmapped, SemanticGateClosed
+ 
+ from module.base.button import ButtonGrid
+ from module.base.timer import Timer
+@@ -600,10 +600,18 @@
+                 try:
+                     state = adapter.guild_operations_state()
+                     break
+-                except Exception:
++                except SemanticGateClosed as exc:
++                    if str(exc) not in (
++                        'guild operations snapshots are not coherent',
++                        'guild operations page identity is absent',
++                        'guild active operation marker is ambiguous',
++                        'guild active operation node is ambiguous',
++                    ):
++                        raise
++                    observation_error = str(exc)
+                     self.device.sleep(0.2)
+             else:
+-                raise RuntimeError('Guild operations did not become observable')
++                raise AlasSemanticUnmapped('Guild operations unavailable: ' + observation_error)
+             if state.mode == 'inactive':
+                 return True
+             if state.mode == 'boss':
+@@ -612,9 +620,13 @@
+                 return True
+             if state.mode != 'active':
+                 return False
+-            if state.active_node_path is None:
++            if not state.active_nodes:
+                 return True
+-            adapter.oracle.click_guild_active_operation(state.active_node_path)
++            # Native dispatch consumes the first visible entrance. Preserve
++            # that visual ordering while retaining each typed node identity.
++            node = min(state.active_nodes, key=lambda node: (
++                node.bounds.top, node.bounds.left, node.path))
++            adapter.oracle.click_guild_active_operation(node.path)
+             for _ in range(30):
+                 if adapter.oracle.enabled('guild/operations/dispatch/open'):
+                     adapter.oracle.click('guild/operations/dispatch/open')
+diff --git a/module/ui/ui.py b/module/ui/ui.py
+--- a/module/ui/ui.py
++++ b/module/ui/ui.py
+@@ -294,7 +294,22 @@
+                 if self.appear(page.check_button, offset=offset, interval=5):
+                     logger.info(f'Page switch: {page} -> {page.parent}')
+                     button = page.links[page.parent]
+-                    self.device.click(button)
++                    if semantic_adapter is not None:
++                        from alas_headless.oracle.errors import SemanticInputBlocked
++                        try:
++                            self.device.click(button)
++                        except SemanticInputBlocked as exc:
++                            if exc.blockers != ('bulletin',):
++                                raise
++                            # No navigation input was sent. The bulletin may
++                            # mount after the screenshot that found this page.
++                            # Refresh through the existing loop; ui_additional
++                            # owns the reviewed announcement close action.
++                            logger.info('Navigation covered by bulletin; refresh native UI loop')
++                            self.device.screenshot()
++                            break
++                    else:
++                        self.device.click(button)
+                     self.ui_button_interval_reset(button)
+                     clicked = True
+                     break
+diff --git a/module/guild/logistics.py b/module/guild/logistics.py
+--- a/module/guild/logistics.py
++++ b/module/guild/logistics.py
+@@ -1,4 +1,4 @@
+-from alas_headless import validate_alas_guild_config
++from alas_headless import validate_alas_guild_config, AlasSemanticUnmapped, SemanticGateClosed
+ 
+ import re
+ 
+@@ -465,10 +465,26 @@
+                 try:
+                     state = adapter.guild_logistics_state()
+                     break
+-                except Exception:
++                except SemanticGateClosed as exc:
++                    # These are read-only logistics parser failures. Keep
++                    # the existing mount retry, then let native ALAS defer
++                    # this task. Identity/input/transport failures propagate.
++                    if str(exc) not in (
++                        'guild logistics snapshots are not coherent',
++                        'guild logistics page identity is absent',
++                        'guild logistics text is absent or ambiguous',
++                        'guild logistics progress is malformed',
++                        'guild exchange remaining count is malformed',
++                        'guild exchange buttons are absent or ambiguous',
++                        'guild exchange row identity is ambiguous',
++                        'guild exchange row values are malformed',
++                        'guild amount is malformed',
++                    ):
++                        raise
++                    observation_error = str(exc)
+                     self.device.sleep(0.2)
+             else:
+-                raise RuntimeError('Guild logistics did not become observable')
++                raise AlasSemanticUnmapped('Guild logistics unavailable: ' + observation_error)
+ 
+             def close_awards():
+                 for _ in range(30):
+diff --git a/module/os/map.py b/module/os/map.py
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -1148,6 +1148,14 @@
+         if 'is_akashi' not in self._solved_map_event and grids and grids[0].is_akashi:
+             grid = grids[0]
+             logger.info(f'Found Akashi on {grid}')
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if semantic_adapter is not None and not semantic_adapter.shop_purchase_allowed():
++                # The native rescan owns this optional visit. A zero purchase
++                # grant means nothing can be bought; keep other map events
++                # running without opening an unused merchant shop.
++                logger.info('Skip Akashi purchase: no shop transaction grant')
++                self._solved_map_event.add('is_akashi')
++                return True
+             fleet = self.convert_radar_to_local((0, 0))
+             if fleet.distance_to(grid) > 1:
+                 self.device.click(grid)
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -47,7 +47,16 @@
+ 
+         try:
+             self.module = importlib.import_module('.' + name, f'campaign.{folder}')
+-        except ModuleNotFoundError:
++        except ModuleNotFoundError as exc:
++            if (getattr(getattr(self, 'device', None), 'semantic_adapter', None) is not None
++                    and exc.name in (f'campaign.{folder}', f'campaign.{folder}.{name}')):
++                # The requested map is unavailable before any navigation or
++                # input. Defer only this native task; dependency/import bugs
++                # and the original rendered-mode recovery remain unchanged.
++                from alas_headless import AlasSemanticUnmapped
++                raise AlasSemanticUnmapped(
++                    f'Campaign map unavailable: campaign.{folder}.{name}; '
++                    'install compatible ALAS map data or select an existing map') from exc
+             logger.warning(f'Map file not found: campaign.{folder}.{name}')
+             if not os.path.exists(f'./campaign/{folder}'):
+                 logger.warning(f'Folder not exists: ./campaign/{folder}')
+diff --git a/module/handler/info_handler.py b/module/handler/info_handler.py
+--- a/module/handler/info_handler.py
++++ b/module/handler/info_handler.py
+@@ -298,12 +298,6 @@
+         return False
+ 
+     def handle_guild_popup_cancel(self):
+-        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+-        if (
+-            semantic_adapter is not None
+-            and semantic_adapter.campaign_combat_active()
+-        ):
+-            return False
+         if self.appear(GUILD_POPUP_CONFIRM, offset=self._popup_offset) \
+                 and self.appear(GUILD_POPUP_CANCEL, offset=self._popup_offset, interval=2):
+             self.device.click(GUILD_POPUP_CANCEL)
+diff --git a/alas.py b/alas.py
+--- a/alas.py
++++ b/alas.py
+@@ -79,7 +79,14 @@
+             logger.warning(e)
+             # Reuse ALAS' configured failure interval for this task only.
+             # None is deferred, not completed and not a runtime failure.
+-            self.config.task_delay(success=False)
++            # Keep a future schedule already selected by the original task
++            # (for example its recon-scan cooldown). A zero failure interval
++            # must not erase that native resource/re-entry decision.
++            next_run = getattr(self.config, 'Scheduler_NextRun', None)
++            if isinstance(next_run, datetime) and next_run > datetime.now():
++                self.config.task_delay(target=next_run)
++            else:
++                self.config.task_delay(success=False)
+             return None
+         except GameNotRunningError as e:
+             logger.warning(e)
+diff --git a/alas.py b/alas.py
+--- a/alas.py
++++ b/alas.py
+@@ -29,11 +29,15 @@
+         # Failure count of tasks
+         # Key: str, task name, value: int, failure count
+         self.failure_record = {}
++        # Only unavailable tasks with no effective native delay are skipped
++        # for this queue pass. ALAS still owns priority, clocks and re-entry.
++        self._semantic_unavailable_tasks = set()
+ 
+     @cached_property
+     def config(self):
+         try:
+             config = AzurLaneConfig(config_name=self.config_name)
++            config._semantic_unavailable_tasks = self._semantic_unavailable_tasks
+             return config
+         except RequestHumanTakeover:
+             logger.critical('Request human takeover')
+@@ -87,6 +91,13 @@
+                 self.config.task_delay(target=next_run)
+             else:
+                 self.config.task_delay(success=False)
++            next_run = getattr(self.config, 'Scheduler_NextRun', None)
++            if isinstance(next_run, datetime) and next_run <= datetime.now():
++                unavailable = getattr(self, '_semantic_unavailable_tasks', None)
++                if unavailable is None:
++                    unavailable = self._semantic_unavailable_tasks = set()
++                self.config._semantic_unavailable_tasks = unavailable
++                unavailable.add(self.config.task.command)
+             return None
+         except GameNotRunningError as e:
+             logger.warning(e)
+@@ -473,6 +484,7 @@
+             time.sleep(5)
+ 
+             if self.config.should_reload():
++                self._semantic_unavailable_tasks.clear()
+                 return False
+ 
+     def get_next_task(self):
+@@ -485,6 +497,13 @@
+                 self.config.Optimization_WhenTaskQueueEmpty
+             )
+             task = self.config.get_next()
++            if task is None:
++                # All enabled tasks are temporarily unavailable. Reuse the
++                # existing config-watching wait, then retry their admission.
++                self.wait_until(datetime.now())
++                self._semantic_unavailable_tasks.clear()
++                del_cached_property(self, 'config')
++                continue
+             self.config.task = task
+             self.config.bind(task)
+ 
+@@ -584,9 +603,14 @@
+             if success is None:
+                 # An optional semantic port is unavailable. Keep other tasks
+                 # schedulable without counting this as a client crash.
++                next_run = getattr(self.config, 'Scheduler_NextRun', None)
++                if isinstance(next_run, datetime) and next_run > datetime.now():
++                    self._semantic_unavailable_tasks.clear()
+                 del_cached_property(self, 'config')
+                 continue
+ 
++            # A real native task outcome permits a fresh availability check.
++            self._semantic_unavailable_tasks.clear()
+             # Check failures
+             failed = deep_get(self.failure_record, keys=task, default=0)
+             failed = 0 if success else failed + 1
+diff --git a/module/config/config.py b/module/config/config.py
+--- a/module/config/config.py
++++ b/module/config/config.py
+@@ -213,6 +213,8 @@
+             func = Function(func)
+             if not func.enable:
+                 continue
++            if func.command in getattr(self, '_semantic_unavailable_tasks', ()):
++                continue
+             if not isinstance(func.next_run, datetime):
+                 error.append(func)
+             elif func.next_run < now:
+@@ -256,6 +258,10 @@
+             logger.attr("Task", task)
+             return task
+         else:
++            unavailable = getattr(self, '_semantic_unavailable_tasks', ())
++            if any(Function(data).enable and Function(data).command in unavailable
++                   for data in self.data.values()):
++                return None
+             logger.critical("No task waiting or pending")
+             logger.critical("Please enable at least one task")
+             raise RequestHumanTakeover
+diff --git a/module/guild/operations.py b/module/guild/operations.py
+--- a/module/guild/operations.py
++++ b/module/guild/operations.py
+@@ -314,6 +314,9 @@
+         Pages:
+             in: page_guild, guild operation, operation dispatch preparation (GUILD_DISPATCH_RECOMMEND)
+         """
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            return semantic_session.open().guild_formation_switch_button()
+         # Fleet switch, for 4 situation
+         #          | 1 |
+         #       | 1 | | 2 |
+@@ -652,6 +655,11 @@
+                     self.device.sleep(0.2)
+             else:
+                 return False
++            self._guild_operations_dispatch_switch_fleet(skip_first_screenshot=False)
++            formation = adapter.guild_formation_state()
++            if formation.in_progress:
++                self._guild_operations_dispatch_exit(skip_first_screenshot=False)
++                return True
+             if formation.empty_slots:
+                 adapter.oracle.click('guild/formation/recommend')
+                 for _ in range(30):
+@@ -663,14 +671,23 @@
+                 if adapter.oracle.enabled('guild/dispatch/confirm'):
+                     break
+                 self.device.sleep(0.2)
+-            adapter.confirm_guild_dispatch()
++            dispatch_receipt = adapter.confirm_guild_dispatch()
+             for _ in range(30):
+-                if adapter.oracle.enabled('guild/dispatch-detail/close'):
+-                    adapter.oracle.click('guild/dispatch-detail/close')
+-                    logger.info('Guild operation run success: True (semantic)')
+-                    return True
++                try:
++                    dispatched_formation = adapter.guild_formation_state()
++                except SemanticGateClosed as exc:
++                    if str(exc) != 'guild formation snapshots are not coherent':
++                        raise
++                else:
++                    if (dispatched_formation.generation > dispatch_receipt.generation
++                            and dispatched_formation.in_progress):
++                        break
+                 self.device.sleep(0.2)
+-            return False
++            else:
++                raise SemanticGateClosed('Guild dispatch did not advance to in-progress state')
++            self._guild_operations_dispatch_exit(skip_first_screenshot=False)
++            logger.info('Guild operation run success: True (semantic)')
++            return True
+         self.guild_side_navbar_ensure(bottom=1)
+         entered = self._guild_operations_ensure()
+         if not entered:
+diff --git a/module/ui/ui.py b/module/ui/ui.py
+--- a/module/ui/ui.py
++++ b/module/ui/ui.py
+@@ -299,13 +299,14 @@
+                         try:
+                             self.device.click(button)
+                         except SemanticInputBlocked as exc:
+-                            if exc.blockers != ('bulletin',):
++                            if not (exc.blockers == ('bulletin',) or
++                                    (exc.semantic_id == 'os/page/back'
++                                     and exc.blockers == ('opsi-exit',))):
+                                 raise
+-                            # No navigation input was sent. The bulletin may
+-                            # mount after the screenshot that found this page.
+-                            # Refresh through the existing loop; ui_additional
+-                            # owns the reviewed announcement close action.
+-                            logger.info('Navigation covered by bulletin; refresh native UI loop')
++                            # No navigation input was sent. A reviewed overlay
++                            # may mount after the native screenshot. Refresh
++                            # this loop; ui_additional owns its handling.
++                            logger.info(f'Navigation covered by {exc.blockers[0]}; refresh native UI loop')
+                             self.device.screenshot()
+                             break
+                     else:
+diff --git a/module/meowfficer/buy.py b/module/meowfficer/buy.py
+--- a/module/meowfficer/buy.py
++++ b/module/meowfficer/buy.py
+@@ -207,7 +207,14 @@
+             if count <= 0:
+                 return
+             if semantic_adapter is not None:
+-                semantic_adapter.buy_meowfficer_boxes(count)
++                from alas_headless.adapter.semantic.contracts import AlasSemanticActionDeferred
++                try:
++                    semantic_adapter.buy_meowfficer_boxes(count)
++                except AlasSemanticActionDeferred as exc:
++                    # This no-input purchase refusal ends only this optional
++                    # branch. Original run() still owns Fort and training.
++                    logger.info(f'Meowfficer paid purchase deferred: {exc}')
++                    return
+             else:
+                 self.meow_choose(count)
+                 self.meow_confirm()
+diff --git a/module/os_handler/mission.py b/module/os_handler/mission.py
+--- a/module/os_handler/mission.py
++++ b/module/os_handler/mission.py
+@@ -188,7 +188,11 @@
+                     return 'pinned_at_archive_zone'
+                 else:
+                     logger.info('Pinned at mission zone')
+-                    self.globe_enter(zone=self.name_to_zone(72))
++                    # Mission checkout pins the real destination; 72 is only
++                    # the upstream placeholder for its original AP flow.
++                    zone = (self.name_to_zone(semantic_oracle.operation_siren_globe_state().zone_name)
++                            if semantic_oracle is not None else self.name_to_zone(72))
++                    self.globe_enter(zone=zone)
+                     return 'pinned_at_mission_zone'
+             if self.is_in_map() and self.info_bar_count():
+                 logger.info('Already at mission zone')
+@@ -216,7 +220,11 @@
+                                 self.globe_enter(zone=self.name_to_zone(72))
+                                 return 'pinned_at_archive_zone'
+                             logger.info('Pinned at mission zone')
+-                            self.globe_enter(zone=self.name_to_zone(72))
++                            # Mission checkout pins the real destination; 72 is only
++                            # the upstream placeholder for its original AP flow.
++                            zone = (self.name_to_zone(semantic_oracle.operation_siren_globe_state().zone_name)
++                                    if semantic_oracle is not None else self.name_to_zone(72))
++                            self.globe_enter(zone=zone)
+                             return 'pinned_at_mission_zone'
+                         if self.is_in_map() and self.info_bar_count():
+                             logger.info('Already at mission zone')
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -1001,6 +1001,7 @@
+                     semantic_session.click_operation_siren_relative_grid(
+                         tuple(int(value) for value in grid),
+                         prefer_adjacent_event=True,
++                        fleet_relative=True,
+                     )
+                 except SemanticGateClosed:
+                     logger.info('Refocus fleet before typed question movement')
+diff --git a/module/os/map.py b/module/os/map.py
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -160,6 +160,9 @@
+         in_month_boss_room = bool(
+             semantic_adapter is not None
+             and semantic_adapter.appear(MAP_EXIT)
++            and semantic_adapter.operation_siren_state().zone_name.startswith(
++                ('普通难度:', '普通难度：', '困难难度:', '困难难度：')
++            )
+         )
+         in_shop = False
+         if semantic_adapter is not None:
+diff --git a/module/os_handler/map_event.py b/module/os_handler/map_event.py
+--- a/module/os_handler/map_event.py
++++ b/module/os_handler/map_event.py
+@@ -134,9 +134,8 @@
+             # semantic oracle to the exact reconnect wording, so consume only
+             # that reviewed overlay and keep the current exploration loop.
+             from module.handler.assets import POPUP_CONFIRM
+-            if semantic_adapter.appear(POPUP_CONFIRM):
++            if self.appear_then_click(POPUP_CONFIRM):
+                 logger.info('Operation Siren map confirmation')
+-                self.device.click(POPUP_CONFIRM)
+                 return 'map_confirmation'
+         if self.handle_map_get_items(drop=drop):
+             return 'map_get_items'
+diff --git a/module/device/control.py b/module/device/control.py
+--- a/module/device/control.py
++++ b/module/device/control.py
+@@ -58,6 +58,9 @@
+                     state
+                 )
+             receipt = semantic_adapter.click(button)
++            if receipt is None:
++                logger.info(f'Semantic click continued without input: {button}')
++                return None
+             logger.info(f'Semantic click {receipt.semantic_id} @ {receipt.path}')
+             return receipt
+         x, y = random_rectangle_point(button.button)
+diff --git a/module/os/map_fleet_selector.py b/module/os/map_fleet_selector.py
+--- a/module/os/map_fleet_selector.py
++++ b/module/os/map_fleet_selector.py
+@@ -196,6 +196,11 @@
+                         opened, selected = refresh_selector_state()
+                         if opened:
+                             return
++                        if selected == index:
++                            # The requested fleet arrived while the dropdown
++                            # was closing. Its fresh typed state is already
++                            # the original selection postcondition.
++                            return True
+                         if selected != current:
+                             raise SemanticGateClosed(
+                                 'Operation Siren fleet changed while opening selector'
+@@ -208,7 +213,9 @@
+                 )
+ 
+             for attempt in range(3):
+-                open_selector()
++                if open_selector():
++                    logger.info(f'Ensure fleet to be {index}')
++                    return True
+                 semantic_session.click_operation_siren_fleet_selector(index)
+                 for _ in range(6):
+                     opened, selected = refresh_selector_state()
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -434,7 +434,8 @@
+ 
+         for _ in self.loop():
+ 
+-            if not confirm_timer.reached():
++            if (not confirm_timer.reached()
++                    or getattr(self.device, 'semantic_adapter', None) is not None):
+                 if self.handle_combat_automation_confirm():
+                     continue
+ 
+diff --git a/module/ui/ui.py b/module/ui/ui.py
+--- a/module/ui/ui.py
++++ b/module/ui/ui.py
+@@ -301,7 +301,8 @@
+                         except SemanticInputBlocked as exc:
+                             if not (exc.blockers == ('bulletin',) or
+                                     (exc.semantic_id == 'os/page/back'
+-                                     and exc.blockers == ('opsi-exit',))):
++                                     and exc.blockers in (('opsi-exit',), ('award-info',),
++                                                          ('award-info1',), ('ship-exp',)))):
+                                 raise
+                             # No navigation input was sent. A reviewed overlay
+                             # may mount after the native screenshot. Refresh
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -279,7 +279,15 @@
+                     semantic_adapter.click_meta_beacon_sortie_confirm()
+                     continue
+                 if oracle.daily_precombat_visible():
+-                    semantic_adapter.click_daily_precombat_start()
++                    from alas_headless.oracle.errors import SemanticInputBlocked
++                    try:
++                        semantic_adapter.click_daily_precombat_start()
++                    except SemanticInputBlocked as exc:
++                        if exc.semantic_id != 'daily/precombat/start' or exc.blockers != ('loading',):
++                            raise
++                        # No start input was sent. The original screenshot
++                        # loop owns waiting for the temporary loading cover.
++                        continue
+                     semantic_daily_start_at = time.time()
+                     continue
+                 if oracle.daily_combat_visible():
+diff --git a/module/tactical/tactical_class.py b/module/tactical/tactical_class.py
+--- a/module/tactical/tactical_class.py
++++ b/module/tactical/tactical_class.py
+@@ -369,6 +369,10 @@
+         """
+         tactical_config = self._validate_tactical_config()
+         logger.hr('Tactical books choose', level=2)
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            self.device.screenshot()
++            if self.appear(POPUP_CONFIRM, offset=(20, 20)):
++                return True
+         if not self._tactical_books_get():
+             return False
+ 
+@@ -470,10 +474,14 @@
+         if semantic_session is None:
+             self.device.click(BACK_ARROW)
+             return False
+-        oracle = semantic_session.open().oracle
++        adapter = semantic_session.open()
++        context = getattr(adapter, '_commission_context', None)
++        if context is not None and context.tactical_empty_slot_receipt is not None:
++            return False
++        oracle = adapter._fresh_input_oracle()
+         if not oracle.enabled('tactical/page/back'):
+             return False
+-        oracle.click('tactical/page/back')
++        adapter._record_mission_transition(oracle.click('tactical/page/back'))
+         return True
+ 
+     def _tactical_dock_selected(self):
+@@ -857,7 +865,19 @@
+         if semantic_adapter is not None:
+             semantic_adapter.begin_tactical()
+         try:
+-            if (
++            inherited_tactical = False
++            if semantic_adapter is not None:
++                self.device.screenshot()
++                # Re-enter the original popup owner after a task-local defer.
++                inherited_tactical = semantic_adapter.cancel_tactical_continue_if_present()
++                if not inherited_tactical:
++                    inherited_tactical = (
++                        semantic_adapter.open().oracle.exists('tactical/page/back')
++                        and (self.appear(DOCK_CHECK, offset=(20, 20))
++                             or self.appear(TACTICAL_CLASS_START, offset=(30, 30))
++                             or self.appear(POPUP_CONFIRM, offset=(20, 20)))
++                    )
++            if not inherited_tactical and (
+                     semantic_adapter is None
+                     or not semantic_adapter.open().oracle.exists('reward/page/back')
+             ):
+diff --git a/module/ui/ui.py b/module/ui/ui.py
+--- a/module/ui/ui.py
++++ b/module/ui/ui.py
+@@ -149,6 +149,12 @@
+         else:
+             return self.appear(check_button, offset=offset)
+ 
++    def _check_semantic_client_version(self):
++        semantic_adapter = getattr(self.device, "semantic_adapter", None)
++        if semantic_adapter is not None and semantic_adapter.client_version_update_required():
++            from module.exception import GameBugError
++            raise GameBugError("Client version warning requires native Restart/update")
++
+     def ui_get_current_page(self, skip_first_screenshot=True):
+         """
+         Args:
+@@ -183,6 +189,8 @@
+             # End
+             if timeout.reached():
+                 break
++
++            self._check_semantic_client_version()
+ 
+             # Known pages
+             semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+@@ -262,6 +270,8 @@
+                 skip_first_screenshot = False
+             else:
+                 self.device.screenshot()
++
++            self._check_semantic_client_version()
+ 
+             # Destination page
+             if self.ui_page_appear(page=destination, offset=offset):
+@@ -524,6 +534,7 @@
+         Args:
+             get_ship:
+         """
++        self._check_semantic_client_version()
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None and semantic_adapter.server_maintenance_visible():
+             logger.warning('Game server is under maintenance')
+diff --git a/module/os/map_operation.py b/module/os/map_operation.py
+--- a/module/os/map_operation.py
++++ b/module/os/map_operation.py
+@@ -291,8 +291,15 @@
+         confirm_timer = Timer(1, count=2)
+         changed = False
+         for _ in self.loop():
+-            # End
+-            if changed and self.is_in_map():
++            # End. A resumed semantic invocation may inherit an already
++            # restored map without owning the earlier confirmation receipt.
++            # Observe the native exit marker in this screenshot; keep the
++            # original map identity and confirmation timer as the completion.
++            semantic_returned = (
++                semantic_adapter is not None
++                and not self.appear(MAP_EXIT, offset=(20, 20))
++            )
++            if (changed or semantic_returned) and self.is_in_map():
+                 if confirm_timer.reached():
+                     break
+             else:
+diff --git a/module/os_handler/port.py b/module/os_handler/port.py
+--- a/module/os_handler/port.py
++++ b/module/os_handler/port.py
+@@ -23,12 +23,19 @@
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
+             semantic_adapter.refresh_frame()
+-            semantic_adapter.open().oracle.click('os/port/enter')
++            receipt = semantic_adapter.open().oracle.click('os/port/enter')
+             for _ in range(24):
+                 self.device.sleep(0.5)
+                 semantic_adapter.refresh_frame()
+                 if semantic_adapter.open().oracle.exists('os/port/supply'):
+                     return
++            oracle = semantic_adapter.open().oracle
++            if oracle.operation_siren_local_map_visible():
++                from alas_headless.oracle.errors import SemanticNavigationPending
++                raise SemanticNavigationPending(
++                    'os/port/enter', receipt, oracle.read_state().generation,
++                    'Typed port entrance did not settle; current local map remains healthy',
++                )
+             raise RuntimeError('Typed Operation Siren port did not open')
+         for _ in self.loop():
+             if self.appear(PORT_SUPPLY_CHECK, offset=(20, 20)):
+@@ -166,43 +173,57 @@
+                 oracle.click('os/port/dock')
+                 self.device.sleep(0.5)
+ 
+-            attempted = False
++            attempted = None
+             repaired = False
+             for _ in range(24):
++                self.device.screenshot()
+                 cost = semantic_adapter.operation_siren_port_repair_cost()
+                 if cost is not None:
+-                    logger.attr('PortRepairCost', cost)
+-                    semantic_adapter.click_operation_siren_port_repair(True)
+-                    repaired = True
++                    if not repaired:
++                        logger.attr('PortRepairCost', cost)
++                        semantic_adapter.click_operation_siren_port_repair(True)
++                        repaired = True
+                     self.device.sleep(0.5)
+                     continue
++                # Preserve ALAS' repair-completion decisions. An accepted
++                # repair-all entrance is not a completed repair confirmation.
++                if attempted is not None and self.info_bar_count():
++                    break
+                 if oracle.enabled('os/port/dock/repair-all'):
+-                    if attempted or repaired:
++                    if repaired:
+                         break
+-                    oracle.click('os/port/dock/repair-all')
+-                    attempted = True
++                    if attempted is None:
++                        attempted = oracle.click('os/port/dock/repair-all')
++                        self.device.sleep(0.5)
++                        continue
++                self.device.sleep(0.25)
++            else:
++                if not repaired and attempted is not None and oracle.enabled('os/port/dock/repair-all'):
++                    from alas_headless.oracle.errors import SemanticNavigationPending
++                    raise SemanticNavigationPending(
++                        'os/port/dock/repair-all', attempted, oracle.read_state().generation,
++                        'Typed repair entrance did not settle; current dock remains healthy',
++                    )
++                raise RuntimeError('Typed port repair did not settle')
++
++            back = None
++            for _ in range(24):
++                self.device.screenshot()
++                if oracle.enabled('os/port/supply'):
++                    return
++                # One accepted return owns its animation. Do not submit the
++                # same old dock control repeatedly into a changing underlay.
++                if back is None and oracle.enabled('os/port/dock/back'):
++                    back = oracle.click('os/port/dock/back')
+                     self.device.sleep(0.5)
+                     continue
+                 self.device.sleep(0.25)
+-            else:
+-                raise RuntimeError('Typed port repair did not settle')
+-
+-            for _ in range(24):
+-                if oracle.enabled('os/port/supply'):
+-                    return
+-                # The dock back control can remain mounted while its first
+-                # click is swallowed by the repair-panel closing animation.
+-                # Re-read the exact control and retry until the port buttons
+-                # are positively visible.
+-                if oracle.exists('os/port/dock/back'):
+-                    try:
+-                        oracle.click('os/port/dock/back')
+-                    except SemanticGateClosed:
+-                        self.device.sleep(0.25)
+-                        continue
+-                    self.device.sleep(0.5)
+-                    continue
+-                self.device.sleep(0.25)
++            if back is not None and oracle.enabled('os/port/dock/repair-all'):
++                from alas_headless.oracle.errors import SemanticNavigationPending
++                raise SemanticNavigationPending(
++                    'os/port/dock/back', back, oracle.read_state().generation,
++                    'Typed dock return did not settle; current dock remains healthy',
++                )
+             raise RuntimeError('Typed port repair did not return to port')
+ 
+         self.ui_click(PORT_GOTO_DOCK, appear_button=PORT_CHECK, check_button=PORT_DOCK_CHECK,
+diff --git a/module/ui/ui.py b/module/ui/ui.py
+--- a/module/ui/ui.py
++++ b/module/ui/ui.py
+@@ -328,6 +328,13 @@
+             if clicked:
+                 continue
+ 
++            if (semantic_adapter is not None
++                    and self.appear(GOTO_MAIN, offset=offset, interval=2)):
++                # A popup can reveal a reviewed page outside Page.iter_pages().
++                # Reuse native unknown-page recovery and its typed Home port.
++                self.ui_get_current_page()
++                continue
++
+             # Additional
+             if self.ui_additional(get_ship=get_ship):
+                 continue
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -1188,9 +1188,10 @@
+                 # means this fleet already lost.  Map-chibi or stacked-fleet
+                 # HUD reads after a boss click must not skip the remaining
+                 # fleets before they fight.
+-                if is_month and 'fleet_unavailable' in str(walk_result):
++                if 'fleet_unavailable' in str(walk_result):
+                     logger.warning('Current fleet is unavailable; rotate to the next fleet')
+-                    self.semantic_month_boss_leave_boss_cell(drop=drop)
++                    if is_month:
++                        self.semantic_month_boss_leave_boss_cell(drop=drop)
+                     return
+             return
+ 
+diff --git a/module/os/map.py b/module/os/map.py
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -87,6 +87,13 @@
+             **kwargs
+         )
+ 
++        if semantic_adapter is not None:
++            if semantic_adapter.operation_siren_low_resolve_prompt_visible():
++                logger.info('Recover retained Operation Siren low-resolve prompt')
++                semantic_adapter.click_operation_siren_low_resolve_cancel()
++                self.device.sleep(0.5)
++                semantic_adapter.refresh_frame()
++
+         # UI switching
+         if (
+             semantic_adapter is not None
+@@ -133,11 +140,6 @@
+             self.ui_ensure(page_os)
+ 
+         if semantic_adapter is not None:
+-            if semantic_adapter.operation_siren_low_resolve_prompt_visible():
+-                logger.info('Recover retained Operation Siren low-resolve prompt')
+-                semantic_adapter.click_operation_siren_low_resolve_cancel()
+-                self.device.sleep(0.5)
+-                semantic_adapter.refresh_frame()
+             for _ in range(8):
+                 if not semantic_adapter.operation_siren_reward_visible():
+                     break
+diff --git a/module/dorm/dorm.py b/module/dorm/dorm.py
+--- a/module/dorm/dorm.py
++++ b/module/dorm/dorm.py
+@@ -549,6 +549,17 @@
+                 continue
+ 
+     def dorm_food_run(self, amount):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is None or amount <= 0:
++            return self._dorm_food_run_alas_state_machine(amount)
++        semantic_adapter.begin_dorm(commission_recovery=True)
++        try:
++            # Original Commission still owns OilMaxed and the food quantity.
++            return self._dorm_food_run_alas_state_machine(amount)
++        finally:
++            semantic_adapter.end_dorm()
++
++    def _dorm_food_run_alas_state_machine(self, amount):
+         """
+         Args:
+             amount (int): amount of food to buy
+diff --git a/module/exercise/combat.py b/module/exercise/combat.py
+--- a/module/exercise/combat.py
++++ b/module/exercise/combat.py
+@@ -126,7 +126,10 @@
+                 ):
+                     logger.info('Exercise quit')
+                     if semantic_adapter is not None:
+-                        semantic_adapter.exercise_quit_low_hp()
++                        if not semantic_adapter.exercise_quit_low_hp():
++                            # The exact result superseded the fresh pause input.
++                            # Original result handlers own the next screenshot.
++                            continue
+                         success = False
+                         end = True
+                         continue
+diff --git a/module/guild/operations.py b/module/guild/operations.py
+--- a/module/guild/operations.py
++++ b/module/guild/operations.py
+@@ -197,6 +197,9 @@
+         Pages:
+             in: page_guild, guild operation, operation map (GUILD_OPERATIONS_ACTIVE_CHECK)
+         """
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            return semantic_session.open().guild_operation_visible_nodes(), ()
+         # Where whole operation mission chain is
+         detection_area = (152, 135, 1280, 630)
+         # Offset inside to avoid clicking on edge
+@@ -246,6 +249,10 @@
+             if len(entrance_1):
+                 return True
+ 
++            semantic_session = getattr(self.device, 'semantic_adapter', None)
++            if semantic_session is not None:
++                semantic_session.open().swipe_guild_operations(forward)
++                continue
+             p1, p2 = random_rectangle_vector(
+                 direction_vector, box=detection_area, random_range=(-50, -50, 50, 50), padding=20)
+             self.device.drag(p1, p2, segments=2, shake=(0, 25), point_random=(0, 0, 0, 0), shake_random=(0, -5, 0, 5))
+@@ -625,10 +632,18 @@
+                 return False
+             if not state.active_nodes:
+                 return True
+-            # Native dispatch consumes the first visible entrance. Preserve
+-            # that visual ordering while retaining each typed node identity.
+-            node = min(state.active_nodes, key=lambda node: (
+-                node.bounds.top, node.bounds.left, node.path))
++            # Keep native direction choice, screenshots and five-attempt
++            # scrolling; semantic ports supply only entrances and drag.
++            for forward in (True, False):
++                if self._guild_operations_dispatch_swipe(
++                        forward=forward, skip_first_screenshot=False):
++                    break
++            else:
++                return False
++            entrances, _ = self._guild_operations_get_entrance()
++            if not entrances:
++                return False
++            node = entrances[0]
+             adapter.oracle.click_guild_active_operation(node.path)
+             for _ in range(30):
+                 if adapter.oracle.enabled('guild/operations/dispatch/open'):
+diff --git a/module/guild/operations.py b/module/guild/operations.py
+--- a/module/guild/operations.py
++++ b/module/guild/operations.py
+@@ -689,13 +689,15 @@
+             dispatch_receipt = adapter.confirm_guild_dispatch()
+             for _ in range(30):
+                 try:
+-                    dispatched_formation = adapter.guild_formation_state()
++                    progress_generation = adapter.guild_dispatch_in_progress_generation()
+                 except SemanticGateClosed as exc:
+-                    if str(exc) != 'guild formation snapshots are not coherent':
++                    if str(exc) not in ('guild formation snapshots are not coherent',
++                                        'guild formation page identity is absent',
++                                        'guild dispatch progress snapshots are not coherent'):
+                         raise
+                 else:
+-                    if (dispatched_formation.generation > dispatch_receipt.generation
+-                            and dispatched_formation.in_progress):
++                    if (progress_generation is not None
++                            and progress_generation > dispatch_receipt.generation):
+                         break
+                 self.device.sleep(0.2)
+             else:
+diff --git a/module/guild/guild_reward.py b/module/guild/guild_reward.py
+--- a/module/guild/guild_reward.py
++++ b/module/guild/guild_reward.py
+@@ -3,6 +3,7 @@
+ from module.guild.lobby import GuildLobby
+ from module.guild.logistics import GuildLogistics
+ from module.guild.operations import GuildOperations
++from module.guild.assets import GUILD_DISPATCH_QUICK, GUILD_DISPATCH_RECOMMEND
+ from module.ui.page import page_guild, page_main
+ 
+ 
+@@ -33,6 +34,13 @@
+             self.config.Scheduler_Enable = False
+             self.config.task_stop()
+ 
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            self.device.screenshot()
++            # Reuse native dispatch exit when recovery inherits its Detail
++            # or Formation page, before normal page navigation resumes.
++            if (self.appear(GUILD_DISPATCH_QUICK) or
++                    self.appear(GUILD_DISPATCH_RECOMMEND)):
++                self._guild_operations_dispatch_exit(skip_first_screenshot=False)
+         self.ui_ensure(page_guild)
+         success = True
+ 
+diff --git a/module/commission/commission.py b/module/commission/commission.py
+--- a/module/commission/commission.py
++++ b/module/commission/commission.py
+@@ -403,11 +403,11 @@
+                 if semantic_adapter.commission_selection_active():
+                     if self.handle_popup_confirm('COMMISSION_START'):
+                         continue
+-                    if semantic_adapter.appear(COMMISSION_ADVICE):
++                    if self.appear(COMMISSION_ADVICE, offset=(5, 20), interval=7):
+                         logger.info('Selected exact typed commission row')
+                         self.device.click(COMMISSION_ADVICE)
+                         count += 1
+-                    elif semantic_adapter.appear(COMMISSION_START):
++                    elif self.appear(COMMISSION_START, offset=(5, 20), interval=7):
+                         self.device.click(COMMISSION_START)
+                     continue
+             if self.info_bar_count():
+diff --git a/module/commission/commission.py b/module/commission/commission.py
+--- a/module/commission/commission.py
++++ b/module/commission/commission.py
+@@ -401,6 +401,10 @@
+                     self.ui_ensure(page_commission)
+                     break
+                 if semantic_adapter.commission_selection_active():
++                    # Keep original ALAS' recommendation-bug recovery reachable.
++                    if count >= 3:
++                        logger.warning('Triggered commission list flashing bug')
++                        raise GameStuckError('Triggered commission list flashing bug')
+                     if self.handle_popup_confirm('COMMISSION_START'):
+                         continue
+                     if self.appear(COMMISSION_ADVICE, offset=(5, 20), interval=7):

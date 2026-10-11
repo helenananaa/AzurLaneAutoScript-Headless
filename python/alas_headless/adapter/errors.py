@@ -64,3 +64,10 @@ class ActionLeaseError(AdapterContractError):
 
     code = "action-lease"
     safe_message = "semantic action lease is invalid"
+
+
+class ActionGrantExhausted(ActionLeaseError):
+    """An open ledger has no remaining grant; no input was attempted."""
+
+    code = "action-grant-exhausted"
+    safe_message = "semantic task action grant is exhausted"
