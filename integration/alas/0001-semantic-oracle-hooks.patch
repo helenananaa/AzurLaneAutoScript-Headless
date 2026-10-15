@@ -9661,7 +9661,7 @@ index ff4edac5..8b2e45b5 100644
              return self._run_alas_state_machine()
          finally:
 diff --git a/module/research/research.py b/module/research/research.py
-index 8b2e45b5..bbca8144 100644
+index bb4cb40478267186cf80420698ec93b821b670ac..fcab86b3d3f0704ef3dff29a459c7b47255cd9fa 100644
 --- a/module/research/research.py
 +++ b/module/research/research.py
 @@ -211,5 +211,9 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
@@ -9671,14 +9671,15 @@ index 8b2e45b5..bbca8144 100644
 -                self.device.click(RESEARCH_ENTRANCE[i])
 +                if semantic_session is not None:
 +                    semantic_session.click_research_project_code(
-+                        project.name, position=index)
++                        project.name, position=index, series=project.series)
 +                else:
 +                    self.device.click(RESEARCH_ENTRANCE[i])
                  self.ensure_research_stable()
 diff --git a/module/research/research.py b/module/research/research.py
+index fcab86b3d3f0704ef3dff29a459c7b47255cd9fa..c516aa0c6f0762e5481812bffa35dfc05ce8c24f 100644
 --- a/module/research/research.py
 +++ b/module/research/research.py
-@@ -189,6 +189,23 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
+@@ -189,6 +189,24 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
              logger.warning(f'The project to start: {project} is not in known projects')
              return None
          logger.info(f'Research project: {index}')
@@ -9689,11 +9690,12 @@ diff --git a/module/research/research.py b/module/research/research.py
 +            # decision names one card, use the typed selected-detail transition
 +            # so the pixel list checker cannot strand this loop below it.
 +            if isinstance(project, int):
-+                selected_code = semantic_session.research_projects()[index].code
++                selected = semantic_session.research_projects()[index]
++                selected_code, selected_series = selected.code, selected.series
 +            else:
-+                selected_code = project.name
++                selected_code, selected_series = project.name, project.series
 +            started = semantic_session.start_research_project_code(
-+                selected_code, position=index)
++                selected_code, position=index, series=selected_series)
 +            if started and add_queue:
 +                self.research_queue_add()
 +            self.research_project_started = project if started else None
@@ -19702,3 +19704,172 @@ diff --git a/module/commission/commission.py b/module/commission/commission.py
                      if self.handle_popup_confirm('COMMISSION_START'):
                          continue
                      if self.appear(COMMISSION_ADVICE, offset=(5, 20), interval=7):
+diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
+index 6d87468144ae5e385b6fadb42515d14f64793485..e7a9501ab288657d58e8263116045b1872f0c8cf 100644
+--- a/module/campaign/campaign_base.py
++++ b/module/campaign/campaign_base.py
+@@ -234,22 +234,6 @@
+         self.enter_map(self.ENTRANCE, mode=self.config.Campaign_Mode)
+ 
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+-        if self.map_is_auto_search and semantic_adapter is not None:
+-            semantic_stage = semantic_adapter.campaign_pre_sortie_stage_code()
+-            proof = semantic_adapter.wait_campaign_auto_search_completion(
+-                semantic_stage,
+-                keep_result=(self.config.Campaign_Mode == 'normal' and '-' in semantic_stage),
+-                recovery_handler=self._semantic_campaign_retirement_recovery,
+-                submarine_handler=lambda: self.handle_submarine_call(self.config.Submarine_Mode),
+-            )
+-            logger.attr(
+-                'Semantic_Auto_Search_Result',
+-                f'{proof.stage_code}, roles='
+-                f'{proof.fleet1_role}/{proof.fleet2_role}, '
+-                f'waited={proof.waited_seconds}s',
+-            )
+-            return True
+-
+         # Map init
+         if not self.map_is_auto_search:
+             self.handle_map_fleet_lock()
+@@ -259,7 +243,10 @@
+             self.map = self.MAP
+             self.battle_count = 0
+             self.lv_reset()
+-            self.lv_get()
++            # A semantic sortie can already be loading its first battle.
++            # Map watchers read levels when the typed map becomes available.
++            if semantic_adapter is None or semantic_adapter.campaign_auto_search_map_running():
++                self.lv_get()
+ 
+         # Run
+         for _ in range(20):
+@@ -269,6 +256,10 @@
+                 else:
+                     self.auto_search_execute_a_battle()
+             except CampaignEnd:
++                if semantic_adapter is not None and self.map_is_auto_search:
++                    # Capture evidence from the native loop's current frame.
++                    # ALAS still owns menu exit, continuation and scheduling.
++                    semantic_adapter.campaign_auto_search_result_visible()
+                 logger.hr('Campaign end')
+                 return True
+ 
+diff --git a/module/handler/auto_search.py b/module/handler/auto_search.py
+index c15ef1fc506ade978279af7d0efe6968d337d39e..9f346fc909c23edb80b99768e68565d61a1842eb 100644
+--- a/module/handler/auto_search.py
++++ b/module/handler/auto_search.py
+@@ -178,7 +178,7 @@
+         """
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
+-            return semantic_adapter.campaign_auto_search_running()
++            return semantic_adapter.campaign_auto_search_map_running()
+         return self.appear(AUTO_SEARCH_MAP_OPTION_ON, offset=self._auto_search_offset) \
+                and self.appear(AUTO_SEARCH_MAP_OPTION_ON)
+ 
+@@ -205,7 +205,7 @@
+             # The total-reward panel exposes one exact typed ButtonExit.  Its
+             # presence proves the auto-search result menu without reading the
+             # framebuffer or authorizing any input.
+-            return semantic_adapter.appear(AUTO_SEARCH_MENU_EXIT)
++            return semantic_adapter.campaign_auto_search_result_visible()
+         return AUTO_SEARCH_MENU_CONTINUE.match_luma(self.device.image, offset=self._auto_search_menu_offset)
+ 
+     def handle_auto_search_continue(self):
+diff --git a/module/campaign/campaign_status.py b/module/campaign/campaign_status.py
+index 13b9b751f8c84290ba7254b325ce3852a96ac326..02eb5f9a2d5cebf7bca14aa21ddff68dde874515 100644
+--- a/module/campaign/campaign_status.py
++++ b/module/campaign/campaign_status.py
+@@ -88,6 +88,10 @@
+         return amount
+ 
+     def _get_oil(self):
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return semantic_session.campaign_oil()
+         # Update offset
+         _ = self.appear(OCR_OIL_CHECK)
+ 
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+index 2312e3c95a93328f3dc0771585d5b83348cde00a..cd66b2bbbb23b56f062f7c463e86d742ecc9a4b4 100644
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -668,7 +668,8 @@
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if (
+             semantic_adapter is not None
+-            and semantic_adapter.campaign_combat_active()
++            and (semantic_adapter.campaign_combat_active()
++                 or semantic_adapter.campaign_auto_search_owned())
+         ):
+             return False
+         if not self.map_cat_attack_timer.reached():
+diff --git a/module/combat/auto_search_combat.py b/module/combat/auto_search_combat.py
+index 9be2a8a4786c0f757fa9690b60ca4bb79d4e43a1..871f99892586837a0a8c0d46a9618a9f6a079b76 100644
+--- a/module/combat/auto_search_combat.py
++++ b/module/combat/auto_search_combat.py
+@@ -41,6 +41,13 @@
+         self.interval_reset(AUTO_SEARCH_MAP_OPTION_ON)
+         for _ in self.loop():
+ 
++            if getattr(self.device, 'semantic_adapter', None) is not None:
++                if self.handle_popup_confirm('AUTO_SEARCH_MAP_OFFENSIVE'):
++                    continue
++                if self.handle_urgent_commission():
++                    continue
++                if self.handle_guild_popup_cancel():
++                    continue
+             if self.handle_auto_search_map_option():
+                 self.interval_reset(AUTO_SEARCH_MAP_OPTION_ON)
+                 continue
+@@ -169,6 +176,13 @@
+         checked_coin = False
+         for _ in self.loop():
+ 
++            if getattr(self.device, 'semantic_adapter', None) is not None:
++                if self.handle_popup_confirm('AUTO_SEARCH_MOVING'):
++                    continue
++                if self.handle_urgent_commission():
++                    continue
++                if self.handle_guild_popup_cancel():
++                    continue
+             if self.is_auto_search_running():
+                 checked_fleet = self.auto_search_watch_fleet(checked_fleet)
+                 if not checked_oil or not checked_coin:
+@@ -223,6 +237,13 @@
+ 
+             if self.handle_combat_automation_confirm():
+                 continue
++            if getattr(self.device, 'semantic_adapter', None) is not None:
++                if self.handle_popup_confirm('AUTO_SEARCH_COMBAT_LOADING'):
++                    continue
++                if self.handle_urgent_commission():
++                    continue
++                if self.handle_guild_popup_cancel():
++                    continue
+             if self.handle_story_skip():
+                 continue
+             if self.handle_vote_popup():
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+index a7a43f43543aea728a4ee73fe9820fdef14ae3d4..49485d0d903441e2bc5891afa8b63e388a3025ee 100644
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -8,7 +8,7 @@
+ from module.campaign.campaign_ui import MODE_SWITCH_1
+ from module.config.config import AzurLaneConfig
+ from module.exception import CampaignEnd, RequestHumanTakeover, ScriptEnd
+-from module.handler.fast_forward import map_files, to_map_file_name
++from module.handler.fast_forward import map_files, to_map_file_name, to_map_input_name
+ from module.logger import logger
+ from module.notify import handle_notify
+ from module.ui.page import page_campaign
+@@ -456,7 +456,7 @@
+             auto_search_mode=self.config.Submarine_AutoSearchMode,
+             distance_to_boss=self.config.Submarine_DistanceToBoss,
+         )
+-        semantic_adapter.begin_campaign_pre_sortie(name, mode=mode)
++        semantic_adapter.begin_campaign_pre_sortie(to_map_input_name(name), mode=mode)
+         try:
+             return self._run(name, folder=folder, mode=mode, total=total)
+         finally:

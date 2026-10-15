@@ -840,8 +840,16 @@ class ActionsOracle:
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed immediately before input")
 
-        x = int(round(point.x))
-        y = int(round(point.y))
+        # A valid subpixel point can round past the screen or this Button's
+        # bounds. Choose the nearest representable point inside both regions.
+        minimum_x = max(0, math.ceil(target.bounds.left))
+        maximum_x = min(self.fingerprint.width - 1, math.floor(target.bounds.right))
+        minimum_y = max(0, math.ceil(target.bounds.top))
+        maximum_y = min(self.fingerprint.height - 1, math.floor(target.bounds.bottom))
+        if minimum_x > maximum_x or minimum_y > maximum_y:
+            raise SemanticGateClosed("semantic target has no in-bounds integer input point")
+        x = min(max(int(round(point.x)), minimum_x), maximum_x)
+        y = min(max(int(round(point.y)), minimum_y), maximum_y)
         self._tap(x, y)
         if delegated_login_update or delegated_login_restart:
             # A small maintenance patch can finish between observer frames.

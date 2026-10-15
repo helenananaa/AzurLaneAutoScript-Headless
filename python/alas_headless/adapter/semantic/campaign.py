@@ -408,6 +408,71 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
             return False
         return True
 
+    def campaign_auto_search_owned(self) -> bool:
+        """The accepted sortie owns official combat, without a manual grid tap."""
+        context = self._campaign_context
+        return bool(context is not None and context.sortie_receipt is not None
+                    and context.sortie_proof is not None
+                    and context.auto_search_role_state is not None)
+
+    def campaign_auto_search_map_running(self) -> bool:
+        """Supply ALAS' map-running probe; a CombatUI is not a moving map."""
+        self._package_gate()
+        if not self.campaign_auto_search_owned():
+            return False
+        oracle = self._frame_or_live_observation_oracle()
+        switch = oracle.campaign_map_auto_search_state()
+        return switch is not None and switch[2]
+
+    def campaign_auto_search_result_visible(self) -> bool:
+        """Observe one native-loop frame and retain its exact result proof.
+
+        ALAS owns waiting, popup recovery, combat handlers and result exit.
+        This reader supplies only the map/combat/result observation boundary.
+        """
+        self._package_gate()
+        oracle = self._frame_or_live_observation_oracle()
+        if not self.campaign_auto_search_owned():
+            # Native startup/recovery can inherit a result from another run.
+            # Its exact menu remains navigable without claiming completion.
+            return oracle.enabled("reward/campaign-total/exit")
+        context = self._campaign_context
+        if not oracle.enabled("reward/campaign-total/exit"):
+            combat_auto = oracle.campaign_official_combat_auto_state()
+            if combat_auto is not None and combat_auto[1]:
+                context.auto_search_combat_generation = combat_auto[0]
+            return False
+        if context.auto_search_completion is not None:
+            return True
+        state = oracle.read_state()
+        combat_generation = context.auto_search_combat_generation
+        if (combat_generation is None
+                or combat_generation <= context.sortie_proof.map_generation
+                or state.generation <= combat_generation):
+            raise SemanticGateClosed("campaign auto-search result has no advancing combat proof")
+        targets = tuple(button for button in state.buttons
+                        if button.name == "ButtonExit" and button.actionable
+                        and button.path.endswith(
+                            "LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit"))
+        if len(targets) != 1:
+            raise SemanticGateClosed("campaign auto-search result target is ambiguous")
+        roles = context.auto_search_role_state
+        input_count = getattr(self.oracle, "input_dispatch_count", None)
+        proof = CampaignAutoSearchCompletionProof(
+            stage_code=context.stage_code, result_generation=state.generation,
+            result_path=targets[0].path, fleet1_role=roles.fleet1_role,
+            fleet2_role=roles.fleet2_role,
+            waited_seconds=max(0.0, round(time.monotonic() - context.auto_search_started_at, 3)),
+            combat_auto_generation=combat_generation, result_exit_receipt=None,
+            passive_after_sortie=(context.auto_search_start_input_count is not None
+                                  and input_count == context.auto_search_start_input_count),
+        )
+        context.auto_search_completion = proof
+        self._last_campaign_auto_search_completion = proof
+        if self._campaign_evidence_bundle is not None:
+            self._campaign_evidence_bundle = replace(self._campaign_evidence_bundle, completion_proof=proof)
+        return True
+
     def campaign_inherited_auto_search_visible(self) -> bool:
         """Recognize an official auto-search owned by an earlier process."""
 
@@ -600,6 +665,8 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
             oil_cost_source=context.prepared_fleet_state.oil_cost_source,
             submarine_auto_mode=context.submarine_auto_mode,
         )
+        context.auto_search_started_at = time.monotonic()
+        context.auto_search_start_input_count = getattr(self.oracle, "input_dispatch_count", None)
         if self._campaign_evidence_bundle is not None:
             self._campaign_evidence_bundle = replace(
                 self._campaign_evidence_bundle,
@@ -962,6 +1029,7 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         context.sortie_proof = None
         context.map_entry_state = None
         context.auto_search_completion = None
+        context.auto_search_combat_generation = None
         context.book_confirmation_receipt = None
         context.passive_transition_until = time.monotonic() + 180.0
         if self._campaign_evidence_bundle is not None:
@@ -993,6 +1061,7 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         context.sortie_proof = None
         context.map_entry_state = None
         context.auto_search_completion = None
+        context.auto_search_combat_generation = None
         context.passive_transition_until = time.monotonic() + 60.0
         return receipt
 
@@ -1167,8 +1236,8 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         self._package_gate()
         context = self._campaign_context
         stage_code = (
-            context.expected_stage_code
-            if context is not None and context.active
+            context.resolved_stage_code or context.stage_code
+            if context is not None
             else None
         )
         return self.oracle.event_coin(stage_code)
@@ -1646,10 +1715,13 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
             return receipt
         if self._campaign_context is not None and name == 'AUTO_SEARCH_MENU_EXIT':
             context = self._campaign_context
+            if (context.auto_search_completion is not None
+                    and context.auto_search_completion.result_exit_receipt is not None):
+                return context.auto_search_completion.result_exit_receipt
             if context.manual_result_exit_receipt is not None:
                 raise SemanticGateClosed('manual campaign result exit already submitted')
             receipt = self.oracle.click('reward/campaign-total/exit')
-            if self.campaign_combat_committed():
+            if self.campaign_combat_committed() and not self.campaign_auto_search_owned():
                 context.manual_result_exit_receipt = receipt
             if context.auto_search_completion is not None:
                 proof = replace(context.auto_search_completion, result_exit_receipt=receipt)

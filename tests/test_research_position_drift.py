@@ -37,7 +37,7 @@ def test_retained_reordered_cards_preserve_native_unique_project_decision():
     receipt = SimpleNamespace(semantic_id='research/project/2', generation=generation)
     o.click_research_project = Mock(return_value=receipt)
     assert a.click_research_project_code('G-236-MI', position=0) is receipt
-    o.click_research_project.assert_called_once_with(2, expected_code='G-236-MI')
+    o.click_research_project.assert_called_once_with(2, expected_code='G-236-MI', expected_series=9)
     assert a._research_context.selected_code == 'G-236-MI'
     assert a._research_context.selected_slot == 2
     assert b.taps == []

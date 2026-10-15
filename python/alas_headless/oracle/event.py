@@ -250,7 +250,7 @@ class EventOracle:
         return self._retry_transition_read(self._event_points_once)
 
     def event_coin(self, stage_code: Optional[str] = None) -> int:
-        """Read coins from a proven event selector or requested stage detail."""
+        """Read the global coin counter on a proven selector, detail or map."""
 
         return self._retry_transition_read(
             lambda: self._event_coin_once(stage_code=stage_code)
@@ -265,14 +265,24 @@ class EventOracle:
                 raise
             preparation = self.campaign_preparation_state(stage_code)
             if preparation is None:
-                raise SemanticGateClosed(
-                    "event coin requires the selector or requested stage detail"
-                )
-            surface_generation = preparation.generation
-            surface_kind = preparation.kind
+                # Native auto-search watches resources while the fleet moves.
+                # The same global ResPanel is retained on a proven map; no
+                # selector/detail underlay or pixel observation is required.
+                entry = self.campaign_map_entry_state()
+                if self._blocking_rules(self.read_state(), "ui/absence-probe"):
+                    raise SemanticGateClosed("campaign map coin surface is obscured")
+                surface_generation = entry.generation
+                surface_kind = "campaign-map"
+            else:
+                surface_generation = preparation.generation
+                surface_kind = preparation.kind
         ui_state = self.read_ui_state()
         if surface_kind == "selector":
             surface_after_generation = self.event_campaign_page_state().generation
+        elif surface_kind == "campaign-map":
+            surface_after_generation = self.campaign_map_entry_state().generation
+            if self._blocking_rules(self.read_state(), "ui/absence-probe"):
+                raise SemanticGateClosed("campaign map coin surface is obscured")
         else:
             assert stage_code is not None
             preparation_after = self.campaign_preparation_state(stage_code)

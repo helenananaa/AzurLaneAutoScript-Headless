@@ -77,6 +77,13 @@ def verify_main_campaign_routes(alas_root: Path) -> Mapping[str, object]:
     template = json.loads(template_path.read_text(encoding="utf-8"))
     stages = _main_catalog(alas_root)
     module = _load_run_module(alas_root)
+    aliases = ("campaign_12_4", "12_4", " 12 - 4 ", "CAMPAIGN_12_4")
+    for alias in aliases:
+        route = validate_alas_main_campaign_route_config(
+            task="Main", stage=alias, event="campaign_main", mode="normal"
+        )
+        if _original_route(module, alias) != (route.module_name, route.event):
+            raise AssertionError("main campaign alias differs from original ALAS")
     routes: dict[str, object] = {}
     for task in MAIN_TASKS:
         task_config = template.get(task)
@@ -106,7 +113,7 @@ def verify_main_campaign_routes(alas_root: Path) -> Mapping[str, object]:
         ("Main", "0-1", "campaign_main", "normal"),
         ("Main", "-1-1", "campaign_main", "normal"),
         ("Main2", "12-5", "campaign_main", "normal"),
-        ("Main3", "campaign_12_4", "campaign_main", "normal"),
+        ("Main3", "campaign_12_5", "campaign_main", "normal"),
         ("Main", "12-4", "event_20260813_cn", "normal"),
         ("Main2", "12-4", "campaign_main", "hard"),
         ("Main3", "12-4", "campaign_main", None),
@@ -132,6 +139,7 @@ def verify_main_campaign_routes(alas_root: Path) -> Mapping[str, object]:
         "task_count": len(MAIN_TASKS),
         "stage_count": len(stages),
         "accepted_route_count": len(MAIN_TASKS) * len(stages),
+        "compatible_alias_count": len(aliases),
         "invalid_case_count": len(invalid_values),
         "routes": routes,
         "source_sha256": {

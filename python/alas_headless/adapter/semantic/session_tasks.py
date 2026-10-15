@@ -363,14 +363,16 @@ class SessionTasksPorts:
         return self.open().research_projects_for_alas(project_factory)
 
     def click_research_project_code(
-        self, code: str, *, position: Optional[int] = None
+        self, code: str, *, position: Optional[int] = None,
+        series: Optional[int] = None,
     ) -> ActionReceipt:
-        return self.open().click_research_project_code(code, position=position)
+        return self.open().click_research_project_code(code, position=position, series=series)
 
     def start_research_project_code(
-        self, code: str, *, position: Optional[int] = None
+        self, code: str, *, position: Optional[int] = None,
+        series: Optional[int] = None,
     ) -> bool:
-        return self.open().start_research_project_code(code, position=position)
+        return self.open().start_research_project_code(code, position=position, series=series)
 
     def validate_research_filter(self, filter_: object, value: str) -> None:
         self.open().validate_research_filter(filter_, value)
@@ -866,6 +868,15 @@ class SessionTasksPorts:
 
     def campaign_auto_search_running(self) -> bool:
         return self.open().campaign_auto_search_running()
+
+    def campaign_auto_search_owned(self) -> bool:
+        return self.open().campaign_auto_search_owned()
+
+    def campaign_auto_search_map_running(self) -> bool:
+        return self.open().campaign_auto_search_map_running()
+
+    def campaign_auto_search_result_visible(self) -> bool:
+        return self.open().campaign_auto_search_result_visible()
 
     def campaign_inherited_auto_search_visible(self) -> bool:
         return self.open().campaign_inherited_auto_search_visible()

@@ -209,10 +209,12 @@ class SemanticFrameClock:
             fingerprint_before, pid_before = self._runtime_identity()
             # Capture owns one closing foreground check for all endpoints.
             # No frame is published until it passes; input still checks again.
+            state_started_ns = self._monotonic_ns()
             state = self._oracle.read_state(check_foreground=False)
             ui_state = None
             ui_snapshot = None
             ui_source_generation = None
+            ui_started_ns = None
             if include_ui:
                 # The observer exposes Button/state atomically, while the full UI
                 # projection is a separate main-thread request.  When those two
@@ -224,13 +226,16 @@ class SemanticFrameClock:
                     # Freeze the raw endpoint once. Family extraction errors,
                     # missing lists and truncation remain attached to this
                     # frame and fail only when that family is consumed.
+                    candidate_ui_started_ns = self._monotonic_ns()
                     candidate_ui = self._oracle.read_ui_snapshot(check_foreground=False)
                     candidate_generation = candidate_ui["generation"]
                     if candidate_generation == before.generation:
                         ui_state = candidate_ui
                         ui_snapshot = dict(candidate_ui)
                         ui_source_generation = candidate_generation
+                        ui_started_ns = candidate_ui_started_ns
                         break
+                    after_started_ns = self._monotonic_ns()
                     after = self._oracle.read_state(check_foreground=False)
                     if (
                         before.generation <= candidate_generation <= after.generation
@@ -239,12 +244,15 @@ class SemanticFrameClock:
                         == _stable_observer_projection(after)
                     ):
                         state = after
+                        state_started_ns = after_started_ns
                         ui_state = candidate_ui
                         ui_snapshot = dict(candidate_ui)
                         ui_source_generation = candidate_generation
+                        ui_started_ns = candidate_ui_started_ns
                         ui_snapshot["generation"] = after.generation
                         break
                     state = after
+                    state_started_ns = after_started_ns
                     if attempt < 29:
                         time.sleep(0.05)
                 if ui_state is None:
@@ -282,8 +290,8 @@ class SemanticFrameClock:
                 generation = button_generation
             scene_handle = _integer(snapshot.get("scene_handle"), "scene_handle")
             ages = [
-                _age(snapshot.get("age_ms"), "snapshot", self._maximum_age_ms),
-                _age(buttons.get("age_ms"), "buttons", self._maximum_age_ms),
+                (state_started_ns, _age(snapshot.get("age_ms"), "snapshot", self._maximum_age_ms)),
+                (state_started_ns, _age(buttons.get("age_ms"), "buttons", self._maximum_age_ms)),
             ]
             if (
                 self._invalidated_generation is not None
@@ -296,26 +304,33 @@ class SemanticFrameClock:
                     snapshot_source_generation
                 )
             if ui_state is not None:
-                if ui_snapshot is None or ui_source_generation is None:
+                if ui_snapshot is None or ui_source_generation is None or ui_started_ns is None:
                     raise SemanticGateClosed("semantic frame UI projection is incomplete")
                 if ui_snapshot.get("pid") != pid_after:
                     raise SemanticGateClosed(
                         "semantic frame UI disagrees on PID"
                     )
                 ages.append(
-                    _age(
+                    (ui_started_ns, _age(
                         ui_snapshot.get("age_ms"),
                         "UI",
                         self._maximum_age_ms,
-                    )
+                    ))
                 )
                 raw_payload["ui"] = ui_snapshot
                 raw_payload["ui_source_generation"] = ui_source_generation
-            age_ms = max(ages)
             raw_state_sha256 = _canonical_sha256(raw_payload)
             captured = self._monotonic_ns()
             if isinstance(captured, bool) or not isinstance(captured, int) or captured <= 0:
                 raise SemanticGateClosed("semantic frame monotonic clock is invalid")
+            # Endpoint ages are measured on the device before transport and
+            # closing checks complete. Count each request's elapsed time too,
+            # rather than issuing a new full lease after a slow acquisition.
+            if any(started > captured for started, _ in ages):
+                raise StaleFrameError()
+            age_ms = max(age + (captured - started) / 1_000_000 for started, age in ages)
+            if age_ms > self._maximum_age_ms:
+                raise StaleFrameError()
             self._ordinal += 1
             frame = SemanticFrame(
                 frame_id="frame-{0}-{1}".format(generation, self._ordinal),
@@ -363,7 +378,7 @@ class SemanticFrameClock:
         # Once frozen, the frame is ALAS's screenshot-equivalent for the whole
         # current scan.  The input boundary explicitly opts back into the age
         # check immediately before invalidating the lease and injecting ADB.
-        if require_fresh and elapsed_ns > self._maximum_age_ms * 1_000_000:
+        if require_fresh and frame.age_ms + elapsed_ns / 1_000_000 > self._maximum_age_ms:
             self._current = None
             raise StaleFrameError()
         return frame
@@ -389,10 +404,45 @@ class SemanticFrameClock:
 class _FrameBoundSemanticOracle(SemanticOracle):
     """Parse each immutable projection once, while checking its lease on use."""
 
-    def __init__(self, *args: Any, frame_guard: Callable[[], Any], **kwargs: Any):
+    def __init__(self, *args: Any, frame_guard: Callable[[], Any],
+                 input_dispatch_counter: Callable[[], int] | None = None, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self._frame_guard = frame_guard
+        self._input_dispatch_counter = input_dispatch_counter
         self._frame_reads: dict[Any, Any] = {}
+        self._frame_blockers: dict[tuple[int, str], tuple[Any, Any]] = {}
+
+    @property
+    def input_dispatch_count(self) -> int:
+        if self._input_dispatch_counter is None:
+            return super().input_dispatch_count
+        return self._input_dispatch_counter()
+
+    def _dispatch_tap(self, x: float, y: float) -> None:
+        # The live oracle owns the one actual dispatch and its preflight.
+        if self._input_dispatch_counter is None:
+            return super()._dispatch_tap(x, y)
+        return self._tap_backend(x, y)
+
+    def _dispatch_swipe(self, x1: int, y1: int, x2: int, y2: int, duration_ms: int) -> None:
+        if self._input_dispatch_counter is None:
+            return super()._dispatch_swipe(x1, y1, x2, y2, duration_ms)
+        assert self._swipe_backend is not None
+        return self._swipe_backend(x1, y1, x2, y2, duration_ms)
+
+    def _blocking_rules(self, state: Any, semantic_id: str):
+        self._frame_guard()
+        if self._frame_reads.get("state") is not state:
+            return super()._blocking_rules(state, semantic_id)
+        key = (id(state), semantic_id)
+        cached = self._frame_blockers.get(key)
+        if cached is None or cached[0] is not state:
+            result = super()._blocking_rules(state, semantic_id)
+            # Retain the state alongside its identity so object-id reuse can
+            # never alias another state. This cache lives for one frozen frame.
+            self._frame_blockers[key] = (state, result)
+            return result
+        return cached[1]
 
     def _frame_read(self, key: Any, read: Callable[[], Any]) -> Any:
         self._frame_guard()
@@ -500,7 +550,7 @@ class SemanticFrameReader:
             # This oracle also supplies the final typed proof for some actions.
             # Recheck the real activity at the actual input boundary, even if
             # the immutable observation still describes the previous page.
-            self._clock.borrow(frame_id)
+            self._clock.borrow(frame_id, require_fresh=True)
             if live._foreground_component() != live.fingerprint.component:
                 raise SemanticGateClosed("game activity changed before semantic input")
             return action(*args)
@@ -511,6 +561,7 @@ class SemanticFrameReader:
             lambda x, y: checked_input(live._tap, x, y),
             live.fingerprint,
             frame_guard=lambda: self._clock.borrow(frame_id),
+            input_dispatch_counter=lambda: live.input_dispatch_count,
             targets=live._targets.values(),
             image_targets=live._image_targets.values(),
             toggle_targets=live._toggle_targets.values(),

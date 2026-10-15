@@ -2471,6 +2471,8 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
         if ((geometry.flags & 0x200u) != 0) {
           record.flags |= 0x10u;
         }
+        // The TLS slot may belong to a different Image in this generation.
+        record.spriteName.fill(0);
         void *sprite = invokeObject(getImageSprite, image);
         const std::string spriteName =
             sprite != nullptr ? invokeString(sprite) : std::string();

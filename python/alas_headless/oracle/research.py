@@ -153,7 +153,8 @@ class ResearchOracle:
         return button_state, tuple(projects)
 
     def click_research_project(
-        self, slot: int, *, expected_code: Optional[str] = None
+        self, slot: int, *, expected_code: Optional[str] = None,
+        expected_series: Optional[int] = None,
     ) -> ActionReceipt:
         if slot not in range(1, 6):
             raise ValueError("research project slot must be 1 through 5")
@@ -161,6 +162,8 @@ class ResearchOracle:
             not isinstance(expected_code, str) or not expected_code.strip()
         ):
             raise ValueError("expected research project code must be non-empty")
+        if expected_series is not None and (type(expected_series) is not int or expected_series < 1):
+            raise ValueError("expected research project series must be positive")
         state, projects = self._retry_transition_read(
             self._research_projects_snapshot,
             attempts=12,
@@ -172,6 +175,8 @@ class ResearchOracle:
         expected = matches[0]
         if expected_code is not None and expected.code != expected_code.strip():
             raise SemanticGateClosed("research project code changed before input")
+        if expected_series is not None and expected.series != expected_series:
+            raise SemanticGateClosed("research project series changed before input")
         target = expected.button
         if self._blocking_rules(state, "research/project/{0}".format(slot)):
             raise SemanticGateClosed("research project input is blocked")
@@ -245,6 +250,16 @@ class ResearchOracle:
 
         code = exact_text("name_bg/Text")
         subtitle = exact_text("sub_name")
+        versions = tuple(image for image in ui_state.images
+                         if image.path.endswith(root + "top/label/version")
+                         and image.active_in_hierarchy and image.active_and_enabled)
+        series = None
+        if versions:
+            version = (re.fullmatch(r"version_([1-9][0-9]*)", versions[0].sprite)
+                       if len(versions) == 1 and not versions[0].truncated else None)
+            if version is None:
+                raise SemanticGateClosed("research detail series is ambiguous")
+            series = int(version.group(1))
 
         def panel_text(suffix: str) -> str:
             path = panel + suffix
@@ -387,7 +402,36 @@ class ResearchOracle:
             is_running=actions["stop"],
             is_finished=actions["finish"],
             resource_costs=resource_costs,
+            series=series,
         )
+
+    def research_detail_identity(self) -> Tuple[str, Optional[int]]:
+        """Read the selected card under its resource or queue confirmation.
+
+        The modal covers its Buttons, so actionability belongs to the modal's
+        own input gate. These active typed card labels bind that exact modal
+        to the project ALAS selected before opening it.
+        """
+        state, ui = self.read_state(), self.read_ui_state()
+        if ui.image_truncated or not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed("research detail identity snapshots are incomplete")
+        root = "TechnologyUI(Clone)/main/base_page/selecte_panel/technology_card/frame/"
+        codes = tuple(text for text in ui.texts
+                      if text.path.endswith(root + "name_bg/Text")
+                      and text.active_in_hierarchy and text.active_and_enabled)
+        versions = tuple(image for image in ui.images
+                         if image.path.endswith(root + "top/label/version")
+                         and image.active_in_hierarchy and image.active_and_enabled)
+        if len(codes) != 1 or codes[0].truncated or not codes[0].text.strip():
+            raise SemanticGateClosed("research detail identity is absent or ambiguous")
+        series = None
+        if versions:
+            version = (re.fullmatch(r"version_([1-9][0-9]*)", versions[0].sprite)
+                       if len(versions) == 1 and not versions[0].truncated else None)
+            if version is None:
+                raise SemanticGateClosed("research detail series is ambiguous")
+            series = int(version.group(1))
+        return codes[0].text.strip(), series
 
     def _research_queue_add_proven(
         self, state: OracleState, ui_state: Optional[UIState] = None

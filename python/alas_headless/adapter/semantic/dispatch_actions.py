@@ -1393,16 +1393,20 @@ class DispatchActionsPorts:
                 if len(matches) != 1:
                     raise SemanticGateClosed("research project slot identity is ambiguous")
                 project = matches[0]
+                project_identity = {"expected_code": project.code}
+                if getattr(project, "series", None) is not None:
+                    project_identity["expected_series"] = project.series
                 if project.status == ResearchProjectStatus.FINISHED:
                     receipt = self._dispatch_mutation(
                         "research.reward",
                         lambda: self.oracle.click_research_project(
-                            slot, expected_code=project.code
+                            slot, **project_identity
                         ),
                     )
                     self._research_context.reward_receipts.append(receipt)
                     self._research_context.selected_slot = None
                     self._research_context.selected_code = None
+                    self._research_context.selected_series = None
                     self._research_context.selected_status = None
                     self._research_context.start_receipt = None
                     self._research_context.start_confirm_receipt = None
@@ -1416,10 +1420,11 @@ class DispatchActionsPorts:
                     self._research_context.queue_add_requires_start_grant = False
                     return receipt
                 receipt = self.oracle.click_research_project(
-                    slot, expected_code=project.code
+                    slot, **project_identity
                 )
                 self._research_context.selected_slot = slot
                 self._research_context.selected_code = project.code
+                self._research_context.selected_series = getattr(project, "series", None)
                 self._research_context.selected_status = project.status
                 self._research_context.start_receipt = None
                 self._research_context.start_confirm_receipt = None

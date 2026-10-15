@@ -307,6 +307,21 @@ class SessionDispatchPorts:
             combat_oracle.observation_surface_present(ObservationSurface.COMBAT)
             and combat_oracle.daily_combat_visible()
         ):
+            if getattr(adapter, "campaign_auto_search_owned", lambda: False)():
+                if self._official_auto_search_combat_state(adapter) != (True, True):
+                    return False
+                if name in ("AUTOMATION_ON", "AUTOMATION_OFF", "COMBAT_AUTO",
+                            "COMBAT_AUTO_133", "COMBAT_AUTO_150"):
+                    state = combat_oracle.campaign_official_combat_auto_state()
+                    if state is None:
+                        return False
+                    enabled = state[1]
+                    if name in ("AUTOMATION_ON", "AUTOMATION_OFF"):
+                        return enabled == (name == "AUTOMATION_ON")
+                    # Native CombatAuto probes its joystick aliases, then
+                    # owns COMBAT_AUTO_SWITCH. Observe the actual toggle;
+                    # a CombatUI root alone does not prove auto is enabled.
+                    return not enabled
             self._daily_combat_seen_at = time.monotonic()
             if name == "AUTOMATION_ON":
                 return True

@@ -141,7 +141,8 @@ class ResearchAdapterPorts:
         return tuple(projects)
 
     def click_research_project_code(
-        self, code: str, *, position: Optional[int] = None
+        self, code: str, *, position: Optional[int] = None,
+        series: Optional[int] = None,
     ) -> ActionReceipt:
         """Click the one current card selected by upstream's project code.
 
@@ -157,6 +158,8 @@ class ResearchAdapterPorts:
         normalized = code.strip() if isinstance(code, str) else ""
         if not normalized:
             raise SemanticGateClosed("research project code is absent")
+        if series is not None and (type(series) is not int or series < 1):
+            raise SemanticGateClosed("selected research project series is invalid")
         # Input cannot reuse the five-second observation cache: re-resolve the
         # selected policy identity from a fresh live card snapshot.
         input_oracle = self._fresh_input_oracle()
@@ -168,13 +171,16 @@ class ResearchAdapterPorts:
                 if attempt:
                     raise
                 time.sleep(0.1)
-        if position is None:
-            matches = tuple(
-                project for project in projects if project.code == normalized
-            )
+        matches = tuple(project for project in projects
+                        if project.code == normalized
+                        and (series is None or getattr(project, "series", None) == series))
+        # A code is reused across research series. Legacy code-only callers
+        # may proceed only when the current cards identify one project; an old
+        # carousel position cannot supply the missing policy identity.
+        if position is None or series is None:
             if len(matches) != 1:
                 raise SemanticGateClosed(
-                    "selected research project code is ambiguous: " + normalized
+                    "selected research project identity is ambiguous: " + normalized
                 )
             project = matches[0]
         else:
@@ -183,11 +189,10 @@ class ResearchAdapterPorts:
             if position < 0 or position >= len(projects):
                 raise SemanticGateClosed("selected research project position is out of range")
             project = projects[position]
-            if project.code != normalized:
+            if project.code != normalized or getattr(project, "series", None) != series:
                 # Returning from another detail recenters the carousel. Keep
                 # ALAS' selected identity when exactly one current card has
                 # that code; a stale position cannot disambiguate duplicates.
-                matches = tuple(p for p in projects if p.code == normalized)
                 if len(matches) != 1:
                     raise SemanticGateClosed(
                         "selected research project position no longer matches its code"
@@ -195,13 +200,15 @@ class ResearchAdapterPorts:
                 project = matches[0]
         if project.status == ResearchProjectStatus.FINISHED:
             raise SemanticGateClosed("research policy cannot select a finished project")
-        receipt = input_oracle.click_research_project(
-            project.slot,
-            expected_code=normalized,
-        )
+        resolved_series = getattr(project, "series", None)
+        identity = {"expected_code": normalized}
+        if resolved_series is not None:
+            identity["expected_series"] = resolved_series
+        receipt = input_oracle.click_research_project(project.slot, **identity)
         context = self._research_context
         context.selected_slot = project.slot
         context.selected_code = project.code
+        context.selected_series = resolved_series
         context.selected_status = project.status
         context.start_receipt = None
         context.start_confirm_receipt = None
@@ -214,7 +221,8 @@ class ResearchAdapterPorts:
         return receipt
 
     def start_research_project_code(
-        self, code: str, *, position: Optional[int] = None
+        self, code: str, *, position: Optional[int] = None,
+        series: Optional[int] = None,
     ) -> bool:
         """Start the upstream-selected current research card atomically.
 
@@ -228,12 +236,13 @@ class ResearchAdapterPorts:
         self._package_gate()
         if self._research_context is None:
             raise SemanticGateClosed("research start used outside ALAS research flow")
-        self.click_research_project_code(code, position=position)
+        self.click_research_project_code(code, position=position, series=series)
         self.research_detail_stable()
         context = self._research_context
         detail = self.oracle.research_detail_state()
         if detail.code != context.selected_code:
             raise SemanticGateClosed("selected research project identity changed")
+        self._require_selected_research_identity(detail=detail)
         # The original Research command also selects an already-running sixth
         # project when a queue slot becomes free, then sends it through the
         # ordinary queue-add branch. It is not a new start and must not open a
@@ -263,14 +272,14 @@ class ResearchAdapterPorts:
             # typed Start control is the one budgeted mutation in this path.
             receipt = self._dispatch_mutation(
                 "research.start",
-                lambda: self.oracle.click("research/detail/start"),
+                lambda: self._click_selected_research_target("research/detail/start"),
             )
             context.start_receipt = receipt
             context.start_confirm_receipt = receipt
             context.last_queue_state = None
             context.last_projects = None
         else:
-            start_receipt = self.oracle.click("research/detail/start")
+            start_receipt = self._click_selected_research_target("research/detail/start")
             context.start_receipt = start_receipt
             context.start_confirm_receipt = None
             expected_cost = tuple(sorted(expected_costs))
@@ -304,6 +313,7 @@ class ResearchAdapterPorts:
         while time.monotonic() < deadline:
             try:
                 running = self.oracle.research_detail_state()
+                self._require_selected_research_identity(detail=running)
                 if running.code == context.selected_code and running.is_running:
                     return True
             except SemanticOracleError as exc:
@@ -318,9 +328,36 @@ class ResearchAdapterPorts:
         oracle = self._fresh_input_oracle()
         if not expected_costs or oracle.research_start_prompt_costs() != expected_costs:
             raise SemanticGateClosed("research costs changed before confirmation input")
+        self._require_selected_research_identity(oracle=oracle)
         return self._dispatch_mutation(
             "research.start", lambda: oracle.click("research/start/confirm")
         )
+
+    def _require_selected_research_identity(self, *, oracle=None, detail=None):
+        """Keep the ALAS-selected card identity through its cost/queue modal."""
+        context = self._research_context
+        if context is None or context.selected_code is None:
+            return
+        if detail is None:
+            oracle = oracle or self.oracle
+            reader = getattr(oracle, "research_detail_identity", None)
+            if callable(reader):
+                code, series = reader()
+            else:
+                detail = oracle.research_detail_state()
+        if detail is not None:
+            code, series = detail.code, getattr(detail, "series", None)
+        if code != context.selected_code:
+            raise SemanticGateClosed("selected research project identity changed")
+        if context.selected_series is not None and series != context.selected_series:
+            raise SemanticGateClosed("selected research project series changed or absent")
+
+    def _click_selected_research_target(self, target):
+        oracle = self._fresh_input_oracle()
+        self._require_selected_research_identity(oracle=oracle)
+        if target == "research/detail/queue":
+            return oracle.click_research_queue_add()
+        return oracle.click(target)
 
     def validate_research_filter(self, filter_: object, value: str) -> None:
         """Fail closed on tokens that upstream's permissive parser would ignore."""
@@ -863,13 +900,14 @@ class ResearchAdapterPorts:
                     )
                 if context.selected_code is not None and detail.code != context.selected_code:
                     raise SemanticGateClosed("selected research project identity changed")
+                self._require_selected_research_identity(detail=detail)
                 self._require_action_grant("research.start")
                 detail_costs = _research_detail_costs(detail)
                 expected_costs = tuple(
                     (resource_id, required)
                     for resource_id, _owned, required in detail_costs
                 )
-                receipt = self.oracle.click("research/detail/start")
+                receipt = self._click_selected_research_target("research/detail/start")
                 context.start_receipt = receipt
                 context.start_confirm_receipt = None
                 context.pending_resource_costs = tuple(sorted(expected_costs))
@@ -885,13 +923,14 @@ class ResearchAdapterPorts:
                 if context.queue_add_receipt is not None:
                     if context.queue_confirm_receipt is not None:
                         return context.queue_confirm_receipt
+                    self._require_selected_research_identity()
                     if context.queue_add_requires_start_grant:
                         receipt = self._dispatch_mutation(
                             "research.start",
-                            lambda: self.oracle.click("research/queue/confirm"),
+                            lambda: self._click_selected_research_target("research/queue/confirm"),
                         )
                     else:
-                        receipt = self.oracle.click("research/queue/confirm")
+                        receipt = self._click_selected_research_target("research/queue/confirm")
                     context.queue_confirm_receipt = receipt
                     context.last_queue_state = None
                     context.last_projects = None
@@ -929,9 +968,10 @@ class ResearchAdapterPorts:
                     raise SemanticGateClosed(
                         "research queue add requires a confirmed start or one budgeted running project"
                     )
+                self._require_selected_research_identity()
                 if existing_running:
                     self._require_action_grant("research.start")
-                receipt = self.oracle.click_research_queue_add()
+                receipt = self._click_selected_research_target("research/detail/queue")
                 context.queue_add_receipt = receipt
                 context.queue_confirm_receipt = None
                 context.queue_add_requires_start_grant = existing_running

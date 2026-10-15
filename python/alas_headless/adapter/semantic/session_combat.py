@@ -25,11 +25,13 @@ from ...semantic_oracle import (
     CampaignMapState,
     ObserverTransportError,
     SemanticGateClosed,
+    SemanticTargetMissing,
     request_observer_state,
 )
 from .adapter import AlasSemanticAdapter
 from .contracts import CampaignMapTargetRecheckProof
 from ...oracle.errors import SemanticExerciseHpNotReady
+from ...oracle.surfaces import ObservationSurface
 
 
 class SessionCombatPorts:
@@ -74,7 +76,7 @@ class SessionCombatPorts:
             or adapter.operation_siren_combat_committed()
         ):
             raise SemanticGateClosed(
-                "live combat observation requires one committed ALAS grid input"
+                "live combat observation requires a committed ALAS combat entry or official auto-search sortie"
             )
         handle = self._runtime_handle
         if handle is None:
@@ -92,6 +94,12 @@ class SessionCombatPorts:
         return snapshot
 
     def _live_combat_visible(self) -> Tuple[str, ...]:
+        official_state = self._official_auto_search_combat_state(self.open())
+        if official_state == (False, False):
+            # Auto-search's native loops probe optional combat popups before
+            # their map/result checks. The current typed non-combat owner wins
+            # over a still-mounted CombatUI; its dedicated ports remain active.
+            return ()
         try:
             return alas_combat_visible_resource_names(
                 self._live_combat_snapshot(), self._live_combat_manifest()
@@ -168,8 +176,37 @@ class SessionCombatPorts:
                 return None
             raise
 
+    def _official_auto_search_combat_state(self, adapter: AlasSemanticAdapter):
+        """Classify one ALAS frame, leaving polling and recovery to ALAS.
+
+        Official auto-search keeps its sortie owner across maps, rewards and
+        reconnect prompts. Those surfaces must not turn the retained CombatUI
+        underneath them into another positive combat/loading observation.
+        """
+        if not getattr(adapter, "campaign_auto_search_owned", lambda: False)():
+            return None
+        oracle = adapter._frame_or_live_observation_oracle()
+        state = oracle.read_state()
+        if (oracle._blocking_rules(state, "campaign/combat/observation")
+                or oracle.observation_surface_present(ObservationSurface.BATTLE_RESULT)):
+            return False, False
+        if oracle.daily_combat_visible():
+            return True, True
+        if oracle.daily_battle_loading_visible():
+            return True, False
+        try:
+            surface = oracle.campaign_auto_search_active_state()
+        except SemanticTargetMissing:
+            # A map, retirement page or restored stage is not a combat loader.
+            # Their original handlers own the next observation and decision.
+            return False, False
+        return surface.root_path.endswith("/ChapterPreCombatUI(Clone)"), False
+
     def combat_is_loading(self) -> bool:
         adapter = self.open()
+        official_state = self._official_auto_search_combat_state(adapter)
+        if official_state is not None:
+            return official_state[0]
         oracle = adapter.oracle
         if getattr(
             oracle,
@@ -240,6 +277,9 @@ class SessionCombatPorts:
                     # screenshot; do not make an HP decision from this frame.
                     return False
                 return True
+            official_state = self._official_auto_search_combat_state(adapter)
+            if official_state is not None:
+                return official_state[1]
             if getattr(
                 self.open().oracle,
                 "daily_battle_result_visible",
@@ -285,7 +325,7 @@ class SessionCombatPorts:
             or adapter.operation_siren_combat_committed()
         ):
             raise SemanticGateClosed(
-                "live combat input requires one committed ALAS grid input"
+                "live combat input requires a committed ALAS combat entry or official auto-search sortie"
             )
         if adapter.meta_beacon_active() and resource_name == 'BATTLE_STATUS_S':
             # META's shared grade/Worldboss statistics stack has a reviewed

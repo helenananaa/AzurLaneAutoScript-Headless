@@ -224,7 +224,7 @@ def image_record(name, path=None, sprite=None, fill=1.0, *, actionable=False):
         "raycast_top": True if actionable else None,
         "color": {"red": 1.0, "green": 1.0, "blue": 1.0, "alpha": 1.0},
         "fill_amount": fill,
-        "flags": 0,
+        "flags": 0x8,  # This synthetic record declares its current sprite.
         "adb_point": {"x": 690.0, "y": 121.0} if actionable else None,
         "adb_bounds": {
             "left": 10.0,
@@ -440,6 +440,41 @@ def fixture_value(phases=ALAS_COMBAT_REPLAY_PHASES):
         "game_fingerprint": GAME,
         "frames": frames,
     }
+
+
+def combat_action_session(frames):
+    """Replay endpoint triples through the production combat action utility."""
+    class Handle:
+        pid = 4242
+        component = "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+
+        def __init__(self):
+            self.request_count = 0
+            self.taps = []
+
+        def foreground_component(self):
+            return self.component
+
+        def observer_request(self, request):
+            value = frames[min(self.request_count // 2, len(frames) - 1)]
+            self.request_count += 1
+            endpoint = request.strip().split("/")[-1]
+            if endpoint == "state":
+                return {
+                    "protocol_schema": "alas-headless.observer/v1",
+                    "status": "ok",
+                    "snapshot": value["snapshot"],
+                    "buttons": value["buttons"],
+                }
+            return value[endpoint]
+
+        def tap(self, x, y):
+            self.taps.append((x, y))
+
+    handle = Handle()
+    session = mock.Mock(package=PACKAGE, driver_revision=DRIVER,
+                        component=handle.component, runtime_handle=handle)
+    return session, handle
 
 
 class AlasCombatObserverContractTests(unittest.TestCase):
@@ -1034,6 +1069,135 @@ class AlasCombatObserverContractTests(unittest.TestCase):
             )
         session.runtime_handle.observer_request.assert_not_called()
         session.runtime_handle.tap.assert_not_called()
+
+    def test_runtime_combat_action_checks_process_and_foreground_at_final_input(self):
+        for outcome in ("allowed", "replacement-process", "changed-cached-pid", "foreground"):
+            with self.subTest(outcome=outcome):
+                frames = [frame(20, ("BATTLE_STATUS_S",)), frame(21, ("BATTLE_STATUS_S",))]
+                session, handle = combat_action_session(frames)
+
+                def validate():
+                    # Both complete action snapshots have already been read.
+                    self.assertEqual(handle.request_count, 4)
+                    self.assertEqual(handle.taps, [])
+                    if outcome == "replacement-process":
+                        raise SemanticGateClosed("game PID changed before semantic input")
+                    if outcome == "changed-cached-pid":
+                        handle.pid = 4243
+                    if outcome == "foreground":
+                        handle.component = "other.package/other.Activity"
+
+                handle.validate_input_process = mock.Mock(side_effect=validate)
+                if outcome == "allowed":
+                    commit = commit_alas_combat_resource_action_for_evidence(
+                        session, qualified_manifest(), "BATTLE_STATUS_S",
+                        expected_pid=4242, minimum_generation=19, action_budget=1,
+                        sleep=lambda _: None,
+                    )
+                    self.assertEqual(commit.commit_generation, 21)
+                    self.assertEqual(handle.taps, [(100, 100)])
+                else:
+                    with self.assertRaises(SemanticGateClosed):
+                        commit_alas_combat_resource_action_for_evidence(
+                            session, qualified_manifest(), "BATTLE_STATUS_S",
+                            expected_pid=4242, minimum_generation=19, action_budget=1,
+                            sleep=lambda _: None,
+                        )
+                    self.assertEqual(handle.taps, [])
+                handle.validate_input_process.assert_called_once_with()
+
+    def test_runtime_combat_action_rounding_stays_inside_target_and_screen(self):
+        cases = (
+            ((1279.9, 719.9), (1278.0, 718.0, 1280.0, 720.0), (1279, 719)),
+            ((100.4, 200.6), (100.2, 199.2, 101.2, 200.8), (101, 200)),
+            ((100.5, 200.0), (100.1, 199.0, 100.9, 201.0), None),
+            ((100.0, 200.5), (99.0, 200.1, 101.0, 200.9), None),
+        )
+        for point, bounds, expected in cases:
+            with self.subTest(point=point, bounds=bounds):
+                frames = [frame(20, ("BATTLE_STATUS_S",)), frame(21, ("BATTLE_STATUS_S",))]
+                for value in frames:
+                    button = value["buttons"]["buttons"][0]
+                    button["adb_point"] = dict(zip(("x", "y"), point))
+                    button["adb_bounds"] = dict(zip(("left", "top", "right", "bottom"), bounds))
+                session, handle = combat_action_session(frames)
+                if expected is None:
+                    with self.assertRaisesRegex(SemanticGateClosed, "no in-bounds integer"):
+                        commit_alas_combat_resource_action_for_evidence(
+                            session, qualified_manifest(), "BATTLE_STATUS_S",
+                            expected_pid=4242, minimum_generation=19, action_budget=1,
+                            sleep=lambda _: None,
+                        )
+                    self.assertEqual(handle.taps, [])
+                else:
+                    commit_alas_combat_resource_action_for_evidence(
+                        session, qualified_manifest(), "BATTLE_STATUS_S",
+                        expected_pid=4242, minimum_generation=19, action_budget=1,
+                        sleep=lambda _: None,
+                    )
+                    self.assertEqual(handle.taps, [expected])
+                    self.assertTrue(Bounds(*bounds).contains(Point(*expected)))
+                    self.assertTrue(0 <= expected[0] < 1280 and 0 <= expected[1] < 720)
+
+    def test_runtime_combat_action_charges_read_and_final_preflight_to_snapshot_age(self):
+        # Age is taken from the oldest of all three captured endpoints. Each
+        # delay is injected into the actual utility's request/preflight path.
+        cases = (
+            (100, 80, 0.002, 0.002, 0.002, True),
+            (100, 80, 0.015, 0.0, 0.0, False),
+            (100, 80, 0.0, 0.03, 0.0, False),
+            (100, 80, 0.0, 0.0, 0.03, False),
+            (200, 80, 0.0, 0.09, 0.0, True),
+            (None, 2000, 0.0, 0.4, 0.0, True),
+            (None, 2400, 0.0, 0.2, 0.0, False),
+        )
+        for maximum, age, read_delay, preflight_delay, foreground_delay, allowed in cases:
+            with self.subTest(maximum=maximum, age=age, read_delay=read_delay,
+                              preflight_delay=preflight_delay, foreground_delay=foreground_delay):
+                frames = [frame(20, ("BATTLE_STATUS_S",)), frame(21, ("BATTLE_STATUS_S",))]
+                frames[1]["snapshot"]["age_ms"] = 10
+                frames[1]["buttons"]["age_ms"] = 20
+                frames[1]["ui"]["age_ms"] = age
+                session, handle = combat_action_session(frames)
+                session.observer_max_age_ms = maximum
+                clock = [100.0]
+                request = handle.observer_request
+
+                def delayed_request(line):
+                    if handle.request_count >= 2:
+                        clock[0] += read_delay
+                    return request(line)
+
+                def validate():
+                    self.assertEqual(handle.request_count, 4)
+                    self.assertEqual(handle.taps, [])
+                    clock[0] += preflight_delay
+
+                def foreground():
+                    if handle.request_count >= 4:
+                        clock[0] += foreground_delay
+                    return handle.component
+
+                handle.observer_request = delayed_request
+                handle.validate_input_process = validate
+                handle.foreground_component = foreground
+                with mock.patch("alas_headless.alas_combat_action.time.monotonic",
+                                side_effect=lambda: clock[0]):
+                    if allowed:
+                        commit_alas_combat_resource_action_for_evidence(
+                            session, qualified_manifest(), "BATTLE_STATUS_S",
+                            expected_pid=4242, minimum_generation=19, action_budget=1,
+                            sleep=lambda _: None,
+                        )
+                        self.assertEqual(handle.taps, [(100, 100)])
+                    else:
+                        with self.assertRaisesRegex(SemanticGateClosed, "stale before input"):
+                            commit_alas_combat_resource_action_for_evidence(
+                                session, qualified_manifest(), "BATTLE_STATUS_S",
+                                expected_pid=4242, minimum_generation=19, action_budget=1,
+                                sleep=lambda _: None,
+                            )
+                        self.assertEqual(handle.taps, [])
 
     def test_live_evidence_action_rejects_endpoint_pid_drift(self):
         manifest = qualified_manifest()

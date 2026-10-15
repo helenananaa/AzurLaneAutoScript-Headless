@@ -1232,11 +1232,14 @@ class CampaignMapAdapterPorts:
         context = self._campaign_context
         # Both a grid entry and an accepted ambush choice can lead to the
         # original Combat flow. Keep their receipts separate: an ambush must
-        # never count as defeating the planned map target.
+        # never count as defeating the planned map target. An official
+        # auto-search sortie owns the same observation/input ports without
+        # inventing a manually clicked grid or a manual combat completion.
         return context is not None and (
             (context.combat_receipt is not None
              and (context.combat_admission is None or context.combat_admission.target_kind == 'enemy'))
             or context.ambush_receipt is not None
+            or self.campaign_auto_search_owned()
         )
 
     def campaign_combat_active(self) -> bool:

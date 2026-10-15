@@ -495,7 +495,9 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
     response.append(",\"path\":");
     AppendJsonString(&response, BoundedStringView(record.path));
     response.append(",\"sprite\":");
-    AppendJsonString(&response, BoundedStringView(record.spriteName));
+    AppendJsonString(&response, (record.flags & 0x8u) != 0
+                                    ? BoundedStringView(record.spriteName)
+                                    : std::string_view());
     char fields[768];
     const int fieldCount = ANGLE_UNSAFE_TODO(std::snprintf(
         fields, sizeof(fields),

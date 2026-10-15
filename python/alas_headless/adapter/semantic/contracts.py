@@ -222,6 +222,7 @@ class _CommissionFlowContext:
 class _ResearchFlowContext:
     selected_slot: Optional[int] = None
     selected_code: Optional[str] = None
+    selected_series: Optional[int] = None
     selected_status: Optional[ResearchProjectStatus] = None
     start_receipt: Optional[ActionReceipt] = None
     start_confirm_receipt: Optional[ActionReceipt] = None
@@ -474,6 +475,9 @@ class _CampaignFlowContext:
     combat_input_retry_count: int = 0
     combat_proof: Optional[AlasCampaignCombatProof] = None
     auto_search_completion: Optional[CampaignAutoSearchCompletionProof] = None
+    auto_search_combat_generation: Optional[int] = None
+    auto_search_started_at: float = 0.0
+    auto_search_start_input_count: Optional[int] = None
     manual_completion_proven: bool = False
     passive_transition_until: float = 0.0
 

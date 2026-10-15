@@ -18,6 +18,7 @@ from ...adapter import (
     PixelAccessRecord,
     RecoveryPolicy,
     RunPolicy,
+    RunPolicyError,
     RuntimeHandlePackageGate,
     RuntimeHandlePort,
     SemanticFrame,
@@ -156,15 +157,6 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
         self.package = package
         self.component = component
         self.required_primary_abi = required_primary_abi
-        self.allow_mission_claim_once = bool(allow_mission_claim_once)
-        self.allow_mail_mutations = bool(allow_mail_mutations)
-        self.mail_mutation_budget = mail_mutation_budget
-        self.minigame_play_budget = minigame_play_budget
-        self.meta_assist_budget = meta_assist_budget
-        self.operation_siren_coordinate_checkout_budget = (
-            operation_siren_coordinate_checkout_budget
-        )
-        self.allow_tactical_rewards = bool(allow_tactical_rewards)
         for label, budget in (
             ("mail mutation", mail_mutation_budget),
             ("minigame play", minigame_play_budget),
@@ -203,29 +195,6 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                 raise ValueError(
                     "{0} budget must be a non-negative integer".format(label)
                 )
-        self.commission_reward_budget = commission_reward_budget
-        self.tactical_assign_budget = tactical_assign_budget
-        self.commission_start_budget = commission_start_budget
-        self.daily_execute_budget = daily_execute_budget
-        self.exercise_execute_budget = exercise_execute_budget
-        self.exercise_refresh_budget = exercise_refresh_budget
-        self.research_reward_budget = research_reward_budget
-        self.research_start_budget = research_start_budget
-        self.dorm_collect_budget = dorm_collect_budget
-        self.dorm_feed_budget = dorm_feed_budget
-        self.awaken_budget = awaken_budget
-        self.enhancement_budget = enhancement_budget
-        self.build_submit_budget = build_submit_budget
-        self.retirement_budget = retirement_budget
-        self.shop_purchase_budget = shop_purchase_budget
-        self.campaign_stage_entry_budget = campaign_stage_entry_budget
-        self.campaign_fleet_mutation_budget = campaign_fleet_mutation_budget
-        self.campaign_sortie_budget = campaign_sortie_budget
-        self.campaign_combat_budget = campaign_combat_budget
-        self.campaign_viewport_swipe_budget = campaign_viewport_swipe_budget
-        self.campaign_camera_positioning_budget = (
-            campaign_camera_positioning_budget
-        )
         self.package_process_lease = package_process_lease
         self.observer_max_age_ms = observer_max_age_ms
         self.trace = trace
@@ -266,8 +235,48 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
             campaign_viewport_swipe_budget=campaign_viewport_swipe_budget,
             campaign_camera_positioning_budget=campaign_camera_positioning_budget,
         )
-        effective_grants = dict(policy_grants or legacy_grants)
+        if run_policy is not None:
+            # The immutable policy owns its receipt hash and the actual grants.
+            # A compatibility copy cannot silently widen or narrow that policy.
+            if policy_grants is not None and dict(policy_grants) != dict(run_policy.grants):
+                raise RunPolicyError()
+            effective_grants = dict(run_policy.grants)
+        else:
+            effective_grants = dict(legacy_grants if policy_grants is None else policy_grants)
         self.policy_grants = MappingProxyType(effective_grants)
+        # Legacy task ports still consume these constructor attributes. Derive
+        # them from the same authority as the ledger, including explicit zeros.
+        self.allow_mission_claim_once = effective_grants.get("mission.claim", 0) > 0
+        self.allow_mail_mutations = effective_grants.get("mail.mutation", 0) > 0
+        self.allow_tactical_rewards = effective_grants.get("tactical.reward", 0) > 0
+        for attribute, capability in (
+            ("mail_mutation_budget", "mail.mutation"),
+            ("minigame_play_budget", "minigame.play"),
+            ("meta_assist_budget", "meta.assist"),
+            ("operation_siren_coordinate_checkout_budget", "operation_siren.coordinate_checkout"),
+            ("tactical_assign_budget", "tactical.assign"),
+            ("commission_reward_budget", "commission.reward"),
+            ("commission_start_budget", "commission.start"),
+            ("daily_execute_budget", "daily.execute"),
+            ("exercise_execute_budget", "exercise.execute"),
+            ("exercise_refresh_budget", "exercise.refresh"),
+            ("research_reward_budget", "research.reward"),
+            ("research_start_budget", "research.start"),
+            ("dorm_collect_budget", "dorm.collect"),
+            ("dorm_feed_budget", "dorm.feed"),
+            ("awaken_budget", "awaken.execute"),
+            ("enhancement_budget", "enhancement.execute"),
+            ("build_submit_budget", "build.submit"),
+            ("retirement_budget", "retirement.execute"),
+            ("shop_purchase_budget", "shop.purchase"),
+            ("campaign_stage_entry_budget", "campaign.stage_entry"),
+            ("campaign_fleet_mutation_budget", "campaign.fleet_mutation"),
+            ("campaign_sortie_budget", "campaign.sortie"),
+            ("campaign_combat_budget", "campaign.grid_click"),
+            ("campaign_viewport_swipe_budget", "campaign.viewport_swipe"),
+            ("campaign_camera_positioning_budget", "campaign.camera_positioning"),
+        ):
+            setattr(self, attribute, effective_grants.get(capability, 0))
         if capability_profile is not None and not isinstance(
             capability_profile, TaskCapabilityProfile
         ):
@@ -283,7 +292,10 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
         )
         if capability_profile is None:
             capability_profile = (
-                TaskCapabilityProfile(profile_id=run_policy.profile_id)
+                compatibility_profile(
+                    run_policy.profile_id, effective_grants, recovery_policy,
+                    run_policy.task_config_sha256,
+                )
                 if run_policy is not None
                 else compatibility_profile("legacy-session", effective_grants)
             )
@@ -489,6 +501,12 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
             package_gate()
 
             def invalidate_current_frame() -> None:
+                # ADB's attached observer PID is a cache. Recheck the actual
+                # package process before using a frame across a game restart.
+                # Other runtime handles retain their existing PID contract.
+                validate_process = getattr(handle, "validate_input_process", None)
+                if validate_process is not None:
+                    validate_process()
                 frame_clock = self._frame_clock
                 if frame_clock is None or frame_clock.current_frame_id is None:
                     return
@@ -499,24 +517,10 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                 frame_clock.borrow(frame_id, require_fresh=True)
                 frame_clock.invalidate(frame_id)
 
-            def invalidate_then_tap(x: float, y: float) -> None:
-                invalidate_current_frame()
-                handle.tap(x, y)
-
-            def invalidate_then_swipe(
-                x1: int,
-                y1: int,
-                x2: int,
-                y2: int,
-                duration_ms: int,
-            ) -> None:
-                invalidate_current_frame()
-                handle.swipe(x1, y1, x2, y2, duration_ms)
-
             oracle = SemanticOracle(
                 handle.observer_request,
                 handle.foreground_component,
-                invalidate_then_tap,
+                handle.tap,
                 OracleFingerprint(
                     package=self.package,
                     component=self.component,
@@ -524,7 +528,8 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                     expected_pid=handle.pid,
                     max_age_ms=self.observer_max_age_ms,
                 ),
-                swipe=invalidate_then_swipe,
+                swipe=handle.swipe,
+                input_preflight=invalidate_current_frame,
             )
             self._frame_clock = SemanticFrameClock(handle, oracle)
             self._frame_reader = SemanticFrameReader(self._frame_clock, oracle)

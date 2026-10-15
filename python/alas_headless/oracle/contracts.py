@@ -1606,6 +1606,7 @@ class ResearchDetailState:
     is_running: bool
     is_finished: bool
     resource_costs: Tuple[ResearchResourceCostState, ...] = ()
+    series: Optional[int] = None
 
 
 @dataclass(frozen=True)

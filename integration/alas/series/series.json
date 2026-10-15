@@ -188,12 +188,12 @@
     {
       "order": 38,
       "path": "integration/alas/series/0320-research-code-selection-port.patch",
-      "sha256": "04d0e525fe66e3280c430025445f0f9b05f84036757524ced0244eb9f2844555"
+      "sha256": "68ad36a70e22223d11a1dc40724f35e296b66c671aa7f4fb62f22ac735cf9a40"
     },
     {
       "order": 39,
       "path": "integration/alas/series/0330-research-atomic-start-port.patch",
-      "sha256": "b8f0730af27ba557f952dd1a2ab6354fe72a3c0a98ae30ffb0d9c645bbf8b030"
+      "sha256": "10ab75d9c2e42c13d6339e7bb5655daccb277bb1bd18e7e150ec6b53db074925"
     },
     {
       "order": 40,
@@ -1059,6 +1059,16 @@
       "order": 212,
       "path": "integration/alas/series/1532-commission-selected-native-recommend-recovery.patch",
       "sha256": "f9ddedf14de52fb1ffc3bdf5424d6fae61e1d9d43d0f279b0ed921e97114d150"
+    },
+    {
+      "order": 213,
+      "path": "integration/alas/series/1533-native-campaign-auto-search-loop.patch",
+      "sha256": "6fd76c16506b70058fac31e561dcbdee298757cbc7adff3aac069c30226ab665"
+    },
+    {
+      "order": 214,
+      "path": "integration/alas/series/1534-main-native-stage-aliases.patch",
+      "sha256": "84524a3b7ddcefa4ba56b6581b8677c0059e5bc2c9f53543812a2edc6f2f34ad"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

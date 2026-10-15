@@ -60,10 +60,12 @@ class CoreOracle:
         monotonic: Callable[[], float] = time.monotonic,
         sleep: Callable[[float], None] = time.sleep,
         swipe: Optional[Callable[[int, int, int, int, int], None]] = None,
+        input_preflight: Optional[Callable[[], None]] = None,
     ) -> None:
         self._request = request
         self._foreground_component = foreground_component
         self._tap_backend = tap
+        self._input_preflight = input_preflight
         self._input_dispatch_lock = threading.Lock()
         self._input_dispatch_count = 0
         self._tap = self._dispatch_tap
@@ -99,6 +101,8 @@ class CoreOracle:
             self._input_dispatch_count += 1
 
     def _dispatch_tap(self, x: float, y: float) -> None:
+        if self._input_preflight is not None:
+            self._input_preflight()
         self._mark_input_dispatched()
         try:
             self._tap_backend(x, y)
@@ -109,8 +113,10 @@ class CoreOracle:
     def _dispatch_swipe(
         self, x1: int, y1: int, x2: int, y2: int, duration_ms: int
     ) -> None:
-        self._mark_input_dispatched()
         assert self._swipe_backend is not None
+        if self._input_preflight is not None:
+            self._input_preflight()
+        self._mark_input_dispatched()
         try:
             self._swipe_backend(x1, y1, x2, y2, duration_ms)
         except SemanticSnapshotStale as exc:
@@ -435,6 +441,10 @@ class CoreOracle:
             if candidate.left < candidate.right and candidate.top < candidate.bottom:
                 bounds = candidate
         flags = self._integer(raw.get("flags"), "image flags")
+        # Older observers can leave a prior Image's name in a reused slot.
+        # No sprite is a valid observation; ignore only that stale field.
+        if not flags & 0x8:
+            sprite = ""
         return ImageState(
             name=name,
             path=path,

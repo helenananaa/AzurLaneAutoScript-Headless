@@ -40,12 +40,13 @@ class FakeRewardsOracle:
             raise SemanticGateClosed("research page identity is not proven")
         return tuple(self.research_project_values)
 
-    def click_research_project(self, slot, *, expected_code=None):
+    def click_research_project(self, slot, *, expected_code=None, expected_series=None):
         if expected_code is not None:
             matches = tuple(
                 project
                 for project in self.research_project_values
                 if project.slot == slot and project.code == expected_code
+                and (expected_series is None or project.series == expected_series)
             )
             if len(matches) != 1:
                 raise SemanticGateClosed("research project code changed before input")

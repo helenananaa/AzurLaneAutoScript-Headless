@@ -293,12 +293,14 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
                 slot=1,
                 unity_index=1,
                 code="C-153-MI",
+                series=9,
                 status=ResearchProjectStatus.DETAIL,
             ),
             SimpleNamespace(
                 slot=5,
                 unity_index=2,
                 code="C-153-MI",
+                series=9,
                 status=ResearchProjectStatus.DETAIL,
             ),
         ]
@@ -306,14 +308,14 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         with self.assertRaisesRegex(SemanticGateClosed, "ambiguous"):
             adapter.click_research_project_code("C-153-MI")
         receipt = adapter.click_research_project_code(
-            "C-153-MI", position=1
+            "C-153-MI", position=1, series=9
         )
 
         self.assertEqual(receipt.semantic_id, "research/project/5")
         self.assertEqual(adapter._research_context.selected_slot, 5)
 
         with self.assertRaisesRegex(SemanticGateClosed, "no longer matches"):
-            adapter.click_research_project_code("G-236-MI", position=1)
+            adapter.click_research_project_code("G-236-MI", position=1, series=9)
 
     def test_research_queue_entry_retries_only_before_one_exact_input(self):
         adapter, oracle, _ = self.make_adapter()

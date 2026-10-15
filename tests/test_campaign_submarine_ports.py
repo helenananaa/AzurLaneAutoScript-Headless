@@ -68,7 +68,8 @@ def test_manual_settlement_exit_is_single_use_even_while_frame_still_shows_it():
     receipt=object()
     context=SimpleNamespace(manual_result_exit_receipt=None,auto_search_completion=None)
     oracle=SimpleNamespace(click=Mock(return_value=receipt))
-    host=SimpleNamespace(_campaign_context=context,oracle=oracle,campaign_combat_committed=lambda:True)
+    host=SimpleNamespace(_campaign_context=context,oracle=oracle,campaign_combat_committed=lambda:True,
+                         campaign_auto_search_owned=lambda:False)
     assert CampaignAdapterPorts._click_campaign_strategy(host,'AUTO_SEARCH_MENU_EXIT') is receipt
     assert context.manual_result_exit_receipt is receipt
     with pytest.raises(SemanticGateClosed,match='already submitted'):
