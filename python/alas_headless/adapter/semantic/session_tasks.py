@@ -364,13 +364,13 @@ class SessionTasksPorts:
 
     def click_research_project_code(
         self, code: str, *, position: Optional[int] = None,
-        series: Optional[int] = None,
+        series: Optional[Union[int, str]] = None,
     ) -> ActionReceipt:
         return self.open().click_research_project_code(code, position=position, series=series)
 
     def start_research_project_code(
         self, code: str, *, position: Optional[int] = None,
-        series: Optional[int] = None,
+        series: Optional[Union[int, str]] = None,
     ) -> bool:
         return self.open().start_research_project_code(code, position=position, series=series)
 

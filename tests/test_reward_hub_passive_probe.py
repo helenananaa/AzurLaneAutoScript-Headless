@@ -73,7 +73,8 @@ def test_ready_sidebar_owns_unrelated_campaign_probes(name, retained_context):
         make_button('go_btn', root+'/frame/main/content/class/frame/go_btn'),
     ])
     adapter = AlasSemanticAdapter(make_oracle(backend), package_gate=lambda: None)
-    if retained_context: adapter._campaign_context = object()
+    if retained_context:
+        adapter.begin_campaign_pre_sortie('12-4')
     assert adapter.appear(NamedButton(name)) is False
     assert backend.taps == []
 

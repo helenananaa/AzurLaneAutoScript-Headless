@@ -65,6 +65,42 @@ class CampaignNavigationOracle:
             attempts=12,
         )
 
+    def campaign_auto_search_map_transition_visible(self) -> bool:
+        """Identify a retained map HUD for passive underlay-page absence.
+
+        Active Back and Retreat on one reviewed root identify the HUD during
+        animation. On/Off, sprites and hit geometry belong to running/input
+        proofs, not to this negative observation.
+        """
+        state = self.read_state()
+        active_buttons = tuple(b for b in state.buttons
+            if b.active_in_hierarchy and b.active_and_enabled)
+        blockers = self._blocking_rules(state, 'ui/absence-probe')
+        if any(rule.blocker_id not in ('loading', 'campaign-menu') for rule in blockers):
+            return False
+        if any(rule.blocker_id == 'loading' for rule in blockers):
+            # The known loading curtain owns absence regardless of how much
+            # of the map HUD has mounted beneath it.
+            return True
+        if any(b.path.startswith('LevelCamera/Canvas/UIMain/LevelGrid/')
+               for b in active_buttons):
+            return False
+        roots = (
+            'OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)',
+            'LevelCamera/Canvas/LevelOrigin/top/LevelStageView(Clone)',
+        )
+        mounted = tuple(root for root in roots if all(
+            sum(b.path == root + suffix for b in active_buttons) == 1
+            for suffix in ('/top_stage/back_button', '/bottom_stage/Normal/retreat_button')))
+        if len(mounted) != 1:
+            return False
+        if (self._matches(state, 'campaign-menu/page/back')
+                and self.campaign_page_is_normal()):
+            # A complete chapter restored by ALAS outranks retained HUD
+            # descendants. Do not keep a finished run waiting on their removal.
+            return False
+        return True
+
     def campaign_auto_search_active_state(
         self,
     ) -> CampaignAutoSearchActiveState:

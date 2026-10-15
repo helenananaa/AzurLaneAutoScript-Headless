@@ -512,26 +512,15 @@ class ResearchOracle:
                 raise SemanticGateClosed("research queue-add input is not proven")
             return state
 
-        state = self._retry_transition_read(
+        self._retry_transition_read(
             exact_state,
             attempts=12,
             interval_seconds=0.5,
         )
-        target = self._unique(state, "research/detail/queue")
-        assert target.point is not None
-        assert target.bounds is not None
-        if self._foreground_component() != self.fingerprint.component:
-            raise SemanticGateClosed("foreground changed before research queue-add")
-        self._tap(int(round(target.point.x)), int(round(target.point.y)))
-        if self._foreground_component() != self.fingerprint.component:
-            raise SemanticGateClosed("foreground changed after research queue-add")
-        return ActionReceipt(
-            semantic_id="research/detail/queue",
-            generation=state.generation,
-            point=target.point,
-            bounds=target.bounds,
-            path=target.path,
-        )
+        # Use the common checked input boundary. Native ALAS observes the
+        # subsequent exact queue confirmation; a successful tap invalidates
+        # this immutable frame, so it cannot be borrowed for a post-tap read.
+        return self.click("research/detail/queue")
 
     def research_queue_state(self) -> ResearchQueueState:
         """Read all non-empty queue slots and the reviewed claim control."""

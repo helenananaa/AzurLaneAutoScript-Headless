@@ -439,11 +439,16 @@ class SessionDispatchPorts:
                 # the normal classifier inspect that new immutable frame;
                 # its blocker and target checks still own the decision.
                 return self.open().appear(button)
-            if (name in UI_PAGE_CHECK_RESOURCES
+            if ((name in UI_PAGE_CHECK_RESOURCES
+                    or (name == 'CAMPAIGN_WITHDRAW_CONFIRM'
+                        and self.open()._campaign_context is None
+                        and self.open()._frame_or_live_observation_oracle().enabled('research-menu/page/back')))
                     and self.open()._frame_or_live_observation_oracle().exists('research-menu/page/back')):
                 # The existing refresh may have caught the completed Shipyard
-                # return. Reclassify that exact menu in the newly leased frame
-                # instead of rethrowing the old transition's unknown-page error.
+                # or Research return. Its existing classifier also owns the
+                # unowned withdrawal probe from ui_additional; foreign modals
+                # still fail there. Reuse this one refreshed screenshot instead
+                # of rethrowing the preceding transition's unknown-page error.
                 return self.open().appear(button)
             if (oracle.observation_surface_present(ObservationSurface.BATTLE_RESULT)
                     and oracle.daily_battle_result_visible()):

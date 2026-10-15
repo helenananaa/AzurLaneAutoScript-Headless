@@ -421,6 +421,8 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         if not self.campaign_auto_search_owned():
             return False
         oracle = self._frame_or_live_observation_oracle()
+        if getattr(oracle, 'campaign_auto_search_map_transition_visible', lambda: False)():
+            return False
         switch = oracle.campaign_map_auto_search_state()
         return switch is not None and switch[2]
 
@@ -1240,11 +1242,11 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
             if context is not None
             else None
         )
-        return self.oracle.event_coin(stage_code)
+        return self._frame_or_live_observation_oracle().event_coin(stage_code)
 
     def campaign_oil(self) -> int:
         self._package_gate()
-        return self.oracle.campaign_oil()
+        return self._frame_or_live_observation_oracle().campaign_oil()
 
     def campaign_map_achievement_state(self) -> CampaignMapAchievementState:
         self._package_gate()

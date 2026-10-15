@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 import time
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple, Union
 from ...semantic_oracle import (
     ActionReceipt,
     ResearchDetailState,
@@ -142,7 +142,7 @@ class ResearchAdapterPorts:
 
     def click_research_project_code(
         self, code: str, *, position: Optional[int] = None,
-        series: Optional[int] = None,
+        series: Optional[Union[int, str]] = None,
     ) -> ActionReceipt:
         """Click the one current card selected by upstream's project code.
 
@@ -158,6 +158,13 @@ class ResearchAdapterPorts:
         normalized = code.strip() if isinstance(code, str) else ""
         if not normalized:
             raise SemanticGateClosed("research project code is absent")
+        # ResearchProject accepts an integer but exposes its policy identity
+        # as "S9". Normalize that ALAS representation only at this boundary;
+        # observed cards, selected context and final input keep integer series.
+        if isinstance(series, str):
+            match = re.fullmatch(r"S([0-9]+)", series.strip(), re.IGNORECASE)
+            if match is not None:
+                series = int(match.group(1))
         if series is not None and (type(series) is not int or series < 1):
             raise SemanticGateClosed("selected research project series is invalid")
         # Input cannot reuse the five-second observation cache: re-resolve the
@@ -222,7 +229,7 @@ class ResearchAdapterPorts:
 
     def start_research_project_code(
         self, code: str, *, position: Optional[int] = None,
-        series: Optional[int] = None,
+        series: Optional[Union[int, str]] = None,
     ) -> bool:
         """Start the upstream-selected current research card atomically.
 

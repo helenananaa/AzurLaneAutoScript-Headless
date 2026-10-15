@@ -554,6 +554,11 @@ class ActionsOracle:
             semantic_id == "mail/manage/back"
             and self._mail_manager_back_delegated_raycast_proven(state)
         )
+        research_queue_add_delegated = (
+            semantic_id == "research/detail/queue"
+            and not target.actionable
+            and self._research_queue_add_proven(state)
+        )
         dorm_food_control = (semantic_id in ('dorm/feed/shop/open', 'dorm/feed/shop/plus',
                                              'dorm/feed/shop/minus', 'dorm/feed/shop/cancel', 'dorm/feed/shop/confirm')
                              and not target.actionable
@@ -635,6 +640,7 @@ class ActionsOracle:
         if (
             (
                 not target.actionable
+                and not research_queue_add_delegated
                 and not delegated_login_update
                 and not delegated_login_restart
                 and not delegated_activity_main_back

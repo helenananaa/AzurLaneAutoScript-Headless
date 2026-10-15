@@ -1591,4 +1591,4 @@ class CampaignPreparationAdapterPorts:
             kwargs = self._campaign_vitals_kwargs(index)
             if kwargs:
                 return oracle.campaign_sparse_fleet_levels(index, **kwargs)
-        return self.oracle.campaign_fleet_levels()
+        return self._frame_or_live_observation_oracle().campaign_fleet_levels()

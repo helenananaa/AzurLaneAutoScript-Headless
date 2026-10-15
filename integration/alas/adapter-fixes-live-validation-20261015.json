@@ -1,0 +1,641 @@
+{
+  "schema": "alas-headless.adapter-fixes-live-validation/v1",
+  "created_at": "2026-10-15T14:26:21.593590+00:00",
+  "curation_script_sha256": "4ce508aa6892bbe6cb44d8ded4a0757b8c789cd83e4b5988f57594f2ccb3db41",
+  "original_ten_fixes_commit": "a5dc8f875419a7e023e09110943c3ecf3ac28f53",
+  "original_offline_validation": {
+    "passed": 1163,
+    "scope": "Original ten fixes before the live follow-up edits"
+  },
+  "support_status_promoted": false,
+  "source_receipts_sha256": {
+    "artifacts/adapter-fixes-live-20261015/main-task-r8.json": "439c806c7a3b9e75aee8853ed78f5a6f5fd8a9f18b5dcd21ab31a4d30629bd59",
+    "artifacts/adapter-fixes-live-20261015/main-task-r8-instrumentation.json": "65e1eeb5055b8bf97861017d005587f16d4ba8f1fdd4b33177399a8c1e867f58",
+    "artifacts/adapter-fixes-live-20261015/main-r8-source.json": "779e5c1da31b33ca33a114a1929f7eb6d6712d95906299c5214638302731d5f4",
+    "artifacts/adapter-fixes-live-20261015/runtime-tree.json": "bd443ab0650cf5571a463fc96cac9c8a289acd6b42ad3c2fbe9618d5ead21eec",
+    "artifacts/adapter-fixes-live-20261015/main-r6-source.json": "4c8615238181dcc27dfd54468863739c58f47488f60c4e6b1d17dab16ca078cd",
+    "artifacts/adapter-fixes-live-20261015/continuity-schedule-preflight.json": "869033358929e2504f90959c9b6416a2871d79251f39d6fb5f0f831817aa4014",
+    "artifacts/adapter-fixes-live-20261015/research-task-r3.json": "883678d5c0839f7ddf09d0f40be161076f791a211794c16f4ca1a212a6755e28",
+    "artifacts/adapter-fixes-live-20261015/research-task-r3-instrumentation.json": "3724e52cce1b4945b1edf510e4664a9e5f0da3834ef3447307a9b65546885f00",
+    "artifacts/adapter-fixes-live-20261015/research-r3-main-r5-source.json": "2fdf7adde328f2afde8e55889b52c795c792b284aff346bfde860d22f88db33c",
+    "artifacts/adapter-fixes-live-20261015/research-task-r2.json": "2eac24389bf4efd24b54b45d79ff3850794413be2a9e3559da9e9827652a0022",
+    "artifacts/adapter-fixes-live-20261015/research-task-r2-instrumentation.json": "702b17844036a24b876577aaa5040c0604479b3d8b1927355dc7b8aafb4a6008",
+    "artifacts/adapter-fixes-live-20261015/research-queue-prompt-cleanup.json": "ccfa29d5ae71d20f4d50571ed83b4f5428e26c3bd6f5be43b59ef2f4043b9af1",
+    "artifacts/adapter-fixes-live-20261015/main-task-r1.json": "e684ad24aa36ac61198b45cd031188ef9e7d6ac2fd325d8b3891bd2f1aec2804",
+    "artifacts/adapter-fixes-live-20261015/main-task-r2.json": "85091787d3a4ad07692b801945fc985dd164af095ff7348fcc380f336031807d",
+    "artifacts/adapter-fixes-live-20261015/main-task-r3.json": "9ad3f22daecc00ef8cc976d4fa0303c2d69e4d0a904f11d5b31fa67429323d1f",
+    "artifacts/adapter-fixes-live-20261015/main-task-r4.json": "121193d3cc099c125f078d4fb9629699ade973ba82491bdf7bda92f358f6c836",
+    "artifacts/adapter-fixes-live-20261015/main-task-r5.json": "6279e03a6430447d1ce0b327d72afc53c9152035073573059a12c147abdfc707",
+    "artifacts/adapter-fixes-live-20261015/main-task-r6.json": "28c13d7c5baf6866b846f04779afe135358046a4a82d6fd61eabd03c288c2af4",
+    "artifacts/adapter-fixes-live-20261015/main-r6-result-reader-replay.json": "0ab35840006be5d3556d1172696a6180c1eb735b2f7ecf7b5f1f3410c7827d6b",
+    "artifacts/adapter-fixes-live-20261015/main-task-r7.json": "c3fc2fd446ce143cc627b3544ed0671f0b0e4df5989017845e50cb25be576c91",
+    "artifacts/adapter-fixes-live-20261015/main-task-r7-instrumentation.json": "f61628778b92057e46cce13ae5e4dfeab630b1792d20704767499d2089a1b604",
+    "artifacts/adapter-fixes-live-20261015/observer/deployment-verified.json": "6ca47150d46b38a87c67224df66778e3ac3598bb8a277e5203ab9820fb8612f4",
+    "artifacts/adapter-fixes-live-20261015/observer/build-receipt.json": "3df99a79354b989d857a0db29a0e5cee3d85bc2c5bd66b00850791d642c1ac0c",
+    "artifacts/adapter-fixes-live-20261015/observer/deployment.json": "8f5bab924c31bd34925ba82bc1c9d4cbb5313158a960751675e58f252bd72383",
+    "artifacts/adapter-fixes-live-20261015/observer/coherent-health.json": "137bd99e8b3bc22e157cdb3201c4e36356221637229a7235609e56a4792a4670",
+    "artifacts/adapter-fixes-live-20261015/observer/sprite-wire-live.json": "7962fab1279d9de3389d9eb8bb3a231c48af62e9a1f4ebfdebb3d02c150780d2",
+    "artifacts/adapter-fixes-live-20261015/stale-frame-preflight-live.json": "352c97709a67a9c0daaf46ee217ebdba2b3a49a018a42ae7bb659d2a59f5ccc7",
+    "artifacts/adapter-fixes-live-20261015/pid-restart-live.json": "6d013fa5bbe0f30c167ebde3a66ed7a10f38eb86fc402a521cce7439c3e974a6",
+    "artifacts/adapter-fixes-live-20261015/login-r1.json": "ccd21e91bcec2d2ffd86cb10c9515113c9def9cdf002acefc72dea5d6779ac7d",
+    "artifacts/adapter-fixes-live-20261015/login-r2.json": "5c3ca4108f8e5f28a10d5e72241526b2dc64085c1cc2c0a4ff16e5c3623c77b7",
+    "artifacts/adapter-fixes-live-20261015/login-r3.json": "3ecaefa96a777ef89ec64b85ab4f3427be87fcfb158cb4b50eea51058030e71f",
+    "artifacts/adapter-fixes-live-20261015/login-r4.json": "989582726a51b90c3132ce082c013839d85e608f6198e19dca848f6266c9525e",
+    "artifacts/adapter-fixes-live-20261015/regression-live-final-r4.xml": "b99445a30bcd6eb80eb3225ffb037c56781ab72ed02aca8087908815848f7c9b",
+    "artifacts/adapter-fixes-live-20261015/account-resource-before.json": "68c6f76f6b2fd5f09d5ad241dd2cb03451136521464b296c5d6101a8049af7d5",
+    "artifacts/adapter-fixes-live-20261015/wallet-after.json": "e5d9a590664e180946a76995922f4dab9f870df0305cf2851a5eff775f63d452",
+    "artifacts/adapter-fixes-live-20261015/return-main.json": "435bdb634efff9b57d22768c064e834924a42ed1fc2c1642e5f4a7040e732feb",
+    "artifacts/adapter-fixes-live-20261015/curation-draft-r1.json": "1ca1fc8fbe9f2561c2f40787c11f3062cabf9900817aba5a491ac9117062925d"
+  },
+  "curation_attempts": [
+    {
+      "receipt": "curation-draft-r1.json",
+      "exit_code": 1,
+      "scope": "Receipt-generator assertion incorrectly expected the wrapped base Continue handler; the actual native handler overrides it. Product receipts were not changed."
+    }
+  ],
+  "source_snapshots": {
+    "Main": {
+      "started_at": "2026-10-15T14:12:55.736130+00:00",
+      "base_commit": "a5dc8f875419a7e023e09110943c3ecf3ac28f53",
+      "sources": {
+        "python/alas_headless/adapter/semantic/campaign.py": "041a2d73d28f674fb38ebba1cd9cc74f8bbaa7100aeed16d476c3bebe3be3da7",
+        "python/alas_headless/adapter/semantic/campaign_preparation.py": "9342703bcbb74d20b1d7e6428946526dc74b526c28f5ee66fa6b2da11d0d2348",
+        "python/alas_headless/adapter/semantic/dispatch_observation.py": "71bb3fe7a9659990874a87abae1d6e078cf1dcf238037cc8d2b628800611de9e",
+        "python/alas_headless/adapter/semantic/research.py": "bc85e1006aeec4f328c34b257877e28f2f1e14f933ec50afe115648d84db62b6",
+        "python/alas_headless/adapter/semantic/session_dispatch.py": "f958daad6f29a5e286ac014875c847e1fdb750c4a6dfad13655f5c20c4d6d857",
+        "python/alas_headless/adapter/semantic/session_tasks.py": "82b2e81f0a2c2c8b2dea03919ea013a82e8f8e9424c828862bb947fdfe3f4d4a",
+        "python/alas_headless/oracle/actions.py": "f95d047712baf5bb5343ab5ce8cfda5c142f4a9ed8301cf47dd90b1fcf39d696",
+        "python/alas_headless/oracle/campaign_navigation.py": "8b7ba15592b65fb6e7b893322b836b53352c056f77f08680848e2419b1f33af9",
+        "python/alas_headless/oracle/research.py": "5be1df4f350a64c8a8f2aaba7889f1e4165d5dbb41f8c9f5b3a8405260f5acd4"
+      },
+      "seed_sha256": "f7de8de42f72c41a5998d9adf96bf085fd80d63cc2ddb7445d344c13741a10cf",
+      "seed_name": "adapter_ten_fixes_continuity_live",
+      "prior_actual_sorties": 6,
+      "prior_interrupted_sorties": 5,
+      "prior_native_completed_sorties": 1,
+      "scope": "Main3-4 run2; native scheduler confirmed only Main due, other NextRun deferred in copied config"
+    },
+    "Research": {
+      "started_at": "2026-10-15T13:35:20.665690+00:00",
+      "base_commit": "a5dc8f875419a7e023e09110943c3ecf3ac28f53",
+      "sources": {
+        "python/alas_headless/adapter/semantic/campaign.py": "08d290ab9ca73a47c325fc22e3eaa45c79f630ac47a3fbea9cefe2a000afdc2b",
+        "python/alas_headless/adapter/semantic/dispatch_observation.py": "a041158e0b6c1ae6fa046b75f22e245936a6fe5fcf71cd35151dc57ff8342233",
+        "python/alas_headless/adapter/semantic/research.py": "bc85e1006aeec4f328c34b257877e28f2f1e14f933ec50afe115648d84db62b6",
+        "python/alas_headless/adapter/semantic/session_dispatch.py": "f958daad6f29a5e286ac014875c847e1fdb750c4a6dfad13655f5c20c4d6d857",
+        "python/alas_headless/adapter/semantic/session_tasks.py": "82b2e81f0a2c2c8b2dea03919ea013a82e8f8e9424c828862bb947fdfe3f4d4a",
+        "python/alas_headless/oracle/actions.py": "f95d047712baf5bb5343ab5ce8cfda5c142f4a9ed8301cf47dd90b1fcf39d696",
+        "python/alas_headless/oracle/campaign_navigation.py": "8b7ba15592b65fb6e7b893322b836b53352c056f77f08680848e2419b1f33af9",
+        "python/alas_headless/oracle/research.py": "5be1df4f350a64c8a8f2aaba7889f1e4165d5dbb41f8c9f5b3a8405260f5acd4"
+      },
+      "prior_interrupted_sorties": 3,
+      "already_started_research": {
+        "code": "D-332-MI",
+        "series": 9,
+        "cost": {
+          "gold": 5000
+        },
+        "queue_prompt_cancelled": true
+      }
+    }
+  },
+  "source_scope": "Research was validated before later Campaign-only observations/level fixes; its five shared Research-critical sources remain identical.",
+  "observer": {
+    "package": "com.bilibili.azurlane",
+    "serial": "emulator-5554",
+    "avd": "alas_game_api32_x64",
+    "game_hot_update_version": "9.7.398",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "apk_sha256": "a70a3cba50df617b2ed06cd8b34923048de64ef4a33e00670dff5c66299e5ad6",
+    "incremental_x86_64_build_and_loaded_library_verified": true,
+    "initial_startup_sampling_failed": true,
+    "later_coherent_health_passed": true,
+    "rollback_retained_sha256": "cad5d03c7c62a697299641b8f01adabc48e95dbaf4c6870069c09c69b7840298",
+    "rollback_tested": false,
+    "scope": "Local x86_64 observer incremental build, not an AOSP image build or ARM64 qualification"
+  },
+  "safety_negatives": {
+    "stale_frame_no_input_and_no_grant_spend": true,
+    "old_pid_input_refused_after_cold_restart": true,
+    "old_pid": 1979,
+    "new_pid": 4231
+  },
+  "Research": {
+    "passed": true,
+    "original_native_runner_returned": true,
+    "prior_failed_attempt_paid_start": [
+      {
+        "code": "D-332-MI",
+        "series": 9,
+        "selection_status": "detail",
+        "returned": true,
+        "new_start": true,
+        "costs": [
+          [
+            "gold",
+            5000
+          ]
+        ],
+        "start_generation": 32576,
+        "confirm_generation": 32603
+      }
+    ],
+    "cleanup": "One queue-prompt cancel; no stop/start; same D-332-MI/S9 remained running",
+    "r3_successful_start_port_calls": [
+      {
+        "code": "D-332-MI",
+        "series": 9,
+        "selection_status": "running",
+        "returned": true,
+        "new_start": false,
+        "costs": [],
+        "start_generation": null,
+        "confirm_generation": null
+      },
+      {
+        "code": "G-412-MI",
+        "series": 9,
+        "selection_status": "detail",
+        "returned": true,
+        "new_start": true,
+        "costs": [
+          [
+            "gold",
+            1500
+          ]
+        ],
+        "start_generation": 37529,
+        "confirm_generation": 37552
+      },
+      {
+        "code": "G-236-MI",
+        "series": 9,
+        "selection_status": "detail",
+        "returned": true,
+        "new_start": true,
+        "costs": [
+          [
+            "gold",
+            3000
+          ]
+        ],
+        "start_generation": 37654,
+        "confirm_generation": 37685
+      },
+      {
+        "code": "G-531-MI",
+        "series": 9,
+        "selection_status": "detail",
+        "returned": true,
+        "new_start": true,
+        "costs": [
+          [
+            "gold",
+            6000
+          ]
+        ],
+        "start_generation": 37786,
+        "confirm_generation": 37814
+      },
+      {
+        "code": "D-381-MI",
+        "series": 9,
+        "selection_status": "detail",
+        "returned": true,
+        "new_start": true,
+        "costs": [
+          [
+            "gold",
+            5000
+          ]
+        ],
+        "start_generation": 37923,
+        "confirm_generation": 37953
+      },
+      {
+        "code": "G-412-MI",
+        "series": 9,
+        "selection_status": "detail",
+        "returned": true,
+        "new_start": true,
+        "costs": [
+          [
+            "gold",
+            1500
+          ]
+        ],
+        "start_generation": 38058,
+        "confirm_generation": 38085
+      }
+    ],
+    "r3_actual_new_paid_starts": 5,
+    "r3_reused_running_projects": 1,
+    "queue_confirm_proofs": [
+      {
+        "code": "D-332-MI",
+        "series": 9,
+        "queue_generation": 37447,
+        "confirm_generation": 37457
+      },
+      {
+        "code": "G-412-MI",
+        "series": 9,
+        "queue_generation": 37565,
+        "confirm_generation": 37576
+      },
+      {
+        "code": "G-236-MI",
+        "series": 9,
+        "queue_generation": 37699,
+        "confirm_generation": 37711
+      },
+      {
+        "code": "G-531-MI",
+        "series": 9,
+        "queue_generation": 37828,
+        "confirm_generation": 37840
+      },
+      {
+        "code": "D-381-MI",
+        "series": 9,
+        "queue_generation": 37966,
+        "confirm_generation": 37978
+      }
+    ],
+    "final_queue": {
+      "entries": [
+        {
+          "slot": 1,
+          "code": "D-332-MI",
+          "series": 9,
+          "status": "running",
+          "remaining_seconds": 17516
+        },
+        {
+          "slot": 2,
+          "code": "G-412-MI",
+          "series": 9,
+          "status": "waiting",
+          "remaining_seconds": 5400
+        },
+        {
+          "slot": 3,
+          "code": "G-236-MI",
+          "series": 9,
+          "status": "waiting",
+          "remaining_seconds": 9000
+        },
+        {
+          "slot": 4,
+          "code": "G-531-MI",
+          "series": 9,
+          "status": "waiting",
+          "remaining_seconds": 14400
+        },
+        {
+          "slot": 5,
+          "code": "D-381-MI",
+          "series": 9,
+          "status": "waiting",
+          "remaining_seconds": 18000
+        }
+      ],
+      "reward_claimable": false
+    },
+    "newly_started_selected_project_outside_full_queue": {
+      "code": "G-412-MI",
+      "series": 9,
+      "selection_status": "detail",
+      "returned": true,
+      "new_start": true,
+      "costs": [
+        [
+          "gold",
+          1500
+        ]
+      ],
+      "start_generation": 38058,
+      "confirm_generation": 38085
+    },
+    "native_queue_append_successes": 5,
+    "next_run": "2026-10-16 02:28:44",
+    "gold_cost": {
+      "prior_failed_attempt": 5000,
+      "successful_r3": 17000,
+      "combined_confirmed_cost": 22000
+    },
+    "cleanup_errors": [],
+    "temporary_config_removed": true
+  },
+  "Main": {
+    "passed": true,
+    "receipt": "main-task-r8.json",
+    "stage_code": "3-4",
+    "mode": "normal",
+    "seed_name": "adapter_ten_fixes_continuity_live",
+    "seed_sha256": "f7de8de42f72c41a5998d9adf96bf085fd80d63cc2ddb7445d344c13741a10cf",
+    "seed_config_enabled_tasks": [
+      "Main"
+    ],
+    "native_scheduler_pending": [
+      "Main"
+    ],
+    "scheduler_scope": "Original get_next_task preflight; other native locked tasks retain Enable semantics and have future NextRun in the copied seed.",
+    "native_CampaignBase_run_successes": 2,
+    "sortie_proofs": [
+      {
+        "stage_code": "3-4",
+        "initial_fleets": [
+          1,
+          2,
+          0
+        ],
+        "requested_fleets": [
+          1,
+          2,
+          0
+        ],
+        "prepared_fleets": [
+          1,
+          2,
+          0
+        ],
+        "mutation_semantic_ids": [],
+        "oil_before_sortie": 8079,
+        "required_oil": 1000,
+        "sortie_generation": 63335,
+        "map_generation": 63684,
+        "map_root_path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)",
+        "oil_cost_source": "conservative-uncapped-reserve",
+        "submarine_auto_mode": null
+      },
+      {
+        "stage_code": "3-4",
+        "initial_fleets": [
+          1,
+          2,
+          0
+        ],
+        "requested_fleets": [
+          1,
+          2,
+          0
+        ],
+        "prepared_fleets": [
+          1,
+          2,
+          0
+        ],
+        "mutation_semantic_ids": [],
+        "oil_before_sortie": 7685,
+        "required_oil": 1000,
+        "sortie_generation": 65978,
+        "map_generation": 66351,
+        "map_root_path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)",
+        "oil_cost_source": "conservative-uncapped-reserve",
+        "submarine_auto_mode": null
+      }
+    ],
+    "completion_proofs": [
+      {
+        "stage_code": "3-4",
+        "result_generation": 65890,
+        "result_path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit",
+        "fleet1_role": "mob",
+        "fleet2_role": "boss",
+        "waited_seconds": 239.344,
+        "combat_auto_generation": 65853,
+        "result_exit_receipt": null,
+        "combat_auto_proven": true,
+        "passive_after_sortie": true
+      },
+      {
+        "stage_code": "3-4",
+        "result_generation": 68334,
+        "result_path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit",
+        "fleet1_role": "mob",
+        "fleet2_role": "boss",
+        "waited_seconds": 209.375,
+        "combat_auto_generation": 68302,
+        "result_exit_receipt": null,
+        "combat_auto_proven": true,
+        "passive_after_sortie": true
+      }
+    ],
+    "actual_continue_action_count": 1,
+    "continue_receipt": {
+      "semantic_id": "reward/campaign-total/go",
+      "generation": 65978,
+      "point": {
+        "x": 916.067,
+        "y": 625.593
+      },
+      "bounds": {
+        "left": 838.813,
+        "top": 596.13,
+        "right": 993.32,
+        "bottom": 655.057
+      },
+      "path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonGO",
+      "policy_sha256": "19e12a1cefe9d3a79439e8e887261875800661d9c27e07bd6a5bc4b6e5976f12",
+      "capability_id": "campaign.sortie"
+    },
+    "native_continue_route": {
+      "owner": "FastForwardHandler.handle_auto_search_continue",
+      "path": "MapOperation.enter_map -> FastForwardHandler override -> original appear_then_click(AUTO_SEARCH_MENU_CONTINUE) -> typed normal Continue port",
+      "runtime_native_source_identity": {
+        "module/map/map_operation.py": {
+          "sha256": "f24997252dce6373dc0b8f6b527a2302fab509f881791f8a156a9938a1463a94",
+          "owner": "MapOperation",
+          "method": "enter_map",
+          "line": 104
+        },
+        "module/handler/fast_forward.py": {
+          "sha256": "2ea8482c635eeed5255149ec849d3ff50202064dd71511329df72797a70a90ce",
+          "owner": "FastForwardHandler",
+          "method": "handle_auto_search_continue",
+          "line": 369
+        }
+      },
+      "base_AutoSearchHandler_wrapper_successes_observed": 0,
+      "override_directly_instrumented": false,
+      "proof_scope": "Static retained native control flow plus one real typed Continue receipt, one sortie-grant spend and an ordered second sortie/completion; no fabricated native handler count."
+    },
+    "final_exit_receipt": {
+      "semantic_id": "reward/campaign-total/exit",
+      "generation": 68389,
+      "point": {
+        "x": 376.527,
+        "y": 625.793
+      },
+      "bounds": {
+        "left": 298.53,
+        "top": 597.287,
+        "right": 454.523,
+        "bottom": 654.3
+      },
+      "path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    "native_final_exit_successes": 1,
+    "after_exit": {
+      "pid": 4231,
+      "generation": 68414,
+      "main_visible": false,
+      "commission_back": false,
+      "campaign_stage_visible": true
+    },
+    "sortie_grants_spent": 2,
+    "final_RunCount": 0,
+    "native_terminal": null,
+    "expected_TaskEnd_after_RunCount_zero": false,
+    "cleanup_errors": [],
+    "temporary_config_removed": true
+  },
+  "prior_Main_attempts": [
+    {
+      "receipt": "main-task-r1.json",
+      "passed": false,
+      "stage": "campaign_12_4",
+      "qualification": "failed, no complete task proof",
+      "native_error": {
+        "type": "SemanticGateClosed",
+        "message": "campaign page identity is not proven"
+      },
+      "sortie_grants_spent": 0
+    },
+    {
+      "receipt": "main-task-r2.json",
+      "passed": false,
+      "stage": "campaign_12_4",
+      "qualification": "failed, no complete task proof",
+      "native_error": {
+        "type": "SemanticGateClosed",
+        "message": "campaign map-scene identity is absent"
+      },
+      "sortie_grants_spent": 1
+    },
+    {
+      "receipt": "main-task-r3.json",
+      "passed": false,
+      "stage": "campaign_12_4",
+      "qualification": "failed, no complete task proof",
+      "native_error": {
+        "type": "SemanticGateClosed",
+        "message": "campaign startup surface is not reviewed"
+      },
+      "sortie_grants_spent": 1
+    },
+    {
+      "receipt": "main-task-r4.json",
+      "passed": false,
+      "stage": "campaign_12_4",
+      "qualification": "failed, no complete task proof",
+      "native_error": {
+        "type": "SemanticGateClosed",
+        "message": "campaign startup surface is not reviewed"
+      },
+      "sortie_grants_spent": 1
+    },
+    {
+      "receipt": "main-task-r5.json",
+      "passed": false,
+      "stage": "campaign_12_4",
+      "qualification": "failed, no complete task proof",
+      "native_error": {
+        "type": "SemanticGateClosed",
+        "message": "campaign map-scene identity is absent"
+      },
+      "sortie_grants_spent": 1
+    },
+    {
+      "receipt": "main-task-r6.json",
+      "passed": false,
+      "stage": "campaign_3_4",
+      "native_error": {
+        "type": "GameStuckError",
+        "message": "Wait too long"
+      },
+      "sortie_grants_spent": 1,
+      "qualification": "Failed with GameStuckError; no cause established by this aggregation",
+      "later_diagnostic_scope": "Offline public-reader replay can identify a later after-failure result frame; this does not reconstruct the failing loop frame or establish the earlier cause."
+    },
+    {
+      "receipt": "main-task-r7.json",
+      "runner_passed": true,
+      "stage": "campaign_3_4",
+      "native_error": {
+        "type": "TaskEnd",
+        "message": ""
+      },
+      "sortie_grants_spent": 1,
+      "native_completed_runs": 1,
+      "final_RunCount": 1,
+      "qualification": "Partial: one native completed run and result exit, then native scheduler task switch; two-run Continue qualification was not reached."
+    }
+  ],
+  "prior_actual_sorties": 6,
+  "partial_stage_scope": "12-4 remains partial with four interrupted sorties. Before this successful run, 3-4 had one GameStuckError and one completed run followed by a native scheduler switch; only the selected final run proves two consecutive completions and Continue.",
+  "final_focused_offline_suite": {
+    "tests": 416,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 50.263
+  },
+  "final_focused_source_binding": "main-r6-source.json and selected final Main source snapshot contain identical runtime-source hashes; the unchanged 416-test suite is reused.",
+  "resources": {
+    "before": {
+      "oil": 10135,
+      "gold": 22321,
+      "gem": 3470
+    },
+    "after": {
+      "oil": 7291,
+      "gold": 9401,
+      "gem": 3470
+    },
+    "net_change": {
+      "oil": -2844,
+      "gold": -12920,
+      "gem": 0
+    },
+    "account_name_unchanged": true,
+    "final_main_visible": true,
+    "coherent_advancing_frames": [
+      {
+        "generation": 69255,
+        "ui_generation": 69255,
+        "pid": 4231,
+        "age_ms": 209.0
+      },
+      {
+        "generation": 69261,
+        "ui_generation": 69261,
+        "pid": 4231,
+        "age_ms": 198.0
+      }
+    ],
+    "wallet_observation_inputs": 0,
+    "return_Main_navigation": {
+      "receipt": "return-main.json",
+      "passed": true,
+      "dispatch_count": 3,
+      "action_ids": [
+        "campaign-menu/page/back",
+        "campaign-menu/page/back",
+        "overlay/guild-message/close"
+      ]
+    },
+    "scope": "Net account observations include ordinary rewards and combat gains/costs across attempts; sortie required_oil is a precondition/reserve, not measured spend. Wallet observation excludes separately recorded native navigation."
+  },
+  "remaining_qualification_limits": [
+    "Single account, configuration, game hot-update version, local x86_64 runtime and observed task paths only; no support-matrix promotion.",
+    "Unity Image valid-to-null slot mutation was covered offline; live wire checks did not force that precise mutation.",
+    "Extremely small float target integer quantization was covered offline; live task targets did not force the smallest geometry case.",
+    "The blocker memo CPU benchmark excludes observer acquisition, socket and ADB; no end-to-end speedup claim.",
+    "No rollback execution, clean build, ARM64 image or broad compatibility qualification."
+  ]
+}

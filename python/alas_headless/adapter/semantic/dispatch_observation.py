@@ -50,8 +50,13 @@ class DispatchObservationPorts:
 
     def _campaign_notice_navigation_surface(self):
         state = self.oracle.read_state()
+        blockers = self.oracle._blocking_rules(state, 'ui/absence-probe')
+        if {rule.blocker_id for rule in blockers} == {'loading', 'campaign-menu'}:
+            # Stage entry can retain its chapter while Loading owns the frame.
+            # This passive notice probe must let ALAS take its next screenshot;
+            # the caller still checks the exact urgent-notice identity.
+            return True
         if time.monotonic() <= self._campaign_event_entry_transition_until:
-            blockers = self.oracle._blocking_rules(state, 'ui/absence-probe')
             if not any(rule.blocker_id != 'loading' for rule in blockers):
                 # The exact event entrance was submitted; its selector may
                 # mount after this screenshot. The notice matcher still runs.
@@ -78,6 +83,16 @@ class DispatchObservationPorts:
             raise
 
     def _appear_priority(self, name):
+        if (name in UI_PAGE_CHECK_RESOURCES.union((
+                'GET_MISSION', 'WITHDRAW', 'GET_SHIP', 'GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3',
+                'AUTO_SEARCH_MAP_OPTION_ON', 'AUTO_SEARCH_MAP_OPTION_OFF'))
+                and self.campaign_auto_search_owned()):
+            oracle = self._frame_or_live_observation_oracle()
+            if getattr(oracle, 'campaign_auto_search_map_transition_visible', lambda: False)():
+                # Official auto-search animates the HUD before LevelGrid. Its
+                # exact shell covers chapter/page and notice probes; native
+                # status owns waiting for its next screenshot, without input.
+                return False
         if (not self._login_flow.active and self._dorm_context is None
                 and name in UI_PAGE_CHECK_RESOURCES.union((
                     'GOTO_MAIN', 'GOTO_MAIN_WHITE', 'RPG_HOME'))):
@@ -168,7 +183,8 @@ class DispatchObservationPorts:
                 and name in UI_PAGE_CHECK_RESOURCES.union((
                     'GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'GET_SHIP', 'GET_MISSION',
                     'GOTO_MAIN_WHITE', 'RPG_HOME', 'POPUP_SINGLE_WHITE', 'GAME_TIPS',
-                    'DORM_TROPHY_CONFIRM', 'PLAYER_CHECK'))):
+                    'DORM_TROPHY_CONFIRM', 'PLAYER_CHECK', 'CAMPAIGN_WITHDRAW_CONFIRM'))
+                and (name != 'CAMPAIGN_WITHDRAW_CONFIRM' or self._campaign_context is None)):
             oracle = self._frame_or_live_observation_oracle()
             blockers = oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe')
             if (any(rule.blocker_id == 'loading' for rule in blockers)
@@ -176,7 +192,9 @@ class DispatchObservationPorts:
                         'loading', 'commission-page', 'tactical-page', 'dorm-page', 'academy-page')
                             for rule in blockers)):
                 # A known loading layer covers these page, reward and tutorial
-                # probes. ALAS owns waiting and the next screenshot boundary.
+                # probes, including ui_additional's unowned withdrawal probe.
+                # ALAS owns waiting and the next screenshot boundary; an active
+                # Campaign and foreign modals retain their dedicated handling.
                 return False
         if not self._login_flow.active:
             oracle = self._frame_or_live_observation_oracle()
