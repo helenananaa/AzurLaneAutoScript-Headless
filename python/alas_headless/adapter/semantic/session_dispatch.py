@@ -285,7 +285,7 @@ class SessionDispatchPorts:
             )()
             or getattr(adapter, "_exercise_execution_active", False)
         )
-        if result_owner_active and adapter.oracle.daily_battle_result_visible():
+        if result_owner_active and observation_oracle.daily_battle_result_visible():
             if (
                 getattr(adapter, "_exercise_execution_active", False)
                 and time.monotonic() <= self._combat_result_transition_until
@@ -403,7 +403,7 @@ class SessionDispatchPorts:
             # surface every optional pixel popup is absent, while the result
             # sentinel remains the only positive probe.
             self.refresh_frame()
-            oracle = self.open().oracle
+            oracle = self.open()._frame_or_live_observation_oracle()
             if self.open()._reward_sidebar_ready(
                     self.open()._frame_or_live_observation_oracle()):
                 # Commission can finish returning to the Reward sidebar on
