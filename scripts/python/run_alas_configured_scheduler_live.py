@@ -20,6 +20,38 @@ from run_alas_configured_task_live import parse_action_budgets, encode_receipt_v
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def scheduler_receipt_payload(value):
+    """Encode retained Guild diagnostics at publication, outside live reads."""
+    published = dict(value)
+    tasks = []
+    for task in value.get('tasks', []):
+        observation = task.get('guild_node_post_input_observation')
+        if observation is not None:
+            task = dict(task)
+            task['guild_node_post_input_observation'] = encode_receipt_value(observation)
+        tasks.append(task)
+    published['tasks'] = tasks
+    return published
+
+
+def write_scheduler_receipt(path: Path, value) -> None:
+    """Publish a complete receipt without truncating the currently readable one."""
+    temporary = path.with_name(path.name + '.tmp')
+    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    # Reuse the existing live-trace Windows sharing-violation policy. Each
+    # task owns one output; no build lock, run handshake or fsync is needed.
+    for attempt in range(20):
+        try:
+            os.replace(temporary, path)
+            return
+        except PermissionError:
+            if attempt == 19:
+                # Preserve both the last published receipt and the new full
+                # temporary receipt for diagnosis instead of a partial JSON.
+                raise
+            time.sleep(.025)
+
+
 def commission_start_ui_record(observed):
     """Retain relevant fields from a read ALAS already performed."""
     root = 'Overlay/UIMain/blur_panel/scrollItem/'
@@ -163,10 +195,29 @@ def record_action_receipt(current, receipt, seen):
     current['actions'].append(encoded)
 
 
-def recorded_click(call, current_record, seen):
+def recorded_click(call, current_record, seen, *, session=None):
     """Observe the session click boundary, including frame-bound operations."""
     def click(*values, **options):
-        receipt = call(*values, **options)
+        try:
+            receipt = call(*values, **options)
+        except Exception as exc:
+            # ALAS' error handler can take another screenshot before run()
+            # returns. Retain this immutable frame before that diagnostic IO.
+            # It may still precede a live fallback, so do not call it the exact
+            # failed input frame or use it to authorize another action.
+            record = current_record()
+            if session is not None and record is not None:
+                try:
+                    button = values[0] if values else None
+                    record['failed_click'] = {
+                        'resource': button if isinstance(button, str) else getattr(button, 'name', None),
+                        'error_type': type(exc).__name__,
+                        'error': str(exc),
+                        'retained_screenshot_before_error_handler': presence_failure_frame(session),
+                    }
+                except Exception as diagnostic_error:
+                    record['failed_click_recording_error'] = str(diagnostic_error)
+            raise
         record_action_receipt(current_record(), receipt, seen)
         return receipt
     return click
@@ -308,7 +359,7 @@ def main():
     session = None
 
     def save():
-        output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        write_scheduler_receipt(output, scheduler_receipt_payload(result))
 
     try:
         from alas import AzurLaneAutoScript
@@ -328,11 +379,11 @@ def main():
             session = app.device.semantic_adapter
             if not any(existing is session for existing in instrumented_sessions):
                 instrumented_sessions.append(session)
-                session.click = recorded_click(session.click, lambda: current, action_receipts_seen)
+                session.click = recorded_click(session.click, lambda: current, action_receipts_seen, session=session)
                 port_repair = getattr(session, 'click_operation_siren_port_repair', None)
                 if callable(port_repair):
                     session.click_operation_siren_port_repair = recorded_click(
-                        port_repair, lambda: current, action_receipts_seen)
+                        port_repair, lambda: current, action_receipts_seen, session=session)
                 original_appear = session.appear
                 def appear(button):
                     # Holding this immutable object has no device-read or encoding
@@ -406,7 +457,10 @@ def main():
                     try:
                         current.setdefault('guild_node_post_input_observation', {
                             'scope': 'Existing native post-node reads; no additional observer request'
-                        })[kind] = encode_receipt_value(observed)
+                        # The transport gives each read its own snapshot. Keep
+                        # its reference here; recursive encoding between state
+                        # and UI reads can itself break their coherence window.
+                        })[kind] = observed
                     except Exception as exc:
                         current['guild_node_post_input_recording_error'] = str(exc)
 

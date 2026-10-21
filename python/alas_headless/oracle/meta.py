@@ -123,8 +123,22 @@ class MetaOracle:
             return True
         state = self.read_state()
         root = 'UICamera/Canvas/UIMain/MetaCharacterUI(Clone)/HidePanel/PTPanel/'
-        return any(b.path.startswith(root) and b.active_in_hierarchy
-                   and b.active_and_enabled for b in state.buttons) or self.meta_character_sync_page_visible()
+        if any(b.path.startswith(root) and b.active_in_hierarchy
+               and b.active_and_enabled for b in state.buttons):
+            return True
+        catalogue = ('UICamera/Canvas/UIMain/MetaCharacterUI(Clone)/HidePanel/'
+                     'ScrollPanel/ListPanel/Container/BannerTpl(Clone)')
+        if any(b.path == catalogue and b.active_in_hierarchy
+               and b.active_and_enabled for b in state.buttons):
+            # Back from focused detail can reveal the catalogue before leaving
+            # META. Its native page graph must observe this existing owner too.
+            backs = self._matches(state, 'meta/character/back')
+            if len(backs) > 1:
+                raise SemanticGateClosed('META catalogue return target is ambiguous')
+            if (backs and backs[0].actionable
+                    and not self._blocking_rules(state, 'meta/character/back')):
+                return True
+        return self.meta_character_sync_page_visible()
 
     def meta_character_sync_page_visible(self) -> bool:
         root = 'OverlayCamera/Overlay/UIMain/MetaCharacterSynUI(Clone)/'
@@ -842,6 +856,28 @@ class MetaOracle:
             bounds=target.bounds,
             path=target.path,
         )
+
+    def meta_category_back_control(self):
+        """Prove the inner-page return used by ALAS' ASH_QUIT branch."""
+        if not self.meta_page_visible():
+            raise SemanticGateClosed("META category page identity is absent")
+        state = self.read_state()
+        target = self._unique(state, 'meta/category/back')
+        if not (
+            target.active_in_hierarchy and target.active_and_enabled
+            and target.interactable and target.raycast_top in (None, True)
+            and target.point is not None and target.bounds is not None
+            and target.bounds.contains(target.point)
+            and not self._blocking_rules(state, 'meta/category/back')
+        ):
+            raise SemanticGateClosed("META category back control is not actionable")
+        return state, target
+
+    def click_meta_category_back(self) -> ActionReceipt:
+        state, target = self.meta_category_back_control()
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt('meta/category/back', state.generation,
+                             target.point, target.bounds, target.path)
 
     def click_meta_card(self, dossier: bool) -> ActionReceipt:
         """Open one exact META category card from a proven landing state."""

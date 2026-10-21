@@ -15,7 +15,49 @@ from .errors import SemanticGateClosed, SemanticOracleError, SemanticTargetNotAc
 class ActionsOracle:
     """Actions operations sharing the oracle frame and input boundary."""
 
+    def _click_dorm_menu_back(self):
+        state = self.read_state()
+        root = self._unique(state, 'dorm-menu/back')
+        if (not root.active_in_hierarchy or not root.active_and_enabled
+                or not root.interactable or root.raycast_top is False or root.bounds is None):
+            raise SemanticTargetNotActionable('dorm-menu/back', state.generation)
+        ui = self.read_ui_state()
+        if (ui.image_truncated or not ui.method_mask & 8
+                or not state.generation <= ui.generation <= state.generation + 2):
+            raise SemanticGateClosed('living-area return Images are incomplete or incoherent')
+        # MainLiveAreaPage.OnInit binds Hide to the root, while cover_btn
+        # opens a different page. The root pivot overlaps commander_btn.
+        # Its AM/PM graphic is an observed child of the root Hide listener.
+        labels = [i for i in ui.images if i.active_in_hierarchy and i.active_and_enabled
+                  and not i.truncated and i.raycast_target and i.bounds is not None
+                  and (i.path, i.sprite) in ((root.path + '/bg/AM', 'am'),
+                                            (root.path + '/bg/PM', 'pm'))]
+        if len(labels) != 1:
+            raise SemanticGateClosed('living-area return graphic is absent or ambiguous')
+        image = labels[0]
+        bounds = image.bounds
+        point = Point((bounds.left + bounds.right) / 2, (bounds.top + bounds.bottom) / 2)
+        dispatched = Point(int(round(point.x)), int(round(point.y)))
+        if (not root.bounds.contains(Point(bounds.left, bounds.top))
+                or not root.bounds.contains(Point(bounds.right, bounds.bottom))
+                or not 0 <= point.x < self.fingerprint.width
+                or not 0 <= point.y < self.fingerprint.height
+                or not bounds.contains(dispatched)
+                or not 0 <= dispatched.x < self.fingerprint.width
+                or not 0 <= dispatched.y < self.fingerprint.height
+                or image.raycast_top is False
+                or any(b.active_in_hierarchy and b.active_and_enabled
+                       and b.path.startswith(root.path + '/') and b.bounds is not None
+                       and (b.bounds.contains(point) or b.bounds.contains(dispatched))
+                       for b in state.buttons)):
+            raise SemanticGateClosed('living-area return graphic is covered or out of bounds')
+        return self._click_exact_image(state, image, 'dorm-menu/back')
+
     def click(self, semantic_id: str) -> Union[ActionReceipt, PrivateQuartersPhysicsReceipt]:
+        if semantic_id == 'dorm-menu/back':
+            return self._click_dorm_menu_back()
+        if semantic_id == 'os/order/back':
+            return self.click_operation_siren_order_back()
         if semantic_id == 'reward/item-info/close':
             return self.click_reward_item_info_close()
         if semantic_id in ('meowfficer/buy/add', 'meowfficer/buy/min'):
@@ -99,6 +141,11 @@ class ActionsOracle:
             "overlay/network-reconnect/cancel",
             "overlay/network-reconnect/confirm",
         ):
+            if not self._matches(state, semantic_id):
+                # A native popup request may outlive its screenshot. Preserve
+                # a classified fresh pre-input miss before checking identity;
+                # no prompt is different from a present, unreviewed prompt.
+                raise SemanticInputTargetMissing(semantic_id, state.generation)
             if self._dock_full_prompt_matches(state):
                 raise SemanticGateClosed(
                     "dock-full prompt cannot use network reconnect input"
@@ -148,7 +195,10 @@ class ActionsOracle:
             "guild/operations/report",
             "guild/operations/dispatch/open",
         ):
-            ui_state = self.read_ui_state()
+            # read_state already checked foreground; avoid another ADB trip
+            # inside this coherent pair. The final foreground/input checks
+            # below still run after the complete target proof.
+            ui_state = self.read_ui_state(check_foreground=False)
             if (
                 ui_state.generation < state.generation
                 or ui_state.generation > state.generation + 2
@@ -162,7 +212,7 @@ class ActionsOracle:
             "guild/dispatch-detail/close",
             "guild/dispatch-detail/formation",
         ):
-            ui_state = self.read_ui_state()
+            ui_state = self.read_ui_state(check_foreground=False)
             if (
                 ui_state.generation < state.generation
                 or ui_state.generation > state.generation + 2
@@ -178,7 +228,7 @@ class ActionsOracle:
             "guild/report/close",
             "guild/report/claim-all",
         ):
-            ui_state = self.read_ui_state()
+            ui_state = self.read_ui_state(check_foreground=False)
             if (
                 ui_state.generation < state.generation
                 or ui_state.generation > state.generation + 2
@@ -193,7 +243,7 @@ class ActionsOracle:
             "guild/formation/recommend",
             "guild/formation/go",
         ):
-            ui_state = self.read_ui_state()
+            ui_state = self.read_ui_state(check_foreground=False)
             if (
                 ui_state.generation < state.generation
                 or ui_state.generation > state.generation + 2
@@ -568,6 +618,9 @@ class ActionsOracle:
             and not self._tactical_continue_prompt_matches(state)
         ):
             raise SemanticGateClosed("tactical continue prompt identity is not proven")
+        if (semantic_id == 'campaign/map-timeout/confirm'
+                and not self.campaign_timeout_prompt_visible(state)):
+            raise SemanticGateClosed('campaign timeout acknowledgement is not proven')
         if (semantic_id == "tactical/completion/ack"
                 and not self._tactical_completion_prompt_matches(state)):
             raise SemanticGateClosed("tactical completion prompt identity is not proven")
@@ -620,6 +673,9 @@ class ActionsOracle:
             "research/queue/confirm",
         ) and not self._research_queue_prompt_matches(state):
             raise SemanticGateClosed("research queue prompt identity is not proven")
+        if (semantic_id in ("research/stop/cancel", "research/stop/confirm")
+                and not self._research_stop_prompt_matches(state)):
+            raise SemanticGateClosed("research stop prompt identity is not proven")
         if semantic_id in (
             "guild/dispatch/cancel",
             "guild/dispatch/confirm",
@@ -842,6 +898,12 @@ class ActionsOracle:
             rule.blocker_id for rule in self._blocking_rules(state, semantic_id)
         )
         if disallowed:
+            if semantic_id == "login/enter" and disallowed == ("loading",):
+                # Native LoginHandler already waits for its next screenshot
+                # after a pre-input entry-readiness refusal. A Loading layer
+                # can mount while the entry Button still exports a top hit.
+                raise SemanticTargetNotActionable(semantic_id, state.generation) from SemanticInputBlocked(
+                    semantic_id, state.generation, disallowed)
             raise SemanticInputBlocked(semantic_id, state.generation, disallowed)
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed immediately before input")

@@ -9,6 +9,47 @@ from alas_headless.semantic_oracle import SemanticGateClosed
 from tests.semantic_support.observer_fixtures import FakeBackend,make_ui,make_oracle,DRIVER_REVISION
 from tests.semantic_support.adapter_fixtures import FakeOracle
 
+
+@pytest.mark.parametrize('drift', [False, True])
+def test_actual_inherited_hard_total_reward_yields_confirmation_to_native_exit(drift):
+    from tests.test_game_tips_loading_presence import host
+    backend, _, adapter = host(drift, 'shop-inherited-total-reward-r373.json')
+    generation = max(p['generation'] for p in (backend.snapshot, backend.buttons, backend.ui))
+    for part in (backend.snapshot, backend.buttons, backend.ui):
+        part['generation'] = generation
+    assert adapter._campaign_context is None
+    assert adapter.appear('CAMPAIGN_WITHDRAW_CONFIRM') is False
+    assert adapter.appear('AUTO_SEARCH_MENU_EXIT') is True
+    assert adapter._campaign_context is None
+    with pytest.raises(SemanticGateClosed):
+        adapter.click('CAMPAIGN_WITHDRAW_CONFIRM')
+    assert not backend.taps
+
+
+@pytest.mark.parametrize('damage', ['foreign-popup', 'missing-exit', 'duplicate-exit', 'foreign-package'])
+def test_unproven_total_reward_does_not_supply_confirmation_absence(damage):
+    from tests.test_game_tips_loading_presence import host
+    from tests.semantic_support.observer_fixtures import make_button
+    from alas_headless import AlasSemanticUnmapped
+    backend, _, adapter = host(fixture='shop-inherited-total-reward-r373.json')
+    path = 'OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit'
+    generation = max(p['generation'] for p in (backend.snapshot, backend.buttons, backend.ui))
+    for part in (backend.snapshot, backend.buttons, backend.ui):
+        part['generation'] = generation
+    if damage == 'foreign-popup':
+        backend.buttons['buttons'].append(make_button('custom_button_1(Clone)',
+            'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)'))
+    elif damage == 'missing-exit':
+        backend.buttons['buttons'] = [b for b in backend.buttons['buttons'] if b['path'] != path]
+    elif damage == 'duplicate-exit':
+        backend.buttons['buttons'].append(dict(next(b for b in backend.buttons['buttons'] if b['path'] == path)))
+    else:
+        backend.snapshot['package'] = 'unrelated.package'
+    backend.buttons['button_count'] = len(backend.buttons['buttons'])
+    with pytest.raises((SemanticGateClosed, AlasSemanticUnmapped)):
+        adapter.appear('CAMPAIGN_WITHDRAW_CONFIRM')
+    assert not backend.taps
+
 def retained_prompt():
     p=Path(__file__).resolve().parents[1]/'artifacts/semantic-cn-r32-original-map-recovery-r2-20260930.json'
     if not p.exists():pytest.skip('native withdrawal prompt unavailable')
@@ -20,6 +61,22 @@ def test_inherited_prompt_reuses_exact_native_withdraw_control():
     b=retained_prompt();o=make_oracle(b)
     assert o.inherited_campaign_withdraw_control(confirm=True) is not None
     assert b.taps==[]
+
+
+def test_native_confirmation_probe_can_precede_inherited_map_retreat():
+    o = FakeOracle()
+    o.inherited_campaign_withdraw_control = Mock(
+        side_effect=lambda *, confirm=False: None if confirm else (object(), 10))
+    a = AlasSemanticAdapter(o, package_gate=lambda: None)
+    a._frame_or_live_observation_oracle = lambda: o
+    assert a._appear_priority('CAMPAIGN_WITHDRAW_CONFIRM') is False
+    assert a._appear_priority('WITHDRAW') is True
+    o.click_campaign_withdraw = Mock()
+    o.inherited_campaign_withdraw_control = Mock(return_value=None)
+    a._fresh_input_oracle = lambda: o
+    with pytest.raises(SemanticGateClosed, match='not actionable'):
+        a._click_priority('WITHDRAW')
+    o.click_campaign_withdraw.assert_not_called()
 
 @pytest.mark.parametrize('duplicate',[False,True])
 def test_confirmation_text_before_button_yields_without_input(duplicate):

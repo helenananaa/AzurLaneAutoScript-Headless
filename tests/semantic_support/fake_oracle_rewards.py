@@ -35,6 +35,11 @@ class FakeRewardsOracle:
     def mail_confirmation_kind(self):
         return self.mail_confirmation_kind_value
 
+    def research_page_visible(self):
+        return (self.enabled_values.get("research/page/back", False)
+                and not self.enabled_values.get("research/detail/root", False)
+                and bool(self.research_project_values))
+
     def research_projects(self):
         if not self.research_projects_visible_value:
             raise SemanticGateClosed("research page identity is not proven")
@@ -71,6 +76,9 @@ class FakeRewardsOracle:
     def research_queue_add_available(self):
         return self.enabled_values.get("research/detail/queue", True)
 
+    def research_queue_add_visible(self):
+        return self.research_queue_add_available()
+
     def click_research_queue_add(self):
         return self.click("research/detail/queue")
 
@@ -85,6 +93,9 @@ class FakeRewardsOracle:
 
     def build_coins_owned(self):
         return self.build_gold_value
+
+    def build_animation_visible(self):
+        return False
 
     def build_queue_empty(self):
         return self.build_queue_empty_value
@@ -235,11 +246,11 @@ class FakeRewardsOracle:
         self.commission_scroll_calls.append("state")
         return self.commission_scroll_value
 
-    def commission_scroll_next(self):
+    def commission_scroll_next(self, *, precondition_oracle=None):
         self.commission_scroll_calls.append("next")
         return SimpleNamespace(direction="next")
 
-    def commission_scroll_to_top(self):
+    def commission_scroll_to_top(self, *, precondition_oracle_factory=None):
         self.commission_scroll_calls.append("top")
         return SimpleNamespace(direction="top")
 

@@ -135,6 +135,11 @@ class BuildAdapterPorts:
                 return UNHANDLED
         if name in BUILD_VIRTUAL_RESOURCES and self._build_context is not None:
             if name in ("BUILD_QUEUE_EMPTY", "BUILD_FINISH_ORDERS", "POPUP_CONFIRM", "POPUP_CANCEL"):
+                # Native Gacha checks its queue before waiting for the launch
+                # animation/new-ship reward. The animation owns this frame;
+                # leave the queue probes absent for the next ALAS screenshot.
+                if self.oracle.build_animation_visible():
+                    return False
                 if self._queue_entry_loading():
                     return False
                 # Original Gacha checks these before handle_retirement(). A

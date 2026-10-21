@@ -56,7 +56,8 @@ def runner(error):
     oracle = SimpleNamespace(daily_precombat_visible=lambda: len(calls) < 2,
                              daily_combat_visible=lambda: len(calls) == 2)
     adapter = SimpleNamespace(campaign_result_ready=lambda: False,
-        open=lambda: SimpleNamespace(oracle=oracle), meta_beacon_active=lambda: False,
+        open=lambda: SimpleNamespace(oracle=oracle, _frame_or_live_observation_oracle=lambda: oracle),
+        meta_beacon_active=lambda: False,
         click_daily_precombat_start=start)
     device = SimpleNamespace(semantic_adapter=adapter, stuck_record_clear=lambda: None,
         click_record_clear=lambda: None, screenshot_interval_set=lambda _: None)

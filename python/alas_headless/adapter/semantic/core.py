@@ -275,6 +275,11 @@ class CoreAdapterPorts:
         """Discard task-owned contexts and proofs, retaining grants and runtime."""
 
         self._prepared_input_oracle = None
+        self._storage_box_candidate = None
+        self._storage_box_use_receipt = None
+        self._storage_box_use_quantity = None
+        self._storage_box_equipment_receipt = None
+        self._storage_box_destroy_receipt = None
         self._mission_context: Optional[_MissionFlowContext] = None
         self._mail_context: Optional[_MailFlowContext] = None
         self._commission_context: Optional[_CommissionFlowContext] = None
@@ -308,6 +313,7 @@ class CoreAdapterPorts:
         self._campaign_event_entry_transition_until = 0.0
         self._operation_siren_entry_transition_until = 0.0
         self._operation_siren_exit_receipt: Optional[ActionReceipt] = None
+        self._operation_siren_exit_handoff = None
         self._operation_siren_abyssal_entry_receipt: Optional[ActionReceipt] = None
         self._operation_siren_abyssal_entry_input_count: Optional[int] = None
         self._operation_siren_page_remount_until = 0.0
@@ -315,6 +321,8 @@ class CoreAdapterPorts:
         self._campaign_archive_entry_receipt: Optional[ActionReceipt] = None
         self._campaign_archive_entry_transition_until = 0.0
         self._operation_siren_globe_map_receipt: Optional[ActionReceipt] = None
+        self._operation_siren_order_entry_receipt: Optional[ActionReceipt] = None
+        self._operation_siren_adaptability_info_receipt: Optional[ActionReceipt] = None
         self._operation_siren_auto_search_transition_until = 0.0
         self._operation_siren_auto_search_active = False
         self._operation_siren_startup_search_provisional = False
@@ -344,10 +352,14 @@ class CoreAdapterPorts:
         self._guild_logistics_transition_until = 0.0
         self._shipyard_entry_receipt = None
         self._meta_entry_receipt = None
+        self._meta_current_create_handoff = None
+        self._orphan_tactical_prompt_probe = None
         self._meta_home_receipt = None
         self._research_back_receipt = None
         self._inherited_home_return_receipt = None
         self._inherited_home_return_until = 0.0
+        self._shop_home_handoff = None
+        self._commission_navigation_handoff = None
         self._inherited_withdraw_open_receipt = None
         self._inherited_withdraw_confirm_receipt = None
         self._research_progress_close_receipt = None
@@ -360,6 +372,7 @@ class CoreAdapterPorts:
         self._daily_entry_receipt = None
         self._daily_entry_transition_until = 0.0
         self._main_tech_entry_receipt = None
+        self._main_storage_entry_receipt = None
         self._main_live_entry_receipt = None
         self._private_quarters_entry_receipt = None
         self._private_quarters_dialogue_receipt = None
@@ -370,7 +383,6 @@ class CoreAdapterPorts:
         self._operation_siren_pending_order: Optional[str] = None
         self._exercise_pending = False
         self._exercise_execution_active = False
-        self._exercise_start_transition_until = 0.0
         self._exercise_chapter_back_transition_until = 0.0
         self._exercise_entry_transition_until = 0.0
         self._exercise_entry_receipt: Optional[ActionReceipt] = None
@@ -546,11 +558,14 @@ class CoreAdapterPorts:
         if name in (
             "POPUP_CONFIRM_RESEARCH_START",
             "POPUP_CONFIRM_RESEARCH_QUEUE",
+            "POPUP_CONFIRM_RESEARCH_CANCEL",
             "POPUP_CONFIRM_LOGIN",
             "POPUP_CONFIRM_CAMPAIGN_RECONNECT",
             "POPUP_CONFIRM_COMBAT_EXECUTE",
             "POPUP_CONFIRM_COMBAT_STATUS",
             "POPUP_CONFIRM_WHITE_LOGIN",
+            "POPUP_CONFIRM_WHITE_UI_ADDITIONAL",
+            "POPUP_CONFIRM_WHITE_CAMPAIGN_RECONNECT",
             "POPUP_CONFIRM_UI_ADDITIONAL",
             "POPUP_CONFIRM_MAIL_CLAIM",
             "POPUP_CONFIRM_MAIL_QUIT",
@@ -563,7 +578,8 @@ class CoreAdapterPorts:
         ):
             return (
                 "POPUP_CONFIRM_WHITE"
-                if name == "POPUP_CONFIRM_WHITE_LOGIN"
+                if name in ("POPUP_CONFIRM_WHITE_LOGIN", "POPUP_CONFIRM_WHITE_UI_ADDITIONAL",
+                            "POPUP_CONFIRM_WHITE_CAMPAIGN_RECONNECT")
                 else "POPUP_CONFIRM"
             )
         return name

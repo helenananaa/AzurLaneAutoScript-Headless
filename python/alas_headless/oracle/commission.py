@@ -18,7 +18,8 @@ from .contracts import (
     Point,
     TextState,
 )
-from .errors import SemanticCommissionRowIncomplete, SemanticGateClosed
+from .errors import (SemanticCommissionRowIncomplete, SemanticGateClosed,
+                     SemanticNavigationPending)
 
 
 class CommissionOracle:
@@ -142,6 +143,7 @@ class CommissionOracle:
             # exercised on the pinned CN 9.7.10 build. New sprites remain closed.
             "kongxian_bg": CommissionStatus.PENDING,
             "tag_ongoing": CommissionStatus.RUNNING,
+            "tag_finish": CommissionStatus.FINISHED,
         }
         rows = []
         for index in sorted(indexed_buttons):
@@ -156,7 +158,6 @@ class CommissionOracle:
             root = row_roots[index]
             name = exact_text(root + "/labelName$").text.strip()
             level_text = exact_text(root + "/level/labelLv$").text.strip()
-            duration_text = exact_text(root + "/labelTime$/Text").text.strip()
             status_matches = tuple(
                 item
                 for item in ui_state.images
@@ -164,6 +165,7 @@ class CommissionOracle:
                 in (
                     root + "/iconState$/0",
                     root + "/iconState$/1",
+                    root + "/iconState$/2",
                 )
                 and item.active_in_hierarchy
                 and item.active_and_enabled
@@ -187,17 +189,31 @@ class CommissionOracle:
                     "commission row status sprite is not reviewed: "
                     + status_image.sprite
                 ) from exc
-            type_image = exact_image(root + "/iconType$")
-            if not type_image.sprite:
-                raise SemanticGateClosed("commission row type sprite is empty")
+            # A completed row replaces its countdown with tag_finish. That
+            # exact status proves zero remaining time; ALAS filters finished
+            # rows and retains ownership of reward collection and scheduling.
+            duration_seconds = (0 if status == CommissionStatus.FINISHED else
+                self.parse_countdown_seconds(
+                    exact_text(root + "/labelTime$/Text").text.strip()))
+            try:
+                type_image = exact_image(root + "/iconType$")
+            except SemanticCommissionRowIncomplete:
+                # Preserve this row and its known occupancy for native ALAS.
+                # None is an unavailable field, never an inferred genre or an
+                # input authority. Native invalid-row filtering owns exclusion.
+                type_sprite = None
+            else:
+                if not type_image.sprite:
+                    raise SemanticGateClosed("commission row type sprite is empty")
+                type_sprite = type_image.sprite
             rows.append(
                 CommissionRowState(
                     index=index,
                     name=name,
                     level=level,
-                    duration_seconds=self.parse_countdown_seconds(duration_text),
+                    duration_seconds=duration_seconds,
                     status=status,
-                    type_sprite=type_image.sprite,
+                    type_sprite=type_sprite,
                     button=button,
                 )
             )
@@ -305,7 +321,7 @@ class CommissionOracle:
     @staticmethod
     def _commission_row_signatures(
         rows: Sequence[CommissionRowState],
-    ) -> Tuple[Tuple[Union[int, str], ...], ...]:
+    ) -> Tuple[Tuple[Union[int, str, None], ...], ...]:
         # Countdown and lifecycle status can change independently of a
         # gesture.  Neither is evidence that a different row entered the
         # actionable viewport.
@@ -324,6 +340,8 @@ class CommissionOracle:
         target_position: float,
         direction: str,
         timeout_seconds: float = 12.0,
+        *,
+        precondition_oracle=None,
     ) -> Optional[CommissionScrollProof]:
         if direction not in ("top", "next"):
             raise ValueError("commission scroll direction is not supported")
@@ -331,8 +349,9 @@ class CommissionOracle:
             raise ValueError("commission scroll target must be within [0, 1]")
         if self._swipe is None:
             raise SemanticGateClosed("semantic commission swipe backend is unavailable")
-        before = self.commission_scroll_state()
-        before_rows = self.commission_rows()
+        source = precondition_oracle if precondition_oracle is not None else self
+        before = source.commission_scroll_state()
+        before_rows = source.commission_rows()
         before_signatures = self._commission_row_signatures(before_rows)
         if not before.scrollable:
             return None
@@ -369,18 +388,23 @@ class CommissionOracle:
             )
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("game activity changed before commission scroll")
+        # Short drags have returned a fresh unchanged owning list on the
+        # contended headless client. Allow more Unity input frames without
+        # adding another gesture or relaxing the movement postcondition.
+        duration_ms = 1500
         self._swipe(
             int(round(start.x)),
             int(round(start.y)),
             int(round(end.x)),
             int(round(end.y)),
-            500,
+            duration_ms,
         )
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("game activity changed after commission scroll")
 
         deadline = self._monotonic() + timeout_seconds
         last_error: Optional[SemanticGateClosed] = None
+        after = None
         while self._monotonic() < deadline:
             self._sleep(0.25)
             try:
@@ -407,12 +431,34 @@ class CommissionOracle:
                 )
         if last_error is not None:
             raise last_error
+        if (after is not None and after.generation > before.generation
+                and after.handle_path == before.handle_path
+                and abs(after.position - before.position) <= 0.03
+                and len(after_signatures) == len(before_signatures)
+                and all(old[:3] == new[:3]
+                        and (old[3] is None or new[3] is None or old[3] == new[3])
+                        for old, new in zip(before_signatures, after_signatures))):
+            # A missed scrollbar drag must not imply list exhaustion or shut
+            # down unrelated tasks. The existing complete page/row reads prove
+            # the same fresh source; a type Image mounting/unmounting alone is
+            # not a changed viewport. ALAS owns its failure interval/re-entry.
+            raise SemanticNavigationPending(
+                "commission/scroll", {
+                    "direction": direction,
+                    "before_generation": before.generation,
+                    "before_position": before.position,
+                    "after_position": after.position,
+                    "points": (int(round(start.x)), int(round(start.y)),
+                               int(round(end.x)), int(round(end.y)), duration_ms),
+                }, after.generation,
+                "commission scrollbar did not move on the fresh owning list")
         raise SemanticGateClosed("commission scrollbar transition was not proven")
 
-    def commission_scroll_next(self) -> Optional[CommissionScrollProof]:
-        state = self.commission_scroll_state()
+    def commission_scroll_next(self, *, precondition_oracle=None) -> Optional[CommissionScrollProof]:
+        source = precondition_oracle if precondition_oracle is not None else self
+        state = source.commission_scroll_state()
         target = min(1.0, state.position + max(0.25, state.page_fraction * 0.8))
-        proof = self._commission_scroll_to(target, "next")
+        proof = self._commission_scroll_to(target, "next", precondition_oracle=source)
         if (
             proof is not None
             and proof.before_row_signatures == proof.after_row_signatures
@@ -423,16 +469,17 @@ class CommissionOracle:
             return None
         return proof
 
-    def commission_scroll_to_top(self) -> Optional[CommissionScrollProof]:
-        before = self.commission_scroll_state()
-        before_signatures = self._commission_row_signatures(self.commission_rows())
+    def commission_scroll_to_top(self, *, precondition_oracle_factory=None) -> Optional[CommissionScrollProof]:
+        source = precondition_oracle_factory() if precondition_oracle_factory is not None else self
+        before = source.commission_scroll_state()
+        before_signatures = self._commission_row_signatures(source.commission_rows())
         if not before.scrollable or before.at_top:
             return None
 
         after = before
         after_signatures = before_signatures
         for _ in range(6):
-            step = self._commission_scroll_to(0.0, "top")
+            step = self._commission_scroll_to(0.0, "top", precondition_oracle=source)
             if step is None:
                 break
             after = self.commission_scroll_state()
@@ -447,6 +494,7 @@ class CommissionOracle:
                     before_row_signatures=before_signatures,
                     after_row_signatures=after_signatures,
                 )
+            source = precondition_oracle_factory() if precondition_oracle_factory is not None else self
         raise SemanticGateClosed("commission scrollbar did not reach the exact top")
 
     def commission_is_empty(self) -> bool:
@@ -509,6 +557,8 @@ class CommissionOracle:
         expected = tuple(expected_signature)
         if len(expected) != 6:
             raise SemanticGateClosed("commission row signature is malformed")
+        if not isinstance(expected[5], str) or not expected[5]:
+            raise SemanticGateClosed("commission row type is unavailable for input")
         rows = self.commission_rows()
         matches = tuple(row for row in rows if row.signature == expected)
         if len(matches) != 1:
@@ -546,6 +596,8 @@ class CommissionOracle:
         expected = tuple(expected_signature)
         if len(expected) != 6 or expected[4] != CommissionStatus.RUNNING.value:
             raise SemanticGateClosed("running commission signature is malformed")
+        if not isinstance(expected[5], str) or not expected[5]:
+            raise SemanticGateClosed("commission row type is unavailable for input")
         rows = self.commission_rows()
         matches = tuple(
             row

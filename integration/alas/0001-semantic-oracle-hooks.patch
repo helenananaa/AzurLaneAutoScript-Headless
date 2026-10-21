@@ -19032,7 +19032,7 @@ diff --git a/module/guild/operations.py b/module/guild/operations.py
              if formation.empty_slots:
                  adapter.oracle.click('guild/formation/recommend')
                  for _ in range(30):
-@@ -663,14 +671,23 @@
+@@ -663,14 +671,24 @@
                  if adapter.oracle.enabled('guild/dispatch/confirm'):
                      break
                  self.device.sleep(0.2)
@@ -19055,7 +19055,8 @@ diff --git a/module/guild/operations.py b/module/guild/operations.py
                  self.device.sleep(0.2)
 -            return False
 +            else:
-+                raise SemanticGateClosed('Guild dispatch did not advance to in-progress state')
++                from alas_headless.adapter.semantic.contracts import AlasSemanticGuildDispatchUnproven
++                raise AlasSemanticGuildDispatchUnproven(dispatch_receipt)
 +            self._guild_operations_dispatch_exit(skip_first_screenshot=False)
 +            logger.info('Guild operation run success: True (semantic)')
 +            return True
@@ -19873,3 +19874,324 @@ index a7a43f43543aea728a4ee73fe9820fdef14ae3d4..49485d0d903441e2bc5891afa8b63e38
          try:
              return self._run(name, folder=folder, mode=mode, total=total)
          finally:
+diff --git a/module/ui/scroll.py b/module/ui/scroll.py
+--- a/module/ui/scroll.py
++++ b/module/ui/scroll.py
+@@ -62,6 +62,10 @@
+             float: 0 to 1.
+         """
+         semantic_adapter = getattr(main.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and self.name == 'METERIAL_SCROLL':
++            state = semantic_adapter.storage_material_scroll_state()
++            self.length = self.total * state.size
++            return semantic_adapter.open().oracle._storage_vertical_position(state)
+         if semantic_adapter is not None and self.name == 'MINIGAME_SCROLL_AREA':
+             return semantic_adapter.open().oracle.minigame_scroll_position()
+         mask = self.match_color(main)
+@@ -113,6 +117,9 @@
+             bool
+         """
+         semantic_adapter = getattr(main.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and self.name == 'METERIAL_SCROLL':
++            state = semantic_adapter.storage_material_scroll_state()
++            return state.size < 1 and all(c.active_in_hierarchy for c in state.controls)
+         if semantic_adapter is not None and self.name == 'MINIGAME_SCROLL_AREA':
+             return semantic_adapter.minigame_scroll_visible()
+         return np.mean(self.match_color(main)) > 0.1
+@@ -168,9 +175,12 @@
+                     continue
+ 
+             if self.drag_interval.reached():
+-                p1 = random_rectangle_point(self.position_to_screen(current), n=1)
+-                p2 = random_rectangle_point(self.position_to_screen(position, random_range=random_range), n=1)
+-                main.device.swipe(p1, p2, name=self.name, distance_check=distance_check)
++                if semantic_adapter is not None and self.name == 'METERIAL_SCROLL':
++                    semantic_adapter.storage_material_scroll_drag_toward(float(position))
++                else:
++                    p1 = random_rectangle_point(self.position_to_screen(current), n=1)
++                    p2 = random_rectangle_point(self.position_to_screen(position, random_range=random_range), n=1)
++                    main.device.swipe(p1, p2, name=self.name, distance_check=distance_check)
+                 self.drag_interval.reset()
+                 dragged += 1
+ 
+diff --git a/module/os/globe_operation.py b/module/os/globe_operation.py
+--- a/module/os/globe_operation.py
++++ b/module/os/globe_operation.py
+@@ -403,10 +403,23 @@
+                     raise SemanticStrongholdEntryLocked(zone.zone_id)
+                 raise OSExploreError
+             semantic_adapter.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
++            from alas_headless.oracle.errors import SemanticSnapshotStale
++            last_stale = None
+             for attempt in range(80):
+                 self.device.sleep(0.25)
+-                self.device.screenshot()
+-                if semantic_adapter.operation_siren_map_visible():
++                try:
++                    self.device.screenshot()
++                    map_visible = semantic_adapter.operation_siren_map_visible()
++                except SemanticSnapshotStale as exc:
++                    if exc.input_outcome_uncertain:
++                        raise
++                    # The accepted entrance owns this existing passive wait.
++                    # Reject the stale frame and let the next screenshot prove
++                    # the destination; do not retry input or consume old data.
++                    last_stale = exc
++                    continue
++                last_stale = None
++                if map_visible:
+                     return
+                 if self.handle_action_point(zone=zone, pinned=pinned):
+                     # The AP panel dismisses the selected-zone float panel.
+@@ -453,6 +466,8 @@
+                     # but re-prove the pinned typed control before every tap.
+                     logger.info('Retry exact typed zone entrance')
+                     semantic_adapter.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
++            if last_stale is not None:
++                raise last_stale
+             raise OSExploreError(f'Unable to enter typed zone {zone}')
+ 
+         click_timer = Timer(10)
+diff --git a/module/ui/scroll.py b/module/ui/scroll.py
+--- a/module/ui/scroll.py
++++ b/module/ui/scroll.py
+@@ -163,7 +163,9 @@
+                 main.device.screenshot()
+ 
+             current = self.cal_position(main)
+-            if abs(position - current) < self.drag_threshold:
++            tolerance = (.001 if semantic_adapter is not None and self.name == 'METERIAL_SCROLL'
++                         and position in (0, 1) else self.drag_threshold)
++            if abs(position - current) < tolerance:
+                 break
+             if self.length:
+                 self.drag_timeout.reset()
+diff --git a/module/storage/storage.py b/module/storage/storage.py
+--- a/module/storage/storage.py
++++ b/module/storage/storage.py
+@@ -208,6 +208,9 @@
+             in: MATERIAL_CHECK
+             out: MATERIAL_CHECK
+         """
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            from alas_headless import AlasSemanticUnmapped
++            raise AlasSemanticUnmapped('Storage equipment-box recognition needs typed item/detail mapping')
+         used = 0
+         timeout = Timer(1.5, count=3).start()
+         while 1:
+diff --git a/module/storage/storage.py b/module/storage/storage.py
+--- a/module/storage/storage.py
++++ b/module/storage/storage.py
+@@ -55,6 +55,7 @@
+         Pages:
+             in: SHOP_BUY_CONFIRM_AMOUNT
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         logger.info(f'Set box amount')
+ 
+         # same code from shop clerk
+@@ -76,7 +77,8 @@
+         current = 0
+         timeout = Timer(1, count=3).start()
+         for _ in self.loop():
+-            current = ocr.ocr(self.device.image)
++            current = (semantic_adapter.storage_box_amount_quantity() if semantic_adapter is not None
++                       else ocr.ocr(self.device.image))
+             if 1 <= current <= amount + 10:
+                 break
+             if timeout.reached():
+@@ -93,7 +95,8 @@
+             if skip_first:
+                 skip_first = False
+             else:
+-                current = ocr.ocr(self.device.image)
++                current = (semantic_adapter.storage_box_amount_quantity() if semantic_adapter is not None
++                       else ocr.ocr(self.device.image))
+             diff = amount - current
+             if diff == 0:
+                 break
+@@ -208,10 +211,8 @@
+             in: MATERIAL_CHECK
+             out: MATERIAL_CHECK
+         """
+-        if getattr(self.device, 'semantic_adapter', None) is not None:
+-            from alas_headless import AlasSemanticUnmapped
+-            raise AlasSemanticUnmapped('Storage equipment-box recognition needs typed item/detail mapping')
+         used = 0
++        pending_observation = None
+         timeout = Timer(1.5, count=3).start()
+         while 1:
+             logger.attr('Used', f'{used}/{amount}')
+@@ -219,6 +220,8 @@
+                 logger.info('Reached target amount, stop')
+                 break
+             if timeout.reached():
++                if pending_observation is not None:
++                    raise pending_observation
+                 logger.info('No more boxes on this page, stop')
+                 break
+ 
+@@ -227,8 +230,19 @@
+             else:
+                 self.device.screenshot()
+ 
+-            image = rgb2gray(self.device.image)
+-            sim, box_button = self._storage_box_template(rarity).match_result(image)
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if semantic_adapter is not None:
++                from alas_headless.oracle.storage import StorageMaterialItemsPending
++                try:
++                    box_button = semantic_adapter.storage_box_candidate(rarity)
++                except StorageMaterialItemsPending as exc:
++                    pending_observation = exc
++                    continue
++                pending_observation = None
++                sim = 1.0 if box_button is not None else 0.0
++            else:
++                image = rgb2gray(self.device.image)
++                sim, box_button = self._storage_box_template(rarity).match_result(image)
+             if sim > 0.9:
+                 used += self._storage_use_one_box(box_button, amount)
+                 continue
+diff --git a/module/storage/storage.py b/module/storage/storage.py
+--- a/module/storage/storage.py
++++ b/module/storage/storage.py
+@@ -170,9 +170,11 @@
+             # a long animation that opens a box, will be on the top of BOX_AMOUNT_CONFIRM
+             if self.match_template_color(BOX_AMOUNT_CONFIRM, offset=(20, 20), interval=5):
+                 actual = self._handle_use_box_amount(amount)
+-                self.device.click(BOX_AMOUNT_CONFIRM)
++                confirmation = self.device.click(BOX_AMOUNT_CONFIRM)
+                 self.interval_reset(BOX_AMOUNT_CONFIRM)
+-                used = actual
++                semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++                used = (semantic_adapter.storage_box_confirmed_quantity(confirmation)
++                        if semantic_adapter is not None else actual)
+                 continue
+             if self.appear_then_click(EQUIP_CONFIRM, offset=(20, 20), interval=5):
+                 self.interval_reset(MATERIAL_CHECK)
+diff --git a/module/handler/info_handler.py b/module/handler/info_handler.py
+--- a/module/handler/info_handler.py
++++ b/module/handler/info_handler.py
+@@ -450,14 +450,15 @@
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
+             oracle = semantic_adapter.open().oracle
+-            if oracle.event_story_skip_prompt_visible():
++            observation = semantic_adapter.open()._frame_or_live_observation_oracle()
++            if observation.event_story_skip_prompt_visible():
+                 logger.info('Modern event story skip -> semantic confirm')
+                 semantic_adapter.refresh_frame()
+                 semantic_adapter.click_event_story_skip_confirm()
+                 self.story_popup_timeout = Timer(10)
+                 return True
+-            if oracle.event_story_dialogue_visible():
+-                option_count = oracle.event_story_option_count()
++            if observation.event_story_dialogue_visible():
++                option_count = observation.event_story_option_count()
+                 if option_count:
+                     logger.attr('Story_options', option_count)
+                     semantic_adapter.refresh_frame()
+@@ -484,7 +485,7 @@
+                 return False
+             # Native story observations own the semantic boundary. A proven
+             # idle branch must not continue into legacy image probes.
+-            if oracle.event_story_surface_absent():
++            if observation.event_story_surface_absent():
+                 return False
+         if self.story_popup_timeout.started() and not self.story_popup_timeout.reached():
+             if self.handle_popup_confirm('STORY_SKIP'):
+@@ -566,11 +567,10 @@
+             return False
+ 
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+-        if semantic_adapter is not None and (
+-            semantic_adapter.open().oracle.daily_combat_visible()
+-            or semantic_adapter.open().oracle.daily_battle_result_visible()
+-        ):
+-            return False
++        if semantic_adapter is not None:
++            observation = semantic_adapter.open()._frame_or_live_observation_oracle()
++            if observation.daily_combat_visible() or observation.daily_battle_result_visible():
++                return False
+         return self.story_skip(drop=drop)
+ 
+     def ensure_no_story(self, skip_first_screenshot=True):
+diff --git a/module/os/map.py b/module/os/map.py
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -793,7 +793,7 @@
+                 self.interval_clear(GOTO_MAIN)
+                 in_main_timer.reset()
+                 continue
+-            if pause_interval.reached():
++            if semantic_session is None and pause_interval.reached():
+                 pause = self.is_combat_executing()
+                 if pause:
+                     self.device.click(pause)
+@@ -802,12 +802,12 @@
+                     pause_interval.reset()
+                     in_main_timer.reset()
+                     continue
+-            if self.handle_combat_quit():
++            if semantic_session is None and self.handle_combat_quit():
+                 self.interval_reset(MAINTENANCE_ANNOUNCE)
+                 pause_interval.reset()
+                 in_main_timer.reset()
+                 continue
+-            if self.handle_combat_quit_reconfirm():
++            if semantic_session is None and self.handle_combat_quit_reconfirm():
+                 self.interval_reset(MAINTENANCE_ANNOUNCE)
+                 pause_interval.reset()
+                 in_main_timer.reset()
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -271,7 +271,10 @@
+             if semantic_adapter is not None:
+                 if semantic_adapter.campaign_result_ready():
+                     return True
+-                oracle = semantic_adapter.open().oracle
++                # These are observations of the current native screenshot.
++                # Input ports below independently refresh and revalidate the
++                # actionable target before dispatch.
++                oracle = semantic_adapter.open()._frame_or_live_observation_oracle()
+                 if self.handle_combat_automation_confirm():
+                     continue
+                 if semantic_adapter.meta_beacon_active() \
+diff --git a/module/commission/project.py b/module/commission/project.py
+--- a/module/commission/project.py
++++ b/module/commission/project.py
+@@ -117,7 +117,10 @@
+         self.duration = timedelta(seconds=state.duration_seconds)
+         self.expire = timedelta(seconds=0)
+         self.status = state.status.value
+-        self.valid = True
++        # Keep known running occupancy even when one row's type Image has
++        # not mounted. The original invalid-row filter excludes it from
++        # selection; independent complete rows remain available.
++        self.valid = bool(state.type_sprite)
+         self.semantic_signature = state.signature
+         self.semantic_row_key = (list_mode, state.index)
+         self.genre = self.commission_name_parse(self.name)
+diff --git a/module/device/control.py b/module/device/control.py
+--- a/module/device/control.py
++++ b/module/device/control.py
+@@ -222,8 +222,15 @@
+                     whitelist_area=whitelist_area,
+                     blacklist_area=blacklist_area
+                 )
+-                if (semantic_adapter is None or not name.startswith('GLOBE_SWIPE_')
+-                        or semantic_adapter.operation_siren_globe_drag_owned(p1,p2)):
++                if semantic_adapter is None or not name.startswith('GLOBE_SWIPE_'):
++                    break
++                select_candidate = getattr(semantic_adapter, 'operation_siren_globe_drag_candidate', None)
++                if select_candidate is not None:
++                    candidate = select_candidate(p1, p2, box=box)
++                    if candidate is not None:
++                        p1, p2 = candidate
++                        break
++                elif semantic_adapter.operation_siren_globe_drag_owned(p1, p2):
+                     break
+                 logger.info('Original ALAS swipe candidate is outside native globe Plane; resample before input')
+             else:

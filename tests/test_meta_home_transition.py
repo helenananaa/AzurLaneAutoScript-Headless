@@ -45,7 +45,7 @@ def test_real_meta_home_return_is_recorded_and_cleared_with_task_state():
 @pytest.mark.parametrize('name', ['GOTO_MAIN_WHITE', 'RPG_HOME'])
 def test_owned_meta_landing_hides_other_home_aliases(name):
     oracle = FakeOracle()
-    oracle.observation_target_present = lambda target: target == 'meta/current/open'
+    oracle.observation_target_present = lambda target: target == 'meta/home'
     oracle.meta_page_visible = lambda: True
     adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
     assert adapter.appear(SimpleNamespace(name=name)) is False

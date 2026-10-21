@@ -34,6 +34,7 @@ from ...adapter import (
 )
 from ...alas_combat_observer import AlasCombatObserverManifest
 from ...alas_package_process_lease import AlasPackageProcessLease
+from ...oracle.errors import SemanticSnapshotStale
 from ...runtime_trace import RuntimeTraceRecorder
 from ...semantic_oracle import (
     ActionReceipt,
@@ -366,6 +367,7 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
         self._combat_result_transition_until = 0.0
         self._combat_result_observation: Optional[Tuple[str, float]] = None
         self._combat_last_result_receipt: Optional[ActionReceipt] = None
+        self._combat_reward_close_pending: Optional[ActionReceipt] = None
         self._login_update_restart_performed = False
         self._game_manager_restart_pending = False
 
@@ -381,9 +383,11 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
         self._combat_automation_source = None
         self._combat_result_observation = None
         self._combat_last_result_receipt = None
+        self._combat_reward_close_pending = None
         self._combat_result_transition_until = 0.0
         self._retirement_return_receipt = None
         self._daily_combat_seen_at = float("-inf")
+        self._operation_siren_interrupt_receipts = []
         self._login_update_restart_performed = False
         self._game_manager_restart_pending = False
 
@@ -611,6 +615,21 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
         if self._frame_clock is None:
             raise StaleFrameError()
         previous_frame_id = self._frame_clock.current_frame_id
+        # A complete publication can temporarily age while Unity changes pages.
+        # Waiting for a genuinely fresh frame is observation I/O, independent
+        # of which task owns that page. Keep the existing 30s bound; retries
+        # never accept old data or renew their own acquisition deadline.
+        stale_observation_deadline = time.monotonic() + 30.0
+        # A running native OS or META combat can enter a Unity loading gap
+        # without another adapter click. Use the last proven CombatUI probe
+        # to cover that handoff with the existing 30s OS observation window.
+        # Capture once: stale retries cannot renew their own deadline.
+        combat_observation_deadline = (
+            getattr(self, '_daily_combat_seen_at', float('-inf')) + 30.0
+            if any(getattr(self.adapter, name, False) for name in (
+                '_operation_siren_auto_search_active', '_meta_beacon_active', '_meta_assist_active'))
+            else 0.0
+        )
         # A Unity transition can keep changing the full hierarchy while the
         # atomic Button/state endpoint is already healthy.  ALAS screenshots
         # are polling boundaries, so retry only this explicit cross-generation
@@ -626,6 +645,11 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                 ObserverTransportError,
             ) as exc:
                 message = str(exc)
+                passive_stale_retry = bool(
+                    isinstance(exc, SemanticSnapshotStale)
+                    and not exc.input_outcome_uncertain
+                    and time.monotonic() <= stale_observation_deadline
+                )
                 # Legacy observers may publish every two seconds. After a
                 # committed input, wait for a newer generation instead of
                 # retrying the same invalidated frame only for 300 ms.
@@ -745,6 +769,7 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                 in_operation_siren_transition = bool(
                     time.monotonic()
                     <= max(
+                        combat_observation_deadline,
                         float(
                             getattr(
                                 semantic_adapter,
@@ -784,7 +809,6 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                             )
                         )
                     )
-                    and attempt < 79
                 )
                 retryable = retryable or bool(
                     in_login_transition and isinstance(exc, ObserverTransportError)
@@ -817,6 +841,7 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                 if not retryable or (
                     attempt >= 2
                     and not input_generation_retry
+                    and not passive_stale_retry
                     and not initial_game_startup_retry
                     and not extended_login_retry
                     and not stale_login_update_wait

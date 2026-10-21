@@ -1319,10 +1319,14 @@ class CampaignPreparationAdapterPorts:
 
     def _campaign_preparation_state_with_stage(
         self,
+        *,
+        reader: Optional[Any] = None,
     ) -> Tuple[Optional[Any], str]:
         """Resolve an event hard stage through its reviewed shared entrance."""
 
         context = self._require_campaign_context()
+        if reader is None:
+            reader = self.oracle
         candidates = [context.stage_code]
         shared = CAMPAIGN_SHARED_HARD_STAGE_ENTRANCES.get(context.stage_code)
         if shared is not None:
@@ -1330,7 +1334,7 @@ class CampaignPreparationAdapterPorts:
         last_identity_error: Optional[SemanticGateClosed] = None
         for stage_code in candidates:
             try:
-                return self.oracle.campaign_preparation_state(stage_code), stage_code
+                return reader.campaign_preparation_state(stage_code), stage_code
             except SemanticGateClosed as exc:
                 if not str(exc).endswith("stage identity changed"):
                     raise

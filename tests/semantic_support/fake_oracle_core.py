@@ -18,10 +18,16 @@ from types import SimpleNamespace
 
 
 class FakeCoreOracle:
+    def reward_sidebar_entry_ready(self, state):
+        return (self.enabled('reward/page/back')
+                or (self.observation_target_present('reward/page/back')
+                    and self.enabled('reward/tactical/go')))
+
     def __init__(self):
         self.enabled_calls = []
         self.bounds_calls = []
         self.click_calls = []
+        self.input_dispatch_count = 0
         self.wait_calls = []
         self.wait_any_calls = []
         self.wait_any_results = []

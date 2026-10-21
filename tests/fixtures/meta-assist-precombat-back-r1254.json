@@ -1,0 +1,6027 @@
+{
+  "scope": "Exact immutable screenshot retained immediately before BACK_ARROW failure; unchanged projections",
+  "source": "failure-meta-back-dispatch-r1253.json failed_click.retained_screenshot_before_error_handler",
+  "frame": {
+    "frame_id": "frame-38383-1139",
+    "pid": 1952,
+    "generation": 38383,
+    "scene_handle": -76,
+    "captured_monotonic_ns": 3440937000000,
+    "age_ms": 132.0,
+    "fingerprint_sha256": "b869705d6cb96326d48ce73fe95ca1f1bb9e7fcd26676e33731b5dceed081531",
+    "raw_state_sha256": "34c924d1f2aa57533ed5feef0fffd8a13e52c2604b2c7f1d3d7a9506bc8e66d3",
+    "projections": {
+      "buttons": {
+        "protocol_schema": "alas-headless.observer/v1",
+        "semantic_schema": "alas-headless.buttons/v1",
+        "status": "ok",
+        "package": "com.bilibili.azurlane",
+        "pid": 1952,
+        "uid": 10105,
+        "peer_uid": 2000,
+        "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+        "schema": 1,
+        "struct_size": 344104,
+        "generation": 38383,
+        "snapshot_monotonic_ns": 3159301185899,
+        "response_monotonic_ns": 3159354041359,
+        "age_ms": 52,
+        "button_count": 27,
+        "truncated": false,
+        "error_count": 0,
+        "buttons": [
+          {
+            "name": "mouseChild",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/xinzexi_root/mouseChild",
+            "canvas": "HeroContainer",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1834478,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": -4.477,
+              "y": 1.544,
+              "z": -390.711
+            },
+            "local_rect": {
+              "x": -1.5,
+              "y": -0.0,
+              "width": 3.0,
+              "height": 3.0
+            },
+            "screen_point": {
+              "x": 438.533,
+              "y": 429.462
+            },
+            "adb_point": {
+              "x": 438.533,
+              "y": 290.538
+            },
+            "screen_bounds": {
+              "left": 373.554,
+              "bottom": 429.462,
+              "right": 503.512,
+              "top": 559.42
+            },
+            "adb_bounds": {
+              "left": 373.554,
+              "top": 160.58,
+              "right": 503.512,
+              "bottom": 290.538
+            }
+          },
+          {
+            "name": "mouseChild",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/bote_root/mouseChild",
+            "canvas": "HeroContainer",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1834272,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": -6.249,
+              "y": -2.233,
+              "z": -390.711
+            },
+            "local_rect": {
+              "x": -1.5,
+              "y": -0.0,
+              "width": 3.0,
+              "height": 3.0
+            },
+            "screen_point": {
+              "x": 358.8,
+              "y": 259.529
+            },
+            "adb_point": {
+              "x": 358.8,
+              "y": 460.471
+            },
+            "screen_bounds": {
+              "left": 293.821,
+              "bottom": 259.529,
+              "right": 423.779,
+              "top": 389.487
+            },
+            "adb_bounds": {
+              "left": 293.821,
+              "top": 330.513,
+              "right": 423.779,
+              "bottom": 460.471
+            }
+          },
+          {
+            "name": "option",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/blur_panel/top/option",
+            "canvas": "blur_panel",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1833958,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": 13.359,
+              "y": 7.494,
+              "z": -390.0
+            },
+            "local_rect": {
+              "x": -46.0,
+              "y": -53.5,
+              "width": 92.0,
+              "height": 107.0
+            },
+            "screen_point": {
+              "x": 1241.138,
+              "y": 697.239
+            },
+            "adb_point": {
+              "x": 1241.138,
+              "y": 22.761
+            },
+            "screen_bounds": {
+              "left": 1210.481,
+              "bottom": 661.584,
+              "right": 1271.795,
+              "top": 732.894
+            },
+            "adb_bounds": {
+              "left": 1210.481,
+              "top": -12.894,
+              "right": 1271.795,
+              "bottom": 58.416
+            }
+          },
+          {
+            "name": "back_btn",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/blur_panel/top/back_btn",
+            "canvas": "blur_panel",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1833916,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": -12.944,
+              "y": 7.165,
+              "z": -390.0
+            },
+            "local_rect": {
+              "x": -65.255,
+              "y": -55.7,
+              "width": 130.51,
+              "height": 111.4
+            },
+            "screen_point": {
+              "x": 57.523,
+              "y": 682.444
+            },
+            "adb_point": {
+              "x": 57.523,
+              "y": 37.556
+            },
+            "screen_bounds": {
+              "left": 0.523,
+              "bottom": 625.443,
+              "right": 114.523,
+              "top": 739.444
+            },
+            "adb_bounds": {
+              "left": 0.523,
+              "top": -19.444,
+              "right": 114.523,
+              "bottom": 94.557
+            }
+          },
+          {
+            "name": "start",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/start",
+            "canvas": "Overlay",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1833682,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": 11.156,
+              "y": -6.255,
+              "z": -390.0
+            },
+            "local_rect": {
+              "x": -173.5,
+              "y": -67.5,
+              "width": 347.0,
+              "height": 135.0
+            },
+            "screen_point": {
+              "x": 1142.0,
+              "y": 78.533
+            },
+            "adb_point": {
+              "x": 1142.0,
+              "y": 641.467
+            },
+            "screen_bounds": {
+              "left": 1026.371,
+              "bottom": 33.548,
+              "right": 1257.629,
+              "top": 123.519
+            },
+            "adb_bounds": {
+              "left": 1026.371,
+              "top": 596.481,
+              "right": 1257.629,
+              "bottom": 686.452
+            }
+          },
+          {
+            "name": "checkBtn",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/checkBtn",
+            "canvas": "Overlay",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1833036,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": -10.889,
+              "y": -6.296,
+              "z": -390.0
+            },
+            "local_rect": {
+              "x": -35.0,
+              "y": -35.0,
+              "width": 70.0,
+              "height": 70.0
+            },
+            "screen_point": {
+              "x": 150.0,
+              "y": 76.667
+            },
+            "adb_point": {
+              "x": 150.0,
+              "y": 643.333
+            },
+            "screen_bounds": {
+              "left": 126.667,
+              "bottom": 53.333,
+              "right": 173.333,
+              "top": 100.0
+            },
+            "adb_bounds": {
+              "left": 126.667,
+              "top": 620.0,
+              "right": 173.333,
+              "bottom": 666.667
+            }
+          },
+          {
+            "name": "award_btn",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/main/award_btn",
+            "canvas": "Canvas",
+            "flags": 3583,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": false,
+            "canvas_render_mode": 1,
+            "instance_id": -1831512,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": 10.823,
+              "y": -4.004,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -70.5,
+              "y": -31.5,
+              "width": 141.0,
+              "height": 63.0
+            },
+            "screen_point": {
+              "x": 1127.04,
+              "y": 179.8
+            },
+            "adb_point": {
+              "x": 1127.04,
+              "y": 540.2
+            },
+            "screen_bounds": {
+              "left": 1080.04,
+              "bottom": 158.8,
+              "right": 1174.041,
+              "top": 200.8
+            },
+            "adb_bounds": {
+              "left": 1080.04,
+              "top": 519.2,
+              "right": 1174.041,
+              "bottom": 561.2
+            }
+          },
+          {
+            "name": "start_btn",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/main/start_btn",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1831528,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": 11.534,
+              "y": -6.905,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -173.0,
+              "y": -70.5,
+              "width": 346.0,
+              "height": 141.0
+            },
+            "screen_point": {
+              "x": 1159.022,
+              "y": 49.267
+            },
+            "adb_point": {
+              "x": 1159.022,
+              "y": 670.733
+            },
+            "screen_bounds": {
+              "left": 1043.669,
+              "bottom": 2.259,
+              "right": 1274.375,
+              "top": 96.275
+            },
+            "adb_bounds": {
+              "left": 1043.669,
+              "top": 623.725,
+              "right": 1274.375,
+              "bottom": 717.741
+            }
+          },
+          {
+            "name": "rank_btn",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/main/rank_btn",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1831520,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": 13.181,
+              "y": -4.004,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -70.5,
+              "y": -31.5,
+              "width": 141.0,
+              "height": 63.0
+            },
+            "screen_point": {
+              "x": 1233.13,
+              "y": 179.8
+            },
+            "adb_point": {
+              "x": 1233.13,
+              "y": 540.2
+            },
+            "screen_bounds": {
+              "left": 1186.139,
+              "bottom": 158.804,
+              "right": 1280.122,
+              "top": 200.796
+            },
+            "adb_bounds": {
+              "left": 1186.139,
+              "top": 519.204,
+              "right": 1280.122,
+              "bottom": 561.196
+            }
+          },
+          {
+            "name": "8",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/8",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1832460,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": -9.627,
+              "y": -5.547,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -296.0,
+              "y": -119.422,
+              "width": 592.0,
+              "height": 135.5
+            },
+            "screen_point": {
+              "x": 206.8,
+              "y": 110.373
+            },
+            "adb_point": {
+              "x": 206.8,
+              "y": 609.627
+            },
+            "screen_bounds": {
+              "left": 9.595,
+              "bottom": 30.811,
+              "right": 404.005,
+              "top": 121.085
+            },
+            "adb_bounds": {
+              "left": 9.595,
+              "top": 598.915,
+              "right": 404.005,
+              "bottom": 689.189
+            }
+          },
+          {
+            "name": "7",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/7",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1832348,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": -9.047,
+              "y": -3.763,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -296.0,
+              "y": -119.422,
+              "width": 592.0,
+              "height": 135.5
+            },
+            "screen_point": {
+              "x": 232.885,
+              "y": 190.654
+            },
+            "adb_point": {
+              "x": 232.885,
+              "y": 529.346
+            },
+            "screen_bounds": {
+              "left": 35.68,
+              "bottom": 111.091,
+              "right": 430.09,
+              "top": 201.366
+            },
+            "adb_bounds": {
+              "left": 35.68,
+              "top": 518.634,
+              "right": 430.09,
+              "bottom": 608.909
+            }
+          },
+          {
+            "name": "6",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/6",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1832236,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": -8.467,
+              "y": -1.979,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -296.0,
+              "y": -119.422,
+              "width": 592.0,
+              "height": 135.5
+            },
+            "screen_point": {
+              "x": 258.97,
+              "y": 270.935
+            },
+            "adb_point": {
+              "x": 258.97,
+              "y": 449.065
+            },
+            "screen_bounds": {
+              "left": 61.765,
+              "bottom": 191.372,
+              "right": 456.175,
+              "top": 281.646
+            },
+            "adb_bounds": {
+              "left": 61.765,
+              "top": 438.354,
+              "right": 456.175,
+              "bottom": 528.628
+            }
+          },
+          {
+            "name": "5",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/5",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1832124,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": -7.888,
+              "y": -0.195,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -296.0,
+              "y": -119.422,
+              "width": 592.0,
+              "height": 135.5
+            },
+            "screen_point": {
+              "x": 285.055,
+              "y": 351.215
+            },
+            "adb_point": {
+              "x": 285.055,
+              "y": 368.785
+            },
+            "screen_bounds": {
+              "left": 87.85,
+              "bottom": 271.653,
+              "right": 482.259,
+              "top": 361.927
+            },
+            "adb_bounds": {
+              "left": 87.85,
+              "top": 358.073,
+              "right": 482.259,
+              "bottom": 448.347
+            }
+          },
+          {
+            "name": "4",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/4",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1832012,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": -7.164,
+              "y": 2.033,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -296.0,
+              "y": -119.422,
+              "width": 592.0,
+              "height": 135.5
+            },
+            "screen_point": {
+              "x": 317.634,
+              "y": 451.483
+            },
+            "adb_point": {
+              "x": 317.634,
+              "y": 268.517
+            },
+            "screen_bounds": {
+              "left": 120.429,
+              "bottom": 371.921,
+              "right": 514.838,
+              "top": 462.195
+            },
+            "adb_bounds": {
+              "left": 120.429,
+              "top": 257.805,
+              "right": 514.838,
+              "bottom": 348.079
+            }
+          },
+          {
+            "name": "3",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/3",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1831900,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": -6.44,
+              "y": 4.261,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -296.0,
+              "y": -119.422,
+              "width": 592.0,
+              "height": 135.5
+            },
+            "screen_point": {
+              "x": 350.212,
+              "y": 551.751
+            },
+            "adb_point": {
+              "x": 350.212,
+              "y": 168.249
+            },
+            "screen_bounds": {
+              "left": 153.008,
+              "bottom": 472.188,
+              "right": 547.417,
+              "top": 562.463
+            },
+            "adb_bounds": {
+              "left": 153.008,
+              "top": 157.537,
+              "right": 547.417,
+              "bottom": 247.812
+            }
+          },
+          {
+            "name": "2",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/2",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1831788,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": -5.86,
+              "y": 6.045,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -296.0,
+              "y": -119.422,
+              "width": 592.0,
+              "height": 135.5
+            },
+            "screen_point": {
+              "x": 376.297,
+              "y": 632.032
+            },
+            "adb_point": {
+              "x": 376.297,
+              "y": 87.968
+            },
+            "screen_bounds": {
+              "left": 179.092,
+              "bottom": 552.469,
+              "right": 573.502,
+              "top": 642.743
+            },
+            "adb_bounds": {
+              "left": 179.092,
+              "top": 77.257,
+              "right": 573.502,
+              "bottom": 167.531
+            }
+          },
+          {
+            "name": "1",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/1",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1831676,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": -5.28,
+              "y": 7.829,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -296.0,
+              "y": -119.422,
+              "width": 592.0,
+              "height": 135.5
+            },
+            "screen_point": {
+              "x": 402.382,
+              "y": 712.313
+            },
+            "adb_point": {
+              "x": 402.382,
+              "y": 7.687
+            },
+            "screen_bounds": {
+              "left": 205.177,
+              "bottom": 632.75,
+              "right": 599.587,
+              "top": 723.024
+            },
+            "adb_bounds": {
+              "left": 205.177,
+              "top": -3.024,
+              "right": 599.587,
+              "bottom": 87.25
+            }
+          },
+          {
+            "name": "point",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/point",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1831624,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": 7.705,
+              "y": 7.186,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -192.55,
+              "y": -34.0,
+              "width": 385.1,
+              "height": 68.0
+            },
+            "screen_point": {
+              "x": 986.743,
+              "y": 683.391
+            },
+            "adb_point": {
+              "x": 986.743,
+              "y": 36.609
+            },
+            "screen_bounds": {
+              "left": 858.376,
+              "bottom": 660.725,
+              "right": 1115.109,
+              "top": 706.058
+            },
+            "adb_bounds": {
+              "left": 858.376,
+              "top": 13.942,
+              "right": 1115.109,
+              "bottom": 59.275
+            }
+          },
+          {
+            "name": "help",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/point/help",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1831656,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": 11.447,
+              "y": 7.172,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -38.5,
+              "y": -38.5,
+              "width": 77.0,
+              "height": 77.0
+            },
+            "screen_point": {
+              "x": 1155.109,
+              "y": 682.724
+            },
+            "adb_point": {
+              "x": 1155.109,
+              "y": 37.276
+            },
+            "screen_bounds": {
+              "left": 1129.443,
+              "bottom": 657.058,
+              "right": 1180.776,
+              "top": 708.391
+            },
+            "adb_bounds": {
+              "left": 1129.443,
+              "top": 11.609,
+              "right": 1180.776,
+              "bottom": 62.942
+            }
+          },
+          {
+            "name": "archives_list_btn",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/archives_list_btn",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1831664,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": -6.324,
+              "y": -7.123,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -173.5,
+              "y": -68.0,
+              "width": 347.0,
+              "height": 136.0
+            },
+            "screen_point": {
+              "x": 355.404,
+              "y": 39.447
+            },
+            "adb_point": {
+              "x": 355.404,
+              "y": 680.553
+            },
+            "screen_bounds": {
+              "left": 239.738,
+              "bottom": -5.887,
+              "right": 471.071,
+              "top": 84.78
+            },
+            "adb_bounds": {
+              "left": 239.738,
+              "top": 635.22,
+              "right": 471.071,
+              "bottom": 725.887
+            }
+          },
+          {
+            "name": "detail_btn",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/detail_btn",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1831616,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": -11.519,
+              "y": -7.123,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -173.5,
+              "y": -67.5,
+              "width": 347.0,
+              "height": 135.0
+            },
+            "screen_point": {
+              "x": 121.667,
+              "y": 39.447
+            },
+            "adb_point": {
+              "x": 121.667,
+              "y": 680.553
+            },
+            "screen_bounds": {
+              "left": 6.0,
+              "bottom": -5.553,
+              "right": 237.333,
+              "top": 84.447
+            },
+            "adb_bounds": {
+              "left": 6.0,
+              "top": 635.553,
+              "right": 237.333,
+              "bottom": 725.553
+            }
+          },
+          {
+            "name": "refresh_btn",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/frame/filter/refresh_btn",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1831474,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": -0.156,
+              "y": 7.377,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -31.0,
+              "y": -28.5,
+              "width": 62.0,
+              "height": 57.0
+            },
+            "screen_point": {
+              "x": 632.976,
+              "y": 691.966
+            },
+            "adb_point": {
+              "x": 632.976,
+              "y": 28.034
+            },
+            "screen_bounds": {
+              "left": 612.303,
+              "bottom": 672.96,
+              "right": 653.65,
+              "top": 710.972
+            },
+            "adb_bounds": {
+              "left": 612.303,
+              "top": 9.028,
+              "right": 653.65,
+              "bottom": 47.04
+            }
+          },
+          {
+            "name": "back_btn",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/back_btn",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1831134,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": -13.236,
+              "y": 7.187,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -45.5,
+              "y": -45.5,
+              "width": 91.0,
+              "height": 91.0
+            },
+            "screen_point": {
+              "x": 44.4,
+              "y": 683.4
+            },
+            "adb_point": {
+              "x": 44.4,
+              "y": 36.6
+            },
+            "screen_bounds": {
+              "left": 14.066,
+              "bottom": 653.067,
+              "right": 74.733,
+              "top": 713.733
+            },
+            "adb_bounds": {
+              "left": 14.066,
+              "top": 6.267,
+              "right": 74.733,
+              "bottom": 66.933
+            }
+          },
+          {
+            "name": "option",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/option",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -1831142,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": 13.074,
+              "y": 7.139,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -46.0,
+              "y": -53.5,
+              "width": 92.0,
+              "height": 107.0
+            },
+            "screen_point": {
+              "x": 1228.333,
+              "y": 681.267
+            },
+            "adb_point": {
+              "x": 1228.333,
+              "y": 38.733
+            },
+            "screen_bounds": {
+              "left": 1197.667,
+              "bottom": 645.6,
+              "right": 1259.0,
+              "top": 716.933
+            },
+            "adb_bounds": {
+              "left": 1197.667,
+              "top": 3.067,
+              "right": 1259.0,
+              "bottom": 74.4
+            }
+          },
+          {
+            "name": "gem",
+            "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gem",
+            "canvas": "ResPanel(Clone)",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -320462,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": 11.915,
+              "y": 7.237,
+              "z": 10.015
+            },
+            "local_rect": {
+              "x": -275.7,
+              "y": -30.0,
+              "width": 275.7,
+              "height": 60.0
+            },
+            "screen_point": {
+              "x": 1176.167,
+              "y": 685.687
+            },
+            "adb_point": {
+              "x": 1176.167,
+              "y": 34.313
+            },
+            "screen_bounds": {
+              "left": 992.367,
+              "bottom": 665.687,
+              "right": 1176.167,
+              "top": 705.687
+            },
+            "adb_bounds": {
+              "left": 992.367,
+              "top": 14.313,
+              "right": 1176.167,
+              "bottom": 54.313
+            }
+          },
+          {
+            "name": "gold",
+            "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gold",
+            "canvas": "ResPanel(Clone)",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -320416,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": 5.225,
+              "y": 7.237,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -137.85,
+              "y": -30.0,
+              "width": 275.7,
+              "height": 60.0
+            },
+            "screen_point": {
+              "x": 875.133,
+              "y": 685.687
+            },
+            "adb_point": {
+              "x": 875.133,
+              "y": 34.313
+            },
+            "screen_bounds": {
+              "left": 783.233,
+              "bottom": 665.687,
+              "right": 967.033,
+              "top": 705.687
+            },
+            "adb_bounds": {
+              "left": 783.233,
+              "top": 14.313,
+              "right": 967.033,
+              "bottom": 54.313
+            }
+          },
+          {
+            "name": "oil",
+            "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/oil",
+            "canvas": "ResPanel(Clone)",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "instance_id": -320366,
+            "click_listener_count": -1,
+            "runtime_click_listener_count": -1,
+            "world_position": {
+              "x": 0.578,
+              "y": 7.237,
+              "z": 10.015
+            },
+            "local_rect": {
+              "x": -137.85,
+              "y": -30.0,
+              "width": 275.7,
+              "height": 60.0
+            },
+            "screen_point": {
+              "x": 666.0,
+              "y": 685.687
+            },
+            "adb_point": {
+              "x": 666.0,
+              "y": 34.313
+            },
+            "screen_bounds": {
+              "left": 574.1,
+              "bottom": 665.687,
+              "right": 757.9,
+              "top": 705.687
+            },
+            "adb_bounds": {
+              "left": 574.1,
+              "top": 14.313,
+              "right": 757.9,
+              "bottom": 54.313
+            }
+          }
+        ]
+      },
+      "snapshot": {
+        "protocol_schema": "alas-headless.observer/v1",
+        "status": "ok",
+        "package": "com.bilibili.azurlane",
+        "pid": 1952,
+        "uid": 10105,
+        "peer_uid": 2000,
+        "abi": "x86_64",
+        "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+        "snapshot_schema": 1,
+        "snapshot_struct_size": 104,
+        "generation": 38383,
+        "scene_generation": 8,
+        "semantic_generation": 2,
+        "snapshot_monotonic_ns": 3159301185899,
+        "response_monotonic_ns": 3159354034074,
+        "age_ms": 52,
+        "observer_tid": 1984,
+        "assembly_count": 129,
+        "semantic_code": 1,
+        "width": 1280,
+        "height": 720,
+        "flags": 15,
+        "observer_attached": false,
+        "main_thread": true,
+        "button_count": 488,
+        "active_button_count": 27,
+        "interactable_button_count": 488,
+        "scene_handle": -76,
+        "ui_stage": 100,
+        "ui_method_mask": 15
+      },
+      "ui": {
+        "protocol_schema": "alas-headless.observer/v1",
+        "semantic_schema": "alas-headless.ui/v1",
+        "status": "ok",
+        "package": "com.bilibili.azurlane",
+        "pid": 1952,
+        "uid": 10105,
+        "peer_uid": 2000,
+        "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+        "schema": 1,
+        "struct_size": 4472768,
+        "generation": 38383,
+        "snapshot_monotonic_ns": 3159301185899,
+        "response_monotonic_ns": 3159371859670,
+        "age_ms": 70,
+        "method_mask": 15,
+        "toggle_count": 4,
+        "text_count": 35,
+        "image_count": 116,
+        "toggle_truncated": false,
+        "text_truncated": false,
+        "image_truncated": false,
+        "error_count": 0,
+        "error_counts": {
+          "toggle": 0,
+          "text": 0,
+          "image": 0,
+          "shared": 0
+        },
+        "skipped_count": 0,
+        "image_source_count": 6134,
+        "image_source_capacity": 16384,
+        "toggles": [
+          {
+            "kind": "toggle",
+            "name": "auto_toggle",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/auto_toggle",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "checked": true,
+            "raycast_top": null,
+            "adb_point": {
+              "x": 690.4,
+              "y": 121.0
+            },
+            "adb_bounds": {
+              "left": 690.4,
+              "top": 121.0,
+              "right": 690.4,
+              "bottom": 121.0
+            }
+          },
+          {
+            "kind": "toggle",
+            "name": "guild",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/guild",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "checked": true,
+            "raycast_top": null,
+            "adb_point": {
+              "x": 525.696,
+              "y": 28.034
+            },
+            "adb_bounds": {
+              "left": 482.366,
+              "top": 8.368,
+              "right": 569.026,
+              "bottom": 47.699
+            }
+          },
+          {
+            "kind": "toggle",
+            "name": "friend",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/friend",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "checked": true,
+            "raycast_top": null,
+            "adb_point": {
+              "x": 399.013,
+              "y": 28.034
+            },
+            "adb_bounds": {
+              "left": 355.683,
+              "top": 8.368,
+              "right": 442.343,
+              "bottom": 47.699
+            }
+          },
+          {
+            "kind": "toggle",
+            "name": "world",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/world",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "checked": true,
+            "raycast_top": null,
+            "adb_point": {
+              "x": 272.331,
+              "y": 28.034
+            },
+            "adb_bounds": {
+              "left": 228.992,
+              "top": 8.365,
+              "right": 315.669,
+              "bottom": 47.703
+            }
+          }
+        ],
+        "texts": [
+          {
+            "kind": "ugui-text",
+            "name": "lv",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/frame/lv_contain/lv",
+            "text": "125",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 449.283,
+              "top": 311.534,
+              "right": 470.269,
+              "bottom": 333.52
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "lv_bg",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/frame/lv_contain/lv_bg",
+            "text": "Lv.",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 434.293,
+              "top": 311.534,
+              "right": 449.283,
+              "bottom": 333.52
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "lv",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/frame/lv_contain/lv",
+            "text": "125",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 369.55,
+              "top": 481.468,
+              "right": 390.536,
+              "bottom": 503.453
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "lv_bg",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/frame/lv_contain/lv_bg",
+            "text": "Lv.",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 354.559,
+              "top": 481.468,
+              "right": 369.55,
+              "bottom": 503.453
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/start/cost_container/popup/Text",
+            "text": "0",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 1106.245,
+              "top": 546.451,
+              "right": 1259.662,
+              "bottom": 613.096
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "title",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/start/cost_container/title",
+            "text": "消耗：",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 1073.322,
+              "top": 546.737,
+              "right": 1131.17,
+              "bottom": 613.382
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "text_en",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/start/text_en",
+            "text": "WEIGH ANCHOR",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 1058.727,
+              "top": 649.331,
+              "right": 1235.003,
+              "bottom": 688.118
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "text",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/start/text",
+            "text": "出击",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 1058.694,
+              "top": 603.112,
+              "right": 1243.3,
+              "bottom": 688.085
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/infomation/target/goal/goal_time/Text",
+            "text": "120秒内结束战斗",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 1017.067,
+              "top": 218.37,
+              "right": 1266.4,
+              "bottom": 247.237
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/infomation/target/goal/goal_sink/Text",
+            "text": "己方舰队全部存活",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 1015.6,
+              "top": 181.563,
+              "right": 1264.933,
+              "bottom": 210.43
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/infomation/target/goal/goal_tpl/Text",
+            "text": "击破敌方舰队",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 1017.067,
+              "top": 144.757,
+              "right": 1266.4,
+              "bottom": 173.623
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "GameObject (1)",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/infomation/target/title/GameObject (1)",
+            "text": "TARGETS",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 1018.319,
+              "top": 119.861,
+              "right": 1087.496,
+              "bottom": 130.524
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "GameObject",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/infomation/target/title/GameObject",
+            "text": "目标",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 974.2,
+              "top": 102.559,
+              "right": 1017.852,
+              "bottom": 132.749
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "GameObject (1)",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/infomation/atlasloot/atlasloot/title/GameObject (1)",
+            "text": "ATLASLOOT",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 1018.567,
+              "top": 290.501,
+              "right": 1113.203,
+              "bottom": 301.164
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "GameObject",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/infomation/atlasloot/atlasloot/title/GameObject",
+            "text": "掉落",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 976.214,
+              "top": 272.34,
+              "right": 1018.0,
+              "bottom": 302.53
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/fleet_info/fleet_name/Text",
+            "text": "信标作战",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 577.727,
+              "top": 624.077,
+              "right": 778.995,
+              "bottom": 658.732
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "fleet_number",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/fleet_info/fleet_number",
+            "text": "1",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 535.408,
+              "top": 621.744,
+              "right": 556.068,
+              "bottom": 661.065
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text3",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/gear_score/main/line/Image/Text3",
+            "text": "FLEET POWER",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 102.163,
+              "top": 131.4,
+              "right": 169.037,
+              "bottom": 140.2
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text2",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/gear_score/main/line/Image/Text2",
+            "text": "MAIN",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 102.163,
+              "top": 122.8,
+              "right": 169.037,
+              "bottom": 131.467
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text1",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/gear_score/main/line/Image/Text1",
+            "text": "主力舰队",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 170.767,
+              "top": 106.133,
+              "right": 284.767,
+              "bottom": 146.8
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/gear_score/main/Text",
+            "text": "3421",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 160.233,
+              "top": 156.5,
+              "right": 281.1,
+              "bottom": 195.767
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text3",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/gear_score/vanguard/line/Image/Text3",
+            "text": "FLEET POWER",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 766.163,
+              "top": 503.4,
+              "right": 833.037,
+              "bottom": 512.2
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text2",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/gear_score/vanguard/line/Image/Text2",
+            "text": "VANGUARD",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 766.163,
+              "top": 494.8,
+              "right": 833.037,
+              "bottom": 503.467
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text1",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/gear_score/vanguard/line/Image/Text1",
+            "text": "先锋舰队",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 834.767,
+              "top": 478.133,
+              "right": 948.767,
+              "bottom": 518.8
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/gear_score/vanguard/Text",
+            "text": "2885",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 824.233,
+              "top": 528.5,
+              "right": 945.1,
+              "bottom": 567.767
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/4/selected/challenging/Text",
+            "text": "",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 394.449,
+              "top": 299.301,
+              "right": 501.044,
+              "bottom": 340.16
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/point/Text",
+            "text": "2/3",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 974.276,
+              "top": 19.642,
+              "right": 1110.209,
+              "bottom": 55.042
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/main/hp/Text",
+            "text": "HP:1820000",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 268.568,
+              "top": 577.203,
+              "right": 1258.035,
+              "bottom": 613.546
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/main/hp/level/Text",
+            "text": "15",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 94.438,
+              "top": 577.666,
+              "right": 201.104,
+              "bottom": 619.0
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "gem_value",
+            "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gem/gem_value",
+            "text": "3470",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 1048.174,
+              "top": 22.943,
+              "right": 1132.426,
+              "bottom": 43.683
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "gold_value",
+            "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gold/gold_value",
+            "text": "6260",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 832.057,
+              "top": 23.076,
+              "right": 921.409,
+              "bottom": 43.816
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "gold_max_value",
+            "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gold/gold_max_value",
+            "text": "MAX: 108300",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 834.945,
+              "top": -2.284,
+              "right": 941.433,
+              "bottom": 16.643
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "oil_value",
+            "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/oil/oil_value",
+            "text": "22926",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 626.591,
+              "top": 23.609,
+              "right": 715.943,
+              "bottom": 44.349
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "oil_max_value",
+            "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/oil/oil_max_value",
+            "text": "MAX: 17450",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 628.799,
+              "top": -1.937,
+              "right": 732.567,
+              "bottom": 15.629
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "FpsPanel",
+            "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+            "text": "",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 573.333,
+              "top": 0.0,
+              "right": 706.667,
+              "bottom": 34.667
+            }
+          }
+        ],
+        "images": [
+          {
+            "kind": "image",
+            "name": "star_tpl(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/stars/star_tpl(Clone)",
+            "sprite": "star",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 401.545,
+              "top": 295.869,
+              "right": 420.206,
+              "bottom": 314.53
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 410.876,
+              "y": 305.2
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "star_tpl(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/stars/star_tpl(Clone)",
+            "sprite": "star",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 412.209,
+              "top": 295.869,
+              "right": 430.869,
+              "bottom": 314.53
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 421.539,
+              "y": 305.2
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "star_tpl(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/stars/star_tpl(Clone)",
+            "sprite": "star",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 422.872,
+              "top": 295.869,
+              "right": 441.532,
+              "bottom": 314.53
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 432.202,
+              "y": 305.2
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "star_tpl(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/stars/star_tpl(Clone)",
+            "sprite": "star",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 433.535,
+              "top": 295.869,
+              "right": 452.196,
+              "bottom": 314.53
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 442.865,
+              "y": 305.2
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "star_tpl(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/stars/star_tpl(Clone)",
+            "sprite": "star",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 444.198,
+              "top": 295.869,
+              "right": 462.859,
+              "bottom": 314.53
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 453.528,
+              "y": 305.2
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "star_tpl(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/stars/star_tpl(Clone)",
+            "sprite": "star",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 454.861,
+              "top": 295.869,
+              "right": 473.522,
+              "bottom": 314.53
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 464.192,
+              "y": 305.2
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "type",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/type",
+            "sprite": "zhanlie",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 376.953,
+              "top": 314.39,
+              "right": 404.678,
+              "bottom": 331.451
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 390.815,
+              "y": 322.92
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "type_icon_bg",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/frame/type_icon_bg",
+            "sprite": "ship_type_icon_bg",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 375.131,
+              "top": 311.201,
+              "right": 407.11,
+              "bottom": 333.853
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 391.121,
+              "y": 322.527
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "frame",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/frame",
+            "sprite": "white_dot",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 0.0,
+              "green": 0.0,
+              "blue": 0.0,
+              "alpha": 0.629
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 407.543,
+              "top": 311.568,
+              "right": 497.019,
+              "bottom": 333.487
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 407.543,
+              "y": 322.527
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "star_tpl(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/stars/star_tpl(Clone)",
+            "sprite": "star",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 321.812,
+              "top": 465.803,
+              "right": 340.473,
+              "bottom": 484.463
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 331.142,
+              "y": 475.133
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "star_tpl(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/stars/star_tpl(Clone)",
+            "sprite": "star",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 332.475,
+              "top": 465.803,
+              "right": 351.136,
+              "bottom": 484.463
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 341.806,
+              "y": 475.133
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "star_tpl(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/stars/star_tpl(Clone)",
+            "sprite": "star",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 343.138,
+              "top": 465.803,
+              "right": 361.799,
+              "bottom": 484.463
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 352.469,
+              "y": 475.133
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "star_tpl(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/stars/star_tpl(Clone)",
+            "sprite": "star",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 353.802,
+              "top": 465.803,
+              "right": 372.462,
+              "bottom": 484.463
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 363.132,
+              "y": 475.133
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "star_tpl(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/stars/star_tpl(Clone)",
+            "sprite": "star",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 364.465,
+              "top": 465.803,
+              "right": 383.125,
+              "bottom": 484.463
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 373.795,
+              "y": 475.133
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "star_tpl(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/stars/star_tpl(Clone)",
+            "sprite": "star",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 375.128,
+              "top": 465.803,
+              "right": 393.789,
+              "bottom": 484.463
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 384.458,
+              "y": 475.133
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "type",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/type",
+            "sprite": "quzhu",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 297.22,
+              "top": 484.323,
+              "right": 324.944,
+              "bottom": 501.384
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 311.082,
+              "y": 492.854
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "type_icon_bg",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/frame/type_icon_bg",
+            "sprite": "ship_type_icon_bg",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 295.398,
+              "top": 481.135,
+              "right": 327.377,
+              "bottom": 503.787
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 311.387,
+              "y": 492.461
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "frame",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/HeroContainer/heroInfo(Clone)/info/frame",
+            "sprite": "white_dot",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 0.0,
+              "green": 0.0,
+              "blue": 0.0,
+              "alpha": 0.629
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 327.81,
+              "top": 481.501,
+              "right": 417.285,
+              "bottom": 503.42
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 327.81,
+              "y": 492.461
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "option",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/blur_panel/top/option",
+            "sprite": "viewall_1920",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 1210.481,
+              "top": -12.894,
+              "right": 1271.795,
+              "bottom": 58.416
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 1241.138,
+              "y": 22.761
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "Image",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/blur_panel/top/title/Image",
+            "sprite": "FORMATION",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 170.486,
+              "top": 5.767,
+              "right": 255.791,
+              "bottom": 32.425
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 213.139,
+              "y": 19.096
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "title",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/blur_panel/top/title",
+            "sprite": "title",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 110.705,
+              "top": -12.894,
+              "right": 184.681,
+              "bottom": 33.758
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 147.693,
+              "y": 10.432
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "Image",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/blur_panel/top/back_btn/mask/Image",
+            "sprite": "back_btn",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 23.001,
+              "top": 2.234,
+              "right": 94.311,
+              "bottom": 72.212
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 58.656,
+              "y": 37.223
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "mask",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/blur_panel/top/back_btn/mask",
+            "sprite": "icon_bg_mask_1920",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 0.140138,
+              "green": 0.125541,
+              "blue": 0.198529,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 11.538,
+              "top": -8.429,
+              "right": 103.508,
+              "bottom": 83.541
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 57.523,
+              "y": 37.556
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "back_btn",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/blur_panel/top/back_btn",
+            "sprite": "icon_bg_front_1920",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 0.523,
+              "top": -19.444,
+              "right": 114.523,
+              "bottom": 94.557
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 57.523,
+              "y": 37.556
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "line",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/blur_panel/top/line",
+            "sprite": "top_line",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 0.588235
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": -213.833,
+              "top": 36.79,
+              "right": 1493.833,
+              "bottom": 38.123
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 640.0,
+              "y": 38.123
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "print",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/blur_panel/top/print",
+            "sprite": "player_info_bg1_1920",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 98.757,
+              "top": 11.39,
+              "right": 363.91,
+              "bottom": 28.724
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 231.333,
+              "y": 20.057
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "print_bg",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/blur_panel/top/print_bg",
+            "sprite": "player_info_bg2_1920",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 94.142,
+              "top": -7.542,
+              "right": 412.792,
+              "bottom": 31.123
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 253.467,
+              "y": 11.79
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "print_top",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/blur_panel/top/print_top",
+            "sprite": "icon_bg_top_1920",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 56.065,
+              "top": -16.544,
+              "right": 114.069,
+              "bottom": 8.791
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 85.067,
+              "y": -3.876
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "top_bg",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/blur_panel/top_bg",
+            "sprite": "top_bg",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 0.208,
+              "top": -16.426,
+              "right": 1279.792,
+              "bottom": 38.223
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 640.0,
+              "y": -16.426
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "off",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/auto_toggle/off",
+            "sprite": "auto_toggle_on",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 759.104,
+              "top": 113.003,
+              "right": 789.761,
+              "bottom": 128.997
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 774.433,
+              "y": 121.0
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "bg",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/auto_toggle/bg",
+            "sprite": "auto_toggle_bg",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 725.122,
+              "top": 98.674,
+              "right": 913.727,
+              "bottom": 143.326
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 819.425,
+              "y": 121.0
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "icon",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/start/cost_container/popup/icon",
+            "sprite": "res_oil",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 1123.173,
+              "top": 557.801,
+              "right": 1158.495,
+              "bottom": 600.453
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 1123.173,
+              "y": 579.127
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "bg",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/start/cost_container/popup/bg",
+            "sprite": "",
+            "flags": 12711,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 0.0,
+              "green": 0.0,
+              "blue": 0.0,
+              "alpha": 0.241
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 1136.435,
+              "top": 566.065,
+              "right": 1214.41,
+              "bottom": 594.055
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 1175.422,
+              "y": 580.06
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "start",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/start",
+            "sprite": "btn_formation_sel",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 1026.371,
+              "top": 596.481,
+              "right": 1257.629,
+              "bottom": 686.452
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 1142.0,
+              "y": 641.467
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "label",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/infomation/target/goal/goal_time/label",
+            "sprite": "label_tri",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 992.2,
+              "top": 226.47,
+              "right": 1005.533,
+              "bottom": 239.137
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 998.867,
+              "y": 232.803
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "label",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/infomation/target/goal/goal_sink/label",
+            "sprite": "label_tri",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 992.2,
+              "top": 189.663,
+              "right": 1005.533,
+              "bottom": 202.33
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 998.867,
+              "y": 195.997
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "label",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/infomation/target/goal/goal_tpl/label",
+            "sprite": "label_tri",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 992.2,
+              "top": 152.857,
+              "right": 1005.533,
+              "bottom": 165.523
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 998.867,
+              "y": 159.19
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "title",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/infomation/target/title",
+            "sprite": "blue_label_bg",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 974.2,
+              "top": 106.191,
+              "right": 1272.103,
+              "bottom": 130.849
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 974.2,
+              "y": 118.52
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "bg",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/infomation/target/bg",
+            "sprite": "bg_bottom_with_add_mark",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 967.8,
+              "top": 99.187,
+              "right": 1285.467,
+              "bottom": 256.72
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 1285.467,
+              "y": 99.187
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "GameObject (1)",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/infomation/atlasloot/spoils/bg/GameObject (1)",
+            "sprite": "item_bg",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 975.348,
+              "top": 413.437,
+              "right": 1275.917,
+              "bottom": 516.07
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 1125.632,
+              "y": 464.753
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "GameObject",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/infomation/atlasloot/spoils/bg/GameObject",
+            "sprite": "item_bg",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 975.299,
+              "top": 306.953,
+              "right": 1275.966,
+              "bottom": 409.62
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 1125.632,
+              "y": 358.287
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "title",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/infomation/atlasloot/atlasloot/title",
+            "sprite": "blue_label_bg",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 974.314,
+              "top": 275.972,
+              "right": 1272.218,
+              "bottom": 300.631
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 974.314,
+              "y": 288.301
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "bg",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/infomation/atlasloot/atlasloot/bg",
+            "sprite": "bg_bottom_with_add_mark",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 967.917,
+              "top": 268.974,
+              "right": 1285.48,
+              "bottom": 521.425
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 1285.48,
+              "y": 268.974
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "fleet_name",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/fleet_info/fleet_name",
+            "sprite": "name_bg",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 570.397,
+              "top": 623.41,
+              "right": 814.317,
+              "bottom": 659.398
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 692.357,
+              "y": 641.404
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "fleet_info",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/fleet_info",
+            "sprite": "label",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 456.434,
+              "top": 608.082,
+              "right": 826.98,
+              "bottom": 674.727
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 641.707,
+              "y": 674.727
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "Image",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/gear_score/main/line/Image",
+            "sprite": "white_dot",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 57.033,
+              "top": 146.133,
+              "right": 288.367,
+              "bottom": 146.8
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 57.033,
+              "y": 146.133
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "line",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/gear_score/main/line",
+            "sprite": "white_dot",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 48.967,
+              "top": 144.1,
+              "right": 57.033,
+              "bottom": 148.033
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 53.0,
+              "y": 146.067
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "print",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/gear_score/main/print",
+            "sprite": "print1",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 48.133,
+              "top": 170.4,
+              "right": 122.133,
+              "bottom": 195.067
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 85.133,
+              "y": 182.733
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "arr",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/gear_score/main/arr",
+            "sprite": "print_left_up",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 47.8,
+              "top": 116.0,
+              "right": 55.133,
+              "bottom": 123.333
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 51.467,
+              "y": 119.667
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "Image",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/gear_score/vanguard/line/Image",
+            "sprite": "white_dot",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 721.033,
+              "top": 518.133,
+              "right": 952.367,
+              "bottom": 518.8
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 721.033,
+              "y": 518.133
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "line",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/gear_score/vanguard/line",
+            "sprite": "white_dot",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 712.967,
+              "top": 516.1,
+              "right": 721.033,
+              "bottom": 520.033
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 717.0,
+              "y": 518.067
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "print",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/gear_score/vanguard/print",
+            "sprite": "print1",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 712.133,
+              "top": 542.4,
+              "right": 786.133,
+              "bottom": 567.067
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 749.133,
+              "y": 554.733
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "arr",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/gear_score/vanguard/arr",
+            "sprite": "print_left_up",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 711.8,
+              "top": 488.0,
+              "right": 719.133,
+              "bottom": 495.333
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 715.467,
+              "y": 491.667
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "edit",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/checkBtn/edit",
+            "sprite": "btn_fleet_edit",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 51.333,
+              "top": 611.667,
+              "right": 248.667,
+              "bottom": 675.0
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 150.0,
+              "y": 643.333
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "shadow",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/mask/GridFrame/vanguard_1/shadow",
+            "sprite": "shadow",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 319.133,
+              "top": 454.8,
+              "right": 398.467,
+              "bottom": 492.8
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 358.8,
+              "y": 473.8
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "shadow",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/mask/GridFrame/main_1/shadow",
+            "sprite": "shadow",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 398.867,
+              "top": 284.867,
+              "right": 478.2,
+              "bottom": 322.867
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 438.533,
+              "y": 303.867
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "grid_bg",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/middle/mask/grid_bg",
+            "sprite": "grid_main",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 101.667,
+              "top": 218.467,
+              "right": 906.867,
+              "bottom": 603.667
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 504.267,
+              "y": 411.067
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "bg",
+            "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/bg",
+            "sprite": "formation_bg",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": -0.0,
+              "top": 0.0,
+              "right": 1280.0,
+              "bottom": 720.0
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 640.0,
+              "y": 360.0
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "world",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/8/tags/world",
+            "sprite": "tag_world",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 27.836,
+              "top": 607.439,
+              "right": 121.133,
+              "bottom": 632.096
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 74.485,
+              "y": 619.768
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "raiding",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/8/raiding",
+            "sprite": "item_03",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 9.545,
+              "top": 608.066,
+              "right": 404.056,
+              "bottom": 680.038
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 206.8,
+              "y": 644.052
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "world",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/7/tags/world",
+            "sprite": "tag_world",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 53.921,
+              "top": 527.158,
+              "right": 147.218,
+              "bottom": 551.815
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 100.57,
+              "y": 539.487
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "raiding",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/7/raiding",
+            "sprite": "item_03",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 35.629,
+              "top": 527.786,
+              "right": 430.14,
+              "bottom": 599.757
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 232.885,
+              "y": 563.772
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "world",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/6/tags/world",
+            "sprite": "tag_world",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 80.006,
+              "top": 446.877,
+              "right": 173.303,
+              "bottom": 471.534
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 126.654,
+              "y": 459.206
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "raiding",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/6/raiding",
+            "sprite": "item_03",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 61.714,
+              "top": 447.505,
+              "right": 456.225,
+              "bottom": 519.477
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 258.97,
+              "y": 483.491
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "world",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/5/tags/world",
+            "sprite": "tag_world",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 106.091,
+              "top": 366.597,
+              "right": 199.387,
+              "bottom": 391.254
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 152.739,
+              "y": 378.925
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "raiding",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/5/raiding",
+            "sprite": "item_03",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 87.799,
+              "top": 367.224,
+              "right": 482.31,
+              "bottom": 439.196
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 285.055,
+              "y": 403.21
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "world",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/4/tags/world",
+            "sprite": "tag_world",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 127.344,
+              "top": 247.881,
+              "right": 220.64,
+              "bottom": 272.538
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 173.992,
+              "y": 260.209
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "challenging",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/4/selected/challenging",
+            "sprite": "item_01",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 101.781,
+              "top": 249.645,
+              "right": 533.489,
+              "bottom": 356.24
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 317.635,
+              "y": 302.942
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "raiding",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/4/raiding",
+            "sprite": "item_03",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 120.378,
+              "top": 266.956,
+              "right": 514.889,
+              "bottom": 338.928
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 317.634,
+              "y": 302.942
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "guild",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/3/tags/guild",
+            "sprite": "tag_guild",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 171.249,
+              "top": 166.061,
+              "right": 264.545,
+              "bottom": 190.718
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 217.897,
+              "y": 178.39
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "raiding",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/3/raiding",
+            "sprite": "item_03",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 152.957,
+              "top": 166.689,
+              "right": 547.468,
+              "bottom": 238.66
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 350.212,
+              "y": 202.674
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "world",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/2/tags/world",
+            "sprite": "tag_world",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 197.334,
+              "top": 85.78,
+              "right": 290.63,
+              "bottom": 110.437
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 243.982,
+              "y": 98.109
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "raiding",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/2/raiding",
+            "sprite": "item_03",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 179.042,
+              "top": 86.408,
+              "right": 573.553,
+              "bottom": 158.379
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 376.297,
+              "y": 122.394
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "world",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/1/tags/world",
+            "sprite": "tag_world",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 223.418,
+              "top": 5.5,
+              "right": 316.715,
+              "bottom": 30.157
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 270.067,
+              "y": 17.828
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "raiding",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg/container/1/raiding",
+            "sprite": "item_03",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 205.126,
+              "top": 6.127,
+              "right": 599.638,
+              "bottom": 78.099
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 402.382,
+              "y": 42.113
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "archives_list_btn",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/archives_list_btn",
+            "sprite": "archives_list_btn",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 239.738,
+              "top": 635.22,
+              "right": 471.071,
+              "bottom": 725.887
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 355.404,
+              "y": 680.553
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "help",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/point/help",
+            "sprite": "help",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 1129.443,
+              "top": 11.609,
+              "right": 1180.776,
+              "bottom": 62.942
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 1155.109,
+              "y": 37.276
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "point",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/point",
+            "sprite": "challenge_point",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 858.376,
+              "top": 13.942,
+              "right": 1115.109,
+              "bottom": 59.275
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 986.743,
+              "y": 36.609
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "detail_btn",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/detail_btn",
+            "sprite": "butten01",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 6.0,
+              "top": 635.553,
+              "right": 237.333,
+              "bottom": 725.553
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 121.667,
+              "y": 680.553
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "title",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/title",
+            "sprite": "title_list",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 67.557,
+              "top": 4.93,
+              "right": 206.89,
+              "bottom": 76.263
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 137.223,
+              "y": 40.597
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "level",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/main/hp/level",
+            "sprite": "level",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 8.038,
+              "top": 588.066,
+              "right": 248.038,
+              "bottom": 629.4
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 128.038,
+              "y": 608.733
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "bar",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/main/hp/slider/bar",
+            "sprite": "hp",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 268.935,
+              "top": 608.666,
+              "right": 1249.535,
+              "bottom": 623.333
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 759.235,
+              "y": 616.0
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "hp",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/main/hp",
+            "sprite": "HPbar",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 60.462,
+              "top": 600.069,
+              "right": 1258.213,
+              "bottom": 629.397
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 659.337,
+              "y": 614.733
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "start_btn",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/main/start_btn",
+            "sprite": "btn_start",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 1043.669,
+              "top": 623.725,
+              "right": 1274.375,
+              "bottom": 717.741
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 1159.022,
+              "y": 670.733
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "rank_btn",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/main/rank_btn",
+            "sprite": "btn_damage_rank",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 1186.139,
+              "top": 519.204,
+              "right": 1280.122,
+              "bottom": 561.196
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 1233.13,
+              "y": 540.2
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "award_btn",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/main/award_btn",
+            "sprite": "btn_award",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 1080.04,
+              "top": 519.2,
+              "right": 1174.041,
+              "bottom": 561.2
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 1127.04,
+              "y": 540.2
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "label",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/main/label",
+            "sprite": "title",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 463.92,
+              "top": 433.2,
+              "right": 1049.92,
+              "bottom": 572.533
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 756.92,
+              "y": 502.867
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "frame",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/frame",
+            "sprite": "world_boss_frame",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 0.18,
+              "top": 561.928,
+              "right": 1559.673,
+              "bottom": 728.541
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 779.926,
+              "y": 720.133
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "refresh_btn",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/frame/filter/refresh_btn",
+            "sprite": "refresh_btn_icon",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 612.303,
+              "top": 9.028,
+              "right": 653.65,
+              "bottom": 47.04
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 632.976,
+              "y": 28.034
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "sel",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/guild/sel",
+            "sprite": "guild_sel",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 464.634,
+              "top": 6.369,
+              "right": 581.958,
+              "bottom": 49.699
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 523.296,
+              "y": 28.034
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "unsel",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/guild/unsel",
+            "sprite": "guild_unsel",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 474.7,
+              "top": 16.035,
+              "right": 576.692,
+              "bottom": 40.033
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 525.696,
+              "y": 28.034
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "img",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/line2/img",
+            "sprite": "line",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 458.356,
+              "top": 17.037,
+              "right": 466.353,
+              "bottom": 39.031
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 462.355,
+              "y": 28.034
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "sel",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/friend/sel",
+            "sprite": "friend_sel",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 348.217,
+              "top": 6.035,
+              "right": 444.21,
+              "bottom": 50.032
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 396.213,
+              "y": 28.034
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "unsel",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/friend/unsel",
+            "sprite": "friend_unsel",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 358.35,
+              "top": 16.701,
+              "right": 439.677,
+              "bottom": 39.366
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 399.013,
+              "y": 28.034
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "img",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/line1/img",
+            "sprite": "line",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 331.672,
+              "top": 17.035,
+              "right": 339.672,
+              "bottom": 39.033
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 335.672,
+              "y": 28.034
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "sel",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/world/sel",
+            "sprite": "world_sel",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 222.524,
+              "top": 5.364,
+              "right": 316.536,
+              "bottom": 50.703
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 269.53,
+              "y": 28.034
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "unsel",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/world/unsel",
+            "sprite": "world_unsel",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 232.992,
+              "top": 15.699,
+              "right": 311.669,
+              "bottom": 40.369
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 272.331,
+              "y": 28.034
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "bg",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/bg",
+            "sprite": "refresh_bg",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 0.578
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 594.571,
+              "top": -3.298,
+              "right": 673.248,
+              "bottom": 59.377
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 633.91,
+              "y": -3.298
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "bg1",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/frame/filter/toggles/bg1",
+            "sprite": "filter_bg",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 212.29,
+              "top": -3.304,
+              "right": 605.072,
+              "bottom": 57.44
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 408.681,
+              "y": -3.304
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "bg",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/list_panel/mask/bg",
+            "sprite": "slider_bg",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": -10.264,
+              "top": -116.163,
+              "right": 623.029,
+              "bottom": 847.107
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 306.382,
+              "y": 365.472
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "option",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/option",
+            "sprite": "option",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 1197.667,
+              "top": 3.067,
+              "right": 1259.0,
+              "bottom": 74.4
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 1228.333,
+              "y": 38.733
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "back_btn",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/back_btn",
+            "sprite": "back_butten",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 14.066,
+              "top": 6.267,
+              "right": 74.733,
+              "bottom": 66.933
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 44.4,
+              "y": 36.6
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "bg",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/bg",
+            "sprite": "world_boss_enable",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": -0.277,
+              "top": -0.314,
+              "right": 1280.277,
+              "bottom": 720.314
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 640.0,
+              "y": 360.0
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "970710(Clone)",
+            "path": "UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/paint/fitter/970710(Clone)",
+            "sprite": "970710",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 157.681,
+              "top": -0.05,
+              "right": 1465.921,
+              "bottom": 805.365
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 814.038,
+              "y": 371.336
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "icon",
+            "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gem/icon",
+            "sprite": "res_diamond",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 975.533,
+              "top": 6.913,
+              "right": 1023.0,
+              "bottom": 61.713
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 999.267,
+              "y": 34.313
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "gem",
+            "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gem",
+            "sprite": "res_bg_1920",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 992.367,
+              "top": 14.313,
+              "right": 1176.167,
+              "bottom": 54.313
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 1176.167,
+              "y": 34.313
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "max_bg2",
+            "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gold/max_bg2",
+            "sprite": "max_bg",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 839.945,
+              "top": -1.952,
+              "right": 943.255,
+              "bottom": 16.71
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 891.6,
+              "y": 7.379
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "icon",
+            "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gold/icon",
+            "sprite": "res_gold",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 769.1,
+              "top": 12.646,
+              "right": 813.1,
+              "bottom": 57.979
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 791.1,
+              "y": 35.313
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "gold",
+            "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gold",
+            "sprite": "res_bg_1920",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 783.233,
+              "top": 14.313,
+              "right": 967.033,
+              "bottom": 54.313
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 875.133,
+              "y": 34.313
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "max_bg",
+            "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/oil/max_bg",
+            "sprite": "max_bg",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 633.533,
+              "top": -1.954,
+              "right": 736.867,
+              "bottom": 16.713
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 685.2,
+              "y": 7.379
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "icon",
+            "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/oil/icon",
+            "sprite": "res_oil",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 555.213,
+              "top": 5.842,
+              "right": 609.254,
+              "bottom": 65.583
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 582.233,
+              "y": 35.713
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "oil",
+            "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/oil",
+            "sprite": "res_bg_1920",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 574.1,
+              "top": 14.313,
+              "right": 757.9,
+              "bottom": 54.313
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 666.0,
+              "y": 34.313
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "top",
+            "path": "OverlayCamera/Adpter/top/top",
+            "sprite": "mask1",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": -0.0,
+              "top": -140.667,
+              "right": 1280.0,
+              "bottom": 0.0
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 640.0,
+              "y": -70.333
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "left",
+            "path": "OverlayCamera/Adpter/left/left",
+            "sprite": "mask",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": -140.667,
+              "top": 0.0,
+              "right": -0.0,
+              "bottom": 720.0
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": -70.333,
+              "y": 360.0
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "bottom",
+            "path": "OverlayCamera/Adpter/bottom/bottom",
+            "sprite": "mask1",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": -0.0,
+              "top": 720.0,
+              "right": 1280.0,
+              "bottom": 860.667
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 640.0,
+              "y": 790.333
+            },
+            "inherited_alpha": 1.0
+          },
+          {
+            "kind": "image",
+            "name": "right",
+            "path": "OverlayCamera/Adpter/right/right",
+            "sprite": "mask",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 1280.0,
+              "top": 0.0,
+              "right": 1420.667,
+              "bottom": 720.0
+            },
+            "anchor_world_position": null,
+            "adb_point": {
+              "x": 1350.333,
+              "y": 360.0
+            },
+            "inherited_alpha": 1.0
+          }
+        ],
+        "globe_geometry": {
+          "schema": "alas-headless.globe-geometry/v1",
+          "status": 0,
+          "truncated": false,
+          "error_count": 0,
+          "camera_path": "",
+          "objects": []
+        },
+        "lua_globe_diagnostic": {
+          "schema": "alas-headless.lua-globe-diagnostic/v1",
+          "status": 0,
+          "stage": 0,
+          "truncated": false,
+          "stack_balanced": false,
+          "registry_visited": 0,
+          "inspection_count": 0,
+          "world_candidates": 0,
+          "drag_candidates": 0,
+          "colors": [],
+          "dragging": [],
+          "drag_pointer_instance_ids": [],
+          "drag_trigger_instance_ids": [],
+          "active_pointer_instance_id": 0
+        },
+        "shipyard_strengthen": {
+          "status": 0,
+          "stage": 0,
+          "truncated": false,
+          "stack_balanced": false,
+          "blueprint_id": 0,
+          "ship_id": 0,
+          "ship_index": 0,
+          "series": 0,
+          "rarity": 0,
+          "pursuing": false,
+          "purchased": 0,
+          "coins": 0,
+          "gems_known": false,
+          "paid_gems": 0,
+          "free_gems": 0,
+          "level": 0,
+          "fate_level": -1,
+          "exp": 0
+        },
+        "activity_identity": {
+          "status": 1,
+          "stack_balanced": true,
+          "archives": {
+            "status": 1,
+            "expected_count": 52,
+            "truncated": false,
+            "records": [
+              {
+                "id": 1,
+                "activity_type": 1,
+                "name": "红染常驻复刻",
+                "bg": "temp_hongran"
+              },
+              {
+                "id": 2,
+                "activity_type": 2,
+                "name": "Z舰队常驻复刻",
+                "bg": "temp_zjiandui"
+              },
+              {
+                "id": 4,
+                "activity_type": 1,
+                "name": "凛冬常驻复刻",
+                "bg": "temp_lingdong"
+              },
+              {
+                "id": 5,
+                "activity_type": 2,
+                "name": "围剿斯佩伯爵』常驻复刻",
+                "bg": "temp_sipei"
+              },
+              {
+                "id": 6,
+                "activity_type": 1,
+                "name": "异色格常驻复刻",
+                "bg": "temp_yisege"
+              },
+              {
+                "id": 7,
+                "activity_type": 1,
+                "name": "坠落之翼常驻复刻",
+                "bg": "temp_zhuiluo"
+              },
+              {
+                "id": 8,
+                "activity_type": 1,
+                "name": "鸢尾之华常驻复刻",
+                "bg": "temp_yuanwei"
+              },
+              {
+                "id": 9,
+                "activity_type": 1,
+                "name": "墨染的钢铁之花常驻复刻",
+                "bg": "temp_moran"
+              },
+              {
+                "id": 10,
+                "activity_type": 2,
+                "name": "光荣的一战常驻复刻",
+                "bg": "temp_guangrong"
+              },
+              {
+                "id": 11,
+                "activity_type": 1,
+                "name": "苍红的回响常驻复刻",
+                "bg": "temp_tiancheng"
+              },
+              {
+                "id": 12,
+                "activity_type": 2,
+                "name": "月光下的序曲常驻复刻",
+                "bg": "temp_xinaoerliang"
+              },
+              {
+                "id": 13,
+                "activity_type": 1,
+                "name": "俾斯麦常驻复刻",
+                "bg": "temp_bisimai"
+              },
+              {
+                "id": 14,
+                "activity_type": 2,
+                "name": "偶像一期常驻复刻",
+                "bg": "temp_ouxiang"
+              },
+              {
+                "id": 15,
+                "activity_type": 1,
+                "name": "神圣的悲喜剧常驻复刻",
+                "bg": "temp_beixiju"
+              },
+              {
+                "id": 16,
+                "activity_type": 2,
+                "name": "斯图尔特的硝烟常驻复刻",
+                "bg": "temp_longxiang"
+              },
+              {
+                "id": 17,
+                "activity_type": 1,
+                "name": "箱庭疗法常驻复刻",
+                "bg": "temp_xiangting"
+              },
+              {
+                "id": 18,
+                "activity_type": 1,
+                "name": "浮樱影华常驻复刻",
+                "bg": "temp_fuying"
+              },
+              {
+                "id": 19,
+                "activity_type": 2,
+                "name": "最珍贵的宝物常驻复刻",
+                "bg": "temp_u110"
+              },
+              {
+                "id": 20,
+                "activity_type": 2,
+                "name": "偶像二期常驻复刻",
+                "bg": "temp_ouxiang2"
+              },
+              {
+                "id": 21,
+                "activity_type": 1,
+                "name": "微层混合常驻复刻",
+                "bg": "temp_weiceng"
+              },
+              {
+                "id": 22,
+                "activity_type": 2,
+                "name": "峡湾间的星辰常驻复刻",
+                "bg": "temp_yonggan"
+              },
+              {
+                "id": 23,
+                "activity_type": 1,
+                "name": "穹顶下的圣咏曲常驻复刻",
+                "bg": "temp_zhende"
+              },
+              {
+                "id": 24,
+                "activity_type": 2,
+                "name": "夜幕下的归途常驻复刻",
+                "bg": "temp_taertu"
+              },
+              {
+                "id": 25,
+                "activity_type": 1,
+                "name": "北境序曲常驻复刻",
+                "bg": "temp_qiaba"
+              },
+              {
+                "id": 26,
+                "activity_type": 1,
+                "name": "永夜幻光常驻复刻",
+                "bg": "temp_hemin"
+              },
+              {
+                "id": 27,
+                "activity_type": 2,
+                "name": "峡湾间的反击常驻复刻",
+                "bg": "temp_aisijimoren"
+              },
+              {
+                "id": 28,
+                "activity_type": 1,
+                "name": "负象限作战常驻复刻",
+                "bg": "temp_u37"
+              },
+              {
+                "id": 29,
+                "activity_type": 1,
+                "name": "蝶海梦花常驻复刻",
+                "bg": "temp_xinnong"
+              },
+              {
+                "id": 30,
+                "activity_type": 1,
+                "name": "镜位螺旋常驻复刻",
+                "bg": "temp_xinzexi"
+              },
+              {
+                "id": 31,
+                "activity_type": 1,
+                "name": "破晓冰华常驻复刻",
+                "bg": "temp_talin"
+              },
+              {
+                "id": 32,
+                "activity_type": 2,
+                "name": "划破海空之翼常驻复刻",
+                "bg": "temp_pulinsidun"
+              },
+              {
+                "id": 33,
+                "activity_type": 2,
+                "name": "杰诺瓦的焰火常驻复刻",
+                "bg": "temp_fuxv"
+              },
+              {
+                "id": 34,
+                "activity_type": 1,
+                "name": "碧海光粼常驻复刻",
+                "bg": "temp_daofeng"
+              },
+              {
+                "id": 35,
+                "activity_type": 1,
+                "name": "复兴的赞美诗常驻复刻",
+                "bg": "temp_weineituo"
+              },
+              {
+                "id": 36,
+                "activity_type": 1,
+                "name": "逆转彩虹之塔常驻复刻",
+                "bg": "temp_huteng"
+              },
+              {
+                "id": 37,
+                "activity_type": 1,
+                "name": "深度回音常驻复刻",
+                "bg": "temp_kalangshitade"
+              },
+              {
+                "id": 38,
+                "activity_type": 2,
+                "name": "虚像构筑之塔常驻复刻",
+                "bg": "temp_diguo"
+              },
+              {
+                "id": 39,
+                "activity_type": 1,
+                "name": "泠誓光庭常驻复刻",
+                "bg": "temp_qianwei"
+              },
+              {
+                "id": 40,
+                "activity_type": 1,
+                "name": "雄鹰的叙事歌常驻复刻",
+                "bg": "temp_luoma"
+              },
+              {
+                "id": 41,
+                "activity_type": 1,
+                "name": "虹彩的终幕曲常驻复刻",
+                "bg": "temp_aimudeng"
+              },
+              {
+                "id": 42,
+                "activity_type": 2,
+                "name": "飓风与青春之泉常驻复刻",
+                "bg": "temp_fengfanv1"
+              },
+              {
+                "id": 43,
+                "activity_type": 1,
+                "name": "紫绛槿岚常驻复刻",
+                "bg": "temp_wuzang"
+              },
+              {
+                "id": 44,
+                "activity_type": 1,
+                "name": "定向折叠常驻复刻",
+                "bg": "temp_yuekechengII"
+              },
+              {
+                "id": 45,
+                "activity_type": 1,
+                "name": "湮烬尘墟常驻复刻",
+                "bg": "temp_yuanchou"
+              },
+              {
+                "id": 46,
+                "activity_type": 2,
+                "name": "远汇点作战常驻复刻",
+                "bg": "temp_bulunxierde"
+              },
+              {
+                "id": 47,
+                "activity_type": 2,
+                "name": "奏响鸢尾之歌常驻复刻",
+                "bg": "temp_masaiqu"
+              },
+              {
+                "id": 48,
+                "activity_type": 1,
+                "name": "空相交汇点常驻复刻",
+                "bg": "temp_bisimaiz"
+              },
+              {
+                "id": 49,
+                "activity_type": 2,
+                "name": "幻梦间奏曲常驻复刻",
+                "bg": "temp_sitelasibao"
+              },
+              {
+                "id": 50,
+                "activity_type": 3,
+                "name": "极地风暴常驻复刻",
+                "bg": "temp_kuersike"
+              },
+              {
+                "id": 51,
+                "activity_type": 3,
+                "name": "童心学院常驻复刻",
+                "bg": "temp_yaerweite"
+              },
+              {
+                "id": 52,
+                "activity_type": 2,
+                "name": "飓风与沉眠之海常驻复刻",
+                "bg": "temp_fengfanv2"
+              },
+              {
+                "id": 53,
+                "activity_type": 2,
+                "name": "飓风与自由群岛常驻复刻",
+                "bg": "temp_fengfanv3"
+              }
+            ]
+          },
+          "raids": {
+            "status": 1,
+            "stage": 14,
+            "proxy_count": 34,
+            "matched_count": 34,
+            "failed_id": 0,
+            "expected_count": 0,
+            "truncated": false,
+            "records": []
+          }
+        },
+        "operation_siren_globe_drag": {
+          "status": 2,
+          "handler_instance_id": 499654,
+          "endpoints": [
+            629.0,
+            327.0,
+            472.0,
+            533.0
+          ],
+          "handler_path": "WorldMap3D/entity/Plane",
+          "samples": [
+            {
+              "x": 629.0,
+              "y": 327.0,
+              "owned": false,
+              "top_path": "UICamera/Canvas/UIMain/WorldUI(Clone)/main/bg"
+            },
+            {
+              "x": 624.094,
+              "y": 333.438,
+              "owned": false,
+              "top_path": "UICamera/Canvas/UIMain/WorldUI(Clone)/main/bg"
+            },
+            {
+              "x": 619.188,
+              "y": 339.875,
+              "owned": false,
+              "top_path": "UICamera/Canvas/UIMain/WorldUI(Clone)/main/bg"
+            },
+            {
+              "x": 614.281,
+              "y": 346.312,
+              "owned": false,
+              "top_path": "UICamera/Canvas/UIMain/WorldUI(Clone)/main/bg"
+            },
+            {
+              "x": 609.375,
+              "y": 352.75,
+              "owned": false,
+              "top_path": "UICamera/Canvas/UIMain/WorldUI(Clone)/main/bg"
+            },
+            {
+              "x": 604.469,
+              "y": 359.188,
+              "owned": false,
+              "top_path": "UICamera/Canvas/UIMain/WorldUI(Clone)/main/bg"
+            },
+            {
+              "x": 599.562,
+              "y": 365.625,
+              "owned": false,
+              "top_path": "UICamera/Canvas/UIMain/WorldUI(Clone)/main/bg"
+            },
+            {
+              "x": 594.656,
+              "y": 372.062,
+              "owned": false,
+              "top_path": "UICamera/Canvas/UIMain/WorldUI(Clone)/main/bg"
+            },
+            {
+              "x": 589.75,
+              "y": 378.5,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 584.844,
+              "y": 384.938,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 579.938,
+              "y": 391.375,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 575.031,
+              "y": 397.812,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 570.125,
+              "y": 404.25,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 565.219,
+              "y": 410.688,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 560.312,
+              "y": 417.125,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 555.406,
+              "y": 423.562,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 550.5,
+              "y": 430.0,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 545.594,
+              "y": 436.438,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 540.688,
+              "y": 442.875,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 535.781,
+              "y": 449.312,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 530.875,
+              "y": 455.75,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 525.969,
+              "y": 462.188,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 521.062,
+              "y": 468.625,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 516.156,
+              "y": 475.062,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 511.25,
+              "y": 481.5,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 506.344,
+              "y": 487.938,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 501.438,
+              "y": 494.375,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 496.531,
+              "y": 500.812,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 491.625,
+              "y": 507.25,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 486.719,
+              "y": 513.688,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 481.812,
+              "y": 520.125,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 476.906,
+              "y": 526.562,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            },
+            {
+              "x": 472.0,
+              "y": 533.0,
+              "owned": true,
+              "top_path": "WorldMap3D/entity/Plane"
+            }
+          ]
+        },
+        "storage_scroll": {
+          "schema": "alas-headless.storage-scroll/v1",
+          "status": 0,
+          "matches": 0,
+          "controls": [],
+          "scrollbar": {
+            "schema": "alas-headless.storage-scrollbar/v1",
+            "status": 0,
+            "matches": 0,
+            "class_found": false,
+            "source_count": 0,
+            "controls": [],
+            "input": {
+              "schema": "alas-headless.storage-scrollbar-input/v1",
+              "status": 0
+            }
+          }
+        },
+        "private_quarters_physics": {
+          "schema": "alas-headless.private-colliders/v1",
+          "status": 0,
+          "truncated": false,
+          "error_count": 0,
+          "camera_path": "",
+          "colliders": []
+        }
+      },
+      "ui_source_generation": 38383
+    }
+  }
+}

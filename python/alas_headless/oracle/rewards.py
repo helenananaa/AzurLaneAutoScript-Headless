@@ -7,11 +7,29 @@ import re
 import time
 from typing import Optional, Tuple
 from .contracts import ActionReceipt, ButtonState, OracleState, Point
-from .errors import SemanticGateClosed, SemanticInputBlocked, SemanticTargetNotActionable
+from .errors import SemanticGateClosed, SemanticInputBlocked, SemanticTargetNotActionable, SemanticNavigationPending
 
 
 class RewardsOracle:
     """Rewards operations sharing the oracle frame and input boundary."""
+
+    def reward_sidebar_entry_ready(self, state: OracleState) -> bool:
+        """Prove an accepted entry's destination from one validated live state."""
+        roots = self._matches(state, 'reward/page/back')
+        if len(roots) > 1:
+            raise SemanticGateClosed('semantic target mapping is ambiguous')
+        if not roots:
+            return False
+        root = roots[0]
+        if root.actionable and not self._blocking_rules(state, 'reward/page/back'):
+            return True
+        if not (root.active_in_hierarchy and root.active_and_enabled):
+            return False
+        children = self._matches(state, 'reward/tactical/go')
+        if len(children) > 1:
+            raise SemanticGateClosed('semantic target mapping is ambiguous')
+        return bool(children and children[0].actionable
+                    and not self._blocking_rules(state, 'reward/tactical/go'))
 
     def _reward_sidebar_scroll_plan(self, semantic_id):
         if semantic_id not in ('reward/tactical/finish', 'reward/tactical/go'):
@@ -55,7 +73,16 @@ class RewardsOracle:
         if not (0 <= viewport.left < viewport.right <= self.fingerprint.width
                 and 0 <= top < viewport.bottom <= self.fingerprint.height):
             raise SemanticTargetNotActionable(semantic_id, state.generation)
-        if top <= target.bounds.top and target.bounds.bottom <= viewport.bottom:
+        # A Button can enter the outer frame while its owning card remains
+        # clipped and cannot receive raycasts. Use that exact reviewed card's
+        # observed bounds too; never tap the covered Button to work around it.
+        card_path = target.path.rsplit('/', 1)[0]
+        cards = [i for i in images if i.path == card_path
+                 and i.sprite in ('frame_class', 'frame_tech')]
+        if len(cards) > 1:
+            raise SemanticGateClosed('reward sidebar target card is ambiguous')
+        content_bounds = cards[0].bounds if cards else target.bounds
+        if top <= content_bounds.top and content_bounds.bottom <= viewport.bottom:
             return None
         anchors = [i for i in images if i.raycast_target and i.path.startswith(prefix + '/main/content/')
                    and (re.search(r'/event/list/mission_[0-9]+\(Clone\)$', i.path)
@@ -66,7 +93,7 @@ class RewardsOracle:
                    and top <= i.bounds.top < i.bounds.bottom <= viewport.bottom]
         if not anchors or self._swipe is None:
             raise SemanticTargetNotActionable(semantic_id, state.generation)
-        downward_content = target.bounds.bottom > viewport.bottom
+        downward_content = content_bounds.bottom > viewport.bottom
         edge = max(i.bounds.bottom for i in anchors) if downward_content else min(i.bounds.top for i in anchors)
         selected = [i for i in anchors if (i.bounds.bottom if downward_content else i.bounds.top) == edge]
         if len(selected) != 1:
@@ -92,7 +119,8 @@ class RewardsOracle:
         state, target, anchor, start, end = plan
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed('foreground changed before reward sidebar scroll')
-        self._swipe(round(start.x), round(start.y), round(end.x), round(end.y), 300)
+        duration_ms = 1500
+        self._swipe(round(start.x), round(start.y), round(end.x), round(end.y), duration_ms)
         deadline = time.monotonic() + 5.0
         while time.monotonic() < deadline:
             after = self.read_state()
@@ -105,6 +133,27 @@ class RewardsOracle:
                 return ActionReceipt(semantic_id='reward/sidebar/scroll', generation=state.generation,
                                      point=start, bounds=anchor.bounds, path=anchor.path)
             time.sleep(.1)
+        # A missed drag on a still-complete owning sidebar is local navigation
+        # delay. Preserve the actual gesture and let native task deferral own
+        # re-entry, rather than making unrelated scheduled tasks exit too.
+        pending = self._reward_sidebar_scroll_plan(semantic_id)
+        if pending is not None:
+            current_state, current_target, current_anchor, _, _ = pending
+            if (current_state.generation > state.generation
+                    and current_target.path == target.path
+                    and current_target.point is not None
+                    and abs(current_target.point.x - target.point.x) <= 1.0
+                    and abs(current_target.point.y - target.point.y) <= 1.0
+                    and current_anchor.path == anchor.path):
+                raise SemanticNavigationPending(
+                    semantic_id,
+                    dict(semantic_id='reward/sidebar/scroll', generation=state.generation,
+                         path=anchor.path, points=[round(start.x), round(start.y),
+                                                 round(end.x), round(end.y), duration_ms],
+                         before_target_point=[target.point.x, target.point.y],
+                         after_target_point=[current_target.point.x, current_target.point.y]),
+                    current_state.generation,
+                    'reward sidebar did not move on its fresh owning page')
         raise SemanticGateClosed('reward sidebar scroll movement was not observed; do not retry')
 
     def reward_item_info_visible(self) -> bool:

@@ -48,3 +48,39 @@ def test_ambiguous_story_stops_original_entry_without_retrying_old_globe():
     with pytest.raises(SemanticGateClosed, match='ambiguous story'):
         run()
     oracle.click_operation_siren_globe_zone_enter.assert_called_once()
+
+
+@pytest.mark.parametrize('site', ['screenshot', 'map-presence'])
+def test_accepted_zone_entry_waits_for_fresh_observation_without_repeating_input(site):
+    from alas_headless.oracle.errors import SemanticSnapshotStale
+    stale = SemanticSnapshotStale(11922, 10000)
+    host, oracle, run = native_entry([stale, True] if site == 'map-presence' else [True])
+    if site == 'screenshot':host.device.screenshot.side_effect=[stale, None]
+    run()
+    assert host.device.screenshot.call_count == 2
+    oracle.click_operation_siren_globe_zone_enter.assert_called_once()
+    host.handle_action_point.assert_not_called()
+    host.handle_map_event.assert_not_called()
+
+
+def test_entry_preserves_uncertain_input_error_without_another_frame_or_input():
+    from alas_headless.oracle.errors import SemanticSnapshotStale
+    stale = SemanticSnapshotStale(11922, 10000);stale.input_outcome_uncertain=True
+    host, oracle, run = native_entry([True])
+    host.device.screenshot.side_effect=stale
+    with pytest.raises(SemanticSnapshotStale) as caught:run()
+    assert caught.value is stale
+    assert host.device.screenshot.call_count==1
+    oracle.click_operation_siren_globe_zone_enter.assert_called_once()
+
+
+def test_persistent_stale_entry_keeps_original_wait_bound_and_classified_local_error():
+    from alas_headless.oracle.errors import SemanticSnapshotStale
+    stale = SemanticSnapshotStale(11922, 10000)
+    host, oracle, run = native_entry([])
+    host.device.screenshot.side_effect=stale
+    with pytest.raises(SemanticSnapshotStale) as caught:run()
+    assert caught.value is stale
+    assert host.device.screenshot.call_count==80
+    oracle.click_operation_siren_globe_zone_enter.assert_called_once()
+    host.handle_map_event.assert_not_called()

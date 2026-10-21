@@ -8,7 +8,8 @@ from alas_headless.oracle.errors import ObserverTransportError
 
 
 @pytest.mark.parametrize('line', ['GET /v1/globe-port-input 6\n', 'GET /v1/globe-projection 268 421\n',
-    'GET /v1/globe-projection -2.68e2 +.421E3\n', 'GET /v1/state\n', 'GET /v1/os-map-drag 500 500 500 300\n', 'GET /v1/globe-map-drag 361 537 661 554\n'])
+    'GET /v1/globe-projection -2.68e2 +.421E3\n', 'GET /v1/storage-scrollbar-input 1260.000 134.267\n',
+    'GET /v1/state\n', 'GET /v1/os-map-drag 500 500 500 300\n', 'GET /v1/globe-map-drag 361 537 661 554\n'])
 def test_transport_sends_complete_read_request(line):
     connection = MagicMock()
     connection.__enter__.return_value = connection
@@ -23,7 +24,10 @@ def test_transport_sends_complete_read_request(line):
     'GET /v1/globe-projection 268 421 trailing\n', 'GET /v1/globe-projection 268 421\nGET /v1/state\n',
     'GET /v1/globe-projection 268 421', 'POST /v1/globe-projection 268 421\n', 'GET /v1/os-map-drag nan 1 2 3\n',
     'GET /v1/os-map-drag 1 2 3 4 trailing\n', 'GET /v1/os-map-drag 1 2 3 4\nGET /v1/state\n', 'GET /v1/globe-map-drag nan 1 2 3\n',
-    'GET /v1/globe-map-drag 1 2 3 4\nGET /v1/state\n'])
+    'GET /v1/globe-map-drag 1 2 3 4\nGET /v1/state\n',
+    'GET /v1/storage-scrollbar-input 1e999 134\n',
+    'GET /v1/storage-scrollbar-input 1260 134 trailing\n',
+    'GET /v1/storage-scrollbar-input 1260 134\nGET /v1/state\n'])
 def test_transport_refuses_malformed_request_before_socket(line):
     with patch('alas_headless.oracle.transport.socket.create_connection') as connect:
         with pytest.raises(ObserverTransportError, match='unsupported'):

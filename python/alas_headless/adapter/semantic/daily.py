@@ -102,14 +102,13 @@ class DailyAdapterPorts:
 
     def click_exercise_precombat_start(self) -> ActionReceipt:
         self._package_gate()
-        if not self._exercise_pending:
+        if not (self._exercise_pending or self._exercise_execution_active):
             raise SemanticGateClosed("exercise execution intent is incomplete")
         receipt = self._dispatch_mutation(
             "exercise.execute", self.oracle.click_daily_precombat_start
         )
         self._exercise_pending = False
         self._exercise_execution_active = True
-        self._exercise_start_transition_until = time.monotonic() + 15.0
         return replace(receipt, semantic_id="exercise/execute")
 
     def complete_daily_battle_result(self, timeout_seconds: float = 30.0) -> Tuple[ActionReceipt, ...]:

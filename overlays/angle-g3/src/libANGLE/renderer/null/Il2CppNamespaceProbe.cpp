@@ -44,6 +44,9 @@ std::mutex gMapDragMutex;
 bool gMapDragRequested = false;
 uint32_t gMapDragScope = 1;
 std::array<float, 4> gMapDragEndpoints = {};
+std::mutex gStorageInputMutex;
+bool gStorageInputRequested = false;
+float gStorageInputX = 0, gStorageInputY = 0;
 constexpr std::array<std::string_view, kIl2CppAllowlistSize>
     kAllowlistedSymbols = {
         "il2cpp_domain_get",
@@ -335,6 +338,7 @@ struct UiProbeResult {
   NativeLuaShipyardState shipyard = {};
   NativeLuaActivityIdentity activityIdentity = {};
   ObserverMapDragProof mapDrag = {};
+  ObserverStorageScroll storageScroll = {};
   uint32_t privatePhysicsStatus = 0;
   uint32_t colliderCount = 0;
   uint32_t colliderTruncated = 0;
@@ -466,7 +470,28 @@ bool IsArchiveCardControl(std::string_view name, std::string_view path) {
        path.substr(root.size()) == "item(Clone)/bg/icon");
 }
 
+bool IsStorageMaterialItemControl(std::string_view name, std::string_view path) {
+  if (name.empty() || !std::all_of(name.begin(), name.end(),
+          [](char value) { return value >= '0' && value <= '9'; })) return false;
+  constexpr std::string_view root = "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/";
+  return path == std::string(root) + "adapt/item_scrollview/item_grid/" + std::string(name) ||
+         path == std::string(root) + "item_scrollview/item_grid/" + std::string(name);
+}
+
 bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
+  if (name == "back" && path ==
+      "OverlayCamera/Overlay/UIMain/SVOrderPanel(Clone)/adapt/back") return true;
+  if (IsStorageMaterialItemControl(name, path)) return true;
+  if (name == "ok_btn" && path ==
+      "OverlayCamera/Overlay/UIMain/ResolveEquipmentUI(Clone)/main/ok_btn") return true;
+  if ((name == "destroy_button" || name == "cancel_button") && path ==
+      "OverlayCamera/Overlay/UIMain/ResolveEquipmentUI(Clone)/destroy_confirm/actions/" + std::string(name)) return true;
+  if ((name == "use_one_button" && path ==
+       "OverlayCamera/Overlay/UIMain/ItemInfoUI(Clone)/window/actions/use_one_button") ||
+      (name == "btnBack" && path ==
+       "OverlayCamera/Overlay/UIMain/ItemInfoUI(Clone)/window/top/btnBack")) return true;
+  if ((name == "confirm_button" || name == "cancel_button") && path ==
+      "OverlayCamera/Overlay/UIMain/ItemInfoUI(Clone)/operate/actions/" + std::string(name)) return true;
   if (IsShipyardStrengthenControl(name, path) || IsArchiveCardControl(name, path)) return true;
   if (IsMeowfficerPurchaseControl(name, path)) return true;
   if (IsShipyardSeriesControl(name, path)) return true;
@@ -936,9 +961,12 @@ bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
     return true;
   }
   if ((name == "confirm_button" || name == "cancel_button") &&
-      EndsWith(path,
+      (EndsWith(path,
                "Overlay/UIMain/blur_panel/select_panel/" +
-                   std::string(name))) {
+                   std::string(name)) ||
+       EndsWith(path,
+                "Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/" +
+                    std::string(name)))) {
     return true;
   }
   if (name == "back" &&
@@ -957,13 +985,14 @@ bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
     std::string_view name;
     std::string_view suffix;
   };
-  constexpr std::array<Target, 11> kMainButtons = {
+  constexpr std::array<Target, 12> kMainButtons = {
       Target{"battle", "frame/right/1/battle"},
       Target{"formation", "frame/right/1/formation"},
       Target{"settings", "frame/top/btns/settings"},
       Target{"mail", "frame/top/btns/mail"},
       Target{"shop", "frame/bottom/frame/shop"},
       Target{"dock", "frame/bottom/frame/dock"},
+      Target{"storage", "frame/bottom/frame/storage"},
       Target{"task", "frame/bottom/frame/task"},
       Target{"build", "frame/bottom/frame/build"},
       Target{"live", "frame/bottom/frame/live"},
@@ -1054,6 +1083,8 @@ bool IsArchivesRewardMarker(std::string_view path) {
 
 bool ShouldEvaluateImageTopRaycast(std::string_view name,
                                    std::string_view path) {
+  if ((name == "left" || name == "right") && path ==
+      "OverlayCamera/Overlay/UIMain/ItemInfoUI(Clone)/operate/count/number_panel/" + std::string(name)) return true;
   if (EndsWith(path, "DockyardQuickSelectSettingUI(Clone)/window/notifications/options/notify_tpl_0/on/Image2")) return true;
   if (name == "bg" &&
       EndsWith(path,
@@ -1172,6 +1203,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
   result.luaGlobe = {};
   result.shipyard = {};
   result.activityIdentity = {};
+  result.storageScroll = {};
   result.colliderCount = 0;
   result.colliderTruncated = 0;
   result.colliderErrors = 0;
@@ -2078,6 +2110,8 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
       if ((objectName == "extend" &&
            EndsWith(path, "NewMainMellowTheme(Clone)/frame/left/extend")) ||
           IsCampaignPreparationSwitch(objectName, path) ||
+          (objectName == "back" && path ==
+           "OverlayCamera/Overlay/UIMain/SVOrderPanel(Clone)/adapt/back") ||
           IsMeowfficerPurchaseControl(objectName, path) ||
           IsRetirementControl(path) || IsSubmarineCallControl(path) ||
           IsCampaignStrategyDetailsControl(path) || IsCampaignDeploymentControl(path) ||
@@ -2180,6 +2214,8 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
           path.find("DockyardUI(Clone)/main/ship_container/ships/") !=
               std::string_view::npos ||
           path.find("Overlay/UIMain/blur_panel/select_panel/") !=
+              std::string_view::npos ||
+          path.find("Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/") !=
               std::string_view::npos ||
           path.find("NewNavalTacticsUI(Clone)/adpter/"
                     "NewNavalTacticsStudentsPage(Clone)/") !=
@@ -2673,6 +2709,208 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
     }
   }
 
+  // Optional StoreHouse scroll telemetry. Read the actual Unity components;
+  // no callbacks, value setters, scroll actions or task decisions run here.
+  bool storageVisible = false;
+  for (size_t i = 0; i < result.recordCount; ++i) {
+    storageVisible |= std::string_view(result.records[i].path.data()).find(
+        "/StoreHouseUI(Clone)/") != std::string_view::npos;
+  }
+  if (storageVisible) {
+    auto &scroll = result.storageScroll;
+    scroll.status = 2;
+    void *scrollClass = classFromName(uiImage, "UnityEngine.UI", "ScrollRect");
+    void *barClass = classFromName(uiImage, "UnityEngine.UI", "Scrollbar");
+    static thread_local LoadedObjectCollector storageScrollCollector;
+    if (scrollClass && barClass && collectLoadedInstances(scrollClass, &storageScrollCollector) &&
+        !storageScrollCollector.truncated) {
+      void *selected = nullptr;
+      for (size_t i = 0; i < storageScrollCollector.count; ++i) {
+        ObserverButtonRecord record;
+        if (!populateControlRecord(storageScrollCollector.objects[i], false, &record)) continue;
+        const std::string_view path(record.path.data());
+        if (path != "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/adapt/item_scrollview" &&
+            path != "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/item_scrollview") continue;
+        ++scroll.matches;
+        selected = storageScrollCollector.objects[i];
+        scroll.controls[0] = record;
+      }
+      if (scroll.matches == 1) {
+        auto objectProperty = [&](void *type, void *object, const char *name) {
+          const void *getter = findMethodInHierarchy(type, name, 0);
+          return getter ? invokeObject(getter, object) : nullptr;
+        };
+        auto valueProperty = [&](void *type, void *object, const char *name, void *out, size_t bytes) {
+          const void *getter = findMethodInHierarchy(type, name, 0);
+          return getter && invokeValue(getter, object, nullptr, out, bytes);
+        };
+        void *bar = objectProperty(scrollClass, selected, "get_verticalScrollbar");
+        void *viewport = objectProperty(scrollClass, selected, "get_viewport");
+        void *content = objectProperty(scrollClass, selected, "get_content");
+        void *handle = bar ? objectProperty(barClass, bar, "get_handleRect") : nullptr;
+        void *track = handle && getParent ? invokeObject(getParent, handle) : nullptr;
+        const std::array<void *, 6> components = {selected, viewport, content, bar, handle, track};
+        bool complete = true, vertical = false, horizontal = false, active = false;
+        const void *getActive = findMethodInHierarchy(scrollClass, "get_isActiveAndEnabled", 0);
+        complete &= getActive && invokeBoolean(getActive, selected, &active) && active;
+        for (size_t i = 0; i < components.size(); ++i) {
+          auto &record = scroll.controls[i];
+          complete &= populateControlRecord(components[i], false, &record, true);
+          complete &= components[i] && getInstanceId && invokeValue(
+              getInstanceId, components[i], nullptr, &record.instanceId, sizeof(record.instanceId));
+          complete &= (record.flags & 0x400u) != 0 && (record.flags & 0x200u) == 0;
+          for (float value : {record.adbLeft, record.adbTop, record.adbRight, record.adbBottom}) {
+            complete &= std::isfinite(value);
+          }
+        }
+        complete &= valueProperty(scrollClass, selected, "get_vertical", &vertical, sizeof(vertical));
+        complete &= valueProperty(scrollClass, selected, "get_horizontal", &horizontal, sizeof(horizontal));
+        complete &= valueProperty(scrollClass, selected, "get_horizontalNormalizedPosition", &scroll.normalizedX, sizeof(float));
+        complete &= valueProperty(scrollClass, selected, "get_verticalNormalizedPosition", &scroll.normalizedY, sizeof(float));
+        if (bar) {
+          complete &= valueProperty(barClass, bar, "get_value", &scroll.value, sizeof(float));
+          complete &= valueProperty(barClass, bar, "get_size", &scroll.size, sizeof(float));
+          complete &= valueProperty(barClass, bar, "get_direction", &scroll.direction, sizeof(scroll.direction));
+        } else {
+          complete = false;
+        }
+        scroll.vertical = vertical ? 1u : 0u;
+        scroll.horizontal = horizontal ? 1u : 0u;
+        for (float value : {scroll.normalizedX, scroll.normalizedY, scroll.value, scroll.size}) {
+          if (!std::isfinite(value)) { complete = false; break; }
+        }
+        if (complete) scroll.status = 1;
+      }
+    }
+  }
+
+  if (storageVisible) {
+    auto &scroll = result.storageScroll;
+    scroll.scrollbarStatus = 2;
+    void *barClass = classFromName(uiImage, "UnityEngine.UI", "Scrollbar");
+    scroll.scrollbarClassFound = barClass ? 1u : 0u;
+    static thread_local LoadedObjectCollector storageBarCollector;
+    if (barClass && collectLoadedInstances(barClass, &storageBarCollector) &&
+        !storageBarCollector.truncated) {
+      scroll.scrollbarSourceCount = static_cast<uint32_t>(storageBarCollector.sourceCount);
+      void *selected = nullptr;
+      for (size_t i = 0; i < storageBarCollector.count; ++i) {
+        ObserverButtonRecord record;
+        if (!populateControlRecord(storageBarCollector.objects[i], false, &record, true)) continue;
+        const std::string_view path(record.path.data());
+        if (path != "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/adapt/item_scrollview/Scrollbar" &&
+            path != "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/item_scrollview/Scrollbar") continue;
+        ++scroll.scrollbarMatches;
+        selected = storageBarCollector.objects[i];
+      }
+      if (scroll.scrollbarMatches == 1) {
+        const void *getHandle = findMethodInHierarchy(barClass, "get_handleRect", 0);
+        void *handle = getHandle ? invokeObject(getHandle, selected) : nullptr;
+        void *track = handle && getParent ? invokeObject(getParent, handle) : nullptr;
+        const std::array<void *, 3> components = {selected, handle, track};
+        bool complete = true;
+        for (size_t i = 0; i < components.size(); ++i) {
+          auto &record = scroll.scrollbarControls[i];
+          complete &= populateControlRecord(components[i], false, &record, true);
+          complete &= components[i] && getInstanceId && invokeValue(
+              getInstanceId, components[i], nullptr, &record.instanceId, sizeof(record.instanceId));
+          complete &= (record.flags & 0x400u) != 0 && (record.flags & 0x200u) == 0;
+          for (float value : {record.adbLeft, record.adbTop, record.adbRight, record.adbBottom})
+            complete &= std::isfinite(value);
+        }
+        auto valueProperty = [&](const char *name, void *out, size_t bytes) {
+          const void *getter = findMethodInHierarchy(barClass, name, 0);
+          return getter && invokeValue(getter, selected, nullptr, out, bytes);
+        };
+        complete &= valueProperty("get_value", &scroll.scrollbarValue, sizeof(float));
+        complete &= valueProperty("get_size", &scroll.scrollbarSize, sizeof(float));
+        complete &= valueProperty("get_direction", &scroll.scrollbarDirection, sizeof(int32_t));
+        complete &= std::isfinite(scroll.scrollbarValue) && std::isfinite(scroll.scrollbarSize);
+        if (complete) scroll.scrollbarStatus = 1;
+        bool inputRequested = false;
+        {
+          std::lock_guard<std::mutex> lock(gStorageInputMutex);
+          inputRequested = gStorageInputRequested;
+          scroll.inputX = gStorageInputX;
+          scroll.inputY = gStorageInputY;
+        }
+        if (inputRequested) {
+          scroll.inputStatus = 2;
+          void *dragInterface = classFromName(uiImage, "UnityEngine.EventSystems", "IDragHandler");
+          void *systemType = systemImage ? classFromName(systemImage, "System", "Type") : nullptr;
+          const void *getComponents = findMethodInHierarchy(gameObjectClass, "GetComponents", 1);
+          const void *getEnabled = findMethodInHierarchy(barClass, "get_isActiveAndEnabled");
+          const void *getBarInteractable = findMethodInHierarchy(barClass, "get_interactable");
+          void *dragType = dragInterface ? typeGetObject(classGetType(dragInterface)) : nullptr;
+          bool enabled = false, interactable = false, evaluated = false;
+          void *barObject = invokeObject(getGameObject, selected);
+          void *barTransform = barObject ? invokeObject(getTransform, barObject) : nullptr;
+          if (complete && dragType && getComponents && systemType &&
+              classFromType(methodGetParam(getComponents, 0)) == systemType &&
+              getEnabled && getBarInteractable &&
+              invokeBoolean(getEnabled, selected, &enabled) &&
+              invokeBoolean(getBarInteractable, selected, &interactable) &&
+              scroll.inputX >= 0 && scroll.inputX < screenWidth &&
+              scroll.inputY >= 0 && scroll.inputY < screenHeight) {
+            scroll.inputEnabled = enabled ? 1u : 0u;
+            scroll.inputInteractable = interactable ? 1u : 0u;
+            const bool descendant = topRaycastMatches(barTransform,
+                Vector2{scroll.inputX, static_cast<float>(screenHeight) - scroll.inputY}, &evaluated);
+            int32_t hits = 0;
+            if (evaluated && invokeValue(getRaycastCount, raycastResults, nullptr, &hits, sizeof(hits))) {
+              scroll.inputStatus = 1;
+              if (hits > 0) {
+                int32_t first = 0; void *arguments[] = {&first};
+                void *hit = invokeObject(getRaycastItem, raycastResults, arguments);
+                void *hitObject = nullptr;
+                if (hit) fieldGetValue(hit, raycastGameObjectField, &hitObject);
+                void *hitTransform = hitObject ? invokeObject(getTransform, hitObject) : nullptr;
+                ObserverButtonRecord topRecord;
+                if (!hitTransform || !populateControlRecord(hitTransform, false, &topRecord, true)) {
+                  scroll.inputStatus = 2;
+                } else {
+                  scroll.inputTopPath = topRecord.path;
+                  // Inspect the actual nearest enabled IDragHandler, including
+                  // custom components. Never infer routing from path ancestry.
+                  for (int depth = 0; hitTransform && depth < 64; ++depth) {
+                    void *go = invokeObject(getGameObject, hitTransform);
+                    void *typeArguments[] = {dragType};
+                    void *dragComponents = go ? invokeObject(getComponents, go, typeArguments) : nullptr;
+                    if (!dragComponents) { scroll.inputStatus = 2; break; }
+                    const uintptr_t dragCount = arrayLength(dragComponents);
+                    const auto *header = static_cast<const ManagedArrayHeader *>(dragComponents);
+                    if (header->maxLength != dragCount || dragCount > 256) { scroll.inputStatus = 2; break; }
+                    const auto *elements = ANGLE_UNSAFE_BUFFERS(reinterpret_cast<void *const *>(
+                        reinterpret_cast<const uint8_t *>(dragComponents) + sizeof(*header)));
+                    size_t activeHandlers = 0;
+                    void *nearest = nullptr;
+                    for (uintptr_t n = 0; n < dragCount; ++n) {
+                      void *component = ANGLE_UNSAFE_BUFFERS(elements[n]);
+                      bool active = false;
+                      if (!component || !invokeBoolean(getEnabled, component, &active)) {
+                        scroll.inputStatus = 2; break;
+                      }
+                      if (active) { ++activeHandlers; nearest = component; }
+                    }
+                    if (scroll.inputStatus != 1) break;
+                    if (activeHandlers) {
+                      if (!invokeValue(getInstanceId, nearest, nullptr, &scroll.inputHandlerInstanceId,
+                                       sizeof(scroll.inputHandlerInstanceId))) { scroll.inputStatus = 2; break; }
+                      scroll.inputOwned = descendant && enabled && interactable && activeHandlers == 1 &&
+                          nearest == selected ? 1u : 0u;
+                      break;
+                    }
+                    hitTransform = getParent ? invokeObject(getParent, hitTransform) : nullptr;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   // Observe an ALAS-selected OS gesture at the actual Unity UI drag port.
   // Additive, optional capability: no input callbacks are invoked here.
   bool mapDragRequested = false;
@@ -2899,36 +3137,6 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
         }
       }
       NativeLuaGlobeReader(api, nativeState, result.luaGlobe, objects).read();
-    }
-    // Read-only native metadata for the game's actual plane input component.
-    // Diagnostic records never carry an input point or authorize a gesture.
-    if (gameImage && systemImage) {
-      void *pointerClass = classFromName(gameImage, "", "PointerInfo");
-      void *typeClass = classFromName(systemImage, "System", "RuntimeType");
-      if (pointerClass && typeClass) {
-        void *pointerType = typeGetObject(classGetType(pointerClass));
-        for (const char *member : {"GetMethods", "GetFields"}) {
-          const void *getter = findMethodInHierarchy(typeClass, member, 0);
-          void *items = getter ? invokeObject(getter, pointerType) : nullptr;
-          if (!items) continue;
-          const uintptr_t count = arrayLength(items);
-          void *infoClass = classFromName(systemImage, "System.Reflection",
-              std::string(member) == "GetMethods" ? "RuntimeMethodInfo" : "RuntimeFieldInfo");
-          const void *toString = infoClass ? findMethodInHierarchy(infoClass, "ToString", 0) : nullptr;
-          if (!toString || count > 128 || static_cast<const ManagedArrayHeader *>(items)->maxLength != count) continue;
-          const auto *elements = ANGLE_UNSAFE_BUFFERS(reinterpret_cast<void *const *>(
-              reinterpret_cast<const uint8_t *>(items) + sizeof(ManagedArrayHeader)));
-          for (uintptr_t index = 0; index < count && result.globeObjectCount < result.globeObjects.size(); ++index) {
-            void *info = ANGLE_UNSAFE_BUFFERS(elements[index]);
-            const std::string signature = info ? readString(invokeObject(toString, info)) : "";
-            if (signature.empty()) continue;
-            auto &record = result.globeObjects[result.globeObjectCount++]; record = {};
-            const bool nameOk = CopyBoundedString("pointer-metadata", &record.name);
-            const bool pathOk = CopyBoundedString("PointerInfo/" + signature, &record.path);
-            record.flags = nameOk && pathOk ? 1u : 0u;
-          }
-        }
-      }
     }
     auto pathOf = [&](void *transform) {
       std::string path;
@@ -3787,6 +3995,7 @@ int32_t ObserverMainThreadTick(uint64_t requestGeneration,
     uiSnapshot.texts = ui.texts;
     uiSnapshot.images = ui.images;
     uiSnapshot.mapDrag = ui.mapDrag;
+    uiSnapshot.storageScroll = ui.storageScroll;
     uiSnapshot.privatePhysicsStatus = ui.privatePhysicsStatus;
     uiSnapshot.globeObjectStatus = ui.globeObjectStatus;
     uiSnapshot.globeObjectCount = ui.globeObjectCount;
@@ -3947,6 +4156,19 @@ bool GetLatestObserverUiSnapshot(ObserverUiSnapshot *snapshot) {
   }
   *snapshot = gObserverUiSnapshot;
   return true;
+}
+
+bool RequestStorageScrollbarInput(float x, float y) {
+#if defined(ANGLE_PLATFORM_ANDROID)
+  if (!std::isfinite(x) || !std::isfinite(y)) return false;
+  std::lock_guard<std::mutex> lock(gStorageInputMutex);
+  gStorageInputX = x;
+  gStorageInputY = y;
+  gStorageInputRequested = true;
+  return true;
+#else
+  return false;
+#endif
 }
 
 bool RequestOperationSirenMapDrag(float x1, float y1, float x2, float y2, bool globe) {

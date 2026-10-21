@@ -18,6 +18,69 @@ from .errors import SemanticGateClosed, SemanticTargetMissing
 class OpsiResourcesOracle:
     """Opsi resources operations sharing the oracle frame and input boundary."""
 
+    def _operation_siren_adaptability_info_state(self):
+        state = self.read_state()
+        root = 'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/'
+        if not any(b.path.startswith(root) for b in state.buttons):
+            return None
+        ui = self.read_ui_state(check_foreground=False)
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('adaptability information snapshots are not coherent')
+        def text(suffix):
+            values = tuple(t.text for t in ui.texts if t.path == root + suffix
+                           and t.active_in_hierarchy and t.active_and_enabled and not t.truncated)
+            return ''.join(values[0].split()) if len(values) == 1 else None
+        if (text('single_item_panel/display_panel/name_container/name/Text') != '适应性调整-攻击'
+                or text('single_item_panel/display_panel/desc/Text') != '攻击适应性影响塞壬单位的攻击力倍率。'):
+            return None
+        buttons = tuple(b for b in state.buttons if b.path.startswith(root + 'button_container/')
+                        and b.active_in_hierarchy and b.active_and_enabled)
+        if (len(buttons) != 1 or buttons[0].path != root + 'button_container/custom_button_1(Clone)'
+                or text('button_container/custom_button_1(Clone)/pic') != '确定'):
+            raise SemanticGateClosed('adaptability information confirmation is ambiguous')
+        return state, buttons[0]
+
+    def operation_siren_adaptability_info_visible(self):
+        return self._operation_siren_adaptability_info_state() is not None
+
+    def operation_siren_adaptability_info_actionable(self):
+        observed = self._operation_siren_adaptability_info_state()
+        return bool(observed is not None and observed[1].actionable
+                    and not self._blocking_rules(observed[0], 'os/adaptability/info/confirm'))
+
+    def click_operation_siren_adaptability_info(self):
+        observed = self._operation_siren_adaptability_info_state()
+        if observed is None:
+            raise SemanticTargetMissing('reviewed adaptability information is absent')
+        state, target = observed
+        if (not target.actionable or self._blocking_rules(state, 'os/adaptability/info/confirm')
+                or self._foreground_component() != self.fingerprint.component):
+            raise SemanticGateClosed('adaptability information confirmation is not actionable')
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt('os/adaptability/info/confirm', state.generation,
+                             target.point, target.bounds, target.path)
+
+    def operation_siren_order_panel_visible(self) -> bool:
+        state = self.read_state()
+        backs = tuple(b for b in self._matches(state, 'os/order/back')
+                      if b.active_in_hierarchy and b.active_and_enabled and b.interactable)
+        if not backs:
+            return False
+        if len(backs) != 1:
+            raise SemanticGateClosed('operation siren order panel is ambiguous')
+        ui = self.read_ui_state(check_foreground=False)
+        # Button publication is complete and uniquely owns this control.
+        # Truncation among unrelated map images does not erase its exported,
+        # individually complete back image or the input raycast proof.
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('operation siren order panel snapshots are incomplete')
+        images = tuple(i for i in ui.images if i.path == backs[0].path and i.name == 'back'
+                       and i.sprite == 'btn_back' and i.active_in_hierarchy and i.active_and_enabled
+                       and not i.truncated and i.bounds is not None)
+        if len(images) != 1:
+            raise SemanticGateClosed('operation siren order panel back image is incomplete')
+        return True
+
     def _operation_siren_order_prompt_mounted(self, state: OracleState) -> bool:
         # This client uses Msgbox/window, without the generic Msgbox(Clone)
         # owner. Bind its blocking effect to the retained SVOrderPanel only.
@@ -140,12 +203,10 @@ class OpsiResourcesOracle:
             )
         bounds = images[0].bounds
         assert bounds is not None
-        point = Point(
-            (bounds.left + bounds.right) / 2.0,
-            (bounds.top + bounds.bottom) / 2.0,
-        )
-        if target.bounds is None or not target.bounds.contains(point):
-            raise SemanticGateClosed("operation siren order-back point changed")
+        if (not target.actionable or not bounds.contains(target.point)
+                or self._blocking_rules(state, 'os/order/back')):
+            raise SemanticGateClosed('operation siren order back is not exact top-raycast actionable')
+        point = target.point
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed(
                 "foreground changed before operation siren order back"

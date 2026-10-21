@@ -13,7 +13,7 @@ from .contracts import (
     Point,
     UiState,
 )
-from .errors import SemanticGateClosed, SemanticTargetMissing, SemanticViewportReanchorRequired, SemanticGlobeSelectionMissed
+from .errors import SemanticGateClosed, SemanticTargetMissing, SemanticViewportReanchorRequired, SemanticGlobeSelectionMissed, SemanticInputBlocked, SemanticTargetNotActionable
 
 
 class OpsiGlobeOracle:
@@ -213,7 +213,6 @@ class OpsiGlobeOracle:
                 ),
                 "SVFloatPanel(Clone)/point/line/bg/sairen": "sairen_mask",
                 "SVFloatPanel(Clone)/point/line/bg": "bg_danger",
-                "SVFloatPanel(Clone)/point/line": "click_point_danger",
                 "SVFloatPanel(Clone)/point": "click_point_danger",
             }
             for path, sprite in stronghold_images.items():
@@ -272,19 +271,31 @@ class OpsiGlobeOracle:
             raise SemanticGateClosed('globe is obscured: ' + ','.join(rule.blocker_id for rule in blockers))
         return state
 
-    def operation_siren_globe_unpin(self) -> OperationSirenGlobeSwipeReceipt:
+    def operation_siren_globe_unpin(self, *, precondition_oracle=None) -> OperationSirenGlobeSwipeReceipt:
         """Dismiss one exact selected-zone pin with its required short drag."""
 
+        source = self if precondition_oracle is None else precondition_oracle
         # Camera/panel easing can briefly cover every exported native anchor.
         # Retry only complete observation before input. The gesture and its
         # postcondition stay outside this read helper and are not repeated.
         def prepare():
-            ui_state, candidates = self._operation_siren_globe_unpin_targets()
+            nonlocal source
+            try:
+                ui_state, candidates = source._operation_siren_globe_unpin_targets()
+            except SemanticGateClosed:
+                # A screenshot acquired during panel easing cannot become
+                # complete by rereading that same immutable frame. The existing
+                # bounded preparation retry must observe the live publication.
+                source = self
+                raise
             # Re-read the complete native proof if foreground or easing changes
             # during preparation. No gesture has been dispatched at this point.
             foreground = self._foreground_component()
-            blockers = self._blocking_rules(self.read_state(), 'os/globe/map')
-            if foreground != self.fingerprint.component or blockers:
+            if foreground != self.fingerprint.component:
+                raise SemanticGateClosed('game activity is not top-resumed before globe unpin: ' + foreground)
+            # The explicit check above owns this adjacent state read.
+            blockers = self._blocking_rules(self.read_state(check_foreground=False), 'os/globe/map')
+            if blockers:
                 raise SemanticGateClosed(
                     'operation siren globe is obscured before unpin: foreground='
                     + foreground + '; blockers='
@@ -301,7 +312,7 @@ class OpsiGlobeOracle:
             raise SemanticGateClosed('globe unpin path is outside the owned plane')
         pin_path = "SVFloatPanel(Clone)/point"
         foreground = self._foreground_component()
-        blockers = self._blocking_rules(self.read_state(), 'os/globe/map')
+        blockers = self._blocking_rules(self.read_state(check_foreground=False), 'os/globe/map')
         if foreground != self.fingerprint.component or blockers:
             raise SemanticGateClosed(
                 'globe changed after unpin drag proof: foreground=' + foreground
@@ -326,7 +337,10 @@ class OpsiGlobeOracle:
                         for image in settled.images):
                     continue
                 if not self.operation_siren_globe_visible():
-                    raise SemanticGateClosed("operation siren globe disappeared after selected-zone unpin")
+                    # Pin and globe publication can settle on different ticks.
+                    # Keep waiting within this existing postcondition budget;
+                    # no second gesture or success receipt is authorized here.
+                    continue
                 return OperationSirenGlobeSwipeReceipt(
                     "os/globe/zone/unpin", ui_state.generation, settled.generation, start, end, duration_ms)
         raise SemanticGateClosed("operation siren selected-zone unpin was not proven; no repeated drag")
@@ -368,7 +382,7 @@ class OpsiGlobeOracle:
                     or marker.get("plane_hit") is not True or marker.get("ui_clear") is not True
                     or marker.get("ui_top_path") not in ("", "WorldMap3D/entity/Plane")
                     or not marker.get("plane_instance_id")
-                    or not isinstance(point, list) or len(point) != 2
+                    or not isinstance(point, (list, tuple)) or len(point) != 2
                     or any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) for v in point)):
                 continue
             start = tuple(int(round(v)) for v in point)
@@ -462,14 +476,14 @@ class OpsiGlobeOracle:
             raise SemanticGateClosed('operation siren map intent is malformed')
         if not self.operation_siren_globe_visible():
             raise SemanticGateClosed('operation siren globe identity is absent')
-        before = self.read_ui_state()
+        before = self.read_ui_state(check_foreground=False)
         ack = self._request('GET /v1/globe-projection %.9g %.9g\n' % tuple(area_pos))
         if (ack.get('status') != 'ok'
                 or ack.get('scope') != 'read-only-map-projection'):
             raise SemanticGateClosed('native map projection capability is unavailable')
         for _ in range(20):
             self._sleep(0.1)
-            ui = self.read_ui_state()
+            ui = self.read_ui_state(check_foreground=False)
             geometry = ui.snapshot.get('globe_geometry', {})
             if ui.generation <= before.generation:
                 continue
@@ -496,6 +510,11 @@ class OpsiGlobeOracle:
                     or any(isinstance(v, bool) or not isinstance(v, (int, float))
                            or not math.isfinite(v) for v in screen) or screen[2] <= 0):
                 raise SemanticGateClosed('native map projection is invalid')
+            # The globe read proved foreground before this adjacent async
+            # query group. Recheck once on its accepted frame instead of a
+            # dumpsys roundtrip on every poll; input checks again at dispatch.
+            if self._foreground_component() != self.fingerprint.component:
+                raise SemanticGateClosed('foreground changed during native map projection')
             return ui, records[0]
         raise SemanticGateClosed('fresh native map projection is unavailable for this intent')
 
@@ -513,7 +532,18 @@ class OpsiGlobeOracle:
             # input boundary below, avoiding a dumpsys delay between this pair.
             state = self.read_state(check_foreground=False)
             if ui.generation <= state.generation <= ui.generation + 2:
-                break
+                loading_root = 'OverlayCamera/Overlay/UIOverlay/Loading(Clone)'
+                top = record.get('ui_top_path')
+                loading = bool(
+                    record.get('plane_hit') is True and record.get('ui_clear') is False
+                    and isinstance(top, str)
+                    and (top == loading_root or top.startswith(loading_root + '/'))
+                    and all(rule.blocker_id == 'loading' for rule in
+                            self._blocking_rules(state, 'os/globe/map')))
+                if not loading or attempt == 3:
+                    break
+                # A known Loading hit can precede the actionable projection.
+                # Reuse this existing read window; never tap its covered point.
             if attempt == 3:
                 raise SemanticGateClosed('native zone projection snapshots are not coherent')
             self._sleep(0.25)
@@ -523,7 +553,10 @@ class OpsiGlobeOracle:
                 or not isinstance(point, list) or len(point) != 2
                 or any(isinstance(v, bool) or not isinstance(v, (int, float))
                        or not math.isfinite(v) for v in point)):
-            raise SemanticGateClosed('native zone projection is not actionable')
+            # No zone input was dispatched. Keep this readiness refusal in
+            # the affected native task's existing failure/re-entry interval.
+            raise SemanticTargetNotActionable('os/globe/zone/select', state.generation) from SemanticGateClosed(
+                'native zone projection is not actionable: ' + repr(record))
         x, y = point
         if not Bounds(20, 220, 980, 620).contains(Point(x, y)):
             raise SemanticViewportReanchorRequired('native zone projection moved outside map sight; no input sent')
@@ -697,13 +730,16 @@ class OpsiGlobeOracle:
             raise SemanticGateClosed('globe drag endpoints are invalid')
         start=tuple(int(v) for v in start);end=tuple(int(v) for v in end)
         self._require_operation_siren_globe_visible()
-        before=self.read_ui_state()
+        # The identity read just proved the foreground. These publications
+        # form one read-only group; prove its foreground again before returning
+        # rather than issuing dumpsys for every adjacent UI poll.
+        before=self.read_ui_state(check_foreground=False)
         ack=self._request('GET /v1/globe-map-drag %d %d %d %d\n' % (*start,*end))
         if ack.get('status')!='ok' or ack.get('scope')!='read-only-globe-map-drag':
             raise SemanticGateClosed('globe native drag proof is unavailable')
         for _ in range(20):
             self._sleep(.1)
-            ui=self.read_ui_state();proof=ui.snapshot.get('operation_siren_globe_drag',{})
+            ui=self.read_ui_state(check_foreground=False);proof=ui.snapshot.get('operation_siren_globe_drag',{})
             if ui.generation<=before.generation or proof.get('endpoints')!=list((*start,*end)):
                 continue
             root='WorldMap3D/entity/Plane'
@@ -724,10 +760,47 @@ class OpsiGlobeOracle:
                             for k,value in zip(('x','y'),expected))
                         or (row['owned'] and not (row['top_path']==root or row['top_path'].startswith(root+'/')))):
                     raise SemanticGateClosed('globe drag proof is malformed')
+            if self._foreground_component() != self.fingerprint.component:
+                raise SemanticGateClosed('game activity changed during globe drag proof')
             return ui.generation,proof
         raise SemanticGateClosed('fresh globe drag proof did not arrive')
 
     def operation_siren_globe_drag_owned(self, start, end):
+        proof = self._settled_globe_drag_proof(start, end)
+        return all(row['owned'] for row in proof['samples'])
+
+    def operation_siren_globe_drag_candidate(self, start, end, *, box):
+        """Propose at most one translation, preserving ALAS' complete vector.
+
+        A rejected edge is only a placement hint. The translated integer path
+        needs a new complete native proof; final dispatch proves it yet again.
+        """
+        proof = self._settled_globe_drag_proof(start, end)
+        rows = proof['samples']
+        if all(row['owned'] for row in rows):
+            return tuple(start), tuple(end)
+        owned = [i for i, row in enumerate(rows) if row['owned']]
+        if not owned or owned != list(range(owned[0], owned[-1] + 1)):
+            return None
+        if owned[0] == 0:
+            edge, anchor = rows[owned[-1]], end
+        elif owned[-1] == len(rows) - 1:
+            edge, anchor = rows[owned[0]], start
+        else:
+            return None
+        offset = tuple(round(edge[key]) - value for key, value in zip(('x', 'y'), anchor))
+        proposed_start = tuple(int(a + d) for a, d in zip(start, offset))
+        proposed_end = tuple(int(a + d) for a, d in zip(end, offset))
+        left, top, right, bottom = box
+        if any(not (left <= x <= right and top <= y <= bottom)
+               for x, y in (proposed_start, proposed_end)):
+            return None
+        fresh = self._settled_globe_drag_proof(proposed_start, proposed_end)
+        if all(row['owned'] for row in fresh['samples']):
+            return proposed_start, proposed_end
+        return None
+
+    def _settled_globe_drag_proof(self, start, end):
         # A loading overlay can appear between ALAS sampling and the final
         # handler proof. Reuse the existing loading-only wait before input.
         for attempt in range(30):
@@ -747,7 +820,7 @@ class OpsiGlobeOracle:
             blocked=self._blocking_rules(self.read_state(),'os/globe/map')
             if not blocked:
                 if all(row['owned'] for row in proof['samples']):
-                    return True
+                    return proof
                 loading_path = 'OverlayCamera/Overlay/UIOverlay/Loading(Clone)'
                 if all(row['owned'] or row['top_path'] == loading_path
                        or row['top_path'].endswith('/' + loading_path)
@@ -759,7 +832,7 @@ class OpsiGlobeOracle:
                         break
                     self._sleep(.1)
                     continue
-                return False
+                return proof
             if any(v.blocker_id!='loading' for v in blocked):
                 raise SemanticGateClosed('globe became obscured during drag proof')
             if attempt==29:break
@@ -873,6 +946,13 @@ class OpsiGlobeOracle:
             (target.bounds.left + target.bounds.right) / 2.0,
             (target.bounds.top + target.bounds.bottom) / 2.0,
         )
+        blockers = self._blocking_rules(state, semantic_id)
+        if blockers:
+            raise SemanticInputBlocked(semantic_id, state.generation, tuple(rule.blocker_id for rule in blockers))
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed before globe zone entrance')
+        if not (0 <= point.x < self.fingerprint.width and 0 <= point.y < self.fingerprint.height):
+            raise SemanticGateClosed('globe zone entrance is outside the screen')
         self._tap(int(round(point.x)), int(round(point.y)))
         return ActionReceipt(
             semantic_id=semantic_id,

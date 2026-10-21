@@ -82,6 +82,8 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
 
     def test_reward_summary_entry_alias_is_idempotent(self):
         adapter, oracle, _ = self.make_adapter()
+        # Abstract destination model; retained r619 frames test typed pending Main.
+        oracle._matches = lambda state, target: ()
         adapter.begin_mission_reward(daily=True, weekly=False)
 
         first = adapter.click(NamedButton("MAIN_GOTO_REWARD"))

@@ -167,20 +167,22 @@ def test_interrupted_commission_closes_only_exact_ship_exp_overlay():
 
 
 def test_retained_commission_page_allows_unrelated_task_page_scan():
-    oracle = FakeOracle()
-    oracle.exists_values['commission/page/back'] = True
-    oracle.enabled_values['commission/page/back'] = True
-    host = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    from tests.test_game_tips_loading_presence import host as typed_host
+    from tests.test_commission_navigation_handoff import replace_frame
+    backend, oracle, host = typed_host(fixture='commission-scrolled-r155.json')
     assert not host.appear(NamedButton('FLEET_CHECK'))
     assert not host.appear(NamedButton('EXERCISE_CHECK'))
     assert host.appear(NamedButton('COMMISSION_CHECK'))
     with pytest.raises(SemanticGateClosed):
         host.click(NamedButton('FLEET_CHECK'))
-    assert host.click(NamedButton('BACK_ARROW')).semantic_id == 'commission/page/back'
+    first = host.click(NamedButton('BACK_ARROW'))
+    assert first.semantic_id == 'commission/page/back'
+    for part in (backend.snapshot, backend.buttons, backend.ui):
+        part['generation'] += 1
     host.begin_mission_reward(daily=False, weekly=False)
-    assert host.click(NamedButton('BACK_ARROW')).semantic_id == 'commission/page/back'
-    oracle.exists_values['commission/page/back'] = False
-    oracle.enabled_values['commission/page/back'] = False
+    assert host.click(NamedButton('BACK_ARROW')) is first
+    assert len(backend.taps) == 1
+    replace_frame(backend, 'commission-return-reward-r157.json', generation=first.generation + 2)
     assert not host.appear(NamedButton('GET_MISSION'))
     assert not host.appear(NamedButton('GET_ITEMS_1'))
     oracle._campaign_urgent_notice_matches = lambda state: True

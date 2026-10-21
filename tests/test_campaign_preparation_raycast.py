@@ -17,6 +17,17 @@ def test_native_repair_raycast_keeps_other_strategy_panels_out():
     helpers = 'bool EndsWith' + source.split('bool EndsWith', 1)[1].split('bool ShouldEvaluateToggleTopRaycast', 1)[0]
     program = '#include <string_view>\n#include <string>\n#include <array>\n#include <algorithm>\n#include <cassert>\n' + helpers + '''
 int main() {
+    assert(ShouldEvaluateTopRaycast("storage", "OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/bottom/frame/storage"));
+    assert(!ShouldEvaluateTopRaycast("storage", "OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/top/storage"));
+    assert(!ShouldEvaluateTopRaycast("storage", "OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/bottom/frame/storage/child"));
+    assert(!ShouldEvaluateTopRaycast("not_storage", "OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/bottom/frame/storage"));
+    for (const std::string name : {"confirm_button", "cancel_button"}) {
+        assert(ShouldEvaluateTopRaycast(name, "OverlayCamera/Overlay/UIMain/blur_panel/select_panel/" + name));
+        assert(ShouldEvaluateTopRaycast(name, "OverlayCamera/Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/" + name));
+        assert(!ShouldEvaluateTopRaycast(name, "OtherUI/blur_panel/select_panel_adapt/select_panel/" + name));
+        assert(!ShouldEvaluateTopRaycast(name, "OverlayCamera/Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/" + name + "/child"));
+    }
+    assert(!ShouldEvaluateTopRaycast("quick_select", "OverlayCamera/Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/quick_select"));
     assert(ShouldEvaluateTopRaycast("bgNormal$", "UICamera/Canvas/UIMain/EventUI(Clone)/scrollRect$/content/0/bgNormal$"));
     assert(ShouldEvaluateTopRaycast("bgEmergence$", "UICamera/Canvas/UIMain/EventUI(Clone)/scrollRect$/content/12/bgEmergence$"));
     assert(!ShouldEvaluateTopRaycast("bgEmergence$", "OtherUI(Clone)/scrollRect$/content/0/bgEmergence$"));
@@ -81,6 +92,7 @@ def test_native_preparation_selector_accepts_only_the_reviewed_controls():
     source = (root / "overlays/angle-g3/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp").read_text(encoding="utf-8")
     selector = source.split("bool IsCampaignPreparationSwitch", 1)[1].split("bool ShouldEvaluateTopRaycast", 1)[0]
     program = '''
+#include <algorithm>
 #include <string_view>
 #include <string>
 #include <cassert>

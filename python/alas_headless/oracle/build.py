@@ -241,6 +241,16 @@ class BuildOracle:
             confirm=confirm,
         )
 
+    def build_animation_visible(self) -> bool:
+        """Identify the native launch animation which covers its queue."""
+        state = self.read_state()
+        path = 'OverlayCamera/Overlay/UIMain/Building(Clone)'
+        owners = tuple(b for b in state.buttons if b.path == path
+                       and b.active_in_hierarchy and b.active_and_enabled)
+        if len(owners) > 1:
+            raise SemanticGateClosed('construction animation identity is ambiguous')
+        return bool(owners)
+
     def build_queue_timers(self) -> Tuple[str, ...]:
         """Read every instantiated slot in the complete typed queue."""
 
@@ -347,7 +357,8 @@ class BuildOracle:
             quick_counts = tuple(
                 item
                 for item in ui_state.texts
-                if item.path.endswith("BuildShipDetailUI1(Clone)/quick_count/value")
+                if item.path.endswith(("BuildShipDetailUI1(Clone)/quick_count/value",
+                                       "BuildShipDetailUI1(Clone)/adapt/quick_count/value"))
                 and item.active_in_hierarchy
                 and item.active_and_enabled
                 and not item.truncated

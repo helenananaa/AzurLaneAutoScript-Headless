@@ -78,11 +78,15 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
             with self.subTest(resource=resource):
                 adapter, oracle, _ = self.make_adapter()
                 oracle.exists_values[semantic_id] = True
+                # This case describes an uncovered page, not the global
+                # statistics modal represented by the fake's default target.
+                oracle.enabled_values['dorm/statistics/confirm'] = False
                 if resource == "DORM_CHECK":
                     oracle.enabled_values["dorm/feed/close"] = False
                 if resource == "RESEARCH_CHECK":
                     # Research requires the native five-card inventory, not
                     # just a back button in an otherwise empty fake page.
+                    oracle.enabled_values['research/page/back'] = True
                     oracle.research_project_values = [SimpleNamespace() for _ in range(5)]
                 self.assertTrue(adapter.appear(NamedButton(resource)))
         self.assertEqual(
@@ -526,6 +530,10 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
 
     def test_dorm_navigation_is_idempotent_during_page_transition(self):
         adapter, oracle, _ = self.make_adapter()
+        # This abstract fake has no typed Button records. Exercise the older
+        # destination handoff; retained r602 frames cover pending-source reuse.
+        oracle._matches = lambda state, target: ()
+        oracle.exists_values['main/live'] = True
         adapter.begin_dorm()
 
         main = adapter.click(NamedButton("MAIN_GOTO_DORMMENU"))

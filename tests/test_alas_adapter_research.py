@@ -89,6 +89,8 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         adapter, oracle, _ = self.make_adapter()
         adapter.begin_research()
         oracle.exists_values["research/page/back"] = True
+        oracle.enabled_values["research/page/back"] = True
+        oracle.enabled_values["research/detail/root"] = False
         oracle.research_project_values = [SimpleNamespace(slot=index) for index in range(5)]
         oracle.recommendation_shop_visible = Mock(
             side_effect=SemanticGateClosed("shop snapshots are unrelated")
@@ -101,6 +103,8 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
     def test_retained_research_page_is_navigable_without_a_research_task(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.exists_values['research/page/back'] = True
+        oracle.enabled_values['research/page/back'] = True
+        oracle.enabled_values['research/detail/root'] = False
         oracle.research_project_values = [SimpleNamespace(slot=index) for index in range(5)]
         self.assertIsNone(adapter._research_context)
         oracle._blocking_rules = Mock(return_value=[SimpleNamespace(blocker_id='research-page')])

@@ -18,7 +18,7 @@ from .contracts import (
     Point,
     UiState,
 )
-from .errors import SemanticGateClosed
+from .errors import SemanticGateClosed, SemanticInputBlocked
 
 
 class MeowfficerOracle:
@@ -85,8 +85,10 @@ class MeowfficerOracle:
         self.meowfficer_purchase_state()  # bg1 ready; no animation or prompt
         state = self.read_state()
         semantic_id = 'meowfficer/buy/close'
-        if self._blocking_rules(state, semantic_id):
-            raise SemanticGateClosed('meowfficer purchase close is obscured')
+        blockers = self._blocking_rules(state, semantic_id)
+        if blockers:
+            raise SemanticInputBlocked(semantic_id, state.generation,
+                                       [rule.blocker_id for rule in blockers])
         matches = [b for b in state.buttons if b.path.endswith('CommanderReserveUI(Clone)/bg')]
         if len(matches) != 1:
             raise SemanticGateClosed('meowfficer purchase background is ambiguous')

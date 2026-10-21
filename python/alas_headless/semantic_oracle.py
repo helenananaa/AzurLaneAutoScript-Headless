@@ -226,6 +226,7 @@ from .oracle.retirement import RetirementOracle
 from .oracle.rewards import RewardsOracle
 from .oracle.shipyard import ShipyardOracle
 from .oracle.shop import ShopOracle
+from .oracle.storage import StorageOracle
 from .oracle.tactical import TacticalOracle
 from .oracle.targets import TargetsOracle
 
@@ -270,6 +271,7 @@ class SemanticOracle(
     RewardsOracle,
     ShipyardOracle,
     ShopOracle,
+    StorageOracle,
     TacticalOracle,
     TargetsOracle,
     CoreOracle,

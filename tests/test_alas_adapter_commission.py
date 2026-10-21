@@ -155,8 +155,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         adapter._commission_context.passive_transition_until = time.monotonic() - 1
         with self.assertRaises(AlasSemanticUnmapped):
             adapter.appear(NamedButton("OIL_MAXED"))
-        with self.assertRaises(AlasSemanticUnmapped):
-            adapter.appear(NamedButton("GUILD_POPUP_CONFIRM"))
+        self.assertFalse(adapter.appear(NamedButton("GUILD_POPUP_CONFIRM")))
 
     def test_commission_page_transition_has_bounded_passive_probe_grace(self):
         adapter, oracle, _ = self.make_adapter()

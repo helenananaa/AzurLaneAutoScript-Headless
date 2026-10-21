@@ -43,7 +43,8 @@ def retained_notice(case='ready'):
     o = SemanticOracle(b.request, b.foreground_component, b.tap,
         OracleFingerprint(package=b.snapshot['package'], component=b.foreground,
             driver_revision=b.snapshot['driver_revision'], expected_pid=b.snapshot['pid']))
-    a = AlasSemanticAdapter(o, package_gate=lambda: None)
+    a = AlasSemanticAdapter(o, package_gate=lambda: None,
+                            frame_observation_oracle=lambda: o)
     a.operation_siren_combat_committed = lambda: True
     s = AlasSemanticSession('replay', b.snapshot['driver_revision'])
     s.adapter = a

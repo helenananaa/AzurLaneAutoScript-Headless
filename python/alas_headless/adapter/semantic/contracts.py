@@ -42,6 +42,23 @@ class AlasSemanticUnmapped(SemanticGateClosed):
     """An ALAS resource has no reviewed semantic mapping."""
 
 
+@dataclass(frozen=True)
+class StorageBoxCandidate:
+    """An inspected list-cell identity, never an authorized box-use target."""
+    slot: str
+    display_label: str
+    icon_sprite: str
+    rarity: int
+    quantity: int
+
+    @property
+    def name(self):
+        return 'STORAGE_BOX_' + self.slot
+
+    def __str__(self):
+        return self.name
+
+
 class AlasSemanticActionDeferred(SemanticGateClosed):
     """No input was dispatched because the task's action grant is exhausted."""
 
@@ -69,6 +86,15 @@ class AlasSemanticCommissionStartUnproven(SemanticGateClosed):
                   else 'commission start did not reach running state; ')
         super().__init__(reason +
                          'exact pending detail remains; no start input repeated')
+
+
+class AlasSemanticGuildDispatchUnproven(SemanticGateClosed):
+    """An accepted Guild confirmation has no proven completion; never replay it."""
+
+    def __init__(self, receipt):
+        self.receipt = receipt
+        super().__init__('Guild dispatch did not advance to in-progress state; '
+                         'confirmation input accepted, completion unproven; no input repeated')
 
 
 class MissionClaimableDetected(SemanticGateClosed):
@@ -213,6 +239,8 @@ class _CommissionFlowContext:
     tactical_empty_slot_receipt: Optional[ActionReceipt] = None
     tactical_skill_confirm_receipt: Optional[ActionReceipt] = None
     tactical_reward_receipt: Optional[ActionReceipt] = None
+    tactical_entry_receipt: Optional[ActionReceipt] = None
+    tactical_entry_input_count: Optional[int] = None
     tactical_confirm_receipt: Optional[ActionReceipt] = None
     tactical_confirm_before_slots: Optional[Set[Tuple[int, int]]] = None
     tactical_confirmed_at: float = 0.0
@@ -240,6 +268,8 @@ class _ResearchFlowContext:
     queue_add_receipt: Optional[ActionReceipt] = None
     queue_confirm_receipt: Optional[ActionReceipt] = None
     queue_add_requires_start_grant: bool = False
+    stop_receipt: Optional[ActionReceipt] = None
+    stop_confirm_receipt: Optional[ActionReceipt] = None
 
 
 def _research_detail_costs(detail: object) -> Tuple[Tuple[str, int, int], ...]:

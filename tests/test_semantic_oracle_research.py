@@ -17,6 +17,25 @@ from unittest import mock
 
 
 class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
+    def test_research_reset_adapt_wrapper_keeps_exact_paired_identity(self):
+        page = "UICamera/Canvas/UIMain/TechnologyUI(Clone)"
+        root = page + "/main/base_page/"
+        path = root + "adapt/refresh_btn"
+        backend = FakeBackend([make_button("back", page + "/blur_panel/adapt/top/back")])
+        backend.ui = make_ui([make_text("每日0点后可刷新", path + "/Text")],
+                               images=[make_image(path=path, sprite="refresh")])
+        oracle = make_oracle(backend)
+        self.assertFalse(oracle.research_reset_available())
+        backend.ui['texts'][0]['path'] = root + "refresh_btn/Text"
+        with self.assertRaisesRegex(SemanticGateClosed, 'ambiguous'):
+            oracle.research_reset_available()
+        backend.ui['texts'][0]['path'] = path + "/Text"
+        backend.ui['images'].append(make_image(path=root + "refresh_btn", sprite="refresh"))
+        backend.ui['image_count'] += 1
+        with self.assertRaisesRegex(SemanticGateClosed, 'ambiguous'):
+            oracle.research_reset_available()
+        self.assertEqual(backend.taps, [])
+
     def test_research_card_page_queue_indicators_require_five_known_ordered_marks(self):
         root = "root/UICamera/Canvas/UIMain/TechnologyUI(Clone)/blur_panel/adapt/left/btn_queue"
         backend = FakeBackend([make_button("btn_queue", root)])

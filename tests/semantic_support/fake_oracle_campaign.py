@@ -16,6 +16,12 @@ from types import SimpleNamespace
 
 
 class FakeCampaignOracle:
+    def campaign_auto_search_reentry_available(self):
+        return False
+
+    def click_campaign_auto_search_reentry(self):
+        return self.click("reward/campaign-total/go")
+
     def campaign_dock_full_visible(self, stage_code):
         return getattr(self, 'dock_full_visible_value', False)
 

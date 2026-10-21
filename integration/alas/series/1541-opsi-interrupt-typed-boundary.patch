@@ -1,0 +1,27 @@
+diff --git a/module/os/map.py b/module/os/map.py
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -793,7 +793,7 @@
+                 self.interval_clear(GOTO_MAIN)
+                 in_main_timer.reset()
+                 continue
+-            if pause_interval.reached():
++            if semantic_session is None and pause_interval.reached():
+                 pause = self.is_combat_executing()
+                 if pause:
+                     self.device.click(pause)
+@@ -802,12 +802,12 @@
+                     pause_interval.reset()
+                     in_main_timer.reset()
+                     continue
+-            if self.handle_combat_quit():
++            if semantic_session is None and self.handle_combat_quit():
+                 self.interval_reset(MAINTENANCE_ANNOUNCE)
+                 pause_interval.reset()
+                 in_main_timer.reset()
+                 continue
+-            if self.handle_combat_quit_reconfirm():
++            if semantic_session is None and self.handle_combat_quit_reconfirm():
+                 self.interval_reset(MAINTENANCE_ANNOUNCE)
+                 pause_interval.reset()
+                 in_main_timer.reset()

@@ -29,7 +29,8 @@ def test_original_story_option_only_recovers_proven_zero_input_disappearance(out
         if outcome == 'dispatched':
             oracle.input_dispatch_count += 1
         raise SemanticGateClosed('dialogue identity absent')
-    adapter = SimpleNamespace(open=lambda: SimpleNamespace(oracle=oracle), refresh_frame=Mock(),
+    adapter = SimpleNamespace(open=lambda: SimpleNamespace(oracle=oracle,
+                                  _frame_or_live_observation_oracle=lambda: oracle), refresh_frame=Mock(),
                               click_event_story_option=Mock(side_effect=choose))
     host = SimpleNamespace(device=SimpleNamespace(semantic_adapter=adapter),
         config=SimpleNamespace(STORY_OPTION=0), story_popup_timeout=Mock())

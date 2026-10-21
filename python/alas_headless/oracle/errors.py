@@ -17,6 +17,14 @@ class SemanticTargetMissing(SemanticGateClosed):
     """A mapped semantic target is not present in the current valid snapshot."""
 
 
+class SemanticResearchStatusUnavailable(SemanticGateClosed):
+    """A card status is unknown; no resource input has been submitted."""
+
+    def __init__(self, status: str):
+        self.status = status
+        super().__init__('research status is not reviewed: ' + status)
+
+
 class SemanticSnapshotStale(SemanticGateClosed):
     """A snapshot failed freshness; pending input results retain uncertainty."""
 
@@ -124,6 +132,10 @@ class SemanticCampaignFleetIncomplete(SemanticGateClosed):
 
 class ObserverTransportError(SemanticOracleError):
     """The local observer transport failed or returned malformed data."""
+
+
+class ObserverConnectionInterrupted(ObserverTransportError):
+    """An established observer stream was aborted, reset, or broken."""
 
 
 class ObserverResponseTimeout(ObserverTransportError):

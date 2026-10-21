@@ -5,7 +5,7 @@ from __future__ import annotations
 import time
 from ...oracle.errors import SemanticInputBlocked
 from typing import Any, Callable, List, Optional, Sequence, Tuple, Union
-from ...adapter import SemanticFrame
+from ...adapter import SemanticFrame, StaleFrameError
 from ...alas_enemy_priority_config_contract import AlasEnemyPriorityConfigSnapshot
 from ...alas_fleet_config_contract import AlasFleetConfigSnapshot
 from ...alas_hp_control_config_contract import AlasHpControlConfigSnapshot
@@ -920,6 +920,10 @@ class SessionTasksPorts:
     def authorize_campaign_auto_search_continue(self, **values) -> bool:
         return self.open().authorize_campaign_auto_search_continue(**values)
 
+    def continue_campaign_hard_auto_search(self) -> ActionReceipt:
+        self.refresh_frame()
+        return self.open().continue_campaign_hard_auto_search()
+
     def ensure_campaign_submarine_auto_mode(self, desired: str) -> str:
         return self.open().ensure_campaign_submarine_auto_mode(desired)
 
@@ -1050,6 +1054,100 @@ class SessionTasksPorts:
     def research_detail_stable(self) -> None:
         self.open().research_detail_stable()
 
+    def storage_material_scroll_state(self):
+        adapter = self.open()
+        adapter._package_gate()
+        oracle = adapter._frame_or_live_observation_oracle()
+        if not oracle.storage_material_visible():
+            state = oracle.read_state()
+            blockers = tuple(rule.blocker_id for rule in oracle._blocking_rules(state, 'storage/page/back'))
+            raise SemanticGateClosed('storage material page is absent; generation={}; blockers={}; active_overlays={}'.format(
+                state.generation, blockers, tuple(b.path for b in state.buttons
+                    if b.active_in_hierarchy and any(owner in b.path for owner in
+                        ('/ItemInfoUI(Clone)/', '/ResolveEquipmentUI(Clone)/', '/UIOverlay/')))))
+        return oracle.storage_scrollbar_state()
+
+    def storage_material_item(self, slot):
+        return self.open()._frame_or_live_observation_oracle().storage_material_item(slot)
+
+    def storage_box_candidate(self, rarity):
+        """Replace only native ALAS' box-template observation boundary."""
+        from .contracts import StorageBoxCandidate
+        if rarity != 1:
+            raise AlasSemanticUnmapped('Storage equipment-box candidate mapping is currently available only for T1')
+        oracle = self.open()._frame_or_live_observation_oracle()
+        if not oracle.storage_material_visible():
+            raise SemanticGateClosed('storage material page is absent during box recognition')
+        state = oracle.read_state()
+        ui = oracle.read_ui_state(check_foreground=False)
+        if ui.image_truncated or not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('storage box recognition snapshots are incomplete or incoherent')
+        buttons = state.buttons
+        pending = False
+        for button in sorted(buttons, key=lambda b: (b.point.y, b.point.x) if b.point else (0, 0)):
+            if (not button.actionable or '/StoreHouseUI(Clone)/' not in button.path
+                    or '/item_scrollview/item_grid/' not in button.path
+                    or not button.name.isascii() or not button.name.isdecimal()
+                    or not 0 <= button.point.x < oracle.fingerprint.width
+                    or not 0 <= button.point.y < oracle.fingerprint.height):
+                continue
+            icons = tuple(i for i in ui.images if i.path == button.path + '/bg/icon_bg/icon'
+                          and i.active_in_hierarchy and i.active_and_enabled and not i.truncated and i.sprite)
+            if not icons:
+                pending = True
+                continue
+            if len(icons) != 1:
+                raise SemanticGateClosed('storage material icon is ambiguous')
+            if icons[0].sprite != '30001':
+                continue
+            item = oracle.storage_material_item(button.name)
+            # This observed T1 appearance only selects an information dialog.
+            # The full dialog name/description proves rarity before any use.
+            if item.icon_sprite == '30001' and item.background_sprite == 'bg1':
+                return StorageBoxCandidate(item.slot, item.display_label, item.icon_sprite, rarity, item.quantity)
+        if pending:
+            from ...oracle.storage import StorageMaterialItemsPending
+            raise StorageMaterialItemsPending('storage item graphics are still loading; native screenshot retry required')
+        return None
+
+    def storage_box_amount_quantity(self):
+        adapter = self.open()
+        amount = adapter._frame_or_live_observation_oracle().storage_box_amount()
+        adapter._validate_storage_box_identity(amount)
+        return amount.quantity
+
+    def storage_box_confirmed_quantity(self, receipt):
+        """Return the actual count proved by the fresh confirmation input."""
+        quantity = getattr(receipt, 'quantity', None)
+        if (getattr(receipt, 'semantic_id', None) != 'storage/box/amount/confirm'
+                or type(quantity) is not int or quantity <= 0):
+            raise AlasSemanticUnmapped('Storage box count requires its accepted typed confirmation receipt')
+        return quantity
+
+    def inspect_storage_material_item(self, slot, *, expected_label, expected_icon):
+        return self.open()._fresh_input_oracle().click_storage_material_item(
+            slot, expected_label=expected_label, expected_icon=expected_icon)
+
+    def click_storage_box_detail(self, action, *, expected_name, expected_rarity):
+        return self.open()._fresh_input_oracle().click_storage_box_detail(
+            action, expected_name=expected_name, expected_rarity=expected_rarity)
+
+    def click_storage_box_amount(self, action, *, expected_name, expected_rarity,
+                                 expected_quantity):
+        return self.open()._fresh_input_oracle().click_storage_box_amount(
+            action, expected_name=expected_name, expected_rarity=expected_rarity,
+            expected_quantity=expected_quantity)
+
+    def storage_material_scroll_drag_toward(self, position):
+        # Pointer-down routing is an asynchronous native observation. The live
+        # oracle owns its fresh query and single drag; ALAS owns retries/target.
+        self.refresh_frame()
+        adapter = self.open()
+        adapter._package_gate()
+        if not adapter._require_frame_observation_oracle().storage_material_visible():
+            raise SemanticGateClosed('storage material page is absent before drag')
+        return adapter._live_oracle.drag_storage_material_scroll_toward(position)
+
     def research_page_stable(self) -> None:
         self.open().research_page_stable()
 
@@ -1148,6 +1246,41 @@ class SessionTasksPorts:
         try:
             return self.click(button, require_present=True)
         except SemanticTargetMissing:
+            return None
+        except SemanticInputBlocked as exc:
+            if (exc.semantic_id == 'os/map/order'
+                    and exc.blockers in (('loading',), ('operation-siren-order',))):
+                adapter = self.open()
+                entry = getattr(adapter, '_operation_siren_order_entry_receipt', None)
+                if entry is None or exc.generation <= entry.generation:
+                    raise
+                self.refresh_frame()
+                oracle = adapter._frame_or_live_observation_oracle()
+                state = oracle.read_state()
+                blockers = oracle._blocking_rules(state, 'os/map/order')
+                if (state.generation >= exc.generation
+                        and tuple(rule.blocker_id for rule in blockers) == ('operation-siren-order',)
+                        and oracle.operation_siren_order_panel_visible()):
+                    # The already accepted entry reached its panel between
+                    # native presence detection and input admission. Let
+                    # order_enter recognize it on its next screenshot.
+                    return None
+                if (state.generation >= exc.generation
+                        and len(oracle._matches(state, 'os/map/order')) == 1
+                        and blockers and all(rule.blocker_id == 'loading' for rule in blockers)):
+                    # An earlier accepted entry owns this loading handoff.
+                    # No input is repeated; the original Order loop takes
+                    # its next screenshot and handles the resulting page.
+                    return None
+                raise
+            if exc.semantic_id != 'os/map/order' or exc.blockers != ('event-story',):
+                raise
+            # A first-visit story can mount after ORDER_ENTER's presence
+            # check. No order input occurred. Give the original Order loop
+            # its new screenshot so its existing handle_map_event owns it.
+            self.refresh_frame()
+            if not self.open()._frame_or_live_observation_oracle().event_story_dialogue_visible():
+                raise
             return None
 
     def campaign_story_black(self) -> bool:
@@ -1277,8 +1410,10 @@ class SessionTasksPorts:
         deadline = time.monotonic() + 20.0
         while time.monotonic() < deadline:
             try:
+                self.refresh_frame()
+                reader = adapter._require_frame_observation_oracle()
                 powers = tuple(
-                    oracle.exercise_opponent_power(index) for index in range(1, 5)
+                    reader.exercise_opponent_power(index) for index in range(1, 5)
                 )
                 break
             except SemanticGateClosed:
@@ -1290,11 +1425,19 @@ class SessionTasksPorts:
             deadline = time.monotonic() + 20.0
             target = "exercise/opponent/{0}".format(index)
             while True:
-                self.refresh_frame()
+                # Powers, or the previous detail's confirmed return, already
+                # supplied this overview frame. Input still enforces its age.
                 before_inputs = getattr(oracle, 'input_dispatch_count', None)
                 try:
-                    receipt = oracle.click(target)
+                    receipt = reader.click(target)
                     break
+                except StaleFrameError:
+                    if (type(before_inputs) is not int
+                            or oracle.input_dispatch_count != before_inputs
+                            or time.monotonic() >= deadline):
+                        raise
+                    self.refresh_frame()
+                    reader = adapter._require_frame_observation_oracle()
                 except SemanticInputBlocked as exc:
                     # The preceding rival's return can briefly mount Loading
                     # over the overview. Re-read within the existing detail
@@ -1303,25 +1446,39 @@ class SessionTasksPorts:
                             or type(before_inputs) is not int
                             or oracle.input_dispatch_count != before_inputs
                             or time.monotonic() >= deadline
-                            or not oracle.exercise_page_visible()):
+                            or not reader.exercise_page_visible()):
                         raise
                     time.sleep(0.25)
+                    self.refresh_frame()
+                    reader = adapter._require_frame_observation_oracle()
             while time.monotonic() < deadline:
                 try:
-                    if oracle.exercise_opponent_detail_visible():
-                        levels = oracle.exercise_opponent_levels()
+                    self.refresh_frame()
+                    reader = adapter._require_frame_observation_oracle()
+                    if reader.exercise_opponent_detail_visible():
+                        # Identity, fleet levels and the closing input share
+                        # one fresh detail frame rather than repeated ADB polls.
+                        levels = reader.exercise_opponent_levels()
                         break
                 except SemanticGateClosed:
                     pass
                 time.sleep(0.25)
             else:
                 raise SemanticGateClosed("Exercise rival detail did not appear")
-            if receipt.generation > oracle.read_ui_state().generation:
+            if receipt.generation > reader.read_ui_state().generation:
                 raise SemanticGateClosed("Exercise rival detail predates its selection")
-            oracle.click_exercise_opponent_back()
+            reader.click_exercise_opponent_back()
             deadline = time.monotonic() + 20.0
             while time.monotonic() < deadline:
-                if oracle.exercise_page_visible():
+                self.refresh_frame()
+                reader = adapter._require_frame_observation_oracle()
+                if (reader.exercise_page_visible()
+                        and not any(button.active_in_hierarchy
+                                    and '/RivalInfoUI(Clone)/' in button.path
+                                    for button in reader.read_state().buttons)):
+                    # Overview controls remain mounted below RivalInfo while
+                    # its closing animation still intercepts input. The next
+                    # rival needs the actual detail departure, not its underlay.
                     break
                 time.sleep(0.25)
             else:
@@ -1335,9 +1492,13 @@ class SessionTasksPorts:
         deadline = time.monotonic() + timeout_seconds
         receipts: List[ActionReceipt] = []
         while time.monotonic() < deadline:
-            oracle = self.open().oracle
             award_action = False
             try:
+                # Result waits may outlive the previous screenshot lease.
+                # Classify and act on one newly captured immutable frame;
+                # dispatch still performs the live input preflight.
+                self.refresh_frame()
+                oracle = self.open()._require_frame_observation_oracle()
                 if oracle.exercise_page_visible():
                     return tuple(receipts)
                 if oracle.exercise_merit_shop_visible():

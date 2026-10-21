@@ -88,6 +88,7 @@ def test_orphan_result_accepts_exact_exercise_return_and_preserves_task_isolatio
     oracle = Mock()
     for name in ('daily_battle_result_visible', 'campaign_battle_reward_visible',
             'operation_siren_page_visible', 'daily_page_visible',
+            'meta_page_visible',
             'main_page_visible', 'event_campaign_page_visible', 'exercise_page_visible'):
         getattr(oracle, name).return_value = False
     oracle.campaign_is_in_map.return_value = False

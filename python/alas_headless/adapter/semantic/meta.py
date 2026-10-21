@@ -10,6 +10,7 @@ from ...semantic_oracle import (
     MetaCurrentDetailState,
     MetaEntranceState,
     SemanticGateClosed,
+    SemanticOracle,
 )
 from .dispatch_result import UNHANDLED
 from .contracts import AlasSemanticUnmapped
@@ -64,9 +65,11 @@ class MetaAdapterPorts:
         self._package_gate()
         self._meta_beacon_active = True
         self._meta_dossier_sync_open_receipt = None
+        self._meta_current_create_handoff = None
 
     def end_meta_beacon(self) -> None:
         self._meta_beacon_active = False
+        self._meta_current_create_handoff = None
         self._meta_dossier_sync_open_receipt = None
         self._meta_reward_close_receipt = None
         self._meta_precombat_start_receipt = None
@@ -112,11 +115,34 @@ class MetaAdapterPorts:
 
     def meta_current_empty_points(self) -> Tuple[int, int]:
         self._package_gate()
-        return self.oracle.meta_current_empty_points()
+        return self._frame_or_live_observation_oracle().meta_current_empty_points()
+
+    def _click_meta_current_create(self) -> ActionReceipt:
+        """Submit one create input; native META polling owns its page change."""
+        self._package_gate()
+        reader = self._fresh_input_oracle()
+        previous = self._meta_current_create_handoff
+        if previous is not None and self.oracle.input_dispatch_count == previous[1]:
+            state = reader.read_state()
+            blockers = reader._blocking_rules(state, 'meta/home')
+            if blockers and all(rule.blocker_id == 'loading' for rule in blockers):
+                return previous[0]
+            try:
+                reader.meta_current_detail_state()
+            except SemanticGateClosed:
+                # The accepted create may still leave its exact empty page
+                # mounted. Do not spend another beacon while ALAS polls it.
+                reader.meta_current_empty_points(require_create=True)
+            # This is the same accepted input, not another create or a claim
+            # of task success. Unknown pages and blockers cannot reach here.
+            return previous[0]
+        receipt = reader.click_meta_current_create()
+        self._meta_current_create_handoff = (receipt, self.oracle.input_dispatch_count)
+        return receipt
 
     def meta_dossier_empty_points(self) -> Tuple[int, int]:
         self._package_gate()
-        return self.oracle.meta_dossier_empty_points()
+        return self._frame_or_live_observation_oracle().meta_dossier_empty_points()
 
     def meta_current_detail_state(self) -> MetaCurrentDetailState:
         self._package_gate()
@@ -161,10 +187,15 @@ class MetaAdapterPorts:
             raise SemanticGateClosed(
                 "META precombat requires non-empty main and vanguard fleets"
             )
+        operation = (self.oracle.click_meta_assist_precombat_start
+                     if self._meta_assist_active else self.oracle.click_daily_precombat_start)
+        if isinstance(self.oracle, SemanticOracle) and self._input_frame_refresher is not None:
+            live_operation = operation
+            operation = lambda: live_operation(input_frame=self._fresh_input_oracle)
         if self._meta_assist_active:
-            receipt = self._dispatch_mutation('meta.assist', self.oracle.click_meta_assist_precombat_start)
+            receipt = self._dispatch_mutation('meta.assist', operation)
         else:
-            receipt = self.oracle.click_daily_precombat_start()
+            receipt = operation()
         if self._meta_assist_active or self._meta_beacon_active:
             self._meta_precombat_start_receipt = receipt
             self._meta_precombat_start_until = time.monotonic() + 20.0
@@ -173,7 +204,8 @@ class MetaAdapterPorts:
 
     def click_meta_precombat_back(self) -> ActionReceipt:
         self._package_gate()
-        receipt = self.oracle.click_daily_precombat_back()
+        receipt = (self._fresh_input_oracle().click_meta_assist_precombat_back()
+                   if self._meta_assist_active else self.oracle.click_daily_precombat_back())
         if self._meta_assist_active:
             self._meta_precombat_back_receipt = receipt
             self._meta_precombat_back_until = time.monotonic() + 20.0
@@ -269,6 +301,11 @@ class MetaAdapterPorts:
             return self.oracle.reward_resource_available(
                 REWARD_RESOURCE_FIELDS[name]
             )
+        if semantic_id == 'meta/category/back':
+            if not self.oracle.observation_target_present(semantic_id):
+                return False
+            self.oracle.meta_category_back_control()
+            return True
         if semantic_id == "meta/page/back":
             try:
                 self.oracle.meta_entrance_state()

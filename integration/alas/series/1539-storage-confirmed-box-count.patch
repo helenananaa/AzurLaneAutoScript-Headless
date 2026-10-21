@@ -1,0 +1,17 @@
+diff --git a/module/storage/storage.py b/module/storage/storage.py
+--- a/module/storage/storage.py
++++ b/module/storage/storage.py
+@@ -170,9 +170,11 @@
+             # a long animation that opens a box, will be on the top of BOX_AMOUNT_CONFIRM
+             if self.match_template_color(BOX_AMOUNT_CONFIRM, offset=(20, 20), interval=5):
+                 actual = self._handle_use_box_amount(amount)
+-                self.device.click(BOX_AMOUNT_CONFIRM)
++                confirmation = self.device.click(BOX_AMOUNT_CONFIRM)
+                 self.interval_reset(BOX_AMOUNT_CONFIRM)
+-                used = actual
++                semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++                used = (semantic_adapter.storage_box_confirmed_quantity(confirmation)
++                        if semantic_adapter is not None else actual)
+                 continue
+             if self.appear_then_click(EQUIP_CONFIRM, offset=(20, 20), interval=5):
+                 self.interval_reset(MATERIAL_CHECK)

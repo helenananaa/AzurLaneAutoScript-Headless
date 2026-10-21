@@ -420,7 +420,10 @@ class OpsiAdapterPorts:
     def complete_operation_siren_combat_if_map_restored(self) -> bool:
         """Release combat ownership on an exact unobstructed OS map."""
 
-        if not self._operation_siren_combat_active:
+        if (not self._operation_siren_combat_active
+                or self._meta_beacon_active or self._meta_assist_active):
+            # META shares the legacy combat-active latch, but its native
+            # expected_end owns return to WorldBoss, never an OS map probe.
             return False
         # The map hierarchy remains mounted under grade and reward overlays.
         # Do not release ownership until those exact result surfaces are gone.
@@ -468,7 +471,7 @@ class OpsiAdapterPorts:
         """Return whether a standalone exact AwardInfo stack covers the map."""
 
         self._package_gate()
-        return self.oracle.award_info_page_visible()
+        return self._frame_or_live_observation_oracle().award_info_page_visible()
 
     def click_operation_siren_reward_close(self) -> ActionReceipt:
         """Close one exact standalone boss reward without pixel fallbacks."""
@@ -691,8 +694,11 @@ class OpsiAdapterPorts:
             self._operation_siren_entry_transition_until = 0.0
         return visible
 
-    def operation_siren_globe_unpin(self) -> OperationSirenGlobeSwipeReceipt:
+    def operation_siren_globe_unpin(self, *, precondition_oracle=None) -> OperationSirenGlobeSwipeReceipt:
         self._package_gate()
+        if precondition_oracle is not None:
+            return self.oracle.operation_siren_globe_unpin(
+                precondition_oracle=precondition_oracle)
         return self.oracle.operation_siren_globe_unpin()
 
     def operation_siren_storage_visible(self) -> bool:
@@ -776,6 +782,14 @@ class OpsiAdapterPorts:
         self._package_gate()
         return self.oracle.operation_siren_globe_drag_owned(start,end)
 
+    def operation_siren_globe_drag_candidate(self, start, end, *, box):
+        self._package_gate()
+        intent = self._operation_siren_globe_swipe_intent
+        bounds = self._campaign_swipe_box(box, 'operation siren globe swipe box')
+        if intent is None or bounds != intent.box:
+            raise SemanticGateClosed('globe candidate has no matching ALAS swipe intent')
+        return self.oracle.operation_siren_globe_drag_candidate(start, end, box=bounds)
+
     def operation_siren_globe_map_projection(self, area_pos):
         self._package_gate()
         return self.oracle.operation_siren_globe_map_projection(area_pos)
@@ -851,17 +865,17 @@ class OpsiAdapterPorts:
 
     def operation_siren_port_repair_cost(self) -> Optional[int]:
         self._package_gate()
-        return self.oracle.operation_siren_port_repair_cost()
+        return self._frame_or_live_observation_oracle().operation_siren_port_repair_cost()
 
     def click_operation_siren_port_repair(
         self, confirm: bool
     ) -> ActionReceipt:
         self._package_gate()
         if not confirm:
-            return self.oracle.click_operation_siren_port_repair(False)
+            return self._fresh_input_oracle().click_operation_siren_port_repair(False)
         return self._dispatch_mutation(
             "operation_siren.port_repair",
-            lambda: self.oracle.click_operation_siren_port_repair(True),
+            lambda: self._fresh_input_oracle().click_operation_siren_port_repair(True),
         )
 
     def operation_siren_port_repair_allowed(self) -> bool:

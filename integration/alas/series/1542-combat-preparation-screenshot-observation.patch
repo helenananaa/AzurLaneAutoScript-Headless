@@ -1,0 +1,15 @@
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -271,7 +271,10 @@
+             if semantic_adapter is not None:
+                 if semantic_adapter.campaign_result_ready():
+                     return True
+-                oracle = semantic_adapter.open().oracle
++                # These are observations of the current native screenshot.
++                # Input ports below independently refresh and revalidate the
++                # actionable target before dispatch.
++                oracle = semantic_adapter.open()._frame_or_live_observation_oracle()
+                 if self.handle_combat_automation_confirm():
+                     continue
+                 if semantic_adapter.meta_beacon_active() \

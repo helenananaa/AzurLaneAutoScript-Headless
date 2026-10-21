@@ -14,11 +14,31 @@ from .contracts import (
     ResearchQueueState,
     ResearchResourceCostState,
 )
-from .errors import SemanticGateClosed
+from .errors import SemanticGateClosed, SemanticResearchStatusUnavailable
 
 
 class ResearchOracle:
     """Research operations sharing the oracle frame and input boundary."""
+
+    def research_page_visible(self) -> bool:
+        """Recognize the card page without parsing optional project metadata.
+
+        TechnologyUI's queue and detail retain the same back Button. The
+        active card container distinguishes the base page from those owners.
+        This presence check grants no project input authority.
+        """
+        state = self.read_state()
+        if not self.enabled("research/page/back") or self.enabled("research/detail/root"):
+            return False
+        pattern = re.compile(
+            r"(?:^|/)TechnologyUI\(Clone\)/main/base_page/srcoll_rect/content/([1-5])$"
+        )
+        return any(
+            (match := pattern.search(button.path)) is not None
+            and button.name == match.group(1)
+            and button.active_in_hierarchy and button.active_and_enabled
+            for button in state.buttons
+        )
 
     def research_reset_available(self) -> bool:
         """Recognize the observed exhausted refresh state, without guessing readiness."""
@@ -28,12 +48,14 @@ class ResearchOracle:
         ui = self.read_ui_state()
         if not state.generation <= ui.generation <= state.generation + 2:
             raise SemanticGateClosed("research reset frames are incoherent")
-        path = "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/refresh_btn"
-        labels = [t for t in ui.texts if t.path == path + "/Text"
+        root = "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/"
+        paths = (root + "refresh_btn", root + "adapt/refresh_btn")
+        labels = [t for t in ui.texts if t.path in tuple(path + "/Text" for path in paths)
                   and t.active_in_hierarchy and t.active_and_enabled and not t.truncated]
-        icons = [i for i in ui.images if i.path == path and i.active_in_hierarchy
+        icons = [i for i in ui.images if i.path in paths and i.active_in_hierarchy
                  and i.active_and_enabled and not i.truncated]
-        if len(labels) != 1 or len(icons) != 1 or icons[0].sprite != "refresh":
+        if (len(labels) != 1 or len(icons) != 1 or icons[0].sprite != "refresh"
+                or labels[0].path != icons[0].path + "/Text"):
             raise SemanticGateClosed("research reset state is absent or ambiguous")
         if labels[0].text.strip() == "每日0点后可刷新":
             return False
@@ -197,6 +219,7 @@ class ResearchOracle:
         plain = re.sub(r"<[^>]*>", "", value).strip()
         statuses = {
             "查看详情": ResearchProjectStatus.DETAIL,
+            "条件未达成": ResearchProjectStatus.REQUIREMENTS_UNMET,
             "进行中": ResearchProjectStatus.RUNNING,
             "等待中": ResearchProjectStatus.WAITING,
             # The live CN queue currently labels a queued item as
@@ -207,9 +230,7 @@ class ResearchOracle:
         try:
             return statuses[plain]
         except KeyError as exc:
-            raise SemanticGateClosed(
-                "research status is not reviewed: " + plain
-            ) from exc
+            raise SemanticResearchStatusUnavailable(plain) from exc
 
     def research_detail_state(self) -> ResearchDetailState:
         """Read the selected research detail and its exact action state."""
@@ -494,6 +515,28 @@ class ResearchOracle:
             raise SemanticGateClosed("research queue-add image is ambiguous")
         return len(images) == 1
 
+    def research_queue_add_visible(self) -> bool:
+        """Observe Queue even when unmet requirements disable its action.
+
+        Native ALAS checks availability separately and closes a locked detail.
+        Hiding that control would strand its existing queue loop.
+        """
+        state = self.read_state()
+        root = self._matches(state, "research/detail/root")
+        if (len(root) != 1 or not root[0].active_in_hierarchy
+                or not root[0].active_and_enabled
+                or self._blocking_rules(state, "research/detail/queue")):
+            return False
+        prefix = "TechnologyUI(Clone)/main/base_page/selecte_panel/technology_card/frame/btns/"
+        controls = tuple(button for button in state.buttons
+            if button.name in ("join_btn", "lock_join_btn")
+            and button.path.endswith(prefix + button.name)
+            and button.active_in_hierarchy and button.active_and_enabled
+            and button.bounds is not None)
+        if len(controls) > 1:
+            raise SemanticGateClosed("research queue presence is ambiguous")
+        return len(controls) == 1
+
     def research_queue_add_available(self) -> bool:
         return self._retry_transition_read(
             self._research_queue_add_available_once,
@@ -697,6 +740,11 @@ class ResearchOracle:
         """Legacy single-cost observation must not silently drop companion costs."""
         costs = self._research_start_prompt_costs(state)
         return costs[0] if costs is not None and len(costs) == 1 else None
+
+    def _research_stop_prompt_matches(self, state: OracleState) -> bool:
+        return self._msgbox_prompt_parts(state) == (
+            "确定终止研发吗？将不返还材料", "取消", "确定"
+        )
 
     def _research_queue_prompt_matches(self, state: OracleState) -> bool:
         parts = self._msgbox_prompt_parts(state)

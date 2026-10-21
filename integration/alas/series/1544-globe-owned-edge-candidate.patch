@@ -1,0 +1,21 @@
+diff --git a/module/device/control.py b/module/device/control.py
+--- a/module/device/control.py
++++ b/module/device/control.py
+@@ -222,8 +222,15 @@
+                     whitelist_area=whitelist_area,
+                     blacklist_area=blacklist_area
+                 )
+-                if (semantic_adapter is None or not name.startswith('GLOBE_SWIPE_')
+-                        or semantic_adapter.operation_siren_globe_drag_owned(p1,p2)):
++                if semantic_adapter is None or not name.startswith('GLOBE_SWIPE_'):
++                    break
++                select_candidate = getattr(semantic_adapter, 'operation_siren_globe_drag_candidate', None)
++                if select_candidate is not None:
++                    candidate = select_candidate(p1, p2, box=box)
++                    if candidate is not None:
++                        p1, p2 = candidate
++                        break
++                elif semantic_adapter.operation_siren_globe_drag_owned(p1, p2):
+                     break
+                 logger.info('Original ALAS swipe candidate is outside native globe Plane; resample before input')
+             else:

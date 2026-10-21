@@ -1,11 +1,13 @@
 """Task-local compatibility outcomes at the original ALAS run boundary."""
 
 from contextlib import contextmanager
+import traceback
 
 from .errors import UnknownObservationError, UnsupportedPixelRead
 from .semantic.contracts import (AlasSemanticActionDeferred, AlasSemanticUnmapped,
                                 AlasSemanticDormFeedResultUnproven,
-                                AlasSemanticCommissionStartUnproven)
+                                AlasSemanticCommissionStartUnproven,
+                                AlasSemanticGuildDispatchUnproven)
 from ..oracle.errors import (SemanticCommissionRowIncomplete, SemanticSnapshotStale, SemanticRaidUnavailable,
                              SemanticInputBlocked, SemanticTargetNotActionable,
                              SemanticNavigationPending,
@@ -21,7 +23,7 @@ class TaskCapabilityUnavailable(RuntimeError):
         self.cause = cause
         reason = ('semantic action deferred' if isinstance(cause, AlasSemanticActionDeferred)
                   else 'semantic navigation pending' if isinstance(cause, SemanticNavigationPending)
-                  else 'semantic resource result unproven' if isinstance(cause, AlasSemanticDormFeedResultUnproven)
+                  else 'semantic resource result unproven' if isinstance(cause, (AlasSemanticDormFeedResultUnproven, AlasSemanticGuildDispatchUnproven))
                   else 'semantic input deferred' if isinstance(cause, (SemanticInputBlocked, SemanticTargetNotActionable))
                   else 'semantic observation not ready' if isinstance(cause, (SemanticCommissionRowIncomplete, SemanticSnapshotStale))
                   else 'game prerequisite pending' if isinstance(cause, SemanticStrongholdEntryLocked)
@@ -72,6 +74,12 @@ def semantic_task_scope(session, task):
             outcome, failure = 'raised', exc
             raise
         outcome, failure = 'capability-unavailable', exc
+        raise TaskCapabilityUnavailable(task, exc) from exc
+    except AlasSemanticGuildDispatchUnproven as exc:
+        if task.lower() != 'guild':
+            outcome, failure = 'raised', exc
+            raise
+        outcome, failure = 'result-unproven', exc
         raise TaskCapabilityUnavailable(task, exc) from exc
     except SemanticGuildFormationUnavailable as exc:
         if task.lower() != 'guild':
@@ -141,6 +149,20 @@ def semantic_task_scope(session, task):
                 age_ms=failure.age_ms,
                 max_age_ms=failure.max_age_ms,
                 input_outcome_uncertain=failure.input_outcome_uncertain,
+                read_stack=[{'file': frame.filename, 'line': frame.lineno,
+                             'function': frame.name}
+                            for frame in traceback.extract_tb(failure.__traceback__)],
             )
+        if isinstance(failure, (SemanticInputBlocked, SemanticTargetNotActionable)):
+            session.last_task_error.update(semantic_id=failure.semantic_id,
+                                           generation=failure.generation)
+            if isinstance(failure, SemanticInputBlocked):
+                session.last_task_error['blockers'] = list(failure.blockers)
+        if (isinstance(failure, SemanticNavigationPending)
+                and isinstance(failure.receipt, dict)):
+            # Preserve the already collected source/destination/gesture facts;
+            # later diagnostic reads cannot reconstruct a missed input frame.
+            session.last_task_error.update(semantic_id=failure.semantic_id,
+                generation=failure.generation, navigation_receipt=dict(failure.receipt))
         if session.trace is not None:
             session.trace.emit("semantic.task.end", fields=session.last_task_outcome)

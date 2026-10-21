@@ -21,13 +21,12 @@ def test_exact_commission_page_proves_only_uncovered_reward_absence(name, foreig
     assert backend.taps == []
 
 
-@pytest.mark.parametrize('change', ['unknown', 'duplicate', 'loading', 'stale', 'foreground'])
+@pytest.mark.parametrize('change', ['unknown', 'duplicate', 'stale', 'foreground'])
 def test_commission_monthly_absence_requires_existing_page_guards(change):
     from alas_headless import SemanticGateClosed
     target = make_button('back_btn', 'UICamera/Canvas/UIMain/EventUI(Clone)/blur_panel/adapt/top/back_btn')
     if change == 'unknown': target['path'] = target['path'].replace('EventUI', 'UnknownUI')
     records = [target, dict(target)] if change == 'duplicate' else [target]
-    if change == 'loading': records.append(make_button('Loading(Clone)', 'OverlayCamera/Overlay/UIOverlay/Loading(Clone)'))
     backend = FakeBackend(records)
     if change == 'stale': backend.snapshot['age_ms'] = backend.buttons['age_ms'] = 99999
     if change == 'foreground': backend.foreground = 'com.android.settings/.Settings'
@@ -37,6 +36,19 @@ def test_commission_monthly_absence_requires_existing_page_guards(change):
         # observation grace so ALAS can take its next screenshot.
         adapter._appear_once(SimpleNamespace(name='MONTHLY_PASS_NOTICE'))
     assert backend.taps == []
+
+
+def test_known_loading_over_commission_yields_notice_probe_without_notice_input():
+    from alas_headless import SemanticGateClosed
+    backend = FakeBackend([
+        make_button('back_btn', 'UICamera/Canvas/UIMain/EventUI(Clone)/blur_panel/adapt/top/back_btn'),
+        make_button('Loading(Clone)', 'OverlayCamera/Overlay/UIOverlay/Loading(Clone)'),
+    ])
+    adapter = AlasSemanticAdapter(make_oracle(backend), package_gate=lambda: None)
+    assert adapter._appear_once(SimpleNamespace(name='MONTHLY_PASS_NOTICE')) is False
+    with pytest.raises((AlasSemanticUnmapped, SemanticGateClosed)):
+        adapter.click(SimpleNamespace(name='MONTHLY_PASS_NOTICE'))
+    assert not backend.taps and not backend.swipes
 
 
 def test_retained_r198_commission_frame_proves_monthly_absence():

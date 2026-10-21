@@ -11,17 +11,19 @@ from alas_headless.oracle.errors import SemanticTargetNotActionable
 from tests.semantic_support.observer_fixtures import FakeBackend, make_button, make_oracle
 
 
-@pytest.mark.parametrize('case', ['settling', 'loading', 'loading-covered', 'ready', 'disabled', 'covered', 'ambiguous'])
+@pytest.mark.parametrize('case', ['settling', 'loading', 'loading-covered',
+    'loading-ready', 'loading-ready-covered', 'ready', 'disabled', 'covered', 'ambiguous'])
 def test_login_input_classifies_preinput_readiness_without_dispatch(case):
     root = 'UICamera/Canvas/UIMain/LoginUI2(Clone)'
-    buttons = [make_button('LoginUI2(Clone)', root, raycast_top=case == 'ready')]
+    buttons = [make_button('LoginUI2(Clone)', root, raycast_top=case in
+        ('ready', 'loading-ready', 'loading-ready-covered'))]
     if case == 'disabled':
         buttons[0]['interactable'] = False
     if case == 'covered':
         buttons.append(make_button('confirm', 'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)'))
     if case.startswith('loading'):
         buttons.append(make_button('Loading(Clone)', 'OverlayCamera/Overlay/UIOverlay/Loading(Clone)'))
-        if case == 'loading-covered':
+        if case in ('loading-covered', 'loading-ready-covered'):
             buttons.append(make_button('confirm', 'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)'))
     if case == 'ambiguous':
         buttons.append(make_button('LoginUI2(Clone)', root, raycast_top=False))
@@ -35,7 +37,10 @@ def test_login_input_classifies_preinput_readiness_without_dispatch(case):
             oracle.click('login/enter')
         # All unique non-actionable targets are pre-input refusals. Duplicate
         # targets retain the fatal ambiguity classification.
-        assert isinstance(error.value, SemanticTargetNotActionable) == (case != 'ambiguous')
+        assert isinstance(error.value, SemanticTargetNotActionable) == (
+            case not in ('ambiguous', 'loading-ready-covered'))
+        if case == 'loading-ready':
+            assert error.value.__cause__.blockers == ('loading',)
         assert backend.taps == []
 
 

@@ -216,6 +216,7 @@ def test_other_task_pages_skip_failed_optional_readers(monkeypatch, page):
     if page == "research":
         adapter.begin_research()
         oracle.exists_values["research/page/back"] = True
+        oracle.enabled_values["research/page/back"] = True
         oracle.research_project_values = [SimpleNamespace(slot=i) for i in range(5)]
         expected = "RESEARCH_CHECK"
     else:

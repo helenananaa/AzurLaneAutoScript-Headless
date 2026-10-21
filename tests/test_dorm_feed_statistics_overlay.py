@@ -4,6 +4,7 @@ from unittest.mock import Mock
 import pytest
 
 from alas_headless.semantic_oracle import SemanticGateClosed
+from alas_headless.adapter.semantic.contracts import _CampaignFlowContext
 from alas_headless.oracle.errors import SemanticTargetNotActionable
 from tests.semantic_support.observer_fixtures import FakeBackend, make_button, make_oracle
 
@@ -188,7 +189,7 @@ def test_unobscured_main_owns_withdraw_absence_with_retained_campaign_context(na
     from tests.semantic_support.adapter_fixtures import NamedButton
     from tests.semantic_support.adapter_cases import AlasSemanticAdapterTestsSupport
     adapter,oracle,_=AlasSemanticAdapterTestsSupport().make_adapter()
-    adapter._campaign_context=object()
+    adapter._campaign_context=_CampaignFlowContext(stage_code='7-2')
     oracle.main_page_visible_value=True
     assert not adapter.appear(NamedButton(name))
     assert oracle.click_calls==[]
@@ -199,7 +200,7 @@ def test_obscured_main_does_not_override_withdraw_probe_owner():
     from tests.semantic_support.adapter_cases import AlasSemanticAdapterTestsSupport
     from alas_headless.adapter.semantic.dispatch_result import UNHANDLED
     adapter,oracle,_=AlasSemanticAdapterTestsSupport().make_adapter()
-    adapter._campaign_context=object()
+    adapter._campaign_context=_CampaignFlowContext(stage_code='7-2')
     oracle.main_page_visible_value=True
     oracle.read_ui_state=Mock(return_value=SimpleNamespace(texts=()))
     oracle._blocking_rules=Mock(return_value=(SimpleNamespace(blocker_id="unknown"),))
@@ -211,7 +212,7 @@ def test_unknown_surface_does_not_prove_dock_absence_with_retained_context():
     from tests.semantic_support.adapter_cases import AlasSemanticAdapterTestsSupport
     from alas_headless.adapter.semantic.dispatch_result import UNHANDLED
     adapter,oracle,_=AlasSemanticAdapterTestsSupport().make_adapter()
-    adapter._campaign_context=object()
+    adapter._campaign_context=_CampaignFlowContext(stage_code='7-2')
     oracle.read_ui_state=Mock(return_value=SimpleNamespace(texts=()))
     oracle._blocking_rules=Mock(return_value=(SimpleNamespace(blocker_id="unknown"),))
     assert adapter._appear_priority('DOCK_CHECK') is UNHANDLED

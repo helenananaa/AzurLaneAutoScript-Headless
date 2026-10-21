@@ -16,6 +16,7 @@ from ...alas_combat_state_replay import (
     ALAS_COMBAT_RESOURCE_ACTION_TARGETS,
 )
 from ...semantic_oracle import ActionReceipt, SemanticGateClosed, SemanticTargetMissing
+from ...oracle.errors import SemanticInputTargetMissing
 from ...oracle.surfaces import ObservationSurface
 from .adapter import AlasSemanticAdapter
 from .contracts import AlasSemanticUnmapped
@@ -86,6 +87,22 @@ class SessionDispatchPorts:
                 return adapter.appear(button)
         if name in ('GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3'):
             oracle = adapter._frame_or_live_observation_oracle()
+            pending = getattr(self, '_combat_reward_close_pending', None)
+            if pending is not None:
+                targets = ('reward/award-info/close', 'reward/award-info1/close')
+                state = oracle.read_state()
+                source_present = any(
+                    b.path == pending.path and b.active_in_hierarchy
+                    for b in state.buttons)
+                if (source_present
+                        and time.monotonic() <= self._combat_result_transition_until
+                        and any(oracle.enabled(target) for target in targets)):
+                    # A committed close can leave AwardInfo mounted in the
+                    # next screenshot. Let the original result loop observe
+                    # its disappearance before offering that same close again.
+                    # Direct input still needs the full fresh action proof.
+                    return False
+                self._combat_reward_close_pending = None
             if (oracle.award_info_page_visible()
                     and getattr(oracle, 'reward_item_info_visible', lambda: False)()):
                 # The exact item description may remain over a reward across
@@ -171,7 +188,8 @@ class SessionDispatchPorts:
         if name in ('AUTOMATION_CONFIRM_CHECK', 'AUTOMATION_CONFIRM') and (
                 adapter._meta_assist_active or adapter.meta_beacon_active()
                 or adapter.daily_execution_active()
-                or adapter.operation_siren_combat_committed()):
+                or adapter.operation_siren_combat_committed()
+                or getattr(adapter, 'campaign_auto_search_owned', lambda: False)()):
             return observation_oracle.combat_automation_info_visible()
         if observation_oracle.enabled("overlay/network-reconnect/confirm"):
             # NetworkDown is a global exact overlay and may mount over any
@@ -488,6 +506,16 @@ class SessionDispatchPorts:
         return self.open().image_color_count(button, color, threshold, count)
 
     def click(self, button: Any, *, require_present: bool = False) -> Optional[Union[ActionReceipt, PrivateQuartersPhysicsReceipt]]:
+        from .contracts import StorageBoxCandidate
+        if isinstance(button, StorageBoxCandidate):
+            receipt = self.inspect_storage_material_item(button.slot,
+                expected_label=button.display_label, expected_icon=button.icon_sprite)
+            self.open()._storage_box_candidate = button
+            self.open()._storage_box_use_receipt = None
+            self.open()._storage_box_use_quantity = None
+            self.open()._storage_box_equipment_receipt = None
+            self.open()._storage_box_destroy_receipt = None
+            return receipt
         if AlasSemanticAdapter._operation_siren_camera_grid(button):
             self.refresh_frame()
             return self.open().click_operation_siren_camera_grid(button)
@@ -512,16 +540,23 @@ class SessionDispatchPorts:
         if name == 'AUTOMATION_CONFIRM' and (
                 self.open()._meta_assist_active or self.open().meta_beacon_active()
                 or self.open().daily_execution_active()
-                or self.open().operation_siren_combat_committed()):
+                or self.open().operation_siren_combat_committed()
+                or getattr(self.open(), 'campaign_auto_search_owned', lambda: False)()):
             self.refresh_frame()
             return self.open().oracle.click_combat_automation_info()
         if (name == 'GUILD_POPUP_CANCEL'
                 and self.open()._frame_or_live_observation_oracle().observation_target_present(
                     'overlay/guild-message/close')):
             self.refresh_frame()
-            # Reuse the reviewed close port and its independent live input
-            # checks, rather than the combat table's unrelated pair selectors.
-            return self.open().click(button)
+            adapter = self.open()
+            current = adapter._require_frame_observation_oracle()
+            if not current.observation_target_present('overlay/guild-message/close'):
+                # A global notice may expire after the original positive
+                # screenshot. A new complete frame proves disappearance;
+                # return to ALAS without input or an invented close receipt.
+                return None
+            with adapter.prepared_input_frame(lambda: current):
+                return adapter.click(button)
         if name in ('SYNC_ENTER', 'SYNC_ENTER2', 'SYNC_TAP'):
             self.refresh_frame()
             return self.open().click(button)
@@ -745,6 +780,7 @@ class SessionDispatchPorts:
                 )
                 receipt = result_oracle.click(target)
                 self._combat_last_result_receipt = receipt
+                self._combat_reward_close_pending = receipt
                 if adapter._meta_assist_active or adapter.meta_beacon_active():
                     # Shared AwardInfo dispatch can close a synchronization
                     # reward too. Hand the accepted receipt to the META port
@@ -811,16 +847,13 @@ class SessionDispatchPorts:
                     time.sleep(0.2)
                 raise SemanticGateClosed("Dock return did not reach the exact main page")
             if name == "GOTO_MAIN" and navigation_oracle.exercise_page_visible():
-                oracle = self.open().oracle
-                receipt = oracle.click_exercise_home()
-                deadline = time.monotonic() + 12.0
-                while time.monotonic() < deadline:
-                    if (oracle.read_state().generation > receipt.generation
-                            and oracle.main_page_visible()
-                            and not oracle.observation_target_present("exercise/page/back")):
-                        return receipt
-                    time.sleep(0.2)
-                raise SemanticGateClosed("Exercise return did not reach the exact main page")
+                # Original ui_goto owns screenshots, retries and destination
+                # proof. The optional Home control did not advance in live
+                # recovery; leave one level through the existing reviewed Back
+                # port and let the native page graph rediscover its destination.
+                receipt = self.open()._fresh_input_oracle().click('exercise/page/back')
+                self.open()._exercise_page_back_transition_until = time.monotonic() + 20.0
+                return receipt
         if (name == 'AUTO_SEARCH_MENU_EXIT' and self.adapter is not None
                 and self.adapter._campaign_context is not None):
             self.refresh_frame()
@@ -878,6 +911,14 @@ class SessionDispatchPorts:
             and name not in MISSION_CLICK_RESOURCES
             and name not in MAIL_CLICK_RESOURCES
             and name not in CAMPAIGN_CLICK_RESOURCES
+            and not (name == 'POPUP_CONFIRM_WHITE_UI_ADDITIONAL' and self.adapter is not None
+                     and (self.adapter._operation_siren_adaptability_info_receipt is not None
+                          or getattr(self.adapter._frame_or_live_observation_oracle(),
+                                     'operation_siren_adaptability_info_visible', lambda: False)()))
+            and not (self.adapter is not None
+                     and getattr(self.adapter, '_storage_box_candidate', None) is not None
+                     and name in ('BOX_USE', 'BOX_AMOUNT_CONFIRM', 'AMOUNT_MINUS', 'AMOUNT_PLUS',
+                                  'MATERIAL_ENTER', 'EQUIP_CONFIRM', 'EQUIP_CONFIRM_2'))
             and not (self.adapter is not None and name == 'GUILD_DISPATCH_CLOSE')
             and not (self.adapter is not None
                      and re.fullmatch(r'GUILD_FORMATION_FLEET_([1-9][0-9]*|add)', name))
@@ -938,6 +979,52 @@ class SessionDispatchPorts:
         # screenshot-equivalent immediately before that read/input boundary.
         prepared_frame = navigation_frame or self.refresh_frame()
         adapter = self.open()
+        if name in ('META_MAIN_DOSSIER_ENTRANCE', 'META_MAIN_BEACON_ENTRANCE'):
+            reader = adapter._require_frame_observation_oracle()
+            blockers = reader._blocking_rules(reader.read_state(), 'meta/home')
+            if blockers and all(rule.blocker_id == 'loading' for rule in blockers):
+                # The native category loop may still hold its positive scan
+                # after the card opens. Only its next screenshot can identify
+                # the destination; neither resubmit nor manufacture success.
+                return None
+        if (adapter._exercise_pending
+                and DEFAULT_ALAS_BUTTON_TARGETS.get(name) in (
+                    'exercise/opponent/1', 'exercise/opponent/2',
+                    'exercise/opponent/3', 'exercise/opponent/4')):
+            reader = adapter._require_frame_observation_oracle()
+            if reader.daily_precombat_visible():
+                blockers = reader._blocking_rules(reader.read_state(), 'exercise/opponent/1')
+                if all(rule.blocker_id in ('daily-precombat', 'loading') for rule in blockers):
+                    # A positive overview scan can precede its accepted detail
+                    # start mounting preparation. Native selection re-observes;
+                    # no second rival input or synthetic receipt is needed.
+                    return None
+        if (name in ('BATTLE_PREPARATION', 'BATTLE_PREPARATION_WITH_OVERLAY')
+                and (adapter._exercise_pending or adapter._exercise_execution_active)):
+            reader = adapter._require_frame_observation_oracle()
+            blockers = reader._blocking_rules(reader.read_state(), 'daily/precombat/start')
+            if blockers and all(rule.blocker_id == 'loading' for rule in blockers):
+                # The earlier positive scan can precede the loading curtain.
+                # No start was sent: native preparation takes its next screenshot.
+                return None
+        if (name == 'DORM_FEED_ENTER' and adapter._dorm_context is not None
+                and time.monotonic() <= adapter._dorm_context.passive_transition_until):
+            reader = adapter._require_frame_observation_oracle()
+            if reader.enabled('dorm/statistics/confirm'):
+                return None
+            state = reader.read_state()
+            targets = reader._matches(state, 'dorm/feed')
+            blockers = reader._blocking_rules(state, 'dorm/feed')
+            if (len(targets) == 1 and targets[0].active_in_hierarchy
+                    and targets[0].active_and_enabled and targets[0].interactable
+                    and targets[0].raycast_top is False
+                    and targets[0].point is not None and targets[0].bounds is not None
+                    and targets[0].bounds.contains(targets[0].point)
+                    and not any(rule.blocker_id != 'loading' for rule in blockers)):
+                # During the existing Dorm entry window a mounting summary or
+                # statistics layer can briefly own this raycast. Leave input
+                # closed and let the original feed/info handlers re-observe.
+                return None
         frame_oracle = (
             adapter._require_frame_observation_oracle()
             if name == "LOGIN_GAME_UPDATE" else None
@@ -954,10 +1041,12 @@ class SessionDispatchPorts:
                 raise SemanticTargetMissing("ALAS target disappeared before input")
             try:
                 receipt = adapter.click(button)
-            except SemanticTargetMissing:
-                if require_present or name != 'POPUP_CONFIRM' or adapter._mail_context is None:
+            except SemanticTargetMissing as exc:
+                if (require_present or name != 'POPUP_CONFIRM'
+                        or (adapter._mail_context is None
+                            and not isinstance(exc, SemanticInputTargetMissing))):
                     raise
-                # InfoHandler's original mail popup path calls Device.click
+                # InfoHandler's original popup path calls Device.click
                 # directly after a positive screenshot. The prompt may have
                 # disappeared meanwhile; let its next screenshot handle the
                 # reward without sending input or fabricating a receipt.

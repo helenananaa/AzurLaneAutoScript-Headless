@@ -170,6 +170,7 @@ class AlasTacticalConfigTests(unittest.TestCase):
             tactical_assign_budget=1,
             input_frame_refresher=refresh,
             tactical_input_frame_refresher=tactical_refresh,
+            frame_observation_oracle=lambda: oracle,
         )
         adapter.begin_tactical()
 
@@ -195,8 +196,10 @@ class AlasTacticalConfigTests(unittest.TestCase):
                 ("wait", "tactical/skill/confirm", 11),
             ],
         )
-        refresh.assert_not_called()
-        self.assertEqual(tactical_refresh.call_count, 3)
+        # Candidate text and the final ship tap each need a complete frame;
+        # favourite and confirm retain the lighter input-only acquisition.
+        self.assertEqual(refresh.call_count, 2)
+        self.assertEqual(tactical_refresh.call_count, 2)
 
     def test_patch_gates_all_original_tactical_decision_methods(self):
         patch = ROOT.joinpath(

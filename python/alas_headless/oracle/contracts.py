@@ -908,11 +908,11 @@ class CommissionRowState:
     level: int
     duration_seconds: int
     status: CommissionStatus
-    type_sprite: str
+    type_sprite: Optional[str]
     button: ButtonState
 
     @property
-    def signature(self) -> Tuple[Union[int, str], ...]:
+    def signature(self) -> Tuple[Union[int, str, None], ...]:
         return (
             self.index,
             self.name,
@@ -989,8 +989,8 @@ class CommissionScrollProof:
     after_position: float
     before_generation: int
     after_generation: int
-    before_row_signatures: Tuple[Tuple[Union[int, str], ...], ...]
-    after_row_signatures: Tuple[Tuple[Union[int, str], ...], ...]
+    before_row_signatures: Tuple[Tuple[Union[int, str, None], ...], ...]
+    after_row_signatures: Tuple[Tuple[Union[int, str, None], ...], ...]
 
 
 class BuildPool(str, Enum):
@@ -1565,6 +1565,7 @@ class OperationSirenStorageScrollReceipt:
 
 class ResearchProjectStatus(str, Enum):
     DETAIL = "detail"
+    REQUIREMENTS_UNMET = "requirements_unmet"
     RUNNING = "running"
     WAITING = "waiting"
     FINISHED = "finished"

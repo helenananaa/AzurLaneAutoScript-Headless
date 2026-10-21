@@ -15,6 +15,7 @@ from ...semantic_oracle import (
     MeowfficerTrainingState,
     SemanticGateClosed,
 )
+from ...oracle.errors import SemanticInputBlocked
 
 
 class MeowfficerAdapterPorts:
@@ -174,7 +175,16 @@ class MeowfficerAdapterPorts:
             except SemanticGateClosed:
                 time.sleep(0.1)
                 continue
-            self.oracle.click("meowfficer/buy/close")
+            try:
+                self.oracle.click("meowfficer/buy/close")
+            except SemanticInputBlocked as exc:
+                if (exc.semantic_id != 'meowfficer/buy/close' or not exc.blockers
+                        or any(b not in ('loading', 'meowfficer-buy-prompt',
+                                         'meowfficer-queue-prompt') for b in exc.blockers)):
+                    raise
+                # The accepted submit can mount its confirmation after the
+                # earlier enabled() probe. Re-observe within this same bounded
+                # transaction; never dismiss through it or repeat the submit.
             time.sleep(0.2)
 
         raise SemanticGateClosed("meowfficer purchase timed out") from last_error

@@ -63,14 +63,15 @@ def test_inherited_ship_keeps_complete_input_proof(case):
     assert not b.taps
 
 
-def test_uncertain_inherited_acknowledgement_never_retries_input(monkeypatch):
-    import itertools
-    import alas_headless.adapter.semantic.dispatch_actions as actions
+def test_accepted_inherited_acknowledgement_returns_to_native_loop_without_polling(monkeypatch):
     b, o, a = ship_host()
-    clock = itertools.count(step=13.0)
-    monkeypatch.setattr(actions.time, 'monotonic', lambda: next(clock))
-    with pytest.raises(SemanticGateClosed, match='postcondition unavailable'):
-        a.click('GET_SHIP')
+    # The game can ignore this click while its background is still loading.
+    # The original GET_SHIP handler owns later screenshots and its retry policy.
+    def no_adapter_wait(_):
+        raise AssertionError('duplicate adapter-owned disappearance wait')
+    monkeypatch.setattr('alas_headless.adapter.semantic.dispatch_actions.time.sleep', no_adapter_wait)
+    receipt = a.click('GET_SHIP')
+    assert receipt.semantic_id == 'reward/new-ship/continue'
     assert len(b.taps) == 1
 
 

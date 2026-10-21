@@ -434,6 +434,19 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         """
         self._package_gate()
         oracle = self._frame_or_live_observation_oracle()
+        context = self._campaign_context
+        if (context is not None and context.mode == 'hard'
+                and context.auto_search_completion is None
+                and context.sortie_proof is None
+                and context.sortie_receipt is not None
+                and context.sortie_receipt.semantic_id in (
+                    'reward/campaign-total/continue', 'reward/campaign-total/go')
+                and time.monotonic() <= context.passive_transition_until
+                and oracle.enabled('reward/campaign-total/exit')):
+            # One accepted Continue is leaving this result. Its controls can
+            # remain mounted for another native screenshot; they cannot offer
+            # a second Continue before the new sortie's map proof exists.
+            return False
         if not self.campaign_auto_search_owned():
             # Native startup/recovery can inherit a result from another run.
             # Its exact menu remains navigable without claiming completion.
@@ -1039,7 +1052,7 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         return receipt
 
     def continue_campaign_hard_auto_search(self) -> ActionReceipt:
-        """Spend one remaining sortie lease on the exact official Continue button."""
+        """Spend one sortie lease on the reviewed official reentry control."""
 
         self._package_gate()
         context = self._require_campaign_context()
@@ -1055,10 +1068,13 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
             raise SemanticGateClosed(
                 "campaign auto-search continue requires a proven result"
             )
-        receipt = self._dispatch_mutation(
-            "campaign.sortie",
-            lambda: self.oracle.click("reward/campaign-total/continue"),
-        )
+        def click_reentry():
+            oracle = self._fresh_input_oracle()
+            if oracle.campaign_auto_search_reentry_available():
+                return oracle.click_campaign_auto_search_reentry()
+            return oracle.click("reward/campaign-total/continue")
+
+        receipt = self._dispatch_mutation("campaign.sortie", click_reentry)
         context.sortie_receipt = receipt
         context.sortie_proof = None
         context.map_entry_state = None
@@ -1259,13 +1275,14 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
 
     def campaign_map_clear_percentage(self) -> float:
         self._package_gate()
-        state, stage_code = self._campaign_preparation_state_with_stage()
+        reader = self._frame_or_live_observation_oracle()
+        state, stage_code = self._campaign_preparation_state_with_stage(reader=reader)
         if state is None or state.kind != "map":
             raise SemanticGateClosed(
                 "campaign clear percentage requires the map-preparation layer"
             )
         try:
-            return self.oracle.campaign_map_clear_percentage(stage_code)
+            return reader.campaign_map_clear_percentage(stage_code)
         except SemanticGateClosed as exc:
             if (
                 stage_code != "sp"
@@ -1273,7 +1290,7 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                 != "campaign achievement progress is absent or ambiguous"
             ):
                 raise
-            toggle = self.oracle.toggle_state(
+            toggle = reader.toggle_state(
                 "campaign/map-preparation/auto-search"
             )
             if (

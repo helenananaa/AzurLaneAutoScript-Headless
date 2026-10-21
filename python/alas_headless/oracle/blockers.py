@@ -129,13 +129,14 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
     BlockerRule(
         "meta-current-empty",
         "/WorldBossUI(Clone)/pages/CurrentWorldBossEmptyUI(Clone)/",
-        ("meta/home", "meta/current/list", "meta/current/create"),
+        ("meta/home", "meta/category/back", "meta/current/list", "meta/current/create"),
     ),
     BlockerRule(
         "meta-current-detail",
         "/WorldBossUI(Clone)/pages/CurrentWorldBossDetailUI(Clone)/",
         (
             "meta/home",
+            "meta/category/back",
             "meta/current/detail/list",
             "meta/current/reward",
             "meta/current/help",
@@ -145,7 +146,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
     BlockerRule(
         "meta-assist",
         "/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/",
-        ("meta/home", "meta/assist/start", "meta/reward-preview/open"),
+        ("meta/home", "meta/category/back", "meta/assist/start", "meta/reward-preview/open"),
     ),
     BlockerRule(
         "task-page",
@@ -289,6 +290,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "operation-siren-map",
         "/top/adapt/top_stage/resources/WorldResPanel(Clone)/",
         (
+            "os/adaptability/info/confirm",
             # WorldResPanel stays mounted below this global notice. Its exact
             # top-raycast close belongs to the overlay, not the covered map.
             "overlay/guild-message/close",
@@ -369,6 +371,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "operation-siren-order",
         "/SVOrderPanel(Clone)/",
         (
+            "os/adaptability/info/confirm",
             "os/order/back",
             "os/order/scan",
             "os/order/submarine",
@@ -496,6 +499,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "dorm-menu",
         "/MainLiveAreaUI(Clone)/",
         (
+            "dorm-menu/back",
             "dorm-menu/academy",
             "dorm-menu/dorm",
             "dorm-menu/meowfficer",
@@ -772,17 +776,22 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "research/start/confirm",
             "research/queue/cancel",
             "research/queue/confirm",
+            "research/stop/cancel",
+            "research/stop/confirm",
         ),
     ),
     BlockerRule(
         "tactical-continue",
         "/Msgbox(Clone)/",
         (
+            "exercise/combat/quit-confirm",
+            "os/adaptability/info/confirm",
             "reward/item-info/close",
             "retirement/equipment/preserve/confirm",
             "enhancement/equipment/preserve/confirm",
             "campaign/map/submarine/oil/confirm",
             "campaign/map/withdraw/confirm",
+            "campaign/map-timeout/confirm",
             "campaign/map/submarine/oil/cancel",
             "campaign/2x-book/confirm",
             "campaign/2x-book/cancel",
@@ -803,6 +812,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "research/start/confirm",
             "research/queue/cancel",
             "research/queue/confirm",
+            "research/stop/cancel",
+            "research/stop/confirm",
             "overlay/network-reconnect/cancel",
             "campaign/urgent-notice/confirm",
             "overlay/network-reconnect/confirm",

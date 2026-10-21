@@ -187,8 +187,16 @@ class SessionCombatPorts:
             return None
         oracle = adapter._frame_or_live_observation_oracle()
         state = oracle.read_state()
-        if (oracle._blocking_rules(state, "campaign/combat/observation")
-                or oracle.observation_surface_present(ObservationSurface.BATTLE_RESULT)):
+        if oracle.observation_surface_present(ObservationSurface.BATTLE_RESULT):
+            return False, False
+        if (oracle.observation_target_present('os/precombat/info/confirm')
+                and oracle.combat_automation_info_visible()
+                and not oracle._blocking_rules(state, 'os/precombat/info/confirm')):
+            # Original auto_search_moving must hand this known information
+            # page to auto_search_combat_execute, whose first handler owns it.
+            # It is preparation, not an unobscured executing battle.
+            return True, False
+        if oracle._blocking_rules(state, "campaign/combat/observation"):
             return False, False
         if oracle.daily_combat_visible():
             return True, True
@@ -207,7 +215,10 @@ class SessionCombatPorts:
         official_state = self._official_auto_search_combat_state(adapter)
         if official_state is not None:
             return official_state[0]
-        oracle = adapter.oracle
+        # These are PAUSE/loading observations in ALAS' current screenshot
+        # scan. Re-reading live state here both splits that scan and repeats
+        # foreground/state/UI round trips for every combat-loop iteration.
+        oracle = adapter._frame_or_live_observation_oracle()
         if getattr(
             oracle,
             "daily_battle_result_visible",
@@ -280,17 +291,22 @@ class SessionCombatPorts:
             official_state = self._official_auto_search_combat_state(adapter)
             if official_state is not None:
                 return official_state[1]
+            oracle = adapter._frame_or_live_observation_oracle()
             if getattr(
-                self.open().oracle,
+                oracle,
                 "daily_battle_result_visible",
                 lambda: False,
             )():
                 return False
-            if self.open().oracle.daily_combat_visible():
+            if oracle.daily_combat_visible():
+                # Native combat loops keep polling PAUSE after their one-time
+                # auto-toggle check. Tie the existing post-combat observation
+                # window to that proven battle, not its much older first scan.
+                self._daily_combat_seen_at = time.monotonic()
                 return True
             if not (
-                self.open().campaign_combat_committed()
-                or self.open().operation_siren_combat_committed()
+                adapter.campaign_combat_committed()
+                or adapter.operation_siren_combat_committed()
             ):
                 return False
             return "PAUSE" in self._live_combat_visible()
@@ -343,6 +359,14 @@ class SessionCombatPorts:
         targets = ALAS_COMBAT_RESOURCE_ACTION_TARGETS.get(resource_name, ())
         if action_name is None and resource_name in targets:
             action_name = resource_name
+        # This path dispatches through the runtime handle after proving two
+        # independent fresh combat snapshots. It bypasses Oracle's ordinary
+        # input preflight, so release ALAS' prior screenshot lease before it
+        # can send input. The next original loop must observe the destination,
+        # including when the backend raises during an uncertain dispatch.
+        frame_clock = getattr(self, '_frame_clock', None)
+        if frame_clock is not None and frame_clock.current_frame_id is not None:
+            frame_clock.invalidate(frame_clock.current_frame_id)
         commit = commit_alas_combat_resource_action_for_evidence(
             self,
             self._live_combat_manifest(),
@@ -373,6 +397,8 @@ class SessionCombatPorts:
         ):
             self._combat_last_result_receipt = commit.receipt
             self._arm_combat_result_transition(adapter)
+            if commit.action_name == "GET_ITEMS_1":
+                self._combat_reward_close_pending = commit.receipt
         return commit.receipt
 
     def _arm_combat_result_transition(
@@ -430,19 +456,42 @@ class SessionCombatPorts:
         """Advance one exact pause/leave/confirm step during task handoff."""
 
         adapter = self.open()
-        if not adapter.operation_siren_combat_committed():
+        startup_recovery = bool(
+            getattr(adapter, '_operation_siren_startup_search_provisional', False)
+            and time.monotonic() <= adapter._operation_siren_entry_transition_until
+        )
+        if not (adapter.operation_siren_combat_committed() or startup_recovery):
             return False
-        oracle = adapter.oracle
+        oracle = adapter._frame_or_live_observation_oracle()
+        action = None
         if oracle.exercise_combat_quit_confirm_visible():
-            oracle.click_exercise_combat_quit_confirm()
-            return True
-        if oracle.exercise_combat_pause_menu_visible():
-            oracle.click_exercise_combat_leave()
-            return True
-        if oracle.combat_pause_visible():
-            oracle.click_combat_pause()
-            return True
-        return False
+            action = 'click_exercise_combat_quit_confirm'
+        elif oracle.exercise_combat_pause_menu_visible():
+            action = 'click_exercise_combat_leave'
+        elif oracle.combat_pause_visible():
+            action = 'click_combat_pause'
+        if action is None:
+            return False
+        receipts = getattr(self, '_operation_siren_interrupt_receipts', None)
+        previous = receipts[-1].semantic_id if receipts else None
+        if (previous == 'exercise/combat/quit-confirm'
+                or previous == 'exercise/combat/leave' and action != 'click_exercise_combat_quit_confirm'
+                or previous == 'combat/pause' and action == 'click_combat_pause'):
+            # A committed input can leave its source mounted during the fade.
+            # Native interrupt owns the next screenshot; never toggle pause
+            # again or cancel a submitted leave/confirmation.
+            return False
+        fresh = adapter._fresh_input_oracle()
+        visible = {'click_combat_pause': 'combat_pause_visible',
+                   'click_exercise_combat_leave': 'exercise_combat_pause_menu_visible',
+                   'click_exercise_combat_quit_confirm': 'exercise_combat_quit_confirm_visible'}[action]
+        if not getattr(fresh, visible)():
+            return False
+        receipt = getattr(fresh, action)()
+        if receipts is None:
+            receipts = self._operation_siren_interrupt_receipts = []
+        receipts.append(receipt)
+        return True
 
     def begin_operation_siren_boss_combat(self) -> None:
         self.open().begin_operation_siren_boss_combat()
@@ -553,7 +602,7 @@ class SessionCombatPorts:
             or getattr(adapter, "_exercise_execution_active", False)
         ):
             return False
-        oracle = adapter.oracle
+        oracle = self._combat_result_action_oracle(adapter)
         return bool(
             oracle.daily_battle_result_visible()
             or oracle.campaign_battle_reward_visible()
@@ -596,14 +645,9 @@ class SessionCombatPorts:
                 or oracle.daily_page_visible()
                 or oracle.main_page_visible()
                 or oracle.event_campaign_page_visible()
-                or (adapter.meta_beacon_active() and oracle.meta_page_visible())
+                or oracle.meta_page_visible()
                 or oracle.exercise_page_visible()
             ):
-                return tuple(receipts)
-            if adapter._meta_assist_active and oracle.meta_page_visible():
-                # A resumed assist owns this return page. Prove its typed
-                # remaining-attempt/candidate state before ending recovery.
-                oracle.meta_assist_state()
                 return tuple(receipts)
             if current_raid_event is not None:
                 try:

@@ -386,6 +386,9 @@ class ExerciseOracle:
         target = self._unique(state, "exercise/combat/leave")
         if target.point is None or target.bounds is None:
             raise SemanticGateClosed("exercise leave target is invalid")
+        if (self._blocking_rules(state, 'exercise/combat/leave')
+                or self._foreground_component() != self.fingerprint.component):
+            raise SemanticGateClosed('combat leave is covered or foreground changed')
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
         return ActionReceipt(
             semantic_id="exercise/combat/leave", generation=state.generation,
@@ -431,6 +434,9 @@ class ExerciseOracle:
         target = self._unique(state, "exercise/combat/quit-confirm")
         if target.point is None or target.bounds is None:
             raise SemanticGateClosed("exercise quit confirmation is invalid")
+        if (self._blocking_rules(state, 'exercise/combat/quit-confirm')
+                or self._foreground_component() != self.fingerprint.component):
+            raise SemanticGateClosed('combat quit confirmation is covered or foreground changed')
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
         return ActionReceipt(
             semantic_id="exercise/combat/quit-confirm",

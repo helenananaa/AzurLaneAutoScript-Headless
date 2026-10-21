@@ -16,6 +16,7 @@ from ...semantic_oracle import (
 from .contracts import AlasSemanticUnmapped, _CommissionFlowContext
 from .dispatch_result import UNHANDLED
 from .resources import TACTICAL_VIRTUAL_RESOURCES
+from ...oracle.errors import SemanticInputBlocked, SemanticTargetNotActionable
 
 
 class TacticalAdapterPorts:
@@ -53,7 +54,7 @@ class TacticalAdapterPorts:
 
     def tactical_candidate_ships(self) -> Tuple[TacticalCandidateShipState, ...]:
         self._package_gate()
-        return self.oracle.tactical_candidate_ships()
+        return self._frame_or_live_observation_oracle().tactical_candidate_ships()
 
     def _refresh_tactical_input_frame(self) -> None:
         refresher = self._tactical_input_frame_refresher or self._input_frame_refresher
@@ -68,7 +69,7 @@ class TacticalAdapterPorts:
 
     def tactical_skills(self) -> Tuple[TacticalSkillState, ...]:
         self._package_gate()
-        return self.oracle.tactical_skills()
+        return self._frame_or_live_observation_oracle().tactical_skills()
 
     def tactical_select_suitable_ship(
         self, favourite: bool, min_level: int, start_index: int
@@ -91,7 +92,9 @@ class TacticalAdapterPorts:
         # Acquire a current immutable frame for each precise Dock mutation.
         self._refresh_tactical_input_frame()
         self.oracle.set_enhancement_dock_favourite(favourite)
-        candidates = self.oracle.tactical_candidate_ships()
+        # Favourite can invalidate the prior screenshot. Candidate text and
+        # controls must come from one complete frame after that transition.
+        candidates = self._fresh_input_oracle().tactical_candidate_ships()
         selected = next(
             (
                 candidate
@@ -102,8 +105,7 @@ class TacticalAdapterPorts:
         )
         if selected is None:
             return False
-        self._refresh_tactical_input_frame()
-        receipt = self.oracle.click_tactical_ship(selected.ship_id)
+        receipt = self._fresh_input_oracle().click_tactical_ship(selected.ship_id)
         self.oracle.wait_for(
             "tactical/dock/confirm",
             timeout_seconds=5.0,
@@ -130,14 +132,16 @@ class TacticalAdapterPorts:
             # The exact newer book page proves arrival; do not select again.
             return True
         skill = next(
-            (skill for skill in self.oracle.tactical_skills() if not skill.max_level),
+            (skill for skill in self._fresh_input_oracle().tactical_skills()
+             if not skill.max_level),
             None,
         )
         if skill is None:
             return False
         self._require_action_grant("tactical.assign")
-        self._refresh_tactical_input_frame()
-        receipt = self.oracle.click_tactical_skill(skill.position)
+        # Skill text and controls share a complete frame; refresh the exact
+        # row again for input after ALAS' potentially long preparation waits.
+        receipt = self._fresh_input_oracle().click_tactical_skill(skill.position)
         self.oracle.wait_for(
             "tactical/skill/confirm",
             timeout_seconds=5.0,
@@ -200,14 +204,18 @@ class TacticalAdapterPorts:
         self._package_gate()
         if self._commission_context is None:
             raise SemanticGateClosed("tactical popup used outside ALAS tactical flow")
-        prompt = self.oracle.tactical_continue_prompt_text()
+        prompt = self._frame_or_live_observation_oracle().tactical_continue_prompt_text()
         if prompt is None:
             return False
         if self._commission_context.flow_kind != "tactical":
             raise SemanticGateClosed("tactical continue cancellation requires the tactical flow")
         if prompt in self._commission_context.cancelled_tactical_prompts:
             return False
-        self.oracle.click("tactical/continue/cancel")
+        reader = self._fresh_input_oracle()
+        prompt = reader.tactical_continue_prompt_text()
+        if prompt is None or prompt in self._commission_context.cancelled_tactical_prompts:
+            return False
+        reader.click("tactical/continue/cancel")
         deadline = time.monotonic() + 5.0
         while time.monotonic() < deadline:
             try:
@@ -238,10 +246,24 @@ class TacticalAdapterPorts:
             and self._commission_context.flow_kind == "tactical"
         ):
             if (semantic_id in ('reward/tactical/finish', 'reward/tactical/go')
-                    and self.oracle.reward_sidebar_control_offscreen(semantic_id)):
-                # The original receive loop requests this exact control. Its
-                # first click only brings it into view; no reward is claimed.
-                return True
+                    and self.oracle.tactical_continue_prompt_text() is not None):
+                # ALAS probes sidebar rewards before its continue-learning
+                # popup handler. A newly queued prompt covers even an
+                # offscreen sidebar control; let the native popup owner run.
+                return False
+            if semantic_id in ('reward/tactical/finish', 'reward/tactical/go'):
+                try:
+                    offscreen = self.oracle.reward_sidebar_control_offscreen(semantic_id)
+                except SemanticInputBlocked as exc:
+                    if exc.semantic_id != semantic_id or exc.blockers != ('loading',):
+                        raise
+                    # A departing sidebar can remain mounted under Loading.
+                    # This passive probe must yield to ALAS' next screenshot;
+                    # the actual scroll/tap still checks every blocker.
+                    return False
+                if offscreen:
+                    # The first native click only brings the control into view.
+                    return True
             if name == "GET_MISSION":
                 return ((self._commission_context.tactical_reward_receipt is not None
                          or self._action_ledger.allowed("tactical.reward"))
@@ -301,7 +323,7 @@ class TacticalAdapterPorts:
                         return False
                 if name == "SKILL_CONFIRM":
                     try:
-                        return bool(self.oracle.tactical_skills())
+                        return bool(self._frame_or_live_observation_oracle().tactical_skills())
                     except SemanticGateClosed:
                         return False
                 if name == "BACK_ARROW":
@@ -332,13 +354,45 @@ class TacticalAdapterPorts:
                 return False
         return UNHANDLED
 
+    def _accepted_tactical_entry_loading(self, error, input_count):
+        context = self._commission_context
+        if (context is not None and context.flow_kind == 'tactical'
+                and context.tactical_entry_receipt is not None
+                and isinstance(error, SemanticInputBlocked)
+                and error.semantic_id == 'reward/tactical/go'
+                and error.blockers == ('loading',)
+                and error.generation > context.tactical_entry_receipt.generation
+                and time.monotonic() <= context.passive_transition_until
+                and context.tactical_entry_input_count == input_count
+                and self.oracle.input_dispatch_count == input_count):
+            # This exact entry was already accepted and no later input owns
+            # its destination. Return that result while ALAS takes another
+            # screenshot; a covered sidebar cannot authorize another gesture.
+            return context.tactical_entry_receipt
+        return None
+
     def _click_tactical(self, name):
         sidebar_target = self._mappings.get(name)
         if (self._commission_context is not None
                 and self._commission_context.flow_kind == 'tactical'
-                and sidebar_target in ('reward/tactical/finish', 'reward/tactical/go')
-                and self.oracle.reward_sidebar_control_offscreen(sidebar_target)):
-            return self.oracle.scroll_reward_sidebar_control(sidebar_target)
+                and sidebar_target == 'reward/tactical/finish'
+                and self._commission_context.tactical_reward_receipt is not None):
+            # Reuse the existing accepted reward before looking at a departing
+            # sidebar under Loading. Native reception owns the next screenshot.
+            return self._commission_context.tactical_reward_receipt
+        if (self._commission_context is not None
+                and self._commission_context.flow_kind == 'tactical'
+                and sidebar_target in ('reward/tactical/finish', 'reward/tactical/go')):
+            before_input = self.oracle.input_dispatch_count
+            try:
+                offscreen = self.oracle.reward_sidebar_control_offscreen(sidebar_target)
+            except SemanticInputBlocked as exc:
+                prior = self._accepted_tactical_entry_loading(exc, before_input)
+                if prior is None:
+                    raise
+                return prior
+            if offscreen:
+                return self.oracle.scroll_reward_sidebar_control(sidebar_target)
         if (name in ("POPUP_CONFIRM", "POPUP_CANCEL")
                 and self.oracle.observation_prompt_kind() == "opsi-exit"
                 and self.oracle.operation_siren_exit_prompt_visible()):
@@ -370,7 +424,32 @@ class TacticalAdapterPorts:
                         return None
                     raise SemanticGateClosed("tactical empty-slot destination was not observed")
                 self._require_action_grant("tactical.assign")
-                receipt = self.oracle.click_tactical_first_empty_slot()
+                try:
+                    receipt = self.oracle.click_tactical_first_empty_slot()
+                except SemanticInputBlocked as exc:
+                    if (exc.semantic_id != 'tactical/slot/first-empty'
+                            or exc.blockers != ('tactical-continue',)):
+                        raise
+                    # A queued learning prompt can mount between the positive
+                    # classroom probe and slot input. No input was sent. Only
+                    # its complete reviewed identity can yield to the native
+                    # next screenshot and existing continue-cancel handler.
+                    try:
+                        prompt = self.oracle.tactical_continue_prompt_text()
+                    except SemanticGateClosed as prompt_error:
+                        # Keep the original task-local input refusal when the
+                        # follow-up prompt cannot be identified completely.
+                        raise exc from prompt_error
+                    if prompt is None:
+                        raise
+                    return None
+                except SemanticTargetNotActionable as exc:
+                    if exc.semantic_id != 'tactical/slot/first-empty':
+                        raise
+                    # No input was dispatched. The next queued learning
+                    # prompt can cover this positive control after presence
+                    # was read; ALAS' next screenshot owns that transition.
+                    return None
                 context.tactical_skill_confirm_receipt = None
                 context.tactical_empty_slot_receipt = self._record_mission_transition(receipt)
                 return receipt

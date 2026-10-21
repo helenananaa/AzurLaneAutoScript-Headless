@@ -96,7 +96,11 @@ def test_classified_no_input_refusal_is_local_and_preserves_grants_and_next_task
     assert caught.value.cause is error
     assert 'semantic input deferred' in str(caught.value)
     assert session.last_task_outcome == {'task': 'research', 'outcome': 'input-unavailable'}
-    assert session.last_task_error == {'type': type(error).__name__, 'message': str(error)}
+    expected_error = {'type': type(error).__name__, 'message': str(error),
+                      'semantic_id': error.semantic_id, 'generation': error.generation}
+    if isinstance(error, SemanticInputBlocked):
+        expected_error['blockers'] = list(error.blockers)
+    assert session.last_task_error == expected_error
     assert oracle.click_calls == []
     assert adapter._action_ledger.remaining('campaign.grid_click') == remaining
     with pytest.raises(StaleFrameError):
@@ -244,6 +248,7 @@ def test_real_stale_observation_defers_task_and_reenters_only_with_fresh_state()
     assert session.last_task_error['age_ms'] == 10001
     assert session.last_task_error['max_age_ms'] == oracle.fingerprint.max_age_ms
     assert session.last_task_error['input_outcome_uncertain'] is False
+    assert any(frame['function'] == 'read_state' for frame in session.last_task_error['read_stack'])
     assert session.last_task_outcome == {'task': 'shop_once', 'outcome': 'observation-not-ready'}
     assert backend.taps == []
     with pytest.raises(TaskCapabilityUnavailable):

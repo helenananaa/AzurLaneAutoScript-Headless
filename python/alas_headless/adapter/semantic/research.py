@@ -19,6 +19,7 @@ from .contracts import _ResearchFlowContext, _research_detail_costs
 from .dispatch_result import UNHANDLED
 from .resources import RESEARCH_CLICK_RESOURCES, RESEARCH_VIRTUAL_RESOURCES
 from ...oracle.input_outcome import input_result_scope
+from ...oracle.errors import SemanticResearchStatusUnavailable
 
 
 class ResearchAdapterPorts:
@@ -47,6 +48,11 @@ class ResearchAdapterPorts:
 
     def end_research(self) -> None:
         self._research_context = None
+        self._storage_box_candidate = None
+        self._storage_box_use_receipt = None
+        self._storage_box_use_quantity = None
+        self._storage_box_equipment_receipt = None
+        self._storage_box_destroy_receipt = None
 
     def _research_entry_completed(self) -> Optional[ActionReceipt]:
         """Acknowledge an actual entry after the destination replaces its source."""
@@ -88,6 +94,12 @@ class ResearchAdapterPorts:
             raise SemanticGateClosed("research projects used outside ALAS research flow")
         try:
             projects = self.oracle.research_projects()
+        except SemanticResearchStatusUnavailable as exc:
+            # Preserve page discovery and independent scheduled tasks. An
+            # unknown card status cannot borrow an older card snapshot or
+            # authorize resource input; ALAS owns its task-local retry.
+            from .contracts import AlasSemanticUnmapped
+            raise AlasSemanticUnmapped(str(exc)) from exc
         except SemanticGateClosed:
             if (
                 self._research_context.last_projects is None
@@ -225,6 +237,8 @@ class ResearchAdapterPorts:
         context.queue_add_receipt = None
         context.queue_confirm_receipt = None
         context.queue_add_requires_start_grant = False
+        context.stop_receipt = None
+        context.stop_confirm_receipt = None
         return receipt
 
     def start_research_project_code(
@@ -656,7 +670,12 @@ class ResearchAdapterPorts:
         return [project.series for project in self.research_projects()]
 
     def research_statuses(self) -> List[str]:
-        return [project.status.value for project in self.research_projects()]
+        # Upstream's coarse status means "not running or finished" here; it
+        # treats a conditional card as detail and owns satisfying its task.
+        # Keep the unmet condition in the typed model. Start/queue admission
+        # still reads the actual detail controls and required resources.
+        return ['detail' if project.status == ResearchProjectStatus.REQUIREMENTS_UNMET
+                else project.status.value for project in self.research_projects()]
 
     def research_detail_stable(self) -> None:
         """Require two identical typed detail snapshots after card selection."""
@@ -789,6 +808,9 @@ class ResearchAdapterPorts:
                 )
             if name in ("POPUP_CANCEL", "POPUP_CONFIRM"):
                 context = self._research_context
+                if context.stop_receipt is not None:
+                    return bool(context.stop_confirm_receipt is None and self.oracle.enabled(
+                        "research/stop/cancel" if name == "POPUP_CANCEL" else "research/stop/confirm"))
                 if context.queue_add_receipt is not None:
                     target = (
                         "research/queue/cancel"
@@ -816,12 +838,14 @@ class ResearchAdapterPorts:
             if name == "RESEARCH_STOP":
                 return self.research_detail_is_running()
             if name == "RESEARCH_QUEUE_ADD":
-                return self.research_detail_can_queue()
+                return self.oracle.research_queue_add_visible()
             if name == "RESEARCH_DETAIL_QUIT":
                 return self.oracle.enabled("research/detail/root")
             if name == "QUEUE_CLAIM_REWARD":
                 try:
-                    queue = self.research_queue_state()
+                    # Navigation's cached queue capacity can outlive its page
+                    # after a claim. Action presence belongs to this screenshot.
+                    queue = self._frame_or_live_observation_oracle().research_queue_state()
                 except SemanticGateClosed:
                     return False
                 return queue.reward_claimable and self._action_ledger.allowed(
@@ -927,6 +951,23 @@ class ResearchAdapterPorts:
                     context.pending_resource_required = None
                 return receipt
             if name == "POPUP_CONFIRM":
+                if context.stop_receipt is not None:
+                    if context.stop_confirm_receipt is not None:
+                        return context.stop_confirm_receipt
+                    receipt = self._click_selected_research_target("research/stop/confirm")
+                    context.stop_confirm_receipt = receipt
+                    context.last_queue_state = None
+                    context.last_projects = None
+                    def stopped():
+                        detail = self.oracle.research_detail_state()
+                        self._require_selected_research_identity(detail=detail)
+                        if detail.is_running:
+                            raise SemanticGateClosed("research stop postcondition has not advanced")
+                        if self.oracle.read_state().generation <= receipt.generation:
+                            raise SemanticGateClosed("research stop generation has not advanced")
+                        return detail
+                    self.oracle._retry_transition_read(stopped, attempts=30, interval_seconds=0.1)
+                    return receipt
                 if context.queue_add_receipt is not None:
                     if context.queue_confirm_receipt is not None:
                         return context.queue_confirm_receipt
@@ -986,14 +1027,21 @@ class ResearchAdapterPorts:
                 context.last_projects = None
                 return self._record_mission_transition(receipt)
             if name == "RESEARCH_STOP":
-                raise SemanticGateClosed("semantic research cancellation is not enabled")
+                if context.selected_code is None:
+                    raise SemanticGateClosed("research stop requires an ALAS-selected project")
+                if context.stop_receipt is not None:
+                    return context.stop_receipt
+                receipt = self._click_selected_research_target("research/detail/stop")
+                context.stop_receipt = receipt
+                return receipt
             if name == "QUEUE_CLAIM_REWARD":
-                queue = self.oracle.research_queue_state()
+                input_oracle = self._fresh_input_oracle()
+                queue = input_oracle.research_queue_state()
                 if not queue.reward_claimable:
                     raise SemanticGateClosed("research queue has no claimable reward")
                 receipt = self._dispatch_mutation(
                     "research.reward",
-                    lambda: self.oracle.click("research/queue/claim"),
+                    lambda: input_oracle.click("research/queue/claim"),
                 )
                 context.reward_receipts.append(receipt)
                 context.last_queue_state = None

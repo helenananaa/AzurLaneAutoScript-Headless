@@ -1,0 +1,157 @@
+{
+  "schema": "alas-headless.no-account-closeout/v1",
+  "recorded_at": "2026-10-21T11:16:14.360070+08:00",
+  "branch": "codex/alas-fixed-upstream-capabilities",
+  "base_commit": "23c3f988c93d2dba3ea77a9fe4ee1aab9eb77f4b",
+  "scope": "Local closeout of accumulated semantic adapter, observer, ALAS patch, and test changes.",
+  "account_boundary": {
+    "account_login_performed": false,
+    "game_input_sent": false,
+    "game_or_avd_started": false,
+    "fresh_runtime_validation_performed": false,
+    "automation_status_observed": "PAUSED"
+  },
+  "fixes_in_this_closeout": [
+    "Restrict passive withdrawal loading classification to an unowned known loading/menu pair; foreign modals and active campaign owners retain their existing classification.",
+    "Repair the offline task isolation verifier namespace and native unavailable-task state.",
+    "Align synthetic sprite flags, immutable-frame test providers, typed flow contexts and blocker fixtures with current contracts; historical game captures are unchanged.",
+    "Supply standard C++ headers in extracted selector harnesses and verify the production receiver on WSL.",
+    "Check zero-delay scheduling against its actual execution time window to remove the reproduced wall-clock second rollover failure."
+  ],
+  "validation": {
+    "full_suite_initial": {
+      "tests": 7904,
+      "failures": 35,
+      "errors": 0,
+      "skipped": 5,
+      "passed": 7864,
+      "log": "artifacts/closeout-no-account-20261021/full-tests.log",
+      "xml": "artifacts/closeout-no-account-20261021/full-tests.xml"
+    },
+    "focused_after_repairs": {
+      "tests": 1939,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "passed": 1938,
+      "log": "artifacts/closeout-no-account-20261021/final-focused-tests.log"
+    },
+    "all_initial_failures_retested": {
+      "tests": [
+        "tests/test_adapter_session_runtime_handle.py::SessionRuntimeHandleTests::test_login_retry_action_latches_across_screenshot_frames",
+        "tests/test_alas_combat_controlled_episode.py::AlasCombatControlledEpisodeTests::test_complete_episode_binds_controls_actions_and_map_transition",
+        "tests/test_alas_combat_controlled_episode.py::AlasCombatControlledEpisodeTests::test_map_or_action_drift_fails_closed",
+        "tests/test_alas_combat_controlled_episode.py::AlasCombatControlledEpisodeTests::test_trace_and_record_tampering_fail_closed",
+        "tests/test_alas_combat_result_evidence.py::AlasCombatResultEvidenceTests::test_all_six_profiles_emit_exact_non_applying_drafts",
+        "tests/test_alas_combat_result_evidence.py::AlasCombatResultEvidenceTests::test_s_controls_reprove_checked_mapping_without_review_draft",
+        "tests/test_alas_combat_result_evidence.py::AlasCombatResultEvidenceTests::test_verifier_recomputes_and_rejects_tampering",
+        "tests/test_campaign_auto_search_hud_transition.py::test_foreign_modal_is_not_hidden_by_hud_or_loading[hud_loading_transition]",
+        "tests/test_campaign_midmap_dock.py::test_new_dock_modal_refreshes_stale_screenshot_before_reclassification[True]",
+        "tests/test_campaign_midmap_dock.py::test_new_dock_modal_refreshes_stale_screenshot_before_reclassification[False]",
+        "tests/test_event_ghost_enemy_map.py::test_retained_map_notice_and_dock_probes_are_read_only",
+        "tests/test_event_ghost_enemy_map.py::test_native_returned_map_covers_retained_selector[DOCK_CHECK]",
+        "tests/test_event_ghost_enemy_map.py::test_native_combat_loading_dock_absence_requires_exact_labels[None]",
+        "tests/test_event_ghost_enemy_map.py::test_native_combat_loading_dock_absence_requires_exact_labels[unknown-label]",
+        "tests/test_event_ghost_enemy_map.py::test_native_combat_loading_dock_absence_requires_exact_labels[unknown-percent]",
+        "tests/test_event_ghost_enemy_map.py::test_native_combat_loading_dock_absence_requires_exact_labels[duplicate-label]",
+        "tests/test_exercise_hp_mount_readiness.py::test_orphan_result_accepts_exact_exercise_return_and_preserves_task_isolation[unknown]",
+        "tests/test_inherited_research_menu_campaign_probe.py::test_loading_owns_only_unowned_passive_withdraw_probe[foreign-modal]",
+        "tests/test_inherited_research_menu_campaign_probe.py::test_loading_owns_only_unowned_passive_withdraw_probe[active-campaign]",
+        "tests/test_meow_purchase_raycast.py::test_native_purchase_raycast_selector_is_scoped",
+        "tests/test_meta_home_transition.py::test_owned_meta_landing_hides_other_home_aliases[GOTO_MAIN_WHITE]",
+        "tests/test_meta_home_transition.py::test_owned_meta_landing_hides_other_home_aliases[RPG_HOME]",
+        "tests/test_native_zero_interval_task_isolation.py::test_classified_no_input_refusal_uses_native_delay_and_keeps_next_task[0-error1]",
+        "tests/test_original_story_option_disappearance.py::test_original_story_option_only_recovers_proven_zero_input_disappearance[success]",
+        "tests/test_original_story_option_disappearance.py::test_original_story_option_only_recovers_proven_zero_input_disappearance[absent]",
+        "tests/test_original_story_option_disappearance.py::test_original_story_option_only_recovers_proven_zero_input_disappearance[partial]",
+        "tests/test_original_story_option_disappearance.py::test_original_story_option_only_recovers_proven_zero_input_disappearance[dispatched]",
+        "tests/test_private_quarters_overview.py::test_overview_optional_popup_probe_requires_unobscured_page",
+        "tests/test_r56_loading_presence.py::test_guild_mount_with_unknown_modal_does_not_hide_campaign_presence_error",
+        "tests/test_semantic_oracle_opsi.py::OperationSirenSemanticOracleTests::test_operation_siren_back_rejects_msgbox_underlay_and_foreground_change",
+        "tests/test_semantic_task_isolation.py::test_other_task_pages_skip_failed_optional_readers[research]",
+        "tests/test_session_guild_notice_during_combat.py::test_actual_notice_during_committed_combat_uses_existing_global_owner[ready]",
+        "tests/test_session_guild_notice_during_combat.py::test_actual_notice_during_committed_combat_uses_existing_global_owner[metadata]",
+        "tests/test_session_guild_notice_during_combat.py::test_original_map_event_guild_cancel_can_close_the_actual_notice[False]",
+        "tests/test_session_guild_notice_during_combat.py::test_original_map_event_guild_cancel_can_close_the_actual_notice[True]"
+      ],
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 35,
+      "log": "artifacts/closeout-no-account-20261021/full-failure-retest.log"
+    },
+    "additional_current_loading_boundary_regression": {
+      "passed": 77,
+      "log": "artifacts/closeout-no-account-20261021/loading-boundary-final.log"
+    },
+    "production_posix_receiver": {
+      "passed": 1,
+      "native_socket_cases": 10,
+      "log": "artifacts/closeout-no-account-20261021/native-observer-receiver.log"
+    },
+    "patch_series": {
+      "byte_count": 921505,
+      "combined_sha256": "694f823e4a23b9b540cb121eba68b03152010273baf9ed7f01a129c8de0fc523",
+      "generated_path": "integration/alas/0001-semantic-oracle-hooks.patch",
+      "member_count": 224,
+      "schema": "alas-headless.alas-patch-series-check/v1",
+      "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
+    },
+    "patch_tree": {
+      "reused_unchanged_result": true,
+      "receipt": "artifacts/goal-continuous-20261016/patch-tree-r1343.json/result.json",
+      "patch_sha256": "694f823e4a23b9b540cb121eba68b03152010273baf9ed7f01a129c8de0fc523",
+      "patch_applied": true,
+      "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
+    },
+    "support_matrix": {
+      "configuration_source_verified": true,
+      "log": "artifacts/closeout-no-account-20261021/support-matrix.log"
+    },
+    "task_isolation": {
+      "baseline": true,
+      "additive_drift": true,
+      "log": "artifacts/closeout-no-account-20261021/task-isolation-r2.log"
+    },
+    "configuration_interactions": {
+      "passed": true,
+      "campaign_pairs": 21,
+      "scheduler_pairs": 18,
+      "invalid_cases": 8,
+      "seeded_sequences": 32,
+      "log": "artifacts/closeout-no-account-20261021/configuration-matrix.log"
+    },
+    "skipped_full_suite_cases": [
+      {
+        "test": "tests.test_alas_event_task_live_validation.AlasEventTaskLiveValidationTests::test_template_preflight_rejects_reparse_without_skipping_other_root_tests",
+        "reason": "symlink privilege unavailable: OSError"
+      },
+      {
+        "test": "tests.test_observer_request_line::test_native_observer_receives_a_complete_line_before_exact_endpoint_matching",
+        "reason": "POSIX C++ socket harness; run on Linux/WSL for native coverage"
+      },
+      {
+        "test": "tests.test_runner_supervision.RunnerSupervisionTests::test_config_cleanup_rejects_symlink_without_skipping_root_test",
+        "reason": "Windows symlink creation is unavailable: [WinError 1314] 客户端没有所需的特权。: 'E:\\\\CacheVault\\\\Temp\\\\tmpeqr_luzb\\\\symlink-target.keep' -> 'E:\\\\CacheVault\\\\Temp\\\\tmpeqr_luzb\\\\alas\\\\config\\\\_codex_event_live_eventsp_12e8089a3b344f94b223b8e48c2317e6.json'"
+      },
+      {
+        "test": "tests.test_runtime_backends.RuntimeBackendsTests::test_kvm_runtime_accepts_isolated_non_srv_root",
+        "reason": "POSIX path contract"
+      },
+      {
+        "test": "tests.test_runtime_backends.RuntimeBackendsTests::test_kvm_runtime_rejects_symlinked_runtime_root",
+        "reason": "POSIX symlink contract"
+      }
+    ],
+    "method": "One complete suite, repair-specific regressions, a focused changed-test run, and an explicit rerun of all 35 initial failures. A second unified full-suite run was not performed."
+  },
+  "qualification": {
+    "support_levels_changed": false,
+    "new_live_qualification": false,
+    "remaining": [
+      "No fresh login/account or continuous-task/end-to-end game validation in this closeout.",
+      "No full Android/ANGLE library rebuild or boot qualification in this closeout.",
+      "Offline replay and native helper coverage do not establish live product or release support."
+    ]
+  }
+}

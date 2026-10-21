@@ -1,0 +1,47 @@
+diff --git a/module/handler/info_handler.py b/module/handler/info_handler.py
+--- a/module/handler/info_handler.py
++++ b/module/handler/info_handler.py
+@@ -450,14 +450,15 @@
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
+             oracle = semantic_adapter.open().oracle
+-            if oracle.event_story_skip_prompt_visible():
++            observation = semantic_adapter.open()._frame_or_live_observation_oracle()
++            if observation.event_story_skip_prompt_visible():
+                 logger.info('Modern event story skip -> semantic confirm')
+                 semantic_adapter.refresh_frame()
+                 semantic_adapter.click_event_story_skip_confirm()
+                 self.story_popup_timeout = Timer(10)
+                 return True
+-            if oracle.event_story_dialogue_visible():
+-                option_count = oracle.event_story_option_count()
++            if observation.event_story_dialogue_visible():
++                option_count = observation.event_story_option_count()
+                 if option_count:
+                     logger.attr('Story_options', option_count)
+                     semantic_adapter.refresh_frame()
+@@ -484,7 +485,7 @@
+                 return False
+             # Native story observations own the semantic boundary. A proven
+             # idle branch must not continue into legacy image probes.
+-            if oracle.event_story_surface_absent():
++            if observation.event_story_surface_absent():
+                 return False
+         if self.story_popup_timeout.started() and not self.story_popup_timeout.reached():
+             if self.handle_popup_confirm('STORY_SKIP'):
+@@ -566,11 +567,10 @@
+             return False
+ 
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+-        if semantic_adapter is not None and (
+-            semantic_adapter.open().oracle.daily_combat_visible()
+-            or semantic_adapter.open().oracle.daily_battle_result_visible()
+-        ):
+-            return False
++        if semantic_adapter is not None:
++            observation = semantic_adapter.open()._frame_or_live_observation_oracle()
++            if observation.daily_combat_visible() or observation.daily_battle_result_visible():
++                return False
+         return self.story_skip(drop=drop)
+ 
+     def ensure_no_story(self, skip_first_screenshot=True):

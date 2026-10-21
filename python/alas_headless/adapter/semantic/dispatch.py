@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from typing import Union
 from ...oracle.private_quarters import PrivateQuartersPhysicsReceipt
 
@@ -135,6 +136,53 @@ class DispatchAdapterPorts:
             return result
 
     def click(self, button: Any) -> Union[ActionReceipt, PrivateQuartersPhysicsReceipt]:
+        name = button if isinstance(button, str) else getattr(button, 'name', None)
+        target = {'BACK_ARROW': 'commission/page/back',
+                  'REWARD_GOTO_COMMISSION': 'reward/commission/go',
+                  'REWARD_GOTO_COMMISSION_WHITE': 'reward/commission/go',
+                  'REWARD_GOTO_MAIN': 'reward/page/back',
+                  'MAIN_GOTO_REWARD': 'main/more',
+                  'MAIN_GOTO_REWARD_WHITE': 'main/more',
+                  'MAIN_GOTO_DORMMENU': 'main/live',
+                  'MAIN_GOTO_DORMMENU_WHITE': 'main/live',
+                  'DORMMENU_GOTO_ACADEMY': 'dorm-menu/academy'}.get(name) if isinstance(name, str) else None
+        prior = getattr(self, '_commission_navigation_handoff', None)
+        if (target is not None and prior is not None
+                and prior[0].semantic_id == target
+                and self.oracle.input_dispatch_count == prior[1]
+                and time.monotonic() <= prior[2]):
+            reader = self._frame_or_live_observation_oracle()
+            state = reader.read_state()
+            blockers = reader._blocking_rules(state, target)
+            destination = {'commission/page/back': 'reward/page/back',
+                           'reward/commission/go': 'commission/page/back',
+                           'reward/page/back': 'main/battle',
+                           'main/more': 'reward/page/back',
+                           'main/live': 'dorm-menu/dorm',
+                           'dorm-menu/academy': 'academy/page/back'}[target]
+            sources = reader._matches(state, target)
+            source_pending = bool(not blockers and len(sources) == 1
+                                  and sources[0].actionable
+                                  and sources[0].path == prior[0].path)
+            if (state.generation > prior[0].generation
+                    and (source_pending
+                         or (blockers and all(rule.blocker_id == 'loading' for rule in blockers))
+                         or (not reader.observation_target_present(target)
+                             and reader.enabled(destination)))):
+                # Native ui_goto can repeat its departing screenshot edge.
+                # Main's two theme aliases can also repeat an accepted live
+                # menu entry while its source is still actionable (r602).
+                # Reuse only our latest accepted navigation; native polling
+                # still owns the destination and no additional input is sent.
+                return prior[0]
+        receipt = self._click_once(button)
+        if (target is not None and getattr(receipt, 'semantic_id', None) == target
+                and type(self.oracle.input_dispatch_count) is int):
+            self._commission_navigation_handoff = (
+                receipt, self.oracle.input_dispatch_count, time.monotonic() + 12.0)
+        return receipt
+
+    def _click_once(self, button: Any) -> Union[ActionReceipt, PrivateQuartersPhysicsReceipt]:
         if self._operation_siren_camera_grid(button):
             return self.click_operation_siren_camera_grid(button)
         if self._campaign_grid_location(button) is not None:

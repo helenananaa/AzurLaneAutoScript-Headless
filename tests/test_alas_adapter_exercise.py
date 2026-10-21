@@ -63,19 +63,19 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         with self.assertRaisesRegex(AlasSemanticUnmapped, "EXERCISE_CHECK"):
             adapter.appear(NamedButton("EXERCISE_CHECK"))
 
-    def test_submitted_exercise_start_does_not_invite_second_click(self):
+    def test_submitted_exercise_start_follows_current_actionable_state(self):
         adapter, oracle, _ = self.make_adapter()
         adapter._exercise_execution_active = True
         adapter._exercise_pending = False
-        adapter._exercise_start_transition_until = time.monotonic() + 15.0
         oracle.daily_precombat_visible = lambda: True
+        oracle._blocking_rules = lambda *_: ('loading',)
 
         self.assertFalse(adapter.appear(NamedButton("BATTLE_PREPARATION")))
         self.assertEqual(oracle.click_calls, [])
 
-        adapter._exercise_start_transition_until = time.monotonic() - 1.0
-        with self.assertRaisesRegex(SemanticGateClosed, "did not leave preparation"):
-            adapter.appear(NamedButton("BATTLE_PREPARATION"))
+        oracle._blocking_rules = lambda *_: ()
+        self.assertTrue(adapter.appear(NamedButton("BATTLE_PREPARATION")))
+        self.assertEqual(oracle.click_calls, [])
 
     def test_chapter_back_only_leases_passive_page_scan(self):
         adapter, oracle, _ = self.make_adapter()

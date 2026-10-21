@@ -688,6 +688,8 @@ class TargetsOracle:
             return bool(matches and self._research_progress_prompt_matches(state))
         if semantic_id in ("research/queue/cancel", "research/queue/confirm"):
             return bool(matches and self._research_queue_prompt_matches(state))
+        if semantic_id in ("research/stop/cancel", "research/stop/confirm"):
+            return bool(matches and self._research_stop_prompt_matches(state))
         if semantic_id in ("guild/dispatch/cancel", "guild/dispatch/confirm"):
             return bool(matches and self._guild_dispatch_prompt_matches(state))
         if semantic_id in ("guild/exchange/cancel", "guild/exchange/confirm"):
@@ -709,6 +711,10 @@ class TargetsOracle:
         if semantic_id in ("os/order/back", "os/order/scan", "os/order/submarine"):
             if self._operation_siren_order_prompt_mounted(state):
                 return False
+            if semantic_id == 'os/order/back':
+                backs = self._matches(state, semantic_id)
+                return (len(backs) == 1 and backs[0].actionable
+                        and not self._blocking_rules(state, semantic_id))
         if semantic_id == "main/raid":
             return bool(
                 self._main_raid_entry_proven(state)
@@ -1043,6 +1049,12 @@ class TargetsOracle:
             "research/queue/cancel",
             "research/queue/confirm",
         ) and not self._research_queue_prompt_matches(state):
+            return False
+        if (semantic_id in ("research/stop/cancel", "research/stop/confirm")
+                and not self._research_stop_prompt_matches(state)):
+            return False
+        if (semantic_id == 'campaign/map-timeout/confirm'
+                and not self.campaign_timeout_prompt_visible(state)):
             return False
         if semantic_id in (
             "guild/dispatch/cancel",

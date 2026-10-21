@@ -157,8 +157,12 @@ def test_passive_exp_close_ack_does_not_require_next_award_actionability():
     backend.buttons['buttons'][0]['raycast_top'] = False
     assert adapter.click('EXP_INFO_S_REWARD') is previous
     assert backend.taps == [(640, 360)]
+    # The known next AwardInfo owns this frame but cannot yet accept input.
+    # Yield the native screenshot loop; its real close action remains closed.
+    assert adapter.click('GET_ITEMS_1') is None
     with pytest.raises(SemanticGateClosed):
-        adapter.click('GET_ITEMS_1')
+        adapter.oracle.click('reward/award-info/close')
+    assert backend.taps == [(640, 360)]
     assert backend.taps == [(640, 360)]
 
 

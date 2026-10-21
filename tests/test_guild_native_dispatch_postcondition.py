@@ -5,6 +5,8 @@ from unittest.mock import Mock
 
 import pytest
 from alas_headless import SemanticGateClosed
+from alas_headless.adapter.semantic.contracts import AlasSemanticGuildDispatchUnproven
+from alas_headless.adapter.task_lifecycle import semantic_task_scope, TaskCapabilityUnavailable
 from tests.test_alas_config_branch_compatibility import source
 
 
@@ -39,9 +41,25 @@ def test_native_dispatch_requires_a_newer_typed_in_progress_result(case):
         assert scope['guild_operations'](host) is True
         host._guild_operations_dispatch_exit.assert_called_once_with(skip_first_screenshot=False)
     else:
-        with pytest.raises(SemanticGateClosed,match='did not advance'):
+        with pytest.raises(AlasSemanticGuildDispatchUnproven,match='did not advance') as failed:
             scope['guild_operations'](host)
+        assert failed.value.receipt.generation == 10
         host._guild_operations_dispatch_exit.assert_not_called()
     host._guild_operations_dispatch_switch_fleet.assert_called_once_with(skip_first_screenshot=False)
     adapter.confirm_guild_dispatch.assert_called_once()
     assert [call.args[0] for call in adapter.oracle.click.call_args_list].count('guild/formation/go') == 1
+
+
+def test_unproven_dispatch_defers_only_guild_and_preserves_accepted_receipt():
+    session = SimpleNamespace(discard_task_state=Mock(), trace=None)
+    receipt = SimpleNamespace(generation=147253, semantic_id='guild/dispatch/confirm')
+    cause = AlasSemanticGuildDispatchUnproven(receipt)
+    with pytest.raises(TaskCapabilityUnavailable) as failed:
+        with semantic_task_scope(session, 'guild'):
+            raise cause
+    assert failed.value.cause.receipt is receipt
+    with semantic_task_scope(session, 'research'):
+        pass  # Independent task remains admissible after the local deferral.
+    with pytest.raises(AlasSemanticGuildDispatchUnproven):
+        with semantic_task_scope(session, 'research'):
+            raise cause

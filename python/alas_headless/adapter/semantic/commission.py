@@ -95,12 +95,13 @@ class CommissionAdapterPorts:
     def commission_scroll_next(self) -> Optional[CommissionScrollProof]:
         self._package_gate()
         self._require_commission_context()
-        return self.oracle.commission_scroll_next()
+        source = self._fresh_input_oracle()
+        return self._live_oracle.commission_scroll_next(precondition_oracle=source)
 
     def commission_scroll_to_top(self) -> Optional[CommissionScrollProof]:
         self._package_gate()
         self._require_commission_context()
-        return self.oracle.commission_scroll_to_top()
+        return self._live_oracle.commission_scroll_to_top(precondition_oracle_factory=self._fresh_input_oracle)
 
     def commission_reward_pending(self) -> bool:
         """Detect a finished commission only from the typed reward summary."""
@@ -321,7 +322,7 @@ class CommissionAdapterPorts:
     def _close_commission_award(self, target):
         """Let the original receive loop observe the next popup after one close."""
         oracle = self.oracle
-        receipt = oracle.click(target)
+        receipt = self._fresh_input_oracle().click(target)
         for attempt in range(20):
             state = oracle.read_state()
             if state.generation > receipt.generation and not any(
@@ -329,6 +330,12 @@ class CommissionAdapterPorts:
                     '/AwardInfoUI(Clone)/', '/AwardInfoUI1(Clone)/'))
                 for button in state.buttons
             ):
+                return receipt
+            if (state.generation > receipt.generation
+                    and oracle.reward_item_info_visible()):
+                # The accepted award input exposed its typed item description.
+                # Return to ALAS' existing popup handler without another input
+                # or claiming that the covered award has finished closing.
                 return receipt
             if attempt < 19:
                 time.sleep(0.1)
@@ -388,7 +395,9 @@ class CommissionAdapterPorts:
         ):
             tab_target = COMMISSION_TAB_TARGETS.get(name)
             if tab_target is not None:
-                return self.oracle.click_image(tab_target)
+                receipt = self.oracle.click_image(tab_target)
+                self._commission_context.passive_transition_until = time.monotonic() + 12.0
+                return receipt
             if name in ("COMMISSION_ADVICE", "COMMISSION_START"):
                 context = self._commission_context
                 if context.selected_signature is None:
@@ -495,6 +504,44 @@ class CommissionAdapterPorts:
                 target = self._award_close_target()
                 if target is None:
                     if context.flow_kind == "commission":
+                        previous = (context.reward_close_receipts[-1]
+                                    if context.reward_close_receipts else None)
+                        if (context.reward_claim_receipt is not None
+                                and previous is not None
+                                and previous.semantic_id == 'reward/ship-exp/close'
+                                and time.monotonic() <= context.passive_transition_until):
+                            oracle = self._frame_or_live_observation_oracle()
+                            state = oracle.read_state()
+                            award_roots = {
+                                b.path.split(root, 1)[0] + root
+                                for b in state.buttons
+                                if b.active_in_hierarchy and b.active_and_enabled
+                                for root in ('/AwardInfoUI(Clone)/', '/AwardInfoUI1(Clone)/')
+                                if root in b.path
+                            }
+                            if (state.generation > previous.generation
+                                    and len(award_roots) == 1
+                                    and not any(b.active_in_hierarchy and '/ShipExpUI(Clone)/' in b.path
+                                                for b in state.buttons)
+                                    and all(rule.blocker_id in ('award-info', 'award-info1', 'reward-page')
+                                            for rule in oracle._blocking_rules(state, 'ui/absence-probe'))):
+                                # EXP has already closed. AwardInfo's hierarchy
+                                # can mount before its close Button is ready.
+                                # Let ALAS acquire its next screenshot; no input
+                                # or synthetic close receipt is needed here.
+                                return None
+                            if (state.generation > previous.generation
+                                    and self._reward_sidebar_ready(oracle)
+                                    and not oracle._blocking_rules(state, 'reward/page/back')
+                                    and not any(b.active_in_hierarchy and any(root in b.path for root in (
+                                        '/ShipExpUI(Clone)/', '/AwardInfoUI(Clone)/', '/AwardInfoUI1(Clone)/'))
+                                        for b in state.buttons)):
+                                # The last EXP can return directly to the hub.
+                                # Native ALAS still checks award aliases from
+                                # its preceding screenshot in this iteration.
+                                # Give its next screenshot the page: no input
+                                # and no fabricated award-close receipt.
+                                return None
                         recorded_awards = tuple(
                             recorded
                             for recorded in context.reward_close_receipts

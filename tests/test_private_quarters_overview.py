@@ -180,7 +180,7 @@ def test_overview_optional_popup_probe_requires_unobscured_page():
     a = AlasSemanticAdapter(o, package_gate=lambda: None)
     button = SimpleNamespace(name='MONTHLY_PASS_NOTICE')
     assert not a.appear(button)
-    o._blocking_rules = lambda state, semantic_id: [object()]
+    o._blocking_rules = lambda state, semantic_id: [SimpleNamespace(blocker_id='unknown-modal')]
     with pytest.raises(AlasSemanticUnmapped):
         a.appear(button)
 

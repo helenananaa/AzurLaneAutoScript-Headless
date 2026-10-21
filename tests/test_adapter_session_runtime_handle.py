@@ -240,7 +240,8 @@ class SessionRuntimeHandleTests(unittest.TestCase):
                         # navigation may additionally revalidate live Button
                         # state at its final input boundary, without recapturing UI.
                         self.assertEqual(handle.requests[:2], ["GET /v1/state\n", "GET /v1/ui\n"], (resource, condition))
-                        self.assertEqual(handle.requests.count("GET /v1/ui\n"), 1)
+                        self.assertEqual(handle.requests.count("GET /v1/ui\n"), 1,
+                                         (resource, condition, handle.requests))
                         self.assertTrue(all(line == "GET /v1/state\n"
                                             for line in handle.requests[2:]))
 
@@ -258,6 +259,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
             campaign_combat_committed=lambda: True,
             _campaign_context=context,
         )
+        session.adapter._frame_or_live_observation_oracle = lambda: session.adapter.oracle
         error = SemanticGateClosed(
             "combat action control is not exact top-raycast actionable: start"
         )
@@ -324,6 +326,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
             operation_siren_combat_committed=lambda: True,
             _campaign_context=None,
         )
+        session.adapter._frame_or_live_observation_oracle = lambda: session.adapter.oracle
         error = SemanticGateClosed(
             "combat fixture endpoint completeness changed"
         )
@@ -1622,6 +1625,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
 
         adapter = SimpleNamespace(
             oracle=live_oracle,
+            _exercise_pending=False,
             _require_frame_observation_oracle=lambda: frame_oracle,
             prepared_input_frame=lambda provider: nullcontext(),
             click=click,

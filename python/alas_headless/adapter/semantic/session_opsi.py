@@ -400,7 +400,13 @@ class SessionOpsiPorts:
         return self.open().operation_siren_globe_visible()
 
     def operation_siren_globe_unpin(self) -> OperationSirenGlobeSwipeReceipt:
-        return self.open().operation_siren_globe_unpin()
+        # Native globe focusing reads the pinned zone and its projection first.
+        # That work can outlive its entry screenshot. Reacquire the input lease;
+        # the live oracle still owns path proof, the one drag and its postcondition.
+        self.refresh_frame()
+        adapter = self.open()
+        return adapter.operation_siren_globe_unpin(
+            precondition_oracle=adapter._require_frame_observation_oracle())
 
     def operation_siren_storage_visible(self) -> bool:
         return self.open().operation_siren_storage_visible()
@@ -461,6 +467,9 @@ class SessionOpsiPorts:
 
     def operation_siren_globe_drag_owned(self, start, end):
         return self.open().operation_siren_globe_drag_owned(start,end)
+
+    def operation_siren_globe_drag_candidate(self, start, end, *, box):
+        return self.open().operation_siren_globe_drag_candidate(start, end, box=box)
 
     def operation_siren_globe_map_projection(self, area_pos):
         return self.open().operation_siren_globe_map_projection(area_pos)

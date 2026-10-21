@@ -39,6 +39,7 @@ def test_native_purchase_raycast_selector_is_scoped():
     source = (root / 'overlays/angle-g3/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp').read_text(encoding='utf-8')
     selector = 'bool IsMeowfficerPurchaseControl' + source.split('bool IsMeowfficerPurchaseControl', 1)[1].split('bool ShouldEvaluateTopRaycast', 1)[0]
     program = '''
+#include <algorithm>
 #include <string>
 #include <string_view>
 #include <cassert>

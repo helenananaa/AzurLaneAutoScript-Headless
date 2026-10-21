@@ -1,0 +1,7003 @@
+{
+  "scope": "Actual readonly immutable frame during native Hard12-4 official auto-search, CombatUI plus automation information; no diagnostic input",
+  "buttons": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.buttons/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 27879,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 344104,
+    "generation": 4134,
+    "snapshot_monotonic_ns": 4037088117329,
+    "response_monotonic_ns": 4038021941192,
+    "age_ms": 933,
+    "button_count": 8,
+    "truncated": false,
+    "error_count": 0,
+    "buttons": [
+      {
+        "name": "custom_button_1(Clone)",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+        "canvas": "Overlay",
+        "flags": 7679,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "canvas_render_mode": 1,
+        "instance_id": -174864,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 0.0,
+          "y": -4.185,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -136.5,
+          "y": -50.5,
+          "width": 273.0,
+          "height": 101.0
+        },
+        "screen_point": {
+          "x": 640.0,
+          "y": 171.667
+        },
+        "adb_point": {
+          "x": 640.0,
+          "y": 548.333
+        },
+        "screen_bounds": {
+          "left": 549.0,
+          "bottom": 138.0,
+          "right": 731.0,
+          "top": 205.333
+        },
+        "adb_bounds": {
+          "left": 549.0,
+          "top": 514.667,
+          "right": 731.0,
+          "bottom": 582.0
+        }
+      },
+      {
+        "name": "ActCtl",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Skill_3/ActCtl",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -172364,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 5.575,
+          "y": -5.84,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -50.0,
+          "y": -50.0,
+          "width": 100.0,
+          "height": 100.0
+        },
+        "screen_point": {
+          "x": 890.88,
+          "y": 97.2
+        },
+        "adb_point": {
+          "x": 890.88,
+          "y": 622.8
+        },
+        "screen_bounds": {
+          "left": 857.547,
+          "bottom": 63.867,
+          "right": 924.213,
+          "top": 130.533
+        },
+        "adb_bounds": {
+          "left": 857.547,
+          "top": 589.467,
+          "right": 924.213,
+          "bottom": 656.133
+        }
+      },
+      {
+        "name": "ActCtl",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Skill_2/ActCtl",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -172242,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 8.818,
+          "y": -5.84,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -50.0,
+          "y": -50.0,
+          "width": 100.0,
+          "height": 100.0
+        },
+        "screen_point": {
+          "x": 1036.8,
+          "y": 97.2
+        },
+        "adb_point": {
+          "x": 1036.8,
+          "y": 622.8
+        },
+        "screen_bounds": {
+          "left": 1003.467,
+          "bottom": 63.867,
+          "right": 1070.133,
+          "top": 130.533
+        },
+        "adb_bounds": {
+          "left": 1003.467,
+          "top": 589.467,
+          "right": 1070.133,
+          "bottom": 656.133
+        }
+      },
+      {
+        "name": "ActCtl",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Skill_1/ActCtl",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -172120,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 12.06,
+          "y": -5.84,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -50.0,
+          "y": -50.0,
+          "width": 100.0,
+          "height": 100.0
+        },
+        "screen_point": {
+          "x": 1182.72,
+          "y": 97.2
+        },
+        "adb_point": {
+          "x": 1182.72,
+          "y": 622.8
+        },
+        "screen_bounds": {
+          "left": 1149.387,
+          "bottom": 63.867,
+          "right": 1216.053,
+          "top": 130.533
+        },
+        "adb_bounds": {
+          "left": 1149.387,
+          "top": 589.467,
+          "right": 1216.053,
+          "bottom": 656.133
+        }
+      },
+      {
+        "name": "PauseBtn",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/PauseBtn",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -163374,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 12.55,
+          "y": 6.926,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -106.0,
+          "y": -37.5,
+          "width": 212.0,
+          "height": 75.0
+        },
+        "screen_point": {
+          "x": 1204.733,
+          "y": 671.667
+        },
+        "adb_point": {
+          "x": 1204.733,
+          "y": 48.333
+        },
+        "screen_bounds": {
+          "left": 1134.067,
+          "bottom": 646.667,
+          "right": 1275.4,
+          "top": 696.667
+        },
+        "adb_bounds": {
+          "left": 1134.067,
+          "top": 23.333,
+          "right": 1275.4,
+          "bottom": 73.333
+        }
+      },
+      {
+        "name": "chatBtn",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/chatBtnContainer/chatBtn",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -163324,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 14.222,
+          "y": 0.164,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -102.0,
+          "y": -111.0,
+          "width": 102.0,
+          "height": 222.0
+        },
+        "screen_point": {
+          "x": 1280.0,
+          "y": 367.4
+        },
+        "adb_point": {
+          "x": 1280.0,
+          "y": 352.6
+        },
+        "screen_bounds": {
+          "left": 1212.0,
+          "bottom": 293.4,
+          "right": 1280.0,
+          "top": 441.4
+        },
+        "adb_bounds": {
+          "left": 1212.0,
+          "top": 278.6,
+          "right": 1280.0,
+          "bottom": 426.6
+        }
+      },
+      {
+        "name": "btnBack",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/top/btnBack",
+        "canvas": "Overlay",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1914,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 5.652,
+          "y": 4.393,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -53.5,
+          "y": -38.5,
+          "width": 107.0,
+          "height": 77.0
+        },
+        "screen_point": {
+          "x": 894.333,
+          "y": 557.667
+        },
+        "adb_point": {
+          "x": 894.333,
+          "y": 162.333
+        },
+        "screen_bounds": {
+          "left": 858.667,
+          "bottom": 532.0,
+          "right": 930.0,
+          "top": 583.333
+        },
+        "adb_bounds": {
+          "left": 858.667,
+          "top": 136.667,
+          "right": 930.0,
+          "bottom": 188.0
+        }
+      },
+      {
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/bg",
+        "canvas": "Overlay",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1546,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -960.0,
+          "y": -540.0,
+          "width": 1920.0,
+          "height": 1080.0
+        },
+        "screen_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "screen_bounds": {
+          "left": -0.0,
+          "bottom": 0.0,
+          "right": 1280.0,
+          "top": 720.0
+        },
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        }
+      }
+    ]
+  },
+  "snapshot": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 27879,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "abi": "x86_64",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "snapshot_schema": 1,
+    "snapshot_struct_size": 104,
+    "generation": 4134,
+    "scene_generation": 2,
+    "semantic_generation": 2,
+    "snapshot_monotonic_ns": 4037088117329,
+    "response_monotonic_ns": 4038021912744,
+    "age_ms": 933,
+    "observer_tid": 27910,
+    "assembly_count": 129,
+    "semantic_code": 1,
+    "width": 1280,
+    "height": 720,
+    "flags": 15,
+    "observer_attached": false,
+    "main_thread": true,
+    "button_count": 282,
+    "active_button_count": 8,
+    "interactable_button_count": 282,
+    "scene_handle": -76,
+    "ui_stage": 100,
+    "ui_method_mask": 15
+  },
+  "ui": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.ui/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 27879,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 4472768,
+    "generation": 4134,
+    "snapshot_monotonic_ns": 4037088117329,
+    "response_monotonic_ns": 4038050702495,
+    "age_ms": 962,
+    "method_mask": 15,
+    "toggle_count": 2,
+    "text_count": 54,
+    "image_count": 176,
+    "toggle_truncated": false,
+    "text_truncated": false,
+    "image_truncated": false,
+    "error_count": 0,
+    "error_counts": {
+      "toggle": 0,
+      "text": 0,
+      "image": 0,
+      "shared": 0
+    },
+    "skipped_count": 0,
+    "image_source_count": 3184,
+    "image_source_capacity": 16384,
+    "toggles": [
+      {
+        "kind": "toggle",
+        "name": "AutoBtn",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AutoBtn",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": true,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 80.0,
+          "y": 46.0
+        },
+        "adb_bounds": {
+          "left": -0.333,
+          "top": 24.333,
+          "right": 160.333,
+          "bottom": 67.667
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "stopRemind",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/stopRemind",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": true,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 844.0,
+          "y": 176.0
+        },
+        "adb_bounds": {
+          "left": 688.0,
+          "top": 149.333,
+          "right": 844.0,
+          "bottom": 176.0
+        }
+      }
+    ],
+    "texts": [
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/normal(Clone)/text",
+        "text": "-51",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1335.524,
+          "top": 640.489,
+          "right": 1442.188,
+          "bottom": 660.488
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "FighterNum",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AirFighterContainer/AirStrikeIcon(Clone)/FighterIcon/FighterNum",
+        "text": "X6",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1216.12,
+          "top": 156.733,
+          "right": 1275.387,
+          "bottom": 223.4
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/pierce(Clone)/text",
+        "text": "-136",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450586.688,
+          "top": -449666.688,
+          "right": 450693.375,
+          "bottom": -449646.688
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/pierce(Clone)/text",
+        "text": "-303",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450586.688,
+          "top": -449666.688,
+          "right": 450693.375,
+          "bottom": -449646.688
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/pierce(Clone)/text",
+        "text": "-329",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450830.125,
+          "top": -449559.062,
+          "right": 450936.75,
+          "bottom": -449539.062
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/pierce(Clone)/text",
+        "text": "-220",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450859.375,
+          "top": -449500.312,
+          "right": 450966.094,
+          "bottom": -449480.312
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/normal(Clone)/text",
+        "text": "-91",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450404.875,
+          "top": -449627.531,
+          "right": 450511.562,
+          "bottom": -449607.531
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/explo(Clone)/text",
+        "text": "-1134",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450527.031,
+          "top": -449747.719,
+          "right": 450633.688,
+          "bottom": -449727.719
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/explo(Clone)/text",
+        "text": "-17",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450551.438,
+          "top": -449721.0,
+          "right": 450658.125,
+          "bottom": -449701.0
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/explo(Clone)/text",
+        "text": "-1523",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450586.688,
+          "top": -449666.688,
+          "right": 450693.375,
+          "bottom": -449646.688
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/critical_pierce(Clone)/text",
+        "text": "-455",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450586.688,
+          "top": -449663.344,
+          "right": 450693.375,
+          "bottom": -449643.344
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/normal(Clone)/text",
+        "text": "-5",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450620.438,
+          "top": -449804.5,
+          "right": 450727.125,
+          "bottom": -449784.5
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/pierce(Clone)/text",
+        "text": "-133",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 880.8,
+          "top": 290.697,
+          "right": 1008.798,
+          "bottom": 314.697
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/explo(Clone)/text",
+        "text": "-1220",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450632.656,
+          "top": -449846.688,
+          "right": 450739.312,
+          "bottom": -449826.688
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "FighterNum",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AirFighterContainer/AirStrikeIcon(Clone)/FighterIcon/FighterNum",
+        "text": "X6",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1216.12,
+          "top": 114.067,
+          "right": 1275.387,
+          "bottom": 180.733
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/explo(Clone)/text",
+        "text": "-3266",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450849.844,
+          "top": -449351.688,
+          "right": 450956.531,
+          "bottom": -449331.688
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/explo(Clone)/text",
+        "text": "-2017",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450849.844,
+          "top": -449351.688,
+          "right": 450956.531,
+          "bottom": -449331.688
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/explo(Clone)/text",
+        "text": "-572",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450529.312,
+          "top": -449846.688,
+          "right": 450635.938,
+          "bottom": -449826.688
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/critical_pierce(Clone)/text",
+        "text": "-453",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450529.312,
+          "top": -449843.344,
+          "right": 450635.938,
+          "bottom": -449823.344
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/pierce(Clone)/text",
+        "text": "-326",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450830.125,
+          "top": -449559.062,
+          "right": 450936.75,
+          "bottom": -449539.062
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/pierce(Clone)/text",
+        "text": "-302",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450485.656,
+          "top": -450026.688,
+          "right": 450592.312,
+          "bottom": -450006.688
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/critical_pierce(Clone)/text",
+        "text": "-489",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450830.125,
+          "top": -449555.719,
+          "right": 450936.75,
+          "bottom": -449535.719
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/pierce(Clone)/text",
+        "text": "-132",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450585.75,
+          "top": -449666.688,
+          "right": 450692.375,
+          "bottom": -449646.688
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/pierce(Clone)/text",
+        "text": "-220",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450769.344,
+          "top": -449484.562,
+          "right": 450875.969,
+          "bottom": -449464.562
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/pierce(Clone)/text",
+        "text": "-302",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450531.5,
+          "top": -450026.688,
+          "right": 450638.156,
+          "bottom": -450006.688
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/normal(Clone)/text",
+        "text": "-48",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1532.99,
+          "top": 928.116,
+          "right": 1639.655,
+          "bottom": 948.116
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/critical_explo(Clone)/text",
+        "text": "-26",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450573.75,
+          "top": -449692.812,
+          "right": 450680.375,
+          "bottom": -449672.812
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/pierce(Clone)/text",
+        "text": "-134",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450586.688,
+          "top": -449666.688,
+          "right": 450693.375,
+          "bottom": -449646.688
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/critical_explo(Clone)/text",
+        "text": "-1912",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 451033.281,
+          "top": -449358.188,
+          "right": 451139.938,
+          "bottom": -449338.188
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/normal(Clone)/text",
+        "text": "-55",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 830.952,
+          "top": 266.579,
+          "right": 937.617,
+          "bottom": 286.579
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/explo(Clone)/text",
+        "text": "-1134",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450687.531,
+          "top": -449801.688,
+          "right": 450794.25,
+          "bottom": -449781.688
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/pierce(Clone)/text",
+        "text": "-305",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 451033.281,
+          "top": -449361.531,
+          "right": 451139.938,
+          "bottom": -449341.531
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/explo(Clone)/text",
+        "text": "-1134",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450451.906,
+          "top": -449673.719,
+          "right": 450558.562,
+          "bottom": -449653.656
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "subText",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyHPBar/nameContain/name/subText",
+        "text": "榛名",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 513.967,
+          "top": 35.267,
+          "right": 713.967,
+          "bottom": 55.267
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "FighterNum",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AirFighterContainer/AirStrikeIcon(Clone)/FighterIcon/FighterNum",
+        "text": "X6",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1216.12,
+          "top": 71.4,
+          "right": 1275.387,
+          "bottom": 138.067
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "pic",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)/pic",
+        "text": "知道了",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 552.333,
+          "top": 514.667,
+          "right": 727.667,
+          "bottom": 574.0
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "CountText",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Skill_3/ActCtl/Count/CountText",
+        "text": "0/5",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 936.68,
+          "top": 568.627,
+          "right": 976.147,
+          "bottom": 596.56
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "CountText",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Skill_2/ActCtl/Count/CountText",
+        "text": "0/5",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1082.6,
+          "top": 568.627,
+          "right": 1122.067,
+          "bottom": 596.56
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "CountText",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Skill_1/ActCtl/Count/CountText",
+        "text": "0/2",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1228.52,
+          "top": 568.627,
+          "right": 1267.987,
+          "bottom": 596.56
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/heal(Clone)/text",
+        "text": "371",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450841.531,
+          "top": -449666.688,
+          "right": 450948.188,
+          "bottom": -449646.688
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/heal(Clone)/text",
+        "text": "207",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450841.531,
+          "top": -449666.688,
+          "right": 450948.188,
+          "bottom": -449646.688
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/heal(Clone)/text",
+        "text": "313",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450841.531,
+          "top": -449666.688,
+          "right": 450948.188,
+          "bottom": -449646.688
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/heal(Clone)/text",
+        "text": "408",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450596.719,
+          "top": -449708.281,
+          "right": 450703.406,
+          "bottom": -449688.25
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/heal(Clone)/text",
+        "text": "198",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450590.188,
+          "top": -449720.125,
+          "right": 450696.906,
+          "bottom": -449700.125
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/heal(Clone)/text",
+        "text": "222",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 450586.688,
+          "top": -449730.875,
+          "right": 450693.375,
+          "bottom": -449710.875
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Skill_Activation/Root/mask(Clone)/skill/skill_name/Text",
+        "text": "弹射起飞试行",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 152.923,
+          "top": 167.474,
+          "right": 423.058,
+          "bottom": 204.159
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Timer/Text",
+        "text": "02:46",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1017.133,
+          "top": 23.047,
+          "right": 1163.134,
+          "bottom": 71.886
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyHPBar/nameContain/Text",
+        "text": " Lv.125",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 453.3,
+          "top": 35.267,
+          "right": 507.3,
+          "bottom": 55.267
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyHPBar/hpbar/Text",
+        "text": "36746/44032",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 722.833,
+          "top": 31.963,
+          "right": 875.433,
+          "bottom": 56.943
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Label",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/stopRemind/Label",
+        "text": "今日不再提示",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 718.0,
+          "top": 152.167,
+          "right": 844.0,
+          "bottom": 173.167
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "help_tpl",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/help_panel/list/help_tpl",
+        "text": "                        注意，自律战斗时可能出现以下情况",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 363.333,
+          "top": 206.667,
+          "right": 906.667,
+          "bottom": 228.667
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "title_en",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/top/bg/infomation/title_en",
+        "text": "INFORMATION",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 429.089,
+          "top": 161.633,
+          "right": 567.089,
+          "bottom": 180.633
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "title",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/top/bg/infomation/title",
+        "text": "信息",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 357.027,
+          "top": 136.9,
+          "right": 535.693,
+          "bottom": 185.233
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "FpsPanel",
+        "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+        "text": "",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 573.333,
+          "top": 0.0,
+          "right": 706.667,
+          "bottom": 34.667
+        }
+      }
+    ],
+    "images": [
+      {
+        "kind": "image",
+        "name": "label",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/miss(Clone)/label",
+        "sprite": "miss",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 484.9,
+          "top": 266.5,
+          "right": 534.899,
+          "bottom": 281.167
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 509.9,
+          "y": 273.834
+        },
+        "inherited_alpha": 0.624143
+      },
+      {
+        "kind": "image",
+        "name": "FighterIcon",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AirFighterContainer/AirStrikeIcon(Clone)/FighterIcon",
+        "sprite": "lingzhan21gai",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1190.733,
+          "top": 171.733,
+          "right": 1227.4,
+          "bottom": 208.4
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1209.067,
+          "y": 190.067
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "AirStrikeIcon(Clone)",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AirFighterContainer/AirStrikeIcon(Clone)",
+        "sprite": "air_strike_bg",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1160.667,
+          "top": 171.067,
+          "right": 1280.0,
+          "bottom": 209.067
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1220.333,
+          "y": 190.067
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "label",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/miss(Clone)/label",
+        "sprite": "miss",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 450618.375,
+          "top": -449638.406,
+          "right": 450668.406,
+          "bottom": -449623.781
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 450643.406,
+          "y": -449631.125
+        },
+        "inherited_alpha": 0.467303
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.952941,
+          "green": 0.235294,
+          "blue": 0.223529,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 2620.386,
+          "top": 138.795,
+          "right": 2707.053,
+          "bottom": 145.461
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 2663.719,
+          "y": 142.128
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 2618.386,
+          "top": 136.795,
+          "right": 2709.053,
+          "bottom": 147.461
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 2663.719,
+          "y": 142.128
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.952941,
+          "green": 0.235294,
+          "blue": 0.223529,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 2530.386,
+          "top": 93.794,
+          "right": 2617.053,
+          "bottom": 100.46
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 2573.719,
+          "y": 97.127
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 2528.386,
+          "top": 91.794,
+          "right": 2619.053,
+          "bottom": 102.46
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 2573.719,
+          "y": 97.127
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.952941,
+          "green": 0.235294,
+          "blue": 0.223529,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 2530.386,
+          "top": -86.21,
+          "right": 2617.053,
+          "bottom": -79.544
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 2573.719,
+          "y": -82.877
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 2528.386,
+          "top": -88.21,
+          "right": 2619.053,
+          "bottom": -77.544
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 2573.719,
+          "y": -82.877
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.952941,
+          "green": 0.235294,
+          "blue": 0.223529,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 2440.386,
+          "top": 48.793,
+          "right": 2527.053,
+          "bottom": 55.459
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 2483.719,
+          "y": 52.126
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 2438.386,
+          "top": 46.793,
+          "right": 2529.053,
+          "bottom": 57.459
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 2483.719,
+          "y": 52.126
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.952941,
+          "green": 0.235294,
+          "blue": 0.223529,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 2440.386,
+          "top": -41.209,
+          "right": 2527.053,
+          "bottom": -34.543
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 2483.719,
+          "y": -37.876
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 2438.386,
+          "top": -43.209,
+          "right": 2529.053,
+          "bottom": -32.543
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 2483.719,
+          "y": -37.876
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "label",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/critical_pierce(Clone)/frame/label",
+        "sprite": "text",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 450598.438,
+          "top": -449677.625,
+          "right": 450685.062,
+          "bottom": -449666.281
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 450641.75,
+          "y": -449671.938
+        },
+        "inherited_alpha": 0.23
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/critical_pierce(Clone)/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 450576.688,
+          "top": -449696.031,
+          "right": 450703.375,
+          "bottom": -449610.688
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 450640.0,
+          "y": -449653.375
+        },
+        "inherited_alpha": 0.23
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.952941,
+          "green": 0.235294,
+          "blue": 0.223529,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 2350.386,
+          "top": 3.792,
+          "right": 2437.053,
+          "bottom": 10.458
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 2393.719,
+          "y": 7.125
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 2348.386,
+          "top": 1.792,
+          "right": 2439.053,
+          "bottom": 12.458
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 2393.719,
+          "y": 7.125
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "FighterIcon",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AirFighterContainer/AirStrikeIcon(Clone)/FighterIcon",
+        "sprite": "97jiangong",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1190.733,
+          "top": 129.067,
+          "right": 1227.4,
+          "bottom": 165.733
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1209.067,
+          "y": 147.4
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "AirStrikeIcon(Clone)",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AirFighterContainer/AirStrikeIcon(Clone)",
+        "sprite": "air_strike_bg",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1160.667,
+          "top": 128.4,
+          "right": 1280.0,
+          "bottom": 166.4
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1220.333,
+          "y": 147.4
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "label",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/critical_pierce(Clone)/frame/label",
+        "sprite": "text",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 450541.094,
+          "top": -449857.625,
+          "right": 450627.75,
+          "bottom": -449846.281
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 450584.406,
+          "y": -449851.938
+        },
+        "inherited_alpha": 0.01
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/critical_pierce(Clone)/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 450519.344,
+          "top": -449876.031,
+          "right": 450645.969,
+          "bottom": -449790.688
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 450582.656,
+          "y": -449833.375
+        },
+        "inherited_alpha": 0.01
+      },
+      {
+        "kind": "image",
+        "name": "label",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/critical_pierce(Clone)/frame/label",
+        "sprite": "text",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 450841.844,
+          "top": -449570.0,
+          "right": 450928.5,
+          "bottom": -449558.656
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 450885.156,
+          "y": -449564.312
+        },
+        "inherited_alpha": 0.2575
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/critical_pierce(Clone)/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 450820.062,
+          "top": -449588.406,
+          "right": 450946.812,
+          "bottom": -449503.062
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 450883.438,
+          "y": -449545.75
+        },
+        "inherited_alpha": 0.2575
+      },
+      {
+        "kind": "image",
+        "name": "label",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/miss(Clone)/label",
+        "sprite": "miss",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 503.095,
+          "top": 310.557,
+          "right": 553.094,
+          "bottom": 325.224
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 528.094,
+          "y": 317.89
+        },
+        "inherited_alpha": 0.0
+      },
+      {
+        "kind": "image",
+        "name": "label",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/critical_explo(Clone)/frame/label",
+        "sprite": "text",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 450585.469,
+          "top": -449707.062,
+          "right": 450672.125,
+          "bottom": -449695.719
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 450628.781,
+          "y": -449701.406
+        },
+        "inherited_alpha": 0.01
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/critical_explo(Clone)/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 450563.719,
+          "top": -449725.469,
+          "right": 450690.375,
+          "bottom": -449640.125
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 450627.062,
+          "y": -449682.812
+        },
+        "inherited_alpha": 0.01
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.952941,
+          "green": 0.235294,
+          "blue": 0.223529,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1581.495,
+          "top": 16.373,
+          "right": 1668.162,
+          "bottom": 23.04
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1624.828,
+          "y": 19.706
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1579.495,
+          "top": 14.373,
+          "right": 1670.162,
+          "bottom": 25.04
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1624.828,
+          "y": 19.706
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "label",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/critical_explo(Clone)/frame/label",
+        "sprite": "text",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 451045.0,
+          "top": -449372.406,
+          "right": 451131.719,
+          "bottom": -449361.125
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 451088.375,
+          "y": -449366.781
+        },
+        "inherited_alpha": 0.065
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPTextCharacterContainer/container(Clone)/critical_explo(Clone)/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 451023.281,
+          "top": -449390.875,
+          "right": 451149.938,
+          "bottom": -449305.531
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 451086.594,
+          "y": -449348.188
+        },
+        "inherited_alpha": 0.065
+      },
+      {
+        "kind": "image",
+        "name": "FighterIcon",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AirFighterContainer/AirStrikeIcon(Clone)/FighterIcon",
+        "sprite": "99shijianbao1",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1190.733,
+          "top": 86.4,
+          "right": 1227.4,
+          "bottom": 123.067
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1209.067,
+          "y": 104.733
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "AirStrikeIcon(Clone)",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AirFighterContainer/AirStrikeIcon(Clone)",
+        "sprite": "air_strike_bg",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1160.667,
+          "top": 85.733,
+          "right": 1280.0,
+          "bottom": 123.733
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1220.333,
+          "y": 104.733
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "custom_button_1(Clone)",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+        "sprite": "btn_big_blue",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 549.0,
+          "top": 514.667,
+          "right": 731.0,
+          "bottom": 582.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 548.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Count",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Skill_3/ActCtl/Count",
+        "sprite": "countTextBG",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 909.88,
+          "top": 569.8,
+          "right": 978.547,
+          "bottom": 595.8
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 944.213,
+          "y": 582.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "unfill",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Skill_3/ActCtl/skill_icon/unfill",
+        "sprite": "weapon_unfill_aircraft",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.745098,
+          "green": 0.745098,
+          "blue": 0.745098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 844.74,
+          "top": 577.2,
+          "right": 936.74,
+          "bottom": 669.2
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 890.74,
+          "y": 623.2
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "unselect",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Skill_3/ActCtl/unselect",
+        "sprite": "Btn_unselecte",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 832.547,
+          "top": 569.8,
+          "right": 949.213,
+          "bottom": 675.8
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 890.88,
+          "y": 622.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "skill_progress",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Skill_3/ActCtl/skill_progress",
+        "sprite": "CDround",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 0.513645,
+        "adb_bounds": {
+          "left": 838.88,
+          "top": 570.8,
+          "right": 942.88,
+          "bottom": 674.8
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 890.88,
+          "y": 622.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Count",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Skill_2/ActCtl/Count",
+        "sprite": "countTextBG",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1055.8,
+          "top": 569.8,
+          "right": 1124.467,
+          "bottom": 595.8
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1090.133,
+          "y": 582.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "unfill",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Skill_2/ActCtl/skill_icon/unfill",
+        "sprite": "weapon_unfill_torpedo",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.745098,
+          "green": 0.745098,
+          "blue": 0.745098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 990.66,
+          "top": 577.2,
+          "right": 1082.66,
+          "bottom": 669.2
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1036.66,
+          "y": 623.2
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "unselect",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Skill_2/ActCtl/unselect",
+        "sprite": "Btn_unselecte",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 978.467,
+          "top": 569.8,
+          "right": 1095.133,
+          "bottom": 675.8
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1036.8,
+          "y": 622.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "skill_progress",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Skill_2/ActCtl/skill_progress",
+        "sprite": "CDround",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 0.548508,
+        "adb_bounds": {
+          "left": 984.8,
+          "top": 570.8,
+          "right": 1088.8,
+          "bottom": 674.8
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1036.8,
+          "y": 622.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Count",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Skill_1/ActCtl/Count",
+        "sprite": "countTextBG",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1201.72,
+          "top": 569.8,
+          "right": 1270.387,
+          "bottom": 595.8
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1236.053,
+          "y": 582.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "unfill",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Skill_1/ActCtl/skill_icon/unfill",
+        "sprite": "weapon_unfill_cannon",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.745098,
+          "green": 0.745098,
+          "blue": 0.745098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1136.58,
+          "top": 577.2,
+          "right": 1228.58,
+          "bottom": 669.2
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1182.58,
+          "y": 623.2
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "unselect",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Skill_1/ActCtl/unselect",
+        "sprite": "Btn_unselecte",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1124.387,
+          "top": 569.8,
+          "right": 1241.053,
+          "bottom": 675.8
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1182.72,
+          "y": 622.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "skill_progress",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Skill_1/ActCtl/skill_progress",
+        "sprite": "CDround",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 0.753971,
+        "adb_bounds": {
+          "left": 1130.72,
+          "top": 570.8,
+          "right": 1234.72,
+          "bottom": 674.8
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1182.72,
+          "y": 622.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "HPProgress",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/HPBar/HPProgress",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.615686,
+          "green": 0.917647,
+          "blue": 0.235294,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 8.533,
+          "top": 479.444,
+          "right": 95.2,
+          "bottom": 486.111
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.867,
+          "y": 482.778
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "HPBar",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/HPBar",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 6.533,
+          "top": 477.444,
+          "right": 97.2,
+          "bottom": 488.111
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.867,
+          "y": 482.778
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "iconbg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/iconbg",
+        "sprite": "pop_gizmos",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 13.267,
+          "top": 405.978,
+          "right": 91.267,
+          "bottom": 483.978
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 52.267,
+          "y": 444.978
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/icon",
+        "sprite": "meikelunbao_2",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 16.047,
+          "top": 407.791,
+          "right": 91.38,
+          "bottom": 483.124
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 53.713,
+          "y": 445.458
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/bg",
+        "sprite": "pop",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.980392,
+          "green": 0.980392,
+          "blue": 0.968627,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -5.667,
+          "top": 401.978,
+          "right": 95.667,
+          "bottom": 487.978
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 45.0,
+          "y": 444.978
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.615686,
+          "green": 0.917647,
+          "blue": 0.235294,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -1293.333,
+          "top": 778.634,
+          "right": -1206.667,
+          "bottom": 785.301
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -1250.0,
+          "y": 781.968
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "heroBlood(Clone)",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -1295.333,
+          "top": 776.634,
+          "right": -1204.667,
+          "bottom": 787.301
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -1250.0,
+          "y": 781.968
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "lock",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/CloakContainer/cloakMeter(Clone)/lock",
+        "sprite": "cloak_lock",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 0.288,
+        "adb_bounds": {
+          "left": 58.62,
+          "top": 219.657,
+          "right": 121.287,
+          "bottom": 344.324
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 89.953,
+          "y": 281.991
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "cloak_restore",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/CloakContainer/cloakMeter(Clone)/cloak_restore",
+        "sprite": "cloak_restore",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 56.59,
+          "top": 217.643,
+          "right": 123.297,
+          "bottom": 344.291
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 58.627,
+          "y": 281.991
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "progress",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/CloakContainer/cloakMeter(Clone)/progress",
+        "sprite": "cloak_progress",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 0.440707,
+        "adb_bounds": {
+          "left": 58.6,
+          "top": 219.657,
+          "right": 121.267,
+          "bottom": 344.324
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 89.933,
+          "y": 281.991
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "meter",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/CloakContainer/cloakMeter(Clone)/meter",
+        "sprite": "cloak_bar",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 58.667,
+          "top": 219.657,
+          "right": 121.333,
+          "bottom": 344.324
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 90.0,
+          "y": 281.991
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "HPProgress",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/HPBar/HPProgress",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.615686,
+          "green": 0.917647,
+          "blue": 0.235294,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 8.533,
+          "top": 316.457,
+          "right": 95.2,
+          "bottom": 323.124
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.867,
+          "y": 319.791
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "HPBar",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/HPBar",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 6.533,
+          "top": 314.457,
+          "right": 97.2,
+          "bottom": 325.124
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.867,
+          "y": 319.791
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "iconbg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/iconbg",
+        "sprite": "pop_gizmos",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 13.267,
+          "top": 242.991,
+          "right": 91.267,
+          "bottom": 320.991
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 52.267,
+          "y": 281.991
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/icon",
+        "sprite": "yingxianzuo",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 16.047,
+          "top": 244.804,
+          "right": 91.38,
+          "bottom": 320.137
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 53.713,
+          "y": 282.471
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/bg",
+        "sprite": "pop",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.980392,
+          "green": 0.980392,
+          "blue": 0.968627,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -5.667,
+          "top": 238.991,
+          "right": 95.667,
+          "bottom": 324.991
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 45.0,
+          "y": 281.991
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "cloak_restore",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/cloakBar/cloak_restore",
+        "sprite": "cloak_restore_blood",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -1250.54,
+          "top": 428.82,
+          "right": -1247.206,
+          "bottom": 436.82
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -1248.873,
+          "y": 432.82
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "lock",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/cloakBar/lock",
+        "sprite": "cloak_lock_blood",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 0.0,
+        "adb_bounds": {
+          "left": -1292.167,
+          "top": 431.486,
+          "right": -1207.833,
+          "bottom": 434.153
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -1250.0,
+          "y": 432.82
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "progress",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/cloakBar/progress",
+        "sprite": "cloak_progress_blood",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 0.343967,
+        "adb_bounds": {
+          "left": -1292.167,
+          "top": 431.486,
+          "right": -1207.833,
+          "bottom": 434.153
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -1250.0,
+          "y": 432.82
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "cloakBar",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/cloakBar",
+        "sprite": "cloak_bar_blood",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -1294.167,
+          "top": 428.82,
+          "right": -1205.833,
+          "bottom": 436.82
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -1250.0,
+          "y": 432.82
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.615686,
+          "green": 0.917647,
+          "blue": 0.235294,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -1293.333,
+          "top": 418.626,
+          "right": -1206.667,
+          "bottom": 425.293
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -1250.0,
+          "y": 421.96
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "heroBlood(Clone)",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -1295.333,
+          "top": 416.626,
+          "right": -1204.667,
+          "bottom": 427.293
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -1250.0,
+          "y": 421.96
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "lock",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/CloakContainer/cloakMeter(Clone)/lock",
+        "sprite": "cloak_lock",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 0.288,
+        "adb_bounds": {
+          "left": 58.62,
+          "top": 301.151,
+          "right": 121.287,
+          "bottom": 425.818
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 89.953,
+          "y": 363.484
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "cloak_restore",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/CloakContainer/cloakMeter(Clone)/cloak_restore",
+        "sprite": "cloak_restore",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 53.592,
+          "top": 301.355,
+          "right": 126.124,
+          "bottom": 430.676
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 58.627,
+          "y": 363.484
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "progress",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/CloakContainer/cloakMeter(Clone)/progress",
+        "sprite": "cloak_progress",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 0.31,
+        "adb_bounds": {
+          "left": 58.6,
+          "top": 301.151,
+          "right": 121.267,
+          "bottom": 425.818
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 89.933,
+          "y": 363.484
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "meter",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/CloakContainer/cloakMeter(Clone)/meter",
+        "sprite": "cloak_bar",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 58.667,
+          "top": 301.151,
+          "right": 121.333,
+          "bottom": 425.818
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 90.0,
+          "y": 363.484
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "HPProgress",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/HPBar/HPProgress",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.615686,
+          "green": 0.917647,
+          "blue": 0.235294,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 8.533,
+          "top": 397.951,
+          "right": 95.2,
+          "bottom": 404.618
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.867,
+          "y": 401.284
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "HPBar",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/HPBar",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 6.533,
+          "top": 395.951,
+          "right": 97.2,
+          "bottom": 406.618
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.867,
+          "y": 401.284
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "iconbg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/iconbg",
+        "sprite": "pop_gizmos",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 13.267,
+          "top": 324.484,
+          "right": 91.267,
+          "bottom": 402.484
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 52.267,
+          "y": 363.484
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/icon",
+        "sprite": "fulici",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 16.047,
+          "top": 326.298,
+          "right": 91.38,
+          "bottom": 401.631
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 53.713,
+          "y": 363.964
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/bg",
+        "sprite": "pop",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.980392,
+          "green": 0.980392,
+          "blue": 0.968627,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -5.667,
+          "top": 320.484,
+          "right": 95.667,
+          "bottom": 406.484
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 45.0,
+          "y": 363.484
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "cloak_restore",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/cloakBar/cloak_restore",
+        "sprite": "cloak_restore_blood",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -1258.943,
+          "top": 608.824,
+          "right": -1255.61,
+          "bottom": 616.824
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -1257.276,
+          "y": 612.824
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "lock",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/cloakBar/lock",
+        "sprite": "cloak_lock_blood",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 0.0,
+        "adb_bounds": {
+          "left": -1292.167,
+          "top": 611.49,
+          "right": -1207.833,
+          "bottom": 614.157
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -1250.0,
+          "y": 612.824
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "progress",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/cloakBar/progress",
+        "sprite": "cloak_progress_blood",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 0.0,
+        "adb_bounds": {
+          "left": -1292.167,
+          "top": 611.49,
+          "right": -1207.833,
+          "bottom": 614.157
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -1250.0,
+          "y": 612.824
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "cloakBar",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/cloakBar",
+        "sprite": "cloak_bar_blood",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -1294.167,
+          "top": 608.824,
+          "right": -1205.833,
+          "bottom": 616.824
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -1250.0,
+          "y": 612.824
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.615686,
+          "green": 0.917647,
+          "blue": 0.235294,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -1293.333,
+          "top": 598.63,
+          "right": -1206.667,
+          "bottom": 605.297
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -1250.0,
+          "y": 601.964
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "heroBlood(Clone)",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -1295.333,
+          "top": 596.63,
+          "right": -1204.667,
+          "bottom": 607.297
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -1250.0,
+          "y": 601.964
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "HPProgress",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/HPBar/HPProgress",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.615686,
+          "green": 0.917647,
+          "blue": 0.235294,
+          "alpha": 1.0
+        },
+        "fill_amount": 0.999144,
+        "adb_bounds": {
+          "left": -196.467,
+          "top": 1194.467,
+          "right": -109.8,
+          "bottom": 1201.133
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -153.133,
+          "y": 1197.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "HPBar",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/HPBar",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -198.467,
+          "top": 1192.467,
+          "right": -107.8,
+          "bottom": 1203.133
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -153.133,
+          "y": 1197.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "iconbg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/iconbg",
+        "sprite": "pop_gizmos",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -191.733,
+          "top": 1121.0,
+          "right": -113.733,
+          "bottom": 1199.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -152.733,
+          "y": 1160.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/icon",
+        "sprite": "pulimaosi",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -188.953,
+          "top": 1122.813,
+          "right": -113.62,
+          "bottom": 1198.147
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -151.287,
+          "y": 1160.48
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/bg",
+        "sprite": "pop",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.980392,
+          "green": 0.980392,
+          "blue": 0.968627,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -210.667,
+          "top": 1117.0,
+          "right": -109.333,
+          "bottom": 1203.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -160.0,
+          "y": 1160.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "HPProgress",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/HPBar/HPProgress",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.615686,
+          "green": 0.917647,
+          "blue": 0.235294,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -196.467,
+          "top": 1194.467,
+          "right": -109.8,
+          "bottom": 1201.133
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -153.133,
+          "y": 1197.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "HPBar",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/HPBar",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -198.467,
+          "top": 1192.467,
+          "right": -107.8,
+          "bottom": 1203.133
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -153.133,
+          "y": 1197.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "iconbg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/iconbg",
+        "sprite": "pop_gizmos",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -191.733,
+          "top": 1121.0,
+          "right": -113.733,
+          "bottom": 1199.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -152.733,
+          "y": 1160.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/icon",
+        "sprite": "aierdeliqi_g",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -188.953,
+          "top": 1122.813,
+          "right": -113.62,
+          "bottom": 1198.147
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -151.287,
+          "y": 1160.48
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/bg",
+        "sprite": "pop",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.980392,
+          "green": 0.980392,
+          "blue": 0.968627,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -210.667,
+          "top": 1117.0,
+          "right": -109.333,
+          "bottom": 1203.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -160.0,
+          "y": 1160.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "HPProgress",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/HPBar/HPProgress",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.615686,
+          "green": 0.917647,
+          "blue": 0.235294,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -196.467,
+          "top": 1194.467,
+          "right": -109.8,
+          "bottom": 1201.133
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -153.133,
+          "y": 1197.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "HPBar",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/HPBar",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -198.467,
+          "top": 1192.467,
+          "right": -107.8,
+          "bottom": 1203.133
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -153.133,
+          "y": 1197.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "iconbg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/iconbg",
+        "sprite": "pop_gizmos",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -191.733,
+          "top": 1121.0,
+          "right": -113.733,
+          "bottom": 1199.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -152.733,
+          "y": 1160.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/icon",
+        "sprite": "shentong_alter",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -188.953,
+          "top": 1122.813,
+          "right": -113.62,
+          "bottom": 1198.147
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -151.287,
+          "y": 1160.48
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/MainArrow(Clone)/bg",
+        "sprite": "pop",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.980392,
+          "green": 0.980392,
+          "blue": 0.968627,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -210.667,
+          "top": 1117.0,
+          "right": -109.333,
+          "bottom": 1203.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -160.0,
+          "y": 1160.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "EnemyArrow(Clone)",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/EnemyArrow(Clone)",
+        "sprite": "jiantou",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -174.667,
+          "top": 1144.333,
+          "right": -145.333,
+          "bottom": 1175.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -160.0,
+          "y": 1160.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "EnemyArrow(Clone)",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/EnemyArrow(Clone)",
+        "sprite": "jiantou",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -174.667,
+          "top": 1144.333,
+          "right": -145.333,
+          "bottom": 1175.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -160.0,
+          "y": 1160.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "EnemyArrow(Clone)",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/EnemyArrow(Clone)",
+        "sprite": "jiantou",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 625.333,
+          "top": -449655.688,
+          "right": 654.667,
+          "bottom": -449624.344
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": -449640.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "EnemyArrow(Clone)",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/EnemyArrow(Clone)",
+        "sprite": "jiantou",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -174.667,
+          "top": 1144.333,
+          "right": -145.333,
+          "bottom": 1175.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -160.0,
+          "y": 1160.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "EnemyArrow(Clone)",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/EnemyArrow(Clone)",
+        "sprite": "jiantou",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 625.333,
+          "top": -449655.688,
+          "right": 654.667,
+          "bottom": -449624.344
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": -449640.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "skill_name",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Skill_Activation/Root/mask(Clone)/skill/skill_name",
+        "sprite": "skill_activation",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 152.99,
+          "top": 151.316,
+          "right": 422.99,
+          "bottom": 202.316
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 287.99,
+          "y": 176.816
+        },
+        "inherited_alpha": 0.144394
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Skill_Activation/Root/mask(Clone)/skill/icon_mask/icon",
+        "sprite": "yingxianzuo",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 61.4,
+          "top": 139.416,
+          "right": 374.6,
+          "bottom": 209.016
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 218.0,
+          "y": 174.216
+        },
+        "inherited_alpha": 0.144394
+      },
+      {
+        "kind": "image",
+        "name": "skill",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Skill_Activation/Root/mask(Clone)/skill",
+        "sprite": "skill_actionvation_bg",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 45.0,
+          "top": 136.716,
+          "right": 421.0,
+          "bottom": 211.716
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 45.0,
+          "y": 211.716
+        },
+        "inherited_alpha": 0.144394
+      },
+      {
+        "kind": "image",
+        "name": "PauseBtn",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/PauseBtn",
+        "sprite": "pause_btn",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1134.067,
+          "top": 23.333,
+          "right": 1275.4,
+          "bottom": 73.333
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1204.733,
+          "y": 48.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Timer",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Timer",
+        "sprite": "timePanel",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1031.134,
+          "top": 13.466,
+          "right": 1285.134,
+          "bottom": 81.466
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1158.133,
+          "y": 47.466
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "chatBtn",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/chatBtnContainer/chatBtn",
+        "sprite": "btn_1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1212.0,
+          "top": 278.6,
+          "right": 1280.0,
+          "bottom": 426.6
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1280.0,
+          "y": 352.6
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AutoBtn/off/Image",
+        "sprite": "auto_btn2",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 94.553,
+          "top": 16.433,
+          "right": 154.647,
+          "bottom": 76.527
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 124.6,
+          "y": 46.48
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "off",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AutoBtn/off",
+        "sprite": "auto_off",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 7.667,
+          "top": 20.48,
+          "right": 105.667,
+          "bottom": 72.48
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 7.667,
+          "y": 46.48
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "AutoBtn",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AutoBtn",
+        "sprite": "auto_btn1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.333,
+          "top": 24.333,
+          "right": 160.333,
+          "bottom": 67.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 80.0,
+          "y": 46.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "mark",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/flagShipMark/mark",
+        "sprite": "flag_ship_mark",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 476.627,
+          "top": 259.455,
+          "right": 501.293,
+          "bottom": 278.122
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 488.96,
+          "y": 268.789
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "EnemyArrow",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyArrowContainer/EnemyArrow",
+        "sprite": "jiantou",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 625.333,
+          "top": -449655.688,
+          "right": 654.667,
+          "bottom": -449624.344
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": -449640.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyHPBar/typeIcon/icon",
+        "sprite": "battle_zhanlie",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 403.567,
+          "top": 29.787,
+          "right": 437.567,
+          "bottom": 47.12
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 420.567,
+          "y": 38.453
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "GameObject (1)",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyHPBar/gizmos/GameObject (1)",
+        "sprite": "boss_hp_bar_gizmos",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 879.1,
+          "top": 35.267,
+          "right": 881.767,
+          "bottom": 55.267
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 880.433,
+          "y": 45.267
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "GameObject",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyHPBar/gizmos/GameObject",
+        "sprite": "boss_hp_bar_gizmos",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 448.567,
+          "top": 35.267,
+          "right": 451.233,
+          "bottom": 55.267
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 449.9,
+          "y": 45.267
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "hpbar",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyHPBar/hpbar",
+        "sprite": "hp_1",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 0.840147,
+        "adb_bounds": {
+          "left": 449.9,
+          "top": 36.6,
+          "right": 880.433,
+          "bottom": 53.933
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 449.9,
+          "y": 45.267
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "elite",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyHPBar/grade/elite",
+        "sprite": "ELETE",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 448.933,
+          "top": 21.573,
+          "right": 482.267,
+          "bottom": 27.573
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 465.6,
+          "y": 24.573
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "EnemyHPBar",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/EnemyHPBar",
+        "sprite": "hp_frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 393.967,
+          "top": 11.6,
+          "right": 886.033,
+          "bottom": 62.933
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 37.267
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.952941,
+          "green": 0.235294,
+          "blue": 0.223529,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1491.495,
+          "top": 241.378,
+          "right": 1578.162,
+          "bottom": 248.045
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1534.828,
+          "y": 244.711
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1489.495,
+          "top": 239.378,
+          "right": 1580.162,
+          "bottom": 250.045
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1534.828,
+          "y": 244.711
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.952941,
+          "green": 0.235294,
+          "blue": 0.223529,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1401.495,
+          "top": 106.375,
+          "right": 1488.162,
+          "bottom": 113.042
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1444.828,
+          "y": 109.708
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1399.495,
+          "top": 104.375,
+          "right": 1490.162,
+          "bottom": 115.042
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1444.828,
+          "y": 109.708
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.952941,
+          "green": 0.235294,
+          "blue": 0.223529,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1401.495,
+          "top": 196.377,
+          "right": 1488.162,
+          "bottom": 203.044
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1444.828,
+          "y": 199.71
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1399.495,
+          "top": 194.377,
+          "right": 1490.162,
+          "bottom": 205.044
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1444.828,
+          "y": 199.71
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.952941,
+          "green": 0.235294,
+          "blue": 0.223529,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1311.495,
+          "top": 151.376,
+          "right": 1398.162,
+          "bottom": 158.043
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1354.828,
+          "y": 154.709
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1309.495,
+          "top": 149.376,
+          "right": 1400.162,
+          "bottom": 160.043
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1354.828,
+          "y": 154.709
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "type",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/type/type",
+        "sprite": "zhanlie",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 874.293,
+          "top": 206.165,
+          "right": 902.022,
+          "bottom": 223.229
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 902.022,
+          "y": 214.697
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "type",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/type",
+        "sprite": "zhanlie",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 872.688,
+          "top": 206.163,
+          "right": 900.422,
+          "bottom": 223.23
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 900.422,
+          "y": 214.697
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.952941,
+          "green": 0.235294,
+          "blue": 0.223529,
+          "alpha": 1.0
+        },
+        "fill_amount": 0.834529,
+        "adb_bounds": {
+          "left": 902.422,
+          "top": 211.363,
+          "right": 989.088,
+          "bottom": 218.03
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 945.755,
+          "y": 214.697
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 900.422,
+          "top": 209.363,
+          "right": 991.088,
+          "bottom": 220.03
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 945.755,
+          "y": 214.697
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.952941,
+          "green": 0.235294,
+          "blue": 0.223529,
+          "alpha": 1.0
+        },
+        "fill_amount": 0.935374,
+        "adb_bounds": {
+          "left": 1172.422,
+          "top": 31.359,
+          "right": 1259.088,
+          "bottom": 38.026
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1215.755,
+          "y": 34.693
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1170.422,
+          "top": 29.359,
+          "right": 1261.088,
+          "bottom": 40.026
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1215.755,
+          "y": 34.693
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.952941,
+          "green": 0.235294,
+          "blue": 0.223529,
+          "alpha": 1.0
+        },
+        "fill_amount": 0.99093,
+        "adb_bounds": {
+          "left": 1172.422,
+          "top": 391.367,
+          "right": 1259.088,
+          "bottom": 398.034
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1215.755,
+          "y": 394.701
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1170.422,
+          "top": 389.367,
+          "right": 1261.088,
+          "bottom": 400.034
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1215.755,
+          "y": 394.701
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.952941,
+          "green": 0.235294,
+          "blue": 0.223529,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1491.495,
+          "top": 61.374,
+          "right": 1578.162,
+          "bottom": 68.041
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1534.828,
+          "y": 64.707
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/enemyBlood(Clone)/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1489.495,
+          "top": 59.374,
+          "right": 1580.162,
+          "bottom": 70.041
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1534.828,
+          "y": 64.707
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "glow",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/sonarMark/glow",
+        "sprite": "sonar_mar_glow",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 398.729,
+          "top": 238.043,
+          "right": 434.062,
+          "bottom": 276.043
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 416.395,
+          "y": 257.043
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "normal",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/sonarMark/normal",
+        "sprite": "sonar_mark",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 398.729,
+          "top": 238.043,
+          "right": 434.062,
+          "bottom": 276.043
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 416.395,
+          "y": 257.043
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.615686,
+          "green": 0.917647,
+          "blue": 0.235294,
+          "alpha": 1.0
+        },
+        "fill_amount": 0.999144,
+        "adb_bounds": {
+          "left": 429.002,
+          "top": 255.509,
+          "right": 515.669,
+          "bottom": 262.176
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 472.335,
+          "y": 258.843
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "heroBlood(Clone)",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 427.002,
+          "top": 253.51,
+          "right": 517.669,
+          "bottom": 264.176
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 472.335,
+          "y": 258.843
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "glow",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/sonarMark/glow",
+        "sprite": "sonar_mar_glow",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 407.55,
+          "top": 251.334,
+          "right": 442.884,
+          "bottom": 289.334
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 425.217,
+          "y": 270.334
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "normal",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/sonarMark/normal",
+        "sprite": "sonar_mark",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 407.55,
+          "top": 251.334,
+          "right": 442.884,
+          "bottom": 289.334
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 425.217,
+          "y": 270.334
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.615686,
+          "green": 0.917647,
+          "blue": 0.235294,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 437.824,
+          "top": 268.801,
+          "right": 524.49,
+          "bottom": 275.468
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 481.157,
+          "y": 272.134
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "heroBlood(Clone)",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 435.824,
+          "top": 266.801,
+          "right": 526.49,
+          "bottom": 277.468
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 481.157,
+          "y": 272.134
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "glow",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/sonarMark/glow",
+        "sprite": "sonar_mar_glow",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 415.353,
+          "top": 261.601,
+          "right": 450.687,
+          "bottom": 299.601
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 433.02,
+          "y": 280.601
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "normal",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/sonarMark/normal",
+        "sprite": "sonar_mark",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 415.353,
+          "top": 261.601,
+          "right": 450.687,
+          "bottom": 299.601
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 433.02,
+          "y": 280.601
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blood",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)/blood",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.615686,
+          "green": 0.917647,
+          "blue": 0.235294,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 445.627,
+          "top": 279.068,
+          "right": 532.293,
+          "bottom": 285.735
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 488.96,
+          "y": 282.401
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "heroBlood(Clone)",
+        "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/HPBarContainer/heroBlood(Clone)",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.152941,
+          "green": 0.196078,
+          "blue": 0.25098,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 443.627,
+          "top": 277.068,
+          "right": 534.293,
+          "bottom": 287.735
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 488.96,
+          "y": 282.401
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Checkmark",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/stopRemind/Background/Checkmark",
+        "sprite": "gou",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 688.0,
+          "top": 149.333,
+          "right": 714.667,
+          "bottom": 176.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 701.333,
+          "y": 162.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Background",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/stopRemind/Background",
+        "sprite": "bg_rect",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 688.0,
+          "top": 149.333,
+          "right": 714.667,
+          "bottom": 176.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 701.333,
+          "y": 162.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/help_panel/list/help_tpl/line",
+        "sprite": "white_dot",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 363.92,
+          "top": 230.0,
+          "right": 882.053,
+          "bottom": 231.333
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 363.92,
+          "y": 231.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/help_panel/list/help_tpl/icon",
+        "sprite": "zilv",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 351.333,
+          "top": 243.333,
+          "right": 879.333,
+          "bottom": 459.333
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 351.333,
+          "y": 243.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/help_panel/bg",
+        "sprite": "bg_rect",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 350.0,
+          "top": 193.333,
+          "right": 930.0,
+          "bottom": 460.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 326.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "btnBack",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/top/btnBack",
+        "sprite": "close_btn",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 858.667,
+          "top": 136.667,
+          "right": 930.0,
+          "bottom": 188.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 894.333,
+          "y": 162.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "infomation",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/top/bg/infomation",
+        "sprite": "title_print",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 351.227,
+          "top": 152.0,
+          "right": 529.893,
+          "bottom": 177.333
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 440.56,
+          "y": 164.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/top/bg",
+        "sprite": "title_frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 350.0,
+          "top": 136.667,
+          "right": 855.333,
+          "bottom": 188.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 602.667,
+          "y": 188.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/bg/bg",
+        "sprite": "",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 338.967,
+          "top": 131.268,
+          "right": 941.033,
+          "bottom": 588.732
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/bg/Image",
+        "sprite": "message",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 326.667,
+          "top": 137.333,
+          "right": 333.333,
+          "bottom": 208.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 333.333,
+          "y": 137.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line1",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/bg/line1",
+        "sprite": "white_dot",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.235294
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 340.2,
+          "top": -880.0,
+          "right": 340.867,
+          "bottom": 1120.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 340.533,
+          "y": 120.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line3",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/bg/line3",
+        "sprite": "white_dot",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.235294
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 340.0,
+          "top": 589.0,
+          "right": 1637.333,
+          "bottom": 590.067
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 340.0,
+          "y": 589.533
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line2",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/bg/line2",
+        "sprite": "white_dot",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.235294
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -954.467,
+          "top": 130.033,
+          "right": 1605.533,
+          "bottom": 131.3
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 325.533,
+          "y": 130.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "decoratebtm",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/bg/decorateCenter/decoratebtm",
+        "sprite": "decorate2_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 356.333,
+          "top": 149.733,
+          "right": 369.667,
+          "bottom": 960.4
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 363.0,
+          "y": 149.733
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "decorateTop",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/bg/decorateCenter/decorateTop",
+        "sprite": "decorate2_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 356.333,
+          "top": -337.153,
+          "right": 369.667,
+          "bottom": 124.4
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 363.0,
+          "y": 124.4
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "decorateCenter",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/bg/decorateCenter",
+        "sprite": "decorate1_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 350.0,
+          "top": 124.4,
+          "right": 376.0,
+          "bottom": 149.733
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 363.0,
+          "y": 137.067
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/bg/print_i/line",
+        "sprite": "white_dot",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 942.484,
+          "top": 137.273,
+          "right": 943.73,
+          "bottom": 141.938
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 943.107,
+          "y": 139.605
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "point",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/bg/print_i/point",
+        "sprite": "white_dot",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 942.484,
+          "top": 134.2,
+          "right": 943.73,
+          "bottom": 136.2
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 943.107,
+          "y": 135.2
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "leg",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/bg/leg",
+        "sprite": "print_right_down",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 916.271,
+          "top": 566.338,
+          "right": 942.929,
+          "bottom": 592.996
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 929.6,
+          "y": 579.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/bg",
+        "sprite": "msg_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 330.0,
+          "top": 120.0,
+          "right": 950.0,
+          "bottom": 600.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/bg",
+        "sprite": "add",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.196
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Msgbox(Clone)",
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)",
+        "sprite": "white_dot",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 0.588235
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "top",
+        "path": "OverlayCamera/Adpter/top/top",
+        "sprite": "mask1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": -140.667,
+          "right": 1280.0,
+          "bottom": 0.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": -70.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "left",
+        "path": "OverlayCamera/Adpter/left/left",
+        "sprite": "mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -140.667,
+          "top": 0.0,
+          "right": -0.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -70.333,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bottom",
+        "path": "OverlayCamera/Adpter/bottom/bottom",
+        "sprite": "mask1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 720.0,
+          "right": 1280.0,
+          "bottom": 860.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 790.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "right",
+        "path": "OverlayCamera/Adpter/right/right",
+        "sprite": "mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1280.0,
+          "top": 0.0,
+          "right": 1420.667,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1350.333,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      }
+    ],
+    "globe_geometry": {
+      "schema": "alas-headless.globe-geometry/v1",
+      "status": 0,
+      "truncated": false,
+      "error_count": 0,
+      "camera_path": "",
+      "objects": []
+    },
+    "lua_globe_diagnostic": {
+      "schema": "alas-headless.lua-globe-diagnostic/v1",
+      "status": 0,
+      "stage": 0,
+      "truncated": false,
+      "stack_balanced": false,
+      "registry_visited": 0,
+      "inspection_count": 0,
+      "world_candidates": 0,
+      "drag_candidates": 0,
+      "colors": [],
+      "dragging": [],
+      "drag_pointer_instance_ids": [],
+      "drag_trigger_instance_ids": [],
+      "active_pointer_instance_id": 0
+    },
+    "shipyard_strengthen": {
+      "status": 0,
+      "stage": 0,
+      "truncated": false,
+      "stack_balanced": false,
+      "blueprint_id": 0,
+      "ship_id": 0,
+      "ship_index": 0,
+      "series": 0,
+      "rarity": 0,
+      "pursuing": false,
+      "purchased": 0,
+      "coins": 0,
+      "gems_known": false,
+      "paid_gems": 0,
+      "free_gems": 0,
+      "level": 0,
+      "fate_level": -1,
+      "exp": 0
+    },
+    "activity_identity": {
+      "status": 1,
+      "stack_balanced": true,
+      "archives": {
+        "status": 1,
+        "expected_count": 52,
+        "truncated": false,
+        "records": [
+          {
+            "id": 1,
+            "activity_type": 1,
+            "name": "红染常驻复刻",
+            "bg": "temp_hongran"
+          },
+          {
+            "id": 2,
+            "activity_type": 2,
+            "name": "Z舰队常驻复刻",
+            "bg": "temp_zjiandui"
+          },
+          {
+            "id": 4,
+            "activity_type": 1,
+            "name": "凛冬常驻复刻",
+            "bg": "temp_lingdong"
+          },
+          {
+            "id": 5,
+            "activity_type": 2,
+            "name": "围剿斯佩伯爵』常驻复刻",
+            "bg": "temp_sipei"
+          },
+          {
+            "id": 6,
+            "activity_type": 1,
+            "name": "异色格常驻复刻",
+            "bg": "temp_yisege"
+          },
+          {
+            "id": 7,
+            "activity_type": 1,
+            "name": "坠落之翼常驻复刻",
+            "bg": "temp_zhuiluo"
+          },
+          {
+            "id": 8,
+            "activity_type": 1,
+            "name": "鸢尾之华常驻复刻",
+            "bg": "temp_yuanwei"
+          },
+          {
+            "id": 9,
+            "activity_type": 1,
+            "name": "墨染的钢铁之花常驻复刻",
+            "bg": "temp_moran"
+          },
+          {
+            "id": 10,
+            "activity_type": 2,
+            "name": "光荣的一战常驻复刻",
+            "bg": "temp_guangrong"
+          },
+          {
+            "id": 11,
+            "activity_type": 1,
+            "name": "苍红的回响常驻复刻",
+            "bg": "temp_tiancheng"
+          },
+          {
+            "id": 12,
+            "activity_type": 2,
+            "name": "月光下的序曲常驻复刻",
+            "bg": "temp_xinaoerliang"
+          },
+          {
+            "id": 13,
+            "activity_type": 1,
+            "name": "俾斯麦常驻复刻",
+            "bg": "temp_bisimai"
+          },
+          {
+            "id": 14,
+            "activity_type": 2,
+            "name": "偶像一期常驻复刻",
+            "bg": "temp_ouxiang"
+          },
+          {
+            "id": 15,
+            "activity_type": 1,
+            "name": "神圣的悲喜剧常驻复刻",
+            "bg": "temp_beixiju"
+          },
+          {
+            "id": 16,
+            "activity_type": 2,
+            "name": "斯图尔特的硝烟常驻复刻",
+            "bg": "temp_longxiang"
+          },
+          {
+            "id": 17,
+            "activity_type": 1,
+            "name": "箱庭疗法常驻复刻",
+            "bg": "temp_xiangting"
+          },
+          {
+            "id": 18,
+            "activity_type": 1,
+            "name": "浮樱影华常驻复刻",
+            "bg": "temp_fuying"
+          },
+          {
+            "id": 19,
+            "activity_type": 2,
+            "name": "最珍贵的宝物常驻复刻",
+            "bg": "temp_u110"
+          },
+          {
+            "id": 20,
+            "activity_type": 2,
+            "name": "偶像二期常驻复刻",
+            "bg": "temp_ouxiang2"
+          },
+          {
+            "id": 21,
+            "activity_type": 1,
+            "name": "微层混合常驻复刻",
+            "bg": "temp_weiceng"
+          },
+          {
+            "id": 22,
+            "activity_type": 2,
+            "name": "峡湾间的星辰常驻复刻",
+            "bg": "temp_yonggan"
+          },
+          {
+            "id": 23,
+            "activity_type": 1,
+            "name": "穹顶下的圣咏曲常驻复刻",
+            "bg": "temp_zhende"
+          },
+          {
+            "id": 24,
+            "activity_type": 2,
+            "name": "夜幕下的归途常驻复刻",
+            "bg": "temp_taertu"
+          },
+          {
+            "id": 25,
+            "activity_type": 1,
+            "name": "北境序曲常驻复刻",
+            "bg": "temp_qiaba"
+          },
+          {
+            "id": 26,
+            "activity_type": 1,
+            "name": "永夜幻光常驻复刻",
+            "bg": "temp_hemin"
+          },
+          {
+            "id": 27,
+            "activity_type": 2,
+            "name": "峡湾间的反击常驻复刻",
+            "bg": "temp_aisijimoren"
+          },
+          {
+            "id": 28,
+            "activity_type": 1,
+            "name": "负象限作战常驻复刻",
+            "bg": "temp_u37"
+          },
+          {
+            "id": 29,
+            "activity_type": 1,
+            "name": "蝶海梦花常驻复刻",
+            "bg": "temp_xinnong"
+          },
+          {
+            "id": 30,
+            "activity_type": 1,
+            "name": "镜位螺旋常驻复刻",
+            "bg": "temp_xinzexi"
+          },
+          {
+            "id": 31,
+            "activity_type": 1,
+            "name": "破晓冰华常驻复刻",
+            "bg": "temp_talin"
+          },
+          {
+            "id": 32,
+            "activity_type": 2,
+            "name": "划破海空之翼常驻复刻",
+            "bg": "temp_pulinsidun"
+          },
+          {
+            "id": 33,
+            "activity_type": 2,
+            "name": "杰诺瓦的焰火常驻复刻",
+            "bg": "temp_fuxv"
+          },
+          {
+            "id": 34,
+            "activity_type": 1,
+            "name": "碧海光粼常驻复刻",
+            "bg": "temp_daofeng"
+          },
+          {
+            "id": 35,
+            "activity_type": 1,
+            "name": "复兴的赞美诗常驻复刻",
+            "bg": "temp_weineituo"
+          },
+          {
+            "id": 36,
+            "activity_type": 1,
+            "name": "逆转彩虹之塔常驻复刻",
+            "bg": "temp_huteng"
+          },
+          {
+            "id": 37,
+            "activity_type": 1,
+            "name": "深度回音常驻复刻",
+            "bg": "temp_kalangshitade"
+          },
+          {
+            "id": 38,
+            "activity_type": 2,
+            "name": "虚像构筑之塔常驻复刻",
+            "bg": "temp_diguo"
+          },
+          {
+            "id": 39,
+            "activity_type": 1,
+            "name": "泠誓光庭常驻复刻",
+            "bg": "temp_qianwei"
+          },
+          {
+            "id": 40,
+            "activity_type": 1,
+            "name": "雄鹰的叙事歌常驻复刻",
+            "bg": "temp_luoma"
+          },
+          {
+            "id": 41,
+            "activity_type": 1,
+            "name": "虹彩的终幕曲常驻复刻",
+            "bg": "temp_aimudeng"
+          },
+          {
+            "id": 42,
+            "activity_type": 2,
+            "name": "飓风与青春之泉常驻复刻",
+            "bg": "temp_fengfanv1"
+          },
+          {
+            "id": 43,
+            "activity_type": 1,
+            "name": "紫绛槿岚常驻复刻",
+            "bg": "temp_wuzang"
+          },
+          {
+            "id": 44,
+            "activity_type": 1,
+            "name": "定向折叠常驻复刻",
+            "bg": "temp_yuekechengII"
+          },
+          {
+            "id": 45,
+            "activity_type": 1,
+            "name": "湮烬尘墟常驻复刻",
+            "bg": "temp_yuanchou"
+          },
+          {
+            "id": 46,
+            "activity_type": 2,
+            "name": "远汇点作战常驻复刻",
+            "bg": "temp_bulunxierde"
+          },
+          {
+            "id": 47,
+            "activity_type": 2,
+            "name": "奏响鸢尾之歌常驻复刻",
+            "bg": "temp_masaiqu"
+          },
+          {
+            "id": 48,
+            "activity_type": 1,
+            "name": "空相交汇点常驻复刻",
+            "bg": "temp_bisimaiz"
+          },
+          {
+            "id": 49,
+            "activity_type": 2,
+            "name": "幻梦间奏曲常驻复刻",
+            "bg": "temp_sitelasibao"
+          },
+          {
+            "id": 50,
+            "activity_type": 3,
+            "name": "极地风暴常驻复刻",
+            "bg": "temp_kuersike"
+          },
+          {
+            "id": 51,
+            "activity_type": 3,
+            "name": "童心学院常驻复刻",
+            "bg": "temp_yaerweite"
+          },
+          {
+            "id": 52,
+            "activity_type": 2,
+            "name": "飓风与沉眠之海常驻复刻",
+            "bg": "temp_fengfanv2"
+          },
+          {
+            "id": 53,
+            "activity_type": 2,
+            "name": "飓风与自由群岛常驻复刻",
+            "bg": "temp_fengfanv3"
+          }
+        ]
+      },
+      "raids": {
+        "status": 1,
+        "stage": 14,
+        "proxy_count": 34,
+        "matched_count": 34,
+        "failed_id": 0,
+        "expected_count": 0,
+        "truncated": false,
+        "records": []
+      }
+    },
+    "operation_siren_map_drag": {
+      "status": 0,
+      "handler_instance_id": 0,
+      "endpoints": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "handler_path": "",
+      "samples": []
+    },
+    "storage_scroll": {
+      "schema": "alas-headless.storage-scroll/v1",
+      "status": 0,
+      "matches": 0,
+      "controls": [],
+      "scrollbar": {
+        "schema": "alas-headless.storage-scrollbar/v1",
+        "status": 0,
+        "matches": 0,
+        "class_found": false,
+        "source_count": 0,
+        "controls": [],
+        "input": {
+          "schema": "alas-headless.storage-scrollbar-input/v1",
+          "status": 0
+        }
+      }
+    },
+    "private_quarters_physics": {
+      "schema": "alas-headless.private-colliders/v1",
+      "status": 0,
+      "truncated": false,
+      "error_count": 0,
+      "camera_path": "",
+      "colliders": []
+    }
+  },
+  "ui_source_generation": 4134
+}

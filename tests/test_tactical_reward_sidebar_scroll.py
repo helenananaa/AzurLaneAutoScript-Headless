@@ -1,5 +1,9 @@
 import pytest
+from types import SimpleNamespace
+from unittest.mock import Mock
 from alas_headless import AlasSemanticAdapter, SemanticGateClosed
+from alas_headless.oracle.errors import SemanticNavigationPending
+from alas_headless.adapter.task_lifecycle import semantic_task_scope, TaskCapabilityUnavailable
 from tests.semantic_support.observer_fixtures import (
     FakeBackend, make_button, make_buttons, make_image, make_oracle, make_snapshot, make_ui,
 )
@@ -45,6 +49,7 @@ def test_native_receive_click_scrolls_then_claims_only_on_next_loop(y):
     receipt = adapter.click('REWARD_2')
     assert receipt.semantic_id == 'reward/sidebar/scroll'
     assert len(backend.swipes) == 1 and backend.taps == []
+    assert backend.swipes[0][-1] == 1500
     assert adapter._commission_context.tactical_reward_receipt is None
     assert adapter._action_ledger.allowed('tactical.reward')
     assert adapter.appear('REWARD_2')
@@ -96,3 +101,55 @@ def test_unrelated_task_does_not_gain_tactical_scroll_authority():
     adapter._commission_context = None
     assert not adapter.appear('REWARD_2')
     assert backend.swipes == [] and backend.taps == []
+
+
+def test_fresh_unchanged_sidebar_defers_only_tactical_and_retains_gesture(monkeypatch):
+    backend, oracle, _ = fixture()
+    def still_here():
+        for part in (backend.snapshot, backend.buttons, backend.ui):
+            part['generation'] += 1
+        backend.ui['images'].reverse()
+        backend.buttons['upstream_metadata'] = True
+    backend.on_swipe = still_here
+    clock = [0.0]
+    monkeypatch.setattr('alas_headless.oracle.rewards.time.monotonic', lambda: clock[0])
+    monkeypatch.setattr('alas_headless.oracle.rewards.time.sleep',
+                        lambda seconds: clock.__setitem__(0, clock[0]+seconds))
+    session = SimpleNamespace(discard_task_state=Mock(), trace=None)
+    with pytest.raises(TaskCapabilityUnavailable) as caught:
+        with semantic_task_scope(session, 'tactical'):
+            oracle.scroll_reward_sidebar_control(TARGET)
+    cause = caught.value.cause
+    assert isinstance(cause, SemanticNavigationPending)
+    assert tuple(cause.receipt['points']) == backend.swipes[0]
+    assert cause.receipt['before_target_point'] == cause.receipt['after_target_point']
+    assert session.last_task_error['navigation_receipt'] == cause.receipt
+    assert session.last_task_outcome['outcome'] == 'navigation-pending'
+    assert len(backend.swipes) == 1 and not backend.taps
+    with semantic_task_scope(session, 'daily'):
+        pass
+    assert session.last_task_outcome['outcome'] == 'returned'
+
+
+@pytest.mark.parametrize('case', ['foreign', 'stale', 'modal', 'truncated'])
+def test_post_input_unhealthy_sidebar_is_not_classified_as_healthy_delay(monkeypatch, case):
+    backend, oracle, _ = fixture()
+    def unsafe():
+        for part in (backend.snapshot, backend.buttons, backend.ui):
+            part['generation'] += 1
+        if case == 'foreign': backend.foreground = 'unrelated/.Activity'
+        elif case == 'stale': backend.snapshot['age_ms'] = 10001
+        elif case == 'truncated': backend.ui['image_truncated'] = True
+        else:
+            backend.buttons['buttons'].append(make_button('custom_button_1(Clone)',
+                'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)'))
+            backend.buttons['button_count'] += 1
+    backend.on_swipe = unsafe
+    clock = [0.0]
+    monkeypatch.setattr('alas_headless.oracle.rewards.time.monotonic', lambda: clock[0])
+    monkeypatch.setattr('alas_headless.oracle.rewards.time.sleep',
+                        lambda seconds: clock.__setitem__(0, clock[0]+seconds))
+    with pytest.raises(SemanticGateClosed) as caught:
+        oracle.scroll_reward_sidebar_control(TARGET)
+    assert not isinstance(caught.value, SemanticNavigationPending)
+    assert len(backend.swipes) == 1 and not backend.taps

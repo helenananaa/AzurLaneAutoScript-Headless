@@ -25,10 +25,15 @@ def retained_adapter():
     return backend, oracle, adapter
 
 
-@pytest.mark.parametrize('resource', ['GET_MISSION', 'CAMPAIGN_WITHDRAW_CONFIRM'])
+@pytest.mark.parametrize('resource', ['GET_MISSION', 'CAMPAIGN_WITHDRAW_CONFIRM',
+                                    'GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'GET_SHIP'])
 @pytest.mark.parametrize('drift', [False, True])
-def test_exact_select_shell_owns_passive_probe_without_enhancement_identity(resource, drift):
+@pytest.mark.parametrize('adapt_wrapper', [False, True])
+def test_exact_select_shell_owns_passive_probe_without_enhancement_identity(resource, drift, adapt_wrapper):
     backend, oracle, adapter = retained_adapter()
+    if adapt_wrapper:
+        for button in backend.buttons['buttons']:
+            button['path'] = button['path'].replace('/select_panel/', '/select_panel_adapt/select_panel/')
     if drift:
         backend.buttons['buttons'].reverse()
         backend.snapshot['new_metadata'] = 'compatible release'
@@ -39,6 +44,19 @@ def test_exact_select_shell_owns_passive_probe_without_enhancement_identity(reso
     oracle._enhancement_dock_records = Mock(side_effect=AssertionError('unrelated validator'))
     assert adapter._appear_priority(resource) is False
     oracle._enhancement_dock_records.assert_not_called()
+    assert backend.taps == []
+
+
+def test_both_reviewed_select_shells_remain_ambiguous():
+    backend, oracle, adapter = retained_adapter()
+    duplicate = dict(next(b for b in backend.buttons['buttons'] if b['path'] == CONFIRM))
+    duplicate['path'] = duplicate['path'].replace('/select_panel/', '/select_panel_adapt/select_panel/')
+    backend.buttons['buttons'].append(duplicate)
+    backend.buttons['button_count'] += 1
+    with pytest.raises(SemanticGateClosed, match='ambiguous'):
+        adapter._appear_priority('GET_MISSION')
+    with pytest.raises(SemanticGateClosed, match='ambiguous'):
+        oracle.click('tactical/dock/confirm')
     assert backend.taps == []
 
 

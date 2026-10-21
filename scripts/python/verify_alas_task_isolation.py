@@ -7,6 +7,7 @@ import argparse
 import ast
 import hashlib
 import json
+from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock
@@ -30,6 +31,7 @@ def verify_source(source: str) -> dict:
         "TaskCapabilityUnavailable": TaskCapabilityUnavailable,
         "inflection": SimpleNamespace(underscore=lambda name: name.lower()),
         "del_cached_property": Mock(),
+        "datetime": datetime,
         "deep_get": lambda value, keys, default: value.get(keys, default),
     }
     # ALAS uses the first argument positionally and value= for the new value.
@@ -55,6 +57,8 @@ def verify_source(source: str) -> dict:
         )
         instance.config = SimpleNamespace(task_delay=Mock(), task_call=Mock(),
                                           Error_HandleError=True, Error_OnePushConfig={})
+        instance._semantic_unavailable_tasks = set()
+        instance.config._semantic_unavailable_tasks = instance._semantic_unavailable_tasks
         instance.checker = SimpleNamespace(wait_until_available=Mock(), is_recovered=lambda: False,
                                            check_now=Mock(), is_available=lambda: True)
         instance.save_error_log = Mock()

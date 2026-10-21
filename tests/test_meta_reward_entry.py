@@ -105,13 +105,16 @@ def test_meta_character_header_back_is_not_routed_as_dock_back():
     session = AlasSemanticSession.__new__(AlasSemanticSession)
     session.adapter = adapter
     session.open = lambda: adapter
-    session.refresh_frame = lambda: None
+    frame = SimpleNamespace(frame_id='meta-header-input')
+    session._frame_clock = SimpleNamespace(borrow=Mock(return_value=frame))
+    session.refresh_frame = lambda: frame
     adapter._require_frame_observation_oracle = lambda: oracle
 
     receipt = session.click(NamedButton('GOTO_MAIN'))
 
     assert receipt.semantic_id == 'meta/character/back'
     assert len(b.taps) == 1
+    session._frame_clock.borrow.assert_called_with('meta-header-input', require_fresh=True)
 
 
 def test_sync_page_and_worldboss_preview_are_distinct():

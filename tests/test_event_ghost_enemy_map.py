@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 from alas_headless.semantic_oracle import SemanticGateClosed
 from alas_headless import AlasSemanticAdapter
+from alas_headless.adapter.semantic.contracts import _CampaignFlowContext
 from tests.semantic_support.observer_fixtures import FakeBackend,make_ui,make_oracle
 
 def retained():
@@ -36,7 +37,7 @@ def test_retained_native_map_yields_to_original_withdrawal(name):
 def test_retained_map_notice_and_dock_probes_are_read_only():
     b,_=retained();a=AlasSemanticAdapter(make_oracle(b),package_gate=lambda:None)
     assert a._campaign_notice_navigation_surface() is True
-    a._campaign_context=object()
+    a._campaign_context=_CampaignFlowContext(stage_code='d3')
     assert a._appear_priority('DOCK_CHECK') is False
     assert b.taps==[]
 
@@ -50,7 +51,7 @@ def test_native_returned_map_covers_retained_selector(name):
     u=r['failure_observation']['ui']['snapshot']
     b.ui=make_ui(u['texts'],images=u['images'],toggles=u['toggles'])
     a=AlasSemanticAdapter(make_oracle(b),package_gate=lambda:None)
-    if name=='DOCK_CHECK':a._campaign_context=object()
+    if name=='DOCK_CHECK':a._campaign_context=_CampaignFlowContext(stage_code='d3')
     assert a._appear_priority(name) is False
     assert a._campaign_notice_navigation_surface() is True
     assert b.taps==[]
@@ -69,7 +70,7 @@ def test_native_combat_loading_dock_absence_requires_exact_labels(mutation):
     if mutation=='unknown-percent':next(t for t in b.ui['texts'] if t['path']==path+'/percent')['text']='unknown'
     if mutation=='duplicate-label':
         b.ui['texts'].append(dict(label));b.ui['text_count']=len(b.ui['texts'])
-    a=AlasSemanticAdapter(make_oracle(b),package_gate=lambda:None);a._campaign_context=object()
+    a=AlasSemanticAdapter(make_oracle(b),package_gate=lambda:None);a._campaign_context=_CampaignFlowContext(stage_code='d3')
     from alas_headless.adapter.semantic.dispatch_result import UNHANDLED
     assert a._appear_priority('DOCK_CHECK') is (False if mutation is None else UNHANDLED)
     assert b.taps==[]

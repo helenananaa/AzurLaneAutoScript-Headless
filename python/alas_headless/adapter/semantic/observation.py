@@ -17,7 +17,8 @@ from ...semantic_oracle import (
 )
 from .contracts import AlasSemanticUnmapped
 from ...oracle.surfaces import ObservationSurface
-from ...oracle.errors import SemanticViewportReanchorRequired
+from ...oracle.errors import SemanticViewportReanchorRequired, SemanticTargetNotActionable
+from ..errors import ExpiredFrameError
 from .resources import (
     BUILD_POOL_NAVBAR_ACTIVE_COLOR,
     BUILD_POOL_NAVBAR_INACTIVE_COLOR,
@@ -569,11 +570,25 @@ class ObservationAdapterPorts:
                 or not (raw_duration or adb_duration)
             ):
                 raise SemanticGateClosed("operation siren globe final duration changed")
-            return self.oracle.operation_siren_globe_swipe(
-                start,
-                end,
-                int(round(float(duration) * 1000.0)),
-            )
+            # Native Control.swipe already refreshes the real input frame.
+            # A slow path proof can still outlive that lease; retain its final
+            # age check and classify only a proven pre-dispatch expiry below.
+            input_count = getattr(self.oracle, 'input_dispatch_count', None)
+            try:
+                return self.oracle.operation_siren_globe_swipe(
+                    start,
+                    end,
+                    int(round(float(duration) * 1000.0)),
+                )
+            except ExpiredFrameError as exc:
+                # The final guard still rejects expiry during a slow proof.
+                # Only a proven pre-dispatch refusal belongs to ALAS' task
+                # failure interval. Identity/invalidated-frame errors and any
+                # uncertain accepted input retain their original failure.
+                if (type(input_count) is not int
+                        or self.oracle.input_dispatch_count != input_count):
+                    raise
+                raise SemanticTargetNotActionable('os/globe/swipe', exc.generation) from exc
         context = self._require_campaign_context()
         intent = context.viewport_swipe_intent
         if intent is None:

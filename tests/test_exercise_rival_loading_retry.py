@@ -4,6 +4,7 @@ from unittest.mock import Mock
 import pytest
 
 from alas_headless import AlasSemanticSession, SemanticGateClosed
+from alas_headless.adapter import StaleFrameError
 from alas_headless.oracle.errors import SemanticInputBlocked
 
 
@@ -14,9 +15,10 @@ def session():
     oracle.exercise_opponent_detail_visible.return_value = True
     oracle.exercise_opponent_levels.return_value = (125, 0, 0, 120, 0, 0)
     oracle.exercise_page_visible.return_value = True
+    oracle.read_state.return_value = SimpleNamespace(buttons=())
     oracle.read_ui_state.return_value = SimpleNamespace(generation=12)
     s = AlasSemanticSession.__new__(AlasSemanticSession)
-    s.open = lambda: SimpleNamespace(oracle=oracle)
+    s.open = lambda: SimpleNamespace(oracle=oracle, _require_frame_observation_oracle=lambda: oracle)
     s.refresh_frame = Mock()
     return s, oracle
 
@@ -42,7 +44,24 @@ def test_loading_before_input_reuses_same_detail_deadline_then_inspects_all_riva
                        'exercise/opponent/3', 'exercise/opponent/4', 'exercise/opponent/4']
     assert oracle.input_dispatch_count == 4
     assert oracle.click_exercise_opponent_back.call_count == 4
-    assert s.refresh_frame.call_count == 5
+    assert s.refresh_frame.call_count == 10
+
+
+@pytest.mark.parametrize('uncertain', [False, True])
+def test_expired_selection_cannot_retry_after_unknown_or_changed_dispatch_count(uncertain):
+    s, oracle = session()
+    error = StaleFrameError()
+    oracle.input_dispatch_count = 0 if uncertain else None
+    def click(target):
+        if uncertain:
+            oracle.input_dispatch_count += 1
+        raise error
+    oracle.click.side_effect = click
+    with pytest.raises(StaleFrameError) as caught:
+        s.exercise_opponents()
+    assert caught.value is error
+    oracle.click.assert_called_once_with('exercise/opponent/1')
+    oracle.click_exercise_opponent_back.assert_not_called()
 
 
 @pytest.mark.parametrize('case', ['other_blocker', 'mixed_blocker', 'wrong_target',
@@ -110,7 +129,7 @@ def test_real_oracle_never_taps_loading_and_revalidates_fresh_reviewed_rivals(mo
     oracle.exercise_opponent_levels = lambda: (125, 0, 0, 120, 0, 0)
     oracle.click_exercise_opponent_back = Mock()
     s = AlasSemanticSession.__new__(AlasSemanticSession)
-    s.open = lambda: SimpleNamespace(oracle=oracle)
+    s.open = lambda: SimpleNamespace(oracle=oracle, _require_frame_observation_oracle=lambda: oracle)
     s.refresh_frame = Mock()
     waits = []
 

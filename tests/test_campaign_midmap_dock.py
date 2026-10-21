@@ -42,6 +42,7 @@ def test_new_dock_modal_refreshes_stale_screenshot_before_reclassification(fresh
     frame = {'fresh': False}
     adapter._frame_or_live_observation_oracle = lambda: SimpleNamespace(
         enabled=lambda _: False,
+        daily_battle_result_visible=lambda: False,
         observation_surface_present=lambda surface: False,
         campaign_dock_full_visible=lambda stage: frame['fresh'] and fresh_is_dock)
     session = AlasSemanticSession.__new__(AlasSemanticSession)

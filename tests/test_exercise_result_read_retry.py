@@ -12,7 +12,8 @@ def session():
     o.exercise_reward_item_info_visible.return_value = False
     o.award_info_page_visible.return_value = False
     s = AlasSemanticSession.__new__(AlasSemanticSession)
-    s.open = lambda: SimpleNamespace(oracle=o)
+    s.refresh_frame = Mock()
+    s.open = lambda: SimpleNamespace(oracle=o, _require_frame_observation_oracle=lambda: o)
     return s, o
 
 
@@ -163,7 +164,7 @@ def test_real_award_dispatch_counter_precedes_uncertain_backend_failure():
     oracle._tap_backend = uncertain_backend
     s, o = session()
     o.award_info_page_visible.return_value = True
-    s.open = lambda: SimpleNamespace(oracle=oracle)
+    s.open = lambda: SimpleNamespace(oracle=oracle, _require_frame_observation_oracle=lambda: oracle)
     oracle.exercise_page_visible = Mock(return_value=False)
     oracle.exercise_merit_shop_visible = Mock(return_value=False)
     oracle.exercise_reward_item_info_visible = Mock(return_value=False)

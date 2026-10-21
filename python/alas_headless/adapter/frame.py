@@ -12,7 +12,7 @@ from collections.abc import Mapping
 from typing import Any, Callable
 
 from ..semantic_oracle import SemanticGateClosed, SemanticOracle
-from .errors import StaleFrameError
+from .errors import ExpiredFrameError, StaleFrameError
 from .ports import RuntimeHandlePort, SemanticFrameIdentity
 
 
@@ -380,7 +380,7 @@ class SemanticFrameClock:
         # check immediately before invalidating the lease and injecting ADB.
         if require_fresh and frame.age_ms + elapsed_ns / 1_000_000 > self._maximum_age_ms:
             self._current = None
-            raise StaleFrameError()
+            raise ExpiredFrameError(frame.generation)
         return frame
 
     def invalidate(self, frame_id: str | None = None) -> None:
@@ -538,8 +538,14 @@ class SemanticFrameReader:
             raise StaleFrameError()
 
         live = self._live_oracle
+        input_completed = False
 
         def frame_foreground_component() -> str:
+            if input_completed:
+                # Some reviewed ports verify foreground after their input.
+                # That input invalidated this lease. Check the live activity;
+                # projection reads and another input still require the lease.
+                return live._foreground_component()
             # Acquisition already proved the exact foreground for this frozen
             # screenshot-equivalent frame. Passive reads must not repeat ADB
             # foreground queries for every ALAS page candidate.
@@ -547,13 +553,16 @@ class SemanticFrameReader:
             return live.fingerprint.component
 
         def checked_input(action: Callable[..., Any], *args: Any) -> Any:
+            nonlocal input_completed
             # This oracle also supplies the final typed proof for some actions.
             # Recheck the real activity at the actual input boundary, even if
             # the immutable observation still describes the previous page.
             self._clock.borrow(frame_id, require_fresh=True)
             if live._foreground_component() != live.fingerprint.component:
                 raise SemanticGateClosed("game activity changed before semantic input")
-            return action(*args)
+            result = action(*args)
+            input_completed = True
+            return result
 
         self._oracle = _FrameBoundSemanticOracle(
             request,

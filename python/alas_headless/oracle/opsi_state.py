@@ -1099,8 +1099,8 @@ class OpsiStateOracle:
         state = self.read_state()
         target = self._unique(state, "os/page/back")
         blockers = self._blocking_rules(state, "os/page/back")
-        if len(blockers) == 1 and blockers[0].blocker_id in ('award-info', 'award-info1', 'ship-exp'):
-            # A reward may mount after ALAS selected the page graph edge.
+        if blockers:
+            # A modal may mount after ALAS selected the page graph edge.
             # Its native UI loop can refresh and run the owning popup handler;
             # classify the no-input refusal without weakening admission.
             raise SemanticInputBlocked('os/page/back', state.generation,

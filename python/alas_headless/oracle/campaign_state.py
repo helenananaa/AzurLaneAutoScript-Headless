@@ -19,6 +19,28 @@ from .campaign_health import CampaignHealthOracle
 class CampaignStateOracle(CampaignHealthOracle):
     """Campaign state operations sharing the oracle frame and input boundary."""
 
+    def campaign_timeout_prompt_visible(self, state=None) -> bool:
+        """Identify the ordinary expired-map acknowledgement, not a purchase."""
+        state = self.read_state() if state is None else state
+        if (not self._matches(state, 'campaign/map-timeout/confirm')
+                or not any(b.active_in_hierarchy and b.active_and_enabled and b.path ==
+                           'LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/op1/retreat'
+                           for b in state.buttons)):
+            return False
+        ui = self._stable_msgbox_ui_state(state)
+        root = 'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/'
+        def text(path):
+            matches = [t for t in ui.texts if t.path == root + path
+                       and t.active_in_hierarchy and t.active_and_enabled]
+            if len(matches) != 1 or matches[0].truncated:
+                return None
+            return re.sub(r'\s+', '', re.sub(r'<[^>]+>', '', matches[0].text))
+        buttons = [b for b in state.buttons if b.path.startswith(root + 'button_container/')
+                   and b.active_in_hierarchy and b.active_and_enabled]
+        return bool(len(buttons) == 1
+                    and text('msg_panel/content') == '作战时间用尽，作战失败，点击确定返回选关界面'
+                    and text('button_container/custom_button_1(Clone)/pic') == '确定')
+
     def campaign_menu_is_entry(self) -> bool:
         """Identify the campaign entrance without conflating the chapter page."""
 

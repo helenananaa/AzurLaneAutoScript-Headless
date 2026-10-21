@@ -116,10 +116,16 @@ def test_classified_no_input_refusal_uses_native_delay_and_keeps_next_task(nativ
     host, cfg, _, now = harness(interval=interval)
     cfg.data['OpsiExplore']['Scheduler']['FutureMetadata'] = {'schema': 2}
     host.opsi_explore.side_effect = error
+    before_run = datetime.now().replace(microsecond=0)
     assert host.run('opsi_explore') is None
     assert host.device.semantic_adapter.last_task_outcome['outcome'] == 'input-unavailable'
     assert cfg.data['OpsiExplore']['Scheduler']['Enable'] is True
-    assert (cfg.data['OpsiExplore']['Scheduler']['NextRun'] > now) == (interval > 0)
+    next_run = cfg.data['OpsiExplore']['Scheduler']['NextRun']
+    if interval > 0:
+        assert next_run > now
+    else:
+        # Zero delay is immediate even when native run() crosses a second.
+        assert before_run <= next_run <= datetime.now()
     next_task = cfg.get_next()
     assert next_task.command == 'Minigame'
     cfg.bind(next_task)

@@ -42,6 +42,57 @@ def test_completed_exit_consumes_old_map_edge_without_a_second_input():
     assert backend.taps == []
 
 
+@pytest.mark.parametrize('acknowledged', [False, True])
+def test_accepted_exit_loading_returns_to_original_navigation_without_another_back(acknowledged):
+    backend, adapter, previous = case('loading')
+    if acknowledged:
+        adapter._operation_siren_exit_handoff = (previous, adapter.oracle.input_dispatch_count)
+        adapter._operation_siren_exit_receipt = None
+    assert adapter.click('GOTO_MAIN') is None
+    if not acknowledged:
+        assert adapter._operation_siren_exit_receipt is previous
+    assert not backend.taps
+
+
+def test_dialog_acknowledgement_keeps_the_same_accepted_input_for_page_handoff():
+    backend, adapter, previous = case()
+    adapter._operation_siren_exit_handoff = (previous, adapter.oracle.input_dispatch_count)
+    # Native handle_popup_confirm already consumed its dialog-level receipt.
+    adapter._operation_siren_exit_receipt = None
+    for _ in range(3):
+        assert adapter.click('GOTO_MAIN') is previous
+    assert not backend.taps
+
+
+def test_acknowledged_dialog_still_waits_for_map_fade_before_consuming_old_edge():
+    from unittest.mock import Mock
+    source_backend, adapter, previous = case('source_present')
+    destination_backend, destination_adapter, _ = case()
+    adapter._operation_siren_exit_handoff = (previous, adapter.oracle.input_dispatch_count)
+    adapter._operation_siren_exit_receipt = None
+    adapter._fresh_input_oracle = Mock(side_effect=[adapter.oracle, destination_adapter.oracle])
+    assert adapter.click('GOTO_MAIN') is previous
+    assert adapter._fresh_input_oracle.call_count == 2
+    assert source_backend.taps == destination_backend.taps == []
+
+
+@pytest.mark.parametrize('change', ['source_present', 'unknown', 'old_generation',
+                                  'duplicate', 'foreign', 'stale', 'foreground', 'new_input'])
+def test_acknowledged_exit_cannot_reuse_a_result_after_reentry_or_lost_destination(change, monkeypatch):
+    backend, adapter, previous = case(None if change == 'new_input' else change)
+    adapter._operation_siren_exit_handoff = (previous, adapter.oracle.input_dispatch_count)
+    adapter._operation_siren_exit_receipt = None
+    if change == 'new_input':
+        adapter.oracle._mark_input_dispatched()
+    # Exercise the unchanged bounded wait without spending five seconds on
+    # every deliberately unavailable destination.
+    monkeypatch.setattr('alas_headless.adapter.semantic.dispatch_actions.time.monotonic',
+                        iter([100.0, 106.0, 112.0, 118.0]).__next__)
+    with pytest.raises(SemanticGateClosed):
+        adapter.click('GOTO_MAIN')
+    assert not backend.taps
+
+
 @pytest.mark.parametrize('retained_destination', [False, True])
 def test_confirmed_exit_awaits_a_new_frame_when_old_map_still_fades(retained_destination):
     source_backend, adapter, previous = case('source_present')
@@ -65,7 +116,7 @@ def test_confirmed_exit_awaits_a_new_frame_when_old_map_still_fades(retained_des
 
 
 @pytest.mark.parametrize('change', ['no_receipt', 'cancel', 'source_present', 'unknown',
-                                  'old_generation', 'duplicate', 'foreign', 'loading', 'stale', 'foreground'])
+                                  'old_generation', 'duplicate', 'foreign', 'stale', 'foreground'])
 def test_exit_handoff_keeps_destination_and_input_guards(change, monkeypatch):
     backend, adapter, previous = case(change)
     # Advance the bounded destination wait without spending wall time on

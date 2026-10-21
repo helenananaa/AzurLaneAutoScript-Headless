@@ -11,8 +11,11 @@ import time
 from typing import Any, Callable, Mapping, Optional, Sequence, Tuple
 from ..runtime_trace import RuntimeTraceRecorder
 from .contracts import AndroidPackageFingerprint, OBSERVER_SCHEMA
-from .errors import ObserverResponseTimeout, ObserverTransportError, SemanticGateClosed
+from .errors import ObserverConnectionInterrupted, ObserverResponseTimeout, ObserverTransportError, SemanticGateClosed
 
+_PLAIN_OBSERVER_READ_REQUESTS = (
+    "GET /v1/snapshot\n", "GET /v1/buttons\n", "GET /v1/ui\n", "GET /v1/state\n",
+)
 
 def encode_adb_shell_string_extra(value: str) -> str:
     """Keep a leading dash as string data across adb's shell argv reparse."""
@@ -99,18 +102,46 @@ class TcpObserverTransport:
         self._trace = trace
 
     def request(self, request_line: str) -> Mapping[str, Any]:
+        retry_reason = None
+        try:
+            value = self._request_once(request_line)
+        except ObserverResponseTimeout:
+            if request_line not in _PLAIN_OBSERVER_READ_REQUESTS:
+                raise
+            # These four requests only observe state. Discard the incomplete
+            # response and reconnect once; no input or parameterized request
+            # is replayed, and the caller still validates the new frame.
+            retry_reason = 'response-timeout'
+        except ObserverConnectionInterrupted:
+            if request_line not in _PLAIN_OBSERVER_READ_REQUESTS:
+                raise
+            retry_reason = 'connection-interrupted'
+        else:
+            if (request_line in _PLAIN_OBSERVER_READ_REQUESTS
+                    and value.get('status') == 'bad-request'):
+                retry_reason = 'bad-request'
+        if retry_reason is not None:
+            # Legacy observers read the stream with one recv(). A valid plain
+            # read can be rejected when fragmented or delayed at the forward.
+            # Reconnect once; parameterized requests and uncertain failures
+            # retain their existing handling, and all response identity/
+            # freshness/coherence checks still belong to the caller.
+            if self._trace is not None:
+                self._trace.emit('observer.plain_read_retry', fields={
+                    'endpoint': request_line.split(' ', 1)[1].strip(),
+                    'reason': retry_reason, 'retry': 1})
+            value = self._request_once(request_line)
+        return value
+
+    def _request_once(self, request_line: str) -> Mapping[str, Any]:
         number = r'[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?'
-        projection = re.fullmatch(r'GET /v1/globe-projection (' + number + r') (' + number + r')\n', request_line)
+        projection = re.fullmatch(r'GET /v1/(?:globe-projection|storage-scrollbar-input) (' + number + r') (' + number + r')\n', request_line)
         projection_request = projection is not None and all(math.isfinite(float(v)) for v in projection.groups())
         drag = re.fullmatch(r'GET /v1/(?:os-map-drag|globe-map-drag) ' + ' '.join(['(' + number + ')'] * 4) + r'\n', request_line)
         drag_request = drag is not None and all(math.isfinite(float(v)) for v in drag.groups())
         port_input_request = re.fullmatch(r'GET /v1/globe-port-input [1-8]\n', request_line) is not None
-        if request_line not in (
-            "GET /v1/snapshot\n",
-            "GET /v1/buttons\n",
-            "GET /v1/ui\n",
-            "GET /v1/state\n",
-        ) and not projection_request and not drag_request and not port_input_request:
+        if (request_line not in _PLAIN_OBSERVER_READ_REQUESTS
+                and not projection_request and not drag_request and not port_input_request):
             raise ObserverTransportError(
                 "client refused an unsupported observer request"
             )
@@ -166,6 +197,8 @@ class TcpObserverTransport:
                     duration_ns=time.monotonic_ns() - started_ns,
                     fields={"endpoint": endpoint, "exception_type": type(exc).__name__},
                 )
+            if connected and isinstance(exc, (ConnectionAbortedError, ConnectionResetError, BrokenPipeError)):
+                raise ObserverConnectionInterrupted("observer socket request failed") from exc
             raise ObserverTransportError("observer socket request failed") from exc
 
         line = bytes(chunks).split(b"\n", 1)[0]
@@ -284,14 +317,30 @@ class AdbObserverBridge:
             output = completed.stdout.decode('utf-8')
         except (OSError, subprocess.SubprocessError, UnicodeError) as exc:
             if self.trace is not None:
+                fields = {"operation": operation, "exception_type": type(exc).__name__}
+                if operation == "foreground-activity":
+                    # A slow failed read must remain distinguishable from a
+                    # daemon/connectivity error or an Android service timeout.
+                    # Keep stderr bounded and never record activity dump data.
+                    fields.update(adb_executable=self.adb, adb_server_port=self.adb_server_port,
+                                  timeout_seconds=timeout)
+                    if isinstance(exc, subprocess.CalledProcessError):
+                        fields["returncode"] = exc.returncode
+                    stderr = getattr(exc, "stderr", None) or ""
+                    if isinstance(stderr, bytes):
+                        stderr = stderr.decode("utf-8", errors="replace")
+                    if stderr:
+                        fields["stderr_tail"] = stderr[-512:]
+                    stdout = getattr(exc, "stdout", None) or getattr(exc, "output", None) or ""
+                    if isinstance(stdout, bytes):
+                        stdout = stdout.decode("utf-8", errors="replace")
+                    if "dump timeout" in stdout.lower():
+                        fields["activity_dump_timeout"] = True
                 self.trace.emit(
                     "adb.command",
                     outcome="error",
                     duration_ns=time.monotonic_ns() - started_ns,
-                    fields={
-                        "operation": operation,
-                        "exception_type": type(exc).__name__,
-                    },
+                    fields=fields,
                 )
             raise ObserverTransportError("ADB command failed") from exc
         if self.trace is not None:

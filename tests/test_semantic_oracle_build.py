@@ -18,6 +18,23 @@ from tests.semantic_support.oracle_cases import SemanticOracleTestsSupport
 
 
 class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
+    def test_empty_queue_accepts_reviewed_adapt_counter_but_rejects_duplicate(self):
+        page = 'root/Overlay/UIMain/blur_panel/'
+        queue = 'root/UICamera/Canvas/UIMain/BuildShipDetailUI1(Clone)/'
+        backend = FakeBackend([make_button('back_btn', page + 'adapt/top/back_btn')])
+        backend.ui = make_ui([
+            make_text('2', queue + 'title/value'),
+            make_text('2469', queue + 'adapt/quick_count/value'),
+        ], toggles=[make_toggle(page + 'adapt/left_length/frame/tagRoot/queue_btn', checked=True)])
+        oracle = make_oracle(backend)
+        self.assertEqual(oracle.build_queue_timers(), ())
+        self.assertTrue(oracle.build_queue_empty())
+        backend.ui['texts'].append(make_text('2469', queue + 'quick_count/value'))
+        backend.ui['text_count'] += 1
+        with self.assertRaisesRegex(SemanticGateClosed, 'incomplete'):
+            oracle.build_queue_empty()
+        self.assertEqual(backend.taps, [])
+
     def test_queue_enumerates_added_slots_and_never_hides_a_new_unread_slot(self):
         page = 'root/Overlay/UIMain/blur_panel/'
         queue = 'root/UICamera/Canvas/UIMain/BuildShipDetailUI1(Clone)/'
@@ -73,6 +90,12 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         self.assertTrue(oracle.build_queue_empty())
         self.assertTrue(oracle.build_queue_all_launch_visible())
         self.assertFalse(oracle.build_queue_all_launch_available())
+        # The current client wraps the batch control and quick counter in
+        # adapt while retaining the same native empty-queue return action.
+        backend.buttons['buttons'][1]['path'] = queue + 'adapt/all_launch'
+        backend.ui['images'][0]['path'] = queue + 'adapt/all_launch'
+        backend.ui['texts'][1]['path'] = queue + 'adapt/quick_count/value'
+        self.assertTrue(oracle.build_queue_all_launch_visible())
         adapter = AlasSemanticAdapter(oracle, lambda: None)
         adapter.begin_build()
         self.assertTrue(adapter.appear(NamedButton('BUILD_FINISH_ORDERS')))
@@ -88,6 +111,11 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         self.assertFalse(oracle.build_queue_all_launch_visible())
         with self.assertRaises(SemanticGateClosed):
             oracle.click_build_empty_queue_return()
+        self.assertEqual(backend.taps, [(1191, 121)])
+        backend.buttons['buttons'].append(make_button('all_launch', queue + 'all_launch'))
+        backend.buttons['button_count'] += 1
+        with self.assertRaisesRegex(SemanticGateClosed, 'ambiguous'):
+            oracle.build_queue_all_launch_visible()
         self.assertEqual(backend.taps, [(1191, 121)])
 
     def test_origin_queue_and_return_navigation_require_exact_shell_and_images(self):

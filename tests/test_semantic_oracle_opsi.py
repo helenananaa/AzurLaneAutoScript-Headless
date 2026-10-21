@@ -2,6 +2,7 @@
 
 import unittest
 from alas_headless.semantic_oracle import SemanticGateClosed, SemanticTargetMissing
+from alas_headless.oracle.errors import SemanticInputBlocked
 from tests.semantic_support.observer_fixtures import (
     FakeBackend,
     make_button,
@@ -190,8 +191,9 @@ class OperationSirenSemanticOracleTests(OperationSirenSemanticOracleTestsSupport
         backend.buttons["buttons"].append(make_button("custom_button_1(Clone)",
             "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)"))
         backend.buttons["button_count"] += 1
-        with self.assertRaisesRegex(SemanticGateClosed, "not actionable"):
+        with self.assertRaises(SemanticInputBlocked) as blocked:
             oracle.click_operation_siren_back()
+        self.assertIn('tactical-continue', blocked.exception.blockers)
         self.assertEqual(backend.taps, [])
         backend.buttons["buttons"].pop()
         backend.buttons["button_count"] -= 1

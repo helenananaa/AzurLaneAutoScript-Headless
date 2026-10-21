@@ -90,6 +90,7 @@ def test_official_combat_ports_use_one_leased_observation_instead_of_live_underl
     reader = mock.Mock()
     reader.read_state.return_value = object()
     reader._blocking_rules.return_value = ()
+    reader.observation_target_present.return_value = False
     reader.observation_surface_present.return_value = False
     reader.daily_combat_visible.return_value = True
     adapter._frame_observation_oracle = lambda: reader

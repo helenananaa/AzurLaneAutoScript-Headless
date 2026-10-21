@@ -319,7 +319,10 @@ class TacticalOracle:
             and image.bounds.top < self.fingerprint.height
         )
         rows = tuple(sorted(rows, key=lambda image: image.bounds.top))
-        if not rows or len(rows) > 4:
+        # Unity clones legitimately share a hierarchy path. Their disjoint
+        # row bounds own the text association and distinguish the targets.
+        if (not rows or len(rows) > 4
+                or len({(row.path, row.bounds) for row in rows}) != len(rows)):
             raise SemanticGateClosed("tactical skill rows are absent or ambiguous")
 
         result = []
@@ -769,12 +772,52 @@ class TacticalOracle:
         return tuple(slots)
 
     def tactical_remaining_seconds(self) -> Tuple[int, ...]:
-        return tuple(
-            slot.remaining_seconds
-            for slot in self.tactical_slots()
-            if slot.status == TacticalSlotStatus.RUNNING
-            and slot.remaining_seconds is not None
-        )
+        """Read native scheduling timers without resolving ship-card identities.
+
+        Pooled portrait children may coexist on one physical student card.
+        They are irrelevant to a countdown and cannot authorize any input.
+        """
+        state = self.read_state()
+        page = self._unique(state, "tactical/page/back")
+        if not page.active_in_hierarchy or not page.active_and_enabled:
+            raise SemanticGateClosed("tactical page identity is not proven")
+        prefix = "NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/"
+        slots = tuple(button for button in state.buttons
+            if button.name == "cancel_btn" and prefix in button.path
+            and button.path.endswith("/cancel_btn")
+            and button.active_in_hierarchy and button.active_and_enabled
+            and button.bounds is not None)
+        if len(slots) > 4:
+            raise SemanticGateClosed("tactical countdown slots are ambiguous")
+        if not slots and any(prefix in button.path
+                and re.fullmatch(r"[1-9][0-9]{5,7}", button.name)
+                and button.active_in_hierarchy and button.active_and_enabled
+                for button in state.buttons):
+            raise SemanticGateClosed("tactical countdown slots are absent")
+        ui = self.read_text_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed("tactical snapshots are not coherent")
+        timers = tuple(text for text in ui.texts
+            if prefix in text.path and text.path.endswith("/timer_Text")
+            and text.active_in_hierarchy and text.active_and_enabled)
+        remaining = []
+        matched = set()
+        for slot in sorted(slots, key=lambda button: button.bounds.left):
+            path = slot.path.rsplit("/", 1)[0] + "/timer_Text"
+            candidates = tuple((index, text) for index, text in enumerate(timers)
+                if text.path == path and text.bounds is not None
+                and slot.bounds.left <= (text.bounds.left + text.bounds.right) / 2.0 <= slot.bounds.right)
+            if len(candidates) != 1 or candidates[0][0] in matched:
+                raise SemanticGateClosed("tactical countdown is absent or ambiguous")
+            index, text = candidates[0]
+            if text.truncated:
+                raise SemanticGateClosed("tactical countdown is truncated")
+            matched.add(index)
+            if text.text.strip():
+                remaining.append(self.parse_countdown_seconds(text.text.strip()))
+        if len(matched) != len(timers):
+            raise SemanticGateClosed("tactical countdown slot identity is incomplete")
+        return tuple(remaining)
 
     def _tactical_continue_prompt_text(self, state: OracleState) -> Optional[str]:
         parts = self._msgbox_prompt_parts(state)

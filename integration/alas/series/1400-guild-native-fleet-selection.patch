@@ -23,7 +23,7 @@ diff --git a/module/guild/operations.py b/module/guild/operations.py
              if formation.empty_slots:
                  adapter.oracle.click('guild/formation/recommend')
                  for _ in range(30):
-@@ -663,14 +671,23 @@
+@@ -663,14 +671,24 @@
                  if adapter.oracle.enabled('guild/dispatch/confirm'):
                      break
                  self.device.sleep(0.2)
@@ -46,7 +46,8 @@ diff --git a/module/guild/operations.py b/module/guild/operations.py
                  self.device.sleep(0.2)
 -            return False
 +            else:
-+                raise SemanticGateClosed('Guild dispatch did not advance to in-progress state')
++                from alas_headless.adapter.semantic.contracts import AlasSemanticGuildDispatchUnproven
++                raise AlasSemanticGuildDispatchUnproven(dispatch_receipt)
 +            self._guild_operations_dispatch_exit(skip_first_screenshot=False)
 +            logger.info('Guild operation run success: True (semantic)')
 +            return True

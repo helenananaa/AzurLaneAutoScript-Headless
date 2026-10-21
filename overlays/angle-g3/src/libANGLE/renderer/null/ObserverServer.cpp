@@ -72,6 +72,32 @@ bool SendAll(int socket, std::string_view response) {
   return true;
 }
 
+template <size_t Capacity>
+std::string_view ReceiveRequestLine(int client, char (&buffer)[Capacity]) {
+  static_assert(Capacity >= 2);
+  size_t used = 0;
+  while (used + 1 < Capacity) {
+    const ssize_t received = ANGLE_UNSAFE_BUFFERS(
+        recv(client, buffer + used, Capacity - used - 1, 0));
+    if (received < 0 && errno == EINTR) {
+      continue;
+    }
+    if (received <= 0) {
+      break;
+    }
+    used += static_cast<size_t>(received);
+    ANGLE_UNSAFE_BUFFERS(buffer[used] = '\0');
+    const std::string_view request(buffer, used);
+    if (request.find('\n') != std::string_view::npos) {
+      return request;
+    }
+  }
+  // EOF, timeout or a full unterminated line is never a request prefix.
+  // Clear it too: the parameter parsers below also inspect this C string.
+  buffer[0] = '\0';
+  return {};
+}
+
 void AppendJsonString(std::string *output, std::string_view value) {
   output->push_back('"');
   for (const unsigned char byte : value) {
@@ -741,7 +767,76 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
       response.push_back('}');
     }
   }
-  response.append("]},\"private_quarters_physics\":{");
+  response.append("]},\"storage_scroll\":{\"schema\":\"alas-headless.storage-scroll/v1\",\"status\":");
+  const auto &storage = snapshot.storageScroll;
+  response.append(std::to_string(storage.status));
+  response.append(",\"matches\":"); response.append(std::to_string(storage.matches));
+  char storageFields[512];
+  if (storage.status == 1) {
+    const int count = ANGLE_UNSAFE_TODO(std::snprintf(storageFields, sizeof(storageFields),
+        ",\"direction\":%d,\"vertical\":%s,\"horizontal\":%s,\"normalized_position\":[%.6f,%.6f],\"value\":%.6f,\"size\":%.6f",
+        storage.direction, storage.vertical ? "true" : "false", storage.horizontal ? "true" : "false",
+        storage.normalizedX, storage.normalizedY, storage.value, storage.size));
+    if (count <= 0 || static_cast<size_t>(count) >= sizeof(storageFields)) return {};
+    response.append(storageFields, static_cast<size_t>(count));
+  }
+  response.append(",\"controls\":[");
+  constexpr std::array<const char *, 6> storageRoles = {"scroll", "viewport", "content", "bar", "handle", "track"};
+  if (storage.status == 1) {
+    for (size_t i = 0; i < storage.controls.size(); ++i) {
+      if (i) response.push_back(',');
+      const auto &record = storage.controls[i];
+      response.append("{\"role\":"); AppendJsonString(&response, storageRoles[i]);
+      response.append(",\"path\":"); AppendJsonString(&response, BoundedStringView(record.path));
+      const int count = ANGLE_UNSAFE_TODO(std::snprintf(storageFields, sizeof(storageFields),
+          ",\"instance_id\":%d,\"active_in_hierarchy\":%s,\"adb_bounds\":{\"left\":%.3f,\"top\":%.3f,\"right\":%.3f,\"bottom\":%.3f}}",
+          record.instanceId, (record.flags & 1u) ? "true" : "false",
+          record.adbLeft, record.adbTop, record.adbRight, record.adbBottom));
+      if (count <= 0 || static_cast<size_t>(count) >= sizeof(storageFields)) return {};
+      response.append(storageFields, static_cast<size_t>(count));
+    }
+  }
+    response.append("],\"scrollbar\":{\"schema\":\"alas-headless.storage-scrollbar/v1\",\"status\":");
+    response.append(std::to_string(storage.scrollbarStatus));
+    response.append(",\"matches\":"); response.append(std::to_string(storage.scrollbarMatches));
+    response.append(",\"class_found\":"); response.append(storage.scrollbarClassFound ? "true" : "false");
+    response.append(",\"source_count\":"); response.append(std::to_string(storage.scrollbarSourceCount));
+    if (storage.scrollbarStatus == 1) {
+      const int count = ANGLE_UNSAFE_TODO(std::snprintf(storageFields, sizeof(storageFields),
+          ",\"direction\":%d,\"value\":%.6f,\"size\":%.6f",
+          storage.scrollbarDirection, storage.scrollbarValue, storage.scrollbarSize));
+      if (count <= 0 || static_cast<size_t>(count) >= sizeof(storageFields)) return {};
+      response.append(storageFields, static_cast<size_t>(count));
+    }
+    response.append(",\"controls\":[");
+    constexpr std::array<const char *, 3> storageBarRoles = {"bar", "handle", "track"};
+    if (storage.scrollbarStatus == 1) {
+      for (size_t i = 0; i < storage.scrollbarControls.size(); ++i) {
+        if (i) response.push_back(',');
+        const auto &record = storage.scrollbarControls[i];
+        response.append("{\"role\":"); AppendJsonString(&response, storageBarRoles[i]);
+        response.append(",\"path\":"); AppendJsonString(&response, BoundedStringView(record.path));
+        const int count = ANGLE_UNSAFE_TODO(std::snprintf(storageFields, sizeof(storageFields),
+            ",\"instance_id\":%d,\"active_in_hierarchy\":%s,\"adb_bounds\":{\"left\":%.3f,\"top\":%.3f,\"right\":%.3f,\"bottom\":%.3f}}",
+            record.instanceId, (record.flags & 1u) ? "true" : "false",
+            record.adbLeft, record.adbTop, record.adbRight, record.adbBottom));
+        if (count <= 0 || static_cast<size_t>(count) >= sizeof(storageFields)) return {};
+        response.append(storageFields, static_cast<size_t>(count));
+      }
+    }
+    response.append("],\"input\":{\"schema\":\"alas-headless.storage-scrollbar-input/v1\",\"status\":");
+    response.append(std::to_string(storage.inputStatus));
+    if (storage.inputStatus != 0) {
+      const int count = ANGLE_UNSAFE_TODO(std::snprintf(storageFields, sizeof(storageFields),
+          ",\"point\":[%.3f,%.3f],\"enabled\":%s,\"interactable\":%s,\"owned\":%s,\"handler_instance_id\":%d,\"top_path\":",
+          storage.inputX, storage.inputY, storage.inputEnabled ? "true" : "false",
+          storage.inputInteractable ? "true" : "false", storage.inputOwned ? "true" : "false",
+          storage.inputHandlerInstanceId));
+      if (count <= 0 || static_cast<size_t>(count) >= sizeof(storageFields)) return {};
+      response.append(storageFields, static_cast<size_t>(count));
+      AppendJsonString(&response, BoundedStringView(storage.inputTopPath));
+    }
+    response.append("}}},\"private_quarters_physics\":{");
   char physicsFields[256];
   const int physicsCount = ANGLE_UNSAFE_TODO(std::snprintf(
       physicsFields, sizeof(physicsFields),
@@ -899,10 +994,7 @@ void ServeObserver() {
     }
 
     char requestBuffer[128] = {};
-    const ssize_t received =
-        recv(client, requestBuffer, sizeof(requestBuffer) - 1, 0);
-    const std::string_view request(
-        requestBuffer, received > 0 ? static_cast<size_t>(received) : 0u);
+    const std::string_view request = ReceiveRequestLine(client, requestBuffer);
     const bool snapshotRequest =
         request == "GET /v1/snapshot\n" || request == "GET /v1/snapshot\r\n";
     const bool semanticRequest =
@@ -921,6 +1013,11 @@ void ServeObserver() {
     const bool globeDragRequest =
         ANGLE_UNSAFE_BUFFERS(sscanf(requestBuffer, "GET /v1/globe-map-drag %f %f %f %f%n", &globeDragX1, &globeDragY1, &globeDragX2, &globeDragY2, &globeDragEnd)) == 4 &&
         (request.substr(globeDragEnd) == "\n" || request.substr(globeDragEnd) == "\r\n");
+    float storageX = 0, storageY = 0;
+    int storageEnd = 0;
+    const bool storageInputRequest =
+        ANGLE_UNSAFE_BUFFERS(sscanf(requestBuffer, "GET /v1/storage-scrollbar-input %f %f%n", &storageX, &storageY, &storageEnd)) == 2 &&
+        (request.substr(storageEnd) == "\n" || request.substr(storageEnd) == "\r\n");
     float mapX = 0, mapY = 0;
     int projectionEnd = 0;
     const bool projectionRequest =
@@ -936,6 +1033,9 @@ void ServeObserver() {
     } else if (globeDragRequest && RequestOperationSirenMapDrag(globeDragX1, globeDragY1, globeDragX2, globeDragY2, true)) {
       SendAll(client, "{\"protocol_schema\":\"alas-headless.observer/v1\","
                       "\"status\":\"ok\",\"scope\":\"read-only-globe-map-drag\"}\n");
+    } else if (storageInputRequest && RequestStorageScrollbarInput(storageX, storageY)) {
+      SendAll(client, "{\"protocol_schema\":\"alas-headless.observer/v1\","
+                      "\"status\":\"ok\",\"scope\":\"read-only-storage-scrollbar-input\"}\n");
     } else if (projectionRequest && RequestGlobeMapProjection(mapX, mapY)) {
       SendAll(client, "{\"protocol_schema\":\"alas-headless.observer/v1\","
                       "\"status\":\"ok\",\"scope\":\"read-only-map-projection\"}\n");

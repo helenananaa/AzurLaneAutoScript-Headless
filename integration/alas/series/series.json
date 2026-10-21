@@ -938,7 +938,7 @@
     {
       "order": 188,
       "path": "integration/alas/series/1400-guild-native-fleet-selection.patch",
-      "sha256": "0c66c287df497793af95dedd797d028c5e49d655fdcbb61294b8192f5c8d314c"
+      "sha256": "29cf70bd680f974f7d1da295e8e13f10ed75a6453d2be3b6ea572ec0680a0c1c"
     },
     {
       "order": 189,
@@ -1069,6 +1069,56 @@
       "order": 214,
       "path": "integration/alas/series/1534-main-native-stage-aliases.patch",
       "sha256": "84524a3b7ddcefa4ba56b6581b8677c0059e5bc2c9f53543812a2edc6f2f34ad"
+    },
+    {
+      "order": 215,
+      "path": "integration/alas/series/1535-storage-native-scroll-ports.patch",
+      "sha256": "358df0799ca7407eda34a3c80e58418fd3eaf11557535fdb00e233bc60664e7f"
+    },
+    {
+      "order": 216,
+      "path": "integration/alas/series/1536-globe-entry-stale-observation-wait.patch",
+      "sha256": "170ff84e039585c7fbab324323130abc70012fc612d892845d0c0e332ea145fe"
+    },
+    {
+      "order": 217,
+      "path": "integration/alas/series/1537-storage-endpoint-and-pixel-boundary.patch",
+      "sha256": "68acfb7c4d0ef198b7752f556e72a71d9b054d231e4dcac879680c118d06c341"
+    },
+    {
+      "order": 218,
+      "path": "integration/alas/series/1538-storage-typed-box-boundaries.patch",
+      "sha256": "e850a9be295b00a014d2d573eb2e4c597d1b6d43c9c54f7f92a2046ce44597a4"
+    },
+    {
+      "order": 219,
+      "path": "integration/alas/series/1539-storage-confirmed-box-count.patch",
+      "sha256": "5ee186b578ebf5202afb4dd38927aa91b44061ccb0fa68147bc0971f9915d141"
+    },
+    {
+      "order": 220,
+      "path": "integration/alas/series/1540-story-screenshot-observation.patch",
+      "sha256": "ce759b173fa20320af26c6af0e09eb975c35c3ce2a7747640e49ea3cc225b6e3"
+    },
+    {
+      "order": 221,
+      "path": "integration/alas/series/1541-opsi-interrupt-typed-boundary.patch",
+      "sha256": "da869bc9cb5a16de29e1414f3582f8cd80776bd9de7249d108ed51d1a7057aef"
+    },
+    {
+      "order": 222,
+      "path": "integration/alas/series/1542-combat-preparation-screenshot-observation.patch",
+      "sha256": "8a61645303462406d516c49a1b3d55fb1a9bb51fcbd7e5f771b248a2651e9b32"
+    },
+    {
+      "order": 223,
+      "path": "integration/alas/series/1543-commission-incomplete-row-isolation.patch",
+      "sha256": "b52178e927d03dbac9f01c6a412554e86f0eff4ab5e88f6e1adecf9101f6fbfb"
+    },
+    {
+      "order": 224,
+      "path": "integration/alas/series/1544-globe-owned-edge-candidate.patch",
+      "sha256": "307ba94f4f463fa3f5296dedf2834c59967548b27f2b6ecc5963609e551b55ce"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

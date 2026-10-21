@@ -9,6 +9,28 @@ from tests.semantic_support.adapter_fixtures import NamedButton
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_commission_inherits_proven_dock_after_awaken(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_commission()
+        button = SimpleNamespace(
+            active_in_hierarchy=True, active_and_enabled=True,
+            path='OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/index_button',
+        )
+        oracle.read_state = lambda: SimpleNamespace(generation=21, buttons=(button,))
+        oracle._enhancement_dock_records = lambda: (None, None)
+        self.assertTrue(adapter.appear(NamedButton('DOCK_CHECK')))
+        self.assertFalse(adapter.appear(NamedButton('GUILD_CHECK')))
+        self.assertEqual(oracle.click_calls, [])
+
+        def incomplete():
+            raise SemanticGateClosed('enhancement Dock identity is incomplete')
+        oracle._enhancement_dock_records = incomplete
+        self.assertIsNot(adapter._appear_priority('DOCK_CHECK'), True)
+        oracle._enhancement_dock_records = lambda: (None, None)
+        oracle.blocking_rules = (SimpleNamespace(blocker_id='msgbox'),)
+        self.assertIsNot(adapter._appear_priority('DOCK_CHECK'), True)
+        self.assertEqual(oracle.click_calls, [])
+
     def test_dock_page_check_requires_exact_coherent_dock_identity(self):
         adapter, oracle, _ = self.make_adapter()
         button = SimpleNamespace(
@@ -25,9 +47,14 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertTrue(adapter.appear(NamedButton('DOCK_CHECK')))
         self.assertFalse(adapter.appear(NamedButton('GUILD_CHECK')))
         self.assertFalse(adapter.appear(NamedButton('CAMPAIGN_WITHDRAW_CONFIRM')))
+        for name in ('GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'GET_SHIP'):
+            self.assertFalse(adapter.appear(NamedButton(name)))
         oracle.blocking_rules = (SimpleNamespace(blocker_id='msgbox'),)
         with self.assertRaises(AlasSemanticUnmapped):
             adapter.appear(NamedButton('CAMPAIGN_WITHDRAW_CONFIRM'))
+        for name in ('GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'GET_SHIP'):
+            with self.assertRaises(AlasSemanticUnmapped):
+                adapter.appear(NamedButton(name))
         oracle.blocking_rules = ()
 
         def incomplete():

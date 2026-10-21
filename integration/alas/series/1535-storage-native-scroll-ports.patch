@@ -1,0 +1,40 @@
+diff --git a/module/ui/scroll.py b/module/ui/scroll.py
+--- a/module/ui/scroll.py
++++ b/module/ui/scroll.py
+@@ -62,6 +62,10 @@
+             float: 0 to 1.
+         """
+         semantic_adapter = getattr(main.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and self.name == 'METERIAL_SCROLL':
++            state = semantic_adapter.storage_material_scroll_state()
++            self.length = self.total * state.size
++            return semantic_adapter.open().oracle._storage_vertical_position(state)
+         if semantic_adapter is not None and self.name == 'MINIGAME_SCROLL_AREA':
+             return semantic_adapter.open().oracle.minigame_scroll_position()
+         mask = self.match_color(main)
+@@ -113,6 +117,9 @@
+             bool
+         """
+         semantic_adapter = getattr(main.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and self.name == 'METERIAL_SCROLL':
++            state = semantic_adapter.storage_material_scroll_state()
++            return state.size < 1 and all(c.active_in_hierarchy for c in state.controls)
+         if semantic_adapter is not None and self.name == 'MINIGAME_SCROLL_AREA':
+             return semantic_adapter.minigame_scroll_visible()
+         return np.mean(self.match_color(main)) > 0.1
+@@ -168,9 +175,12 @@
+                     continue
+ 
+             if self.drag_interval.reached():
+-                p1 = random_rectangle_point(self.position_to_screen(current), n=1)
+-                p2 = random_rectangle_point(self.position_to_screen(position, random_range=random_range), n=1)
+-                main.device.swipe(p1, p2, name=self.name, distance_check=distance_check)
++                if semantic_adapter is not None and self.name == 'METERIAL_SCROLL':
++                    semantic_adapter.storage_material_scroll_drag_toward(float(position))
++                else:
++                    p1 = random_rectangle_point(self.position_to_screen(current), n=1)
++                    p2 = random_rectangle_point(self.position_to_screen(position, random_range=random_range), n=1)
++                    main.device.swipe(p1, p2, name=self.name, distance_check=distance_check)
+                 self.drag_interval.reset()
+                 dragged += 1
+ 

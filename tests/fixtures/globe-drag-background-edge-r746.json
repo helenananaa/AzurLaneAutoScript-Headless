@@ -1,0 +1,442 @@
+[
+  {
+    "requested_endpoints": [
+      780,
+      494,
+      705,
+      419
+    ],
+    "at": "2026-10-19T07:50:11.505515+08:00",
+    "proof": {
+      "status": 1,
+      "handler_instance_id": 294110,
+      "endpoints": [
+        780.0,
+        494.0,
+        705.0,
+        419.0
+      ],
+      "handler_path": "WorldMap3D/entity/Plane",
+      "samples": [
+        {
+          "x": 780.0,
+          "y": 494.0,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 777.656,
+          "y": 491.656,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 775.312,
+          "y": 489.312,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 772.969,
+          "y": 486.969,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 770.625,
+          "y": 484.625,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 768.281,
+          "y": 482.281,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 765.938,
+          "y": 479.938,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 763.594,
+          "y": 477.594,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 761.25,
+          "y": 475.25,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 758.906,
+          "y": 472.906,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 756.562,
+          "y": 470.562,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 754.219,
+          "y": 468.219,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 751.875,
+          "y": 465.875,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 749.531,
+          "y": 463.531,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 747.188,
+          "y": 461.188,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 744.844,
+          "y": 458.844,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 742.5,
+          "y": 456.5,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 740.156,
+          "y": 454.156,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 737.812,
+          "y": 451.812,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 735.469,
+          "y": 449.469,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 733.125,
+          "y": 447.125,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 730.781,
+          "y": 444.781,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 728.438,
+          "y": 442.438,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 726.094,
+          "y": 440.094,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 723.75,
+          "y": 437.75,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 721.406,
+          "y": 435.406,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 719.062,
+          "y": 433.062,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 716.719,
+          "y": 430.719,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 714.375,
+          "y": 428.375,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 712.031,
+          "y": 426.031,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 709.688,
+          "y": 423.688,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 707.344,
+          "y": 421.344,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 705.0,
+          "y": 419.0,
+          "owned": false,
+          "top_path": "UICamera/Canvas/UIMain/WorldUI(Clone)/main/bg"
+        }
+      ]
+    }
+  },
+  {
+    "requested_endpoints": [
+      841,
+      476,
+      766,
+      401
+    ],
+    "at": "2026-10-19T09:09:40.905748+08:00",
+    "proof": {
+      "status": 1,
+      "handler_instance_id": 822104,
+      "endpoints": [
+        841.0,
+        476.0,
+        766.0,
+        401.0
+      ],
+      "handler_path": "WorldMap3D/entity/Plane",
+      "samples": [
+        {
+          "x": 841.0,
+          "y": 476.0,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 838.656,
+          "y": 473.656,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 836.312,
+          "y": 471.312,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 833.969,
+          "y": 468.969,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 831.625,
+          "y": 466.625,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 829.281,
+          "y": 464.281,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 826.938,
+          "y": 461.938,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 824.594,
+          "y": 459.594,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 822.25,
+          "y": 457.25,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 819.906,
+          "y": 454.906,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 817.562,
+          "y": 452.562,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 815.219,
+          "y": 450.219,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 812.875,
+          "y": 447.875,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 810.531,
+          "y": 445.531,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 808.188,
+          "y": 443.188,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 805.844,
+          "y": 440.844,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 803.5,
+          "y": 438.5,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 801.156,
+          "y": 436.156,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 798.812,
+          "y": 433.812,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 796.469,
+          "y": 431.469,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 794.125,
+          "y": 429.125,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 791.781,
+          "y": 426.781,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 789.438,
+          "y": 424.438,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 787.094,
+          "y": 422.094,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 784.75,
+          "y": 419.75,
+          "owned": false,
+          "top_path": "UICamera/Canvas/UIMain/WorldUI(Clone)/main/bg"
+        },
+        {
+          "x": 782.406,
+          "y": 417.406,
+          "owned": false,
+          "top_path": "UICamera/Canvas/UIMain/WorldUI(Clone)/main/bg"
+        },
+        {
+          "x": 780.062,
+          "y": 415.062,
+          "owned": false,
+          "top_path": "UICamera/Canvas/UIMain/WorldUI(Clone)/main/bg"
+        },
+        {
+          "x": 777.719,
+          "y": 412.719,
+          "owned": false,
+          "top_path": "UICamera/Canvas/UIMain/WorldUI(Clone)/main/bg"
+        },
+        {
+          "x": 775.375,
+          "y": 410.375,
+          "owned": false,
+          "top_path": "UICamera/Canvas/UIMain/WorldUI(Clone)/main/bg"
+        },
+        {
+          "x": 773.031,
+          "y": 408.031,
+          "owned": false,
+          "top_path": "UICamera/Canvas/UIMain/WorldUI(Clone)/main/bg"
+        },
+        {
+          "x": 770.688,
+          "y": 405.688,
+          "owned": false,
+          "top_path": "UICamera/Canvas/UIMain/WorldUI(Clone)/main/bg"
+        },
+        {
+          "x": 768.344,
+          "y": 403.344,
+          "owned": false,
+          "top_path": "UICamera/Canvas/UIMain/WorldUI(Clone)/main/bg"
+        },
+        {
+          "x": 766.0,
+          "y": 401.0,
+          "owned": false,
+          "top_path": "UICamera/Canvas/UIMain/WorldUI(Clone)/main/bg"
+        }
+      ]
+    }
+  }
+]

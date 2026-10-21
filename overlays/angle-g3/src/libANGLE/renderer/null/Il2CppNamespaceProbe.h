@@ -211,6 +211,30 @@ struct ObserverMapDragProof {
   std::array<ObserverMapDragSample, 33> samples = {};
 };
 
+struct ObserverStorageScroll {
+  uint32_t status = 0; // 0: outside StoreHouse, 1: observed, 2: unavailable
+  uint32_t matches = 0;
+  int32_t direction = -1;
+  uint32_t vertical = 0, horizontal = 0;
+  float normalizedX = 0, normalizedY = 0, value = 0, size = 0;
+  // ScrollRect, viewport, content, vertical Scrollbar, handle, handle parent.
+  // Geometry is observation only and never authorizes an input.
+  std::array<ObserverButtonRecord, 6> controls = {};
+  // A custom list need not inherit Unity's standard ScrollRect. Observe its
+  // actual Scrollbar and linked handle independently; never infer positions.
+  uint32_t scrollbarStatus = 0, scrollbarMatches = 0, scrollbarSourceCount = 0;
+  uint32_t scrollbarClassFound = 0;
+  int32_t scrollbarDirection = -1;
+  float scrollbarValue = 0, scrollbarSize = 0;
+  std::array<ObserverButtonRecord, 3> scrollbarControls = {};
+  // Optional read-only pointer-down routing query. Unity captures the drag
+  // handler at pointer-down; moving beyond the handle does not reselect it.
+  uint32_t inputStatus = 0, inputOwned = 0, inputEnabled = 0, inputInteractable = 0;
+  float inputX = 0, inputY = 0;
+  int32_t inputHandlerInstanceId = 0;
+  std::array<char, kObserverPathBytes> inputTopPath = {};
+};
+
 struct ObserverUiSnapshot {
   uint32_t structSize = sizeof(ObserverUiSnapshot);
   uint32_t schema = 1;
@@ -240,6 +264,7 @@ struct ObserverUiSnapshot {
   NativeLuaShipyardState shipyard = {};
   NativeLuaActivityIdentity activityIdentity = {};
   ObserverMapDragProof mapDrag = {};
+  ObserverStorageScroll storageScroll = {};
   uint32_t privatePhysicsStatus = 0; // 0: outside room, 1: observed, 2: unavailable
   uint32_t colliderCount = 0;
   uint32_t colliderTruncated = 0;
@@ -269,6 +294,7 @@ bool RequestGlobePortInput(uint32_t entrance);
 
 // Observe the reviewed OS drag handler and EventSystem path; never dispatch input.
 bool RequestOperationSirenMapDrag(float x1, float y1, float x2, float y2, bool globe = false);
+bool RequestStorageScrollbarInput(float x, float y);
 
 } // namespace rx::alas
 

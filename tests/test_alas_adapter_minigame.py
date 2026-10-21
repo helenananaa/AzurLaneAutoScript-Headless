@@ -19,6 +19,10 @@ class TicketOracle:
 class AlasSemanticAdapterMinigameTests(unittest.TestCase):
     def test_live_menu_arrival_reuses_entry_receipt(self):
         oracle = FakeOracle()
+        # Preserve the abstract destination-handoff model. Typed pending Main
+        # source matching is covered by test_live_menu_navigation_handoff.
+        oracle._matches = lambda state, target: ()
+        oracle.exists_values['main/live'] = True
         adapter = AlasSemanticAdapter(oracle, lambda: None)
         adapter.begin_minigame()
 
@@ -47,6 +51,8 @@ class AlasSemanticAdapterMinigameTests(unittest.TestCase):
 
     def test_live_menu_animation_waits_without_second_toggle(self):
         oracle = FakeOracle()
+        oracle._matches = lambda state, target: ()
+        oracle.exists_values['main/live'] = True
         adapter = AlasSemanticAdapter(oracle, lambda: None)
         adapter.begin_minigame()
         first = adapter.click(NamedButton('MAIN_GOTO_DORMMENU'))
@@ -60,6 +66,8 @@ class AlasSemanticAdapterMinigameTests(unittest.TestCase):
 
     def test_live_menu_blocked_by_new_message_does_not_toggle_again(self):
         oracle = FakeOracle()
+        oracle._matches = lambda state, target: ()
+        oracle.exists_values['main/live'] = True
         adapter = AlasSemanticAdapter(oracle, lambda: None)
         adapter.begin_minigame()
         adapter.click(NamedButton('MAIN_GOTO_DORMMENU'))

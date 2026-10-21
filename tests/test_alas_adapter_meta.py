@@ -163,6 +163,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         adapter, oracle, _ = self.make_adapter()
         adapter.begin_meta_assist()
         oracle.daily_precombat_visible_value = True
+        oracle.click_meta_assist_precombat_back = Mock(side_effect=oracle.click_daily_precombat_back)
         first = adapter.click(NamedButton('BACK_ARROW'))
         self.assertEqual(first.semantic_id, 'daily/precombat/back')
 
@@ -233,10 +234,14 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         oracle.meta_page_visible = Mock(return_value=True)
         self.assertEqual(session.recover_orphan_combat_result(), ())
         adapter.end_meta_beacon()
+        # Recovery also serves unrelated tasks inheriting a complete META
+        # page. Its typed identity owns this return, not the departed task.
+        self.assertEqual(session.recover_orphan_combat_result(), ())
+        oracle.meta_page_visible.return_value = False
         with self.assertRaisesRegex(SemanticGateClosed, 'did not return'):
             session.recover_orphan_combat_result(timeout_seconds=.001)
 
-    def test_assist_orphan_result_requires_typed_assist_return(self):
+    def test_assist_orphan_result_uses_complete_meta_page_proof_once(self):
         adapter, oracle, _ = self.make_adapter()
         adapter.begin_meta_assist()
         session = AlasSemanticSession.__new__(AlasSemanticSession)
@@ -249,8 +254,8 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
                      'operation_siren_page_visible', 'daily_page_visible',
                      'main_page_visible', 'event_campaign_page_visible'):
             setattr(oracle, name, Mock(return_value=False))
-        oracle.meta_page_visible = Mock(return_value=True)
         oracle.meta_assist_state = Mock(return_value=object())
+        oracle.meta_page_visible = Mock(side_effect=lambda: bool(oracle.meta_assist_state()))
         self.assertEqual(session.recover_orphan_combat_result(), ())
         oracle.meta_assist_state.assert_called_once()
         oracle.meta_assist_state.side_effect = SemanticGateClosed('unknown assist state')
