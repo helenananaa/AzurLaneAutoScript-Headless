@@ -316,8 +316,11 @@ class AdbObserverBridge:
             # calling thread so malformed output is a classified failure.
             output = completed.stdout.decode('utf-8')
         except (OSError, subprocess.SubprocessError, UnicodeError) as exc:
+            winerror = getattr(exc, "winerror", None)
             if self.trace is not None:
                 fields = {"operation": operation, "exception_type": type(exc).__name__}
+                if isinstance(winerror, int):
+                    fields["winerror"] = winerror
                 if operation == "foreground-activity":
                     # A slow failed read must remain distinguishable from a
                     # daemon/connectivity error or an Android service timeout.
@@ -342,6 +345,14 @@ class AdbObserverBridge:
                     duration_ns=time.monotonic_ns() - started_ns,
                     fields=fields,
                 )
+            if winerror == 1450:
+                # This host-side process-creation failure is distinct from an
+                # Android disconnect. Preserve fail-closed behavior; restarting
+                # the game or replaying input cannot repair host commit pressure.
+                raise ObserverTransportError(
+                    "Windows host resources exhausted while starting ADB (WinError 1450); "
+                    "inspect system commit usage and WSL cached memory"
+                ) from exc
             raise ObserverTransportError("ADB command failed") from exc
         if self.trace is not None:
             self.trace.emit(

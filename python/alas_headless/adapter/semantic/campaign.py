@@ -1813,10 +1813,14 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                 raise SemanticGateClosed(
                     "campaign stage entry was already submitted"
                 )
-            context.oil_before_sortie = self.oracle.campaign_oil()
+            # Reuse the input frame prepared by Session.click for both the
+            # wallet and exact stage proof. Serial live reads can outlive that
+            # lease on WSL even while the stage remains unchanged.
+            reader = self._fresh_input_oracle()
+            context.oil_before_sortie = reader.campaign_oil()
             receipt = self._dispatch_mutation(
                 "campaign.stage_entry",
-                lambda: self.oracle.click_campaign_stage(campaign_stage_code),
+                lambda: reader.click_campaign_stage(campaign_stage_code),
             )
             context.entry_receipt = receipt
             context.passive_transition_until = time.monotonic() + 20.0
@@ -2110,25 +2114,35 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                 raise SemanticGateClosed(
                     "campaign auto-search toggle is only valid before map preparation"
                 )
-            if context.auto_search_toggle_receipt is not None:
-                raise SemanticGateClosed(
-                    "campaign auto-search toggle transition is single-use"
-                )
             if self._campaign_preparation_kind() != "map":
                 raise SemanticGateClosed(
                     "campaign auto-search toggle requires the map-preparation layer"
                 )
-            selected = self.oracle.toggle_selected(
+            reader = self._fresh_input_oracle()
+            selected = reader.toggle_selected(
                 "campaign/map-preparation/auto-search"
             )
+            previous = context.auto_search_toggle_receipt
+            if previous is not None and (
+                context.auto_search_toggle_previous_state is None
+                or selected == context.auto_search_toggle_previous_state
+                or reader.read_state().generation <= previous.generation
+            ):
+                raise SemanticGateClosed(
+                    "campaign auto-search toggle has no fresh state-change postcondition"
+                )
             if selected != (name in CAMPAIGN_AUTO_SEARCH_ON_RESOURCES):
                 raise SemanticGateClosed(
                     "campaign auto-search resource state changed before input"
                 )
-            receipt = self.oracle.click_toggle(
+            # Original ALAS can turn this off, enable clear mode, then turn it
+            # back on. Retain its switch semantics while refusing to replay an
+            # input whose previous state change has not been observed.
+            receipt = reader.click_toggle(
                 "campaign/map-preparation/auto-search"
             )
             context.auto_search_toggle_receipt = receipt
+            context.auto_search_toggle_previous_state = selected
             context.passive_transition_until = time.monotonic() + 5.0
             return receipt
         if self._campaign_context is not None and name == "MAP_PREPARATION":

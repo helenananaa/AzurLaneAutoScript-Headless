@@ -75,7 +75,7 @@ def observation_surface_present(oracle, surface: ObservationSurface) -> bool:
         return False
     # Routing needs only text. Unrelated image/toggle limits must not disable
     # another task's confirmation; the chosen action keeps its full contract.
-    ui = oracle.read_text_state()
+    ui = oracle._paired_ui_after_state()
     if not state.generation <= ui.generation <= state.generation + 2:
         raise SemanticGateClosed("Msgbox snapshots are not coherent")
     return any(

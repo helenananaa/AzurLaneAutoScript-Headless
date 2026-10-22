@@ -1119,6 +1119,11 @@
       "order": 224,
       "path": "integration/alas/series/1544-globe-owned-edge-candidate.patch",
       "sha256": "307ba94f4f463fa3f5296dedf2834c59967548b27f2b6ecc5963609e551b55ce"
+    },
+    {
+      "order": 225,
+      "path": "integration/alas/series/1545-campaign-progress-native-animation.patch",
+      "sha256": "2d6c77b7f75edc8f51d1a89e9c7fb4bee231946c85113854170a87a7548436b3"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

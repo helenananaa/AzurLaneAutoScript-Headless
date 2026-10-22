@@ -1,6 +1,7 @@
 """Commission regression cases for the oracle."""
 
 import unittest
+from unittest.mock import Mock
 from alas_headless.semantic_oracle import CommissionStatus, SemanticGateClosed
 from tests.semantic_support.observer_fixtures import (
     FakeBackend,
@@ -47,7 +48,22 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
             ],
         )
 
-        rows = make_oracle(backend).commission_rows()
+        oracle = make_oracle(backend)
+        calls = []
+        def foreground():
+            calls.append('activity')
+            if len(calls) > 1:
+                backend.ui['generation'] = 13
+            return oracle.fingerprint.component
+        oracle._foreground_component = foreground
+        rows = oracle.commission_rows()
+        self.assertEqual(len(calls), 2)
+        # Closing the paired read still rejects an actual activity handoff.
+        backend.ui['generation'] = 10
+        oracle = make_oracle(backend)
+        oracle._foreground_component = Mock(side_effect=[oracle.fingerprint.component, 'other/app'])
+        with self.assertRaisesRegex(SemanticGateClosed, 'activity changed during paired observation'):
+            oracle._commission_rows_once()
 
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0].index, 0)

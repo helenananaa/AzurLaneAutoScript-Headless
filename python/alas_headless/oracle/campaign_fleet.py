@@ -208,7 +208,7 @@ class CampaignFleetOracle:
 
     def _campaign_submarine_auto_mode_once(self) -> str:
         state = self.read_state()
-        ui = self.read_ui_state()
+        ui = self._paired_ui_after_state()
         if not state.generation <= ui.generation <= state.generation + 2 or ui.image_truncated:
             raise SemanticGateClosed('submarine duty frame is incomplete')
         tabs = self._toggle_matches(ui, 'campaign/fleet-preparation/roles/tab')
@@ -245,7 +245,7 @@ class CampaignFleetOracle:
         self,
     ) -> CampaignAutoSearchRoleState:
         button_state = self.read_state()
-        ui_state = self.read_ui_state()
+        ui_state = self._paired_ui_after_state()
         if (
             not button_state.generation <= ui_state.generation <= button_state.generation + 2
             or ui_state.image_truncated
@@ -373,7 +373,7 @@ class CampaignFleetOracle:
         self, stage_code: str, *, fallback_oil_cost: Optional[int] = None
     ) -> CampaignFleetSelectionState:
         button_state = self.read_state()
-        ui_state = self.read_ui_state()
+        ui_state = self._paired_ui_after_state()
         preparation = self._campaign_fleet_preparation_state_once(
             stage_code,
             button_state=button_state,
@@ -806,7 +806,7 @@ class CampaignFleetOracle:
         """Read one coherent Button/Toggle generation pair for the dropdown."""
 
         button_state = self.read_state()
-        ui_state = self.read_ui_state()
+        ui_state = self._paired_ui_after_state()
         option_matches = tuple(
             self._toggle_matches(
                 ui_state, "campaign/fleet-preparation/option/{0}".format(index)

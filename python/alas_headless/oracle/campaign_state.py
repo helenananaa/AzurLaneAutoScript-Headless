@@ -277,7 +277,7 @@ class CampaignStateOracle(CampaignHealthOracle):
             raise SemanticGateClosed("campaign page identity is not proven")
         if self._matches(button_state, "campaign-menu/normal"):
             raise SemanticGateClosed("campaign entrance is not a chapter page")
-        ui_state = self.read_ui_state()
+        ui_state = self._paired_ui_after_state()
         if (
             ui_state.generation < button_state.generation
             or ui_state.generation > button_state.generation + 2
@@ -1339,7 +1339,7 @@ class CampaignStateOracle(CampaignHealthOracle):
     def campaign_withdraw_control(self, *, confirm: bool = False):
         """Observe the exact map retreat or its own confirmation, without input."""
         state = self.read_state()
-        ui = self.read_ui_state()
+        ui = self._paired_ui_after_state()
         if not state.generation <= ui.generation <= state.generation + 2:
             raise SemanticGateClosed('campaign withdrawal frames are incoherent')
         if confirm:

@@ -1,6 +1,7 @@
 """Tactical regression cases for the oracle."""
 
 import unittest
+from unittest.mock import Mock
 from alas_headless.semantic_oracle import TacticalSlotStatus, SemanticGateClosed
 from tests.semantic_support.observer_fixtures import (
     FakeBackend,
@@ -153,7 +154,19 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         books = oracle.tactical_books()
         book_receipt = oracle.click_tactical_book(0)
 
+        calls = []
+        def foreground():
+            calls.append('activity')
+            if len(calls) > 1:
+                backend.ui['generation'] = 13
+            return oracle.fingerprint.component
+        oracle._foreground_component = foreground
         self.assertEqual(oracle.tactical_book_skill_progress(), "900/3200")
+        self.assertEqual(len(calls), 2)
+        backend.ui['generation'] = 10
+        oracle._foreground_component = Mock(side_effect=[oracle.fingerprint.component, 'other/app'])
+        with self.assertRaisesRegex(SemanticGateClosed, 'activity changed during paired observation'):
+            oracle.tactical_book_skill_progress()
         self.assertEqual(books[0].item_id, "16024")
         self.assertEqual((books[0].genre, books[0].tier), (3, 4))
         self.assertTrue(books[0].exp_bonus)

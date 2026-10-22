@@ -1,0 +1,24 @@
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -334,7 +334,7 @@
+                             'Semantic campaign pre-sortie validation complete'
+                         )
+                     logger.info('Semantic pre-sortie: scan map preparation')
+-                    if self.appear(MAP_PREPARATION, offset=(20, 20)):
++                    if self.handle_map_preparation():
+                         logger.info('Semantic pre-sortie: map preparation active')
+                         observed_mode = (
+                             semantic_adapter.campaign_map_preparation_mode_state()
+diff --git a/module/handler/fast_forward.py b/module/handler/fast_forward.py
+--- a/module/handler/fast_forward.py
++++ b/module/handler/fast_forward.py
+@@ -402,7 +402,7 @@
+         from alas_headless import current_semantic_session
+         semantic_session = current_semantic_session()
+         if semantic_session is not None:
+-            return semantic_session.campaign_map_achievement_state().clear_percentage
++            return semantic_session.campaign_map_clear_percentage()
+ 
+         percent = color_bar_percentage(self.device.image, area=MAP_CLEAR_PERCENTAGE.area, prev_color=(231, 170, 82))
+         if self.config.MAP_CLEAR_PERCENTAGE_SHORT:

@@ -19,6 +19,13 @@ def test_actual_inherited_hard_total_reward_yields_confirmation_to_native_exit(d
         part['generation'] = generation
     assert adapter._campaign_context is None
     assert adapter.appear('CAMPAIGN_WITHDRAW_CONFIRM') is False
+    assert adapter.appear('GET_MISSION') is False
+    for probe in ('GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'GET_SHIP',
+                  'MONTHLY_PASS_NOTICE', 'BATTLE_PASS_NOTICE', 'BATTLE_PASS_NEW_SEASON',
+                  'PLAYER_CHECK', 'POPUP_SINGLE_WHITE', 'GAME_TIPS', 'DORM_TROPHY_CONFIRM',
+                  'MEOWFFICER_INFO', 'MEOWFFICER_BUY', 'MAP_PREPARATION',
+                  'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION'):
+        assert adapter.appear(probe) is False
     assert adapter.appear('AUTO_SEARCH_MENU_EXIT') is True
     assert adapter._campaign_context is None
     with pytest.raises(SemanticGateClosed):
@@ -48,6 +55,10 @@ def test_unproven_total_reward_does_not_supply_confirmation_absence(damage):
     backend.buttons['button_count'] = len(backend.buttons['buttons'])
     with pytest.raises((SemanticGateClosed, AlasSemanticUnmapped)):
         adapter.appear('CAMPAIGN_WITHDRAW_CONFIRM')
+    with pytest.raises((SemanticGateClosed, AlasSemanticUnmapped)):
+        adapter.appear('GET_MISSION')
+    with pytest.raises((SemanticGateClosed, AlasSemanticUnmapped)):
+        adapter.appear('GET_ITEMS_1')
     assert not backend.taps
 
 def retained_prompt():
@@ -56,6 +67,29 @@ def retained_prompt():
     r=json.loads(p.read_text(encoding='utf8'));b=FakeBackend(r['after']['buttons_snapshot']['buttons'])
     u=r['ui_after']['snapshot'];b.ui=make_ui(u['texts'],images=u['images'],toggles=u['toggles'])
     return b
+
+
+@pytest.mark.parametrize('damage', [None, 'foreign-text', 'duplicate-confirm'])
+def test_withdraw_modal_excludes_home_alias_without_admitting_input(damage):
+    from tests.semantic_support.observer_fixtures import make_button, make_text
+    from alas_headless import AlasSemanticUnmapped
+    root = 'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/'
+    target = make_button('custom_button_1(Clone)', root + 'button_container/custom_button_1(Clone)')
+    b = FakeBackend([target, dict(target)] if damage == 'duplicate-confirm' else [target])
+    b.ui = make_ui([make_text('是否购买?' if damage == 'foreign-text' else '真的要撤退吗?',
+                              root + 'msg_panel/content')])
+    a = AlasSemanticAdapter(make_oracle(b), package_gate=lambda: None)
+    for probe in ('GOTO_MAIN', 'GOTO_MAIN_WHITE', 'RPG_HOME'):
+        if damage is None:
+            assert a.appear(probe) is False
+        elif damage == 'foreign-text':
+            assert a.oracle.inherited_campaign_withdraw_control(confirm=True) is None
+            with pytest.raises(SemanticGateClosed, match='not actionable'):
+                a._click_priority('CAMPAIGN_WITHDRAW_CONFIRM')
+        else:
+            with pytest.raises((SemanticGateClosed, AlasSemanticUnmapped)):
+                a.appear(probe)
+    assert b.taps == []
 
 def test_inherited_prompt_reuses_exact_native_withdraw_control():
     b=retained_prompt();o=make_oracle(b)
@@ -71,12 +105,40 @@ def test_native_confirmation_probe_can_precede_inherited_map_retreat():
     a._frame_or_live_observation_oracle = lambda: o
     assert a._appear_priority('CAMPAIGN_WITHDRAW_CONFIRM') is False
     assert a._appear_priority('WITHDRAW') is True
+    for probe in ('GET_ITEMS_1', 'GET_SHIP', 'GAME_TIPS', 'MAP_PREPARATION'):
+        assert a._appear_priority(probe) is False
     o.click_campaign_withdraw = Mock()
     o.inherited_campaign_withdraw_control = Mock(return_value=None)
     a._fresh_input_oracle = lambda: o
     with pytest.raises(SemanticGateClosed, match='not actionable'):
         a._click_priority('WITHDRAW')
     o.click_campaign_withdraw.assert_not_called()
+
+
+@pytest.mark.parametrize('damage', [None, 'foreign-popup', 'missing-retreat'])
+def test_typed_inherited_map_owns_popup_absence_only_when_uncovered(damage):
+    from tests.semantic_support.campaign_fixtures import make_campaign_map_backend
+    from tests.semantic_support.observer_fixtures import make_button
+    from alas_headless import AlasSemanticUnmapped
+    b = make_campaign_map_backend(generations=(10,))
+    b.buttons = b.buttons_sequence.pop(0)
+    b.ui = b.ui_sequence.pop(0)
+    if damage != 'missing-retreat':
+        b.buttons['buttons'].append(make_button('retreat_button',
+            'OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/bottom_stage/Normal/retreat_button'))
+    if damage == 'foreign-popup':
+        b.buttons['buttons'].append(make_button('custom_button_1(Clone)',
+            'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)'))
+    b.buttons['button_count'] = len(b.buttons['buttons'])
+    o = make_oracle(b)
+    a = AlasSemanticAdapter(o, package_gate=lambda: None)
+    for probe in ('GET_ITEMS_1', 'GET_SHIP', 'GAME_TIPS', 'MAP_PREPARATION'):
+        if damage is None:
+            assert a.appear(probe) is False
+        else:
+            with pytest.raises((SemanticGateClosed, AlasSemanticUnmapped)):
+                a.appear(probe)
+    assert b.taps == []
 
 @pytest.mark.parametrize('duplicate',[False,True])
 def test_confirmation_text_before_button_yields_without_input(duplicate):
