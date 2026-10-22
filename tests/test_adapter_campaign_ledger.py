@@ -1,6 +1,7 @@
 import unittest
 from dataclasses import fields
 from types import SimpleNamespace
+from unittest.mock import Mock
 
 from alas_headless.alas_adapter import AlasSemanticAdapter, _CampaignFlowContext
 from alas_headless.semantic_oracle import SemanticGateClosed
@@ -109,6 +110,18 @@ class CampaignLedgerTests(unittest.TestCase):
         with self.assertRaises(SemanticGateClosed):
             adapter.click(self.stage_button())
         self.assertEqual(attempts, ["12-4"])
+
+    def test_stage_entry_uses_prepared_frame_for_wallet_and_target(self):
+        adapter, live = self.adapter()
+        prepared = FakeOracle()
+        live.campaign_oil = Mock(side_effect=AssertionError('extra live wallet read'))
+        live.click_campaign_stage = Mock(side_effect=AssertionError('extra live stage read'))
+        adapter.begin_campaign_pre_sortie('12-4')
+        with adapter.prepared_input_frame(lambda: prepared):
+            receipt = adapter.click(self.stage_button())
+        self.assertEqual(receipt.semantic_id, 'campaign/stage/12-4')
+        self.assertEqual(prepared.click_calls, ['campaign/stage/12-4'])
+        self.assertEqual(adapter._action_ledger.remaining('campaign.stage_entry'), 0)
 
     def test_closed_ledger_refuses_campaign_before_backend(self):
         adapter, oracle = self.adapter()

@@ -167,7 +167,7 @@ class CampaignNavigationOracle:
 
     def _campaign_map_entry_state_once(self) -> CampaignMapEntryState:
         button_state = self.read_state()
-        ui_state = self.read_ui_state()
+        ui_state = self._paired_ui_after_state()
         return self._campaign_map_entry_state_from_snapshots(button_state, ui_state)
 
     @staticmethod

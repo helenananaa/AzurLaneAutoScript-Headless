@@ -8,7 +8,13 @@ param(
 
     [string]$Distro = 'Ubuntu-22.04',
 
-    [string]$ProjectArtifactDirectory
+    [string]$ProjectArtifactDirectory,
+
+    [ValidatePattern('^[a-z][a-z0-9-]{0,47}$')]
+    [string]$ProjectInstance = 'projectlocal',
+
+    [ValidateRange(1, 65535)]
+    [int]$ProjectAdbPort = 5556
 )
 
 $ErrorActionPreference = 'Stop'
@@ -94,15 +100,15 @@ if ($Profile -eq 'Project') {
     }
     $projectOci = ($projectOciOutput | Out-String).Trim()
     $profileEnvironment = @(
-        'ALAS_REDROID_LOCAL_CONTAINER=alas-redroid-wsl-projectlocal',
+        "ALAS_REDROID_LOCAL_CONTAINER=alas-redroid-wsl-$ProjectInstance",
         "ALAS_REDROID_LOCAL_IMAGE=$projectManifestDigest",
-        'ALAS_REDROID_LOCAL_DATA_NAME=projectlocal-data',
-        'ALAS_REDROID_LOCAL_ADB_PORT=5556',
+        "ALAS_REDROID_LOCAL_DATA_NAME=$ProjectInstance-data",
+        "ALAS_REDROID_LOCAL_ADB_PORT=$ProjectAdbPort",
         'ALAS_REDROID_LOCAL_CONFIRM_IMMERSIVE=1',
         "ALAS_REDROID_LOCAL_OCI_TAR=$projectOci",
         "ALAS_REDROID_LOCAL_OCI_TAR_SHA256=$projectOciSha256"
     )
-    $adbPort = 5556
+    $adbPort = $ProjectAdbPort
 } elseif ($Profile -eq 'Api31') {
     $profileEnvironment = @(
         'ALAS_REDROID_LOCAL_CONTAINER=alas-redroid-wsl-api31',
@@ -167,6 +173,11 @@ function Stop-KeepAlive {
 }
 
 function Test-ManagedContainerRunning {
+    # Named Project instances created by this manager carry this label. Keep
+    # legacy names below for containers created before labels were introduced.
+    $named = & wsl.exe -d $Distro -- docker --host unix:///var/run/docker.sock --config $dockerConfig ps --filter 'label=io.github.alas-headless.runtime=redroid-wsl' --format '{{.Names}}'
+    if ($LASTEXITCODE -ne 0) { throw 'Failed to inspect managed Redroid containers' }
+    if (-not [string]::IsNullOrWhiteSpace(($named | Out-String))) { return $true }
     foreach ($name in @('alas-redroid-wsl-localdev', 'alas-redroid-wsl-projectdev', 'alas-redroid-wsl-projectlocal', 'alas-redroid-wsl-api31')) {
         $running = & wsl.exe -d $Distro -- docker --host unix:///var/run/docker.sock --config $dockerConfig container inspect --format '{{.State.Running}}' $name 2>$null
         if ($LASTEXITCODE -eq 0 -and ($running | Out-String).Trim() -eq 'true') {
@@ -187,9 +198,10 @@ switch ($Action) {
             package = 'com.bilibili.azurlane'
             component = 'com.bilibili.azurlane/com.manjuu.azurlane.MainActivity'
             host_class = 'windows-wsl2-x86_64-redroid'
-            container_id = 'alas-redroid-wsl-projectlocal'
+            container_id = "alas-redroid-wsl-$ProjectInstance"
             image_manifest_digest = $projectManifestDigest
-            userdata_path = "$linuxHome/.local/share/alas-redroid/projectlocal-data"
+            userdata_path = "$linuxHome/.local/share/alas-redroid/$ProjectInstance-data"
+            project_instance = $ProjectInstance
             manager_script = $PSCommandPath
             project_artifact_directory = $projectArtifactDirectoryResolved
             distro = $Distro

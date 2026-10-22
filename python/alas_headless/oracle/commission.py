@@ -36,7 +36,7 @@ class CommissionOracle:
         if (not targets[0].active_in_hierarchy or not targets[0].active_and_enabled
                 or self._blocking_rules(state, 'reward/commission/finish')):
             return False
-        ui = self.read_ui_state()
+        ui = self._paired_ui_after_state()
         if not state.generation <= ui.generation <= state.generation + 2:
             raise SemanticGateClosed('commission oil rejection snapshots are incoherent')
         tips = [t for t in ui.texts if t.path.endswith(
@@ -95,7 +95,7 @@ class CommissionOracle:
                 "commission page has neither indexed rows nor the exact empty marker"
             )
 
-        ui_state = self.read_ui_state()
+        ui_state = self._paired_ui_after_state()
         if ui_state.image_truncated or ui_state.method_mask & 0x8 == 0:
             raise SemanticGateClosed("typed commission Image snapshot is incomplete")
         if (
@@ -233,7 +233,7 @@ class CommissionOracle:
             button_state, "commission/scroll"
         ):
             raise SemanticGateClosed("commission scroll page identity is not proven")
-        ui_state = self.read_ui_state()
+        ui_state = self._paired_ui_after_state()
         if ui_state.image_truncated or ui_state.method_mask & 0x8 == 0:
             raise SemanticGateClosed(
                 "typed commission scroll Image snapshot is incomplete"
@@ -506,7 +506,7 @@ class CommissionOracle:
             button_state, "commission/page/back"
         ):
             raise SemanticGateClosed("commission page identity is not proven")
-        ui_state = self.read_ui_state()
+        ui_state = self._paired_ui_after_state()
         if (
             ui_state.generation < button_state.generation
             or ui_state.generation > button_state.generation + 2
@@ -640,7 +640,7 @@ class CommissionOracle:
         back = self._unique(state, "commission/detail/back")
         if not back.actionable:
             raise SemanticGateClosed("running commission detail is not actionable")
-        ui_state = self.read_ui_state()
+        ui_state = self._paired_ui_after_state()
         if not state.generation <= ui_state.generation <= state.generation + 2:
             raise SemanticGateClosed("running commission detail snapshots are incoherent")
         suffix = "/maskDetail/detailPanel/btn/giveup"
@@ -702,7 +702,7 @@ class CommissionOracle:
                     "commission detail input is not structurally valid"
                 )
 
-        ui_state = self.read_ui_state()
+        ui_state = self._paired_ui_after_state()
         if (
             ui_state.generation < button_state.generation
             or ui_state.generation > button_state.generation + 2
@@ -825,7 +825,7 @@ class CommissionOracle:
     ):
         """Classify a fresh client rejection without authorizing recovery input."""
         state = self.read_state()
-        ui = self.read_ui_state()
+        ui = self._paired_ui_after_state()
         tips = tuple(t for t in ui.texts if t.path.endswith(
             'UIOverlay/TipPanel(Clone)/Grid/toolTip(Clone)/Text')
             and t.active_in_hierarchy and t.active_and_enabled)
@@ -863,7 +863,7 @@ class CommissionOracle:
                 or self._blocking_rules(state, 'commission/detail/back')
                 or self._blocking_rules(state, 'commission/detail/start')):
             raise SemanticGateClosed('pending commission detail is blocked')
-        ui = self.read_ui_state()
+        ui = self._paired_ui_after_state()
         if (ui.image_truncated or ui.method_mask & 0x8 == 0
                 or not state.generation <= ui.generation <= state.generation + 2):
             raise SemanticGateClosed('pending commission detail snapshot is incomplete or incoherent')
@@ -923,7 +923,7 @@ class CommissionOracle:
                 raise SemanticGateClosed(
                     "running commission detail identity is not proven"
                 )
-            ui_state = self.read_ui_state()
+            ui_state = self._paired_ui_after_state()
             if ui_state.image_truncated or ui_state.method_mask & 0x8 == 0:
                 raise SemanticGateClosed(
                     "running commission detail Image snapshot is incomplete"
@@ -1018,7 +1018,7 @@ class CommissionOracle:
         if len(row_buttons) != 1:
             raise SemanticGateClosed("started commission row is absent or ambiguous")
 
-        ui_state = self.read_ui_state()
+        ui_state = self._paired_ui_after_state()
         if ui_state.image_truncated or ui_state.method_mask & 0x8 == 0:
             raise SemanticGateClosed(
                 "commission start proof Image snapshot is incomplete"

@@ -146,6 +146,7 @@ start_container() {
     else
         "${docker_cmd[@]}" run -d \
             --name "$container" \
+            --label io.github.alas-headless.runtime=redroid-wsl \
             --privileged \
             --restart no \
             -v "$data_root:/data" \

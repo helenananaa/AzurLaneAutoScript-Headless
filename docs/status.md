@@ -1,5 +1,19 @@
 # Validation status
 
+2026-10-22: Local Windows/WSL Redroid completed one uninterrupted original ALAS Main
+12-4 run: native return true, RunCount 0, typed result exit and stage postcondition,
+379.484 seconds. A separate original UI check returned home; the run used 317 oil and
+no gems. Earlier diagnostics used another 62 oil. Windows commit exhaustion was resolved
+by reclaiming clean WSL file cache; subsequent sampling retained at least 37.3 GiB commit
+headroom with no new Event 2004. The AVD network failure was traced to its 2 GB data limit;
+disabling it persisted across reboot and allowed update, login and native Benchmark.
+The 225-member patch restores ALAS's existing preparation-animation wait. Final focused
+regression: 558 passed, 8 historical-fixture skips; patch/configuration/matrix gates passed.
+Both backends completed the same short Benchmark; AVD was faster. No continuous scheduler
+activation, full manual-map qualification or support-matrix promotion.
+See [completion evidence and comparison](redroid-completion-20261022.zh-CN.md) and
+[retained first-round failures](redroid-gameplay-20261022.zh-CN.md).
+
 2026-09-13: Shipyard level parsing now tolerates numeric font-size metadata and plain text. 79 focused/isolation tests passed; original helpers observed 11 ships across series 2 and 7, restored series 9 and returned home. No actual FATE panel was found; Shipyard stays B. See [scope](shipyard-fate-survey-20260913.zh-CN.md).
 
 2026-09-13: Login shipyard home mapping fixed. Original LoginHandler shipyard return and subsequent original navigation to main passed live; cold-start notice trigger chain was not rerun. 99 focused checks passed; five pre-existing facade call-sequence parity failures remain. See [evidence](login-shipyard-recovery-20260913.zh-CN.md).

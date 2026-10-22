@@ -646,3 +646,35 @@ userdata 写入和镜像诊断文件在回滚后均消失。原 Project 随后�
 完整命令、失败样本与支持范围见
 [本地镜像回滚演练](redroid-wsl-rollback-20260907.zh-CN.md)。缓存的旧 FBE 镜像
 不能用于当前 host-directory 数据；受控候选 PASS 不代表真实版本回退已资格化。
+
+## 17. 独立账号实例与原 ALAS 实跑
+
+Project manager 支持命名实例。默认仍是 `projectlocal` / 5556；例如独立的
+`gameplay` 使用 `alas-redroid-wsl-gameplay`、`gameplay-data` 和 5558。实例名只允许
+小写字母开头的小写字母、数字和连字符，不能作为任意宿主路径。
+
+```powershell
+& scripts/windows/manage-redroid-wsl-local-dev.ps1 -Action Start -Profile Project `
+    -ProjectInstance gameplay -ProjectAdbPort 5558
+& scripts/windows/manage-redroid-wsl-local-dev.ps1 -Action Config -Profile Project `
+    -ProjectInstance gameplay -ProjectAdbPort 5558 |
+    Set-Content -Encoding utf8 artifacts/redroid-gameplay-runtime-config.json
+```
+
+统一 backend 会把实例和端口传回同一个 manager，并核对实际容器、userdata、镜像和
+ADB 绑定后才执行 Start/Stop。容器带有 manager 标签；只要其他受管实例仍在运行，
+停止一个实例就不会结束共享 WSL 保活。已有 userdata 根权限继续由 Android init 管理。
+
+已有账号迁移应在源容器停止后保存独立副本，保留源目录。不要让两个实例共用可写
+userdata，也不要同时登录同一个游戏账号。临时 overlay 验证成功后，可在源停止、
+overlay 只读挂载时保留完整独立目录；卸载 overlay 后再启动命名实例。
+
+账号实例继续使用原 ALAS 配置、任务与调度。为验证复制配置时关闭错误截图与外发
+通知，并限定本次原生任务次数。APK 的 `driver_revision` 可能相同而 observer 内容
+不同；部署需保留实际 APK 哈希和可回退副本，并以任务所需 typed 能力确认可用性。
+不能用旧 APK 缺少的 raycast 信息作为放宽输入边界的理由。
+
+2026-10-22 的首轮实跑见
+[本地 Redroid 账号任务验证](redroid-gameplay-20261022.zh-CN.md)；Windows 提交内存、
+AVD 2 GB 流量上限、原 ALAS 动画等待及后续补验见
+[完整任务与 AVD 对照](redroid-completion-20261022.zh-CN.md)。

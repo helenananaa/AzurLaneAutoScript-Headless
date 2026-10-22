@@ -32,6 +32,7 @@ class WslRedroidRuntimeConfig:
     userdata_path: str
     manager_script: str
     project_artifact_directory: str
+    project_instance: str = "projectlocal"
     distro: str = "Ubuntu-22.04"
     wsl: str = "wsl.exe"
     powershell: str = "powershell.exe"
@@ -81,6 +82,8 @@ class WslRedroidRuntimeConfig:
                 raise ValueError("WSL Project command/path is missing")
         if not isinstance(self.allow_sdk_activity_reentry, bool):
             raise ValueError("SDK Activity recovery switch must be boolean")
+        if not re.fullmatch(r"[a-z][a-z0-9-]{0,47}", self.project_instance):
+            raise ValueError("WSL Project instance name is malformed")
 
 
 class WslRedroidBackend(RedroidBackend):
@@ -298,6 +301,8 @@ class WslRedroidBackend(RedroidBackend):
             self.config.manager_script, "-Profile", "Project",
             "-Distro", self.config.distro, "-ProjectArtifactDirectory",
             self.config.project_artifact_directory,
+            "-ProjectInstance", self.config.project_instance,
+            "-ProjectAdbPort", self.serial.rsplit(":", 1)[1],
         )
         selected = self._json(self._command("wsl-project-config", argv + ("-Action", "Config")), "wsl-project-config-failed")
         if not isinstance(selected, dict) or any(selected.get(name) != getattr(self.config, name) for name in ("container_id", "serial", "userdata_path", "image_manifest_digest")):

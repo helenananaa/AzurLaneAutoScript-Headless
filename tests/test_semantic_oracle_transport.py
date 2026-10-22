@@ -9,6 +9,27 @@ from types import SimpleNamespace
 from unittest import mock
 
 
+@pytest.mark.parametrize('winerror', [1450, 5])
+def test_host_spawn_failure_keeps_error_code_without_replaying_input(tmp_path, winerror):
+    import json
+    from alas_headless.runtime_trace import RuntimeTraceRecorder
+    path = tmp_path / 'trace.jsonl'
+    trace = RuntimeTraceRecorder(path, enabled=True)
+    bridge = AdbObserverBridge('device-1', PACKAGE, trace=trace)
+    failure = OSError('private diagnostic must not enter trace')
+    failure.winerror = winerror
+    with mock.patch('alas_headless.semantic_oracle.subprocess.run', side_effect=failure) as run:
+        with pytest.raises(ObserverTransportError) as caught:
+            bridge._run(('shell', 'input', 'tap', '12', '34'))
+        assert caught.value.__cause__ is failure
+        assert run.call_count == 1
+        assert ('WinError 1450' in str(caught.value)) == (winerror == 1450)
+    trace.close()
+    raw = path.read_text(encoding='utf-8')
+    assert 'private diagnostic' not in raw
+    assert json.loads(raw)['fields']['winerror'] == winerror
+
+
 @pytest.mark.parametrize('flags,methods', [(15, 15), (31, 15), (15, 31), (0x100F, 0x100F)])
 def test_state_read_accepts_additive_publisher_capabilities(flags, methods):
     backend = FakeBackend([])

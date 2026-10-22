@@ -380,16 +380,30 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertEqual(
             receipt.semantic_id, "campaign/map-preparation/auto-search"
         )
+        oracle.state_generation = receipt.generation + 1
+        with self.assertRaisesRegex(SemanticGateClosed, "state-change postcondition"):
+            adapter.click(NamedButton("AUTO_SEARCH_ON"))
         oracle.toggle_selected_values[
             "campaign/map-preparation/auto-search"
         ] = False
         self.assertTrue(adapter.appear(NamedButton("AUTO_SEARCH_OFF")))
-        with self.assertRaisesRegex(SemanticGateClosed, "single-use"):
+        oracle.state_generation = receipt.generation
+        with self.assertRaisesRegex(SemanticGateClosed, "state-change postcondition"):
+            adapter.click(NamedButton("AUTO_SEARCH_OFF"))
+        oracle.state_generation = receipt.generation + 1
+        with self.assertRaisesRegex(SemanticGateClosed, "resource state changed"):
+            adapter.click(NamedButton("AUTO_SEARCH_ON"))
+        adapter.click(NamedButton("AUTO_SEARCH_OFF"))
+
+        # Even a proven switch cannot act after map preparation was submitted.
+        adapter._campaign_context.map_preparation_receipt = receipt
+        with self.assertRaisesRegex(SemanticGateClosed, "before map preparation"):
             adapter.click(NamedButton("AUTO_SEARCH_OFF"))
 
         self.assertEqual(
             oracle.click_calls,
-            ["campaign/stage/12-4", "campaign/map-preparation/auto-search"],
+            ["campaign/stage/12-4", "campaign/map-preparation/auto-search",
+             "campaign/map-preparation/auto-search"],
         )
 
     def test_campaign_auto_search_state_has_single_typed_fast_path(self):

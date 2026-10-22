@@ -641,6 +641,18 @@ class CoreOracle:
             image_source_capacity=deferred("image", "image_source_capacity"),
         )
 
+    def _paired_ui_after_state(self) -> UiState:
+        """Finish an already-started Button/UI pair before closing its activity check.
+
+        Callers first validate read_state(), then retain their own generation
+        and capability checks. Slow ADB activity reads must remain outside the
+        endpoint pairing window; actual actions also recheck before dispatch.
+        """
+        state = self.read_ui_state(check_foreground=False)
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed during paired observation")
+        return state
+
     def read_text_state(self) -> UiState:
         """Require the text family without consuming unrelated UI families."""
         state = self.read_ui_state()

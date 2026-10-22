@@ -1,0 +1,242 @@
+{
+  "schema": "alas-headless.local-redroid-gameplay/v1",
+  "date": "2026-10-22",
+  "scope": "Local Windows/WSL x86_64, one CN account, original ALAS tasks; no matrix support promotion",
+  "configuration": {
+    "schema": "alas-headless.runtime-config/v1",
+    "backend": "redroid",
+    "container_engine": "wsl-docker",
+    "serial": "127.0.0.1:5558",
+    "package": "com.bilibili.azurlane",
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "host_class": "windows-wsl2-x86_64-redroid",
+    "container_id": "alas-redroid-wsl-gameplay",
+    "image_manifest_digest": "sha256:2e6e03e3ef33c08acf91a13b1cd9cc4a6a5d33d2d579511760c85ea7bb6c8e5a",
+    "userdata_path": "/home/helenanana/.local/share/alas-redroid/gameplay-data",
+    "project_instance": "gameplay",
+    "manager_script": "E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-redroid-x86_64\\scripts\\windows\\manage-redroid-wsl-local-dev.ps1",
+    "project_artifact_directory": "E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-localdata\\redroid-x86_64-candidates\\current",
+    "distro": "Ubuntu-22.04",
+    "adb": "F:\\platform-tools\\adb.exe"
+  },
+  "identity": {
+    "alas_upstream": "81ccf63b4540f00241628c82a58c02c7a2bb11af",
+    "patch_series_members": 224,
+    "game_apk": "9.7.10/9710",
+    "game_resources": "9.7.411",
+    "angle_apk_sha256": "7433f076161bb8c51eafa2fa5a2902ccd3aa9f187379bee3244431afab02b29e",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "renderer": "ANGLE NULL",
+    "display": [
+      1280,
+      720
+    ]
+  },
+  "data": {
+    "standalone_userdata": true,
+    "source_project_preserved": true,
+    "avd_reference_read_only_boot": true,
+    "continuous_scheduler_started": false
+  },
+  "final_state": {
+    "backend": "redroid",
+    "serial": "127.0.0.1:5558",
+    "container_running": true,
+    "main_visible": true,
+    "health": [
+      {
+        "generation": 458,
+        "ui_generation": 458,
+        "pid": 1610,
+        "age_ms": 270.0
+      },
+      {
+        "generation": 472,
+        "ui_generation": 472,
+        "pid": 1610,
+        "age_ms": 283.0
+      }
+    ],
+    "resources": {
+      "oil": 5665,
+      "gold": 69499,
+      "gem": 3505
+    },
+    "receipt": {
+      "path": "artifacts/redroid-product-20261022/redroid-final.json",
+      "sha256": "ffe7f5d36d5ee36b057a19a2097d3ba9ff1f7eb80148886025860eecbc22fb8e"
+    },
+    "avd_reference_stopped": true
+  },
+  "tasks": {
+    "Commission": {
+      "returned": true,
+      "starts": 4,
+      "native_next_run": "2026-10-22 17:51:24",
+      "receipt": {
+        "path": "artifacts/redroid-product-20261022/scheduler-6.json",
+        "sha256": "24f314691b671bb126d97216703f1a41caa5c1b646a66c296cf1a0db753be691"
+      },
+      "receipt_scope": "Commission task succeeded; later Tactical failed in this same historical attempt"
+    },
+    "Tactical": {
+      "returned": true,
+      "courses_started": 4,
+      "books": {
+        "blue_t4": 1,
+        "red_t3": 3
+      },
+      "native_next_run": "2026-10-23 01:03:06",
+      "receipt": {
+        "path": "artifacts/redroid-product-20261022/scheduler-9.json",
+        "sha256": "5afeac48118cbd4c895dc34bc833e40a7b2a00ec20cf8a8f532d6a62dce2abaa"
+      }
+    },
+    "Main": {
+      "returned": false,
+      "game_reached_total_reward": true,
+      "stage": "12-4",
+      "mode": "normal",
+      "fleets": [
+        1,
+        2,
+        0
+      ],
+      "double_book": false,
+      "native_run_count_completion_verified": false,
+      "failure": "Windows WinError 1450 while spawning ADB foreground query; native process interrupted during boss battle",
+      "receipt": {
+        "path": "artifacts/redroid-product-20261022/main-4.json",
+        "sha256": "2c37d3d9fc10242c1ae4631b6945517ce90b32b0c46ec000368ee6097f41df70"
+      },
+      "game_result": {
+        "path": "artifacts/redroid-product-20261022/interrupted-main-observation.json",
+        "sha256": "c130b21d91aa87fd912ff08ec4ec84d9bc4c8a1dd18a5997141be47fe1827af2"
+      },
+      "result_exit": {
+        "path": "artifacts/redroid-product-20261022/post-result-exit-observation.json",
+        "sha256": "c873b6e758de1c14107e801db9e610f69ac93706e94972098031b89b060f04f7"
+      },
+      "native_return_home": {
+        "path": "artifacts/redroid-product-20261022/redroid-after-main-r4.json",
+        "sha256": "7d207fee8085675ea4ba112d3a229a89b3160863daec7f872a3a085ce858e898"
+      },
+      "recovery_scope": "Separate original UI processes; initial exit postcondition failed on Button/UI pairing, then corrected and returned home; not uninterrupted Main success"
+    }
+  },
+  "resources": {
+    "before_main": {
+      "oil": 5982,
+      "gold": 67435,
+      "gem": 3505
+    },
+    "after_main": {
+      "oil": 5665,
+      "gold": 69499,
+      "gem": 3505
+    },
+    "main_net_oil_consumed": 317,
+    "premium_spent": 0,
+    "combat_sample": {
+      "seconds": 179.29999999999563,
+      "container_cpu_percent": 186.68731957613392,
+      "memory_current_bytes_range": [
+        4753494016,
+        4810305536
+      ],
+      "receipt": {
+        "path": "artifacts/redroid-product-20261022/resources-combat/manifest.json",
+        "sha256": "2a31247874f0e91898475a8f08c86a943e81a7f7e30a292c10c026943c6f5cf1"
+      }
+    }
+  },
+  "recovery": {
+    "game_cold_restart": true,
+    "container_restart": true,
+    "container_started_before": "2026-10-22T08:38:36.675091179Z",
+    "container_started_after": "2026-10-22T09:24:03.136649597Z",
+    "account_retained": true,
+    "advancing_coherent_main_frames": [
+      {
+        "generation": 583,
+        "ui_generation": 583,
+        "pid": 1611,
+        "age_ms": 245.0
+      },
+      {
+        "generation": 598,
+        "ui_generation": 598,
+        "pid": 1611,
+        "age_ms": 271.0
+      }
+    ],
+    "receipt": {
+      "path": "artifacts/redroid-product-20261022/container-recovery.json",
+      "sha256": "d3dfe2aa2379e1c11d3ef012dc58941d5444f9f3bfbe382c878ffb037728dad7"
+    },
+    "login_receipt": {
+      "path": "artifacts/redroid-product-20261022/redroid-after-container.json",
+      "sha256": "406a1c9b83e224be349dbc64e0548d1db0ef509074b76c5017adc076ed203837"
+    }
+  },
+  "comparison": {
+    "scope": "Original Benchmark; best 12 of 15; not full-task throughput or matched Android versions. Shared host had concurrent workloads, not isolated. CPU=one logical CPU at 100%; guest game PSS excludes emulator/container overhead.",
+    "redroid": {
+      "native_benchmark_samples": 15,
+      "native_best_sample_count": 12,
+      "observe_seconds": 0.3272478666664635,
+      "reversible_ui_seconds": 1.4338256499983497,
+      "idle_game_cpu_percent": 110.64924782262494,
+      "idle_game_pss_kib": 1525110
+    },
+    "avd": null,
+    "avd_passed": false,
+    "avd_failure": "Read-only AVD DNS resolution failed with both default DNS and explicit host WLAN DNS 192.168.5.1; game latest-version fetch could not proceed",
+    "redroid_receipt": {
+      "path": "artifacts/redroid-product-20261022/redroid-benchmark-r2.json",
+      "sha256": "5c2a5369b2a9b6e0235ad4ad5f683c2af3070638a683ed04f5b66efdc6356f4c"
+    },
+    "avd_receipt": {
+      "path": "artifacts/redroid-product-20261022/avd-benchmark-r2.json",
+      "sha256": "badb0fb54af08b00b590cbf9c3c1802745acbd7412b011b3f0c909fe8c9d83bc"
+    }
+  },
+  "validation": {
+    "accumulated_tests_passed": 344,
+    "accumulated_xml": {
+      "path": "artifacts/redroid-product-20261022/final-accumulated.xml",
+      "sha256": "fb7f0c0f4dfc3c2586437fb36b5d28f270ba31ebca9ec284c8a6d41441b98766"
+    },
+    "later_inherited_tests": {
+      "passed": 115,
+      "skipped_retained_fixture_unavailable": 8,
+      "xml": {
+        "path": "artifacts/redroid-product-20261022/inherited-recovery-r2.xml",
+        "sha256": "9327f9a8226d5d786b53dade2535f95c170e5d67dd8609f142c283b9edb8f28c"
+      }
+    },
+    "later_campaign_recovery_tests": {
+      "passed": 59,
+      "skipped_retained_fixture_unavailable": 8,
+      "xml": {
+        "path": "artifacts/redroid-product-20261022/campaign-recovery.xml",
+        "sha256": "71b9ed3b465b2b6647c9505f578b43e8c6cf59450ad3a6d77ff7e2ffd76b31e3"
+      }
+    },
+    "counts_overlap": true,
+    "patch_series_passed": true,
+    "patch_tree_passed": true,
+    "support_matrix_passed": true,
+    "configuration_matrix_passed": true
+  },
+  "not_qualified": [
+    "uninterrupted native Main task completion",
+    "host resource exhaustion resolved",
+    "long-running unattended service",
+    "full ALAS task and field matrix on Redroid",
+    "native Linux Redroid",
+    "clean Android build reproducibility",
+    "real-version image rollback",
+    "paired full-task speed improvement"
+  ]
+}

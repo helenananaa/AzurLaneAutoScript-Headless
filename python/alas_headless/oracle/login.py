@@ -550,7 +550,17 @@ class LoginOracle:
             return False
 
         change_server = active_text("LoginUI2(Clone)/adapt/current_server/Text")
-        server_name = active_text("LoginUI2(Clone)/adapt/current_server/server_name")
+        server_name = tuple(
+            text for text in ui_state.texts
+            if text.path.endswith("LoginUI2(Clone)/adapt/current_server/server_name")
+            and text.active_in_hierarchy and text.active_and_enabled
+        )
+        server_name_unset = not server_name or (
+            len(server_name) == 1
+            and not server_name[0].truncated
+            and server_name[0].bounds is not None
+            and not server_name[0].text.strip()
+        )
         versions = active_text("LoginUI2(Clone)/adapt/version")
         progress = active_text("UpdatePanel/progressInfo")
         matched = bool(
@@ -558,7 +568,10 @@ class LoginOracle:
             and len(login_root) == 1
             and len(change_server) == 1
             and change_server[0].text.strip() == "点击更换"
-            and not server_name
+            # The updated client retains one empty label instead of removing
+            # it. A populated or ambiguous server label is still a normal
+            # login surface, never evidence for an update cold restart.
+            and server_name_unset
             and len(versions) == 1
             and re.fullmatch(r"ver [0-9]+\.[0-9]+\.[0-9]+", versions[0].text.strip())
             and not progress

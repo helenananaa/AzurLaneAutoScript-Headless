@@ -434,5 +434,24 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
             ]
         )
 
-        self.assertTrue(oracle.login_update_restart_required())
-        self.assertFalse(oracle.login_update_restart_required())
+        login_texts = backend.ui['texts']
+        server_path = 'root/UICamera/Canvas/UIMain/LoginUI2(Clone)/adapt/current_server/server_name'
+        cases = (
+            ('absent', [], True),
+            ('empty', [make_text('', server_path)], True),
+            ('whitespace', [make_text('  ', server_path)], True),
+            ('selected-server', [make_text('海域二区', server_path)], False),
+            ('duplicate-empty', [make_text('', server_path), make_text('', server_path)], False),
+            ('truncated-empty', [dict(make_text('', server_path), flags=271 | 0x10)], False),
+        )
+        for name, labels, expected in cases:
+            with self.subTest(name=name):
+                backend.ui = make_ui([make_text('正在检查更新...', 'root/Overlay/UIMain/UpdatePanel/progressInfo')])
+                oracle = make_oracle(backend)
+                self.assertTrue(oracle.login_update_in_progress())
+                backend.ui = make_ui(login_texts + labels)
+                self.assertEqual(oracle.login_update_restart_required(), expected, name)
+                self.assertFalse(oracle.login_update_restart_required())
+                # The same opening surface during ordinary startup has no
+                # observed update and must not request a cold restart.
+                self.assertFalse(make_oracle(backend).login_update_restart_required())

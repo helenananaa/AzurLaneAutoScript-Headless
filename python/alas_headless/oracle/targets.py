@@ -129,7 +129,9 @@ class TargetsOracle:
         ui_state: Optional[UiState] = None
         for attempt in range(8):
             candidate_buttons = self.read_state()
-            candidate_ui = self.read_ui_state()
+            # The Button read checks foreground; dispatch checks it again.
+            # Keep that slow Android query outside this endpoint pair.
+            candidate_ui = self.read_ui_state(check_foreground=False)
             if candidate_ui.method_mask & 0x1 == 0:
                 raise SemanticGateClosed("typed Unity Toggle snapshot is incomplete")
             if (
@@ -354,7 +356,11 @@ class TargetsOracle:
     def _coherent_image_input_states(self) -> Tuple[OracleState, UiState]:
         """Read both endpoints again before input when a transition splits them."""
         button_state = self.read_state()
-        ui_state = self.read_ui_state()
+        # read_state checks foreground before this pair; click_image checks it
+        # again immediately before dispatch. A redundant ADB activity dump
+        # between endpoints can itself advance Unity beyond the coherent pair.
+        # Keep UI identity/freshness validation and the same generation bound.
+        ui_state = self.read_ui_state(check_foreground=False)
         if ui_state.image_truncated or ui_state.method_mask & 0x8 == 0:
             raise SemanticGateClosed("typed Unity Image snapshot is incomplete")
         if (

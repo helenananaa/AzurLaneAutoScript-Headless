@@ -1,6 +1,6 @@
 import json
 import itertools
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from unittest.mock import patch
 
 import pytest
@@ -65,6 +65,37 @@ def test_manager_target_must_match_selected_container(tmp_path):
     with pytest.raises(RuntimeIdentityMismatch, match="manager-target"):
         backend._manager("start", "Start")
     assert not any(call.mutating for call in executor.calls)
+
+
+@pytest.mark.parametrize('wrong_target', [False, True])
+def test_named_project_restart_targets_its_own_userdata(tmp_path, wrong_target):
+    backend, executor, info = setup_backend(tmp_path)
+    config = replace(backend.config, project_instance='gameplay', serial='127.0.0.1:5558',
+        container_id='alas-redroid-wsl-gameplay', userdata_path='/home/test/gameplay-data')
+    backend = WslRedroidBackend(config, executor)
+    info['Name'] = '/' + config.container_id
+    info['Mounts'][0]['Source'] = config.userdata_path
+    info['HostConfig']['PortBindings']['5555/tcp'][0]['HostPort'] = '5558'
+    executor.results['wsl-container-inspect'] = (0, json.dumps([info]), '')
+    selected = asdict(config)
+    if wrong_target:
+        selected['userdata_path'] = '/home/test/projectlocal-data'
+    executor.results['wsl-project-config'] = (0, json.dumps(selected), '')
+    if wrong_target:
+        with pytest.raises(RuntimeIdentityMismatch, match='manager-target'):
+            backend._manager('named-start', 'Start')
+        assert not any(call.mutating for call in executor.calls)
+    else:
+        backend._manager('named-start', 'Start')
+        call = next(call for call in executor.calls if call.label == 'named-start')
+        assert call.argv[call.argv.index('-ProjectInstance') + 1] == 'gameplay'
+        assert call.argv[call.argv.index('-ProjectAdbPort') + 1] == '5558'
+
+
+def test_project_instance_cannot_escape_userdata_parent(tmp_path):
+    backend, _, _ = setup_backend(tmp_path)
+    with pytest.raises(ValueError, match='instance name'):
+        replace(backend.config, project_instance='../projectlocal')
 
 
 def test_restart_uses_stop_offline_start_order(tmp_path):

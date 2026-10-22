@@ -29,7 +29,7 @@ class CampaignMapOracle:
         allow_deployment: bool = False,
     ) -> CampaignMapState:
         button_state = self.read_state()
-        ui_state = self.read_ui_state()
+        ui_state = self._paired_ui_after_state()
         entry = self._campaign_map_entry_state_from_snapshots(button_state, ui_state, allow_deployment=allow_deployment)
         if ui_state.image_truncated:
             raise SemanticGateClosed("campaign map Image snapshot is truncated")

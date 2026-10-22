@@ -425,6 +425,7 @@ class _CampaignFlowContext:
     entry_receipt: Optional[ActionReceipt] = None
     map_preparation_receipt: Optional[ActionReceipt] = None
     auto_search_toggle_receipt: Optional[ActionReceipt] = None
+    auto_search_toggle_previous_state: Optional[bool] = None
     map_preparation_oil_cost: Optional[int] = None
     resolved_stage_code: Optional[str] = None
     daemon_auto_search_selected: Optional[bool] = None

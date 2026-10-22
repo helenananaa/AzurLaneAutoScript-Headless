@@ -216,7 +216,7 @@ class TacticalOracle:
                 ),
             )
         )
-        ui_state = self.read_text_state()
+        ui_state = self._paired_ui_after_state()
         if (
             ui_state.generation < button_state.generation
             or ui_state.generation > button_state.generation + 2
@@ -296,7 +296,7 @@ class TacticalOracle:
         confirm = self._unique(button_state, "tactical/skill/confirm")
         if not confirm.active_and_enabled:
             raise SemanticGateClosed("tactical skill dialog identity is not proven")
-        ui_state = self.read_ui_state()
+        ui_state = self._paired_ui_after_state()
         if (
             ui_state.generation < button_state.generation
             or ui_state.generation > button_state.generation + 2
@@ -420,7 +420,7 @@ class TacticalOracle:
         cancel = self._unique(button_state, "tactical/book/cancel")
         if not start.active_and_enabled or not cancel.active_and_enabled:
             raise SemanticGateClosed("tactical book dialog identity is not proven")
-        ui_state = self.read_ui_state()
+        ui_state = self._paired_ui_after_state()
         if (
             ui_state.generation < button_state.generation
             or ui_state.generation > button_state.generation + 2
@@ -551,7 +551,7 @@ class TacticalOracle:
         cancel = self._unique(button_state, "tactical/book/cancel")
         if not start.active_and_enabled or not cancel.active_and_enabled:
             raise SemanticGateClosed("tactical book progress page identity is not proven")
-        text_state = self.read_text_state()
+        text_state = self._paired_ui_after_state()
         if (
             text_state.generation < button_state.generation
             or text_state.generation > button_state.generation + 2
@@ -665,7 +665,7 @@ class TacticalOracle:
             sorted(ship_buttons, key=lambda button: button.bounds.left)
         )
 
-        ui_state = self.read_ui_state()
+        ui_state = self._paired_ui_after_state()
         if (
             ui_state.generation < button_state.generation
             or ui_state.generation > button_state.generation + 2
@@ -794,7 +794,7 @@ class TacticalOracle:
                 and button.active_in_hierarchy and button.active_and_enabled
                 for button in state.buttons):
             raise SemanticGateClosed("tactical countdown slots are absent")
-        ui = self.read_text_state()
+        ui = self._paired_ui_after_state()
         if not state.generation <= ui.generation <= state.generation + 2:
             raise SemanticGateClosed("tactical snapshots are not coherent")
         timers = tuple(text for text in ui.texts

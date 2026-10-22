@@ -1,0 +1,349 @@
+{
+  "schema": "alas-headless.redroid-completion/v1",
+  "date": "2026-10-22",
+  "scope": "One CN account; Windows/WSL x86_64 Redroid, AVD WHPX API32; original ALAS owns tasks",
+  "identity": {
+    "package": "com.bilibili.azurlane",
+    "game_apk": "9.7.10/9710",
+    "game_resources": "9.7.411",
+    "renderer": "ANGLE NULL",
+    "display": [
+      1280,
+      720
+    ],
+    "image_manifest_digest": "sha256:2e6e03e3ef33c08acf91a13b1cd9cc4a6a5d33d2d579511760c85ea7bb6c8e5a",
+    "angle_apk_sha256": "7433f076161bb8c51eafa2fa5a2902ccd3aa9f187379bee3244431afab02b29e",
+    "alas_upstream": "81ccf63b4540f00241628c82a58c02c7a2bb11af",
+    "main_patch_members": 225,
+    "main_patch_sha256": "70e3bd94fc71ce446b7985a559d67763656ecc213f7e048a7a44da41ff84f906",
+    "benchmark_patch_members": 224,
+    "benchmark_patch_sha256": "694f823e4a23b9b540cb121eba68b03152010273baf9ed7f01a129c8de0fc523"
+  },
+  "host": {
+    "cause": "Windows commit exhaustion; Event 2004 and large WSL file cache",
+    "repair": "One-time sync and clean page-cache reclaim; no WSL shutdown or pagefile change",
+    "sample_count": 575,
+    "sample_start": "2026-10-22T17:41:23.042686+08:00",
+    "sample_end": "2026-10-22T18:30:58.688703+08:00",
+    "minimum_commit_headroom_gib": 37.301090240478516,
+    "maximum_commit_gib": 68.9594497680664,
+    "resource_exhaustion_events_after_repair": []
+  },
+  "avd_network": {
+    "cause": "EmulatorDataPlan 2000000000-byte hard limit disabled mobile data",
+    "limit_bytes_after_repair": -1,
+    "inferred": false,
+    "reboot_persistence_verified": true,
+    "launch_dns": "192.168.5.1",
+    "host_dns_or_proxy_changed": false,
+    "resource_update_completed": true,
+    "login_and_benchmark_after_reboot_passed": true
+  },
+  "main": {
+    "passed": true,
+    "native_return": true,
+    "elapsed_seconds": 379.484,
+    "configuration": {
+      "Campaign": {
+        "Name": "12-4",
+        "Event": "campaign_main",
+        "Mode": "normal",
+        "UseClearMode": true,
+        "UseFleetLock": true,
+        "UseAutoSearch": true,
+        "Use2xBook": false,
+        "AmbushEvade": true
+      },
+      "Fleet": {
+        "Fleet1": 1,
+        "Fleet1Formation": "double_line",
+        "Fleet1Mode": "combat_auto",
+        "Fleet1Step": 3,
+        "Fleet2": 2,
+        "Fleet2Formation": "double_line",
+        "Fleet2Mode": "combat_auto",
+        "Fleet2Step": 2,
+        "FleetOrder": "fleet1_mob_fleet2_boss"
+      },
+      "Submarine": {
+        "Fleet": 0,
+        "Mode": "do_not_use",
+        "AutoSearchMode": "sub_standby",
+        "DistanceToBoss": "2_grid_to_boss"
+      },
+      "StopCondition": {
+        "OilLimit": 3000,
+        "RunCount": 0,
+        "MapAchievement": "non_stop",
+        "StageIncrease": false,
+        "GetNewShip": true,
+        "ReachLevel": 120
+      }
+    },
+    "before": {
+      "pid": 3075,
+      "generation": 19454,
+      "main_visible": true
+    },
+    "after": {
+      "pid": 3075,
+      "generation": 24668,
+      "main_visible": false,
+      "commission_back": false,
+      "campaign_stage_visible": true
+    },
+    "task_outcome": {
+      "task": "main",
+      "outcome": "returned"
+    },
+    "budgets": [
+      "ALAS_SEMANTIC_CAMPAIGN_STAGE_ENTRY_BUDGET=1",
+      "ALAS_SEMANTIC_CAMPAIGN_FLEET_MUTATION_BUDGET=6",
+      "ALAS_SEMANTIC_CAMPAIGN_SORTIE_BUDGET=1",
+      "ALAS_SEMANTIC_CAMPAIGN_COMBAT_BUDGET=8"
+    ],
+    "remaining_campaign_grants": {
+      "campaign.stage_entry": 0,
+      "campaign.fleet_mutation": 0,
+      "campaign.sortie": 0,
+      "campaign.grid_click": 8,
+      "campaign.viewport_swipe": 0
+    },
+    "completion": null,
+    "temporary_config_removed": true
+  },
+  "resources": {
+    "before_diagnostics": {
+      "oil": 5665,
+      "gold": 69499,
+      "gem": 3505
+    },
+    "before_complete_main": {
+      "oil": 5603,
+      "gold": 69518,
+      "gem": 3505
+    },
+    "after_complete_main": {
+      "oil": 5286,
+      "gold": 71586,
+      "gem": 3505
+    },
+    "diagnostic_oil_used": 62,
+    "complete_main_oil_used": 317,
+    "complete_main_gold_gained": 2068,
+    "total_oil_used": 379,
+    "gems_used": 0
+  },
+  "comparison": {
+    "method": "Original Benchmark, best 12 of 15; sequential same account/version; no full-task throughput comparison",
+    "redroid": {
+      "serial": "127.0.0.1:5558",
+      "observe_seconds": 0.3138523166665739,
+      "ui_round_trip_seconds": 1.4001900833330485,
+      "game_idle_cpu_percent_one_core_100": 101.41198205334298,
+      "game_pss_kib": 1535500,
+      "health": [
+        {
+          "generation": 1042,
+          "ui_generation": 1042,
+          "pid": 1607,
+          "age_ms": 280.0
+        },
+        {
+          "generation": 1057,
+          "ui_generation": 1057,
+          "pid": 1607,
+          "age_ms": 258.0
+        }
+      ]
+    },
+    "avd": {
+      "serial": "emulator-5560",
+      "observe_seconds": 0.09015019166751397,
+      "ui_round_trip_seconds": 0.9695304333320868,
+      "game_idle_cpu_percent_one_core_100": 89.17450642641042,
+      "game_pss_kib": 1517509,
+      "health": [
+        {
+          "generation": 3156,
+          "ui_generation": 3156,
+          "pid": 1928,
+          "age_ms": 125.0
+        },
+        {
+          "generation": 3165,
+          "ui_generation": 3165,
+          "pid": 1928,
+          "age_ms": 133.0
+        }
+      ]
+    },
+    "scope_limits": [
+      "Android14 versus Android12",
+      "shared host",
+      "game-process CPU/PSS exclude runtime overhead",
+      "short samples"
+    ]
+  },
+  "validation": {
+    "passed": 558,
+    "skipped": 8,
+    "skip_reason": "retained historical fixtures unavailable",
+    "patch_series_check": true,
+    "patch_tree_applied_and_compiled": true,
+    "support_matrix_verified": true,
+    "configuration_attack_matrix_verified": true,
+    "support_classifications_promoted": false
+  },
+  "final_state": {
+    "observed_at": "2026-10-22T18:31:00.710025+08:00",
+    "redroid_running": true,
+    "original_project_running": false,
+    "avd_running": false,
+    "continuous_scheduler_running": false,
+    "owned_alas_python_processes": [],
+    "userdata_mode": "771 1000:1000",
+    "main_visible": true,
+    "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "health": [
+      {
+        "generation": 25989,
+        "ui_generation": 25989,
+        "pid": 3075,
+        "age_ms": 293.0
+      },
+      {
+        "generation": 25996,
+        "ui_generation": 25996,
+        "pid": 3075,
+        "age_ms": 341.0
+      }
+    ],
+    "resources": {
+      "oil": 5286,
+      "gold": 71586,
+      "gem": 3505
+    }
+  },
+  "not_qualified": [
+    "continuous unattended scheduling",
+    "native Linux Redroid",
+    "full task matrix",
+    "complete manual-map Main route",
+    "paired full Main throughput"
+  ],
+  "receipts": [
+    {
+      "path": "artifacts/redroid-product-20261022/main-5.json",
+      "sha256": "e0b70ab8a3552b71e176c897435eb6a0a1692b3294b30baf6707f7ac7f3a4bf3"
+    },
+    {
+      "path": "artifacts/redroid-product-20261022/main-6.json",
+      "sha256": "75df571c2c0568dc145442331c46179428453520e06e5d778107bc98e2315f95"
+    },
+    {
+      "path": "artifacts/redroid-product-20261022/main-7.json",
+      "sha256": "993026543207b48855cc4044edf8363b8f2b6d05c55bb53b8170bbf1d4f57b1a"
+    },
+    {
+      "path": "artifacts/redroid-product-20261022/main-8.json",
+      "sha256": "c93253d62430c6702c5de1d88483a1316f00c81d891572198857ef82f31421cb"
+    },
+    {
+      "path": "artifacts/redroid-product-20261022/main-9.json",
+      "sha256": "0c3cb52fb5b0f610d22f5150791e9b95c0ebf8981a19ec958525e29074738224"
+    },
+    {
+      "path": "artifacts/redroid-product-20261022/redroid-map-recovery-r5.json",
+      "sha256": "4b04c24cd0679e8492ef2b0934e89b43078bab5c4791101b25fd899199ad0a64"
+    },
+    {
+      "path": "artifacts/redroid-product-20261022/redroid-pre-main9.json",
+      "sha256": "61b9d59f83148f0541322529b2ed1099c4b66213df61de28a3af44bf1b0d7699"
+    },
+    {
+      "path": "artifacts/redroid-product-20261022/redroid-completion-final.json",
+      "sha256": "67b91bb9e803864b3e48fe5c7f62b288a28a47a392d5e0ade044bdf82edd3381"
+    },
+    {
+      "path": "artifacts/redroid-product-20261022/redroid-completion-benchmark.json",
+      "sha256": "f3db6a0783072afecc62817f7306aaa49f79609604a3d242294e5b2d6a1f885e"
+    },
+    {
+      "path": "artifacts/redroid-product-20261022/avd-completion-r3.json",
+      "sha256": "b47e25f046b723f665d4f939fcd5169ad7de070911ba7159191772e74dbdb07d"
+    },
+    {
+      "path": "artifacts/redroid-product-20261022/avd-completion-final.json",
+      "sha256": "10b8c1b11c359337526d59c0f8cb20367c8d52ad03c4e1039d2c1d2862d09368"
+    },
+    {
+      "path": "artifacts/redroid-product-20261022/avd-completion-postboot.json",
+      "sha256": "a35420abc4467009e1d19d20de87db8debd837f262e72d59abb2e7e648011c17"
+    },
+    {
+      "path": "artifacts/redroid-product-20261022/avd-completion-idle.json",
+      "sha256": "74579bc51c74b32a0a2de6307616f298e1e67d9043ca2de7efa95fa06c68f177"
+    },
+    {
+      "path": "artifacts/redroid-product-20261022/redroid-completion-idle.json",
+      "sha256": "f31158b2521d00543f35fa9b9fea4790f8dd320049893e826166ec01d821ad92"
+    },
+    {
+      "path": "artifacts/redroid-completion-20261022/host-before.json",
+      "sha256": "dd6218aac52939fbce7c2909df4cccaab34c89f4b5b0adb96c6dc12a5998b20c"
+    },
+    {
+      "path": "artifacts/redroid-completion-20261022/host-samples.jsonl",
+      "sha256": "55e3aea039abe8bedc0fb7f9b9790c0527a030feb08b58bf685edc54d958bf71"
+    },
+    {
+      "path": "artifacts/redroid-completion-20261022/resource-events-after.json",
+      "sha256": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f"
+    },
+    {
+      "path": "artifacts/redroid-completion-20261022/avd-netpolicy-before.log",
+      "sha256": "501dfc17ea2d0c8561aa91c92f7a11f9197b5935851813ea9ec332632c644308"
+    },
+    {
+      "path": "artifacts/redroid-completion-20261022/avd-netpolicy-after-reboot.log",
+      "sha256": "eb11d56e035ec907bf7630470bceb93a35138647e1fbf6d09569a8eaacf05653"
+    },
+    {
+      "path": "artifacts/redroid-completion-20261022/avd-dns-after-reboot.log",
+      "sha256": "97eec6b21f9f9d4f24b2a6d5f7389877bf8a6e3b90841d0ca524675cabb5e2f4"
+    },
+    {
+      "path": "artifacts/redroid-completion-20261022/preparation-only.json",
+      "sha256": "35578643f74fa10c0dbe040b3d04d04918a75ddd070c7736daa3881299064146"
+    },
+    {
+      "path": "artifacts/redroid-completion-20261022/preparation-diagnostic.jsonl",
+      "sha256": "64cbc46e80c36d7da9fd47ab119075355f45760694bff7cf8b99b7c0ba6fca2f"
+    },
+    {
+      "path": "artifacts/redroid-completion-20261022/final-regression-r4.xml",
+      "sha256": "154ea8386ec87374c1643734aefffe852bc9c960f8b41456180e60370cdd4f4e"
+    },
+    {
+      "path": "artifacts/redroid-completion-20261022/patch-series-r2.log",
+      "sha256": "53e69a260e3cc449bf1b2c55e841e2f057c0e6f4c72b00216571ece28591b3da"
+    },
+    {
+      "path": "artifacts/redroid-completion-20261022/patch-tree-r2/result.json",
+      "sha256": "5e6ef7ea20e085efd36ab9b3a987dc0e96fd4b4d0a2da1fb00a19f7439aa495f"
+    },
+    {
+      "path": "artifacts/redroid-completion-20261022/support-matrix-r2.json",
+      "sha256": "bb1380e9a072579f3a0567611c804f9d53f39dc5d4e83b4438a8d15570d5ea68"
+    },
+    {
+      "path": "artifacts/redroid-completion-20261022/configuration-matrix-r3.log",
+      "sha256": "a967bdb388e37adaba41c1c18966689827f18f126ab8e242bec3e0d0c9d8b713"
+    },
+    {
+      "path": "artifacts/redroid-completion-20261022/final-runtime-state.json",
+      "sha256": "de39ed4f85f34c7463934fb13a69da78d47bb1a2738258907665b4220fc49095"
+    }
+  ]
+}

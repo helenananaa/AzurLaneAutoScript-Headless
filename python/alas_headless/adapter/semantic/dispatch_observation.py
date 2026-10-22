@@ -448,6 +448,33 @@ class DispatchObservationPorts:
                 # task. Its return proof excludes these main-page notices.
                 self._package_gate()
                 return False
+        if (self._campaign_context is None and not self._login_flow.active
+                and name in ('CAMPAIGN_WITHDRAW_CONFIRM', 'GET_MISSION',
+                             'GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3', 'GET_SHIP',
+                             'MONTHLY_PASS_NOTICE', 'BATTLE_PASS_NOTICE', 'BATTLE_PASS_NEW_SEASON',
+                             'PLAYER_CHECK', 'POPUP_SINGLE_WHITE', 'GAME_TIPS',
+                             'DORM_TROPHY_CONFIRM', 'MEOWFFICER_INFO', 'MEOWFFICER_BUY',
+                             'MAP_PREPARATION', 'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION')):
+            oracle = self._frame_or_live_observation_oracle()
+            state = oracle.read_state()
+            blockers = oracle._blocking_rules(state, 'ui/absence-probe')
+            if (not blockers and getattr(oracle, 'inherited_campaign_withdraw_control',
+                                        lambda **kw: None)(confirm=False) is not None):
+                # Native ui_additional probes these popups before WITHDRAW.
+                # The complete uncovered inherited map owns their absence;
+                # its original retreat handler still owns the recovery input.
+                self._package_gate()
+                return False
+            if (any(rule.blocker_id == 'campaign-total-reward' for rule in blockers)
+                    and all(rule.blocker_id in ('campaign-total-reward', 'campaign-menu')
+                            for rule in blockers)
+                    and oracle.observation_target_present('reward/campaign-total/exit')
+                    and oracle.enabled('reward/campaign-total/exit')):
+                # Native UI probes unrelated popups before its retained result
+                # exit handler. This exact, uncovered result owns their absence;
+                # a foreign overlay or ambiguous exit cannot supply that proof.
+                self._package_gate()
+                return False
         if name == 'GET_MISSION' and not self._login_flow.active:
             oracle = self._frame_or_live_observation_oracle()
             state = oracle.read_state()
@@ -661,6 +688,15 @@ class DispatchObservationPorts:
                     # A fully identified map covers the still-mounted selector.
                     # The original UI graph owns its withdrawal/recovery edge.
                     return False
+        if (self._campaign_context is None and not self._login_flow.active
+                and name in ('GOTO_MAIN', 'GOTO_MAIN_WHITE', 'RPG_HOME')):
+            oracle = self._frame_or_live_observation_oracle()
+            if getattr(oracle, 'inherited_campaign_withdraw_control',
+                       lambda **kw: None)(confirm=True) is not None:
+                # The original UI confirmation owns this exact modal. A HOME
+                # alias cannot navigate through its still-mounted map underlay.
+                self._package_gate()
+                return False
         if name == 'DOCK_CHECK' and self._campaign_context is not None:
             oracle = self._frame_or_live_observation_oracle()
             state = oracle.read_state()
@@ -701,16 +737,6 @@ class DispatchObservationPorts:
                 # retreat button. A proven inherited map owns that absence;
                 # ALAS must reach its existing WITHDRAW branch to open it.
                 return False
-            if name == 'CAMPAIGN_WITHDRAW_CONFIRM':
-                blockers = oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe')
-                if (any(rule.blocker_id == 'campaign-total-reward' for rule in blockers)
-                        and all(rule.blocker_id in ('campaign-total-reward', 'campaign-menu') for rule in blockers)
-                        and oracle.observation_target_present('reward/campaign-total/exit')
-                        and oracle.enabled('reward/campaign-total/exit')):
-                    # ui_additional probes confirmation before its existing
-                    # total-reward exit. The reviewed result owns this absence,
-                    # including when inherited by an unrelated scheduled task.
-                    return False
             # Absence of a withdrawal control does not identify an unknown
             # surface. Continue to the existing owned-surface classifiers.
         if (self._campaign_context is None and not self._login_flow.active
