@@ -1,0 +1,3214 @@
+{
+  "scope": "Actual frozen ShopOnce appear entry 148359 with Academy and Loading; controlled clear variants remove Loading explicitly",
+  "source": "goal-r132-shop-return-failure-r1.json row16",
+  "snapshot": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 1917,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "abi": "x86_64",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "snapshot_schema": 1,
+    "snapshot_struct_size": 104,
+    "generation": 148359,
+    "scene_generation": 6,
+    "semantic_generation": 2,
+    "snapshot_monotonic_ns": 14191855256424,
+    "response_monotonic_ns": 14191943997013,
+    "age_ms": 88,
+    "observer_tid": 1949,
+    "assembly_count": 129,
+    "semantic_code": 1,
+    "width": 1280,
+    "height": 720,
+    "flags": 15,
+    "observer_attached": false,
+    "main_thread": true,
+    "button_count": 381,
+    "active_button_count": 18,
+    "interactable_button_count": 381,
+    "scene_handle": -76,
+    "ui_stage": 100,
+    "ui_method_mask": 15
+  },
+  "buttons": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.buttons/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 1917,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 344104,
+    "generation": 148359,
+    "snapshot_monotonic_ns": 14191855256424,
+    "response_monotonic_ns": 14191944015422,
+    "age_ms": 88,
+    "button_count": 18,
+    "truncated": false,
+    "error_count": 0,
+    "buttons": [
+      {
+        "name": "chat",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/ship(Clone)/chat",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1326164,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 6.889,
+          "y": -0.252,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -31.0,
+          "y": -26.5,
+          "width": 62.0,
+          "height": 53.0
+        },
+        "screen_point": {
+          "x": 950.0,
+          "y": 348.667
+        },
+        "adb_point": {
+          "x": 950.0,
+          "y": 371.333
+        },
+        "screen_bounds": {
+          "left": 929.333,
+          "bottom": 331.0,
+          "right": 970.667,
+          "top": 366.333
+        },
+        "adb_bounds": {
+          "left": 929.333,
+          "top": 353.667,
+          "right": 970.667,
+          "bottom": 389.0
+        }
+      },
+      {
+        "name": "click",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/ship(Clone)/click",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1326154,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 5.911,
+          "y": -0.919,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -40.0,
+          "y": -55.0,
+          "width": 80.0,
+          "height": 110.0
+        },
+        "screen_point": {
+          "x": 906.0,
+          "y": 318.667
+        },
+        "adb_point": {
+          "x": 906.0,
+          "y": 401.333
+        },
+        "screen_bounds": {
+          "left": 879.333,
+          "bottom": 282.0,
+          "right": 932.667,
+          "top": 355.333
+        },
+        "adb_bounds": {
+          "left": 879.333,
+          "top": 364.667,
+          "right": 932.667,
+          "bottom": 438.0
+        }
+      },
+      {
+        "name": "back",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/blur_container/adapt/top/title/back",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1326080,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -12.939,
+          "y": 6.8,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -65.255,
+          "y": -55.7,
+          "width": 130.51,
+          "height": 111.4
+        },
+        "screen_point": {
+          "x": 57.734,
+          "y": 665.982
+        },
+        "adb_point": {
+          "x": 57.734,
+          "y": 54.018
+        },
+        "screen_bounds": {
+          "left": 0.715,
+          "bottom": 608.964,
+          "right": 114.753,
+          "top": 723.001
+        },
+        "adb_bounds": {
+          "left": 0.715,
+          "top": -3.001,
+          "right": 114.753,
+          "bottom": 111.036
+        }
+      },
+      {
+        "name": "option",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/blur_container/adapt/top/option",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1326126,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 14.222,
+          "y": 8.0,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -92.0,
+          "y": -107.0,
+          "width": 92.0,
+          "height": 107.0
+        },
+        "screen_point": {
+          "x": 1280.0,
+          "y": 720.0
+        },
+        "adb_point": {
+          "x": 1280.0,
+          "y": 0.0
+        },
+        "screen_bounds": {
+          "left": 1218.667,
+          "bottom": 648.667,
+          "right": 1280.0,
+          "top": 720.0
+        },
+        "adb_bounds": {
+          "left": 1218.667,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 71.333
+        }
+      },
+      {
+        "name": "minigamehall",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/minigamehall",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1325908,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 9.372,
+          "y": -1.038,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -275.0,
+          "y": -167.0,
+          "width": 550.0,
+          "height": 334.0
+        },
+        "screen_point": {
+          "x": 1061.733,
+          "y": 313.293
+        },
+        "adb_point": {
+          "x": 1061.733,
+          "y": 406.707
+        },
+        "screen_bounds": {
+          "left": 878.4,
+          "bottom": 201.96,
+          "right": 1245.067,
+          "top": 424.627
+        },
+        "adb_bounds": {
+          "left": 878.4,
+          "top": 295.373,
+          "right": 1245.067,
+          "bottom": 518.04
+        }
+      },
+      {
+        "name": "popup",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/canteen/popup",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1325890,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -6.865,
+          "y": -2.126,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -72.5,
+          "y": -81.5,
+          "width": 145.0,
+          "height": 163.0
+        },
+        "screen_point": {
+          "x": 331.067,
+          "y": 264.315
+        },
+        "adb_point": {
+          "x": 331.067,
+          "y": 455.685
+        },
+        "screen_bounds": {
+          "left": 292.4,
+          "bottom": 220.848,
+          "right": 369.733,
+          "top": 307.782
+        },
+        "adb_bounds": {
+          "left": 292.4,
+          "top": 412.218,
+          "right": 369.733,
+          "bottom": 499.152
+        }
+      },
+      {
+        "name": "canteen",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/canteen",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1325800,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -7.437,
+          "y": -3.431,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -271.0,
+          "y": -176.5,
+          "width": 542.0,
+          "height": 353.0
+        },
+        "screen_point": {
+          "x": 305.333,
+          "y": 205.6
+        },
+        "adb_point": {
+          "x": 305.333,
+          "y": 514.4
+        },
+        "screen_bounds": {
+          "left": 124.667,
+          "bottom": 87.933,
+          "right": 486.0,
+          "top": 323.267
+        },
+        "adb_bounds": {
+          "left": 124.667,
+          "top": 396.733,
+          "right": 486.0,
+          "bottom": 632.067
+        }
+      },
+      {
+        "name": "popup",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/shop/popup",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1325782,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 0.538,
+          "y": -4.142,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -72.5,
+          "y": -81.5,
+          "width": 145.0,
+          "height": 163.0
+        },
+        "screen_point": {
+          "x": 664.2,
+          "y": 173.598
+        },
+        "adb_point": {
+          "x": 664.2,
+          "y": 546.402
+        },
+        "screen_bounds": {
+          "left": 625.533,
+          "bottom": 130.131,
+          "right": 702.867,
+          "top": 217.064
+        },
+        "adb_bounds": {
+          "left": 625.533,
+          "top": 502.936,
+          "right": 702.867,
+          "bottom": 589.869
+        }
+      },
+      {
+        "name": "shop",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/shop",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1325692,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 2.178,
+          "y": -5.689,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -199.5,
+          "y": -160.0,
+          "width": 399.0,
+          "height": 320.0
+        },
+        "screen_point": {
+          "x": 738.0,
+          "y": 104.0
+        },
+        "adb_point": {
+          "x": 738.0,
+          "y": 616.0
+        },
+        "screen_bounds": {
+          "left": 605.0,
+          "bottom": -2.667,
+          "right": 871.0,
+          "top": 210.667
+        },
+        "adb_bounds": {
+          "left": 605.0,
+          "top": 509.333,
+          "right": 871.0,
+          "bottom": 722.667
+        }
+      },
+      {
+        "name": "fountain",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/fountain",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1325654,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -1.35,
+          "y": 1.289,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -80.0,
+          "y": -100.5,
+          "width": 160.0,
+          "height": 201.0
+        },
+        "screen_point": {
+          "x": 579.267,
+          "y": 418.0
+        },
+        "adb_point": {
+          "x": 579.267,
+          "y": 302.0
+        },
+        "screen_bounds": {
+          "left": 525.933,
+          "bottom": 351.0,
+          "right": 632.6,
+          "top": 485.0
+        },
+        "adb_bounds": {
+          "left": 525.933,
+          "top": 235.0,
+          "right": 632.6,
+          "bottom": 369.0
+        }
+      },
+      {
+        "name": "supplyShop",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/supplyShop",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1325616,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 8.901,
+          "y": 3.876,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -199.5,
+          "y": -188.5,
+          "width": 399.0,
+          "height": 377.0
+        },
+        "screen_point": {
+          "x": 1040.533,
+          "y": 534.4
+        },
+        "adb_point": {
+          "x": 1040.533,
+          "y": 185.6
+        },
+        "screen_bounds": {
+          "left": 907.533,
+          "bottom": 408.733,
+          "right": 1173.533,
+          "top": 660.067
+        },
+        "adb_bounds": {
+          "left": 907.533,
+          "top": 59.933,
+          "right": 1173.533,
+          "bottom": 311.267
+        }
+      },
+      {
+        "name": "tacticRoom",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/tacticRoom",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1325578,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 2.252,
+          "y": 4.563,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -261.0,
+          "y": -134.5,
+          "width": 522.0,
+          "height": 269.0
+        },
+        "screen_point": {
+          "x": 741.333,
+          "y": 565.333
+        },
+        "adb_point": {
+          "x": 741.333,
+          "y": 154.667
+        },
+        "screen_bounds": {
+          "left": 567.333,
+          "bottom": 475.667,
+          "right": 915.333,
+          "top": 655.0
+        },
+        "adb_bounds": {
+          "left": 567.333,
+          "top": 65.0,
+          "right": 915.333,
+          "bottom": 244.333
+        }
+      },
+      {
+        "name": "commander",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/commander",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1325520,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -8.49,
+          "y": 3.025,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -105.5,
+          "y": -252.0,
+          "width": 211.0,
+          "height": 504.0
+        },
+        "screen_point": {
+          "x": 257.933,
+          "y": 496.133
+        },
+        "adb_point": {
+          "x": 257.933,
+          "y": 223.867
+        },
+        "screen_bounds": {
+          "left": 187.6,
+          "bottom": 328.133,
+          "right": 328.267,
+          "top": 664.133
+        },
+        "adb_bounds": {
+          "left": 187.6,
+          "top": 55.867,
+          "right": 328.267,
+          "bottom": 391.867
+        }
+      },
+      {
+        "name": "classRoom",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/classRoom",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1325392,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -4.975,
+          "y": 4.538,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -190.5,
+          "y": -147.5,
+          "width": 381.0,
+          "height": 295.0
+        },
+        "screen_point": {
+          "x": 416.133,
+          "y": 564.2
+        },
+        "adb_point": {
+          "x": 416.133,
+          "y": 155.8
+        },
+        "screen_bounds": {
+          "left": 289.133,
+          "bottom": 465.867,
+          "right": 543.133,
+          "top": 662.533
+        },
+        "adb_bounds": {
+          "left": 289.133,
+          "top": 57.467,
+          "right": 543.133,
+          "bottom": 254.133
+        }
+      },
+      {
+        "name": "gem",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem",
+        "canvas": "ResPanel(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -187272,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 11.915,
+          "y": 7.216,
+          "z": -389.985
+        },
+        "local_rect": {
+          "x": -275.7,
+          "y": -30.0,
+          "width": 275.7,
+          "height": 60.0
+        },
+        "screen_point": {
+          "x": 1176.167,
+          "y": 684.711
+        },
+        "adb_point": {
+          "x": 1176.167,
+          "y": 35.289
+        },
+        "screen_bounds": {
+          "left": 992.367,
+          "bottom": 664.711,
+          "right": 1176.167,
+          "top": 704.711
+        },
+        "adb_bounds": {
+          "left": 992.367,
+          "top": 15.289,
+          "right": 1176.167,
+          "bottom": 55.289
+        }
+      },
+      {
+        "name": "gold",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold",
+        "canvas": "ResPanel(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -187226,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 5.225,
+          "y": 7.216,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -137.85,
+          "y": -30.0,
+          "width": 275.7,
+          "height": 60.0
+        },
+        "screen_point": {
+          "x": 875.133,
+          "y": 684.711
+        },
+        "adb_point": {
+          "x": 875.133,
+          "y": 35.289
+        },
+        "screen_bounds": {
+          "left": 783.233,
+          "bottom": 664.711,
+          "right": 967.033,
+          "top": 704.711
+        },
+        "adb_bounds": {
+          "left": 783.233,
+          "top": 15.289,
+          "right": 967.033,
+          "bottom": 55.289
+        }
+      },
+      {
+        "name": "oil",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil",
+        "canvas": "ResPanel(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -187176,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 0.578,
+          "y": 7.216,
+          "z": -389.985
+        },
+        "local_rect": {
+          "x": -137.85,
+          "y": -30.0,
+          "width": 275.7,
+          "height": 60.0
+        },
+        "screen_point": {
+          "x": 666.0,
+          "y": 684.711
+        },
+        "adb_point": {
+          "x": 666.0,
+          "y": 35.289
+        },
+        "screen_bounds": {
+          "left": 574.1,
+          "bottom": 664.711,
+          "right": 757.9,
+          "top": 704.711
+        },
+        "adb_bounds": {
+          "left": 574.1,
+          "top": 15.289,
+          "right": 757.9,
+          "bottom": 55.289
+        }
+      },
+      {
+        "name": "Loading(Clone)",
+        "path": "OverlayCamera/Overlay/UIOverlay/Loading(Clone)",
+        "canvas": "Loading(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1368,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -960.0,
+          "y": -540.0,
+          "width": 1920.0,
+          "height": 1080.0
+        },
+        "screen_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "screen_bounds": {
+          "left": -0.0,
+          "bottom": 0.0,
+          "right": 1280.0,
+          "top": 720.0
+        },
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        }
+      }
+    ]
+  },
+  "ui": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.ui/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 1917,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 4466248,
+    "generation": 148359,
+    "snapshot_monotonic_ns": 14191855256424,
+    "response_monotonic_ns": 14191951435583,
+    "age_ms": 96,
+    "method_mask": 15,
+    "toggle_count": 0,
+    "text_count": 17,
+    "image_count": 49,
+    "toggle_truncated": false,
+    "text_truncated": false,
+    "image_truncated": false,
+    "error_count": 0,
+    "error_counts": {
+      "toggle": 0,
+      "text": 0,
+      "image": 0,
+      "shared": 0
+    },
+    "skipped_count": 0,
+    "image_source_count": 4440,
+    "image_source_capacity": 16384,
+    "toggles": [],
+    "texts": [
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/minigamehall/name/Text",
+        "text": "游戏屋",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1096.667,
+          "top": 476.507,
+          "right": 1239.333,
+          "bottom": 517.173
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "level",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/canteen/name/level",
+        "text": "Lv.12",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 318.933,
+          "top": 580.16,
+          "right": 385.6,
+          "bottom": 646.827
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/canteen/name/Text",
+        "text": "海军食堂",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 187.4,
+          "top": 592.693,
+          "right": 318.933,
+          "bottom": 633.36
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "level",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/shop/name/level",
+        "text": "Lv.12",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 746.667,
+          "top": 611.373,
+          "right": 813.333,
+          "bottom": 678.04
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/shop/name/Text",
+        "text": "小卖部",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 615.867,
+          "top": 626.473,
+          "right": 746.667,
+          "bottom": 664.54
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/fountain/name/Text",
+        "text": "收藏室",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 508.467,
+          "top": 336.2,
+          "right": 651.133,
+          "bottom": 376.867
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/supplyShop/name/Text",
+        "text": "补给商店",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1019.467,
+          "top": 177.86,
+          "right": 1162.133,
+          "bottom": 218.527
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/tacticRoom/name/Text",
+        "text": "战术学院",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 705.2,
+          "top": 146.933,
+          "right": 847.867,
+          "bottom": 184.267
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/commander/name/Text",
+        "text": "指挥喵",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 136.733,
+          "top": 253.0,
+          "right": 279.4,
+          "bottom": 293.667
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "level",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/classRoom/name/level",
+        "text": "Lv.15",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 475.6,
+          "top": 199.367,
+          "right": 517.6,
+          "bottom": 226.367
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/classRoom/name/Text",
+        "text": "大讲堂",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 376.267,
+          "top": 197.367,
+          "right": 442.267,
+          "bottom": 228.367
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "gem_value",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem/gem_value",
+        "text": "5070",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1048.174,
+          "top": 23.919,
+          "right": 1132.426,
+          "bottom": 44.659
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "gold_value",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/gold_value",
+        "text": "62",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 832.057,
+          "top": 24.052,
+          "right": 921.409,
+          "bottom": 44.792
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "gold_max_value",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/gold_max_value",
+        "text": "MAX: 108300",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 834.945,
+          "top": -1.308,
+          "right": 941.433,
+          "bottom": 17.619
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "oil_value",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/oil_value",
+        "text": "24417",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 626.591,
+          "top": 24.586,
+          "right": 715.943,
+          "bottom": 45.326
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "oil_max_value",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/oil_max_value",
+        "text": "MAX: 17450",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 628.799,
+          "top": -0.961,
+          "right": 732.567,
+          "bottom": 16.606
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "FpsPanel",
+        "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+        "text": "",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 573.333,
+          "top": 0.0,
+          "right": 706.667,
+          "bottom": 34.667
+        }
+      }
+    ],
+    "images": [
+      {
+        "kind": "image",
+        "name": "click",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/ship(Clone)/click",
+        "sprite": "white_dot",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.011765
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 879.333,
+          "top": 364.667,
+          "right": 932.667,
+          "bottom": 438.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 906.0,
+          "y": 401.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "shadow",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/ship(Clone)/shadow",
+        "sprite": "shadow",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 868.333,
+          "top": 410.333,
+          "right": 943.667,
+          "bottom": 465.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 906.0,
+          "y": 438.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "option",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/blur_container/adapt/top/option",
+        "sprite": "viewall_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1218.667,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 71.333
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1280.0,
+          "y": 0.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "GameObject",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/blur_container/adapt/top/title/title/GameObject",
+        "sprite": "title_acadmy_en",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 171.467,
+          "top": 21.933,
+          "right": 242.133,
+          "bottom": 48.6
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 206.8,
+          "y": 35.267
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "title",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/blur_container/adapt/top/title/title",
+        "sprite": "title_acadmy_cn",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 111.267,
+          "top": 3.267,
+          "right": 185.267,
+          "bottom": 49.933
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 111.267,
+          "y": 26.6
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/blur_container/adapt/top/title/back/mask/Image",
+        "sprite": "back_btn",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 23.201,
+          "top": 18.684,
+          "right": 94.534,
+          "bottom": 88.684
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 58.868,
+          "y": 53.684
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "mask",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/blur_container/adapt/top/title/back/mask",
+        "sprite": "icon_bg_mask_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.140138,
+          "green": 0.125541,
+          "blue": 0.198529,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 11.734,
+          "top": 8.018,
+          "right": 103.734,
+          "bottom": 100.018
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 57.734,
+          "y": 54.018
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "back",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/blur_container/adapt/top/title/back",
+        "sprite": "icon_bg_front_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 0.715,
+          "top": -3.001,
+          "right": 114.753,
+          "bottom": 111.036
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 57.734,
+          "y": 54.018
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/blur_container/adapt/top/title/line",
+        "sprite": "top_line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.588235
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -213.833,
+          "top": 53.351,
+          "right": 1493.833,
+          "bottom": 54.684
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 54.684
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "print",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/blur_container/adapt/top/title/print",
+        "sprite": "player_info_bg1_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 98.891,
+          "top": 27.945,
+          "right": 364.024,
+          "bottom": 45.279
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 231.457,
+          "y": 36.612
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "print_bg",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/blur_container/adapt/top/title/print_bg",
+        "sprite": "player_info_bg2_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 94.264,
+          "top": 9.009,
+          "right": 412.931,
+          "bottom": 47.676
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 253.598,
+          "y": 28.343
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "print_top",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/blur_container/adapt/top/title/print_top",
+        "sprite": "icon_bg_top_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 56.143,
+          "top": 0.004,
+          "right": 114.143,
+          "bottom": 25.337
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 85.143,
+          "y": 12.671
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "top_bg",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/blur_container/top_bg",
+        "sprite": "top_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 54.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 0.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/minigamehall/name",
+        "sprite": "bg_acadmy_building_label",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1096.667,
+          "top": 476.507,
+          "right": 1239.333,
+          "bottom": 517.173
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1168.0,
+          "y": 496.84
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "minigamehall",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/minigamehall",
+        "sprite": "icon_minigamehall",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 878.4,
+          "top": 295.373,
+          "right": 1245.067,
+          "bottom": 518.04
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1061.733,
+          "y": 406.707
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/canteen/popup/icon",
+        "sprite": "res_oil",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 309.909,
+          "top": 424.661,
+          "right": 352.309,
+          "bottom": 475.861
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 331.109,
+          "y": 450.261
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "popup",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/canteen/popup",
+        "sprite": "acadmy_pop",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 292.4,
+          "top": 412.218,
+          "right": 369.733,
+          "bottom": 499.152
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 331.067,
+          "y": 455.685
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/canteen/name",
+        "sprite": "bg_acadmy_building_label",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 187.4,
+          "top": 592.693,
+          "right": 379.4,
+          "bottom": 633.36
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 283.4,
+          "y": 613.027
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "canteen",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/canteen",
+        "sprite": "icon_canteen",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 124.667,
+          "top": 396.733,
+          "right": 486.0,
+          "bottom": 632.067
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 305.333,
+          "y": 514.4
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/shop/popup/icon",
+        "sprite": "res_gold",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 642.547,
+          "top": 516.957,
+          "right": 688.947,
+          "bottom": 564.157
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 665.747,
+          "y": 540.557
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "popup",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/shop/popup",
+        "sprite": "acadmy_pop",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 625.533,
+          "top": 502.936,
+          "right": 702.867,
+          "bottom": 589.869
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 664.2,
+          "y": 546.402
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/shop/name",
+        "sprite": "bg_acadmy_building_label",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 615.867,
+          "top": 623.907,
+          "right": 807.867,
+          "bottom": 664.573
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 711.867,
+          "y": 644.24
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "shop",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/shop",
+        "sprite": "icon_shop",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 605.0,
+          "top": 509.333,
+          "right": 871.0,
+          "bottom": 722.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 738.0,
+          "y": 616.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/fountain/name",
+        "sprite": "bg_acadmy_building_label",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 508.467,
+          "top": 336.2,
+          "right": 651.133,
+          "bottom": 376.867
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 579.8,
+          "y": 356.533
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "fountain",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/fountain",
+        "sprite": "icon_fountain",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 525.933,
+          "top": 235.0,
+          "right": 632.6,
+          "bottom": 369.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 579.267,
+          "y": 302.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/supplyShop/name",
+        "sprite": "bg_acadmy_building_label",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1019.467,
+          "top": 177.86,
+          "right": 1162.133,
+          "bottom": 218.527
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1090.8,
+          "y": 198.193
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "supplyShop",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/supplyShop",
+        "sprite": "icon_merchant",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 907.533,
+          "top": 59.933,
+          "right": 1173.533,
+          "bottom": 311.267
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1040.533,
+          "y": 185.6
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/tacticRoom/name",
+        "sprite": "bg_acadmy_building_label",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 705.2,
+          "top": 143.6,
+          "right": 847.867,
+          "bottom": 184.267
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 776.533,
+          "y": 163.933
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tacticRoom",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/tacticRoom",
+        "sprite": "icon_tacticroom",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 567.333,
+          "top": 65.0,
+          "right": 915.333,
+          "bottom": 244.333
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 741.333,
+          "y": 154.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tip",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/commander/tip",
+        "sprite": "tip",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 257.4,
+          "top": 237.733,
+          "right": 290.067,
+          "bottom": 270.4
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 273.733,
+          "y": 254.067
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/commander/name",
+        "sprite": "bg_acadmy_building_label",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 136.733,
+          "top": 254.333,
+          "right": 279.4,
+          "bottom": 295.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 208.067,
+          "y": 274.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "commander",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/commander",
+        "sprite": "icon_gym",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 187.6,
+          "top": 55.867,
+          "right": 328.267,
+          "bottom": 391.867
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 257.933,
+          "y": 223.867
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/classRoom/name",
+        "sprite": "bg_acadmy_building_label",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 350.933,
+          "top": 192.533,
+          "right": 542.933,
+          "bottom": 233.2
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 446.933,
+          "y": 212.867
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "classRoom",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map/classRoom",
+        "sprite": "icon_classroom",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 289.133,
+          "top": 57.467,
+          "right": 543.133,
+          "bottom": 254.133
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 416.133,
+          "y": 155.8
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "map",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/academyMap/map",
+        "sprite": "navalacademyautumn_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -139.667,
+          "top": -120.0,
+          "right": 1419.667,
+          "bottom": 840.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "BottomBG",
+        "path": "UICamera/Canvas/UIMain/NavalAcademyUI/BottomBG",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -188.0,
+          "top": 0.0,
+          "right": 1468.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem/icon",
+        "sprite": "res_diamond",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 975.533,
+          "top": 7.889,
+          "right": 1023.0,
+          "bottom": 62.689
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 999.267,
+          "y": 35.289
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "gem",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem",
+        "sprite": "res_bg_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 992.367,
+          "top": 15.289,
+          "right": 1176.167,
+          "bottom": 55.289
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1176.167,
+          "y": 35.289
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "max_bg2",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/max_bg2",
+        "sprite": "max_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 839.945,
+          "top": -0.976,
+          "right": 943.255,
+          "bottom": 17.687
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 891.6,
+          "y": 8.355
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/icon",
+        "sprite": "res_gold",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 769.1,
+          "top": 13.622,
+          "right": 813.1,
+          "bottom": 58.956
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 791.1,
+          "y": 36.289
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "gold",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold",
+        "sprite": "res_bg_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 783.233,
+          "top": 15.289,
+          "right": 967.033,
+          "bottom": 55.289
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 875.133,
+          "y": 35.289
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "max_bg",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/max_bg",
+        "sprite": "max_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 633.533,
+          "top": -0.978,
+          "right": 736.867,
+          "bottom": 17.689
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 685.2,
+          "y": 8.356
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/icon",
+        "sprite": "res_oil",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 555.213,
+          "top": 6.818,
+          "right": 609.254,
+          "bottom": 66.559
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 582.233,
+          "y": 36.689
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "oil",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil",
+        "sprite": "res_bg_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 574.1,
+          "top": 15.289,
+          "right": 757.9,
+          "bottom": 55.289
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 666.0,
+          "y": 35.289
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Loading(Clone)",
+        "path": "OverlayCamera/Overlay/UIOverlay/Loading(Clone)",
+        "sprite": "white_dot",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 0.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "top",
+        "path": "OverlayCamera/Adpter/top/top",
+        "sprite": "mask1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": -140.667,
+          "right": 1280.0,
+          "bottom": 0.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": -70.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "left",
+        "path": "OverlayCamera/Adpter/left/left",
+        "sprite": "mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -140.667,
+          "top": 0.0,
+          "right": -0.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -70.333,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bottom",
+        "path": "OverlayCamera/Adpter/bottom/bottom",
+        "sprite": "mask1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 720.0,
+          "right": 1280.0,
+          "bottom": 860.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 790.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "right",
+        "path": "OverlayCamera/Adpter/right/right",
+        "sprite": "mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1280.0,
+          "top": 0.0,
+          "right": 1420.667,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1350.333,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      }
+    ],
+    "globe_geometry": {
+      "schema": "alas-headless.globe-geometry/v1",
+      "status": 0,
+      "truncated": false,
+      "error_count": 0,
+      "camera_path": "",
+      "objects": []
+    },
+    "lua_globe_diagnostic": {
+      "schema": "alas-headless.lua-globe-diagnostic/v1",
+      "status": 0,
+      "stage": 0,
+      "truncated": false,
+      "stack_balanced": false,
+      "registry_visited": 0,
+      "inspection_count": 0,
+      "world_candidates": 0,
+      "drag_candidates": 0,
+      "colors": [],
+      "dragging": [],
+      "drag_pointer_instance_ids": [],
+      "drag_trigger_instance_ids": [],
+      "active_pointer_instance_id": 0
+    },
+    "shipyard_strengthen": {
+      "status": 0,
+      "stage": 0,
+      "truncated": false,
+      "stack_balanced": false,
+      "blueprint_id": 0,
+      "ship_id": 0,
+      "ship_index": 0,
+      "series": 0,
+      "rarity": 0,
+      "pursuing": false,
+      "purchased": 0,
+      "coins": 0,
+      "gems_known": false,
+      "paid_gems": 0,
+      "free_gems": 0,
+      "level": 0,
+      "fate_level": -1,
+      "exp": 0
+    },
+    "activity_identity": {
+      "status": 1,
+      "stack_balanced": true,
+      "archives": {
+        "status": 1,
+        "expected_count": 50,
+        "truncated": false,
+        "records": [
+          {
+            "id": 1,
+            "activity_type": 1,
+            "name": "红染常驻复刻",
+            "bg": "temp_hongran"
+          },
+          {
+            "id": 2,
+            "activity_type": 2,
+            "name": "Z舰队常驻复刻",
+            "bg": "temp_zjiandui"
+          },
+          {
+            "id": 4,
+            "activity_type": 1,
+            "name": "凛冬常驻复刻",
+            "bg": "temp_lingdong"
+          },
+          {
+            "id": 5,
+            "activity_type": 2,
+            "name": "围剿斯佩伯爵』常驻复刻",
+            "bg": "temp_sipei"
+          },
+          {
+            "id": 6,
+            "activity_type": 1,
+            "name": "异色格常驻复刻",
+            "bg": "temp_yisege"
+          },
+          {
+            "id": 7,
+            "activity_type": 1,
+            "name": "坠落之翼常驻复刻",
+            "bg": "temp_zhuiluo"
+          },
+          {
+            "id": 8,
+            "activity_type": 1,
+            "name": "鸢尾之华常驻复刻",
+            "bg": "temp_yuanwei"
+          },
+          {
+            "id": 9,
+            "activity_type": 1,
+            "name": "墨染的钢铁之花常驻复刻",
+            "bg": "temp_moran"
+          },
+          {
+            "id": 10,
+            "activity_type": 2,
+            "name": "光荣的一战常驻复刻",
+            "bg": "temp_guangrong"
+          },
+          {
+            "id": 11,
+            "activity_type": 1,
+            "name": "苍红的回响常驻复刻",
+            "bg": "temp_tiancheng"
+          },
+          {
+            "id": 12,
+            "activity_type": 2,
+            "name": "月光下的序曲常驻复刻",
+            "bg": "temp_xinaoerliang"
+          },
+          {
+            "id": 13,
+            "activity_type": 1,
+            "name": "俾斯麦常驻复刻",
+            "bg": "temp_bisimai"
+          },
+          {
+            "id": 14,
+            "activity_type": 2,
+            "name": "偶像一期常驻复刻",
+            "bg": "temp_ouxiang"
+          },
+          {
+            "id": 15,
+            "activity_type": 1,
+            "name": "神圣的悲喜剧常驻复刻",
+            "bg": "temp_beixiju"
+          },
+          {
+            "id": 16,
+            "activity_type": 2,
+            "name": "斯图尔特的硝烟常驻复刻",
+            "bg": "temp_longxiang"
+          },
+          {
+            "id": 17,
+            "activity_type": 1,
+            "name": "箱庭疗法常驻复刻",
+            "bg": "temp_xiangting"
+          },
+          {
+            "id": 18,
+            "activity_type": 1,
+            "name": "浮樱影华常驻复刻",
+            "bg": "temp_fuying"
+          },
+          {
+            "id": 19,
+            "activity_type": 2,
+            "name": "最珍贵的宝物常驻复刻",
+            "bg": "temp_u110"
+          },
+          {
+            "id": 20,
+            "activity_type": 2,
+            "name": "偶像二期常驻复刻",
+            "bg": "temp_ouxiang2"
+          },
+          {
+            "id": 21,
+            "activity_type": 1,
+            "name": "微层混合常驻复刻",
+            "bg": "temp_weiceng"
+          },
+          {
+            "id": 22,
+            "activity_type": 2,
+            "name": "峡湾间的星辰常驻复刻",
+            "bg": "temp_yonggan"
+          },
+          {
+            "id": 23,
+            "activity_type": 1,
+            "name": "穹顶下的圣咏曲常驻复刻",
+            "bg": "temp_zhende"
+          },
+          {
+            "id": 24,
+            "activity_type": 2,
+            "name": "夜幕下的归途常驻复刻",
+            "bg": "temp_taertu"
+          },
+          {
+            "id": 25,
+            "activity_type": 1,
+            "name": "北境序曲常驻复刻",
+            "bg": "temp_qiaba"
+          },
+          {
+            "id": 26,
+            "activity_type": 1,
+            "name": "永夜幻光常驻复刻",
+            "bg": "temp_hemin"
+          },
+          {
+            "id": 27,
+            "activity_type": 2,
+            "name": "峡湾间的反击常驻复刻",
+            "bg": "temp_aisijimoren"
+          },
+          {
+            "id": 28,
+            "activity_type": 1,
+            "name": "负象限作战常驻复刻",
+            "bg": "temp_u37"
+          },
+          {
+            "id": 29,
+            "activity_type": 1,
+            "name": "蝶海梦花常驻复刻",
+            "bg": "temp_xinnong"
+          },
+          {
+            "id": 30,
+            "activity_type": 1,
+            "name": "镜位螺旋常驻复刻",
+            "bg": "temp_xinzexi"
+          },
+          {
+            "id": 31,
+            "activity_type": 1,
+            "name": "破晓冰华常驻复刻",
+            "bg": "temp_talin"
+          },
+          {
+            "id": 32,
+            "activity_type": 2,
+            "name": "划破海空之翼常驻复刻",
+            "bg": "temp_pulinsidun"
+          },
+          {
+            "id": 33,
+            "activity_type": 2,
+            "name": "杰诺瓦的焰火常驻复刻",
+            "bg": "temp_fuxv"
+          },
+          {
+            "id": 34,
+            "activity_type": 1,
+            "name": "碧海光粼常驻复刻",
+            "bg": "temp_daofeng"
+          },
+          {
+            "id": 35,
+            "activity_type": 1,
+            "name": "复兴的赞美诗常驻复刻",
+            "bg": "temp_weineituo"
+          },
+          {
+            "id": 36,
+            "activity_type": 1,
+            "name": "逆转彩虹之塔常驻复刻",
+            "bg": "temp_huteng"
+          },
+          {
+            "id": 37,
+            "activity_type": 1,
+            "name": "深度回音常驻复刻",
+            "bg": "temp_kalangshitade"
+          },
+          {
+            "id": 38,
+            "activity_type": 2,
+            "name": "虚像构筑之塔常驻复刻",
+            "bg": "temp_diguo"
+          },
+          {
+            "id": 39,
+            "activity_type": 1,
+            "name": "泠誓光庭常驻复刻",
+            "bg": "temp_qianwei"
+          },
+          {
+            "id": 40,
+            "activity_type": 1,
+            "name": "雄鹰的叙事歌常驻复刻",
+            "bg": "temp_luoma"
+          },
+          {
+            "id": 41,
+            "activity_type": 1,
+            "name": "虹彩的终幕曲常驻复刻",
+            "bg": "temp_aimudeng"
+          },
+          {
+            "id": 42,
+            "activity_type": 2,
+            "name": "飓风与青春之泉常驻复刻",
+            "bg": "temp_fengfanv1"
+          },
+          {
+            "id": 43,
+            "activity_type": 1,
+            "name": "紫绛槿岚常驻复刻",
+            "bg": "temp_wuzang"
+          },
+          {
+            "id": 44,
+            "activity_type": 1,
+            "name": "定向折叠常驻复刻",
+            "bg": "temp_yuekechengII"
+          },
+          {
+            "id": 45,
+            "activity_type": 1,
+            "name": "湮烬尘墟常驻复刻",
+            "bg": "temp_yuanchou"
+          },
+          {
+            "id": 46,
+            "activity_type": 2,
+            "name": "远汇点作战常驻复刻",
+            "bg": "temp_bulunxierde"
+          },
+          {
+            "id": 47,
+            "activity_type": 2,
+            "name": "奏响鸢尾之歌常驻复刻",
+            "bg": "temp_masaiqu"
+          },
+          {
+            "id": 48,
+            "activity_type": 1,
+            "name": "空相交汇点常驻复刻",
+            "bg": "temp_bisimaiz"
+          },
+          {
+            "id": 49,
+            "activity_type": 2,
+            "name": "幻梦间奏曲常驻复刻",
+            "bg": "temp_sitelasibao"
+          },
+          {
+            "id": 50,
+            "activity_type": 3,
+            "name": "极地风暴常驻复刻",
+            "bg": "temp_kuersike"
+          },
+          {
+            "id": 51,
+            "activity_type": 3,
+            "name": "童心学院常驻复刻",
+            "bg": "temp_yaerweite"
+          }
+        ]
+      },
+      "raids": {
+        "status": 1,
+        "stage": 14,
+        "proxy_count": 36,
+        "matched_count": 36,
+        "failed_id": 0,
+        "expected_count": 0,
+        "truncated": false,
+        "records": []
+      }
+    },
+    "operation_siren_globe_drag": {
+      "status": 2,
+      "handler_instance_id": 231418,
+      "endpoints": [
+        558.0,
+        375.0,
+        608.0,
+        325.0
+      ],
+      "handler_path": "WorldMap3D/entity/Plane",
+      "samples": [
+        {
+          "x": 558.0,
+          "y": 375.0,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 559.562,
+          "y": 373.438,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 561.125,
+          "y": 371.875,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 562.688,
+          "y": 370.312,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 564.25,
+          "y": 368.75,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 565.812,
+          "y": 367.188,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 567.375,
+          "y": 365.625,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 568.938,
+          "y": 364.062,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 570.5,
+          "y": 362.5,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 572.062,
+          "y": 360.938,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 573.625,
+          "y": 359.375,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 575.188,
+          "y": 357.812,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 576.75,
+          "y": 356.25,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 578.312,
+          "y": 354.688,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 579.875,
+          "y": 353.125,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 581.438,
+          "y": 351.562,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 583.0,
+          "y": 350.0,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 584.562,
+          "y": 348.438,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 586.125,
+          "y": 346.875,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 587.688,
+          "y": 345.312,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 589.25,
+          "y": 343.75,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 590.812,
+          "y": 342.188,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 592.375,
+          "y": 340.625,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 593.938,
+          "y": 339.062,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 595.5,
+          "y": 337.5,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 597.062,
+          "y": 335.938,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 598.625,
+          "y": 334.375,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 600.188,
+          "y": 332.812,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 601.75,
+          "y": 331.25,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 603.312,
+          "y": 329.688,
+          "owned": true,
+          "top_path": "WorldMap3D/entity/Plane"
+        },
+        {
+          "x": 604.875,
+          "y": 328.125,
+          "owned": false,
+          "top_path": "OverlayCamera/Overlay/UIMain/top/SVFloatPanel(Clone)/point/line/bg/enter"
+        },
+        {
+          "x": 606.438,
+          "y": 326.562,
+          "owned": false,
+          "top_path": "OverlayCamera/Overlay/UIMain/top/SVFloatPanel(Clone)/point/line/bg/enter"
+        },
+        {
+          "x": 608.0,
+          "y": 325.0,
+          "owned": false,
+          "top_path": "OverlayCamera/Overlay/UIMain/top/SVFloatPanel(Clone)/point/line/bg/enter"
+        }
+      ]
+    },
+    "private_quarters_physics": {
+      "schema": "alas-headless.private-colliders/v1",
+      "status": 0,
+      "truncated": false,
+      "error_count": 0,
+      "camera_path": "",
+      "colliders": []
+    }
+  }
+}

@@ -1,0 +1,32 @@
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -285,11 +285,18 @@
+ 
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
++            # Globe entry can leave a lease from the previous local-map panel.
++            self.device.screenshot()
+             try:
+                 state = semantic_adapter.operation_siren_globe_state()
+             except SemanticGateClosed:
+                 state = None
+             if state is not None and state.zone_name == zone.cn:
++                if zone.zone_id > 7:
++                    # Refresh the native plane projection also when no pin
++                    # click is needed; the original safe-skip unpin uses it.
++                    semantic_adapter.operation_siren_globe_map_projection(zone.area_pos)
++                    self.device.screenshot()
+                 logger.attr('Globe_pinned', zone)
+                 return
+             if state is not None:
+@@ -306,6 +313,9 @@
+                         raise
+                     logger.info('Native globe target moved before input; reanchor original camera')
+                     continue
++                # Match the original loop's next screenshot after pin input.
++                # Zone type/switch checks must see the newly selected panel.
++                self.device.screenshot()
+                 logger.attr('Globe_pinned', zone)
+                 return
+ 

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Qualify one original-ALAS Research resource-policy value on the live client.
 
-The runner deliberately constrains the original ``Research`` command to one
-research-start grant.  ALAS still owns navigation, card detection, selection,
-fallback/enforcement, the cost-confirmation loop, queueing, and scheduling.
-The harness only supplies a temporary config and records the original
-selector's typed input/output plus the semantic mutation receipt.
+By default the runner stops queue appending after one research-start grant.
+``--native-queue-fill`` instead leaves the original fill loop intact and grants
+up to six starts. ALAS owns navigation, card detection, selection, resource
+policy, confirmation, queueing, and scheduling. The temporary config and
+recorded receipts distinguish a bounded policy sample from a native fill run.
 """
 
 from __future__ import annotations
@@ -47,6 +47,14 @@ RESOURCE_FILTERS = {
     "part": "S9-Q",
 }
 STRATEGIES = ("always_use", "only_05_hour", "only_no_project", "do_not_use")
+
+
+def _has_resource_cost(dispatches: list[Mapping[str, Any]]) -> bool:
+    return any(
+        item.get("expected_prompt_costs")
+        or (item.get("expected_prompt_cost") or {}).get("resource_id")
+        for item in dispatches
+    )
 
 
 from alas_headless.semantic_sources import semantic_source_hashes
@@ -162,6 +170,7 @@ def validate(
     filter_override: str | None = None,
     serial_override: str | None = None,
     reward_budget_override: int | None = None,
+    native_queue_fill: bool = False,
 ) -> Mapping[str, Any]:
     if resource not in RESOURCE_FIELDS:
         raise ValueError("resource must be coin, cube, or part")
@@ -239,13 +248,14 @@ def validate(
     prior_budget = os.environ.get("ALAS_SEMANTIC_RESEARCH_START_BUDGET")
     prior_reward_budget = os.environ.get("ALAS_SEMANTIC_RESEARCH_REWARD_BUDGET")
     try:
-        start_budget = 0 if expect == "insufficient_delay" else 1
+        start_budget = 0 if expect == "insufficient_delay" else (6 if native_queue_fill else 1)
         reward_budget = (
             reward_budget_override
             if reward_budget_override is not None
             else (0 if expect == "insufficient_delay" else 2)
         )
         result["research_start_grant"] = start_budget
+        result["native_queue_fill"] = native_queue_fill
         result["research_reward_grant"] = reward_budget
         modules = _load_modules(
             alas_root,
@@ -354,7 +364,8 @@ def validate(
                 return False
             return original_queue_append(*args, **kwargs)
 
-        task.research_queue_append = run_one_queue_append
+        if not native_queue_fill:
+            task.research_queue_append = run_one_queue_append
 
         def recover_exact_network_popup() -> bool:
             semantic_id = "overlay/network-reconnect/confirm"
@@ -422,8 +433,8 @@ def validate(
             item["capability"] != "research.start" for item in result["dispatches"]
         ):
             raise AssertionError("Research policy issued an unexpected mutation capability")
-        if len(result["dispatches"]) > 1:
-            raise AssertionError("bounded Research policy run exceeded one start receipt")
+        if len(result["dispatches"]) > start_budget:
+            raise AssertionError("Research policy run exceeded its start grant")
         if len(result["reward_dispatches"]) > 2:
             raise AssertionError("bounded Research policy run exceeded two reward receipts")
         if any(
@@ -495,18 +506,15 @@ def validate(
                 for item in result["dispatches"]
             ):
                 raise AssertionError("do_not_use started a resource-consuming research project")
-            if result["research_start_grant_remaining"] != 1 - len(result["dispatches"]):
+            if result["research_start_grant_remaining"] != start_budget - len(result["dispatches"]):
                 raise AssertionError("do_not_use start-budget accounting is inconsistent")
         elif not result["dispatches"]:
             raise AssertionError("resource policy did not produce its bounded start receipt")
         else:
-            if not (
-                result["dispatches"][0].get("expected_prompt_costs")
-                or result["dispatches"][0]["expected_prompt_cost"]["resource_id"]
-            ):
-                raise AssertionError("resource policy selected a resource-free project")
-            if result["research_start_grant_remaining"] != 0:
-                raise AssertionError("bounded Research start did not consume its grant")
+            if not _has_resource_cost(result["dispatches"]):
+                raise AssertionError("resource policy started no resource-consuming project")
+            if result["research_start_grant_remaining"] != start_budget - len(result["dispatches"]):
+                raise AssertionError("Research start-budget accounting is inconsistent")
         result["passed"] = True
     except BaseException as exc:
         result["error"] = type(exc).__name__ + ": " + str(exc)
@@ -575,6 +583,10 @@ def main() -> int:
     parser.add_argument("--filter", dest="filter_override")
     parser.add_argument("--serial")
     parser.add_argument("--reward-budget", type=int)
+    parser.add_argument(
+        "--native-queue-fill", action="store_true",
+        help="Keep original ALAS queue filling, allowing up to six starts instead of truncating after one.",
+    )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     output = args.output.resolve()
@@ -589,6 +601,7 @@ def main() -> int:
         filter_override=args.filter_override,
         serial_override=args.serial,
         reward_budget_override=args.reward_budget,
+        native_queue_fill=args.native_queue_fill,
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     _write_json(output, result)

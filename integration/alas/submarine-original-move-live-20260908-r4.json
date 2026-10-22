@@ -1,0 +1,86 @@
+{
+  "schema": "alas-headless.submarine-map-probe/v1",
+  "passed": false,
+  "stage": "10-2",
+  "serial": "emulator-5580",
+  "combat_budget": 0,
+  "oil_before": 8686,
+  "sortie": {
+    "stage_code": "10-2",
+    "initial_fleets": [
+      2,
+      1,
+      1
+    ],
+    "requested_fleets": [
+      2,
+      1,
+      1
+    ],
+    "prepared_fleets": [
+      2,
+      1,
+      1
+    ],
+    "mutation_semantic_ids": [],
+    "oil_before_sortie": 8686,
+    "required_oil": 91,
+    "sortie_generation": 30993,
+    "map_generation": 31116,
+    "map_root_path": "LevelCamera/Canvas/UIMain/LevelGrid",
+    "oil_cost_source": "observed-fleet-summary",
+    "submarine_auto_mode": null
+  },
+  "move_requested": {
+    "origin": "E3",
+    "destination": "E2"
+  },
+  "traceback": "Traceback (most recent call last):\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\scripts\\python\\probe_campaign_submarine_map.py\", line 61, in main\n    result['original_move_returned'] = h.submarine_goto((target.column-1,target.row-1))\n                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\map\\fleet.py\", line 1239, in submarine_goto\n    self.strategy_submarine_move_confirm()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\handler\\strategy.py\", line 188, in strategy_submarine_move_confirm\n    if self.handle_popup_confirm('SUBMARINE_MOVE'):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\handler\\info_handler.py\", line 110, in handle_popup_confirm\n    if self.appear(POPUP_CANCEL, offset=offset) \\\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\base\\base.py\", line 255, in appear\n    appear = semantic_adapter.appear(button)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\python\\alas_headless\\adapter\\semantic\\session_dispatch.py\", line 47, in appear\n    return adapter.campaign_submarine_move_popup_appear(name)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\python\\alas_headless\\adapter\\semantic\\campaign.py\", line 603, in campaign_submarine_move_popup_appear\n    observed = self._frame_or_live_observation_oracle().campaign_submarine_move_confirmation()\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\python\\alas_headless\\oracle\\campaign_state.py\", line 794, in campaign_submarine_move_confirmation\n    raise SemanticGateClosed('submarine move confirmation buttons are ambiguous')\nalas_headless.oracle.errors.SemanticGateClosed: submarine move confirmation buttons are ambiguous\n",
+  "error": "SemanticGateClosed: submarine move confirmation buttons are ambiguous",
+  "fingerprint": {
+    "package": "com.bilibili.azurlane",
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "width": 1280,
+    "height": 720,
+    "max_age_ms": 10000,
+    "peer_uid": 2000,
+    "expected_pid": 19236
+  },
+  "oil_cancel_receipt": {
+    "semantic_id": "campaign/map/submarine/oil/cancel",
+    "generation": 31323,
+    "point": {
+      "x": 490.0,
+      "y": 515.0
+    },
+    "bounds": {
+      "left": 399.0,
+      "top": 481.333,
+      "right": 581.0,
+      "bottom": 548.667
+    },
+    "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
+    "policy_sha256": null,
+    "capability_id": null
+  },
+  "deployment_cancel_receipt": {
+    "semantic_id": "campaign/map/deployment/cancel",
+    "generation": 31337,
+    "point": {
+      "x": 947.9,
+      "y": 662.667
+    },
+    "bounds": {
+      "left": 856.9,
+      "top": 629.0,
+      "right": 1038.9,
+      "bottom": 696.333
+    },
+    "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/bottom_stage/Action/MissileStrike/cancel_button",
+    "policy_sha256": null,
+    "capability_id": null
+  },
+  "stage_after": true,
+  "oil_after": 8676
+}

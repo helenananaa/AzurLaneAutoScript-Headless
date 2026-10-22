@@ -1,0 +1,46 @@
+diff --git a/module/guild/operations.py b/module/guild/operations.py
+--- a/module/guild/operations.py
++++ b/module/guild/operations.py
+@@ -1,4 +1,4 @@
+-from alas_headless import validate_alas_guild_config
++from alas_headless import validate_alas_guild_config, AlasSemanticUnmapped, SemanticGateClosed
+ 
+ from module.base.button import ButtonGrid
+ from module.base.timer import Timer
+@@ -600,10 +600,18 @@
+                 try:
+                     state = adapter.guild_operations_state()
+                     break
+-                except Exception:
++                except SemanticGateClosed as exc:
++                    if str(exc) not in (
++                        'guild operations snapshots are not coherent',
++                        'guild operations page identity is absent',
++                        'guild active operation marker is ambiguous',
++                        'guild active operation node is ambiguous',
++                    ):
++                        raise
++                    observation_error = str(exc)
+                     self.device.sleep(0.2)
+             else:
+-                raise RuntimeError('Guild operations did not become observable')
++                raise AlasSemanticUnmapped('Guild operations unavailable: ' + observation_error)
+             if state.mode == 'inactive':
+                 return True
+             if state.mode == 'boss':
+@@ -612,9 +620,13 @@
+                 return True
+             if state.mode != 'active':
+                 return False
+-            if state.active_node_path is None:
++            if not state.active_nodes:
+                 return True
+-            adapter.oracle.click_guild_active_operation(state.active_node_path)
++            # Native dispatch consumes the first visible entrance. Preserve
++            # that visual ordering while retaining each typed node identity.
++            node = min(state.active_nodes, key=lambda node: (
++                node.bounds.top, node.bounds.left, node.path))
++            adapter.oracle.click_guild_active_operation(node.path)
+             for _ in range(30):
+                 if adapter.oracle.enabled('guild/operations/dispatch/open'):
+                     adapter.oracle.click('guild/operations/dispatch/open')

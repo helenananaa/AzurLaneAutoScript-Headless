@@ -1,0 +1,4064 @@
+{
+  "passed": true,
+  "schema": "alas-headless.private-quarters-room-probe/v1",
+  "source_sha256": {
+    "python/alas_headless/adapter/semantic/__init__.py": "649733a0379b5a6bf1f48f2f8605524168ef8cc8f6cf35242e3c7760a7581017",
+    "python/alas_headless/adapter/semantic/adapter.py": "2a8f3859db58088395b71f8b5153294937e18321c0e620a6b815f89d3f69786f",
+    "python/alas_headless/adapter/semantic/archives.py": "74f453051ad4f85a0065a19362889ec5a12804f987dedd52ea48c6dd2bcf67ce",
+    "python/alas_headless/adapter/semantic/build.py": "e06943310a0f11c002efc457f0df4d0bfc532b603f6d33f11e82952042401934",
+    "python/alas_headless/adapter/semantic/campaign.py": "ba372cc4a2c351e2a00ee9cf6d069969462673eb46538d7308704673029365fe",
+    "python/alas_headless/adapter/semantic/campaign_health.py": "a148a0b346989b625efd7b0a1e7d1aa6c2af85c928ab2a07c998e1424587dcba",
+    "python/alas_headless/adapter/semantic/campaign_map.py": "c8c99cbf889e03bac5d930705fec79e7ad40db3e83e200edc3d925af3217f39d",
+    "python/alas_headless/adapter/semantic/campaign_preparation.py": "904633d6bbbb12d8eb61b4694a0257288e1ec63524b59329ee3f4d8a9c0078f0",
+    "python/alas_headless/adapter/semantic/commission.py": "91fe54d2b37e4b2e85eba2868be6f4ac8f248beaf8501dd46b426aa4867e31cf",
+    "python/alas_headless/adapter/semantic/contracts.py": "a07fa9b7b131442554a4011cb3c3ccf5afcef244d0c5697d22e1c4e08a13e1a9",
+    "python/alas_headless/adapter/semantic/core.py": "46674c7dc7a9e9a99dbf2c545c53cb1ae2527dcc9002fc64bba878563a7fc4f8",
+    "python/alas_headless/adapter/semantic/daily.py": "8c071a33bec728dcdf137abb527dbc441c3e8722d6ca8896355e5255de0fa796",
+    "python/alas_headless/adapter/semantic/dispatch.py": "68bdb629da07f44dc20e0be8a9ad7b488df488a90e9a35337c872b0150eb2792",
+    "python/alas_headless/adapter/semantic/dispatch_actions.py": "d9e941a8d20329b8965d7d46dcd1f4999c22ce8d21ab8259d2564abee1f8a559",
+    "python/alas_headless/adapter/semantic/dispatch_observation.py": "f6d72f5583a5262b77ca00be48c45322ad581a51f9bf8e488e0d06928f69f93c",
+    "python/alas_headless/adapter/semantic/dispatch_result.py": "382856e91a043693d2e55357b635a774dab5a169a3ef380deba4e65751518fce",
+    "python/alas_headless/adapter/semantic/dock.py": "e7e2757a027c4d97ffe499f10d08e26b5e2c29fb2b55c9cd8fa5305d08995910",
+    "python/alas_headless/adapter/semantic/dorm.py": "5cff605ffa3ad9eb37dce9d9fdeaed6ab1c11eaf4fbb9150aa030b6af6855ffe",
+    "python/alas_headless/adapter/semantic/event.py": "d25336bfd638de2e77ba3b4bd00190d1afe9e84589252d6bf1e3b9cf52cde7f5",
+    "python/alas_headless/adapter/semantic/gems_farming.py": "c3f6df38589ee979f2d43949617d82aaf2bca6c1561fa87918d5bdee65be731f",
+    "python/alas_headless/adapter/semantic/guild.py": "fe56bd8e77c678cdaa0698100d0f48b402d58a74e4fb1bc7ebacbfc4bc6a6547",
+    "python/alas_headless/adapter/semantic/legacy.py": "f4064664c242a65b66a30c954c99493e2e508dc51088a2fde3d4adfe807a86eb",
+    "python/alas_headless/adapter/semantic/login.py": "54a7221b6873e04e86257fcf53a07e0501f725d98d50a152385a22f869e68bbd",
+    "python/alas_headless/adapter/semantic/mail.py": "4d835b384ea3737746a450e7405e9d7dd2d6b67bb57b1b48ba5730bde2602a7b",
+    "python/alas_headless/adapter/semantic/meowfficer.py": "01a3bf29926ade7eaabb71c679643b1d7fa56fe81a4588d9e498e6b253ba1ff2",
+    "python/alas_headless/adapter/semantic/meta.py": "813f068b8fd5cd33f4296765922f6c359fc9cbdb97076ab236b0ce7088c6d28e",
+    "python/alas_headless/adapter/semantic/minigame.py": "542b099e1c78f2bf5112adf7b8cd1270767b5e4c94933debe428b99cf84ca5da",
+    "python/alas_headless/adapter/semantic/mission.py": "126515c7e88e7b5b5b3b86e30fe4010bdc18367fcb75abc6087c99c0b2795865",
+    "python/alas_headless/adapter/semantic/observation.py": "6a09fff5392685d9510669438230918f3c92225094f743f2b02d0e1e45fde20c",
+    "python/alas_headless/adapter/semantic/opsi.py": "99bd0e78bc9181e0724bdaf9885413b36069a6b7fd367a4d33cf21435d271d62",
+    "python/alas_headless/adapter/semantic/opsi_shop.py": "f31e7d666b8fff1949041a4b9c3a5ab02c3d1137c55f909bf127572d550e1916",
+    "python/alas_headless/adapter/semantic/raid.py": "e04fd95232b3c09bb7654fbbe71dfda06175c2e3695e1fca8a3004c0c0581af5",
+    "python/alas_headless/adapter/semantic/research.py": "2031f208d69940023c692e47d0816bded5292875ddf9fd8b8dd8b0dce8b712af",
+    "python/alas_headless/adapter/semantic/resources.py": "0a346f49162ad65f96ec710b7031918ab17f10d235bd492f176ff2910cb98fcd",
+    "python/alas_headless/adapter/semantic/rewards.py": "46f1c4ec41677789d2346e3de2c7627518db50b524d1225eea4dcba5c1837d12",
+    "python/alas_headless/adapter/semantic/session.py": "cfde885fa20ffef6fbbb0b6333883b23297077ce726f2842e91d550b2fd65a71",
+    "python/alas_headless/adapter/semantic/session_combat.py": "42ad62ec2987eeb70d331445dbacb15f4c764ff85684f1d0552b1714aded77cd",
+    "python/alas_headless/adapter/semantic/session_dispatch.py": "34c363710c2be652434f27ca02c9dec23f425a4ad3278b800af925645ca83b22",
+    "python/alas_headless/adapter/semantic/session_opsi.py": "1494afdc7a74ab97b4f64db4a6c1f15b2b63a0ab070c8ce51ede33082e05b508",
+    "python/alas_headless/adapter/semantic/session_tasks.py": "5dec96eab7dc4724d2f9fe4b72e1b201f9d789c3b74110cc7971e9c9b3977457",
+    "python/alas_headless/adapter/semantic/shop.py": "0268c62890cc033e58e77d4c67848afbf79bac5c15df4ab654d5d320880167d6",
+    "python/alas_headless/adapter/semantic/tactical.py": "ba5b6bd144f50cba3e7c581747df3661fbf5f852f7b9322ac69bed2abea64253",
+    "python/alas_headless/adapter/task_lifecycle.py": "2f653129104e2b33fbcf71dbce218216b1cbcc105cafa3c0ce369583fec0b98c",
+    "python/alas_headless/alas_adapter.py": "5767af823ed712aeeb2589b6b4aaf4a7d03b31e3d4c2ab0698d690814123b0b4",
+    "python/alas_headless/oracle/__init__.py": "649733a0379b5a6bf1f48f2f8605524168ef8cc8f6cf35242e3c7760a7581017",
+    "python/alas_headless/oracle/actions.py": "df4602f124e61da43e59fcf15d0b8c96f200d44570d408d811b3c35db5a9192f",
+    "python/alas_headless/oracle/archives.py": "a87a308e763a243568969150f23cf351ec7fcd64cff2397b6cbd3e0769d65ee9",
+    "python/alas_headless/oracle/awaken.py": "171760aa6958733268e202aebc2a127c6df52c06cddddf84183574ae778b03ea",
+    "python/alas_headless/oracle/blockers.py": "dfc51defe49505b3b15d9d482393a60a0afb20135801c001e53322307f7b7a7d",
+    "python/alas_headless/oracle/build.py": "348e4c3b42723c399c2b9c19724b15c29372bba17d5563e8041ab8c8842b9ccc",
+    "python/alas_headless/oracle/button_targets.py": "d34a17f5229a97634bf1561f73becb05e2851f0cbc50a7d964cb41fe5dbb6af8",
+    "python/alas_headless/oracle/campaign_fleet.py": "5e730d1efa42a74dd6832cb1c152d88f734dfffc00a7c1d987dea0b820326b58",
+    "python/alas_headless/oracle/campaign_health.py": "3179a5ba27a666d47487aafb68865a780c7da7eab736408eaee852dc088b1bd2",
+    "python/alas_headless/oracle/campaign_map.py": "a618a9888446298009d805a56a7472352b0d0edf731cb9ea0f93efae0ec8de81",
+    "python/alas_headless/oracle/campaign_mappings.py": "8054660b5e80734f6a9e537c51269e715f29befba56adac058fb5921422204d9",
+    "python/alas_headless/oracle/campaign_navigation.py": "70abb0bab5c1fa88cd32d933de762a2d63ffc3fbbc62f3ea5014667122b59485",
+    "python/alas_headless/oracle/campaign_preparation.py": "590fe087320fb47c46418c0e210803f1e13c40a1714b4c88b4f3afff05a56b6d",
+    "python/alas_headless/oracle/campaign_state.py": "b9487750ff8ddc931a40d1a68d9f52370c8e490fbc5a8bd9ad20b018b6111782",
+    "python/alas_headless/oracle/combat.py": "1f765d638733bf1c93dbc486bbf07e868413ad587845658ff42010b68cc46b99",
+    "python/alas_headless/oracle/commission.py": "522da93c10f6718abd0d5f5fb0b13af8ad711f6fb85d01b4a2858d8e9f9b338a",
+    "python/alas_headless/oracle/contracts.py": "ab400bc14abf94bd3029bba796f6a258b4243c0e65cdad977f3a2aa24122d795",
+    "python/alas_headless/oracle/core.py": "0eceb0fb1ecac226bccc64a7bfc250e2a6ccc382f36cc56f37629d5c7ca55463",
+    "python/alas_headless/oracle/dorm.py": "2a719100b7c8c3752c238fe689118a293d371076277199e27e1f153050a018d3",
+    "python/alas_headless/oracle/enhancement.py": "ff29527baea14d78bd329cf6d262f05c4ea5c651fee391d73ca53c53780e0f29",
+    "python/alas_headless/oracle/errors.py": "10fc292499647cdafb229a2e748800724b72022a49d775ea2839ec33af374021",
+    "python/alas_headless/oracle/event.py": "bd32d33740ee859dafecd62b6cc30d6a1cc4b5f4e37c7b99d74458d596753aeb",
+    "python/alas_headless/oracle/exercise.py": "e101c7731f0aed08fec0009ee9d1c8218baf0a40248516233552e1df76e9fcdf",
+    "python/alas_headless/oracle/gems_equipment.py": "8a9e4543f2a4da117f9a9ee412420e921699ca7f86f35a68a9e1d6364946969a",
+    "python/alas_headless/oracle/gems_farming.py": "f1dc3d1c7bc3de350cd24c21c52c77be4add53eb28255e3b0bc7871d9b2ccecd",
+    "python/alas_headless/oracle/guild.py": "ed7fe4315ad4d590ac6cde1e8b6d7ea326e0a2193bb0fa6539edc516140604cb",
+    "python/alas_headless/oracle/login.py": "cb81bc3b5abcccba4458d6141df01ffbf6ac37eb2ba898b01c52d10f8ac37f14",
+    "python/alas_headless/oracle/mail.py": "a19e6a5ed778f6b1b1688f01e4d11e7c7c81d73021a8ef1d1b344482a245ff3d",
+    "python/alas_headless/oracle/meowfficer.py": "13cc430df9d982ce6adaaaf0c7e53b1ac96913e9d129fc3e277597f6829bc68a",
+    "python/alas_headless/oracle/meta.py": "3eae7bc230354a5a08fde61f272830ba72e8ac76bcdb9ef339e6aa78ca0d50a8",
+    "python/alas_headless/oracle/minigame.py": "2197a338aef67b6f3c13292551f467564f87c5bc21f55218e7802665d7afe7db",
+    "python/alas_headless/oracle/mission.py": "31e6c05a8cfd628e6507633c1afecdf654cb67c7fd0a8821c79138d24d8e36ed",
+    "python/alas_headless/oracle/opsi_globe.py": "683c7a3400daf148240e1f051640b37edb1626aef506f41ed62df5a5a851979a",
+    "python/alas_headless/oracle/opsi_mission.py": "127ba09751cd2180144976e1cf74f5bb5e11f1aa4a7dc978ad8b7f240b81a538",
+    "python/alas_headless/oracle/opsi_navigation.py": "6b100a962af17018e4d53cfc78eee969ce53e022a811fad13dcb343fd027c0f3",
+    "python/alas_headless/oracle/opsi_resources.py": "69565a46c6d1bcdbc0a7551385d6a4f2809007b6c6045e6428fa8e461c91001b",
+    "python/alas_headless/oracle/opsi_shop.py": "df906393bbd1979e6e197ac7548b658c688054fad026e721451e5cb6d48a5743",
+    "python/alas_headless/oracle/opsi_state.py": "9a79e7fb9d5ddc15ba460113549cd4b4369db1fd16828ee8aa0f63c17f51aea6",
+    "python/alas_headless/oracle/opsi_storage.py": "8058e29c4696e2a0404f04fc5331bc1ac7b967134324799361dcc5785e251445",
+    "python/alas_headless/oracle/private_quarters.py": "d2575000ae44195488567347e6821eb9a1f144be6b3d05c5ff511881ba503d0b",
+    "python/alas_headless/oracle/raid.py": "550f1382843f0947049f6b2b4da417bda2eab50b4a8b6a1aa57bea0cc3345bd4",
+    "python/alas_headless/oracle/research.py": "69579f3c17a0b728622cd373a5ec41f158b22231b98d7397842d37dbadc042fb",
+    "python/alas_headless/oracle/retirement.py": "19a5aa3ab387b3edb5fe2e07056e9800d9105dc63549497a054ad2cf4081a1d8",
+    "python/alas_headless/oracle/rewards.py": "064f202dacdcf97e0a5c72f537471f84aaf668ec1b6a3a1948693ae672388c8b",
+    "python/alas_headless/oracle/shipyard.py": "bbff42a0b73fad107edc1a3c623d0828783ae080ae5e9b936104101ea16a668e",
+    "python/alas_headless/oracle/shop.py": "ea903177b989cf9a02b2822b49b62019f75ea62a3458ff248a8d58e27133ca31",
+    "python/alas_headless/oracle/surfaces.py": "22864bd0aa0fd84f93936cfd779d75a7ff924047d0d81741d9e1d3eae8e4f165",
+    "python/alas_headless/oracle/tactical.py": "54dc50669996fa1ac2b552c071bbde7c00b309d761c863efc637e79ebccb9a9c",
+    "python/alas_headless/oracle/targets.py": "50b9c4655d9d790230bf6e71cbeb1f1870cf2d5c46b082c0f58a7fff07446128",
+    "python/alas_headless/oracle/transport.py": "6734e3d0c5d7ade9863b52fc8ed3e7e7cc5fc9f46585076924bc8b31bcdfcf25",
+    "python/alas_headless/oracle/ui_targets.py": "66ae8b25b4c31954ba60d345b4014276395ef6442fbcf45035658b5e299c912d",
+    "python/alas_headless/semantic_oracle.py": "e459cae11bf20453fa500f102d01389bfb4ddb33c51e70b1309e7aa6053ad353"
+  },
+  "receipts": [
+    {
+      "semantic_id": "main/live",
+      "generation": 2068,
+      "point": {
+        "x": 561.926,
+        "y": 683.572
+      },
+      "bounds": {
+        "left": 478.952,
+        "top": 650.25,
+        "right": 644.899,
+        "bottom": 716.895
+      },
+      "path": "OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/bottom/frame/live",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "dorm-menu/private-quarters",
+      "generation": 2075,
+      "point": {
+        "x": 1077.532,
+        "y": 480.0
+      },
+      "bounds": {
+        "left": 984.199,
+        "top": 309.0,
+        "right": 1170.865,
+        "bottom": 651.0
+      },
+      "path": "OverlayCamera/Overlay/UIMain/MainLiveAreaUI(Clone)/dorm_btn",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "private-quarters/room/new-jersey",
+      "generation": 2106,
+      "point": {
+        "x": 998.667,
+        "y": 322.0
+      },
+      "bounds": {
+        "left": 965.333,
+        "top": 288.667,
+        "right": 1032.0,
+        "bottom": 355.333
+      },
+      "path": "UICamera/Canvas/UIMain/SelectDorm3DUI(Clone)/Map/floor_2/Xinzexi",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "private-quarters/dialogue/continue",
+      "generation": 2685,
+      "point": {
+        "x": 640.0,
+        "y": 360.0
+      },
+      "bounds": {
+        "left": -0.0,
+        "top": 0.0,
+        "right": 1280.0,
+        "bottom": 720.0
+      },
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "private-quarters/home",
+      "generation": 2772,
+      "point": {
+        "x": 1125.049,
+        "y": 36.0
+      },
+      "bounds": {
+        "left": 1111.049,
+        "top": 21.667,
+        "right": 1139.049,
+        "bottom": 50.333
+      },
+      "path": "UICamera/Canvas/UIMain/SelectDorm3DUI(Clone)/Main/option/home",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "before": {
+    "generation": 2097,
+    "remaining": 3,
+    "capacity": 3,
+    "locale": "汐语小筑"
+  },
+  "room": {
+    "generation": 2697,
+    "scene_handle": -55774,
+    "snapshot": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 6967,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "abi": "x86_64",
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "snapshot_schema": 1,
+      "snapshot_struct_size": 104,
+      "generation": 2697,
+      "scene_generation": 3,
+      "semantic_generation": 2,
+      "snapshot_monotonic_ns": 14580185301500,
+      "response_monotonic_ns": 14580277762900,
+      "age_ms": 92,
+      "observer_tid": 6999,
+      "assembly_count": 129,
+      "semantic_code": 1,
+      "width": 1280,
+      "height": 720,
+      "flags": 15,
+      "observer_attached": false,
+      "main_thread": true,
+      "button_count": 104,
+      "active_button_count": 10,
+      "interactable_button_count": 104,
+      "scene_handle": -55774,
+      "ui_stage": 100,
+      "ui_method_mask": 15
+    },
+    "buttons_snapshot": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "semantic_schema": "alas-headless.buttons/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 6967,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "schema": 1,
+      "struct_size": 340008,
+      "generation": 2697,
+      "snapshot_monotonic_ns": 14580185301500,
+      "response_monotonic_ns": 14580277806500,
+      "age_ms": 92,
+      "button_count": 10,
+      "truncated": false,
+      "error_count": 0,
+      "buttons": [
+        {
+          "name": "Zone",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/right/Zone",
+          "canvas": "Canvas",
+          "flags": 3583,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": false,
+          "canvas_render_mode": 1,
+          "instance_id": -54570,
+          "world_position": {
+            "x": 13.883,
+            "y": -7.333,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -298.0,
+            "y": -0.0,
+            "width": 298.0,
+            "height": 82.0
+          },
+          "screen_point": {
+            "x": 1264.739,
+            "y": 30.0
+          },
+          "adb_point": {
+            "x": 1264.739,
+            "y": 690.0
+          },
+          "screen_bounds": {
+            "left": 1066.073,
+            "bottom": 30.0,
+            "right": 1264.739,
+            "top": 84.667
+          },
+          "adb_bounds": {
+            "left": 1066.073,
+            "top": 635.333,
+            "right": 1264.739,
+            "bottom": 690.0
+          }
+        },
+        {
+          "name": "btn_skin",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/left/btn_skin",
+          "canvas": "Canvas",
+          "flags": 3583,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": false,
+          "canvas_render_mode": 1,
+          "instance_id": -54550,
+          "world_position": {
+            "x": 0.77,
+            "y": -7.503,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -144.0,
+            "y": -0.0,
+            "width": 144.0,
+            "height": 70.0
+          },
+          "screen_point": {
+            "x": 674.667,
+            "y": 22.354
+          },
+          "adb_point": {
+            "x": 674.667,
+            "y": 697.646
+          },
+          "screen_bounds": {
+            "left": 578.667,
+            "bottom": 22.354,
+            "right": 674.667,
+            "top": 69.02
+          },
+          "adb_bounds": {
+            "left": 578.667,
+            "top": 650.98,
+            "right": 674.667,
+            "bottom": 697.646
+          }
+        },
+        {
+          "name": "btn_accompany",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/left/btn_accompany",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -54490,
+          "world_position": {
+            "x": -2.37,
+            "y": -7.503,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -144.0,
+            "y": -0.0,
+            "width": 144.0,
+            "height": 70.0
+          },
+          "screen_point": {
+            "x": 533.333,
+            "y": 22.354
+          },
+          "adb_point": {
+            "x": 533.333,
+            "y": 697.646
+          },
+          "screen_bounds": {
+            "left": 437.333,
+            "bottom": 22.354,
+            "right": 533.333,
+            "top": 69.02
+          },
+          "adb_bounds": {
+            "left": 437.333,
+            "top": 650.98,
+            "right": 533.333,
+            "bottom": 697.646
+          }
+        },
+        {
+          "name": "btn_furniture",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/left/btn_furniture",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -54452,
+          "world_position": {
+            "x": -5.511,
+            "y": -7.503,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -144.0,
+            "y": -0.0,
+            "width": 144.0,
+            "height": 70.0
+          },
+          "screen_point": {
+            "x": 392.0,
+            "y": 22.354
+          },
+          "adb_point": {
+            "x": 392.0,
+            "y": 697.646
+          },
+          "screen_bounds": {
+            "left": 296.0,
+            "bottom": 22.354,
+            "right": 392.0,
+            "top": 69.02
+          },
+          "adb_bounds": {
+            "left": 296.0,
+            "top": 650.98,
+            "right": 392.0,
+            "bottom": 697.646
+          }
+        },
+        {
+          "name": "btn_collection",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/left/btn_collection",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -54422,
+          "world_position": {
+            "x": -9.719,
+            "y": -6.985,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -72.0,
+            "y": -35.0,
+            "width": 144.0,
+            "height": 70.0
+          },
+          "screen_point": {
+            "x": 202.667,
+            "y": 45.687
+          },
+          "adb_point": {
+            "x": 202.667,
+            "y": 674.313
+          },
+          "screen_bounds": {
+            "left": 154.667,
+            "bottom": 22.354,
+            "right": 250.667,
+            "top": 69.02
+          },
+          "adb_bounds": {
+            "left": 154.667,
+            "top": 650.98,
+            "right": 250.667,
+            "bottom": 697.646
+          }
+        },
+        {
+          "name": "btn_photograph",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/left/btn_photograph",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -54400,
+          "world_position": {
+            "x": -12.859,
+            "y": -6.985,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -72.0,
+            "y": -35.0,
+            "width": 144.0,
+            "height": 70.0
+          },
+          "screen_point": {
+            "x": 61.333,
+            "y": 45.687
+          },
+          "adb_point": {
+            "x": 61.333,
+            "y": 674.313
+          },
+          "screen_bounds": {
+            "left": 13.333,
+            "bottom": 22.354,
+            "right": 109.333,
+            "top": 69.02
+          },
+          "adb_bounds": {
+            "left": 13.333,
+            "top": 650.98,
+            "right": 109.333,
+            "bottom": 697.646
+          }
+        },
+        {
+          "name": "setting",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/top/setting",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -54384,
+          "world_position": {
+            "x": 13.119,
+            "y": 6.815,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -50.0,
+            "y": -50.0,
+            "width": 100.0,
+            "height": 100.0
+          },
+          "screen_point": {
+            "x": 1230.339,
+            "y": 666.667
+          },
+          "adb_point": {
+            "x": 1230.339,
+            "y": 53.333
+          },
+          "screen_bounds": {
+            "left": 1197.006,
+            "bottom": 633.333,
+            "right": 1263.672,
+            "top": 700.0
+          },
+          "adb_bounds": {
+            "left": 1197.006,
+            "top": 20.0,
+            "right": 1263.672,
+            "bottom": 86.667
+          }
+        },
+        {
+          "name": "favor_level",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/top/favor_level",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -54318,
+          "world_position": {
+            "x": 12.052,
+            "y": 7.481,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -334.0,
+            "y": -78.0,
+            "width": 334.0,
+            "height": 78.0
+          },
+          "screen_point": {
+            "x": 1182.339,
+            "y": 696.667
+          },
+          "adb_point": {
+            "x": 1182.339,
+            "y": 23.333
+          },
+          "screen_bounds": {
+            "left": 959.672,
+            "bottom": 644.667,
+            "right": 1182.339,
+            "top": 696.667
+          },
+          "adb_bounds": {
+            "left": 959.672,
+            "top": 23.333,
+            "right": 1182.339,
+            "bottom": 75.333
+          }
+        },
+        {
+          "name": "help",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/btn_back/help",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -54298,
+          "world_position": {
+            "x": -10.134,
+            "y": 6.8,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -0.0,
+            "y": -37.0,
+            "width": 74.0,
+            "height": 74.0
+          },
+          "screen_point": {
+            "x": 183.973,
+            "y": 666.0
+          },
+          "adb_point": {
+            "x": 183.973,
+            "y": 54.0
+          },
+          "screen_bounds": {
+            "left": 183.973,
+            "bottom": 641.333,
+            "right": 233.306,
+            "top": 690.667
+          },
+          "adb_bounds": {
+            "left": 183.973,
+            "top": 29.333,
+            "right": 233.306,
+            "bottom": 78.667
+          }
+        },
+        {
+          "name": "btn_back",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/btn_back",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -54290,
+          "world_position": {
+            "x": -14.223,
+            "y": 7.526,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -0.0,
+            "y": -98.0,
+            "width": 256.0,
+            "height": 98.0
+          },
+          "screen_point": {
+            "x": 85.0,
+            "y": 666.0
+          },
+          "adb_point": {
+            "x": 85.0,
+            "y": 54.0
+          },
+          "screen_bounds": {
+            "left": -0.027,
+            "bottom": 633.333,
+            "right": 170.639,
+            "top": 698.667
+          },
+          "adb_bounds": {
+            "left": -0.027,
+            "top": 21.333,
+            "right": 170.639,
+            "bottom": 86.667
+          }
+        }
+      ]
+    },
+    "buttons": [
+      {
+        "name": "Zone",
+        "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/right/Zone",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": false,
+        "point": {
+          "x": 1264.739,
+          "y": 690.0
+        },
+        "bounds": {
+          "left": 1066.073,
+          "top": 635.333,
+          "right": 1264.739,
+          "bottom": 690.0
+        },
+        "raw": {
+          "name": "Zone",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/right/Zone",
+          "canvas": "Canvas",
+          "flags": 3583,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": false,
+          "canvas_render_mode": 1,
+          "instance_id": -54570,
+          "world_position": {
+            "x": 13.883,
+            "y": -7.333,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -298.0,
+            "y": -0.0,
+            "width": 298.0,
+            "height": 82.0
+          },
+          "screen_point": {
+            "x": 1264.739,
+            "y": 30.0
+          },
+          "adb_point": {
+            "x": 1264.739,
+            "y": 690.0
+          },
+          "screen_bounds": {
+            "left": 1066.073,
+            "bottom": 30.0,
+            "right": 1264.739,
+            "top": 84.667
+          },
+          "adb_bounds": {
+            "left": 1066.073,
+            "top": 635.333,
+            "right": 1264.739,
+            "bottom": 690.0
+          }
+        }
+      },
+      {
+        "name": "btn_skin",
+        "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/left/btn_skin",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": false,
+        "point": {
+          "x": 674.667,
+          "y": 697.646
+        },
+        "bounds": {
+          "left": 578.667,
+          "top": 650.98,
+          "right": 674.667,
+          "bottom": 697.646
+        },
+        "raw": {
+          "name": "btn_skin",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/left/btn_skin",
+          "canvas": "Canvas",
+          "flags": 3583,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": false,
+          "canvas_render_mode": 1,
+          "instance_id": -54550,
+          "world_position": {
+            "x": 0.77,
+            "y": -7.503,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -144.0,
+            "y": -0.0,
+            "width": 144.0,
+            "height": 70.0
+          },
+          "screen_point": {
+            "x": 674.667,
+            "y": 22.354
+          },
+          "adb_point": {
+            "x": 674.667,
+            "y": 697.646
+          },
+          "screen_bounds": {
+            "left": 578.667,
+            "bottom": 22.354,
+            "right": 674.667,
+            "top": 69.02
+          },
+          "adb_bounds": {
+            "left": 578.667,
+            "top": 650.98,
+            "right": 674.667,
+            "bottom": 697.646
+          }
+        }
+      },
+      {
+        "name": "btn_accompany",
+        "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/left/btn_accompany",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 533.333,
+          "y": 697.646
+        },
+        "bounds": {
+          "left": 437.333,
+          "top": 650.98,
+          "right": 533.333,
+          "bottom": 697.646
+        },
+        "raw": {
+          "name": "btn_accompany",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/left/btn_accompany",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -54490,
+          "world_position": {
+            "x": -2.37,
+            "y": -7.503,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -144.0,
+            "y": -0.0,
+            "width": 144.0,
+            "height": 70.0
+          },
+          "screen_point": {
+            "x": 533.333,
+            "y": 22.354
+          },
+          "adb_point": {
+            "x": 533.333,
+            "y": 697.646
+          },
+          "screen_bounds": {
+            "left": 437.333,
+            "bottom": 22.354,
+            "right": 533.333,
+            "top": 69.02
+          },
+          "adb_bounds": {
+            "left": 437.333,
+            "top": 650.98,
+            "right": 533.333,
+            "bottom": 697.646
+          }
+        }
+      },
+      {
+        "name": "btn_furniture",
+        "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/left/btn_furniture",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 392.0,
+          "y": 697.646
+        },
+        "bounds": {
+          "left": 296.0,
+          "top": 650.98,
+          "right": 392.0,
+          "bottom": 697.646
+        },
+        "raw": {
+          "name": "btn_furniture",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/left/btn_furniture",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -54452,
+          "world_position": {
+            "x": -5.511,
+            "y": -7.503,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -144.0,
+            "y": -0.0,
+            "width": 144.0,
+            "height": 70.0
+          },
+          "screen_point": {
+            "x": 392.0,
+            "y": 22.354
+          },
+          "adb_point": {
+            "x": 392.0,
+            "y": 697.646
+          },
+          "screen_bounds": {
+            "left": 296.0,
+            "bottom": 22.354,
+            "right": 392.0,
+            "top": 69.02
+          },
+          "adb_bounds": {
+            "left": 296.0,
+            "top": 650.98,
+            "right": 392.0,
+            "bottom": 697.646
+          }
+        }
+      },
+      {
+        "name": "btn_collection",
+        "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/left/btn_collection",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 202.667,
+          "y": 674.313
+        },
+        "bounds": {
+          "left": 154.667,
+          "top": 650.98,
+          "right": 250.667,
+          "bottom": 697.646
+        },
+        "raw": {
+          "name": "btn_collection",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/left/btn_collection",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -54422,
+          "world_position": {
+            "x": -9.719,
+            "y": -6.985,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -72.0,
+            "y": -35.0,
+            "width": 144.0,
+            "height": 70.0
+          },
+          "screen_point": {
+            "x": 202.667,
+            "y": 45.687
+          },
+          "adb_point": {
+            "x": 202.667,
+            "y": 674.313
+          },
+          "screen_bounds": {
+            "left": 154.667,
+            "bottom": 22.354,
+            "right": 250.667,
+            "top": 69.02
+          },
+          "adb_bounds": {
+            "left": 154.667,
+            "top": 650.98,
+            "right": 250.667,
+            "bottom": 697.646
+          }
+        }
+      },
+      {
+        "name": "btn_photograph",
+        "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/left/btn_photograph",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 61.333,
+          "y": 674.313
+        },
+        "bounds": {
+          "left": 13.333,
+          "top": 650.98,
+          "right": 109.333,
+          "bottom": 697.646
+        },
+        "raw": {
+          "name": "btn_photograph",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/left/btn_photograph",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -54400,
+          "world_position": {
+            "x": -12.859,
+            "y": -6.985,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -72.0,
+            "y": -35.0,
+            "width": 144.0,
+            "height": 70.0
+          },
+          "screen_point": {
+            "x": 61.333,
+            "y": 45.687
+          },
+          "adb_point": {
+            "x": 61.333,
+            "y": 674.313
+          },
+          "screen_bounds": {
+            "left": 13.333,
+            "bottom": 22.354,
+            "right": 109.333,
+            "top": 69.02
+          },
+          "adb_bounds": {
+            "left": 13.333,
+            "top": 650.98,
+            "right": 109.333,
+            "bottom": 697.646
+          }
+        }
+      },
+      {
+        "name": "setting",
+        "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/top/setting",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 1230.339,
+          "y": 53.333
+        },
+        "bounds": {
+          "left": 1197.006,
+          "top": 20.0,
+          "right": 1263.672,
+          "bottom": 86.667
+        },
+        "raw": {
+          "name": "setting",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/top/setting",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -54384,
+          "world_position": {
+            "x": 13.119,
+            "y": 6.815,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -50.0,
+            "y": -50.0,
+            "width": 100.0,
+            "height": 100.0
+          },
+          "screen_point": {
+            "x": 1230.339,
+            "y": 666.667
+          },
+          "adb_point": {
+            "x": 1230.339,
+            "y": 53.333
+          },
+          "screen_bounds": {
+            "left": 1197.006,
+            "bottom": 633.333,
+            "right": 1263.672,
+            "top": 700.0
+          },
+          "adb_bounds": {
+            "left": 1197.006,
+            "top": 20.0,
+            "right": 1263.672,
+            "bottom": 86.667
+          }
+        }
+      },
+      {
+        "name": "favor_level",
+        "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/top/favor_level",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 1182.339,
+          "y": 23.333
+        },
+        "bounds": {
+          "left": 959.672,
+          "top": 23.333,
+          "right": 1182.339,
+          "bottom": 75.333
+        },
+        "raw": {
+          "name": "favor_level",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/top/favor_level",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -54318,
+          "world_position": {
+            "x": 12.052,
+            "y": 7.481,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -334.0,
+            "y": -78.0,
+            "width": 334.0,
+            "height": 78.0
+          },
+          "screen_point": {
+            "x": 1182.339,
+            "y": 696.667
+          },
+          "adb_point": {
+            "x": 1182.339,
+            "y": 23.333
+          },
+          "screen_bounds": {
+            "left": 959.672,
+            "bottom": 644.667,
+            "right": 1182.339,
+            "top": 696.667
+          },
+          "adb_bounds": {
+            "left": 959.672,
+            "top": 23.333,
+            "right": 1182.339,
+            "bottom": 75.333
+          }
+        }
+      },
+      {
+        "name": "help",
+        "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/btn_back/help",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 183.973,
+          "y": 54.0
+        },
+        "bounds": {
+          "left": 183.973,
+          "top": 29.333,
+          "right": 233.306,
+          "bottom": 78.667
+        },
+        "raw": {
+          "name": "help",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/btn_back/help",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -54298,
+          "world_position": {
+            "x": -10.134,
+            "y": 6.8,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -0.0,
+            "y": -37.0,
+            "width": 74.0,
+            "height": 74.0
+          },
+          "screen_point": {
+            "x": 183.973,
+            "y": 666.0
+          },
+          "adb_point": {
+            "x": 183.973,
+            "y": 54.0
+          },
+          "screen_bounds": {
+            "left": 183.973,
+            "bottom": 641.333,
+            "right": 233.306,
+            "top": 690.667
+          },
+          "adb_bounds": {
+            "left": 183.973,
+            "top": 29.333,
+            "right": 233.306,
+            "bottom": 78.667
+          }
+        }
+      },
+      {
+        "name": "btn_back",
+        "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/btn_back",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 85.0,
+          "y": 54.0
+        },
+        "bounds": {
+          "left": -0.027,
+          "top": 21.333,
+          "right": 170.639,
+          "bottom": 86.667
+        },
+        "raw": {
+          "name": "btn_back",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/btn_back",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -54290,
+          "world_position": {
+            "x": -14.223,
+            "y": 7.526,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -0.0,
+            "y": -98.0,
+            "width": 256.0,
+            "height": 98.0
+          },
+          "screen_point": {
+            "x": 85.0,
+            "y": 666.0
+          },
+          "adb_point": {
+            "x": 85.0,
+            "y": 54.0
+          },
+          "screen_bounds": {
+            "left": -0.027,
+            "bottom": 633.333,
+            "right": 170.639,
+            "top": 698.667
+          },
+          "adb_bounds": {
+            "left": -0.027,
+            "top": 21.333,
+            "right": 170.639,
+            "bottom": 86.667
+          }
+        }
+      }
+    ]
+  },
+  "original_count": 3,
+  "after": {
+    "generation": 2766,
+    "remaining": 3,
+    "capacity": 3,
+    "locale": "汐语小筑"
+  },
+  "main": {
+    "generation": 2787,
+    "scene_handle": -76,
+    "snapshot": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 6967,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "abi": "x86_64",
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "snapshot_schema": 1,
+      "snapshot_struct_size": 104,
+      "generation": 2787,
+      "scene_generation": 4,
+      "semantic_generation": 2,
+      "snapshot_monotonic_ns": 14598370747400,
+      "response_monotonic_ns": 14598698642100,
+      "age_ms": 327,
+      "observer_tid": 6999,
+      "assembly_count": 129,
+      "semantic_code": 1,
+      "width": 1280,
+      "height": 720,
+      "flags": 15,
+      "observer_attached": false,
+      "main_thread": true,
+      "button_count": 114,
+      "active_button_count": 26,
+      "interactable_button_count": 114,
+      "scene_handle": -76,
+      "ui_stage": 100,
+      "ui_method_mask": 15
+    },
+    "buttons_snapshot": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "semantic_schema": "alas-headless.buttons/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 6967,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "schema": 1,
+      "struct_size": 340008,
+      "generation": 2787,
+      "snapshot_monotonic_ns": 14598370747400,
+      "response_monotonic_ns": 14598698663000,
+      "age_ms": 327,
+      "button_count": 26,
+      "truncated": false,
+      "error_count": 0,
+      "buttons": [
+        {
+          "name": "MainCoreActivityBtn2",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/activity/MainCoreActivityBtn2",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -71290,
+          "world_position": {
+            "x": 8.038,
+            "y": 5.282,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -85.0,
+            "y": -85.028,
+            "width": 170.0,
+            "height": 170.055
+          },
+          "screen_point": {
+            "x": 1001.727,
+            "y": 597.675
+          },
+          "adb_point": {
+            "x": 1001.727,
+            "y": 122.325
+          },
+          "screen_bounds": {
+            "left": 945.061,
+            "bottom": 540.99,
+            "right": 1058.394,
+            "top": 654.36
+          },
+          "adb_bounds": {
+            "left": 945.061,
+            "top": 65.64,
+            "right": 1058.394,
+            "bottom": 179.01
+          }
+        },
+        {
+          "name": "MainCoreActivityBtn",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/activity/MainCoreActivityBtn",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -71248,
+          "world_position": {
+            "x": 10.467,
+            "y": 5.282,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -85.0,
+            "y": -85.028,
+            "width": 170.0,
+            "height": 170.055
+          },
+          "screen_point": {
+            "x": 1110.995,
+            "y": 597.675
+          },
+          "adb_point": {
+            "x": 1110.995,
+            "y": 122.325
+          },
+          "screen_bounds": {
+            "left": 1054.329,
+            "bottom": 540.99,
+            "right": 1167.662,
+            "top": 654.36
+          },
+          "adb_bounds": {
+            "left": 1054.329,
+            "top": 65.64,
+            "right": 1167.662,
+            "bottom": 179.01
+          }
+        },
+        {
+          "name": "item(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+          "canvas": "banner",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -71216,
+          "world_position": {
+            "x": 39.031,
+            "y": -4.864,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -210.0,
+            "y": -76.0,
+            "width": 420.0,
+            "height": 152.0
+          },
+          "screen_point": {
+            "x": 2396.395,
+            "y": 141.137
+          },
+          "adb_point": {
+            "x": 2396.395,
+            "y": 578.863
+          },
+          "screen_bounds": {
+            "left": 2256.35,
+            "bottom": 90.454,
+            "right": 2536.441,
+            "top": 191.82
+          },
+          "adb_bounds": {
+            "left": 2256.35,
+            "top": 528.18,
+            "right": 2536.441,
+            "bottom": 629.546
+          }
+        },
+        {
+          "name": "item(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+          "canvas": "banner",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -71174,
+          "world_position": {
+            "x": 32.807,
+            "y": -4.864,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -210.0,
+            "y": -76.0,
+            "width": 420.0,
+            "height": 152.0
+          },
+          "screen_point": {
+            "x": 2116.304,
+            "y": 141.137
+          },
+          "adb_point": {
+            "x": 2116.304,
+            "y": 578.863
+          },
+          "screen_bounds": {
+            "left": 1976.259,
+            "bottom": 90.454,
+            "right": 2256.35,
+            "top": 191.82
+          },
+          "adb_bounds": {
+            "left": 1976.259,
+            "top": 528.18,
+            "right": 2256.35,
+            "bottom": 629.546
+          }
+        },
+        {
+          "name": "item(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+          "canvas": "banner",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -71132,
+          "world_position": {
+            "x": 26.583,
+            "y": -4.864,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -210.0,
+            "y": -76.0,
+            "width": 420.0,
+            "height": 152.0
+          },
+          "screen_point": {
+            "x": 1836.213,
+            "y": 141.137
+          },
+          "adb_point": {
+            "x": 1836.213,
+            "y": 578.863
+          },
+          "screen_bounds": {
+            "left": 1696.167,
+            "bottom": 90.454,
+            "right": 1976.259,
+            "top": 191.82
+          },
+          "adb_bounds": {
+            "left": 1696.167,
+            "top": 528.18,
+            "right": 1976.259,
+            "bottom": 629.546
+          }
+        },
+        {
+          "name": "item(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+          "canvas": "banner",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -71090,
+          "world_position": {
+            "x": 20.358,
+            "y": -4.864,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -210.0,
+            "y": -76.0,
+            "width": 420.0,
+            "height": 152.0
+          },
+          "screen_point": {
+            "x": 1556.122,
+            "y": 141.137
+          },
+          "adb_point": {
+            "x": 1556.122,
+            "y": 578.863
+          },
+          "screen_bounds": {
+            "left": 1416.076,
+            "bottom": 90.454,
+            "right": 1696.167,
+            "top": 191.82
+          },
+          "adb_bounds": {
+            "left": 1416.076,
+            "top": 528.18,
+            "right": 1696.167,
+            "bottom": 629.546
+          }
+        },
+        {
+          "name": "item(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+          "canvas": "banner",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -71048,
+          "world_position": {
+            "x": 14.134,
+            "y": -4.864,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -210.0,
+            "y": -76.0,
+            "width": 420.0,
+            "height": 152.0
+          },
+          "screen_point": {
+            "x": 1276.031,
+            "y": 141.137
+          },
+          "adb_point": {
+            "x": 1276.031,
+            "y": 578.863
+          },
+          "screen_bounds": {
+            "left": 1135.985,
+            "bottom": 90.454,
+            "right": 1416.076,
+            "top": 191.82
+          },
+          "adb_bounds": {
+            "left": 1135.985,
+            "top": 528.18,
+            "right": 1416.076,
+            "bottom": 629.546
+          }
+        },
+        {
+          "name": "item(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+          "canvas": "banner",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -71006,
+          "world_position": {
+            "x": 7.91,
+            "y": -4.864,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -210.0,
+            "y": -76.0,
+            "width": 420.0,
+            "height": 152.0
+          },
+          "screen_point": {
+            "x": 995.94,
+            "y": 141.137
+          },
+          "adb_point": {
+            "x": 995.94,
+            "y": 578.863
+          },
+          "screen_bounds": {
+            "left": 855.894,
+            "bottom": 90.454,
+            "right": 1135.985,
+            "top": 191.82
+          },
+          "adb_bounds": {
+            "left": 855.894,
+            "top": 528.18,
+            "right": 1135.985,
+            "bottom": 629.546
+          }
+        },
+        {
+          "name": "item(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+          "canvas": "banner",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -70964,
+          "world_position": {
+            "x": 1.686,
+            "y": -4.864,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -210.0,
+            "y": -76.0,
+            "width": 420.0,
+            "height": 152.0
+          },
+          "screen_point": {
+            "x": 715.849,
+            "y": 141.137
+          },
+          "adb_point": {
+            "x": 715.849,
+            "y": 578.863
+          },
+          "screen_bounds": {
+            "left": 575.803,
+            "bottom": 90.454,
+            "right": 855.894,
+            "top": 191.82
+          },
+          "adb_bounds": {
+            "left": 575.803,
+            "top": 528.18,
+            "right": 855.894,
+            "bottom": 629.546
+          }
+        },
+        {
+          "name": "item(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+          "canvas": "banner",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -70922,
+          "world_position": {
+            "x": -4.539,
+            "y": -4.864,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -210.0,
+            "y": -76.0,
+            "width": 420.0,
+            "height": 152.0
+          },
+          "screen_point": {
+            "x": 435.758,
+            "y": 141.137
+          },
+          "adb_point": {
+            "x": 435.758,
+            "y": 578.863
+          },
+          "screen_bounds": {
+            "left": 295.712,
+            "bottom": 90.454,
+            "right": 575.803,
+            "top": 191.82
+          },
+          "adb_bounds": {
+            "left": 295.712,
+            "top": 528.18,
+            "right": 575.803,
+            "bottom": 629.546
+          }
+        },
+        {
+          "name": "item",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item",
+          "canvas": "banner",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -69570,
+          "world_position": {
+            "x": -10.763,
+            "y": -4.864,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -210.0,
+            "y": -76.0,
+            "width": 420.0,
+            "height": 152.0
+          },
+          "screen_point": {
+            "x": 155.667,
+            "y": 141.137
+          },
+          "adb_point": {
+            "x": 155.667,
+            "y": 578.863
+          },
+          "screen_bounds": {
+            "left": 15.621,
+            "bottom": 90.454,
+            "right": 295.712,
+            "top": 191.82
+          },
+          "adb_bounds": {
+            "left": 15.621,
+            "top": 528.18,
+            "right": 295.712,
+            "bottom": 629.546
+          }
+        },
+        {
+          "name": "click",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/change_skin/click",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -70568,
+          "world_position": {
+            "x": 12.877,
+            "y": 3.035,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -97.215,
+            "y": -47.685,
+            "width": 194.43,
+            "height": 95.37
+          },
+          "screen_point": {
+            "x": 1219.48,
+            "y": 496.567
+          },
+          "adb_point": {
+            "x": 1219.48,
+            "y": 223.433
+          },
+          "screen_bounds": {
+            "left": 1154.67,
+            "bottom": 464.777,
+            "right": 1284.29,
+            "top": 528.357
+          },
+          "adb_bounds": {
+            "left": 1154.67,
+            "top": 191.643,
+            "right": 1284.29,
+            "bottom": 255.223
+          }
+        },
+        {
+          "name": "disable",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/chat_room/disable",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -69826,
+          "world_position": {
+            "x": 13.442,
+            "y": -5.809,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -22.0,
+            "y": -22.0,
+            "width": 44.0,
+            "height": 44.0
+          },
+          "screen_point": {
+            "x": 1244.877,
+            "y": 98.606
+          },
+          "adb_point": {
+            "x": 1244.877,
+            "y": 621.394
+          },
+          "screen_bounds": {
+            "left": 1230.215,
+            "bottom": 83.945,
+            "right": 1259.539,
+            "top": 113.268
+          },
+          "adb_bounds": {
+            "left": 1230.215,
+            "top": 606.732,
+            "right": 1259.539,
+            "bottom": 636.055
+          }
+        },
+        {
+          "name": "gem",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/top/res/gem",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -69412,
+          "world_position": {
+            "x": 5.633,
+            "y": 7.2,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -128.235,
+            "y": -18.47,
+            "width": 256.47,
+            "height": 36.94
+          },
+          "screen_point": {
+            "x": 893.5,
+            "y": 683.997
+          },
+          "adb_point": {
+            "x": 893.5,
+            "y": 36.003
+          },
+          "screen_bounds": {
+            "left": 808.011,
+            "bottom": 671.683,
+            "right": 978.991,
+            "top": 696.31
+          },
+          "adb_bounds": {
+            "left": 808.011,
+            "top": 23.69,
+            "right": 978.991,
+            "bottom": 48.317
+          }
+        },
+        {
+          "name": "oil",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/top/res/oil",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -69366,
+          "world_position": {
+            "x": -2.016,
+            "y": 7.2,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -128.235,
+            "y": -18.47,
+            "width": 256.47,
+            "height": 36.94
+          },
+          "screen_point": {
+            "x": 549.3,
+            "y": 683.997
+          },
+          "adb_point": {
+            "x": 549.3,
+            "y": 36.003
+          },
+          "screen_bounds": {
+            "left": 463.81,
+            "bottom": 671.683,
+            "right": 634.791,
+            "top": 696.31
+          },
+          "adb_bounds": {
+            "left": 463.81,
+            "top": 23.69,
+            "right": 634.791,
+            "bottom": 48.317
+          }
+        },
+        {
+          "name": "gold",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/top/res/gold",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -69320,
+          "world_position": {
+            "x": 1.82,
+            "y": 7.2,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -128.235,
+            "y": -18.47,
+            "width": 256.47,
+            "height": 36.94
+          },
+          "screen_point": {
+            "x": 721.894,
+            "y": 683.997
+          },
+          "adb_point": {
+            "x": 721.894,
+            "y": 36.003
+          },
+          "screen_bounds": {
+            "left": 636.404,
+            "bottom": 671.683,
+            "right": 807.384,
+            "top": 696.31
+          },
+          "adb_bounds": {
+            "left": 636.404,
+            "top": 23.69,
+            "right": 807.384,
+            "bottom": 48.317
+          }
+        },
+        {
+          "name": "collection",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/2/collection",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -70308,
+          "world_position": {
+            "x": 9.372,
+            "y": -1.417,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -73.5,
+            "y": -107.5,
+            "width": 147.0,
+            "height": 215.0
+          },
+          "screen_point": {
+            "x": 1061.734,
+            "y": 296.235
+          },
+          "adb_point": {
+            "x": 1061.734,
+            "y": 423.765
+          },
+          "screen_bounds": {
+            "left": 1012.75,
+            "bottom": 224.592,
+            "right": 1110.719,
+            "top": 367.879
+          },
+          "adb_bounds": {
+            "left": 1012.75,
+            "top": 352.121,
+            "right": 1110.719,
+            "bottom": 495.408
+          }
+        },
+        {
+          "name": "rank",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/2/rank",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -70268,
+          "world_position": {
+            "x": 9.372,
+            "y": -4.098,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -73.5,
+            "y": -73.5,
+            "width": 147.0,
+            "height": 147.0
+          },
+          "screen_point": {
+            "x": 1061.734,
+            "y": 175.608
+          },
+          "adb_point": {
+            "x": 1061.734,
+            "y": 544.392
+          },
+          "screen_bounds": {
+            "left": 1012.75,
+            "bottom": 126.624,
+            "right": 1110.719,
+            "top": 224.592
+          },
+          "adb_bounds": {
+            "left": 1012.75,
+            "top": 495.408,
+            "right": 1110.719,
+            "bottom": 593.376
+          }
+        },
+        {
+          "name": "friend",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/2/friend",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -70228,
+          "world_position": {
+            "x": 12.23,
+            "y": -0.662,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -119.5,
+            "y": -56.5,
+            "width": 239.0,
+            "height": 113.0
+          },
+          "screen_point": {
+            "x": 1190.359,
+            "y": 330.224
+          },
+          "adb_point": {
+            "x": 1190.359,
+            "y": 389.776
+          },
+          "screen_bounds": {
+            "left": 1110.719,
+            "bottom": 292.57,
+            "right": 1270.0,
+            "top": 367.879
+          },
+          "adb_bounds": {
+            "left": 1110.719,
+            "top": 352.121,
+            "right": 1270.0,
+            "bottom": 427.43
+          }
+        },
+        {
+          "name": "menor",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/2/menor",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -70188,
+          "world_position": {
+            "x": 12.23,
+            "y": -3.342,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -119.5,
+            "y": -124.5,
+            "width": 239.0,
+            "height": 249.0
+          },
+          "screen_point": {
+            "x": 1190.359,
+            "y": 209.597
+          },
+          "adb_point": {
+            "x": 1190.359,
+            "y": 510.403
+          },
+          "screen_bounds": {
+            "left": 1110.719,
+            "bottom": 126.624,
+            "right": 1270.0,
+            "top": 292.57
+          },
+          "adb_bounds": {
+            "left": 1110.719,
+            "top": 427.43,
+            "right": 1270.0,
+            "bottom": 593.376
+          }
+        },
+        {
+          "name": "MainActMapBtn",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/1/act/MainActMapBtn",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -70020,
+          "world_position": {
+            "x": 12.261,
+            "y": -0.587,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -123.5,
+            "y": -60.5,
+            "width": 247.0,
+            "height": 121.0
+          },
+          "screen_point": {
+            "x": 1191.732,
+            "y": 333.603
+          },
+          "adb_point": {
+            "x": 1191.732,
+            "y": 386.397
+          },
+          "screen_bounds": {
+            "left": 1109.399,
+            "bottom": 293.27,
+            "right": 1274.066,
+            "top": 373.936
+          },
+          "adb_bounds": {
+            "left": 1109.399,
+            "top": 346.064,
+            "right": 1274.066,
+            "bottom": 426.73
+          }
+        },
+        {
+          "name": "formation",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/1/formation",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 3583,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": false,
+          "canvas_render_mode": 1,
+          "instance_id": -69980,
+          "world_position": {
+            "x": 9.363,
+            "y": -3.327,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -73.5,
+            "y": -124.5,
+            "width": 147.0,
+            "height": 249.0
+          },
+          "screen_point": {
+            "x": 1061.33,
+            "y": 210.307
+          },
+          "adb_point": {
+            "x": 1061.33,
+            "y": 509.693
+          },
+          "screen_bounds": {
+            "left": 1012.346,
+            "bottom": 127.334,
+            "right": 1110.314,
+            "top": 293.28
+          },
+          "adb_bounds": {
+            "left": 1012.346,
+            "top": 426.72,
+            "right": 1110.314,
+            "bottom": 592.666
+          }
+        },
+        {
+          "name": "battle",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/1/battle",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 3583,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": false,
+          "canvas_render_mode": 1,
+          "instance_id": -69888,
+          "world_position": {
+            "x": 12.261,
+            "y": -3.327,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -119.5,
+            "y": -124.5,
+            "width": 239.0,
+            "height": 249.0
+          },
+          "screen_point": {
+            "x": 1191.73,
+            "y": 210.307
+          },
+          "adb_point": {
+            "x": 1191.73,
+            "y": 509.693
+          },
+          "screen_bounds": {
+            "left": 1112.089,
+            "bottom": 127.334,
+            "right": 1271.371,
+            "top": 293.28
+          },
+          "adb_bounds": {
+            "left": 1112.089,
+            "top": 426.72,
+            "right": 1271.371,
+            "bottom": 592.666
+          }
+        },
+        {
+          "name": "chat_room",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/chat_room",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -69806,
+          "world_position": {
+            "x": 9.825,
+            "y": -5.809,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -269.955,
+            "y": -28.07,
+            "width": 539.91,
+            "height": 56.14
+          },
+          "screen_point": {
+            "x": 1082.11,
+            "y": 98.606
+          },
+          "adb_point": {
+            "x": 1082.11,
+            "y": 621.394
+          },
+          "screen_bounds": {
+            "left": 902.199,
+            "bottom": 79.899,
+            "right": 1262.021,
+            "top": 117.314
+          },
+          "adb_bounds": {
+            "left": 902.199,
+            "top": 602.686,
+            "right": 1262.021,
+            "bottom": 640.101
+          }
+        },
+        {
+          "name": "MainActSummaryBtn",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/activity/MainActSummaryBtn",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -69728,
+          "world_position": {
+            "x": 12.895,
+            "y": 5.282,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -85.0,
+            "y": -85.028,
+            "width": 170.0,
+            "height": 170.055
+          },
+          "screen_point": {
+            "x": 1220.263,
+            "y": 597.675
+          },
+          "adb_point": {
+            "x": 1220.263,
+            "y": 122.325
+          },
+          "screen_bounds": {
+            "left": 1163.597,
+            "bottom": 540.99,
+            "right": 1276.93,
+            "top": 654.36
+          },
+          "adb_bounds": {
+            "left": 1163.597,
+            "top": 65.64,
+            "right": 1276.93,
+            "bottom": 179.01
+          }
+        },
+        {
+          "name": "paint",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/paint",
+          "canvas": "paint",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -11674,
+          "world_position": {
+            "x": -2.148,
+            "y": -0.148,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -441.0,
+            "y": -483.75,
+            "width": 882.0,
+            "height": 967.5
+          },
+          "screen_point": {
+            "x": 543.333,
+            "y": 353.333
+          },
+          "adb_point": {
+            "x": 543.333,
+            "y": 366.667
+          },
+          "screen_bounds": {
+            "left": 249.333,
+            "bottom": 30.833,
+            "right": 837.333,
+            "top": 675.833
+          },
+          "adb_bounds": {
+            "left": 249.333,
+            "top": 44.167,
+            "right": 837.333,
+            "bottom": 689.167
+          }
+        }
+      ]
+    },
+    "buttons": [
+      {
+        "name": "MainCoreActivityBtn2",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/activity/MainCoreActivityBtn2",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1001.727,
+          "y": 122.325
+        },
+        "bounds": {
+          "left": 945.061,
+          "top": 65.64,
+          "right": 1058.394,
+          "bottom": 179.01
+        },
+        "raw": {
+          "name": "MainCoreActivityBtn2",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/activity/MainCoreActivityBtn2",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -71290,
+          "world_position": {
+            "x": 8.038,
+            "y": 5.282,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -85.0,
+            "y": -85.028,
+            "width": 170.0,
+            "height": 170.055
+          },
+          "screen_point": {
+            "x": 1001.727,
+            "y": 597.675
+          },
+          "adb_point": {
+            "x": 1001.727,
+            "y": 122.325
+          },
+          "screen_bounds": {
+            "left": 945.061,
+            "bottom": 540.99,
+            "right": 1058.394,
+            "top": 654.36
+          },
+          "adb_bounds": {
+            "left": 945.061,
+            "top": 65.64,
+            "right": 1058.394,
+            "bottom": 179.01
+          }
+        }
+      },
+      {
+        "name": "MainCoreActivityBtn",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/activity/MainCoreActivityBtn",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1110.995,
+          "y": 122.325
+        },
+        "bounds": {
+          "left": 1054.329,
+          "top": 65.64,
+          "right": 1167.662,
+          "bottom": 179.01
+        },
+        "raw": {
+          "name": "MainCoreActivityBtn",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/activity/MainCoreActivityBtn",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -71248,
+          "world_position": {
+            "x": 10.467,
+            "y": 5.282,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -85.0,
+            "y": -85.028,
+            "width": 170.0,
+            "height": 170.055
+          },
+          "screen_point": {
+            "x": 1110.995,
+            "y": 597.675
+          },
+          "adb_point": {
+            "x": 1110.995,
+            "y": 122.325
+          },
+          "screen_bounds": {
+            "left": 1054.329,
+            "bottom": 540.99,
+            "right": 1167.662,
+            "top": 654.36
+          },
+          "adb_bounds": {
+            "left": 1054.329,
+            "top": 65.64,
+            "right": 1167.662,
+            "bottom": 179.01
+          }
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 2396.395,
+          "y": 578.863
+        },
+        "bounds": {
+          "left": 2256.35,
+          "top": 528.18,
+          "right": 2536.441,
+          "bottom": 629.546
+        },
+        "raw": {
+          "name": "item(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+          "canvas": "banner",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -71216,
+          "world_position": {
+            "x": 39.031,
+            "y": -4.864,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -210.0,
+            "y": -76.0,
+            "width": 420.0,
+            "height": 152.0
+          },
+          "screen_point": {
+            "x": 2396.395,
+            "y": 141.137
+          },
+          "adb_point": {
+            "x": 2396.395,
+            "y": 578.863
+          },
+          "screen_bounds": {
+            "left": 2256.35,
+            "bottom": 90.454,
+            "right": 2536.441,
+            "top": 191.82
+          },
+          "adb_bounds": {
+            "left": 2256.35,
+            "top": 528.18,
+            "right": 2536.441,
+            "bottom": 629.546
+          }
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 2116.304,
+          "y": 578.863
+        },
+        "bounds": {
+          "left": 1976.259,
+          "top": 528.18,
+          "right": 2256.35,
+          "bottom": 629.546
+        },
+        "raw": {
+          "name": "item(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+          "canvas": "banner",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -71174,
+          "world_position": {
+            "x": 32.807,
+            "y": -4.864,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -210.0,
+            "y": -76.0,
+            "width": 420.0,
+            "height": 152.0
+          },
+          "screen_point": {
+            "x": 2116.304,
+            "y": 141.137
+          },
+          "adb_point": {
+            "x": 2116.304,
+            "y": 578.863
+          },
+          "screen_bounds": {
+            "left": 1976.259,
+            "bottom": 90.454,
+            "right": 2256.35,
+            "top": 191.82
+          },
+          "adb_bounds": {
+            "left": 1976.259,
+            "top": 528.18,
+            "right": 2256.35,
+            "bottom": 629.546
+          }
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1836.213,
+          "y": 578.863
+        },
+        "bounds": {
+          "left": 1696.167,
+          "top": 528.18,
+          "right": 1976.259,
+          "bottom": 629.546
+        },
+        "raw": {
+          "name": "item(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+          "canvas": "banner",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -71132,
+          "world_position": {
+            "x": 26.583,
+            "y": -4.864,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -210.0,
+            "y": -76.0,
+            "width": 420.0,
+            "height": 152.0
+          },
+          "screen_point": {
+            "x": 1836.213,
+            "y": 141.137
+          },
+          "adb_point": {
+            "x": 1836.213,
+            "y": 578.863
+          },
+          "screen_bounds": {
+            "left": 1696.167,
+            "bottom": 90.454,
+            "right": 1976.259,
+            "top": 191.82
+          },
+          "adb_bounds": {
+            "left": 1696.167,
+            "top": 528.18,
+            "right": 1976.259,
+            "bottom": 629.546
+          }
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1556.122,
+          "y": 578.863
+        },
+        "bounds": {
+          "left": 1416.076,
+          "top": 528.18,
+          "right": 1696.167,
+          "bottom": 629.546
+        },
+        "raw": {
+          "name": "item(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+          "canvas": "banner",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -71090,
+          "world_position": {
+            "x": 20.358,
+            "y": -4.864,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -210.0,
+            "y": -76.0,
+            "width": 420.0,
+            "height": 152.0
+          },
+          "screen_point": {
+            "x": 1556.122,
+            "y": 141.137
+          },
+          "adb_point": {
+            "x": 1556.122,
+            "y": 578.863
+          },
+          "screen_bounds": {
+            "left": 1416.076,
+            "bottom": 90.454,
+            "right": 1696.167,
+            "top": 191.82
+          },
+          "adb_bounds": {
+            "left": 1416.076,
+            "top": 528.18,
+            "right": 1696.167,
+            "bottom": 629.546
+          }
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1276.031,
+          "y": 578.863
+        },
+        "bounds": {
+          "left": 1135.985,
+          "top": 528.18,
+          "right": 1416.076,
+          "bottom": 629.546
+        },
+        "raw": {
+          "name": "item(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+          "canvas": "banner",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -71048,
+          "world_position": {
+            "x": 14.134,
+            "y": -4.864,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -210.0,
+            "y": -76.0,
+            "width": 420.0,
+            "height": 152.0
+          },
+          "screen_point": {
+            "x": 1276.031,
+            "y": 141.137
+          },
+          "adb_point": {
+            "x": 1276.031,
+            "y": 578.863
+          },
+          "screen_bounds": {
+            "left": 1135.985,
+            "bottom": 90.454,
+            "right": 1416.076,
+            "top": 191.82
+          },
+          "adb_bounds": {
+            "left": 1135.985,
+            "top": 528.18,
+            "right": 1416.076,
+            "bottom": 629.546
+          }
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 995.94,
+          "y": 578.863
+        },
+        "bounds": {
+          "left": 855.894,
+          "top": 528.18,
+          "right": 1135.985,
+          "bottom": 629.546
+        },
+        "raw": {
+          "name": "item(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+          "canvas": "banner",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -71006,
+          "world_position": {
+            "x": 7.91,
+            "y": -4.864,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -210.0,
+            "y": -76.0,
+            "width": 420.0,
+            "height": 152.0
+          },
+          "screen_point": {
+            "x": 995.94,
+            "y": 141.137
+          },
+          "adb_point": {
+            "x": 995.94,
+            "y": 578.863
+          },
+          "screen_bounds": {
+            "left": 855.894,
+            "bottom": 90.454,
+            "right": 1135.985,
+            "top": 191.82
+          },
+          "adb_bounds": {
+            "left": 855.894,
+            "top": 528.18,
+            "right": 1135.985,
+            "bottom": 629.546
+          }
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 715.849,
+          "y": 578.863
+        },
+        "bounds": {
+          "left": 575.803,
+          "top": 528.18,
+          "right": 855.894,
+          "bottom": 629.546
+        },
+        "raw": {
+          "name": "item(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+          "canvas": "banner",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -70964,
+          "world_position": {
+            "x": 1.686,
+            "y": -4.864,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -210.0,
+            "y": -76.0,
+            "width": 420.0,
+            "height": 152.0
+          },
+          "screen_point": {
+            "x": 715.849,
+            "y": 141.137
+          },
+          "adb_point": {
+            "x": 715.849,
+            "y": 578.863
+          },
+          "screen_bounds": {
+            "left": 575.803,
+            "bottom": 90.454,
+            "right": 855.894,
+            "top": 191.82
+          },
+          "adb_bounds": {
+            "left": 575.803,
+            "top": 528.18,
+            "right": 855.894,
+            "bottom": 629.546
+          }
+        }
+      },
+      {
+        "name": "item(Clone)",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 435.758,
+          "y": 578.863
+        },
+        "bounds": {
+          "left": 295.712,
+          "top": 528.18,
+          "right": 575.803,
+          "bottom": 629.546
+        },
+        "raw": {
+          "name": "item(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item(Clone)",
+          "canvas": "banner",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -70922,
+          "world_position": {
+            "x": -4.539,
+            "y": -4.864,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -210.0,
+            "y": -76.0,
+            "width": 420.0,
+            "height": 152.0
+          },
+          "screen_point": {
+            "x": 435.758,
+            "y": 141.137
+          },
+          "adb_point": {
+            "x": 435.758,
+            "y": 578.863
+          },
+          "screen_bounds": {
+            "left": 295.712,
+            "bottom": 90.454,
+            "right": 575.803,
+            "top": 191.82
+          },
+          "adb_bounds": {
+            "left": 295.712,
+            "top": 528.18,
+            "right": 575.803,
+            "bottom": 629.546
+          }
+        }
+      },
+      {
+        "name": "item",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 155.667,
+          "y": 578.863
+        },
+        "bounds": {
+          "left": 15.621,
+          "top": 528.18,
+          "right": 295.712,
+          "bottom": 629.546
+        },
+        "raw": {
+          "name": "item",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/left/banner/mask/content/item",
+          "canvas": "banner",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -69570,
+          "world_position": {
+            "x": -10.763,
+            "y": -4.864,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -210.0,
+            "y": -76.0,
+            "width": 420.0,
+            "height": 152.0
+          },
+          "screen_point": {
+            "x": 155.667,
+            "y": 141.137
+          },
+          "adb_point": {
+            "x": 155.667,
+            "y": 578.863
+          },
+          "screen_bounds": {
+            "left": 15.621,
+            "bottom": 90.454,
+            "right": 295.712,
+            "top": 191.82
+          },
+          "adb_bounds": {
+            "left": 15.621,
+            "top": 528.18,
+            "right": 295.712,
+            "bottom": 629.546
+          }
+        }
+      },
+      {
+        "name": "click",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/change_skin/click",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1219.48,
+          "y": 223.433
+        },
+        "bounds": {
+          "left": 1154.67,
+          "top": 191.643,
+          "right": 1284.29,
+          "bottom": 255.223
+        },
+        "raw": {
+          "name": "click",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/change_skin/click",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -70568,
+          "world_position": {
+            "x": 12.877,
+            "y": 3.035,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -97.215,
+            "y": -47.685,
+            "width": 194.43,
+            "height": 95.37
+          },
+          "screen_point": {
+            "x": 1219.48,
+            "y": 496.567
+          },
+          "adb_point": {
+            "x": 1219.48,
+            "y": 223.433
+          },
+          "screen_bounds": {
+            "left": 1154.67,
+            "bottom": 464.777,
+            "right": 1284.29,
+            "top": 528.357
+          },
+          "adb_bounds": {
+            "left": 1154.67,
+            "top": 191.643,
+            "right": 1284.29,
+            "bottom": 255.223
+          }
+        }
+      },
+      {
+        "name": "disable",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/chat_room/disable",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1244.877,
+          "y": 621.394
+        },
+        "bounds": {
+          "left": 1230.215,
+          "top": 606.732,
+          "right": 1259.539,
+          "bottom": 636.055
+        },
+        "raw": {
+          "name": "disable",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/chat_room/disable",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -69826,
+          "world_position": {
+            "x": 13.442,
+            "y": -5.809,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -22.0,
+            "y": -22.0,
+            "width": 44.0,
+            "height": 44.0
+          },
+          "screen_point": {
+            "x": 1244.877,
+            "y": 98.606
+          },
+          "adb_point": {
+            "x": 1244.877,
+            "y": 621.394
+          },
+          "screen_bounds": {
+            "left": 1230.215,
+            "bottom": 83.945,
+            "right": 1259.539,
+            "top": 113.268
+          },
+          "adb_bounds": {
+            "left": 1230.215,
+            "top": 606.732,
+            "right": 1259.539,
+            "bottom": 636.055
+          }
+        }
+      },
+      {
+        "name": "gem",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/top/res/gem",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 893.5,
+          "y": 36.003
+        },
+        "bounds": {
+          "left": 808.011,
+          "top": 23.69,
+          "right": 978.991,
+          "bottom": 48.317
+        },
+        "raw": {
+          "name": "gem",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/top/res/gem",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -69412,
+          "world_position": {
+            "x": 5.633,
+            "y": 7.2,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -128.235,
+            "y": -18.47,
+            "width": 256.47,
+            "height": 36.94
+          },
+          "screen_point": {
+            "x": 893.5,
+            "y": 683.997
+          },
+          "adb_point": {
+            "x": 893.5,
+            "y": 36.003
+          },
+          "screen_bounds": {
+            "left": 808.011,
+            "bottom": 671.683,
+            "right": 978.991,
+            "top": 696.31
+          },
+          "adb_bounds": {
+            "left": 808.011,
+            "top": 23.69,
+            "right": 978.991,
+            "bottom": 48.317
+          }
+        }
+      },
+      {
+        "name": "oil",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/top/res/oil",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 549.3,
+          "y": 36.003
+        },
+        "bounds": {
+          "left": 463.81,
+          "top": 23.69,
+          "right": 634.791,
+          "bottom": 48.317
+        },
+        "raw": {
+          "name": "oil",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/top/res/oil",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -69366,
+          "world_position": {
+            "x": -2.016,
+            "y": 7.2,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -128.235,
+            "y": -18.47,
+            "width": 256.47,
+            "height": 36.94
+          },
+          "screen_point": {
+            "x": 549.3,
+            "y": 683.997
+          },
+          "adb_point": {
+            "x": 549.3,
+            "y": 36.003
+          },
+          "screen_bounds": {
+            "left": 463.81,
+            "bottom": 671.683,
+            "right": 634.791,
+            "top": 696.31
+          },
+          "adb_bounds": {
+            "left": 463.81,
+            "top": 23.69,
+            "right": 634.791,
+            "bottom": 48.317
+          }
+        }
+      },
+      {
+        "name": "gold",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/top/res/gold",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 721.894,
+          "y": 36.003
+        },
+        "bounds": {
+          "left": 636.404,
+          "top": 23.69,
+          "right": 807.384,
+          "bottom": 48.317
+        },
+        "raw": {
+          "name": "gold",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/top/res/gold",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -69320,
+          "world_position": {
+            "x": 1.82,
+            "y": 7.2,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -128.235,
+            "y": -18.47,
+            "width": 256.47,
+            "height": 36.94
+          },
+          "screen_point": {
+            "x": 721.894,
+            "y": 683.997
+          },
+          "adb_point": {
+            "x": 721.894,
+            "y": 36.003
+          },
+          "screen_bounds": {
+            "left": 636.404,
+            "bottom": 671.683,
+            "right": 807.384,
+            "top": 696.31
+          },
+          "adb_bounds": {
+            "left": 636.404,
+            "top": 23.69,
+            "right": 807.384,
+            "bottom": 48.317
+          }
+        }
+      },
+      {
+        "name": "collection",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/2/collection",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1061.734,
+          "y": 423.765
+        },
+        "bounds": {
+          "left": 1012.75,
+          "top": 352.121,
+          "right": 1110.719,
+          "bottom": 495.408
+        },
+        "raw": {
+          "name": "collection",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/2/collection",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -70308,
+          "world_position": {
+            "x": 9.372,
+            "y": -1.417,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -73.5,
+            "y": -107.5,
+            "width": 147.0,
+            "height": 215.0
+          },
+          "screen_point": {
+            "x": 1061.734,
+            "y": 296.235
+          },
+          "adb_point": {
+            "x": 1061.734,
+            "y": 423.765
+          },
+          "screen_bounds": {
+            "left": 1012.75,
+            "bottom": 224.592,
+            "right": 1110.719,
+            "top": 367.879
+          },
+          "adb_bounds": {
+            "left": 1012.75,
+            "top": 352.121,
+            "right": 1110.719,
+            "bottom": 495.408
+          }
+        }
+      },
+      {
+        "name": "rank",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/2/rank",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1061.734,
+          "y": 544.392
+        },
+        "bounds": {
+          "left": 1012.75,
+          "top": 495.408,
+          "right": 1110.719,
+          "bottom": 593.376
+        },
+        "raw": {
+          "name": "rank",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/2/rank",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -70268,
+          "world_position": {
+            "x": 9.372,
+            "y": -4.098,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -73.5,
+            "y": -73.5,
+            "width": 147.0,
+            "height": 147.0
+          },
+          "screen_point": {
+            "x": 1061.734,
+            "y": 175.608
+          },
+          "adb_point": {
+            "x": 1061.734,
+            "y": 544.392
+          },
+          "screen_bounds": {
+            "left": 1012.75,
+            "bottom": 126.624,
+            "right": 1110.719,
+            "top": 224.592
+          },
+          "adb_bounds": {
+            "left": 1012.75,
+            "top": 495.408,
+            "right": 1110.719,
+            "bottom": 593.376
+          }
+        }
+      },
+      {
+        "name": "friend",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/2/friend",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1190.359,
+          "y": 389.776
+        },
+        "bounds": {
+          "left": 1110.719,
+          "top": 352.121,
+          "right": 1270.0,
+          "bottom": 427.43
+        },
+        "raw": {
+          "name": "friend",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/2/friend",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -70228,
+          "world_position": {
+            "x": 12.23,
+            "y": -0.662,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -119.5,
+            "y": -56.5,
+            "width": 239.0,
+            "height": 113.0
+          },
+          "screen_point": {
+            "x": 1190.359,
+            "y": 330.224
+          },
+          "adb_point": {
+            "x": 1190.359,
+            "y": 389.776
+          },
+          "screen_bounds": {
+            "left": 1110.719,
+            "bottom": 292.57,
+            "right": 1270.0,
+            "top": 367.879
+          },
+          "adb_bounds": {
+            "left": 1110.719,
+            "top": 352.121,
+            "right": 1270.0,
+            "bottom": 427.43
+          }
+        }
+      },
+      {
+        "name": "menor",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/2/menor",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1190.359,
+          "y": 510.403
+        },
+        "bounds": {
+          "left": 1110.719,
+          "top": 427.43,
+          "right": 1270.0,
+          "bottom": 593.376
+        },
+        "raw": {
+          "name": "menor",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/2/menor",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -70188,
+          "world_position": {
+            "x": 12.23,
+            "y": -3.342,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -119.5,
+            "y": -124.5,
+            "width": 239.0,
+            "height": 249.0
+          },
+          "screen_point": {
+            "x": 1190.359,
+            "y": 209.597
+          },
+          "adb_point": {
+            "x": 1190.359,
+            "y": 510.403
+          },
+          "screen_bounds": {
+            "left": 1110.719,
+            "bottom": 126.624,
+            "right": 1270.0,
+            "top": 292.57
+          },
+          "adb_bounds": {
+            "left": 1110.719,
+            "top": 427.43,
+            "right": 1270.0,
+            "bottom": 593.376
+          }
+        }
+      },
+      {
+        "name": "MainActMapBtn",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/1/act/MainActMapBtn",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1191.732,
+          "y": 386.397
+        },
+        "bounds": {
+          "left": 1109.399,
+          "top": 346.064,
+          "right": 1274.066,
+          "bottom": 426.73
+        },
+        "raw": {
+          "name": "MainActMapBtn",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/1/act/MainActMapBtn",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -70020,
+          "world_position": {
+            "x": 12.261,
+            "y": -0.587,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -123.5,
+            "y": -60.5,
+            "width": 247.0,
+            "height": 121.0
+          },
+          "screen_point": {
+            "x": 1191.732,
+            "y": 333.603
+          },
+          "adb_point": {
+            "x": 1191.732,
+            "y": 386.397
+          },
+          "screen_bounds": {
+            "left": 1109.399,
+            "bottom": 293.27,
+            "right": 1274.066,
+            "top": 373.936
+          },
+          "adb_bounds": {
+            "left": 1109.399,
+            "top": 346.064,
+            "right": 1274.066,
+            "bottom": 426.73
+          }
+        }
+      },
+      {
+        "name": "formation",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/1/formation",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": false,
+        "point": {
+          "x": 1061.33,
+          "y": 509.693
+        },
+        "bounds": {
+          "left": 1012.346,
+          "top": 426.72,
+          "right": 1110.314,
+          "bottom": 592.666
+        },
+        "raw": {
+          "name": "formation",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/1/formation",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 3583,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": false,
+          "canvas_render_mode": 1,
+          "instance_id": -69980,
+          "world_position": {
+            "x": 9.363,
+            "y": -3.327,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -73.5,
+            "y": -124.5,
+            "width": 147.0,
+            "height": 249.0
+          },
+          "screen_point": {
+            "x": 1061.33,
+            "y": 210.307
+          },
+          "adb_point": {
+            "x": 1061.33,
+            "y": 509.693
+          },
+          "screen_bounds": {
+            "left": 1012.346,
+            "bottom": 127.334,
+            "right": 1110.314,
+            "top": 293.28
+          },
+          "adb_bounds": {
+            "left": 1012.346,
+            "top": 426.72,
+            "right": 1110.314,
+            "bottom": 592.666
+          }
+        }
+      },
+      {
+        "name": "battle",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/1/battle",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": false,
+        "point": {
+          "x": 1191.73,
+          "y": 509.693
+        },
+        "bounds": {
+          "left": 1112.089,
+          "top": 426.72,
+          "right": 1271.371,
+          "bottom": 592.666
+        },
+        "raw": {
+          "name": "battle",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/1/battle",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 3583,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": false,
+          "canvas_render_mode": 1,
+          "instance_id": -69888,
+          "world_position": {
+            "x": 12.261,
+            "y": -3.327,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -119.5,
+            "y": -124.5,
+            "width": 239.0,
+            "height": 249.0
+          },
+          "screen_point": {
+            "x": 1191.73,
+            "y": 210.307
+          },
+          "adb_point": {
+            "x": 1191.73,
+            "y": 509.693
+          },
+          "screen_bounds": {
+            "left": 1112.089,
+            "bottom": 127.334,
+            "right": 1271.371,
+            "top": 293.28
+          },
+          "adb_bounds": {
+            "left": 1112.089,
+            "top": 426.72,
+            "right": 1271.371,
+            "bottom": 592.666
+          }
+        }
+      },
+      {
+        "name": "chat_room",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/chat_room",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1082.11,
+          "y": 621.394
+        },
+        "bounds": {
+          "left": 902.199,
+          "top": 602.686,
+          "right": 1262.021,
+          "bottom": 640.101
+        },
+        "raw": {
+          "name": "chat_room",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/chat_room",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -69806,
+          "world_position": {
+            "x": 9.825,
+            "y": -5.809,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -269.955,
+            "y": -28.07,
+            "width": 539.91,
+            "height": 56.14
+          },
+          "screen_point": {
+            "x": 1082.11,
+            "y": 98.606
+          },
+          "adb_point": {
+            "x": 1082.11,
+            "y": 621.394
+          },
+          "screen_bounds": {
+            "left": 902.199,
+            "bottom": 79.899,
+            "right": 1262.021,
+            "top": 117.314
+          },
+          "adb_bounds": {
+            "left": 902.199,
+            "top": 602.686,
+            "right": 1262.021,
+            "bottom": 640.101
+          }
+        }
+      },
+      {
+        "name": "MainActSummaryBtn",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/activity/MainActSummaryBtn",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1220.263,
+          "y": 122.325
+        },
+        "bounds": {
+          "left": 1163.597,
+          "top": 65.64,
+          "right": 1276.93,
+          "bottom": 179.01
+        },
+        "raw": {
+          "name": "MainActSummaryBtn",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/NewMainMellowTheme(Clone)/frame/right/activity/MainActSummaryBtn",
+          "canvas": "NewMainMellowTheme(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -69728,
+          "world_position": {
+            "x": 12.895,
+            "y": 5.282,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -85.0,
+            "y": -85.028,
+            "width": 170.0,
+            "height": 170.055
+          },
+          "screen_point": {
+            "x": 1220.263,
+            "y": 597.675
+          },
+          "adb_point": {
+            "x": 1220.263,
+            "y": 122.325
+          },
+          "screen_bounds": {
+            "left": 1163.597,
+            "bottom": 540.99,
+            "right": 1276.93,
+            "top": 654.36
+          },
+          "adb_bounds": {
+            "left": 1163.597,
+            "top": 65.64,
+            "right": 1276.93,
+            "bottom": 179.01
+          }
+        }
+      },
+      {
+        "name": "paint",
+        "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/paint",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 543.333,
+          "y": 366.667
+        },
+        "bounds": {
+          "left": 249.333,
+          "top": 44.167,
+          "right": 837.333,
+          "bottom": 689.167
+        },
+        "raw": {
+          "name": "paint",
+          "path": "UICamera/Canvas/UIMain/NewMainUI(Clone)/paint",
+          "canvas": "paint",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -11674,
+          "world_position": {
+            "x": -2.148,
+            "y": -0.148,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -441.0,
+            "y": -483.75,
+            "width": 882.0,
+            "height": 967.5
+          },
+          "screen_point": {
+            "x": 543.333,
+            "y": 353.333
+          },
+          "adb_point": {
+            "x": 543.333,
+            "y": 366.667
+          },
+          "screen_bounds": {
+            "left": 249.333,
+            "bottom": 30.833,
+            "right": 837.333,
+            "top": 675.833
+          },
+          "adb_bounds": {
+            "left": 249.333,
+            "top": 44.167,
+            "right": 837.333,
+            "bottom": 689.167
+          }
+        }
+      }
+    ]
+  }
+}

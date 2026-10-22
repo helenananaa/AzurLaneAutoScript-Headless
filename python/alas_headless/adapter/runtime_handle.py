@@ -129,7 +129,22 @@ class AdbRuntimeHandle:
     def foreground_component(self) -> str:
         return self.__bridge.foreground_component()
 
-    def tap(self, x: int, y: int) -> None:
+    def validate_input_process(self) -> None:
+        """Recheck the actual package process before dispatching cached state.
+
+        ``pid`` identifies the attached observer, not Android's current process.
+        A replacement Unity process may have the same foreground component.
+        """
+        expected_pid = self.pid
+        current_pid = self.__bridge.package_pid()
+        if current_pid != expected_pid:
+            raise SemanticGateClosed(
+                "game PID changed before semantic input: expected={0}, observed={1}".format(
+                    expected_pid, current_pid
+                )
+            )
+
+    def tap(self, x: float, y: float) -> None:
         self.__bridge.tap(x, y)
 
     def swipe(

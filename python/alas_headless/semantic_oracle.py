@@ -33,6 +33,7 @@ from .oracle.contracts import CampaignMapCellState as CampaignMapCellState
 from .oracle.contracts import CampaignMapEnemyState as CampaignMapEnemyState
 from .oracle.contracts import CampaignMapEntryState as CampaignMapEntryState
 from .oracle.contracts import CampaignMapFleetState as CampaignMapFleetState
+from .oracle.contracts import CampaignMapSubmarineState as CampaignMapSubmarineState
 from .oracle.contracts import CampaignMapPickupState as CampaignMapPickupState
 from .oracle.contracts import CampaignMapState as CampaignMapState
 from .oracle.contracts import CampaignMapViewportSwipeIntent as CampaignMapViewportSwipeIntent
@@ -53,6 +54,7 @@ from .oracle.button_targets import DEFAULT_TARGETS as DEFAULT_TARGETS
 from .oracle.ui_targets import DEFAULT_TEXT_TARGETS as DEFAULT_TEXT_TARGETS
 from .oracle.ui_targets import DEFAULT_TOGGLE_TARGETS as DEFAULT_TOGGLE_TARGETS
 from .oracle.contracts import DormFeedState as DormFeedState
+from .oracle.contracts import DormFoodShopState as DormFoodShopState
 from .oracle.contracts import DormFoodState as DormFoodState
 from .oracle.contracts import DormFurniturePurchaseState as DormFurniturePurchaseState
 from .oracle.contracts import DormFurnitureShopBalance as DormFurnitureShopBalance
@@ -127,6 +129,11 @@ from .oracle.errors import SemanticTargetMissing as SemanticTargetMissing
 from .oracle.contracts import SemanticTextTarget as SemanticTextTarget
 from .oracle.contracts import SemanticToggleTarget as SemanticToggleTarget
 from .oracle.contracts import ShipyardState as ShipyardState
+from .oracle.contracts import ShipyardStrengthenPanel as ShipyardStrengthenPanel
+from .oracle.contracts import ShipyardPurchaseState as ShipyardPurchaseState
+from .oracle.contracts import ShipyardPurchaseResult as ShipyardPurchaseResult
+from .oracle.contracts import ShipyardBlueprintUseState as ShipyardBlueprintUseState
+from .oracle.contracts import ShipyardBlueprintUseResult as ShipyardBlueprintUseResult
 from .oracle.contracts import TacticalBookState as TacticalBookState
 from .oracle.contracts import TacticalCandidateShipState as TacticalCandidateShipState
 from .oracle.contracts import TacticalSkillState as TacticalSkillState
@@ -192,6 +199,7 @@ from .oracle.combat import CombatOracle
 from .oracle.commission import CommissionOracle
 from .oracle.core import CoreOracle
 from .oracle.dorm import DormOracle
+from .oracle.private_quarters import PrivateQuartersOracle
 from .oracle.enhancement import EnhancementOracle
 from .oracle.event import EventOracle
 from .oracle.exercise import ExerciseOracle
@@ -207,6 +215,7 @@ from .oracle.mission import MissionOracle
 from .oracle.opsi_globe import OpsiGlobeOracle
 from .oracle.opsi_mission import OpsiMissionOracle
 from .oracle.opsi_navigation import OpsiNavigationOracle
+from .oracle.opsi_map import OpsiMapOracle
 from .oracle.opsi_resources import OpsiResourcesOracle
 from .oracle.opsi_shop import OpsiShopOracle
 from .oracle.opsi_state import OpsiStateOracle
@@ -217,6 +226,7 @@ from .oracle.retirement import RetirementOracle
 from .oracle.rewards import RewardsOracle
 from .oracle.shipyard import ShipyardOracle
 from .oracle.shop import ShopOracle
+from .oracle.storage import StorageOracle
 from .oracle.tactical import TacticalOracle
 from .oracle.targets import TargetsOracle
 
@@ -234,6 +244,7 @@ class SemanticOracle(
     CombatOracle,
     CommissionOracle,
     DormOracle,
+    PrivateQuartersOracle,
     EnhancementOracle,
     EventOracle,
     ExerciseOracle,
@@ -249,6 +260,7 @@ class SemanticOracle(
     OpsiGlobeOracle,
     OpsiMissionOracle,
     OpsiNavigationOracle,
+    OpsiMapOracle,
     OpsiResourcesOracle,
     OpsiShopOracle,
     OpsiStateOracle,
@@ -259,6 +271,7 @@ class SemanticOracle(
     RewardsOracle,
     ShipyardOracle,
     ShopOracle,
+    StorageOracle,
     TacticalOracle,
     TargetsOracle,
     CoreOracle,

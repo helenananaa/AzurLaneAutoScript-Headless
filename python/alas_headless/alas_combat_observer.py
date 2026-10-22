@@ -54,6 +54,7 @@ from .semantic_oracle import (
     ToggleState,
     UiState,
 )
+from .oracle.transport import observer_snapshot_semantic_ready
 
 
 ALAS_COMBAT_OBSERVER_FIXTURE_SCHEMA = (
@@ -883,10 +884,10 @@ def validate_alas_combat_observer_snapshot(
     _validate_snapshot(snapshot, manifest)
 
 
-def _record_for_selector(
+def _active_selector_records(
     snapshot: AlasCombatObserverSnapshot,
     selector: AlasCombatUnitySelector,
-) -> Optional[Any]:
+) -> Tuple[Any, ...]:
     if selector.kind is AlasCombatUnityRecordKind.BUTTON:
         records: Iterable[Any] = snapshot.oracle_state.buttons
     elif selector.kind is AlasCombatUnityRecordKind.IMAGE:
@@ -895,11 +896,60 @@ def _record_for_selector(
         records = snapshot.ui_state.texts
     else:
         records = snapshot.ui_state.toggles
-    identities = [record for record in records if record.path == selector.path]
+    return tuple(
+        record for record in records
+        if record.path == selector.path
+        and record.active_in_hierarchy and record.active_and_enabled
+    )
+
+
+def _selector_proven_absent(
+    selector: AlasCombatUnitySelector,
+    identities: Tuple[Any, ...],
+) -> bool:
+    """Prove a conjunct absent without guessing through unknown identity.
+
+    Shared endpoint completeness is established before mapping discovery. An
+    absent exact path or a complete, nonmatching discriminator disproves this
+    all-of mapping, regardless of errors in another page's retained control.
+    Name drift and truncated records are unknown, never absence evidence.
+    """
+    if not identities:
+        return True
+    if any(record.name != selector.name for record in identities):
+        return False
+    if selector.kind in (AlasCombatUnityRecordKind.IMAGE, AlasCombatUnityRecordKind.TEXT):
+        if any(record.truncated for record in identities):
+            return False
+        if selector.kind is AlasCombatUnityRecordKind.IMAGE:
+            return all(record.sprite != selector.sprite for record in identities)
+        if selector.text:
+            return all(record.text != selector.text for record in identities)
+    if selector.kind in (AlasCombatUnityRecordKind.TOGGLE_OFF, AlasCombatUnityRecordKind.TOGGLE_ON):
+        expected = selector.kind is AlasCombatUnityRecordKind.TOGGLE_ON
+        return all(
+            isinstance(record, ToggleState) and record.checked is not expected
+            for record in identities
+        )
+    return False
+
+
+def _record_for_selector(
+    snapshot: AlasCombatObserverSnapshot,
+    selector: AlasCombatUnitySelector,
+    *,
+    _identities: Optional[Tuple[Any, ...]] = None,
+) -> Optional[Any]:
+    identities = (
+        _active_selector_records(snapshot, selector)
+        if _identities is None else _identities
+    )
     if not identities:
         return None
     if any(record.name != selector.name for record in identities):
         raise SemanticGateClosed("combat Unity selector name drifted")
+    if selector.ordinal is None and len(identities) > 1:
+        raise SemanticGateClosed("combat Unity selector path is ambiguous")
     if selector.kind is AlasCombatUnityRecordKind.IMAGE:
         if any(record.truncated for record in identities):
             raise SemanticGateClosed("combat Unity Image identity is truncated")
@@ -922,8 +972,6 @@ def _record_for_selector(
         ):
             return None
     if selector.ordinal is None:
-        if len(identities) > 1:
-            raise SemanticGateClosed("combat Unity selector path is ambiguous")
         return identities[0]
     if any(record.bounds is None for record in identities):
         raise SemanticGateClosed("combat Unity selector ordinal lacks bounds")
@@ -956,8 +1004,10 @@ def _record_for_selector(
 def _selector_present(
     snapshot: AlasCombatObserverSnapshot,
     selector: AlasCombatUnitySelector,
+    *,
+    _identities: Optional[Tuple[Any, ...]] = None,
 ) -> bool:
-    record = _record_for_selector(snapshot, selector)
+    record = _record_for_selector(snapshot, selector, _identities=_identities)
     if record is None:
         return False
     if not record.active_in_hierarchy or not record.active_and_enabled:
@@ -971,6 +1021,27 @@ def _selector_present(
                 + str(getattr(record, "raycast_top", None))
             )
     return True
+
+
+def _selectors_present(
+    snapshot: AlasCombatObserverSnapshot,
+    selectors: Sequence[AlasCombatUnitySelector],
+) -> bool:
+    # The existing exact all-of selectors are the ownership contract. Resolve
+    # certain negatives before interpreting potentially unrelated controls;
+    # otherwise selector ordering becomes a cross-page failure policy.
+    if not selectors:
+        return False
+    candidates = tuple(
+        (selector, _active_selector_records(snapshot, selector))
+        for selector in selectors
+    )
+    if any(_selector_proven_absent(selector, records) for selector, records in candidates):
+        return False
+    return all(
+        _selector_present(snapshot, selector, _identities=records)
+        for selector, records in candidates
+    )
 
 
 def _actionable_control(record: Any) -> bool:
@@ -1016,6 +1087,16 @@ def alas_combat_unity_selector_present(
     return _selector_present(snapshot, selector)
 
 
+def alas_combat_unity_selectors_present(
+    snapshot: AlasCombatObserverSnapshot,
+    selectors: Sequence[AlasCombatUnitySelector],
+) -> bool:
+    """Resolve one exact all-of mapping on a validated observer snapshot."""
+    for selector in selectors:
+        _validate_selector(selector)
+    return _selectors_present(snapshot, selectors)
+
+
 def alas_combat_active_blocker_names(
     snapshot: AlasCombatObserverSnapshot,
     manifest: AlasCombatObserverManifest,
@@ -1027,10 +1108,7 @@ def alas_combat_active_blocker_names(
         blocker.blocker_name
         for blocker in manifest.blockers
         if blocker.qualified
-        and all(
-            _selector_present(snapshot, selector)
-            for selector in blocker.selectors
-        )
+        and _selectors_present(snapshot, blocker.selectors)
     )
 
 
@@ -1042,7 +1120,7 @@ def _visible_action_variants(
         variant
         for variant in mapping.resolved_variants
         if variant.qualified
-        and all(_selector_present(snapshot, item) for item in variant.selectors)
+        and _selectors_present(snapshot, variant.selectors)
     )
 
 
@@ -1088,7 +1166,7 @@ def prepare_alas_combat_resource_action(
         blocker.blocker_name
         for blocker in manifest.blockers
         if blocker.qualified
-        and all(_selector_present(snapshot, item) for item in blocker.selectors)
+        and _selectors_present(snapshot, blocker.selectors)
     )
     if active_blockers:
         raise SemanticGateClosed(
@@ -1109,25 +1187,30 @@ def prepare_alas_combat_resource_action(
     }
 
     def action_visible(candidate: AlasCombatActionMapping) -> bool:
+        triggers = tuple(
+            trigger
+            for trigger, targets in ALAS_COMBAT_RESOURCE_ACTION_TARGETS.items()
+            if candidate.action_name in targets
+        )
+        if not any(
+            resource_index[trigger].qualified
+            and _resource_visible(snapshot, resource_index[trigger])
+            for trigger in triggers
+        ):
+            return False
+        # A control from an absent resource cannot compete with this action.
+        # Validate its variants only after proving an applicable trigger.
         variants = _visible_action_variants(snapshot, candidate)
         if len(variants) > 1:
             raise SemanticGateClosed(
                 "combat action target has ambiguous Unity variants: "
                 + candidate.action_name
             )
-        if not variants:
-            return False
-        triggers = tuple(
-            trigger
-            for trigger, targets in ALAS_COMBAT_RESOURCE_ACTION_TARGETS.items()
-            if candidate.action_name in targets
-        )
-        return any(
-            resource_index[trigger].qualified
-            and _resource_visible(snapshot, resource_index[trigger])
-            for trigger in triggers
-        )
+        return bool(variants)
 
+    # Explicit actions already carry the original ALAS branch's exact choice.
+    # Competing-action discovery is only used to disambiguate implicit input;
+    # it must not make an unrelated action a prerequisite for this one.
     competing_actions = tuple(
         candidate.action_name
         for candidate in manifest.actions
@@ -1136,8 +1219,8 @@ def prepare_alas_combat_resource_action(
         not in _ACTION_PRECEDENCE_ALLOWLIST.get(action_name, frozenset())
         and candidate.qualified
         and action_visible(candidate)
-    )
-    if competing_actions and not explicit_action:
+    ) if not explicit_action else ()
+    if competing_actions:
         raise SemanticGateClosed(
             "combat action resource is ambiguous with: "
             + ", ".join(competing_actions)
@@ -1174,7 +1257,7 @@ def _resource_visible(
     snapshot: AlasCombatObserverSnapshot,
     mapping: AlasCombatResourceMapping,
 ) -> bool:
-    return all(_selector_present(snapshot, item) for item in mapping.selectors)
+    return _selectors_present(snapshot, mapping.selectors)
 
 
 def _visible_resource_names(
@@ -1183,20 +1266,28 @@ def _visible_resource_names(
 ) -> Tuple[str, ...]:
     """Translate active Unity objects into ALAS's foreground appear semantics."""
 
+    # Resolve foreground resources before the two background anchors which
+    # ALAS cannot observe through them. Their established occlusion rules also
+    # scope selector failures: an irrelevant covered anchor must not invalidate
+    # a proven foreground page. Endpoint completeness and blockers are still
+    # validated before this function, and foreground ambiguity still raises.
+    background_anchors = {"IN_MAP", "PAUSE"}
     visible = {
         name
         for name in ALAS_COMBAT_REPLAY_RESOURCE_NAMES
-        if name in mappings and _resource_visible(snapshot, mappings[name])
+        if name not in background_anchors
+        and name in mappings
+        and _resource_visible(snapshot, mappings[name])
     }
-    if "BATTLE_PREPARATION" in visible:
-        # LevelStageView remains active behind ChapterPreCombatUI, whereas the
-        # original screenshot template does not see IN_MAP through that layer.
-        visible.discard("IN_MAP")
-    if visible.intersection(
-        {"BATTLE_STATUS_S", "GET_ITEMS_1", "EXP_INFO_S"}
-    ):
-        # The battle pause object remains active behind result overlays.
-        visible.discard("PAUSE")
+    occluded = {
+        "IN_MAP": "BATTLE_PREPARATION" in visible,
+        "PAUSE": bool(visible.intersection(
+            {"BATTLE_STATUS_S", "GET_ITEMS_1", "EXP_INFO_S"}
+        )),
+    }
+    for name, covered in occluded.items():
+        if not covered and name in mappings and _resource_visible(snapshot, mappings[name]):
+            visible.add(name)
     if snapshot.campaign_map is not None:
         # Search and stable-map fixtures carry a fully parsed map model; this
         # is stronger evidence than a background Image anchor alone.
@@ -1390,7 +1481,7 @@ def build_alas_campaign_combat_replay_from_observer(
         active_blockers = tuple(
             mapping.blocker_name
             for mapping in manifest.blockers
-            if all(_selector_present(snapshot, item) for item in mapping.selectors)
+            if _selectors_present(snapshot, mapping.selectors)
         )
         if active_blockers:
             raise SemanticGateClosed(
@@ -1505,10 +1596,7 @@ def build_alas_campaign_combat_normal_replay_from_observer(
         active_blockers = tuple(
             mapping.blocker_name
             for mapping in qualified_blockers
-            if all(
-                _selector_present(snapshot, selector)
-                for selector in mapping.selectors
-            )
+            if _selectors_present(snapshot, mapping.selectors)
         )
         if active_blockers:
             raise SemanticGateClosed(
@@ -1741,10 +1829,7 @@ def parse_alas_combat_observer_fixture_frame(
     if snapshot_raw.get("snapshot_schema") != 1:
         raise SemanticGateClosed("combat fixture snapshot schema mismatch")
     if (
-        snapshot_raw.get("main_thread") is not True
-        or snapshot_raw.get("flags") != 15
-        or snapshot_raw.get("ui_stage") != 100
-        or snapshot_raw.get("ui_method_mask") != 15
+        not observer_snapshot_semantic_ready(snapshot_raw)
         or snapshot_raw.get("width") != 1280
         or snapshot_raw.get("height") != 720
     ):
@@ -1758,6 +1843,7 @@ def parse_alas_combat_observer_fixture_frame(
         for item in (raw_buttons, raw_toggles, raw_texts, raw_images)
     ):
         raise SemanticGateClosed("combat fixture record list is malformed")
+    method_mask = parser._integer(ui_raw.get("method_mask"), "UI method_mask")
     if (
         buttons_raw.get("schema") != 1
         or buttons_raw.get("truncated") is not False
@@ -1771,7 +1857,8 @@ def parse_alas_combat_observer_fixture_frame(
         or ui_raw.get("toggle_count") != len(raw_toggles)
         or ui_raw.get("text_count") != len(raw_texts)
         or ui_raw.get("image_count") != len(raw_images)
-        or ui_raw.get("method_mask") != 15
+        or not 0 <= method_mask <= 0xFFFFFFFF
+        or method_mask & 0xF != 0xF
     ):
         raise SemanticGateClosed("combat fixture endpoint completeness changed")
     oracle_generation = parser._integer(
@@ -1796,7 +1883,7 @@ def parse_alas_combat_observer_fixture_frame(
     )
     ui_state = UiState(
         generation=ui_generation,
-        method_mask=15,
+        method_mask=method_mask,
         skipped_count=parser._integer(ui_raw.get("skipped_count"), "skipped_count"),
         image_truncated=False,
         snapshot=ui_raw,

@@ -3,13 +3,31 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from typing import Optional, Tuple
-from .contracts import ActionReceipt, OracleState, TextState, UI_SCHEMA
+from .contracts import ActionReceipt, OracleState, TextState, UiState, UI_SCHEMA
 from .errors import ObserverTransportError, SemanticGateClosed
 
 
 class LoginOracle:
     """Login operations sharing the oracle frame and input boundary."""
+
+    def client_version_update_required(self) -> bool:
+        """Classify the exact version warning for native ALAS restart recovery."""
+        state = self.read_state()
+        if not self._matches(state, 'login/update/restart-msgbox'):
+            return False
+        ui = self.read_text_state()
+        content = tuple(text for text in ui.texts
+                        if text.path.endswith('Msgbox(Clone)/window/msg_panel/content')
+                        and text.active_in_hierarchy and text.active_and_enabled
+                        and not text.truncated and text.bounds is not None)
+        warning = '指挥官，当前客户端的游戏版本不是最新的，推荐您重新打开游戏进行更新'
+        if not any(''.join(text.text.split()) == warning for text in content):
+            return False
+        # This passive recovery classification does not authorize the shared
+        # affirmative button. Its raycast state remains mandatory for input.
+        return self._login_update_restart_prompt_target(state) == 'login/update/restart-msgbox'
 
     def _login_data_expired_prompt_matches(self, state: OracleState) -> bool:
         ui_state = self._stable_msgbox_ui_state(state)
@@ -43,9 +61,25 @@ class LoginOracle:
         )
 
     def server_maintenance_visible(self) -> bool:
-        """Recognize the exact one-button CN server-maintenance prompt."""
+        """Recognize CN maintenance; a cancel button does not make it actionable login."""
 
-        state = self.read_state()
+        # Asset updates can temporarily stop publication on Unity's main
+        # thread. Wait for a complete fresh read; never consume the old frame.
+        state = self._retry_transition_read(self.read_state, attempts=12)
+        buttons = self._matches(state, "overlay/server-maintenance/confirm")
+        if not buttons:
+            # This passive probe cannot identify maintenance without its
+            # confirm control. A page transition elsewhere needs no modal
+            # text sandwich tied to the previous scene.
+            return False
+        content_probe = tuple(t for t in self.read_ui_state().texts
+                              if t.path.endswith('Msgbox(Clone)/window/msg_panel/content')
+                              and t.active_in_hierarchy and t.active_and_enabled)
+        if (len(content_probe) == 1 and not content_probe[0].truncated
+                and content_probe[0].text.strip() != '服务器维护'):
+            # This shared button belongs to another modal. Only maintenance
+            # content needs the stable sandwich tied to this probe's frame.
+            return False
         ui_state = self._stable_msgbox_ui_state(state)
 
         def matches(suffix: str) -> Tuple[TextState, ...]:
@@ -66,19 +100,21 @@ class LoginOracle:
         cancel = matches(
             "Msgbox(Clone)/window/button_container/custom_button_2(Clone)/pic"
         )
-        buttons = self._matches(state, "overlay/server-maintenance/confirm")
         return bool(
             len(content) == 1
             and content[0].text.strip() == "服务器维护"
             and len(confirm) == 1
             and "".join(confirm[0].text.split()) == "确定"
-            and not cancel
+            and (not cancel or (len(cancel) == 1 and ''.join(cancel[0].text.split()) == '取消'))
             and len(buttons) == 1
             and buttons[0].actionable
         )
 
-    def _login_update_download_prompt_matches(self, state: OracleState) -> bool:
-        ui_state = self.read_ui_state()
+    def _login_update_download_prompt_matches(
+        self, state: OracleState, ui_state: Optional[UiState] = None
+    ) -> bool:
+        if ui_state is None:
+            ui_state = self.read_text_state()
         if (
             ui_state.generation < state.generation
             or ui_state.generation > state.generation + 2
@@ -106,7 +142,12 @@ class LoginOracle:
                 button.active_in_hierarchy
                 and button.active_and_enabled
                 and button.interactable
-                and button.raycast_top is None
+                # Older observer builds could not classify DialogPanel
+                # raycast ownership and reported ``None``.  Current builds
+                # positively prove the affirmative button is topmost with
+                # ``True``.  Preserve the historical unknown-but-reviewed
+                # shape while rejecting an explicitly obscured button.
+                and button.raycast_top is not False
                 and button.point is not None
                 and button.bounds is not None
                 and button.bounds.contains(button.point)
@@ -116,8 +157,40 @@ class LoginOracle:
 
     def login_update_download_available(self) -> bool:
         return self._retry_transition_read(
-            lambda: self._login_update_download_prompt_matches(self.read_state())
+            lambda: self._login_update_action_prompt_matches(self.read_state())
         )
+
+    def _login_update_retry_prompt_matches(
+        self, state: OracleState, ui_state: Optional[UiState] = None
+    ) -> bool:
+        if self._login_update_retry_attempted:
+            return False
+        if ui_state is None:
+            ui_state = self.read_text_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed("login update retry snapshots are not coherent")
+        content = tuple(
+            text for text in ui_state.texts
+            if text.path.endswith("DialogPanel/dialog/content/Text")
+            and text.active_in_hierarchy and text.active_and_enabled
+            and not text.truncated and text.bounds is not None
+        )
+        if len(content) != 1 or content[0].text.strip() != "部分文件下载失败，是否重试？":
+            return False
+        retry = self._matches(state, "login/update/download")
+        cancel = self._matches(state, "login/update/cancel")
+        return bool(
+            len(retry) == len(cancel) == 1
+            and retry[0].actionable and retry[0].raycast_top is True
+            and retry[0].point is not None and retry[0].bounds is not None
+            and retry[0].bounds.contains(retry[0].point)
+            and cancel[0].active_in_hierarchy and cancel[0].active_and_enabled
+        )
+
+    def _login_update_action_prompt_matches(self, state: OracleState) -> bool:
+        ui_state = self.read_text_state()
+        return (self._login_update_download_prompt_matches(state, ui_state)
+                or self._login_update_retry_prompt_matches(state, ui_state))
 
     @staticmethod
     def _login_update_restart_text_matches(value: str) -> bool:
@@ -145,7 +218,7 @@ class LoginOracle:
         agree.  Any mixed or ambiguous surface remains closed.
         """
 
-        ui_state = self.read_ui_state()
+        ui_state = self.read_text_state()
         if (
             ui_state.generation < state.generation
             or ui_state.generation > state.generation + 2
@@ -184,6 +257,14 @@ class LoginOracle:
             button = self._matches(state, semantic_id)
             cancel = self._matches(state, cancel_id) if cancel_id is not None else ()
             if not content and not label and not button:
+                continue
+            if not content and not any(
+                "".join(item.text.split()) in ("重启", "重启游戏", "重新启动")
+                for item in label
+            ):
+                # A shared affirmative Button (including an item description)
+                # does not identify an update/restart prompt. Its actual owner
+                # keeps handling it; no restart action is admitted here.
                 continue
             # DialogPanel is shared by download confirmation and many other
             # login notices.  It is a restart candidate only when its exact
@@ -317,7 +398,7 @@ class LoginOracle:
         # LOGIN_GAME_UPDATE click branch.
         if self.login_update_download_available():
             return False
-        state = self.read_ui_state()
+        state = self.read_text_state()
         progress = tuple(
             text
             for text in state.texts
@@ -342,7 +423,9 @@ class LoginOracle:
         it admits no frame, records no update transition, and exposes no
         actionable control. It exists only so the GameManager-owned cold-start
         wait can remain fail-closed while Unity has left a same-process,
-        identity-valid UpdatePanel snapshot stale during update checking. The
+        identity-valid UpdatePanel snapshot during update checking. The UI
+        endpoint may already be fresh while the state endpoint remains stale;
+        its age cannot make this passive wait unsafe. The
         stale wait does not interpret status text: some pre-login Unity text is
         emitted lossily, and this method never converts the observation into an
         action or an update-completion latch.
@@ -351,7 +434,7 @@ class LoginOracle:
         if self._foreground_component() != self.fingerprint.component:
             return False
         ui_snapshot = self._request("GET /v1/ui\n")
-        if not isinstance(ui_snapshot, dict):
+        if not isinstance(ui_snapshot, Mapping):
             return False
         try:
             self._validate_identity(
@@ -359,10 +442,6 @@ class LoginOracle:
                 UI_SCHEMA,
                 allow_stale=True,
             )
-            if self._integer(ui_snapshot.get("age_ms"), "UI age_ms") <= (
-                self.fingerprint.max_age_ms
-            ):
-                return False
             if (
                 ui_snapshot.get("schema") != 1
                 or ui_snapshot.get("text_truncated") is not False
@@ -372,7 +451,7 @@ class LoginOracle:
                 return False
             raw_texts = ui_snapshot.get("texts")
             if (
-                not isinstance(raw_texts, list)
+                not isinstance(raw_texts, (list, tuple))
                 or self._integer(ui_snapshot.get("text_count"), "text_count")
                 != len(raw_texts)
             ):

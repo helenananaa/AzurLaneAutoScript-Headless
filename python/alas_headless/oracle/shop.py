@@ -41,8 +41,17 @@ class ShopOracle:
     def munitions_page_visible(self) -> bool:
         """Identify the exact post-2025 Supply Shop surface."""
 
+        # Live tab admission can straddle Button/UI publication. Re-acquire a
+        # complete coherent view before input; immutable leased frames retain
+        # one attempt through the existing transition-read override.
+        return self._retry_transition_read(self._munitions_page_visible_once)
+
+    def _munitions_page_visible_once(self) -> bool:
         state = self.read_state()
         ui_state = self.read_ui_state()
+        return self._munitions_page_visible_from_states(state, ui_state)
+
+    def _munitions_page_visible_from_states(self, state: OracleState, ui_state: UiState) -> bool:
         if (
             ui_state.generation < state.generation
             or ui_state.generation > state.generation + 2
@@ -347,8 +356,23 @@ class ShopOracle:
         toggle_name = names.get(label)
         if toggle_name is None:
             raise SemanticGateClosed("shop navigation label is invalid")
-        if not self.munitions_page_visible():
-            raise SemanticGateClosed("shop page identity is absent")
+        state, target = self._retry_transition_read(
+            lambda: self._shop_nav_target(label, toggle_name)
+        )
+        assert target.point is not None and target.bounds is not None
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        # Retry only the complete observation. Never retry accepted or uncertain input.
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="shop/navigation/" + label,
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def _shop_nav_target(self, label: str, toggle_name: str):
         state = self.read_state()
         ui_state = self.read_ui_state()
         if (
@@ -356,6 +380,8 @@ class ShopOracle:
             or ui_state.generation > state.generation + 2
         ):
             raise SemanticGateClosed("shop navigation snapshots are not coherent")
+        if not self._munitions_page_visible_from_states(state, ui_state):
+            raise SemanticGateClosed("shop page identity is absent")
         label_path = (
             "buttonList/shop1List/supplyShop/shop2List/" + toggle_name + "/name"
         )
@@ -385,18 +411,7 @@ class ShopOracle:
         )
         if len(labels) != 1 or len(toggles) != 1:
             raise SemanticGateClosed("shop navigation control is absent or ambiguous")
-        target = toggles[0]
-        assert target.point is not None and target.bounds is not None
-        if self._foreground_component() != self.fingerprint.component:
-            raise SemanticGateClosed("foreground changed immediately before input")
-        self._tap(int(round(target.point.x)), int(round(target.point.y)))
-        return ActionReceipt(
-            semantic_id="shop/navigation/" + label,
-            generation=state.generation,
-            point=target.point,
-            bounds=target.bounds,
-            path=target.path,
-        )
+        return state, toggles[0]
 
     def shop_refresh_available(self) -> bool:
         """Read the exact refresh control state without pixel-color guessing."""
@@ -483,11 +498,34 @@ class ShopOracle:
             raise SemanticGateClosed("selected shop tab is absent or ambiguous")
         return labels[0]
 
-    def click_shop_tab(self, label: str) -> ActionReceipt:
+    def click_shop_tab(self, label: str) -> Optional[ActionReceipt]:
         if not isinstance(label, str) or not label:
             raise SemanticGateClosed("shop tab label is invalid")
-        if not self.munitions_page_visible():
-            raise SemanticGateClosed("shop page identity is absent")
+        state, target = self._retry_transition_read(lambda: self._shop_tab_target(label))
+        if target is None:
+            # The native Switch may have observed the departing tab before
+            # this fresh pair published the requested selection. No further
+            # input is needed; its own next screenshot verifies the switch.
+            return None
+        bounds = target.bounds
+        assert bounds is not None
+        point = Point(
+            (bounds.left + bounds.right) / 2, (bounds.top + bounds.bottom) / 2
+        )
+        # Only read preparation is retried. An accepted or uncertain input
+        # never returns through that loop.
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="shop/tab/" + label,
+            generation=state.generation,
+            point=point,
+            bounds=bounds,
+            path=target.path,
+        )
+
+    def _shop_tab_target(self, label: str):
+        # Page identity and tab target must come from the same complete pair;
+        # a second independent page read adds a publication race, not proof.
         state = self.read_state()
         ui_state = self.read_ui_state()
         if (
@@ -495,6 +533,8 @@ class ShopOracle:
             or ui_state.generation > state.generation + 2
         ):
             raise SemanticGateClosed("shop tab snapshots are not coherent")
+        if not self._munitions_page_visible_from_states(state, ui_state):
+            raise SemanticGateClosed("shop page identity is absent")
         labels = tuple(
             text
             for text in ui_state.texts
@@ -506,6 +546,22 @@ class ShopOracle:
             and text.bounds is not None
             and re.sub(r"<[^>]*>", "", text.text).strip() == label
         )
+        if not labels:
+            selected = tuple(
+                re.sub(r"<[^>]*>", "", text.text).strip()
+                for text in ui_state.texts
+                if text.path.endswith("/selected/Label")
+                and "ShopSupplyShopUI(Clone)/toggleGroup/" in text.path
+                and text.active_in_hierarchy
+                and text.active_and_enabled
+                and not text.truncated
+                and text.bounds is not None
+                and re.sub(r"<[^>]*>", "", text.text).strip()
+            )
+            if selected == (label,):
+                if self._blocking_rules(state, "ui/absence-probe"):
+                    raise SemanticGateClosed("selected shop tab is obscured")
+                return state, None
         if len(labels) != 1 or labels[0].bounds is None:
             raise SemanticGateClosed("shop tab label is absent or ambiguous")
         label_bounds = labels[0].bounds
@@ -527,19 +583,7 @@ class ShopOracle:
         )
         if len(controls) != 1:
             raise SemanticGateClosed("shop tab control is absent or ambiguous")
-        bounds = controls[0].bounds
-        assert bounds is not None
-        point = Point(
-            (bounds.left + bounds.right) / 2, (bounds.top + bounds.bottom) / 2
-        )
-        self._tap(int(round(point.x)), int(round(point.y)))
-        return ActionReceipt(
-            semantic_id="shop/tab/" + label,
-            generation=state.generation,
-            point=point,
-            bounds=bounds,
-            path=controls[0].path,
-        )
+        return state, controls[0]
 
     @staticmethod
     def _canonical_general_shop_name(display_name: str) -> str:
@@ -596,7 +640,11 @@ class ShopOracle:
         return "DefaultItem"
 
     def general_shop_items(self) -> Tuple[GeneralShopItemState, ...]:
-        """Return the ten exact cards from the selected Supply Shop tab."""
+        """Return the ten exact cards after a bounded passive transition read."""
+        return self._retry_transition_read(self._general_shop_items_once)
+
+    def _general_shop_items_once(self) -> Tuple[GeneralShopItemState, ...]:
+        """Read one complete card snapshot without injecting input."""
 
         if not self.munitions_page_visible():
             raise SemanticGateClosed("supply shop is not selected")

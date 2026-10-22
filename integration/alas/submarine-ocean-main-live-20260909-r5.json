@@ -1,0 +1,66 @@
+{
+  "schema": "alas-headless.main-task-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-09-09T02:47:28.855459Z",
+  "finished_at": "2026-09-09T02:51:42.416894Z",
+  "task": "Main",
+  "stage": "10-2",
+  "serial": "emulator-5580",
+  "run_count_requested": 1,
+  "execution_status": "incomplete",
+  "error": "SystemExit: 1",
+  "preparations": [],
+  "completed_sorties": [],
+  "auto_menu_observations": [],
+  "continuation_receipts": [],
+  "submarine_observations": [],
+  "submarine_calls": [
+    {
+      "semantic_id": "campaign/combat/submarine/call",
+      "generation": 45117,
+      "point": {
+        "x": 742.4,
+        "y": 622.8
+      },
+      "bounds": {
+        "left": 709.067,
+        "top": 589.467,
+        "right": 775.733,
+        "bottom": 656.133
+      },
+      "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Weapon_button(Clone)/ActCtl",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "combat_admissions": [
+    {
+      "generation": 44605,
+      "battle_count": 6,
+      "target": "H1",
+      "expected": "combat_boss",
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "E3",
+        "ammo": 6,
+        "ammo_capacity": 6
+      },
+      "hunting_nodes": [
+        "B3",
+        "B4",
+        "D2",
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "F3",
+        "F4",
+        "G2",
+        "G3",
+        "G4",
+        "H5"
+      ],
+      "submarine_destination": null
+    }
+  ]
+}

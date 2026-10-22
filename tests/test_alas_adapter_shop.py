@@ -3,12 +3,33 @@
 import time
 import unittest
 from alas_headless import AlasSemanticAdapter, AlasSemanticUnmapped
+from alas_headless.semantic_oracle import SemanticGateClosed, SemanticTargetMissing
 from tests.semantic_support.adapter_cases import AlasSemanticAdapterTestsSupport
 from tests.semantic_support.adapter_fixtures import FakeOracle, NamedButton
 from types import SimpleNamespace
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_shop_shell_owns_passive_page_scan_without_mapping_unknown_input(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.recommendation_shop_visible_value = True
+        oracle.enabled_values["shop/home"] = True
+
+        self.assertFalse(adapter.appear(NamedButton("SUPPLY_PACK_CHECK")))
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("SHOP_CHECK")))
+        with self.assertRaises(AlasSemanticUnmapped):
+            adapter.click(NamedButton("SUPPLY_PACK_CHECK"))
+
+        oracle.recommendation_shop_visible_value = False
+        with self.assertRaises(AlasSemanticUnmapped):
+            adapter.appear(NamedButton("SUPPLY_PACK_CHECK"))
+
+        oracle.recommendation_shop_visible_value = True
+        oracle.enabled_values["shop/home"] = False
+        with self.assertRaises(AlasSemanticUnmapped):
+            adapter.appear(NamedButton("SUPPLY_PACK_CHECK"))
+
     def test_regular_shop_purchase_is_atomic_and_postconditioned(self):
         oracle = FakeOracle()
         state = {"remaining": 4, "balance": 3626, "dialog": False}
@@ -52,6 +73,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
     def test_battle_pass_navigation_recovers_from_existing_shop(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.recommendation_shop_visible_value = True
+        oracle.enabled_values["event-list/page/back"] = False
         adapter.begin_battle_pass()
 
         self.assertTrue(adapter.appear(NamedButton("SHOP_CHECK")))
@@ -62,5 +84,96 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         adapter._battle_pass_context.passive_transition_until = time.monotonic() - 1
         self.assertFalse(adapter.appear(NamedButton("EVENT_LIST_CHECK")))
         adapter.end_battle_pass()
-        with self.assertRaisesRegex(AlasSemanticUnmapped, "EVENT_LIST_CHECK"):
-            adapter.appear(NamedButton("EVENT_LIST_CHECK"))
+        self.assertFalse(adapter.appear(NamedButton("EVENT_LIST_CHECK")))
+
+    def test_selected_gift_pack_page_owns_supply_pack_page_check(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.recommendation_shop_visible_value = True
+        oracle.gift_pack_page_visible_value = True
+        oracle.enabled_values["shop/home"] = True
+        adapter.begin_supply_pack()
+
+        self.assertTrue(adapter.match_template_color(NamedButton("SUPPLY_PACK_CHECK")))
+        self.assertFalse(adapter.appear(NamedButton("SHOP_CHECK")))
+
+        oracle.gift_pack_page_visible_value = False
+        self.assertFalse(adapter.appear(NamedButton("SUPPLY_PACK_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("SHOP_CHECK")))
+
+    def test_munitions_page_owns_page_check_inside_shared_shop_shell(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.recommendation_shop_visible_value = True
+        oracle.enabled_values["shop/home"] = True
+        oracle.munitions_page_visible = lambda: True
+
+        self.assertTrue(adapter.appear(NamedButton("MUNITIONS_CHECK")))
+        self.assertFalse(adapter.appear(NamedButton("SHOP_CHECK")))
+
+        oracle.munitions_page_visible = lambda: False
+        self.assertFalse(adapter.appear(NamedButton("MUNITIONS_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("SHOP_CHECK")))
+
+    def test_shop_navigation_checks_remain_visible_inside_shop_shell(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.recommendation_shop_visible_value = True
+        oracle.enabled_values["shop/home"] = True
+        oracle.shop_general_nav_selected = lambda: True
+        oracle.shop_general_tab_selected = lambda: True
+
+        self.assertTrue(adapter.appear(NamedButton("NAV_GENERAL")))
+        self.assertTrue(adapter.appear(NamedButton("TAB_GENERAL")))
+
+    def test_supply_pack_tab_waits_for_loading_then_clicks_once(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.recommendation_shop_visible_value = True
+        adapter.begin_supply_pack()
+        original = oracle.click_toggle
+        attempts = []
+
+        def loading_once(target):
+            attempts.append(target)
+            if len(attempts) == 1:
+                raise SemanticGateClosed("semantic toggle action is blocked")
+            return original(target)
+
+        oracle.click_toggle = loading_once
+        oracle._blocking_rules = lambda state, target: ()
+        receipt = adapter.click(NamedButton("SHOP_GOTO_SUPPLY_PACK"))
+
+        self.assertEqual(receipt.semantic_id, "shop/gift-pack")
+        self.assertEqual(attempts, ["shop/gift-pack", "shop/gift-pack"])
+        self.assertEqual(oracle.click_calls, ["shop/gift-pack"])
+
+    def test_main_shop_transition_reuses_only_proven_destination_receipt(self):
+        adapter, oracle, _ = self.make_adapter()
+        first = adapter.click(NamedButton("MAIN_GOTO_SHOP"))
+        self.assertEqual(oracle.click_calls, ["main/shop"])
+
+        def missing(_semantic_id):
+            raise SemanticTargetMissing("semantic target is absent: main/shop")
+
+        oracle.click = missing
+        with self.assertRaises(SemanticTargetMissing):
+            adapter.click(NamedButton("MAIN_GOTO_SHOP"))
+
+        oracle.recommendation_shop_visible_value = True
+        self.assertIs(adapter.click(NamedButton("MAIN_GOTO_SHOP")), first)
+        oracle.state_generation = first.generation
+        with self.assertRaises(SemanticTargetMissing):
+            adapter.click(NamedButton("MAIN_GOTO_SHOP"))
+
+    def test_main_shop_transition_waits_through_loading_without_second_click(self):
+        adapter, oracle, _ = self.make_adapter()
+        first = adapter.click(NamedButton("MAIN_GOTO_SHOP"))
+        oracle.state_generation = first.generation + 1
+
+        def blocked(_semantic_id):
+            raise SemanticGateClosed("semantic target is not actionable")
+
+        oracle.click = blocked
+        oracle.blocking_rules = (SimpleNamespace(blocker_id="loading"),)
+        self.assertIs(adapter.click(NamedButton("MAIN_GOTO_SHOP")), first)
+
+        oracle.blocking_rules = (SimpleNamespace(blocker_id="unknown-overlay"),)
+        with self.assertRaises(SemanticGateClosed):
+            adapter.click(NamedButton("MAIN_GOTO_SHOP"))

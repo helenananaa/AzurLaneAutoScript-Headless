@@ -1,0 +1,291 @@
+{
+  "schema": "alas-headless.main-task-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-09-09T03:40:42.149408Z",
+  "finished_at": "2026-09-09T03:52:38.159573Z",
+  "task": "Main",
+  "stage": "10-2",
+  "event": "campaign_main",
+  "mode": "normal",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "scheduler_command": "Main",
+  "run_result": false,
+  "run_count_before": 1,
+  "run_count_after": 1,
+  "scheduler_enabled_after": true,
+  "use_auto_search": false,
+  "use_2x_book": false,
+  "auto_menu_observations": [],
+  "completed_sorties": [],
+  "continuation_receipts": [],
+  "submarine_observations": [],
+  "submarine_calls": [
+    {
+      "semantic_id": "campaign/combat/submarine/call",
+      "generation": 107299,
+      "point": {
+        "x": 742.4,
+        "y": 622.8
+      },
+      "bounds": {
+        "left": 709.067,
+        "top": 589.467,
+        "right": 775.733,
+        "bottom": 656.133
+      },
+      "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Weapon_button(Clone)/ActCtl",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "combat_admissions": [
+    {
+      "generation": 98683,
+      "battle_count": 0,
+      "target": "G4",
+      "expected": "combat",
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "E3",
+        "ammo": 6,
+        "ammo_capacity": 6
+      },
+      "hunting_nodes": [
+        "B3",
+        "B4",
+        "D2",
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "F3",
+        "F4",
+        "G2",
+        "G3",
+        "G4",
+        "H5"
+      ],
+      "submarine_destination": null
+    },
+    {
+      "generation": 99831,
+      "battle_count": 1,
+      "target": "F4",
+      "expected": "combat",
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "E3",
+        "ammo": 6,
+        "ammo_capacity": 6
+      },
+      "hunting_nodes": [
+        "B3",
+        "B4",
+        "D2",
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "F3",
+        "F4",
+        "G2",
+        "G3",
+        "G4",
+        "H5"
+      ],
+      "submarine_destination": null
+    },
+    {
+      "generation": 100631,
+      "battle_count": 2,
+      "target": "G3",
+      "expected": "combat",
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "E3",
+        "ammo": 6,
+        "ammo_capacity": 6
+      },
+      "hunting_nodes": [
+        "B3",
+        "B4",
+        "D2",
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "F3",
+        "F4",
+        "G2",
+        "G3",
+        "G4",
+        "H5"
+      ],
+      "submarine_destination": null
+    },
+    {
+      "generation": 101818,
+      "battle_count": 3,
+      "target": "G5",
+      "expected": "combat",
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "E3",
+        "ammo": 6,
+        "ammo_capacity": 6
+      },
+      "hunting_nodes": [
+        "B3",
+        "B4",
+        "D2",
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "F3",
+        "F4",
+        "G2",
+        "G3",
+        "G4",
+        "H5"
+      ],
+      "submarine_destination": null
+    },
+    {
+      "generation": 103051,
+      "battle_count": 6,
+      "target": "H1",
+      "expected": "combat_boss",
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "E3",
+        "ammo": 6,
+        "ammo_capacity": 6
+      },
+      "hunting_nodes": [
+        "B3",
+        "B4",
+        "D2",
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "F3",
+        "F4",
+        "G2",
+        "G3",
+        "G4",
+        "H5"
+      ],
+      "submarine_destination": null
+    }
+  ],
+  "submarine_moves": [],
+  "submarine_strategy": [
+    {
+      "semantic_id": "campaign/map/strategy/submarine/view",
+      "generation": 98179,
+      "point": {
+        "x": 1230.667,
+        "y": 398.0
+      },
+      "bounds": {
+        "left": 1188.0,
+        "top": 355.333,
+        "right": 1273.333,
+        "bottom": 440.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/detail/items/item(Clone)/icon",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "campaign/map/strategy/submarine/view",
+      "generation": 98524,
+      "point": {
+        "x": 1230.667,
+        "y": 398.0
+      },
+      "bounds": {
+        "left": 1188.0,
+        "top": 355.333,
+        "right": 1273.333,
+        "bottom": 440.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/detail/items/item(Clone)/icon",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "campaign/map/strategy/submarine/view",
+      "generation": 103483,
+      "point": {
+        "x": 1230.667,
+        "y": 398.0
+      },
+      "bounds": {
+        "left": 1188.0,
+        "top": 355.333,
+        "right": 1273.333,
+        "bottom": 440.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/detail/items/item(Clone)/icon",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "campaign/map/strategy/submarine/view",
+      "generation": 103815,
+      "point": {
+        "x": 1230.667,
+        "y": 398.0
+      },
+      "bounds": {
+        "left": 1188.0,
+        "top": 355.333,
+        "right": 1273.333,
+        "bottom": 440.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/detail/items/item(Clone)/icon",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "observe_submarine_range": true,
+  "submarine_configuration": {
+    "Fleet": 2,
+    "Mode": "boss_only",
+    "AutoSearchMode": "sub_standby",
+    "DistanceToBoss": "use_open_ocean_support"
+  },
+  "preparations": [],
+  "auto_book_checks": [],
+  "fleet_order": "fleet1_mob_fleet2_boss",
+  "auto_search_completion": null,
+  "login_recovery_performed": false,
+  "starting_surface": {
+    "main_page": false,
+    "campaign_map": true,
+    "campaign_entry": false,
+    "generation": 97590
+  },
+  "budgets": {
+    "stage_entry": 1,
+    "fleet_mutation": 8,
+    "sortie": 1,
+    "combat": 24,
+    "viewport_swipe": 16
+  },
+  "observer": {
+    "generation": 108803,
+    "scene_handle": -76,
+    "button_count": 64
+  },
+  "final_surface": {
+    "main_page": false,
+    "campaign_map": true,
+    "campaign_entry": false
+  },
+  "raw_input_fallback_used": false
+}

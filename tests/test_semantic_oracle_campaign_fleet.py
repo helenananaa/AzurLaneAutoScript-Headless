@@ -889,6 +889,22 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         with self.assertRaisesRegex(SemanticGateClosed, "incomplete"):
             make_oracle(backend).campaign_fleet_dropdown_state()
 
+        # A submarine dropdown has two fully labelled choices, not six.
+        backend.snapshot_sequence = []
+        backend.buttons_sequence = []
+        backend.ui_sequence = []
+        backend.ui = make_ui(texts[:2], toggles=toggles[:2])
+        backend.snapshot = make_snapshot()
+        backend.buttons = make_buttons(buttons)
+        backend.taps.clear()
+        submarine_oracle = make_oracle(backend)
+        self.assertEqual(len(submarine_oracle.campaign_fleet_dropdown_state().options), 2)
+        with self.assertRaises(SemanticGateClosed):
+            submarine_oracle.click_campaign_fleet_option(3)
+        self.assertEqual(backend.taps, [])
+        submarine_oracle.click_campaign_fleet_option(2)
+        self.assertEqual(len(backend.taps), 1)
+
     def test_campaign_map_model_rejects_ambiguous_current_fleet_marker(self):
         backend = make_campaign_map_backend(generations=(10,))
         roster_path = (

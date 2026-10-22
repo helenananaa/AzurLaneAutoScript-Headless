@@ -1,0 +1,6390 @@
+{
+  "state": {
+    "generation": 31881,
+    "scene_handle": -76,
+    "snapshot": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 1614,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "abi": "x86_64",
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "snapshot_schema": 1,
+      "snapshot_struct_size": 104,
+      "generation": 31881,
+      "scene_generation": 2,
+      "semantic_generation": 2,
+      "snapshot_monotonic_ns": 2810259967400,
+      "response_monotonic_ns": 2810351872400,
+      "age_ms": 91,
+      "observer_tid": 1817,
+      "assembly_count": 129,
+      "semantic_code": 1,
+      "width": 1280,
+      "height": 720,
+      "flags": 15,
+      "observer_attached": false,
+      "main_thread": true,
+      "button_count": 322,
+      "active_button_count": 15,
+      "interactable_button_count": 322,
+      "scene_handle": -76,
+      "ui_stage": 100,
+      "ui_method_mask": 15
+    },
+    "buttons_snapshot": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "semantic_schema": "alas-headless.buttons/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 1614,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "schema": 1,
+      "struct_size": 340008,
+      "generation": 31881,
+      "snapshot_monotonic_ns": 2810259967400,
+      "response_monotonic_ns": 2810351960900,
+      "age_ms": 91,
+      "button_count": 15,
+      "truncated": false,
+      "error_count": 0,
+      "buttons": [
+        {
+          "name": "arrow1",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/arrows/arrow1",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -337468,
+          "world_position": {
+            "x": 13.333,
+            "y": 0.0,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -27.5,
+            "y": -46.0,
+            "width": 55.0,
+            "height": 92.0
+          },
+          "screen_point": {
+            "x": 1240.0,
+            "y": 360.0
+          },
+          "adb_point": {
+            "x": 1240.0,
+            "y": 360.0
+          },
+          "screen_bounds": {
+            "left": 1221.667,
+            "bottom": 329.333,
+            "right": 1258.333,
+            "top": 390.667
+          },
+          "adb_bounds": {
+            "left": 1221.667,
+            "top": 329.333,
+            "right": 1258.333,
+            "bottom": 390.667
+          }
+        },
+        {
+          "name": "arrow2",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/arrows/arrow2",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -337476,
+          "world_position": {
+            "x": -13.333,
+            "y": 0.0,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -27.5,
+            "y": -46.0,
+            "width": 55.0,
+            "height": 92.0
+          },
+          "screen_point": {
+            "x": 40.0,
+            "y": 360.0
+          },
+          "adb_point": {
+            "x": 40.0,
+            "y": 360.0
+          },
+          "screen_bounds": {
+            "left": 21.667,
+            "bottom": 329.333,
+            "right": 58.333,
+            "top": 390.667
+          },
+          "adb_bounds": {
+            "left": 21.667,
+            "top": 329.333,
+            "right": 58.333,
+            "bottom": 390.667
+          }
+        },
+        {
+          "name": "back_button",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_button",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -338764,
+          "world_position": {
+            "x": -12.941,
+            "y": 6.802,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -65.255,
+            "y": -55.7,
+            "width": 130.51,
+            "height": 111.4
+          },
+          "screen_point": {
+            "x": 57.667,
+            "y": 666.08
+          },
+          "adb_point": {
+            "x": 57.667,
+            "y": 53.92
+          },
+          "screen_bounds": {
+            "left": 0.644,
+            "bottom": 609.057,
+            "right": 114.69,
+            "top": 723.103
+          },
+          "adb_bounds": {
+            "left": 0.644,
+            "top": -3.103,
+            "right": 114.69,
+            "bottom": 110.943
+          }
+        },
+        {
+          "name": "option",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/option",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -338724,
+          "world_position": {
+            "x": 13.345,
+            "y": 7.142,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -46.0,
+            "y": -53.5,
+            "width": 92.0,
+            "height": 107.0
+          },
+          "screen_point": {
+            "x": 1240.523,
+            "y": 681.372
+          },
+          "adb_point": {
+            "x": 1240.523,
+            "y": 38.628
+          },
+          "screen_bounds": {
+            "left": 1209.855,
+            "bottom": 645.703,
+            "right": 1271.191,
+            "top": 717.04
+          },
+          "adb_bounds": {
+            "left": 1209.855,
+            "top": 2.96,
+            "right": 1271.191,
+            "bottom": 74.297
+          }
+        },
+        {
+          "name": "201",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -340492,
+          "world_position": {
+            "x": -14.576,
+            "y": -0.533,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -182.5,
+            "y": -422.5,
+            "width": 365.0,
+            "height": 845.0
+          },
+          "screen_point": {
+            "x": -15.918,
+            "y": 336.0
+          },
+          "adb_point": {
+            "x": -15.918,
+            "y": 384.0
+          },
+          "screen_bounds": {
+            "left": -85.352,
+            "bottom": 175.256,
+            "right": 53.516,
+            "top": 496.744
+          },
+          "adb_bounds": {
+            "left": -85.352,
+            "top": 223.256,
+            "right": 53.516,
+            "bottom": 544.744
+          }
+        },
+        {
+          "name": "301",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -340212,
+          "world_position": {
+            "x": -10.655,
+            "y": -0.533,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -182.5,
+            "y": -422.5,
+            "width": 365.0,
+            "height": 845.0
+          },
+          "screen_point": {
+            "x": 160.505,
+            "y": 336.0
+          },
+          "adb_point": {
+            "x": 160.505,
+            "y": 384.0
+          },
+          "screen_bounds": {
+            "left": 73.66,
+            "bottom": 134.948,
+            "right": 247.35,
+            "top": 537.052
+          },
+          "adb_bounds": {
+            "left": 73.66,
+            "top": 182.948,
+            "right": 247.35,
+            "bottom": 585.052
+          }
+        },
+        {
+          "name": "401",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -339932,
+          "world_position": {
+            "x": -5.912,
+            "y": -0.533,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -182.5,
+            "y": -422.5,
+            "width": 365.0,
+            "height": 845.0
+          },
+          "screen_point": {
+            "x": 373.973,
+            "y": 336.0
+          },
+          "adb_point": {
+            "x": 373.973,
+            "y": 384.0
+          },
+          "screen_bounds": {
+            "left": 269.718,
+            "bottom": 94.641,
+            "right": 478.229,
+            "top": 577.359
+          },
+          "adb_bounds": {
+            "left": 269.718,
+            "top": 142.641,
+            "right": 478.229,
+            "bottom": 625.359
+          }
+        },
+        {
+          "name": "601",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -339652,
+          "world_position": {
+            "x": -0.074,
+            "y": -0.533,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -182.5,
+            "y": -422.5,
+            "width": 365.0,
+            "height": 845.0
+          },
+          "screen_point": {
+            "x": 636.667,
+            "y": 336.0
+          },
+          "adb_point": {
+            "x": 636.667,
+            "y": 384.0
+          },
+          "screen_bounds": {
+            "left": 515.0,
+            "bottom": 54.333,
+            "right": 758.333,
+            "top": 617.667
+          },
+          "adb_bounds": {
+            "left": 515.0,
+            "top": 102.333,
+            "right": 758.333,
+            "bottom": 665.667
+          }
+        },
+        {
+          "name": "501",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/501",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -339372,
+          "world_position": {
+            "x": 5.712,
+            "y": -0.533,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -182.5,
+            "y": -422.5,
+            "width": 365.0,
+            "height": 845.0
+          },
+          "screen_point": {
+            "x": 897.058,
+            "y": 336.0
+          },
+          "adb_point": {
+            "x": 897.058,
+            "y": 384.0
+          },
+          "screen_bounds": {
+            "left": 792.772,
+            "bottom": 94.571,
+            "right": 1001.344,
+            "top": 577.429
+          },
+          "adb_bounds": {
+            "left": 792.772,
+            "top": 142.571,
+            "right": 1001.344,
+            "bottom": 625.429
+          }
+        },
+        {
+          "name": "701",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/701",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -339092,
+          "world_position": {
+            "x": 10.528,
+            "y": -0.533,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -182.5,
+            "y": -422.5,
+            "width": 365.0,
+            "height": 845.0
+          },
+          "screen_point": {
+            "x": 1113.776,
+            "y": 336.0
+          },
+          "adb_point": {
+            "x": 1113.776,
+            "y": 384.0
+          },
+          "screen_bounds": {
+            "left": 1026.871,
+            "bottom": 134.81,
+            "right": 1200.681,
+            "top": 537.19
+          },
+          "adb_bounds": {
+            "left": 1026.871,
+            "top": 182.81,
+            "right": 1200.681,
+            "bottom": 585.19
+          }
+        },
+        {
+          "name": "101",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/101",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -338812,
+          "world_position": {
+            "x": 14.538,
+            "y": -0.533,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -182.5,
+            "y": -422.5,
+            "width": 365.0,
+            "height": 845.0
+          },
+          "screen_point": {
+            "x": 1294.197,
+            "y": 336.0
+          },
+          "adb_point": {
+            "x": 1294.197,
+            "y": 384.0
+          },
+          "screen_bounds": {
+            "left": 1224.674,
+            "bottom": 175.048,
+            "right": 1363.721,
+            "top": 496.952
+          },
+          "adb_bounds": {
+            "left": 1224.674,
+            "top": 223.048,
+            "right": 1363.721,
+            "bottom": 544.952
+          }
+        },
+        {
+          "name": "help_btn",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/help_btn",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -337548,
+          "world_position": {
+            "x": -13.218,
+            "y": -7.064,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -40.0,
+            "y": -42.0,
+            "width": 80.0,
+            "height": 84.0
+          },
+          "screen_point": {
+            "x": 45.2,
+            "y": 42.133
+          },
+          "adb_point": {
+            "x": 45.2,
+            "y": 677.867
+          },
+          "screen_bounds": {
+            "left": 21.2,
+            "bottom": 16.933,
+            "right": 69.2,
+            "top": 67.333
+          },
+          "adb_bounds": {
+            "left": 21.2,
+            "top": 652.667,
+            "right": 69.2,
+            "bottom": 703.067
+          }
+        },
+        {
+          "name": "gem",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem",
+          "canvas": "ResPanel(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -43938,
+          "world_position": {
+            "x": 11.915,
+            "y": 7.216,
+            "z": -389.985
+          },
+          "local_rect": {
+            "x": -275.7,
+            "y": -30.0,
+            "width": 275.7,
+            "height": 60.0
+          },
+          "screen_point": {
+            "x": 1176.167,
+            "y": 684.711
+          },
+          "adb_point": {
+            "x": 1176.167,
+            "y": 35.289
+          },
+          "screen_bounds": {
+            "left": 992.367,
+            "bottom": 664.711,
+            "right": 1176.167,
+            "top": 704.711
+          },
+          "adb_bounds": {
+            "left": 992.367,
+            "top": 15.289,
+            "right": 1176.167,
+            "bottom": 55.289
+          }
+        },
+        {
+          "name": "gold",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold",
+          "canvas": "ResPanel(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -43892,
+          "world_position": {
+            "x": 5.225,
+            "y": 7.216,
+            "z": -390.0
+          },
+          "local_rect": {
+            "x": -137.85,
+            "y": -30.0,
+            "width": 275.7,
+            "height": 60.0
+          },
+          "screen_point": {
+            "x": 875.133,
+            "y": 684.711
+          },
+          "adb_point": {
+            "x": 875.133,
+            "y": 35.289
+          },
+          "screen_bounds": {
+            "left": 783.233,
+            "bottom": 664.711,
+            "right": 967.033,
+            "top": 704.711
+          },
+          "adb_bounds": {
+            "left": 783.233,
+            "top": 15.289,
+            "right": 967.033,
+            "bottom": 55.289
+          }
+        },
+        {
+          "name": "oil",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil",
+          "canvas": "ResPanel(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -43842,
+          "world_position": {
+            "x": 0.578,
+            "y": 7.216,
+            "z": -389.985
+          },
+          "local_rect": {
+            "x": -137.85,
+            "y": -30.0,
+            "width": 275.7,
+            "height": 60.0
+          },
+          "screen_point": {
+            "x": 666.0,
+            "y": 684.711
+          },
+          "adb_point": {
+            "x": 666.0,
+            "y": 35.289
+          },
+          "screen_bounds": {
+            "left": 574.1,
+            "bottom": 664.711,
+            "right": 757.9,
+            "top": 704.711
+          },
+          "adb_bounds": {
+            "left": 574.1,
+            "top": 15.289,
+            "right": 757.9,
+            "bottom": 55.289
+          }
+        }
+      ]
+    },
+    "buttons": [
+      {
+        "name": "arrow1",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/arrows/arrow1",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1240.0,
+          "y": 360.0
+        },
+        "bounds": {
+          "left": 1221.667,
+          "top": 329.333,
+          "right": 1258.333,
+          "bottom": 390.667
+        },
+        "raw": {
+          "name": "arrow1",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/arrows/arrow1",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -337468,
+          "world_position": {
+            "x": 13.333,
+            "y": 0.0,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -27.5,
+            "y": -46.0,
+            "width": 55.0,
+            "height": 92.0
+          },
+          "screen_point": {
+            "x": 1240.0,
+            "y": 360.0
+          },
+          "adb_point": {
+            "x": 1240.0,
+            "y": 360.0
+          },
+          "screen_bounds": {
+            "left": 1221.667,
+            "bottom": 329.333,
+            "right": 1258.333,
+            "top": 390.667
+          },
+          "adb_bounds": {
+            "left": 1221.667,
+            "top": 329.333,
+            "right": 1258.333,
+            "bottom": 390.667
+          }
+        }
+      },
+      {
+        "name": "arrow2",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/arrows/arrow2",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 40.0,
+          "y": 360.0
+        },
+        "bounds": {
+          "left": 21.667,
+          "top": 329.333,
+          "right": 58.333,
+          "bottom": 390.667
+        },
+        "raw": {
+          "name": "arrow2",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/arrows/arrow2",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -337476,
+          "world_position": {
+            "x": -13.333,
+            "y": 0.0,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -27.5,
+            "y": -46.0,
+            "width": 55.0,
+            "height": 92.0
+          },
+          "screen_point": {
+            "x": 40.0,
+            "y": 360.0
+          },
+          "adb_point": {
+            "x": 40.0,
+            "y": 360.0
+          },
+          "screen_bounds": {
+            "left": 21.667,
+            "bottom": 329.333,
+            "right": 58.333,
+            "top": 390.667
+          },
+          "adb_bounds": {
+            "left": 21.667,
+            "top": 329.333,
+            "right": 58.333,
+            "bottom": 390.667
+          }
+        }
+      },
+      {
+        "name": "back_button",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_button",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 57.667,
+          "y": 53.92
+        },
+        "bounds": {
+          "left": 0.644,
+          "top": -3.103,
+          "right": 114.69,
+          "bottom": 110.943
+        },
+        "raw": {
+          "name": "back_button",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_button",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -338764,
+          "world_position": {
+            "x": -12.941,
+            "y": 6.802,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -65.255,
+            "y": -55.7,
+            "width": 130.51,
+            "height": 111.4
+          },
+          "screen_point": {
+            "x": 57.667,
+            "y": 666.08
+          },
+          "adb_point": {
+            "x": 57.667,
+            "y": 53.92
+          },
+          "screen_bounds": {
+            "left": 0.644,
+            "bottom": 609.057,
+            "right": 114.69,
+            "top": 723.103
+          },
+          "adb_bounds": {
+            "left": 0.644,
+            "top": -3.103,
+            "right": 114.69,
+            "bottom": 110.943
+          }
+        }
+      },
+      {
+        "name": "option",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/option",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1240.523,
+          "y": 38.628
+        },
+        "bounds": {
+          "left": 1209.855,
+          "top": 2.96,
+          "right": 1271.191,
+          "bottom": 74.297
+        },
+        "raw": {
+          "name": "option",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/option",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -338724,
+          "world_position": {
+            "x": 13.345,
+            "y": 7.142,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -46.0,
+            "y": -53.5,
+            "width": 92.0,
+            "height": 107.0
+          },
+          "screen_point": {
+            "x": 1240.523,
+            "y": 681.372
+          },
+          "adb_point": {
+            "x": 1240.523,
+            "y": 38.628
+          },
+          "screen_bounds": {
+            "left": 1209.855,
+            "bottom": 645.703,
+            "right": 1271.191,
+            "top": 717.04
+          },
+          "adb_bounds": {
+            "left": 1209.855,
+            "top": 2.96,
+            "right": 1271.191,
+            "bottom": 74.297
+          }
+        }
+      },
+      {
+        "name": "201",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": -15.918,
+          "y": 384.0
+        },
+        "bounds": {
+          "left": -85.352,
+          "top": 223.256,
+          "right": 53.516,
+          "bottom": 544.744
+        },
+        "raw": {
+          "name": "201",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -340492,
+          "world_position": {
+            "x": -14.576,
+            "y": -0.533,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -182.5,
+            "y": -422.5,
+            "width": 365.0,
+            "height": 845.0
+          },
+          "screen_point": {
+            "x": -15.918,
+            "y": 336.0
+          },
+          "adb_point": {
+            "x": -15.918,
+            "y": 384.0
+          },
+          "screen_bounds": {
+            "left": -85.352,
+            "bottom": 175.256,
+            "right": 53.516,
+            "top": 496.744
+          },
+          "adb_bounds": {
+            "left": -85.352,
+            "top": 223.256,
+            "right": 53.516,
+            "bottom": 544.744
+          }
+        }
+      },
+      {
+        "name": "301",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 160.505,
+          "y": 384.0
+        },
+        "bounds": {
+          "left": 73.66,
+          "top": 182.948,
+          "right": 247.35,
+          "bottom": 585.052
+        },
+        "raw": {
+          "name": "301",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -340212,
+          "world_position": {
+            "x": -10.655,
+            "y": -0.533,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -182.5,
+            "y": -422.5,
+            "width": 365.0,
+            "height": 845.0
+          },
+          "screen_point": {
+            "x": 160.505,
+            "y": 336.0
+          },
+          "adb_point": {
+            "x": 160.505,
+            "y": 384.0
+          },
+          "screen_bounds": {
+            "left": 73.66,
+            "bottom": 134.948,
+            "right": 247.35,
+            "top": 537.052
+          },
+          "adb_bounds": {
+            "left": 73.66,
+            "top": 182.948,
+            "right": 247.35,
+            "bottom": 585.052
+          }
+        }
+      },
+      {
+        "name": "401",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 373.973,
+          "y": 384.0
+        },
+        "bounds": {
+          "left": 269.718,
+          "top": 142.641,
+          "right": 478.229,
+          "bottom": 625.359
+        },
+        "raw": {
+          "name": "401",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -339932,
+          "world_position": {
+            "x": -5.912,
+            "y": -0.533,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -182.5,
+            "y": -422.5,
+            "width": 365.0,
+            "height": 845.0
+          },
+          "screen_point": {
+            "x": 373.973,
+            "y": 336.0
+          },
+          "adb_point": {
+            "x": 373.973,
+            "y": 384.0
+          },
+          "screen_bounds": {
+            "left": 269.718,
+            "bottom": 94.641,
+            "right": 478.229,
+            "top": 577.359
+          },
+          "adb_bounds": {
+            "left": 269.718,
+            "top": 142.641,
+            "right": 478.229,
+            "bottom": 625.359
+          }
+        }
+      },
+      {
+        "name": "601",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 636.667,
+          "y": 384.0
+        },
+        "bounds": {
+          "left": 515.0,
+          "top": 102.333,
+          "right": 758.333,
+          "bottom": 665.667
+        },
+        "raw": {
+          "name": "601",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -339652,
+          "world_position": {
+            "x": -0.074,
+            "y": -0.533,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -182.5,
+            "y": -422.5,
+            "width": 365.0,
+            "height": 845.0
+          },
+          "screen_point": {
+            "x": 636.667,
+            "y": 336.0
+          },
+          "adb_point": {
+            "x": 636.667,
+            "y": 384.0
+          },
+          "screen_bounds": {
+            "left": 515.0,
+            "bottom": 54.333,
+            "right": 758.333,
+            "top": 617.667
+          },
+          "adb_bounds": {
+            "left": 515.0,
+            "top": 102.333,
+            "right": 758.333,
+            "bottom": 665.667
+          }
+        }
+      },
+      {
+        "name": "501",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/501",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 897.058,
+          "y": 384.0
+        },
+        "bounds": {
+          "left": 792.772,
+          "top": 142.571,
+          "right": 1001.344,
+          "bottom": 625.429
+        },
+        "raw": {
+          "name": "501",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/501",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -339372,
+          "world_position": {
+            "x": 5.712,
+            "y": -0.533,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -182.5,
+            "y": -422.5,
+            "width": 365.0,
+            "height": 845.0
+          },
+          "screen_point": {
+            "x": 897.058,
+            "y": 336.0
+          },
+          "adb_point": {
+            "x": 897.058,
+            "y": 384.0
+          },
+          "screen_bounds": {
+            "left": 792.772,
+            "bottom": 94.571,
+            "right": 1001.344,
+            "top": 577.429
+          },
+          "adb_bounds": {
+            "left": 792.772,
+            "top": 142.571,
+            "right": 1001.344,
+            "bottom": 625.429
+          }
+        }
+      },
+      {
+        "name": "701",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/701",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1113.776,
+          "y": 384.0
+        },
+        "bounds": {
+          "left": 1026.871,
+          "top": 182.81,
+          "right": 1200.681,
+          "bottom": 585.19
+        },
+        "raw": {
+          "name": "701",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/701",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -339092,
+          "world_position": {
+            "x": 10.528,
+            "y": -0.533,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -182.5,
+            "y": -422.5,
+            "width": 365.0,
+            "height": 845.0
+          },
+          "screen_point": {
+            "x": 1113.776,
+            "y": 336.0
+          },
+          "adb_point": {
+            "x": 1113.776,
+            "y": 384.0
+          },
+          "screen_bounds": {
+            "left": 1026.871,
+            "bottom": 134.81,
+            "right": 1200.681,
+            "top": 537.19
+          },
+          "adb_bounds": {
+            "left": 1026.871,
+            "top": 182.81,
+            "right": 1200.681,
+            "bottom": 585.19
+          }
+        }
+      },
+      {
+        "name": "101",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/101",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1294.197,
+          "y": 384.0
+        },
+        "bounds": {
+          "left": 1224.674,
+          "top": 223.048,
+          "right": 1363.721,
+          "bottom": 544.952
+        },
+        "raw": {
+          "name": "101",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/101",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -338812,
+          "world_position": {
+            "x": 14.538,
+            "y": -0.533,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -182.5,
+            "y": -422.5,
+            "width": 365.0,
+            "height": 845.0
+          },
+          "screen_point": {
+            "x": 1294.197,
+            "y": 336.0
+          },
+          "adb_point": {
+            "x": 1294.197,
+            "y": 384.0
+          },
+          "screen_bounds": {
+            "left": 1224.674,
+            "bottom": 175.048,
+            "right": 1363.721,
+            "top": 496.952
+          },
+          "adb_bounds": {
+            "left": 1224.674,
+            "top": 223.048,
+            "right": 1363.721,
+            "bottom": 544.952
+          }
+        }
+      },
+      {
+        "name": "help_btn",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/help_btn",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 45.2,
+          "y": 677.867
+        },
+        "bounds": {
+          "left": 21.2,
+          "top": 652.667,
+          "right": 69.2,
+          "bottom": 703.067
+        },
+        "raw": {
+          "name": "help_btn",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/help_btn",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -337548,
+          "world_position": {
+            "x": -13.218,
+            "y": -7.064,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -40.0,
+            "y": -42.0,
+            "width": 80.0,
+            "height": 84.0
+          },
+          "screen_point": {
+            "x": 45.2,
+            "y": 42.133
+          },
+          "adb_point": {
+            "x": 45.2,
+            "y": 677.867
+          },
+          "screen_bounds": {
+            "left": 21.2,
+            "bottom": 16.933,
+            "right": 69.2,
+            "top": 67.333
+          },
+          "adb_bounds": {
+            "left": 21.2,
+            "top": 652.667,
+            "right": 69.2,
+            "bottom": 703.067
+          }
+        }
+      },
+      {
+        "name": "gem",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 1176.167,
+          "y": 35.289
+        },
+        "bounds": {
+          "left": 992.367,
+          "top": 15.289,
+          "right": 1176.167,
+          "bottom": 55.289
+        },
+        "raw": {
+          "name": "gem",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem",
+          "canvas": "ResPanel(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -43938,
+          "world_position": {
+            "x": 11.915,
+            "y": 7.216,
+            "z": -389.985
+          },
+          "local_rect": {
+            "x": -275.7,
+            "y": -30.0,
+            "width": 275.7,
+            "height": 60.0
+          },
+          "screen_point": {
+            "x": 1176.167,
+            "y": 684.711
+          },
+          "adb_point": {
+            "x": 1176.167,
+            "y": 35.289
+          },
+          "screen_bounds": {
+            "left": 992.367,
+            "bottom": 664.711,
+            "right": 1176.167,
+            "top": 704.711
+          },
+          "adb_bounds": {
+            "left": 992.367,
+            "top": 15.289,
+            "right": 1176.167,
+            "bottom": 55.289
+          }
+        }
+      },
+      {
+        "name": "gold",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 875.133,
+          "y": 35.289
+        },
+        "bounds": {
+          "left": 783.233,
+          "top": 15.289,
+          "right": 967.033,
+          "bottom": 55.289
+        },
+        "raw": {
+          "name": "gold",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold",
+          "canvas": "ResPanel(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -43892,
+          "world_position": {
+            "x": 5.225,
+            "y": 7.216,
+            "z": -390.0
+          },
+          "local_rect": {
+            "x": -137.85,
+            "y": -30.0,
+            "width": 275.7,
+            "height": 60.0
+          },
+          "screen_point": {
+            "x": 875.133,
+            "y": 684.711
+          },
+          "adb_point": {
+            "x": 875.133,
+            "y": 35.289
+          },
+          "screen_bounds": {
+            "left": 783.233,
+            "bottom": 664.711,
+            "right": 967.033,
+            "top": 704.711
+          },
+          "adb_bounds": {
+            "left": 783.233,
+            "top": 15.289,
+            "right": 967.033,
+            "bottom": 55.289
+          }
+        }
+      },
+      {
+        "name": "oil",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 666.0,
+          "y": 35.289
+        },
+        "bounds": {
+          "left": 574.1,
+          "top": 15.289,
+          "right": 757.9,
+          "bottom": 55.289
+        },
+        "raw": {
+          "name": "oil",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil",
+          "canvas": "ResPanel(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -43842,
+          "world_position": {
+            "x": 0.578,
+            "y": 7.216,
+            "z": -389.985
+          },
+          "local_rect": {
+            "x": -137.85,
+            "y": -30.0,
+            "width": 275.7,
+            "height": 60.0
+          },
+          "screen_point": {
+            "x": 666.0,
+            "y": 684.711
+          },
+          "adb_point": {
+            "x": 666.0,
+            "y": 35.289
+          },
+          "screen_bounds": {
+            "left": 574.1,
+            "bottom": 664.711,
+            "right": 757.9,
+            "top": 704.711
+          },
+          "adb_bounds": {
+            "left": 574.1,
+            "top": 15.289,
+            "right": 757.9,
+            "bottom": 55.289
+          }
+        }
+      }
+    ]
+  },
+  "ui": {
+    "generation": 31881,
+    "method_mask": 15,
+    "skipped_count": 0,
+    "image_truncated": false,
+    "snapshot": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "semantic_schema": "alas-headless.ui/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 1614,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "schema": 1,
+      "struct_size": 1533000,
+      "generation": 31881,
+      "snapshot_monotonic_ns": 2810259967400,
+      "response_monotonic_ns": 2810279522100,
+      "age_ms": 19,
+      "method_mask": 15,
+      "toggle_count": 0,
+      "text_count": 19,
+      "image_count": 53,
+      "toggle_truncated": false,
+      "text_truncated": false,
+      "image_truncated": false,
+      "error_count": 0,
+      "skipped_count": 0,
+      "image_source_count": 4275,
+      "image_source_capacity": 16384,
+      "toggles": [],
+      "texts": [
+        {
+          "kind": "ugui-text",
+          "name": "count",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/count",
+          "text": "3/3",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": -76.754,
+            "top": 232.775,
+            "right": -56.209,
+            "bottom": 244.189
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/Text",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": -58.34,
+            "top": 426.992,
+            "right": 28.786,
+            "bottom": 471.886
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "count",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301/count",
+          "text": "0/3",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 84.414,
+            "top": 194.854,
+            "right": 110.111,
+            "bottom": 209.13
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301/Text",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 107.446,
+            "top": 437.772,
+            "right": 216.419,
+            "bottom": 493.924
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "count",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/count",
+          "text": "3/3",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 282.628,
+            "top": 156.934,
+            "right": 313.477,
+            "bottom": 174.072
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/Text",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 310.277,
+            "top": 448.553,
+            "right": 441.097,
+            "bottom": 515.962
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "count",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601/count",
+          "text": "0/3",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 530.067,
+            "top": 119.013,
+            "right": 566.067,
+            "bottom": 139.013
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601/Text",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 562.333,
+            "top": 459.333,
+            "right": 715.0,
+            "bottom": 538.0
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "count",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/501/count",
+          "text": "0/4",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 805.687,
+            "top": 156.869,
+            "right": 836.544,
+            "bottom": 174.011
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/501/Text",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 833.344,
+            "top": 448.571,
+            "right": 964.201,
+            "bottom": 516.0
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "count",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/701/count",
+          "text": "0/2",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 1037.633,
+            "top": 194.724,
+            "right": 1063.347,
+            "bottom": 209.009
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/701/Text",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 1060.681,
+            "top": 437.81,
+            "right": 1169.728,
+            "bottom": 494.0
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/101/Text",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 1251.721,
+            "top": 427.048,
+            "right": 1338.959,
+            "bottom": 472.0
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "gem_value",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem/gem_value",
+          "text": "5040",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 1048.174,
+            "top": 23.919,
+            "right": 1132.426,
+            "bottom": 44.659
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "gold_value",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/gold_value",
+          "text": "28018",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 832.057,
+            "top": 24.052,
+            "right": 921.409,
+            "bottom": 44.792
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "gold_max_value",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/gold_max_value",
+          "text": "MAX: 108300",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 834.945,
+            "top": -1.308,
+            "right": 941.433,
+            "bottom": 17.619
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "oil_value",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/oil_value",
+          "text": "6193",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 626.591,
+            "top": 24.586,
+            "right": 715.943,
+            "bottom": 45.326
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "oil_max_value",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/oil_max_value",
+          "text": "MAX: 17450",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 628.799,
+            "top": -0.961,
+            "right": 732.567,
+            "bottom": 16.606
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "FpsPanel",
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 573.333,
+            "top": 0.0,
+            "right": 706.667,
+            "bottom": 34.667
+          }
+        }
+      ],
+      "images": [
+        {
+          "kind": "image",
+          "name": "title",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/701/icon/card/title",
+          "sprite": "bingzhuangDesc",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1030.078,
+            "top": 423.704,
+            "right": 1194.322,
+            "bottom": 489.878
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "char",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/701/icon/card/mask/char",
+          "sprite": "bingzhuangChar",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1033.002,
+            "top": 199.614,
+            "right": 1197.247,
+            "bottom": 591.896
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "card",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/701/icon/card",
+          "sprite": "bingzhuangBg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1026.893,
+            "top": 182.86,
+            "right": 1200.659,
+            "bottom": 585.14
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "title",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301/icon/card/title",
+          "sprite": "haiyutujin_zi",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 76.864,
+            "top": 423.677,
+            "right": 240.996,
+            "bottom": 489.805
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "char",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301/icon/card/mask/char",
+          "sprite": "haiyutujin_renwu",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 71.024,
+            "top": 192.079,
+            "right": 244.67,
+            "bottom": 584.091
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "card",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301/icon/card",
+          "sprite": "haiyutujin",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 73.682,
+            "top": 182.999,
+            "right": 247.328,
+            "bottom": 585.001
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "title",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/501/icon/card/title",
+          "sprite": "pojiaozuozhan_zi",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 796.595,
+            "top": 431.657,
+            "right": 993.738,
+            "bottom": 511.086
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "char",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/501/icon/card/mask/char",
+          "sprite": "pojiaozuozhan_renwu",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 787.611,
+            "top": 151.838,
+            "right": 996.182,
+            "bottom": 622.695
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "card",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/501/icon/card",
+          "sprite": "pojiaozuozhan",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 792.772,
+            "top": 142.571,
+            "right": 1001.344,
+            "bottom": 625.429
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "title",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/icon/card/title",
+          "sprite": "shangchuanhuwei_zi",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -82.807,
+            "top": 415.73,
+            "right": 48.452,
+            "bottom": 468.614
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "char",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/icon/card/mask/char",
+          "sprite": "shangchuanhuwei_renwu",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -86.998,
+            "top": 232.111,
+            "right": 53.391,
+            "bottom": 504.52
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "card",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/icon/card",
+          "sprite": "shangchuanhuwei",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -85.352,
+            "top": 223.256,
+            "right": 53.516,
+            "bottom": 544.744
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "title",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601/icon/card/title",
+          "sprite": "zhanshuzuanyan_zi",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 519.489,
+            "top": 439.586,
+            "right": 749.432,
+            "bottom": 532.23
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "char",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601/icon/card/mask/char",
+          "sprite": "zhanshuzuanyan_renwu",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 515.347,
+            "top": 146.437,
+            "right": 761.285,
+            "bottom": 652.977
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "card",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601/icon/card",
+          "sprite": "zhanshuzuanyan",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 515.03,
+            "top": 102.404,
+            "right": 758.303,
+            "bottom": 665.596
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "card",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/101/icon/card",
+          "sprite": "jinqingqidai",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1224.691,
+            "top": 223.088,
+            "right": 1363.704,
+            "bottom": 544.912
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "title",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/icon/card/title",
+          "sprite": "zhanshouxingdong_zi",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 273.565,
+            "top": 431.632,
+            "right": 470.601,
+            "bottom": 511.017
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "char",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/icon/card/mask/char",
+          "sprite": "zhanshouxingdong_renwu",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 264.099,
+            "top": 168.671,
+            "right": 474.843,
+            "bottom": 639.275
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "card",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/icon/card",
+          "sprite": "zhanshouxingdong",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 269.744,
+            "top": 142.701,
+            "right": 478.203,
+            "bottom": 625.299
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "Image",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/lock/Image",
+          "sprite": "back_btn",
+          "flags": 487,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.0,
+            "green": 0.0,
+            "blue": 0.0,
+            "alpha": 0.313726
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -81.928,
+            "top": 226.68,
+            "right": 50.091,
+            "bottom": 541.32
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "lock",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/lock",
+          "sprite": "suo",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -88.776,
+            "top": 363.265,
+            "right": 56.94,
+            "bottom": 404.735
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "Image",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/lock/Image",
+          "sprite": "icon_bg_front_1920",
+          "flags": 487,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.0,
+            "green": 0.0,
+            "blue": 0.0,
+            "alpha": 0.313726
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 274.859,
+            "top": 147.782,
+            "right": 473.088,
+            "bottom": 620.218
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "lock",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/lock",
+          "sprite": "suo",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 264.576,
+            "top": 352.866,
+            "right": 483.371,
+            "bottom": 415.134
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "Image",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/title/Image",
+          "sprite": "DAILYRAID",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 169.58,
+            "top": 21.934,
+            "right": 248.25,
+            "bottom": 48.602
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "title",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/title",
+          "sprite": "meiri",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 110.53,
+            "top": 4.4,
+            "right": 183.867,
+            "bottom": 51.069
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "Image",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_button/mask/Image",
+          "sprite": "back_btn",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 23.131,
+            "top": 18.584,
+            "right": 94.469,
+            "bottom": 88.589
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "mask",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_button/mask",
+          "sprite": "icon_bg_mask_1920",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.140138,
+            "green": 0.125541,
+            "blue": 0.198529,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 11.663,
+            "top": 7.917,
+            "right": 103.67,
+            "bottom": 99.923
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "back_button",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_button",
+          "sprite": "icon_bg_front_1920",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 0.644,
+            "top": -3.103,
+            "right": 114.69,
+            "bottom": 110.943
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "line",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/line",
+          "sprite": "top_line",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.588235
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -207.859,
+            "top": 53.173,
+            "right": 1499.808,
+            "bottom": 54.507
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "print",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/print",
+          "sprite": "player_info_bg1_1920",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 98.757,
+            "top": 27.853,
+            "right": 363.91,
+            "bottom": 45.187
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "print_bg",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/print_bg",
+          "sprite": "player_info_bg2_1920",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 94.141,
+            "top": 8.921,
+            "right": 412.792,
+            "bottom": 47.586
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "print_top",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/print_top",
+          "sprite": "icon_bg_top_1920",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 56.065,
+            "top": -0.001,
+            "right": 114.069,
+            "bottom": 25.334
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "option",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/option",
+          "sprite": "viewall_1920",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1209.855,
+            "top": 2.96,
+            "right": 1271.191,
+            "bottom": 74.297
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "top_bg",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/top_bg",
+          "sprite": "top_bg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 0.067,
+            "top": 0.0,
+            "right": 1280.0,
+            "bottom": 54.686
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "icon",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/help_btn/icon",
+          "sprite": "btn_help",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 21.2,
+            "top": 652.667,
+            "right": 69.2,
+            "bottom": 703.067
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "help_btn",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/help_btn",
+          "sprite": "btn_help",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.784314
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 21.2,
+            "top": 652.667,
+            "right": 69.2,
+            "bottom": 703.067
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "arrow2",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/arrows/arrow2",
+          "sprite": "jiantou",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 21.667,
+            "top": 329.333,
+            "right": 58.333,
+            "bottom": 390.667
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "arrow1",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/arrows/arrow1",
+          "sprite": "jiantou",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1221.667,
+            "top": 329.333,
+            "right": 1258.333,
+            "bottom": 390.667
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "decorate_sign_left",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/prints/decorate_sign_left",
+          "sprite": "white_dot",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.313726
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 760.87,
+            "top": -639.756,
+            "right": 762.203,
+            "bottom": 1359.756
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "decorate_sign_top",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/prints/decorate_sign_top",
+          "sprite": "white_dot",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.313726
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -583.237,
+            "top": 664.21,
+            "right": 1896.57,
+            "bottom": 665.544
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "bg",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/bg",
+          "sprite": "technology_bg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 0.089,
+            "top": 0.05,
+            "right": 1279.911,
+            "bottom": 719.95
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "icon",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem/icon",
+          "sprite": "res_diamond",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 975.533,
+            "top": 7.889,
+            "right": 1023.0,
+            "bottom": 62.689
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "gem",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem",
+          "sprite": "res_bg_1920",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 992.367,
+            "top": 15.289,
+            "right": 1176.167,
+            "bottom": 55.289
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "max_bg2",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/max_bg2",
+          "sprite": "max_bg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 839.945,
+            "top": -0.976,
+            "right": 943.255,
+            "bottom": 17.687
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "icon",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/icon",
+          "sprite": "res_gold",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 769.1,
+            "top": 13.622,
+            "right": 813.1,
+            "bottom": 58.956
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "gold",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold",
+          "sprite": "res_bg_1920",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 783.233,
+            "top": 15.289,
+            "right": 967.033,
+            "bottom": 55.289
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "max_bg",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/max_bg",
+          "sprite": "max_bg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 633.533,
+            "top": -0.978,
+            "right": 736.867,
+            "bottom": 17.689
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "icon",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/icon",
+          "sprite": "res_oil",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 555.213,
+            "top": 6.818,
+            "right": 609.254,
+            "bottom": 66.559
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "oil",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil",
+          "sprite": "res_bg_1920",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 574.1,
+            "top": 15.289,
+            "right": 757.9,
+            "bottom": 55.289
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "top",
+          "path": "OverlayCamera/Adpter/top/top",
+          "sprite": "mask1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": -140.667,
+            "right": 1280.0,
+            "bottom": 0.0
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "left",
+          "path": "OverlayCamera/Adpter/left/left",
+          "sprite": "mask",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -140.667,
+            "top": 0.0,
+            "right": -0.0,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "bottom",
+          "path": "OverlayCamera/Adpter/bottom/bottom",
+          "sprite": "mask1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 720.0,
+            "right": 1280.0,
+            "bottom": 860.667
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "right",
+          "path": "OverlayCamera/Adpter/right/right",
+          "sprite": "mask",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1280.0,
+            "top": 0.0,
+            "right": 1420.667,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        }
+      ]
+    },
+    "toggles": [],
+    "texts": [
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/count",
+        "text": "3/3",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": -76.754,
+          "top": 232.775,
+          "right": -56.209,
+          "bottom": 244.189
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "count",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/count",
+          "text": "3/3",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": -76.754,
+            "top": 232.775,
+            "right": -56.209,
+            "bottom": 244.189
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/Text",
+        "text": "",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": -58.34,
+          "top": 426.992,
+          "right": 28.786,
+          "bottom": 471.886
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/Text",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": -58.34,
+            "top": 426.992,
+            "right": 28.786,
+            "bottom": 471.886
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301/count",
+        "text": "0/3",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 84.414,
+          "top": 194.854,
+          "right": 110.111,
+          "bottom": 209.13
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "count",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301/count",
+          "text": "0/3",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 84.414,
+            "top": 194.854,
+            "right": 110.111,
+            "bottom": 209.13
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301/Text",
+        "text": "",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 107.446,
+          "top": 437.772,
+          "right": 216.419,
+          "bottom": 493.924
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301/Text",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 107.446,
+            "top": 437.772,
+            "right": 216.419,
+            "bottom": 493.924
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/count",
+        "text": "3/3",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 282.628,
+          "top": 156.934,
+          "right": 313.477,
+          "bottom": 174.072
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "count",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/count",
+          "text": "3/3",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 282.628,
+            "top": 156.934,
+            "right": 313.477,
+            "bottom": 174.072
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/Text",
+        "text": "",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 310.277,
+          "top": 448.553,
+          "right": 441.097,
+          "bottom": 515.962
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/Text",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 310.277,
+            "top": 448.553,
+            "right": 441.097,
+            "bottom": 515.962
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601/count",
+        "text": "0/3",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 530.067,
+          "top": 119.013,
+          "right": 566.067,
+          "bottom": 139.013
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "count",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601/count",
+          "text": "0/3",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 530.067,
+            "top": 119.013,
+            "right": 566.067,
+            "bottom": 139.013
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601/Text",
+        "text": "",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 562.333,
+          "top": 459.333,
+          "right": 715.0,
+          "bottom": 538.0
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601/Text",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 562.333,
+            "top": 459.333,
+            "right": 715.0,
+            "bottom": 538.0
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/501/count",
+        "text": "0/4",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 805.687,
+          "top": 156.869,
+          "right": 836.544,
+          "bottom": 174.011
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "count",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/501/count",
+          "text": "0/4",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 805.687,
+            "top": 156.869,
+            "right": 836.544,
+            "bottom": 174.011
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/501/Text",
+        "text": "",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 833.344,
+          "top": 448.571,
+          "right": 964.201,
+          "bottom": 516.0
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/501/Text",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 833.344,
+            "top": 448.571,
+            "right": 964.201,
+            "bottom": 516.0
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/701/count",
+        "text": "0/2",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 1037.633,
+          "top": 194.724,
+          "right": 1063.347,
+          "bottom": 209.009
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "count",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/701/count",
+          "text": "0/2",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 1037.633,
+            "top": 194.724,
+            "right": 1063.347,
+            "bottom": 209.009
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/701/Text",
+        "text": "",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 1060.681,
+          "top": 437.81,
+          "right": 1169.728,
+          "bottom": 494.0
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/701/Text",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 1060.681,
+            "top": 437.81,
+            "right": 1169.728,
+            "bottom": 494.0
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/101/Text",
+        "text": "",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 1251.721,
+          "top": 427.048,
+          "right": 1338.959,
+          "bottom": 472.0
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/101/Text",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 1251.721,
+            "top": 427.048,
+            "right": 1338.959,
+            "bottom": 472.0
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "gem_value",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem/gem_value",
+        "text": "5040",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 1048.174,
+          "top": 23.919,
+          "right": 1132.426,
+          "bottom": 44.659
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "gem_value",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem/gem_value",
+          "text": "5040",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 1048.174,
+            "top": 23.919,
+            "right": 1132.426,
+            "bottom": 44.659
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "gold_value",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/gold_value",
+        "text": "28018",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 832.057,
+          "top": 24.052,
+          "right": 921.409,
+          "bottom": 44.792
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "gold_value",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/gold_value",
+          "text": "28018",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 832.057,
+            "top": 24.052,
+            "right": 921.409,
+            "bottom": 44.792
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "gold_max_value",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/gold_max_value",
+        "text": "MAX: 108300",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 834.945,
+          "top": -1.308,
+          "right": 941.433,
+          "bottom": 17.619
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "gold_max_value",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/gold_max_value",
+          "text": "MAX: 108300",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 834.945,
+            "top": -1.308,
+            "right": 941.433,
+            "bottom": 17.619
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "oil_value",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/oil_value",
+        "text": "6193",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 626.591,
+          "top": 24.586,
+          "right": 715.943,
+          "bottom": 45.326
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "oil_value",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/oil_value",
+          "text": "6193",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 626.591,
+            "top": 24.586,
+            "right": 715.943,
+            "bottom": 45.326
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "oil_max_value",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/oil_max_value",
+        "text": "MAX: 17450",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 628.799,
+          "top": -0.961,
+          "right": 732.567,
+          "bottom": 16.606
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "oil_max_value",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/oil_max_value",
+          "text": "MAX: 17450",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 628.799,
+            "top": -0.961,
+            "right": 732.567,
+            "bottom": 16.606
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "FpsPanel",
+        "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+        "text": "",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 573.333,
+          "top": 0.0,
+          "right": 706.667,
+          "bottom": 34.667
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "FpsPanel",
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 573.333,
+            "top": 0.0,
+            "right": 706.667,
+            "bottom": 34.667
+          }
+        }
+      }
+    ],
+    "images": [
+      {
+        "name": "title",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/701/icon/card/title",
+        "sprite": "bingzhuangDesc",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 1030.078,
+          "top": 423.704,
+          "right": 1194.322,
+          "bottom": 489.878
+        },
+        "raw": {
+          "kind": "image",
+          "name": "title",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/701/icon/card/title",
+          "sprite": "bingzhuangDesc",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1030.078,
+            "top": 423.704,
+            "right": 1194.322,
+            "bottom": 489.878
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "char",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/701/icon/card/mask/char",
+        "sprite": "bingzhuangChar",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 1033.002,
+          "top": 199.614,
+          "right": 1197.247,
+          "bottom": 591.896
+        },
+        "raw": {
+          "kind": "image",
+          "name": "char",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/701/icon/card/mask/char",
+          "sprite": "bingzhuangChar",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1033.002,
+            "top": 199.614,
+            "right": 1197.247,
+            "bottom": 591.896
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "card",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/701/icon/card",
+        "sprite": "bingzhuangBg",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 1026.893,
+          "top": 182.86,
+          "right": 1200.659,
+          "bottom": 585.14
+        },
+        "raw": {
+          "kind": "image",
+          "name": "card",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/701/icon/card",
+          "sprite": "bingzhuangBg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1026.893,
+            "top": 182.86,
+            "right": 1200.659,
+            "bottom": 585.14
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "title",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301/icon/card/title",
+        "sprite": "haiyutujin_zi",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 76.864,
+          "top": 423.677,
+          "right": 240.996,
+          "bottom": 489.805
+        },
+        "raw": {
+          "kind": "image",
+          "name": "title",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301/icon/card/title",
+          "sprite": "haiyutujin_zi",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 76.864,
+            "top": 423.677,
+            "right": 240.996,
+            "bottom": 489.805
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "char",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301/icon/card/mask/char",
+        "sprite": "haiyutujin_renwu",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 71.024,
+          "top": 192.079,
+          "right": 244.67,
+          "bottom": 584.091
+        },
+        "raw": {
+          "kind": "image",
+          "name": "char",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301/icon/card/mask/char",
+          "sprite": "haiyutujin_renwu",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 71.024,
+            "top": 192.079,
+            "right": 244.67,
+            "bottom": 584.091
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "card",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301/icon/card",
+        "sprite": "haiyutujin",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 73.682,
+          "top": 182.999,
+          "right": 247.328,
+          "bottom": 585.001
+        },
+        "raw": {
+          "kind": "image",
+          "name": "card",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301/icon/card",
+          "sprite": "haiyutujin",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 73.682,
+            "top": 182.999,
+            "right": 247.328,
+            "bottom": 585.001
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "title",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/501/icon/card/title",
+        "sprite": "pojiaozuozhan_zi",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 796.595,
+          "top": 431.657,
+          "right": 993.738,
+          "bottom": 511.086
+        },
+        "raw": {
+          "kind": "image",
+          "name": "title",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/501/icon/card/title",
+          "sprite": "pojiaozuozhan_zi",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 796.595,
+            "top": 431.657,
+            "right": 993.738,
+            "bottom": 511.086
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "char",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/501/icon/card/mask/char",
+        "sprite": "pojiaozuozhan_renwu",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 787.611,
+          "top": 151.838,
+          "right": 996.182,
+          "bottom": 622.695
+        },
+        "raw": {
+          "kind": "image",
+          "name": "char",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/501/icon/card/mask/char",
+          "sprite": "pojiaozuozhan_renwu",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 787.611,
+            "top": 151.838,
+            "right": 996.182,
+            "bottom": 622.695
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "card",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/501/icon/card",
+        "sprite": "pojiaozuozhan",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 792.772,
+          "top": 142.571,
+          "right": 1001.344,
+          "bottom": 625.429
+        },
+        "raw": {
+          "kind": "image",
+          "name": "card",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/501/icon/card",
+          "sprite": "pojiaozuozhan",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 792.772,
+            "top": 142.571,
+            "right": 1001.344,
+            "bottom": 625.429
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "title",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/icon/card/title",
+        "sprite": "shangchuanhuwei_zi",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -82.807,
+          "top": 415.73,
+          "right": 48.452,
+          "bottom": 468.614
+        },
+        "raw": {
+          "kind": "image",
+          "name": "title",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/icon/card/title",
+          "sprite": "shangchuanhuwei_zi",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -82.807,
+            "top": 415.73,
+            "right": 48.452,
+            "bottom": 468.614
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "char",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/icon/card/mask/char",
+        "sprite": "shangchuanhuwei_renwu",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -86.998,
+          "top": 232.111,
+          "right": 53.391,
+          "bottom": 504.52
+        },
+        "raw": {
+          "kind": "image",
+          "name": "char",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/icon/card/mask/char",
+          "sprite": "shangchuanhuwei_renwu",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -86.998,
+            "top": 232.111,
+            "right": 53.391,
+            "bottom": 504.52
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "card",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/icon/card",
+        "sprite": "shangchuanhuwei",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -85.352,
+          "top": 223.256,
+          "right": 53.516,
+          "bottom": 544.744
+        },
+        "raw": {
+          "kind": "image",
+          "name": "card",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/icon/card",
+          "sprite": "shangchuanhuwei",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -85.352,
+            "top": 223.256,
+            "right": 53.516,
+            "bottom": 544.744
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "title",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601/icon/card/title",
+        "sprite": "zhanshuzuanyan_zi",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 519.489,
+          "top": 439.586,
+          "right": 749.432,
+          "bottom": 532.23
+        },
+        "raw": {
+          "kind": "image",
+          "name": "title",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601/icon/card/title",
+          "sprite": "zhanshuzuanyan_zi",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 519.489,
+            "top": 439.586,
+            "right": 749.432,
+            "bottom": 532.23
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "char",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601/icon/card/mask/char",
+        "sprite": "zhanshuzuanyan_renwu",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 515.347,
+          "top": 146.437,
+          "right": 761.285,
+          "bottom": 652.977
+        },
+        "raw": {
+          "kind": "image",
+          "name": "char",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601/icon/card/mask/char",
+          "sprite": "zhanshuzuanyan_renwu",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 515.347,
+            "top": 146.437,
+            "right": 761.285,
+            "bottom": 652.977
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "card",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601/icon/card",
+        "sprite": "zhanshuzuanyan",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 515.03,
+          "top": 102.404,
+          "right": 758.303,
+          "bottom": 665.596
+        },
+        "raw": {
+          "kind": "image",
+          "name": "card",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601/icon/card",
+          "sprite": "zhanshuzuanyan",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 515.03,
+            "top": 102.404,
+            "right": 758.303,
+            "bottom": 665.596
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "card",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/101/icon/card",
+        "sprite": "jinqingqidai",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 1224.691,
+          "top": 223.088,
+          "right": 1363.704,
+          "bottom": 544.912
+        },
+        "raw": {
+          "kind": "image",
+          "name": "card",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/101/icon/card",
+          "sprite": "jinqingqidai",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1224.691,
+            "top": 223.088,
+            "right": 1363.704,
+            "bottom": 544.912
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "title",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/icon/card/title",
+        "sprite": "zhanshouxingdong_zi",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 273.565,
+          "top": 431.632,
+          "right": 470.601,
+          "bottom": 511.017
+        },
+        "raw": {
+          "kind": "image",
+          "name": "title",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/icon/card/title",
+          "sprite": "zhanshouxingdong_zi",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 273.565,
+            "top": 431.632,
+            "right": 470.601,
+            "bottom": 511.017
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "char",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/icon/card/mask/char",
+        "sprite": "zhanshouxingdong_renwu",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 264.099,
+          "top": 168.671,
+          "right": 474.843,
+          "bottom": 639.275
+        },
+        "raw": {
+          "kind": "image",
+          "name": "char",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/icon/card/mask/char",
+          "sprite": "zhanshouxingdong_renwu",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 264.099,
+            "top": 168.671,
+            "right": 474.843,
+            "bottom": 639.275
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "card",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/icon/card",
+        "sprite": "zhanshouxingdong",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 269.744,
+          "top": 142.701,
+          "right": 478.203,
+          "bottom": 625.299
+        },
+        "raw": {
+          "kind": "image",
+          "name": "card",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/icon/card",
+          "sprite": "zhanshouxingdong",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 269.744,
+            "top": 142.701,
+            "right": 478.203,
+            "bottom": 625.299
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/lock/Image",
+        "sprite": "back_btn",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          0.0,
+          0.0,
+          0.0,
+          0.313726
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -81.928,
+          "top": 226.68,
+          "right": 50.091,
+          "bottom": 541.32
+        },
+        "raw": {
+          "kind": "image",
+          "name": "Image",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/lock/Image",
+          "sprite": "back_btn",
+          "flags": 487,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.0,
+            "green": 0.0,
+            "blue": 0.0,
+            "alpha": 0.313726
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -81.928,
+            "top": 226.68,
+            "right": 50.091,
+            "bottom": 541.32
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "lock",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/lock",
+        "sprite": "suo",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -88.776,
+          "top": 363.265,
+          "right": 56.94,
+          "bottom": 404.735
+        },
+        "raw": {
+          "kind": "image",
+          "name": "lock",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/lock",
+          "sprite": "suo",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -88.776,
+            "top": 363.265,
+            "right": 56.94,
+            "bottom": 404.735
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/lock/Image",
+        "sprite": "icon_bg_front_1920",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          0.0,
+          0.0,
+          0.0,
+          0.313726
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 274.859,
+          "top": 147.782,
+          "right": 473.088,
+          "bottom": 620.218
+        },
+        "raw": {
+          "kind": "image",
+          "name": "Image",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/lock/Image",
+          "sprite": "icon_bg_front_1920",
+          "flags": 487,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.0,
+            "green": 0.0,
+            "blue": 0.0,
+            "alpha": 0.313726
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 274.859,
+            "top": 147.782,
+            "right": 473.088,
+            "bottom": 620.218
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "lock",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/lock",
+        "sprite": "suo",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 264.576,
+          "top": 352.866,
+          "right": 483.371,
+          "bottom": 415.134
+        },
+        "raw": {
+          "kind": "image",
+          "name": "lock",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/401/lock",
+          "sprite": "suo",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 264.576,
+            "top": 352.866,
+            "right": 483.371,
+            "bottom": 415.134
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/title/Image",
+        "sprite": "DAILYRAID",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 169.58,
+          "top": 21.934,
+          "right": 248.25,
+          "bottom": 48.602
+        },
+        "raw": {
+          "kind": "image",
+          "name": "Image",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/title/Image",
+          "sprite": "DAILYRAID",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 169.58,
+            "top": 21.934,
+            "right": 248.25,
+            "bottom": 48.602
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "title",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/title",
+        "sprite": "meiri",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 110.53,
+          "top": 4.4,
+          "right": 183.867,
+          "bottom": 51.069
+        },
+        "raw": {
+          "kind": "image",
+          "name": "title",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/title",
+          "sprite": "meiri",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 110.53,
+            "top": 4.4,
+            "right": 183.867,
+            "bottom": 51.069
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_button/mask/Image",
+        "sprite": "back_btn",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 23.131,
+          "top": 18.584,
+          "right": 94.469,
+          "bottom": 88.589
+        },
+        "raw": {
+          "kind": "image",
+          "name": "Image",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_button/mask/Image",
+          "sprite": "back_btn",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 23.131,
+            "top": 18.584,
+            "right": 94.469,
+            "bottom": 88.589
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "mask",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_button/mask",
+        "sprite": "icon_bg_mask_1920",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          0.140138,
+          0.125541,
+          0.198529,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 11.663,
+          "top": 7.917,
+          "right": 103.67,
+          "bottom": 99.923
+        },
+        "raw": {
+          "kind": "image",
+          "name": "mask",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_button/mask",
+          "sprite": "icon_bg_mask_1920",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.140138,
+            "green": 0.125541,
+            "blue": 0.198529,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 11.663,
+            "top": 7.917,
+            "right": 103.67,
+            "bottom": 99.923
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "back_button",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_button",
+        "sprite": "icon_bg_front_1920",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 0.644,
+          "top": -3.103,
+          "right": 114.69,
+          "bottom": 110.943
+        },
+        "raw": {
+          "kind": "image",
+          "name": "back_button",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_button",
+          "sprite": "icon_bg_front_1920",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 0.644,
+            "top": -3.103,
+            "right": 114.69,
+            "bottom": 110.943
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "line",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/line",
+        "sprite": "top_line",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          0.588235
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -207.859,
+          "top": 53.173,
+          "right": 1499.808,
+          "bottom": 54.507
+        },
+        "raw": {
+          "kind": "image",
+          "name": "line",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/line",
+          "sprite": "top_line",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.588235
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -207.859,
+            "top": 53.173,
+            "right": 1499.808,
+            "bottom": 54.507
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "print",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/print",
+        "sprite": "player_info_bg1_1920",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 98.757,
+          "top": 27.853,
+          "right": 363.91,
+          "bottom": 45.187
+        },
+        "raw": {
+          "kind": "image",
+          "name": "print",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/print",
+          "sprite": "player_info_bg1_1920",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 98.757,
+            "top": 27.853,
+            "right": 363.91,
+            "bottom": 45.187
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "print_bg",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/print_bg",
+        "sprite": "player_info_bg2_1920",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 94.141,
+          "top": 8.921,
+          "right": 412.792,
+          "bottom": 47.586
+        },
+        "raw": {
+          "kind": "image",
+          "name": "print_bg",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/print_bg",
+          "sprite": "player_info_bg2_1920",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 94.141,
+            "top": 8.921,
+            "right": 412.792,
+            "bottom": 47.586
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "print_top",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/print_top",
+        "sprite": "icon_bg_top_1920",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 56.065,
+          "top": -0.001,
+          "right": 114.069,
+          "bottom": 25.334
+        },
+        "raw": {
+          "kind": "image",
+          "name": "print_top",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/print_top",
+          "sprite": "icon_bg_top_1920",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 56.065,
+            "top": -0.001,
+            "right": 114.069,
+            "bottom": 25.334
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "option",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/option",
+        "sprite": "viewall_1920",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 1209.855,
+          "top": 2.96,
+          "right": 1271.191,
+          "bottom": 74.297
+        },
+        "raw": {
+          "kind": "image",
+          "name": "option",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/option",
+          "sprite": "viewall_1920",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1209.855,
+            "top": 2.96,
+            "right": 1271.191,
+            "bottom": 74.297
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "top_bg",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/top_bg",
+        "sprite": "top_bg",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 0.067,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 54.686
+        },
+        "raw": {
+          "kind": "image",
+          "name": "top_bg",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/top_bg",
+          "sprite": "top_bg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 0.067,
+            "top": 0.0,
+            "right": 1280.0,
+            "bottom": 54.686
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/help_btn/icon",
+        "sprite": "btn_help",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 21.2,
+          "top": 652.667,
+          "right": 69.2,
+          "bottom": 703.067
+        },
+        "raw": {
+          "kind": "image",
+          "name": "icon",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/help_btn/icon",
+          "sprite": "btn_help",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 21.2,
+            "top": 652.667,
+            "right": 69.2,
+            "bottom": 703.067
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "help_btn",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/help_btn",
+        "sprite": "btn_help",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          0.784314
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 21.2,
+          "top": 652.667,
+          "right": 69.2,
+          "bottom": 703.067
+        },
+        "raw": {
+          "kind": "image",
+          "name": "help_btn",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/help_btn",
+          "sprite": "btn_help",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.784314
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 21.2,
+            "top": 652.667,
+            "right": 69.2,
+            "bottom": 703.067
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "arrow2",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/arrows/arrow2",
+        "sprite": "jiantou",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 21.667,
+          "top": 329.333,
+          "right": 58.333,
+          "bottom": 390.667
+        },
+        "raw": {
+          "kind": "image",
+          "name": "arrow2",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/arrows/arrow2",
+          "sprite": "jiantou",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 21.667,
+            "top": 329.333,
+            "right": 58.333,
+            "bottom": 390.667
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "arrow1",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/arrows/arrow1",
+        "sprite": "jiantou",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 1221.667,
+          "top": 329.333,
+          "right": 1258.333,
+          "bottom": 390.667
+        },
+        "raw": {
+          "kind": "image",
+          "name": "arrow1",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/arrows/arrow1",
+          "sprite": "jiantou",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1221.667,
+            "top": 329.333,
+            "right": 1258.333,
+            "bottom": 390.667
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "decorate_sign_left",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/prints/decorate_sign_left",
+        "sprite": "white_dot",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          0.313726
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 760.87,
+          "top": -639.756,
+          "right": 762.203,
+          "bottom": 1359.756
+        },
+        "raw": {
+          "kind": "image",
+          "name": "decorate_sign_left",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/prints/decorate_sign_left",
+          "sprite": "white_dot",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.313726
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 760.87,
+            "top": -639.756,
+            "right": 762.203,
+            "bottom": 1359.756
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "decorate_sign_top",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/prints/decorate_sign_top",
+        "sprite": "white_dot",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          0.313726
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -583.237,
+          "top": 664.21,
+          "right": 1896.57,
+          "bottom": 665.544
+        },
+        "raw": {
+          "kind": "image",
+          "name": "decorate_sign_top",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/prints/decorate_sign_top",
+          "sprite": "white_dot",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.313726
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -583.237,
+            "top": 664.21,
+            "right": 1896.57,
+            "bottom": 665.544
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/bg",
+        "sprite": "technology_bg",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 0.089,
+          "top": 0.05,
+          "right": 1279.911,
+          "bottom": 719.95
+        },
+        "raw": {
+          "kind": "image",
+          "name": "bg",
+          "path": "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/bg",
+          "sprite": "technology_bg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 0.089,
+            "top": 0.05,
+            "right": 1279.911,
+            "bottom": 719.95
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem/icon",
+        "sprite": "res_diamond",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 975.533,
+          "top": 7.889,
+          "right": 1023.0,
+          "bottom": 62.689
+        },
+        "raw": {
+          "kind": "image",
+          "name": "icon",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem/icon",
+          "sprite": "res_diamond",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 975.533,
+            "top": 7.889,
+            "right": 1023.0,
+            "bottom": 62.689
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "gem",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem",
+        "sprite": "res_bg_1920",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 992.367,
+          "top": 15.289,
+          "right": 1176.167,
+          "bottom": 55.289
+        },
+        "raw": {
+          "kind": "image",
+          "name": "gem",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gem",
+          "sprite": "res_bg_1920",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 992.367,
+            "top": 15.289,
+            "right": 1176.167,
+            "bottom": 55.289
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "max_bg2",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/max_bg2",
+        "sprite": "max_bg",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 839.945,
+          "top": -0.976,
+          "right": 943.255,
+          "bottom": 17.687
+        },
+        "raw": {
+          "kind": "image",
+          "name": "max_bg2",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/max_bg2",
+          "sprite": "max_bg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 839.945,
+            "top": -0.976,
+            "right": 943.255,
+            "bottom": 17.687
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/icon",
+        "sprite": "res_gold",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 769.1,
+          "top": 13.622,
+          "right": 813.1,
+          "bottom": 58.956
+        },
+        "raw": {
+          "kind": "image",
+          "name": "icon",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/icon",
+          "sprite": "res_gold",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 769.1,
+            "top": 13.622,
+            "right": 813.1,
+            "bottom": 58.956
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "gold",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold",
+        "sprite": "res_bg_1920",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 783.233,
+          "top": 15.289,
+          "right": 967.033,
+          "bottom": 55.289
+        },
+        "raw": {
+          "kind": "image",
+          "name": "gold",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold",
+          "sprite": "res_bg_1920",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 783.233,
+            "top": 15.289,
+            "right": 967.033,
+            "bottom": 55.289
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "max_bg",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/max_bg",
+        "sprite": "max_bg",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 633.533,
+          "top": -0.978,
+          "right": 736.867,
+          "bottom": 17.689
+        },
+        "raw": {
+          "kind": "image",
+          "name": "max_bg",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/max_bg",
+          "sprite": "max_bg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 633.533,
+            "top": -0.978,
+            "right": 736.867,
+            "bottom": 17.689
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/icon",
+        "sprite": "res_oil",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 555.213,
+          "top": 6.818,
+          "right": 609.254,
+          "bottom": 66.559
+        },
+        "raw": {
+          "kind": "image",
+          "name": "icon",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/icon",
+          "sprite": "res_oil",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 555.213,
+            "top": 6.818,
+            "right": 609.254,
+            "bottom": 66.559
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "oil",
+        "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil",
+        "sprite": "res_bg_1920",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 574.1,
+          "top": 15.289,
+          "right": 757.9,
+          "bottom": 55.289
+        },
+        "raw": {
+          "kind": "image",
+          "name": "oil",
+          "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil",
+          "sprite": "res_bg_1920",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 574.1,
+            "top": 15.289,
+            "right": 757.9,
+            "bottom": 55.289
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "top",
+        "path": "OverlayCamera/Adpter/top/top",
+        "sprite": "mask1",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -0.0,
+          "top": -140.667,
+          "right": 1280.0,
+          "bottom": 0.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "top",
+          "path": "OverlayCamera/Adpter/top/top",
+          "sprite": "mask1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": -140.667,
+            "right": 1280.0,
+            "bottom": 0.0
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "left",
+        "path": "OverlayCamera/Adpter/left/left",
+        "sprite": "mask",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -140.667,
+          "top": 0.0,
+          "right": -0.0,
+          "bottom": 720.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "left",
+          "path": "OverlayCamera/Adpter/left/left",
+          "sprite": "mask",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -140.667,
+            "top": 0.0,
+            "right": -0.0,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "bottom",
+        "path": "OverlayCamera/Adpter/bottom/bottom",
+        "sprite": "mask1",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -0.0,
+          "top": 720.0,
+          "right": 1280.0,
+          "bottom": 860.667
+        },
+        "raw": {
+          "kind": "image",
+          "name": "bottom",
+          "path": "OverlayCamera/Adpter/bottom/bottom",
+          "sprite": "mask1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 720.0,
+            "right": 1280.0,
+            "bottom": 860.667
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "right",
+        "path": "OverlayCamera/Adpter/right/right",
+        "sprite": "mask",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 1280.0,
+          "top": 0.0,
+          "right": 1420.667,
+          "bottom": 720.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "right",
+          "path": "OverlayCamera/Adpter/right/right",
+          "sprite": "mask",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1280.0,
+            "top": 0.0,
+            "right": 1420.667,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        }
+      }
+    ],
+    "image_source_count": 4275,
+    "image_source_capacity": 16384
+  }
+}

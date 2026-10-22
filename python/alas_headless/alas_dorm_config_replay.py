@@ -314,7 +314,7 @@ def _verify_contract() -> tuple[int, int]:
                 feed=feed,
                 feed_filter=text,
             )
-            if snapshot.feed_order != order:
+            if snapshot.feed_order != (order if feed else ()):
                 raise AssertionError("Dorm accepted configuration drifted")
         order_count += 1
     invalid_count = 0

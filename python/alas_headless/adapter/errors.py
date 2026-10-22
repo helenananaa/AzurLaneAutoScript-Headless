@@ -45,6 +45,14 @@ class StaleFrameError(AdapterContractError):
     safe_message = "semantic frame is absent, stale, or invalidated"
 
 
+class ExpiredFrameError(StaleFrameError):
+    """An otherwise valid lease exceeded its input-time freshness limit."""
+
+    def __init__(self, generation: int) -> None:
+        self.generation = generation
+        super().__init__()
+
+
 class CapabilityClosureError(AdapterContractError):
     """The exact task profile lacks required observation or recovery closure."""
 
@@ -64,3 +72,10 @@ class ActionLeaseError(AdapterContractError):
 
     code = "action-lease"
     safe_message = "semantic action lease is invalid"
+
+
+class ActionGrantExhausted(ActionLeaseError):
+    """An open ledger has no remaining grant; no input was attempted."""
+
+    code = "action-grant-exhausted"
+    safe_message = "semantic task action grant is exhausted"

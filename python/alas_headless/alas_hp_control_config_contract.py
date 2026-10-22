@@ -13,11 +13,11 @@ class AlasHpControlConfigSnapshot:
     use_hp_balance: bool
     use_emergency_repair: bool
     use_low_hp_retreat: bool
-    hp_balance_threshold: float
+    hp_balance_threshold: float | None
     hp_balance_weight: tuple[int, int, int]
-    repair_use_single_threshold: float
-    repair_use_multi_threshold: float
-    low_hp_retreat_threshold: float
+    repair_use_single_threshold: float | None
+    repair_use_multi_threshold: float | None
+    low_hp_retreat_threshold: float | None
 
 
 def _boolean(name: str, value: object) -> bool:
@@ -67,40 +67,28 @@ def validate_alas_hp_control_config(
     repair_use_multi_threshold: object,
     low_hp_retreat_threshold: object,
 ) -> AlasHpControlConfigSnapshot:
-    """Validate all values, then refuse branches lacking final semantic input."""
+    """Validate values; unsupported input branches fail at their owning port."""
 
+    balance = _boolean("HpControl_UseHpBalance", use_hp_balance)
+    repair = _boolean("HpControl_UseEmergencyRepair", use_emergency_repair)
+    retreat = _boolean("HpControl_UseLowHpRetreat", use_low_hp_retreat)
     snapshot = AlasHpControlConfigSnapshot(
-        use_hp_balance=_boolean("HpControl_UseHpBalance", use_hp_balance),
-        use_emergency_repair=_boolean(
-            "HpControl_UseEmergencyRepair", use_emergency_repair
-        ),
-        use_low_hp_retreat=_boolean(
-            "HpControl_UseLowHpRetreat", use_low_hp_retreat
-        ),
+        use_hp_balance=balance,
+        use_emergency_repair=repair,
+        use_low_hp_retreat=retreat,
         hp_balance_threshold=_ratio(
             "HpControl_HpBalanceThreshold", hp_balance_threshold
-        ),
+        ) if balance else None,
+        # hp_get uses weights even with every HP-control switch disabled.
         hp_balance_weight=_weights(hp_balance_weight),
         repair_use_single_threshold=_ratio(
             "HpControl_RepairUseSingleThreshold", repair_use_single_threshold
-        ),
+        ) if repair else None,
         repair_use_multi_threshold=_ratio(
             "HpControl_RepairUseMultiThreshold", repair_use_multi_threshold
-        ),
+        ) if repair else None,
         low_hp_retreat_threshold=_ratio(
             "HpControl_LowHpRetreatThreshold", low_hp_retreat_threshold
-        ),
+        ) if retreat else None,
     )
-    if snapshot.use_hp_balance:
-        raise SemanticGateClosed(
-            "HP balance requires an unqualified scout-position drag"
-        )
-    if snapshot.use_emergency_repair:
-        raise SemanticGateClosed(
-            "emergency repair requires unqualified combat template input"
-        )
-    if snapshot.use_low_hp_retreat:
-        raise SemanticGateClosed(
-            "low-HP retreat reaches an unqualified campaign withdrawal loop"
-        )
     return snapshot

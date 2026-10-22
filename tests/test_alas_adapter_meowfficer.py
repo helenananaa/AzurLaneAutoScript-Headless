@@ -75,7 +75,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         oracle.click_meowfficer_fort_chore.assert_called_once_with(path)
 
     def test_meowfficer_purchase_uses_exact_selected_count_and_postconditions(self):
-        adapter, oracle, gate_calls = self.make_adapter()
+        adapter, oracle, gate_calls = self.make_adapter(shop_purchase_budget=1)
         before = SimpleNamespace(
             purchased=0,
             purchase_total=15,

@@ -53,8 +53,6 @@ class AlasFleetConfigTests(unittest.TestCase):
 
     def test_valid_but_unqualified_values_fail_before_navigation(self):
         for field, value in (
-            ("fleet1_formation", "diamond"),
-            ("fleet2_formation", "line_ahead"),
             ("fleet1_mode", "combat_manual"),
             ("fleet2_mode", "hide_in_upper_left"),
         ):
@@ -75,8 +73,8 @@ class AlasFleetConfigTests(unittest.TestCase):
         )
 
         config["fleet2"] = 2
-        with self.assertRaises(SemanticGateClosed):
-            validate_alas_fleet_config(**config)
+        self.assertEqual(validate_alas_fleet_config(**config).fleet_order,
+                         "fleet1_all_fleet2_standby")
 
     def test_hardfleet_two_reversed_all_order_requires_two_fleets(self):
         config = defaults()

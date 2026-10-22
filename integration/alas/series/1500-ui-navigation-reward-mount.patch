@@ -1,0 +1,13 @@
+diff --git a/module/ui/ui.py b/module/ui/ui.py
+--- a/module/ui/ui.py
++++ b/module/ui/ui.py
+@@ -301,7 +301,8 @@
+                         except SemanticInputBlocked as exc:
+                             if not (exc.blockers == ('bulletin',) or
+                                     (exc.semantic_id == 'os/page/back'
+-                                     and exc.blockers == ('opsi-exit',))):
++                                     and exc.blockers in (('opsi-exit',), ('award-info',),
++                                                          ('award-info1',), ('ship-exp',)))):
+                                 raise
+                             # No navigation input was sent. A reviewed overlay
+                             # may mount after the native screenshot. Refresh

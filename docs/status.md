@@ -1,5 +1,19 @@
 # Validation status
 
+2026-09-13: Shipyard level parsing now tolerates numeric font-size metadata and plain text. 79 focused/isolation tests passed; original helpers observed 11 ships across series 2 and 7, restored series 9 and returned home. No actual FATE panel was found; Shipyard stays B. See [scope](shipyard-fate-survey-20260913.zh-CN.md).
+
+2026-09-13: Login shipyard home mapping fixed. Original LoginHandler shipyard return and subsequent original navigation to main passed live; cold-start notice trigger chain was not rerun. 99 focused checks passed; five pre-existing facade call-sequence parity failures remain. See [evidence](login-shipyard-recovery-20260913.zh-CN.md).
+
+2026-09-13: Native PrivateQuarters selection, entry and three interactions executed; final exit failed the original alias-based click watchdog. Concrete control identity fix and focused replay passed; full continuous qualification stays open. See [scope](private-quarters-native-20260913.zh-CN.md). Research exhausted-reset observation also added; no reset input qualified.
+
+2026-09-13: Research multi-resource confirmation and fresh-frame complete-cost comparison passed 104 focused/shared checks and original start/queue offline contract replay. Live navigation returned to main without spending; no suitable new dual-resource card was present. Actual consumption and full-task qualification remain open. See [scope](research-dual-resource-20260913.zh-CN.md).
+
+2026-09-13: Offline original-ALAS full-dock combat, delayed equipment deselection,
+and inherited retirement recovery passed on the rebuilt 114-member patch tree.
+Live uninterrupted qualification remains open. See [offline scope and evidence](campaign-midmap-offline-20260913.zh-CN.md).
+
+2026-09-13: Natural mid-map full dock recovered in separate processes: 79 ships retired, equipment preserved, one same-map continuation battle and withdrawal passed. The uninterrupted chain remains unqualified. See [live assessment](campaign-midmap-recovery-20260913.zh-CN.md).
+
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-09-08
@@ -130,6 +144,329 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   attempted. This promotes only the local Project resource-update and empty
   login boundary, not ALAS workload, recovery, rollback, soak or native-Linux
   Redroid qualification.
+For the current 60-panel work queue and re-entry conditions, see the
+[adaptation task board](alas-adaptation-task-board.zh-CN.md).
+
+## 2026-09-12
+
+Shipyard series selection now waits for actionable choices and proves the
+requested selected series. The installed x64 observer verifies exact integer
+series-control hits. Original UI passed series 9→1→9, Neptune DEV 30/30 plus
+separate fate-stage V (8 blueprints), restoration of Takahashi and main return.
+A navbar FATE badge no longer mislabels the visible DEV pane. Session recovery
+now reclassifies an exact research menu after its existing frame refresh;
+earlier failed returns remain failed. 117 focused/shared checks passed.
+Actual FATE-pane input and strengthening remain unqualified. See
+[scope and receipts](shipyard-series-20260912.zh-CN.md).
+
+Research then passed a bounded natural-completion continuation: one finished
+project claimed, G-412-MI selected by original UseCoin=only_no_project enforcement,
+1500 gold consumed, queueing and scheduling completed. Retained Research-page
+navigation no longer requires an active Research task; original UI independently
+returned to main. Final shared regression: 118 passed. Final resources:
+5040 gems, 6193 oil, 31458 gold. This does not qualify unattended long-running work.
+
+Further Research work passed the part only_05_hour enforcement fallback:
+Q-202-MI, 20 T2 general parts, queueing and original scheduling. Shipyard ship
+selection now requires actual top-raycast proof and coherent input frames;
+the installed x64 observer qualifies integer card hits. Original ShipyardUI
+read Duncan DEV 15/30 and Valparaiso DEV 10/30 (two blueprints each), restored
+the in-progress Takahashi selection and returned to main without spending.
+94 focused/shared checks passed. FATE, series switching and complete Shipyard
+consumption remain unqualified. See [scope and receipts](research-shipyard-next-20260912.zh-CN.md).
+
+Research now acknowledges a completed menu-to-lab transition from its actual
+entry receipt and fresh typed destination after the short transition grace
+expires. Two bounded original tasks passed: cube only_05_hour fell through the
+original enforce branch to one-hour H-387-MI (3 cubes), and part only_no_project
+selected Q-368-MI (20 T1 anti-aircraft parts). Both queued and returned with
+original scheduling; the first also claimed three completed projects.
+An actual Shipyard progress notification exposed a further return-to-main
+blocker. Its exact two-button ports now let original UI recovery confirm the
+notice, visit Shipyard and return to an unobscured main page; the final separate
+recovery receipt passed. Earlier interrupted/failed navigation attempts remain
+failed. 122 focused/shared checks passed; no strengthening or purchase occurred.
+Natural half-hour paths, dual-resource confirmation, reset and unattended
+cross-round operation remain unqualified. See [scope and receipts](research-continuation-20260912.zh-CN.md).
+
+Shipyard now reads the selected in-progress ship without mixing development
+levels into blueprint inventory or inventing a missing level. Takahashi/50
+blueprints and the original cannot-strengthen helper passed twice, including
+re-entry and return to main; duplicate entry sent zero new input. Purchase and
+strengthening workflows remain unqualified. See [state evidence](shipyard-state-20260912.zh-CN.md).
+
+Daily navigation now survives stale source-frame entry retries and owns its
+page-registry sweep without an unrelated Dock flow. Two original main/Daily/main
+round trips passed in one process; each explicit duplicate request sent zero
+extra input. 67 focused checks passed, resources stayed unchanged, and locked
+challenge types were not executed. See [navigation evidence](daily-navigation-20260912.zh-CN.md).
+
+PrivateQuarters now has typed overview/count ports, an original disabled-action
+branch and New Jersey collider input. The original three-interaction loop ran,
+but a favor-level-3 popup blocked final room exit and ALAS timed out. Recovery
+confirmed 0/3 remaining and returned to main; this is segmented evidence, not a
+complete TargetInteract task pass. IK/watch/base back controls passed live
+checks; level-up dismissal, gifts, shop and other characters remain unqualified.
+96 focused checks passed. See [interaction evidence](private-quarters-physics-20260912.zh-CN.md)
+and the [earlier overview scope](private-quarters-20260912.zh-CN.md).
+
+Research-menu entry now survives ALAS's fading-main duplicate click. Two
+consecutive original UI round trips passed, with exactly one actual entry input
+per round; round two naturally repeated the entry request with zero extra input.
+45 focused checks and Research configuration verification passed. See
+[navigation evidence](research-navigation-20260912.zh-CN.md).
+
+META reward follow-up corrected the page identity: WorldBoss reward preview is
+not MetaCharacterUI. The original MetaReward pending-sync branch now finishes
+without timeout on actual 1830/2000 typed progress. Ready/unknown reward phases
+fail locally instead of becoming false no-reward reports. Actual claiming and
+the complete assist-to-sync-page task remain unqualified. See
+[page correction and live scope](meta-reward-page-20260912.zh-CN.md).
+
+Daily quick execution now has two real batch receipts (Tactical first and Fierce
+first, each 3→0), with segmented award recovery. The observer row pivot and
+Daily award ownership/blocking bugs are fixed. META consumed 3 assists; its last
+original battle completed uninterrupted from 1→0 through result and list return.
+Earlier attempts retain transition failures. Zero-attempt original task returned
+and scheduled tomorrow, but MetaReward reported no reward after a page wait
+timeout, so actual reward-marker/claim support remains unqualified. No oil or
+premium currency consumed. See [scope and evidence](daily-meta-live-20260912.zh-CN.md).
+
+## 2026-09-11
+
+### Daily quick and META assist boundary repairs
+
+Daily gains identity-based remaining counts, reviewed return navigation and
+top-raycast-checked quick input. META gains task ownership, typed page/counter
+ports and archive-to-current navigation. The installed x64 observer proves the
+two archive navigation hits; original META zero-attempt helper passes at 0/3.
+Daily quick consumption and full META combat/reward remain unqualified; today's
+Daily eligible attempts were exhausted or closed. No battle/attempt consumption
+in this round. See [scope and live evidence](daily-meta-boundaries-20260911.zh-CN.md).
+
+### Evening mid-map dock recovery: partial qualification
+
+At 929/930 dock occupancy, two original Main battles naturally triggered full
+dock. A stale-frame popup classification failed before retirement; that race
+is fixed. A later transaction retired 72 ships (930→858), then stopped on an
+early equipment-deselection check; delayed deselection now waits without a
+second toggle. All 115 equipment items went through preserve confirmation.
+Original Main resumed the retained map, won one battle and withdrew with
+RunCount 0 and scheduler off. Total 106 oil, three battles, no premium spending.
+80 focused and 20 retirement checks pass. These are separate processes, so the
+uninterrupted chain remains unqualified. See
+[receipts and next natural trigger](campaign-midmap-recovery-20260911.zh-CN.md).
+
+### Archive empty movement followed by combat
+
+Original WarArchives entered war_archives_20190321_en A1, moved fleet 2 through C1 to
+empty C2 with unchanged ammo/count, switched to fleet 1, won one C3 battle,
+read HP from a refreshed screenshot frame and withdrew. RunCount 0, scheduler
+off; final receipt passed. The final run used 79 oil and 5 keys. This qualifies
+the bounded movement/combat/withdrawal path, not Boss clear or all archives.
+111 patch members apply and compile on clean pinned upstream; login/frame/pixel
+checks, 253 focused tests and 49 integration checks pass. See
+[scope, costs and retained failures](campaign-empty-movement-20260911.zh-CN.md).
+
+### Sparse inherited-precombat recovery
+
+A fresh original Main process recovered fleet 6 (2 main + 2 vanguard) on 10-2
+without a preparation record, won one battle and withdrew to the chapter page.
+Native hero owners, precombat portraits and map portraits establish the fleet
+identity; later HP and level reads recheck it in the current frame. RunCount 0,
+scheduler off, two empty slots preserved. Total cost including setup: 42 oil,
+one battle, no repair or retirement. Map-only restart without this identity and
+other sparse configurations remain unqualified. See
+[scope and receipts](campaign-sparse-resume-20260911.zh-CN.md).
+
+## 2026-09-09
+
+### Natural low HP and pre-sortie full-dock recovery
+
+Original Main recovered a real full-dock popup above normal sortie preparation,
+retired 95 ships through existing official one-click settings (930→835, equipment
+preserved), then completed two battles and naturally triggered enabled low-HP
+retreat at the default 0.3 threshold (minimum 21.89%). RunCount 0, scheduler off,
+main restored; final dock 836/930. Cost: 74 oil, no repair or premium spending.
+The inherited-popup startup hook reuses original ALAS retirement/loop methods;
+ordinary preparation underlays now permit the exact organize/enhance ports.
+110 patch members and 120 focused tests pass. Mid-map dock-full same-map
+continuation is a distinct unqualified variant. See [scope and receipts](campaign-natural-hp-dock-20260909.zh-CN.md).
+
+### Sparse fleet live observation
+
+Fleet 6 with two main ships and two vanguard ships passed original Main entry,
+map HP/presence/levels, precombat HP/presence and withdrawal on 10-2 without
+battle. Empty slots remained false, levels were 120/119/0/123/118/0, RunCount
+became 0 and scheduler disabled. Fixed cross-frame sparse-level reads and
+level-label ownership when the glyph box extends above its portrait. Original
+return to main completed. 180 related tests pass. Three entries consumed 30 oil;
+no battle or repair occurred. Other sparse configurations and sparse combat
+remain unqualified. See [sparse live evidence](campaign-sparse-live-20260909.zh-CN.md).
+
+### Cancelled-precombat re-entry
+
+Original Main re-entered the same B6 enemy after cancelling preparation on
+10-2, then withdrew with RunCount 0 and scheduler off. The retained action
+marker is now accepted only for one exact enemy co-located with the uniquely
+selected fleet; active preparation/combat still blocks map input. Unrelated
+busy markers do not deny this local capability. 243 focused regressions pass.
+A typed dock roundtrip found 914/930 slots used. All fleets are full according
+to the user, so sparse live verification awaits manual setup. This batch used
+10 oil, zero battles and zero repair items; final state is main.
+See [re-entry evidence](campaign-reentry-20260909.zh-CN.md).
+
+### HP followthrough and navigation
+
+Fresh single-process Main qualification passed: fleet 6 on 10-2, one battle,
+one repair (stock 3→2 and HP restored), original withdrawal and scheduler off.
+Original UI main→chapter→main roundtrip also passed with four typed navigation
+inputs. Known campaign-menu frames now own page enumeration; absent event-list
+and reward probes no longer require unrelated task contexts. Login waits for
+its bulletin to close before accepting the main underlay as complete.
+Sparse Campaign HP/presence/levels are implemented with preparation-count
+correlation and offline coverage; sparse live operation remains unqualified.
+295 related tests pass. This batch consumed one battle, 42 oil and one repair.
+See [scope and evidence](campaign-hp-followthrough-20260909.zh-CN.md).
+
+### Nonzero emergency repair continuation
+
+Original Main resumed the retained 10-2 map with fleet 6 (Vestal) and completed
+one repair: stock 3→2, damaged scout HP 99%/99.34%/98.44%→100%, then original
+withdrawal, RunCount 1→0 and scheduler disabled. Fixed the session observation
+and action routing that wrongly sent repair confirmation through generic combat
+handling; bounded read-only refresh tolerates precombat entry animation.
+151 related tests pass. Across all development attempts: five battles, 210 oil,
+one repair item. The fresh-sortie single-process path, sparse fleets and natural
+default-threshold activation remain unqualified. See [evidence and failures](campaign-repair-nonzero-20260909.zh-CN.md).
+
+### Campaign scout insertion continuation
+
+Original HPBalancer moved scout slot 2 to 0 and restored 0 to 2 on 10-2, with
+fresh typed postconditions and no battle. The first swap-model attempt failed
+and was recovered; it is not qualification evidence. The series now has 109
+members. Main is observed after withdrawal, but original goto_main ended with
+an EVENT_LIST_CHECK unmapped error. Nonzero repair awaits manual repair-ship
+assignment; sparse fleets remain unqualified. See [continuation evidence](campaign-scout-20260909.zh-CN.md).
+
+### Campaign HP control and routine handoff (earlier batch)
+
+Original Main completed a 10-2 battle followed by low-HP withdrawal at the
+temporary 1.0 threshold: six occupied ships, typed damage, original withdrawal,
+chapter return, RunCount 1→0 and scheduler disabled. Emergency repair's zero-stock
+branch and an inspect/cancel round trip passed. A subsequent original Reward run
+collected oil/coins/EXP books; a separate same-process fault→main→Reward handoff
+passed with four navigation inputs and released task/frame contexts.
+Nonzero repair consumption, actual scout-position dragging and broader HP/fleet
+combinations remain unqualified. The fixed series has 108 members; 639 focused
+and shared-adapter tests pass. See [scope, evidence and retained failures](campaign-hp-control-20260909.zh-CN.md).
+
+Final submarine closeout: one-grid Boss deployment and the latest call/exit
+fixes passed a complete 10-2 Main run, fleet (2,1,2), boss_only and standby.
+G1 deployment, H1 call and one settlement exit completed; RunCount 1→0 and
+scheduler disabled. Receipt: `integration/alas/submarine-one-grid-final-live-20260909-r2.json`.
+Current code passes 290 focused tests. Final typed read: ordinary stage page,
+PID 17018, oil 11938, no retained result or active validation process.
+The remaining one-grid/latest-exit closeout items are complete. Earlier
+failed runs remain failed; support is evidence-scoped, not all combinations.
+
+Earlier: original Main passed a complete 10-2 sortie using submarine fleet 2,
+hunt_and_boss, 2_grid_to_boss and standby. Six mob battles, G2 deployment,
+H1 Boss call and settlement exit completed with RunCount 1→0 and scheduler
+disabled. Receipt: `integration/alas/submarine-hunt-main-live-20260909-r7.json`.
+The fixed series now has 107 members; patch-tree, login, frame and pixel checks
+pass. Direct deployment onto Boss H6 and a subsequent call also have live
+receipts. That separate run clicked settlement exit, then rejected a duplicate
+exit while its old animation frame remained visible; it is still marked failed.
+The duplicate-exit race is fixed with one-shot receipt handling and focused
+coverage. The final live read proved the ordinary stage page, oil 12488, PID
+17018. That historical one-grid qualification gap is now closed by the final
+receipt above; these results are not blanket qualification for all stages.
+See [current evidence](campaign-submarine-ocean-20260909.zh-CN.md).
+
+## 2026-09-08
+
+Original Campaign SubmarineCall completed four battle-correlated manual calls
+on a single 10-2 standby AUTO run. Stable typed submarine ammo moved 3/6→2/6
+across a recorded call; original Main completed and disabled its run counter.
+Original submarine_goto also completed E3→E2 through the game's 4-oil prompt,
+proved the same submarine at E2, then restored the stage page. The fixed series
+has 104 members with patch-tree, login, frame and pixel verification.
+Boss-distance planning, open-ocean support and full manual-map submarine
+execution remain live-incomplete. The client now explicitly reports server
+maintenance; original LoginHandler stops on its two-button variant without
+input. User confirmed no open-ocean skill ship is currently assigned.
+See [receipts, fixes and re-entry scope](campaign-submarine-call-20260908.zh-CN.md).
+
+## 2026-09-07
+
+### Campaign submarine preparation, strategy and call-port progress
+
+Pinned 101-member integration now accepts active submarine configuration,
+proves submarine preparation/oil and AUTO duty selection, and projects the
+submarine separately from surface fleets. Original Main completed 12-4
+auto-call-mode and 10-2 standby sorties; these do not prove actual calls.
+Hunt/view switches completed a live round trip. The dynamic combat-call
+Oracle boundary has focused coverage, but its new observer is not installed
+and original SubmarineCall integration, movement and open-ocean support remain
+unfinished. See [evidence and remaining work](campaign-submarine-progress-20260907.zh-CN.md).
+
+### Original AUTO Continue and retirement handler closure
+
+Original Main passed two 3-1 normal sorties using PREP then actual ButtonGO,
+with Boss/mob duties on fleets (2,1,0), books 563→562→561 and RunCount 2→0.
+Original FastForward sets the AUTO checkbox; no second fleet preparation or
+adapter-owned task loop replaces ALAS's continuation decision. Original
+retirement handler passed one complete 8-ship transaction, equipment
+preservation, return to its build-page predecessor and DOCK_FULL_TRIGGERED.
+Natural dock-full → retirement → map-resume combined live evidence remains
+condition-dependent; no deliberate dock filling was performed. Final main-page
+oil 9711, gems 5040; fixed patch series now has 100 members.
+See [scope, failures, receipts and resource accounting](campaign-reentry-retirement-20260907.zh-CN.md).
+
+### Repeat preparation and normal-stage structural reuse
+
+Normal sorties retain multi-run authorization while refreshing preparation
+only after proven completion; normal official-auto preparation no longer uses
+the historical 12-4 whitelist. Original Main completed individual 3-1 sorties
+with swapped fleets/duties. Original FastForward passed AUTO book on/off with
+no book consumption. Original StrategyHandler proved two different formations
+on manual 12-4 and restored them; withdrawal required a typed follow-up after
+an early dialog sample. The original outer-loop replay passes two rounds;
+the earlier live run stopped at ALAS's oil floor (449, minimum 500). After
+user refill and authorized one-click retirement (dock 931 to 829), original
+Main completed two 12-4 normal sorties with swapped fleets and Boss/mob duties:
+RunCount 2 to 0, books 566 to 565 to 564, final oil 11959, returned to main.
+Retirement's final receipt failed an overflow assertion despite actual cleanup;
+the failed receipt and independent readback are retained separately. AUTO
+ButtonGO and full automatic dock-full return/resume were unqualified at that
+earlier milestone; the later closure above supersedes the ButtonGO gap.
+Relevant final regression: 194 passed; fixed 99-member patch check passed.
+See [new live closure](campaign-oil-refill-closure-20260907.zh-CN.md) and
+[earlier scope and evidence](campaign-repeat-20260907.zh-CN.md).
+
+### FleetLock live switch and original ambush flow
+
+The original ALAS FleetLock Switch passed on/off/on on the clear-mode manual
+12-4 map. Ambush choices now require positive top-raycast proof, remain bound
+to one view, and feed the original evade/result/combat flow without completing
+the planned map target. Two existing fleets on non-clear-mode 7-2 showed
+reconnaissance 175/147 and no ambush probability; natural positive ambush
+qualification remains open. Relevant regression: 207 passed.
+See [scope and evidence](campaign-remaining-20260907.zh-CN.md).
+
+## 2026-09-06
+
+### Shared Campaign preparation: clear mode, 2x book, and fleet configuration
+
+The fixed-upstream semantic path now reuses the original clear-mode decision,
+sets the 2x book after fleet/duty preparation, and recognizes its exact item
+confirmation. A real Main 12-4 official-auto run completed with RunCount 1 to 0;
+typed follow-up showed one book and 634 oil consumed. A separate manual-map
+probe exercised clear-mode off and the original formation switch without combat.
+Two distinct normal surface-fleet indices and four official duty combinations
+are covered offline. FleetLock and naturally triggered ambush remain open.
+See [the implementation and evidence scope](campaign-preparation-20260906.zh-CN.md).
 
 ## 2026-09-02
 
@@ -4153,3 +4490,18 @@ See [G8 real ALAS reward and commission validation](g8-alas-reward-commission-va
   underlay clicks and interrupted same-zone recovery. The final 23 run retained
   stable source hashes and the original ALAS completion/persistence flow. See
   [continuation evidence and limits](operation-siren-monthstart-continuation-20260902.zh-CN.md).
+
+### Campaign 2+2 combat and controlled repair (2026-09-11)
+
+- Original Main on 10-2 with fleet1=6 (two main and two vanguard), fleet2=1
+  completed two-scout insertion/restoration and four battles, preserving empty
+  HP slots. A separate threshold-1.0 run completed one battle, repair stock
+  3 to 2, four occupied ships restored to full HP, and original withdrawal.
+- Default repair thresholds 0.3/0.6 did not trigger in the four-battle run;
+  that receipt remains a failed natural-trigger qualification despite normal
+  task completion. Other sparse combinations and sparse cross-process recovery
+  remain unqualified.
+- The scout qualification helper now refreshes cached HP after restoring
+  temporary weights; a failed refresh cannot mark the probe passed. Evidence,
+  retained failures and resource accounting are in
+  [the scoped report](campaign-sparse-repair-20260911.zh-CN.md).

@@ -1,0 +1,36 @@
+{
+  "schema": "alas-headless.campaign-scout-assessment/v1",
+  "passed": true,
+  "scope": "10-2 three occupied scouts, original HPBalancer insertion and restoration; no battle",
+  "failed_attempt": "scout-live-r1.json",
+  "failure_reason": "swap postcondition rejected actual insertion; own order restored in separate recovery",
+  "main_navigation": "main observed, original goto_main later raised EVENT_LIST_CHECK unmapped",
+  "remaining": [
+    "nonzero repair needs user assigned repair ship",
+    "sparse fleets",
+    "natural default low HP threshold",
+    "EVENT_LIST_CHECK final main handoff"
+  ],
+  "sha256": {
+    "overlays/angle-g3/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp": "40f6bf78c31653fda951291e1d4a250470b42ae6c828b6e061dfedcae38fc9c8",
+    "artifacts/campaign-hp-continuation/observer-scout-centered.apk": "b769137bd2d2c6b783f364a800cba243d0cd5392aff708af36a47fba53895d31",
+    "integration/alas/series/0620-campaign-scout-exchange.patch": "5009fe9eb3dd89d7834b523a34cc1f0b0e0c81e954a293792cf1f61eb4c5898b",
+    "integration/alas/series/series.json": "f40b2ae57d392303b1ca924f89510ced92624ca0cad9319453e1a715d84de32b",
+    "integration/alas/0001-semantic-oracle-hooks.patch": "4e72555a0d99be9d910bc44e08889cb460a6d040de3304e08174be011b58651c"
+  },
+  "validation": {
+    "initial_final_suite": "107 passed, 1 stale submarine path inventory expectation failed",
+    "targeted_rerun": "4 split tests passed after adding the actual 0570 port",
+    "unique_tests_passing_after_fix": 108
+  },
+  "resource_usage": {
+    "sortie_entries": 2,
+    "completed_battles": 0,
+    "scout_drags": 4,
+    "oil_before_first_entry": 13522,
+    "oil_before_second_entry": 13512,
+    "oil_final_main": 13502,
+    "oil_net_decrease": 20,
+    "repair_items_used": 0
+  }
+}

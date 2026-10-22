@@ -1,0 +1,67 @@
+{
+  "schema": "alas-headless.main-task-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-09-08T01:05:31.145522Z",
+  "finished_at": "2026-09-08T01:09:35.809040Z",
+  "task": "Main",
+  "stage": "10-2",
+  "event": "campaign_main",
+  "mode": "normal",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "scheduler_command": "Main",
+  "run_result": false,
+  "run_count_before": 1,
+  "run_count_after": 1,
+  "scheduler_enabled_after": true,
+  "use_auto_search": false,
+  "use_2x_book": false,
+  "auto_menu_observations": [],
+  "completed_sorties": [],
+  "continuation_receipts": [],
+  "submarine_observations": [],
+  "submarine_calls": [],
+  "submarine_configuration": {
+    "Fleet": 1,
+    "Mode": "every_combat",
+    "AutoSearchMode": "sub_standby",
+    "DistanceToBoss": "2_grid_to_boss"
+  },
+  "preparations": [
+    {
+      "generation": 59541,
+      "mode": "prep",
+      "use_2x_book": false,
+      "book_selected": false,
+      "book_count": 561
+    }
+  ],
+  "auto_book_checks": [],
+  "fleet_order": "fleet1_mob_fleet2_boss",
+  "auto_search_completion": null,
+  "login_recovery_performed": false,
+  "starting_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "campaign_entry": false,
+    "generation": 58447
+  },
+  "budgets": {
+    "stage_entry": 1,
+    "fleet_mutation": 8,
+    "sortie": 1,
+    "combat": 8,
+    "viewport_swipe": 2
+  },
+  "observer": {
+    "generation": 62448,
+    "scene_handle": -76,
+    "button_count": 59
+  },
+  "final_surface": {
+    "main_page": false,
+    "campaign_map": true,
+    "campaign_entry": false
+  },
+  "raw_input_fallback_used": false
+}

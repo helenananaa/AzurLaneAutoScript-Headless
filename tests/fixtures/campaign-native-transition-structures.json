@@ -1,0 +1,1365 @@
+{
+  "schema": "alas-headless.test/campaign-native-transitions-v1",
+  "scope": "Minimal structural projections of retained captures; runtime identity normalized and account balances replaced. No task success claim.",
+  "captures": {
+    "chapter_loading": {
+      "state": {
+        "snapshot": {
+          "protocol_schema": "alas-headless.observer/v1",
+          "status": "ok",
+          "package": "com.bilibili.azurlane",
+          "pid": 4242,
+          "peer_uid": 2000,
+          "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+          "snapshot_schema": 1,
+          "generation": 5778,
+          "age_ms": 20,
+          "main_thread": true,
+          "flags": 15,
+          "ui_stage": 100,
+          "ui_method_mask": 15,
+          "width": 1280,
+          "height": 720,
+          "scene_handle": -76
+        },
+        "buttons": {
+          "protocol_schema": "alas-headless.observer/v1",
+          "semantic_schema": "alas-headless.buttons/v1",
+          "status": "ok",
+          "package": "com.bilibili.azurlane",
+          "pid": 4242,
+          "peer_uid": 2000,
+          "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+          "schema": 1,
+          "generation": 5778,
+          "age_ms": 20,
+          "button_count": 3,
+          "truncated": false,
+          "error_count": 0,
+          "buttons": [
+            {
+              "name": "main",
+              "path": "UICamera/Canvas/UIMain/LevelMainScene(Clone)/float/levels/items/Chapter_1204/main",
+              "flags": 3583,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": false,
+              "adb_point": {
+                "x": 905.0,
+                "y": 553.333
+              },
+              "adb_bounds": {
+                "left": 905.0,
+                "top": 518.0,
+                "right": 1161.0,
+                "bottom": 588.667
+              }
+            },
+            {
+              "name": "back_button",
+              "path": "UICamera/Canvas/UIMain/LevelMainScene(Clone)/top/top_chapter/back_button",
+              "flags": 3583,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": false,
+              "adb_point": {
+                "x": 57.667,
+                "y": 54.0
+              },
+              "adb_bounds": {
+                "left": 0.648,
+                "top": -3.019,
+                "right": 114.685,
+                "bottom": 111.019
+              }
+            },
+            {
+              "name": "Loading(Clone)",
+              "path": "OverlayCamera/Overlay/UIOverlay/Loading(Clone)",
+              "flags": 1535,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": null,
+              "adb_point": {
+                "x": 640.0,
+                "y": 360.0
+              },
+              "adb_bounds": {
+                "left": -0.0,
+                "top": 0.0,
+                "right": 1280.0,
+                "bottom": 720.0
+              }
+            }
+          ]
+        }
+      },
+      "ui": {
+        "protocol_schema": "alas-headless.observer/v1",
+        "semantic_schema": "alas-headless.ui/v1",
+        "status": "ok",
+        "package": "com.bilibili.azurlane",
+        "pid": 4242,
+        "peer_uid": 2000,
+        "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+        "schema": 1,
+        "generation": 5778,
+        "age_ms": 20,
+        "method_mask": 15,
+        "toggle_count": 0,
+        "text_count": 3,
+        "image_count": 0,
+        "toggle_truncated": false,
+        "text_truncated": false,
+        "image_truncated": false,
+        "error_count": 0,
+        "skipped_count": 0,
+        "toggles": [],
+        "texts": [
+          {
+            "kind": "ugui-text",
+            "name": "title",
+            "path": "UICamera/Canvas/UIMain/LevelMainScene(Clone)/float/levels/items/Chapter_1204/main/info/bk/title_form/title",
+            "text": "TF58，翱翔于天际",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 1011.2,
+              "top": 542.867,
+              "right": 1176.2,
+              "bottom": 562.867
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "title_index",
+            "path": "UICamera/Canvas/UIMain/LevelMainScene(Clone)/float/levels/items/Chapter_1204/main/info/bk/title_form/title_index",
+            "text": "12–4  ",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 965.2,
+              "top": 540.867,
+              "right": 1011.2,
+              "bottom": 564.867
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "name",
+            "path": "UICamera/Canvas/UIMain/LevelMainScene(Clone)/top/top_chapter/title_chapter/name",
+            "text": "马里亚纳风云上",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 205.867,
+              "top": 63.333,
+              "right": 472.533,
+              "bottom": 108.667
+            }
+          }
+        ],
+        "images": []
+      }
+    },
+    "map_preparation": {
+      "state": {
+        "snapshot": {
+          "protocol_schema": "alas-headless.observer/v1",
+          "status": "ok",
+          "package": "com.bilibili.azurlane",
+          "pid": 4242,
+          "peer_uid": 2000,
+          "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+          "snapshot_schema": 1,
+          "generation": 5834,
+          "age_ms": 20,
+          "main_thread": true,
+          "flags": 15,
+          "ui_stage": 100,
+          "ui_method_mask": 15,
+          "width": 1280,
+          "height": 720,
+          "scene_handle": -76
+        },
+        "buttons": {
+          "protocol_schema": "alas-headless.observer/v1",
+          "semantic_schema": "alas-headless.buttons/v1",
+          "status": "ok",
+          "package": "com.bilibili.azurlane",
+          "pid": 4242,
+          "peer_uid": 2000,
+          "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+          "schema": 1,
+          "generation": 5834,
+          "age_ms": 20,
+          "button_count": 2,
+          "truncated": false,
+          "error_count": 0,
+          "buttons": [
+            {
+              "name": "start_button",
+              "path": "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/start_button",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "adb_point": {
+                "x": 1034.333,
+                "y": 524.0
+              },
+              "adb_bounds": {
+                "left": 944.333,
+                "top": 477.333,
+                "right": 1124.333,
+                "bottom": 570.667
+              }
+            },
+            {
+              "name": "btnBack",
+              "path": "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/btnBack",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "adb_point": {
+                "x": 1068.967,
+                "y": 191.233
+              },
+              "adb_bounds": {
+                "left": 1051.133,
+                "top": 149.133,
+                "right": 1122.467,
+                "bottom": 205.267
+              }
+            }
+          ]
+        }
+      },
+      "ui": {
+        "protocol_schema": "alas-headless.observer/v1",
+        "semantic_schema": "alas-headless.ui/v1",
+        "status": "ok",
+        "package": "com.bilibili.azurlane",
+        "pid": 4242,
+        "peer_uid": 2000,
+        "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+        "schema": 1,
+        "generation": 5834,
+        "age_ms": 20,
+        "method_mask": 15,
+        "toggle_count": 0,
+        "text_count": 0,
+        "image_count": 0,
+        "toggle_truncated": false,
+        "text_truncated": false,
+        "image_truncated": false,
+        "error_count": 0,
+        "skipped_count": 0,
+        "toggles": [],
+        "texts": [],
+        "images": []
+      }
+    },
+    "map_running": {
+      "state": {
+        "snapshot": {
+          "protocol_schema": "alas-headless.observer/v1",
+          "status": "ok",
+          "package": "com.bilibili.azurlane",
+          "pid": 4242,
+          "peer_uid": 2000,
+          "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+          "snapshot_schema": 1,
+          "generation": 12986,
+          "age_ms": 20,
+          "main_thread": true,
+          "flags": 15,
+          "ui_stage": 100,
+          "ui_method_mask": 15,
+          "width": 1280,
+          "height": 720,
+          "scene_handle": -76
+        },
+        "buttons": {
+          "protocol_schema": "alas-headless.observer/v1",
+          "semantic_schema": "alas-headless.buttons/v1",
+          "status": "ok",
+          "package": "com.bilibili.azurlane",
+          "pid": 4242,
+          "peer_uid": 2000,
+          "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+          "schema": 1,
+          "generation": 12986,
+          "age_ms": 20,
+          "button_count": 4,
+          "truncated": false,
+          "error_count": 0,
+          "buttons": [
+            {
+              "name": "On",
+              "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/collapse/LevelStageAutoFightPanel(Clone)/On",
+              "flags": 1535,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": null,
+              "adb_point": {
+                "x": 1226.0,
+                "y": 559.867
+              },
+              "adb_bounds": {
+                "left": 1172.0,
+                "top": 531.533,
+                "right": 1280.0,
+                "bottom": 588.2
+              }
+            },
+            {
+              "name": "back_button",
+              "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/top_stage/back_button",
+              "flags": 1535,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": null,
+              "adb_point": {
+                "x": 58.6,
+                "y": 53.8
+              },
+              "adb_bounds": {
+                "left": 1.581,
+                "top": -3.219,
+                "right": 115.619,
+                "bottom": 110.819
+              }
+            },
+            {
+              "name": "retreat_button",
+              "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/bottom_stage/Normal/retreat_button",
+              "flags": 3583,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": false,
+              "adb_point": {
+                "x": 834.667,
+                "y": 892.667
+              },
+              "adb_bounds": {
+                "left": 733.0,
+                "top": 854.333,
+                "right": 936.333,
+                "bottom": 931.0
+              }
+            },
+            {
+              "name": "chapter_cell_quad_8_11",
+              "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_8_11",
+              "flags": 3583,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": false,
+              "adb_point": {
+                "x": 1461.797,
+                "y": 591.074
+              },
+              "adb_bounds": {
+                "left": 1375.297,
+                "top": 538.072,
+                "right": 1552.529,
+                "bottom": 646.669
+              }
+            }
+          ]
+        }
+      },
+      "ui": {
+        "protocol_schema": "alas-headless.observer/v1",
+        "semantic_schema": "alas-headless.ui/v1",
+        "status": "ok",
+        "package": "com.bilibili.azurlane",
+        "pid": 4242,
+        "peer_uid": 2000,
+        "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+        "schema": 1,
+        "generation": 12986,
+        "age_ms": 20,
+        "method_mask": 15,
+        "toggle_count": 0,
+        "text_count": 9,
+        "image_count": 5,
+        "toggle_truncated": false,
+        "text_truncated": false,
+        "image_truncated": false,
+        "error_count": 0,
+        "skipped_count": 0,
+        "toggles": [],
+        "texts": [
+          {
+            "kind": "ugui-text",
+            "name": "gold_value",
+            "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/gold_value",
+            "text": "800",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 832.057,
+              "top": 24.052,
+              "right": 921.409,
+              "bottom": 44.792
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "oil_value",
+            "path": "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/oil_value",
+            "text": "450",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 626.591,
+              "top": 24.586,
+              "right": 715.943,
+              "bottom": 45.326
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text",
+            "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/left_stage/fleet/vanguard/shiptpl(Clone)/icon_bg/lv/Text",
+            "text": "100",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 75.742,
+              "top": 623.437,
+              "right": 101.733,
+              "bottom": 648.429
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text",
+            "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/left_stage/fleet/vanguard/shiptpl(Clone)/icon_bg/lv/Text",
+            "text": "100",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 75.742,
+              "top": 523.437,
+              "right": 101.733,
+              "bottom": 548.429
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text",
+            "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/left_stage/fleet/vanguard/shiptpl(Clone)/icon_bg/lv/Text",
+            "text": "100",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 76.742,
+              "top": 423.437,
+              "right": 101.733,
+              "bottom": 448.429
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text",
+            "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/left_stage/fleet/main/shiptpl(Clone)/icon_bg/lv/Text",
+            "text": "100",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 76.742,
+              "top": 323.437,
+              "right": 101.733,
+              "bottom": 348.429
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text",
+            "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/left_stage/fleet/main/shiptpl(Clone)/icon_bg/lv/Text",
+            "text": "100",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 76.742,
+              "top": 223.437,
+              "right": 101.733,
+              "bottom": 248.429
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "Text",
+            "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/left_stage/fleet/main/shiptpl(Clone)/icon_bg/lv/Text",
+            "text": "100",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 75.742,
+              "top": 123.437,
+              "right": 101.733,
+              "bottom": 148.429
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "number",
+            "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/top_stage/msg_panel/fleet_info/number",
+            "text": "1",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 186.534,
+              "top": 55.133,
+              "right": 253.2,
+              "bottom": 121.8
+            }
+          }
+        ],
+        "images": [
+          {
+            "kind": "image",
+            "name": "sea",
+            "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/display/mask/sea",
+            "sprite": "sea_day",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": -61.328,
+              "top": -25.74,
+              "right": 1556.251,
+              "bottom": 648.949
+            },
+            "adb_point": {
+              "x": 729.274,
+              "y": 254.512
+            }
+          },
+          {
+            "kind": "image",
+            "name": "Icon",
+            "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/collapse/LevelStageAutoFightPanel(Clone)/On/Icon",
+            "sprite": "auto_fight_on_icon",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 1173.865,
+              "top": 538.866,
+              "right": 1209.868,
+              "bottom": 576.201
+            },
+            "adb_point": {
+              "x": 1191.867,
+              "y": 557.533
+            }
+          },
+          {
+            "kind": "image",
+            "name": "On",
+            "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/collapse/LevelStageAutoFightPanel(Clone)/On",
+            "sprite": "auto_fight_on",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 1172.0,
+              "top": 531.533,
+              "right": 1280.0,
+              "bottom": 588.2
+            },
+            "adb_point": {
+              "x": 1226.0,
+              "y": 559.867
+            }
+          },
+          {
+            "kind": "image",
+            "name": "Image",
+            "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/top_stage/back_button/mask/Image",
+            "sprite": "back_btn",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 24.067,
+              "top": 18.467,
+              "right": 95.4,
+              "bottom": 88.467
+            },
+            "adb_point": {
+              "x": 59.733,
+              "y": 53.467
+            }
+          },
+          {
+            "kind": "image",
+            "name": "retreat_button",
+            "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/bottom_stage/Normal/retreat_button",
+            "sprite": "chetui_butten",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 733.0,
+              "top": 854.333,
+              "right": 936.333,
+              "bottom": 931.0
+            },
+            "adb_point": {
+              "x": 834.667,
+              "y": 892.667
+            }
+          }
+        ]
+      }
+    },
+    "combat_loading": {
+      "state": {
+        "snapshot": {
+          "protocol_schema": "alas-headless.observer/v1",
+          "status": "ok",
+          "package": "com.bilibili.azurlane",
+          "pid": 4242,
+          "peer_uid": 2000,
+          "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+          "snapshot_schema": 1,
+          "generation": 12013,
+          "age_ms": 20,
+          "main_thread": true,
+          "flags": 15,
+          "ui_stage": 100,
+          "ui_method_mask": 15,
+          "width": 1280,
+          "height": 720,
+          "scene_handle": -76
+        },
+        "buttons": {
+          "protocol_schema": "alas-headless.observer/v1",
+          "semantic_schema": "alas-headless.buttons/v1",
+          "status": "ok",
+          "package": "com.bilibili.azurlane",
+          "pid": 4242,
+          "peer_uid": 2000,
+          "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+          "schema": 1,
+          "generation": 12013,
+          "age_ms": 20,
+          "button_count": 0,
+          "truncated": false,
+          "error_count": 0,
+          "buttons": []
+        }
+      },
+      "ui": {
+        "protocol_schema": "alas-headless.observer/v1",
+        "semantic_schema": "alas-headless.ui/v1",
+        "status": "ok",
+        "package": "com.bilibili.azurlane",
+        "pid": 4242,
+        "peer_uid": 2000,
+        "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+        "schema": 1,
+        "generation": 12013,
+        "age_ms": 20,
+        "method_mask": 15,
+        "toggle_count": 0,
+        "text_count": 3,
+        "image_count": 6,
+        "toggle_truncated": false,
+        "text_truncated": false,
+        "image_truncated": false,
+        "error_count": 0,
+        "skipped_count": 0,
+        "toggles": [],
+        "texts": [
+          {
+            "kind": "ugui-text",
+            "name": "percent",
+            "path": "UICamera/Canvas/UIMain/CombatLoadUI(Clone)/loading/loading_label/percent",
+            "text": "85.53%",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 1158.167,
+              "top": 684.1,
+              "right": 1248.367,
+              "bottom": 710.7
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "loading_label",
+            "path": "UICamera/Canvas/UIMain/CombatLoadUI(Clone)/loading/loading_label",
+            "text": "NOW LOADING...",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 1075.367,
+              "top": 694.133,
+              "right": 1248.367,
+              "bottom": 710.667
+            }
+          },
+          {
+            "kind": "ugui-text",
+            "name": "tipsText",
+            "path": "UICamera/Canvas/UIMain/CombatLoadUI(Clone)/loading/tipsText",
+            "text": "轻巡洋舰的防空能力比较强",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": -0.0,
+              "top": 689.333,
+              "right": 1280.0,
+              "bottom": 710.667
+            }
+          }
+        ],
+        "images": [
+          {
+            "kind": "image",
+            "name": "loading_anima",
+            "path": "UICamera/Canvas/UIMain/CombatLoadUI(Clone)/loading/loading_anima",
+            "sprite": "loading_anima_11",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 1008.486,
+              "top": 607.667,
+              "right": 1067.153,
+              "bottom": 685.667
+            },
+            "adb_point": {
+              "x": 1037.82,
+              "y": 646.667
+            }
+          },
+          {
+            "kind": "image",
+            "name": "gizmos",
+            "path": "UICamera/Canvas/UIMain/CombatLoadUI(Clone)/loading/loading_bar/progress/gizmos",
+            "sprite": "taskProgressBar_b",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 1071.153,
+              "top": 666.667,
+              "right": 1081.82,
+              "bottom": 689.333
+            },
+            "adb_point": {
+              "x": 1071.153,
+              "y": 678.0
+            }
+          },
+          {
+            "kind": "image",
+            "name": "progress",
+            "path": "UICamera/Canvas/UIMain/CombatLoadUI(Clone)/loading/loading_bar/progress",
+            "sprite": "taskProgressBar_a",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 0.0,
+            "adb_bounds": {
+              "left": 33.333,
+              "top": 666.0,
+              "right": 1071.153,
+              "bottom": 690.0
+            },
+            "adb_point": {
+              "x": 552.243,
+              "y": 678.0
+            }
+          },
+          {
+            "kind": "image",
+            "name": "loading_bar",
+            "path": "UICamera/Canvas/UIMain/CombatLoadUI(Clone)/loading/loading_bar",
+            "sprite": "white_dot",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 0.862745
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 33.333,
+              "top": 676.0,
+              "right": 1246.667,
+              "bottom": 680.0
+            },
+            "adb_point": {
+              "x": 640.0,
+              "y": 680.0
+            }
+          },
+          {
+            "kind": "image",
+            "name": "bg_btm",
+            "path": "UICamera/Canvas/UIMain/CombatLoadUI(Clone)/bg_btm",
+            "sprite": "",
+            "flags": 12775,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 0.0,
+              "green": 0.0,
+              "blue": 0.0,
+              "alpha": 0.498039
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 0.192,
+              "top": 640.0,
+              "right": 1279.808,
+              "bottom": 720.0
+            },
+            "adb_point": {
+              "x": 640.0,
+              "y": 720.0
+            }
+          },
+          {
+            "kind": "image",
+            "name": "GalleryEnv",
+            "path": "UICamera/Canvas/UIMain/CombatLoadUI(Clone)/GalleryEnv",
+            "sprite": "bg_10",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": -0.0,
+              "top": -0.093,
+              "right": 1280.0,
+              "bottom": 720.093
+            },
+            "adb_point": {
+              "x": 640.0,
+              "y": 360.0
+            }
+          }
+        ]
+      }
+    },
+    "hud_transition": {
+      "state": {
+        "snapshot": {
+          "protocol_schema": "alas-headless.observer/v1",
+          "status": "ok",
+          "package": "com.bilibili.azurlane",
+          "pid": 4242,
+          "peer_uid": 2000,
+          "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+          "snapshot_schema": 1,
+          "generation": 17558,
+          "age_ms": 20,
+          "main_thread": true,
+          "flags": 15,
+          "ui_stage": 100,
+          "ui_method_mask": 15,
+          "width": 1280,
+          "height": 720,
+          "scene_handle": -76
+        },
+        "buttons": {
+          "protocol_schema": "alas-headless.observer/v1",
+          "semantic_schema": "alas-headless.buttons/v1",
+          "status": "ok",
+          "package": "com.bilibili.azurlane",
+          "pid": 4242,
+          "peer_uid": 2000,
+          "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+          "schema": 1,
+          "generation": 17558,
+          "age_ms": 20,
+          "button_count": 4,
+          "truncated": false,
+          "error_count": 0,
+          "buttons": [
+            {
+              "name": "On",
+              "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/collapse/LevelStageAutoFightPanel(Clone)/On",
+              "flags": 1535,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": null,
+              "adb_point": {
+                "x": 1302.203,
+                "y": 559.867
+              },
+              "adb_bounds": {
+                "left": 1248.203,
+                "top": 531.533,
+                "right": 1356.203,
+                "bottom": 588.2
+              }
+            },
+            {
+              "name": "back_button",
+              "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/top_stage/back_button",
+              "flags": 1535,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": null,
+              "adb_point": {
+                "x": 58.6,
+                "y": 38.122
+              },
+              "adb_bounds": {
+                "left": 1.581,
+                "top": -18.897,
+                "right": 115.619,
+                "bottom": 95.141
+              }
+            },
+            {
+              "name": "retreat_button",
+              "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/bottom_stage/Normal/retreat_button",
+              "flags": 3583,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": false,
+              "adb_point": {
+                "x": 834.667,
+                "y": 892.667
+              },
+              "adb_bounds": {
+                "left": 733.0,
+                "top": 854.333,
+                "right": 936.333,
+                "bottom": 931.0
+              }
+            },
+            {
+              "name": "btn_next",
+              "path": "UICamera/Canvas/UIMain/LevelMainScene(Clone)/main/right_chapter/btn_next",
+              "flags": 1535,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": null,
+              "adb_point": {
+                "x": 1901.727,
+                "y": 399.167
+              },
+              "adb_bounds": {
+                "left": 1807.594,
+                "top": 338.8,
+                "right": 1901.727,
+                "bottom": 459.533
+              }
+            }
+          ]
+        }
+      },
+      "ui": {
+        "protocol_schema": "alas-headless.observer/v1",
+        "semantic_schema": "alas-headless.ui/v1",
+        "status": "ok",
+        "package": "com.bilibili.azurlane",
+        "pid": 4242,
+        "peer_uid": 2000,
+        "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+        "schema": 1,
+        "generation": 17558,
+        "age_ms": 20,
+        "method_mask": 15,
+        "toggle_count": 0,
+        "text_count": 0,
+        "image_count": 4,
+        "toggle_truncated": false,
+        "text_truncated": false,
+        "image_truncated": false,
+        "error_count": 0,
+        "skipped_count": 0,
+        "toggles": [],
+        "texts": [],
+        "images": [
+          {
+            "kind": "image",
+            "name": "Icon",
+            "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/collapse/LevelStageAutoFightPanel(Clone)/On/Icon",
+            "sprite": "auto_fight_on_icon",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 1242.388,
+              "top": 531.999,
+              "right": 1293.751,
+              "bottom": 583.068
+            },
+            "adb_point": {
+              "x": 1268.07,
+              "y": 557.533
+            }
+          },
+          {
+            "kind": "image",
+            "name": "On",
+            "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/collapse/LevelStageAutoFightPanel(Clone)/On",
+            "sprite": "auto_fight_on",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 1248.203,
+              "top": 531.533,
+              "right": 1356.203,
+              "bottom": 588.2
+            },
+            "adb_point": {
+              "x": 1302.203,
+              "y": 559.867
+            }
+          },
+          {
+            "kind": "image",
+            "name": "Image",
+            "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/top_stage/back_button/mask/Image",
+            "sprite": "back_btn",
+            "flags": 12719,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 24.067,
+              "top": 2.789,
+              "right": 95.4,
+              "bottom": 72.789
+            },
+            "adb_point": {
+              "x": 59.733,
+              "y": 37.789
+            }
+          },
+          {
+            "kind": "image",
+            "name": "retreat_button",
+            "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/bottom_stage/Normal/retreat_button",
+            "sprite": "chetui_butten",
+            "flags": 12783,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 733.0,
+              "top": 854.333,
+              "right": 936.333,
+              "bottom": 931.0
+            },
+            "adb_point": {
+              "x": 834.667,
+              "y": 892.667
+            }
+          }
+        ]
+      }
+    },
+    "hud_loading_transition": {
+      "state": {
+        "snapshot": {
+          "protocol_schema": "alas-headless.observer/v1",
+          "status": "ok",
+          "package": "com.bilibili.azurlane",
+          "pid": 4242,
+          "peer_uid": 2000,
+          "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+          "snapshot_schema": 1,
+          "generation": 26142,
+          "age_ms": 20,
+          "main_thread": true,
+          "flags": 15,
+          "ui_stage": 100,
+          "ui_method_mask": 15,
+          "width": 1280,
+          "height": 720,
+          "scene_handle": -76
+        },
+        "buttons": {
+          "protocol_schema": "alas-headless.observer/v1",
+          "semantic_schema": "alas-headless.buttons/v1",
+          "status": "ok",
+          "package": "com.bilibili.azurlane",
+          "pid": 4242,
+          "peer_uid": 2000,
+          "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+          "schema": 1,
+          "generation": 26142,
+          "age_ms": 20,
+          "button_count": 4,
+          "truncated": false,
+          "error_count": 0,
+          "buttons": [
+            {
+              "name": "back_button",
+              "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/top_stage/back_button",
+              "flags": 1535,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": null,
+              "adb_point": {
+                "x": 58.6,
+                "y": -113.533
+              },
+              "adb_bounds": {
+                "left": 1.581,
+                "top": -170.552,
+                "right": 115.619,
+                "bottom": -56.515
+              }
+            },
+            {
+              "name": "retreat_button",
+              "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/bottom_stage/Normal/retreat_button",
+              "flags": 3583,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": false,
+              "adb_point": {
+                "x": 834.667,
+                "y": 892.667
+              },
+              "adb_bounds": {
+                "left": 733.0,
+                "top": 854.333,
+                "right": 936.333,
+                "bottom": 931.0
+              }
+            },
+            {
+              "name": "btn_next",
+              "path": "UICamera/Canvas/UIMain/LevelMainScene(Clone)/main/right_chapter/btn_next",
+              "flags": 1535,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": null,
+              "adb_point": {
+                "x": 1280.0,
+                "y": 399.167
+              },
+              "adb_bounds": {
+                "left": 1185.867,
+                "top": 338.8,
+                "right": 1280.0,
+                "bottom": 459.533
+              }
+            },
+            {
+              "name": "Loading(Clone)",
+              "path": "OverlayCamera/Overlay/UIOverlay/Loading(Clone)",
+              "flags": 1535,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": null,
+              "adb_point": {
+                "x": 640.0,
+                "y": 360.0
+              },
+              "adb_bounds": {
+                "left": -0.0,
+                "top": 0.0,
+                "right": 1280.0,
+                "bottom": 720.0
+              }
+            }
+          ]
+        }
+      },
+      "ui": {
+        "protocol_schema": "alas-headless.observer/v1",
+        "semantic_schema": "alas-headless.ui/v1",
+        "status": "ok",
+        "package": "com.bilibili.azurlane",
+        "pid": 4242,
+        "peer_uid": 2000,
+        "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+        "schema": 1,
+        "generation": 26142,
+        "age_ms": 20,
+        "method_mask": 15,
+        "toggle_count": 0,
+        "text_count": 0,
+        "image_count": 0,
+        "toggle_truncated": false,
+        "text_truncated": false,
+        "image_truncated": false,
+        "error_count": 0,
+        "skipped_count": 0,
+        "toggles": [],
+        "texts": [],
+        "images": []
+      }
+    }
+  },
+  "provenance": {
+    "chapter_loading": "Main-r1 failed_presence generation 5778, exact failure owner projected",
+    "map_preparation": "Main-r1 failure_observation, settled AFTER failure; not the failed frame",
+    "map_running": "map-coin-after-r2-failure generation 12986, independent AFTER-failure map observation; retained fleet row geometry with account levels replaced by 100",
+    "combat_loading": "Main-r2 failure_observation generation 12013, AFTER failure; not the exact coin exception frame",
+    "hud_transition": "Main-r3 failed_presence generation 17558, exact failure owner projected",
+    "hud_loading_transition": "Main-r4 failed_presence generation 26142, exact owner projected; Loading and HUD Back/Retreat, no On/Off needed"
+  }
+}

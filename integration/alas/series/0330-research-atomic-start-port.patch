@@ -1,7 +1,8 @@
 diff --git a/module/research/research.py b/module/research/research.py
+index fcab86b3d3f0704ef3dff29a459c7b47255cd9fa..c516aa0c6f0762e5481812bffa35dfc05ce8c24f 100644
 --- a/module/research/research.py
 +++ b/module/research/research.py
-@@ -189,6 +189,23 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
+@@ -189,6 +189,24 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
              logger.warning(f'The project to start: {project} is not in known projects')
              return None
          logger.info(f'Research project: {index}')
@@ -12,11 +13,12 @@ diff --git a/module/research/research.py b/module/research/research.py
 +            # decision names one card, use the typed selected-detail transition
 +            # so the pixel list checker cannot strand this loop below it.
 +            if isinstance(project, int):
-+                selected_code = semantic_session.research_projects()[index].code
++                selected = semantic_session.research_projects()[index]
++                selected_code, selected_series = selected.code, selected.series
 +            else:
-+                selected_code = project.name
++                selected_code, selected_series = project.name, project.series
 +            started = semantic_session.start_research_project_code(
-+                selected_code, position=index)
++                selected_code, position=index, series=selected_series)
 +            if started and add_queue:
 +                self.research_queue_add()
 +            self.research_project_started = project if started else None

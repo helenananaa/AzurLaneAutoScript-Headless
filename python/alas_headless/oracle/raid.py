@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import replace
 from typing import Dict, List, Optional, Tuple
 from .contracts import (
     ActionReceipt,
@@ -13,11 +14,41 @@ from .contracts import (
     RaidRemainState,
     UiState,
 )
-from .errors import SemanticGateClosed
+from .errors import SemanticGateClosed, SemanticRaidUnavailable
+from .activity_identity import raid_identity
+
+
+def _unsupported_event(capability: str, event: str) -> SemanticRaidUnavailable:
+    return SemanticRaidUnavailable(
+        f"Raid {capability} event is unsupported: {event!r}; "
+        "a reviewed event identity and typed layout mapping are required for "
+        "this Raid capability; independent tasks remain available"
+    )
 
 
 class RaidOracle:
     """Raid operations sharing the oracle frame and input boundary."""
+
+    def current_raid_event(self) -> str:
+        snapshot = self.read_ui_snapshot()
+        if "activity_identity" not in snapshot:
+            return "raid_20260827"  # Existing observer's reviewed baseline port.
+        return raid_identity(snapshot)[0]
+
+    def supports_raid_layout(self, event: str) -> bool:
+        """Resolve the configured task to a supported live layout, without input."""
+        if event == "raid_20260212":
+            return False  # Its legacy counter port is separate from this layout.
+        snapshot = self.read_ui_snapshot()
+        if "activity_identity" not in snapshot:
+            if event == "raid_20260827":
+                return True
+            raise _unsupported_event("identity mapping", event)
+        return raid_identity(snapshot, event)[1] == "amatsukaze"
+
+    def _require_current_raid(self, event: str) -> None:
+        if not self.supports_raid_layout(event):
+            raise _unsupported_event("layout mapping", event)
 
     def _main_raid_entry_proven(self, state: OracleState) -> bool:
         """Prove the current main-page raid shortcut with its typed icon.
@@ -82,15 +113,14 @@ class RaidOracle:
     def raid_remain_state(self, event: str, mode: str) -> RaidRemainState:
         """Read one reviewed RaidDaily counter from typed Unity state."""
 
-        if event == "raid_20260827":
+        if event != "raid_20260212":
+            self._require_current_raid(event)
             if mode not in ("easy", "normal", "hard", "ex"):
                 raise SemanticGateClosed("Raid remaining counter mode is unsupported")
             return self._retry_transition_read(
-                lambda: self._amatsukaze_raid_remain_state(mode),
+                lambda: replace(self._amatsukaze_raid_remain_state(mode), event=event),
                 attempts=8,
             )
-        if event != "raid_20260212":
-            raise SemanticGateClosed("Raid remaining counter event is unsupported")
         node_ids = {"easy": 5001, "normal": 5002, "hard": 5003, "ex": 5004}
         try:
             node_id = node_ids[mode]
@@ -187,11 +217,11 @@ class RaidOracle:
     def _amatsukaze_raid_page_state(
         self,
     ) -> Tuple[OracleState, UiState, str, Dict[str, ButtonState]]:
-        """Prove the 2026-08-27 Raid page and its five distinct stage slots.
+        """Prove the known amatsukaze Raid layout and its five stage slots.
 
         The first four slots belong to the existing ALAS Raid state machine.
-        Slot five is the update's separate advanced challenge and is proven only
-        so it cannot be confused with EX; it is deliberately not actionable.
+        Slot five is a separate advanced challenge with its own typed input
+        method; it must not be confused with the ordinary EX slot.
         """
 
         button_state = self.read_state()
@@ -486,8 +516,7 @@ class RaidOracle:
         )
 
     def raid_page_visible(self, event: str) -> bool:
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid page event is unsupported")
+        self._require_current_raid(event)
         try:
             self._amatsukaze_raid_page_state()
         except SemanticGateClosed as exc:
@@ -504,8 +533,7 @@ class RaidOracle:
     def click_raid_stage(self, event: str, mode: str) -> ActionReceipt:
         """Click one current Raid slot after exact page and mode proof."""
 
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid stage event is unsupported")
+        self._require_current_raid(event)
         button_state, _ui_state, _root, buttons = self._amatsukaze_raid_page_state()
         if mode not in ("easy", "normal", "hard", "ex"):
             raise SemanticGateClosed("Raid stage mode is unsupported")
@@ -528,8 +556,7 @@ class RaidOracle:
     def click_raid_advanced_challenge(self, event: str) -> ActionReceipt:
         """Open the separate fifth current-Raid slot without treating it as EX."""
 
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid advanced-challenge event is unsupported")
+        self._require_current_raid(event)
         button_state, _ui_state, _root, buttons = self._amatsukaze_raid_page_state()
         target = buttons["advanced"]
         if self._blocking_rules(button_state, "raid/advanced/entry"):
@@ -548,8 +575,7 @@ class RaidOracle:
         )
 
     def click_raid_home(self, event: str) -> ActionReceipt:
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid page event is unsupported")
+        self._require_current_raid(event)
         button_state, ui_state, root, _buttons = self._amatsukaze_raid_page_state()
         path = root + "/adapt/top/TopPage/top/btn_home"
         targets = tuple(
@@ -686,8 +712,7 @@ class RaidOracle:
         return button_state, ui_state, buttons
 
     def raid_fleet_selection_visible(self, event: str) -> bool:
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid fleet-selection event is unsupported")
+        self._require_current_raid(event)
         try:
             self._amatsukaze_raid_fleet_selection_state()
         except SemanticGateClosed as exc:
@@ -697,8 +722,7 @@ class RaidOracle:
         return True
 
     def raid_fleet_ready(self, event: str) -> bool:
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid fleet-selection event is unsupported")
+        self._require_current_raid(event)
         button_state, _ui_state, _buttons = (
             self._amatsukaze_raid_fleet_selection_state()
         )
@@ -730,8 +754,7 @@ class RaidOracle:
         return True
 
     def click_raid_fleet_back(self, event: str) -> ActionReceipt:
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid fleet-selection event is unsupported")
+        self._require_current_raid(event)
         button_state, _ui_state, buttons = self._amatsukaze_raid_fleet_selection_state()
         target = buttons["back"]
         if self._blocking_rules(button_state, "raid/fleet/back"):
@@ -757,8 +780,7 @@ class RaidOracle:
         )
 
     def click_raid_fleet_start(self, event: str) -> ActionReceipt:
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid fleet-selection event is unsupported")
+        self._require_current_raid(event)
         button_state, _ui_state, buttons = self._amatsukaze_raid_fleet_selection_state()
         target = buttons["start"]
         if self._blocking_rules(button_state, "raid/fleet/start"):
@@ -780,8 +802,7 @@ class RaidOracle:
         )
 
     def click_raid_fleet_recommend(self, event: str) -> ActionReceipt:
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid fleet-selection event is unsupported")
+        self._require_current_raid(event)
         button_state, ui_state, _buttons = (
             self._amatsukaze_raid_fleet_selection_state()
         )
@@ -1051,8 +1072,6 @@ class RaidOracle:
         return button_state, ui_state, target
 
     def raid_precombat_visible(self, event: str) -> bool:
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid precombat event is unsupported")
         candidate_state = self.read_state()
         precombat_start_paths = {
             "UICamera/Canvas/UIOrigin/ActivityBossPrecombatUI(Clone)/adapt/right/start",
@@ -1084,6 +1103,7 @@ class RaidOracle:
                 # identity and coverage proof and remains fail-closed.
                 return False
             raise
+        self._require_current_raid(event)
         if (
             self._blocking_rules(button_state, "raid/precombat/start")
             and not self.raid_precombat_notice_visible(event)
@@ -1151,8 +1171,7 @@ class RaidOracle:
         return button_state, ui_state, target
 
     def raid_precombat_multiple_visible(self, event: str) -> bool:
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid precombat event is unsupported")
+        self._require_current_raid(event)
         candidate = self.read_state()
         if not any(
             button.name == "multiple"
@@ -1166,8 +1185,7 @@ class RaidOracle:
         return True
 
     def click_raid_precombat_multiple(self, event: str) -> ActionReceipt:
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid precombat event is unsupported")
+        self._require_current_raid(event)
         button_state, _ui_state, target = self._amatsukaze_raid_multiple_target()
         if self.raid_precombat_notice_visible(event):
             raise SemanticGateClosed("Raid multiple-sortie entry is obscured by notice")
@@ -1271,8 +1289,7 @@ class RaidOracle:
         return button_state, ui_state, target
 
     def raid_multiple_sortie_visible(self, event: str) -> bool:
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid multiple-sortie event is unsupported")
+        self._require_current_raid(event)
         candidate = self.read_state()
         root = "OverlayCamera/Overlay/UIMain/ContinuousOperationWindowUI(Clone)"
         if not any(
@@ -1287,8 +1304,7 @@ class RaidOracle:
         return True
 
     def raid_multiple_sortie_state(self, event: str) -> RaidMultipleSortieState:
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid multiple-sortie event is unsupported")
+        self._require_current_raid(event)
         button_state, ui_state, _target = self._amatsukaze_raid_multiple_back_target()
         root = "OverlayCamera/Overlay/UIMain/ContinuousOperationWindowUI(Clone)"
 
@@ -1358,8 +1374,7 @@ class RaidOracle:
         )
 
     def click_raid_multiple_sortie_back(self, event: str) -> ActionReceipt:
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid multiple-sortie event is unsupported")
+        self._require_current_raid(event)
         button_state, _ui_state, target = self._amatsukaze_raid_multiple_back_target()
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed immediately before Raid input")
@@ -1456,8 +1471,7 @@ class RaidOracle:
         return button_state, ui_state, target
 
     def raid_precombat_notice_visible(self, event: str) -> bool:
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid precombat event is unsupported")
+        self._require_current_raid(event)
         try:
             self._amatsukaze_raid_notice_target()
         except SemanticGateClosed as exc:
@@ -1467,8 +1481,7 @@ class RaidOracle:
         return True
 
     def click_raid_precombat_notice(self, event: str) -> ActionReceipt:
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid precombat event is unsupported")
+        self._require_current_raid(event)
         button_state, _ui_state, target = self._amatsukaze_raid_notice_target()
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed immediately before Raid input")
@@ -1484,8 +1497,7 @@ class RaidOracle:
         )
 
     def click_raid_precombat_start(self, event: str) -> ActionReceipt:
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid precombat event is unsupported")
+        self._require_current_raid(event)
         button_state, _ui_state, target = self._amatsukaze_raid_precombat_state()
         if self.raid_precombat_notice_visible(event):
             raise SemanticGateClosed("Raid precombat start is obscured by notice")
@@ -1505,8 +1517,7 @@ class RaidOracle:
         )
 
     def click_raid_precombat_back(self, event: str) -> ActionReceipt:
-        if event != "raid_20260827":
-            raise SemanticGateClosed("Raid precombat event is unsupported")
+        self._require_current_raid(event)
         button_state, ui_state, start = self._amatsukaze_raid_precombat_state()
         if self.raid_precombat_notice_visible(event):
             raise SemanticGateClosed("Raid precombat back is obscured by notice")

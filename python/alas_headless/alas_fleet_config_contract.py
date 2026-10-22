@@ -33,7 +33,7 @@ class AlasFleetConfigSnapshot:
     fleet1_step: int
     fleet2: int
     fleet2_formation: str
-    fleet2_mode: str
+    fleet2_mode: str | None
     fleet2_step: int
     fleet_order: str
 
@@ -70,16 +70,16 @@ def validate_alas_fleet_config(
     fleet2_step: Any,
     fleet_order: Any,
 ) -> AlasFleetConfigSnapshot:
-    """Classify the complete pinned Fleet surface before ALAS navigates.
+    """Validate the configured Fleet surface before ALAS navigates.
 
-    Fleet selection and step values remain owned by ALAS and its existing map
-    state machine. The pinned ALAS tree never consumes either Formation field,
-    while non-auto combat modes still require untyped directional/weapon input.
-    The semantic campaign sortie has only reviewed one FleetOrder. Refuse those
-    valid-but-unqualified values early instead of silently ignoring or reaching
-    a legacy pixel/input path.
+    ALAS owns fleet selection, formation changes, step routing, and map flow.
+    Formation is consumed through the original strategy handler's dynamic
+    attribute lookup. Non-auto modes still require directional/weapon input
+    that this semantic boundary does not provide. Fleet-order combinations
+    below retain the required relationship with the configured second fleet.
     """
 
+    second_fleet = _bounded_integer(fleet2, field="Fleet.Fleet2", low=0, high=6)
     snapshot = AlasFleetConfigSnapshot(
         fleet1=_bounded_integer(fleet1, field="Fleet.Fleet1", low=1, high=6),
         fleet1_formation=_enum(
@@ -93,7 +93,7 @@ def validate_alas_fleet_config(
         fleet1_step=_bounded_integer(
             fleet1_step, field="Fleet.Fleet1Step", low=2, high=5
         ),
-        fleet2=_bounded_integer(fleet2, field="Fleet.Fleet2", low=0, high=6),
+        fleet2=second_fleet,
         fleet2_formation=_enum(
             fleet2_formation,
             field="Fleet.Fleet2Formation",
@@ -101,7 +101,7 @@ def validate_alas_fleet_config(
         ),
         fleet2_mode=_enum(
             fleet2_mode, field="Fleet.Fleet2Mode", allowed=FLEET_MODES
-        ),
+        ) if second_fleet else None,
         fleet2_step=_bounded_integer(
             fleet2_step, field="Fleet.Fleet2Step", low=2, high=5
         ),
@@ -110,25 +110,18 @@ def validate_alas_fleet_config(
         ),
     )
     if (
-        snapshot.fleet1_formation != "double_line"
-        or snapshot.fleet2_formation != "double_line"
-    ):
-        raise SemanticGateClosed(
-            "non-default Fleet formation is not consumed by pinned ALAS"
-        )
-    if (
         snapshot.fleet1_mode != "combat_auto"
-        or snapshot.fleet2_mode != "combat_auto"
+        or (snapshot.fleet2 != 0 and snapshot.fleet2_mode != "combat_auto")
     ):
         raise SemanticGateClosed(
             "manual Fleet modes require unqualified directional or weapon input"
         )
-    reviewed_order = snapshot.fleet_order == "fleet1_mob_fleet2_boss" or (
+    reviewed_order = snapshot.fleet_order in ("fleet1_mob_fleet2_boss", "fleet1_boss_fleet2_mob") or (
         snapshot.fleet2 == 0
         and snapshot.fleet_order == "fleet1_all_fleet2_standby"
     ) or (
         snapshot.fleet2 != 0
-        and snapshot.fleet_order == "fleet1_standby_fleet2_all"
+        and snapshot.fleet_order in ("fleet1_standby_fleet2_all", "fleet1_all_fleet2_standby")
     )
     if not reviewed_order:
         raise SemanticGateClosed(

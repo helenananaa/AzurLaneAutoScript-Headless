@@ -1,0 +1,2583 @@
+{
+  "scope": "Original frozen frame at native Guild PLAYER_CHECK session entry, not later diagnostic state",
+  "source": "goal-r144-guild-player-check-local-gap-r1.json",
+  "entry_generation": 1818,
+  "ui_source_generation": 1818,
+  "snapshot": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 17531,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "abi": "x86_64",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "snapshot_schema": 1,
+    "snapshot_struct_size": 104,
+    "generation": 1818,
+    "scene_generation": 2,
+    "semantic_generation": 2,
+    "snapshot_monotonic_ns": 5109269581528,
+    "response_monotonic_ns": 5109343159671,
+    "age_ms": 73,
+    "observer_tid": 17562,
+    "assembly_count": 129,
+    "semantic_code": 1,
+    "width": 1280,
+    "height": 720,
+    "flags": 15,
+    "observer_attached": false,
+    "main_thread": true,
+    "button_count": 144,
+    "active_button_count": 4,
+    "interactable_button_count": 144,
+    "scene_handle": -76,
+    "ui_stage": 100,
+    "ui_method_mask": 15
+  },
+  "buttons": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.buttons/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 17531,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 344104,
+    "generation": 1818,
+    "snapshot_monotonic_ns": 5109269581528,
+    "response_monotonic_ns": 5109343181880,
+    "age_ms": 73,
+    "button_count": 4,
+    "truncated": false,
+    "error_count": 0,
+    "buttons": [
+      {
+        "name": "help",
+        "path": "UICamera/Canvas/UIMain/GuildEmptyUI(Clone)/frame/help",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -40026,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -11.111,
+          "y": -7.256,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -26.5,
+          "y": -26.5,
+          "width": 53.0,
+          "height": 53.0
+        },
+        "screen_point": {
+          "x": 140.0,
+          "y": 33.467
+        },
+        "adb_point": {
+          "x": 140.0,
+          "y": 686.533
+        },
+        "screen_bounds": {
+          "left": 122.333,
+          "bottom": 15.8,
+          "right": 157.667,
+          "top": 51.133
+        },
+        "adb_bounds": {
+          "left": 122.333,
+          "top": 668.867,
+          "right": 157.667,
+          "bottom": 704.2
+        }
+      },
+      {
+        "name": "back",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back",
+        "canvas": "Overlay",
+        "flags": 3583,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": false,
+        "canvas_render_mode": 1,
+        "instance_id": -36248,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -12.942,
+          "y": 6.801,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -65.255,
+          "y": -55.7,
+          "width": 130.51,
+          "height": 111.4
+        },
+        "screen_point": {
+          "x": 57.605,
+          "y": 666.032
+        },
+        "adb_point": {
+          "x": 57.605,
+          "y": 53.968
+        },
+        "screen_bounds": {
+          "left": 0.576,
+          "bottom": 609.003,
+          "right": 114.634,
+          "top": 723.061
+        },
+        "adb_bounds": {
+          "left": 0.576,
+          "top": -3.061,
+          "right": 114.634,
+          "bottom": 110.997
+        }
+      },
+      {
+        "name": "option",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/option",
+        "canvas": "Overlay",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -36296,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 13.073,
+          "y": 7.141,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -46.0,
+          "y": -53.5,
+          "width": 92.0,
+          "height": 107.0
+        },
+        "screen_point": {
+          "x": 1228.276,
+          "y": 681.362
+        },
+        "adb_point": {
+          "x": 1228.276,
+          "y": 38.638
+        },
+        "screen_bounds": {
+          "left": 1197.602,
+          "bottom": 645.687,
+          "right": 1258.95,
+          "top": 717.037
+        },
+        "adb_bounds": {
+          "left": 1197.602,
+          "top": 2.963,
+          "right": 1258.95,
+          "bottom": 74.313
+        }
+      },
+      {
+        "name": "Loading(Clone)",
+        "path": "OverlayCamera/Overlay/UIOverlay/Loading(Clone)",
+        "canvas": "Loading(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -1368,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -960.0,
+          "y": -540.0,
+          "width": 1920.0,
+          "height": 1080.0
+        },
+        "screen_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "screen_bounds": {
+          "left": -0.0,
+          "bottom": 0.0,
+          "right": 1280.0,
+          "top": 720.0
+        },
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        }
+      }
+    ]
+  },
+  "ui": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.ui/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 17531,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 4466248,
+    "generation": 1818,
+    "snapshot_monotonic_ns": 5109269581528,
+    "response_monotonic_ns": 5109391068148,
+    "age_ms": 121,
+    "method_mask": 15,
+    "toggle_count": 5,
+    "text_count": 13,
+    "image_count": 54,
+    "toggle_truncated": false,
+    "text_truncated": false,
+    "image_truncated": false,
+    "error_count": 0,
+    "error_counts": {
+      "toggle": 0,
+      "text": 0,
+      "image": 0,
+      "shared": 0
+    },
+    "skipped_count": 0,
+    "image_source_count": 1488,
+    "image_source_capacity": 16384,
+    "toggles": [
+      {
+        "kind": "toggle",
+        "name": "battle",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/battle",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": true,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 538.416
+        },
+        "adb_bounds": {
+          "left": 0.078,
+          "top": 491.093,
+          "right": 103.055,
+          "bottom": 585.739
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "technology",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/technology",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 443.739
+        },
+        "adb_bounds": {
+          "left": 0.078,
+          "top": 396.416,
+          "right": 103.055,
+          "bottom": 491.062
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "office",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/office",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 349.062
+        },
+        "adb_bounds": {
+          "left": 0.078,
+          "top": 301.739,
+          "right": 103.055,
+          "bottom": 396.385
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "member",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/member",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 254.386
+        },
+        "adb_bounds": {
+          "left": 0.078,
+          "top": 207.063,
+          "right": 103.055,
+          "bottom": 301.709
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "main",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/main",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 159.709
+        },
+        "adb_bounds": {
+          "left": 0.061,
+          "top": 112.371,
+          "right": 103.072,
+          "bottom": 207.047
+        }
+      }
+    ],
+    "texts": [
+      {
+        "kind": "ugui-text",
+        "name": "pt",
+        "path": "OverlayCamera/Overlay/UIOverlay/ToastUI(Clone)/container/crusing_pt_tpl(Clone)/info/pt",
+        "text": "+120",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 156.453,
+          "top": 149.013,
+          "right": 221.537,
+          "bottom": 174.013
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "OverlayCamera/Overlay/UIOverlay/ToastUI(Clone)/container/crusing_pt_tpl(Clone)/info/name",
+        "text": "巡游点数",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 45.369,
+          "top": 150.513,
+          "right": 156.453,
+          "bottom": 172.513
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/path/ougen_h/name",
+        "text": "国际网骗梅莉",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 2010.524,
+          "top": 552.037,
+          "right": 2212.791,
+          "bottom": 600.488
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/path/sebao_2/name",
+        "text": "廖卧齊",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 211.109,
+          "top": 452.07,
+          "right": 413.376,
+          "bottom": 500.521
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/path/chair(Clone)/jinluhao_4/name",
+        "text": "咿呀啦",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 500.041,
+          "top": 491.057,
+          "right": 702.309,
+          "bottom": 539.508
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/path/aijier_4/name",
+        "text": "henlan",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 931.43,
+          "top": 452.07,
+          "right": 1133.697,
+          "bottom": 500.521
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/path/ankeleiqi_4/name",
+        "text": "桔梗謡",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 31.722,
+          "top": 452.07,
+          "right": 233.99,
+          "bottom": 500.521
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/path/chair1(Clone)/bisimai_2/name",
+        "text": "汉斯咖啡丿",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 970.362,
+          "top": 492.057,
+          "right": 1172.629,
+          "bottom": 540.508
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/path/xingdengbao_3/name",
+        "text": "时崎夜刀",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1610.654,
+          "top": 485.392,
+          "right": 1812.921,
+          "bottom": 533.843
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/path/kuangsan_2/name",
+        "text": "夏璃璃璃璃璃",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 344.398,
+          "top": 585.36,
+          "right": 546.666,
+          "bottom": 633.811
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/path/yanusi_7/name",
+        "text": "温水煮蛮啾",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 144.464,
+          "top": 485.392,
+          "right": 346.731,
+          "bottom": 533.843
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/path/mojiaduoer_4/name",
+        "text": "孤昔",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 710.946,
+          "top": 485.392,
+          "right": 913.214,
+          "bottom": 533.843
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "FpsPanel",
+        "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+        "text": "",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 573.333,
+          "top": 0.0,
+          "right": 706.667,
+          "bottom": 34.667
+        }
+      }
+    ],
+    "images": [
+      {
+        "kind": "image",
+        "name": "help",
+        "path": "UICamera/Canvas/UIMain/GuildEmptyUI(Clone)/frame/help",
+        "sprite": "help_butten",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 122.333,
+          "top": 668.867,
+          "right": 157.667,
+          "bottom": 704.2
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 140.0,
+          "y": 686.533
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "PointIcon",
+        "path": "OverlayCamera/Overlay/UIOverlay/ToastUI(Clone)/container/crusing_pt_tpl(Clone)/PointIcon",
+        "sprite": "battlepass_pt",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 140.333,
+          "right": 42.667,
+          "bottom": 182.999
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 21.333,
+          "y": 161.666
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "BG",
+        "path": "OverlayCamera/Overlay/UIOverlay/ToastUI(Clone)/container/crusing_pt_tpl(Clone)/BG",
+        "sprite": "bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 134.999,
+          "right": 227.333,
+          "bottom": 190.999
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 113.667,
+          "y": 162.999
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "guild_office_red(Clone)",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/bg/painting/fitter/guild_office_red(Clone)",
+        "sprite": "guild_office_red",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -149.322,
+          "top": 53.216,
+          "right": 588.35,
+          "bottom": 1042.953
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 148.724,
+          "y": 473.987
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tag",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/path/mojiaduoer_4/tag",
+        "sprite": "tag_commander",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 764.429,
+          "top": 471.963,
+          "right": 859.731,
+          "bottom": 493.956
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 812.08,
+          "y": 482.96
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "chair1(Clone)",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/path/chair1(Clone)",
+        "sprite": "chair1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1010.182,
+          "top": 547.606,
+          "right": 1132.142,
+          "bottom": 698.223
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1010.182,
+          "y": 698.223
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "chair(Clone)",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/path/chair(Clone)",
+        "sprite": "chair",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 538.529,
+          "top": 545.606,
+          "right": 659.823,
+          "bottom": 698.223
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 538.529,
+          "y": 698.223
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "option",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/option",
+        "sprite": "viewall_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1197.602,
+          "top": 2.963,
+          "right": 1258.95,
+          "bottom": 74.313
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1228.276,
+          "y": 38.638
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/title/Image",
+        "sprite": "dajiandui_text1",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 200.964,
+          "top": 22.302,
+          "right": 252.969,
+          "bottom": 48.972
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 226.966,
+          "y": 35.637
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "title",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/title",
+        "sprite": "dajiandui_text",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 110.405,
+          "top": 4.43,
+          "right": 209.762,
+          "bottom": 50.441
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 160.083,
+          "y": 27.435
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back/mask/Image",
+        "sprite": "back_btn",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 23.065,
+          "top": 18.628,
+          "right": 94.412,
+          "bottom": 88.641
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 58.739,
+          "y": 53.634
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "mask",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back/mask",
+        "sprite": "icon_bg_mask_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.140138,
+          "green": 0.125541,
+          "blue": 0.198529,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 11.597,
+          "top": 7.959,
+          "right": 103.613,
+          "bottom": 99.976
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 57.605,
+          "y": 53.968
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "back",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back",
+        "sprite": "icon_bg_front_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 0.576,
+          "top": -3.061,
+          "right": 114.634,
+          "bottom": 110.997
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 57.605,
+          "y": 53.968
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/line",
+        "sprite": "top_line",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.588235
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -214.041,
+          "top": 53.301,
+          "right": 1494.041,
+          "bottom": 54.634
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 54.634
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "print",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/print",
+        "sprite": "player_info_bg1_1920",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 98.7,
+          "top": 27.898,
+          "right": 363.88,
+          "bottom": 45.234
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 231.29,
+          "y": 36.566
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "print_bg",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/print_bg",
+        "sprite": "player_info_bg2_1920",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 94.084,
+          "top": 8.964,
+          "right": 412.768,
+          "bottom": 47.633
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 253.426,
+          "y": 28.298
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "print_top",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/print_top",
+        "sprite": "icon_bg_top_1920",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 56.003,
+          "top": -0.039,
+          "right": 114.013,
+          "bottom": 25.299
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 85.008,
+          "y": 12.63
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tip",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/battle/tip",
+        "sprite": "tip",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 70.394,
+          "top": 491.091,
+          "right": 103.057,
+          "bottom": 523.754
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 86.725,
+          "y": 507.423
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/battle/line",
+        "sprite": "line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.089,
+          "top": 585.072,
+          "right": 103.222,
+          "bottom": 586.405
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 585.739
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/battle/selected/Image",
+        "sprite": "toggle_battle_sel",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -1.755,
+          "top": 485.094,
+          "right": 104.888,
+          "bottom": 591.737
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 538.416
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "selected",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/battle/selected",
+        "sprite": "selected",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 0.078,
+          "top": 491.093,
+          "right": 103.055,
+          "bottom": 585.739
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 538.416
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "battle",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/battle",
+        "sprite": "line",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 0.078,
+          "top": 491.093,
+          "right": 103.055,
+          "bottom": 585.739
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 538.416
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/technology/line",
+        "sprite": "line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.089,
+          "top": 490.396,
+          "right": 103.222,
+          "bottom": 491.729
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 491.062
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/technology/Image",
+        "sprite": "toggle_tech_unsel",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -1.755,
+          "top": 390.417,
+          "right": 104.888,
+          "bottom": 497.061
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 443.739
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "technology",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/technology",
+        "sprite": "line",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 0.078,
+          "top": 396.416,
+          "right": 103.055,
+          "bottom": 491.062
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 443.739
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/office/line",
+        "sprite": "line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.089,
+          "top": 395.719,
+          "right": 103.222,
+          "bottom": 397.052
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 396.385
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/office/Image",
+        "sprite": "toggle_office_unsel",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -1.755,
+          "top": 295.741,
+          "right": 104.888,
+          "bottom": 402.384
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 349.062
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "office",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/office",
+        "sprite": "line",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 0.078,
+          "top": 301.739,
+          "right": 103.055,
+          "bottom": 396.385
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 349.062
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/member/line",
+        "sprite": "line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.089,
+          "top": 301.042,
+          "right": 103.222,
+          "bottom": 302.375
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 301.709
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/member/Image",
+        "sprite": "toggle_chengyuan_unsel",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -1.755,
+          "top": 201.064,
+          "right": 104.888,
+          "bottom": 307.707
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 254.386
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "member",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/member",
+        "sprite": "line",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 0.078,
+          "top": 207.063,
+          "right": 103.055,
+          "bottom": 301.709
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 254.386
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/main/line",
+        "sprite": "line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.106,
+          "top": 206.381,
+          "right": 103.239,
+          "bottom": 207.714
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 207.047
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/main/Image",
+        "sprite": "toggle_souye_unsel",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -1.773,
+          "top": 106.37,
+          "right": 104.905,
+          "bottom": 213.048
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 159.709
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "main",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/main",
+        "sprite": "left_panel",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 0.061,
+          "top": 112.371,
+          "right": 103.072,
+          "bottom": 207.047
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.566,
+          "y": 159.709
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame",
+        "sprite": "left_panel",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.271,
+          "top": -0.038,
+          "right": 103.073,
+          "bottom": 717.905
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.401,
+          "y": 358.933
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "hori",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/hori",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.313726
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 103.543,
+          "top": 53.301,
+          "right": 104.877,
+          "bottom": 996.504
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 104.21,
+          "y": 53.301
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "left_length",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length",
+        "sprite": "top_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.068,
+          "top": -0.038,
+          "right": 103.277,
+          "bottom": 719.905
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -0.068,
+          "y": 359.933
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "top_bg",
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/top_bg",
+        "sprite": "top_bg",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.016,
+          "top": 0.0,
+          "right": 1280.016,
+          "bottom": 54.668
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 0.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/bg",
+        "sprite": "bg_guild_red_n",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 0.075,
+          "top": 0.042,
+          "right": 1279.925,
+          "bottom": 719.958
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "object9",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect1/content/object9",
+        "sprite": "light",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 490.664,
+          "top": 16.637,
+          "right": 751.206,
+          "bottom": 334.485
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 620.935,
+          "y": 175.561
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "object8",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect1/content/object8",
+        "sprite": "light",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 814.348,
+          "top": 16.637,
+          "right": 1074.89,
+          "bottom": 334.485
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 944.619,
+          "y": 175.561
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "object7",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect1/content/object7",
+        "sprite": "light",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1349.799,
+          "top": 16.637,
+          "right": 1610.341,
+          "bottom": 334.485
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1480.07,
+          "y": 175.561
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "object6",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/object6",
+        "sprite": "table1",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1551.403,
+          "top": 590.354,
+          "right": 1987.261,
+          "bottom": 719.646
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1769.332,
+          "y": 655.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "object5",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/object5",
+        "sprite": "table",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 685.525,
+          "top": 569.691,
+          "right": 1050.073,
+          "bottom": 719.642
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 867.799,
+          "y": 644.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "object4",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/object4",
+        "sprite": "door",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1087.392,
+          "top": 583.689,
+          "right": 1457.938,
+          "bottom": 719.645
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1272.665,
+          "y": 651.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "object1",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/object1",
+        "sprite": "buckt",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 462.932,
+          "top": 619.0,
+          "right": 558.265,
+          "bottom": 719.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 510.599,
+          "y": 669.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg2",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/bg2",
+        "sprite": "guild_d_bg2",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1364.665,
+          "top": -0.333,
+          "right": 2124.665,
+          "bottom": 719.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1744.665,
+          "y": 359.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg1",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg/scrollrect/content/bg1",
+        "sprite": "guild_d_bg1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.668,
+          "top": -0.333,
+          "right": 1364.665,
+          "bottom": 719.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 681.999,
+          "y": 359.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "dynamic_bg",
+        "path": "UICamera/Canvas/UIMain/GuildMainUI(Clone)/dynamic_bg",
+        "sprite": "white_dot",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Loading(Clone)",
+        "path": "OverlayCamera/Overlay/UIOverlay/Loading(Clone)",
+        "sprite": "white_dot",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 0.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "top",
+        "path": "OverlayCamera/Adpter/top/top",
+        "sprite": "mask1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": -140.667,
+          "right": 1280.0,
+          "bottom": 0.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": -70.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "left",
+        "path": "OverlayCamera/Adpter/left/left",
+        "sprite": "mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -140.667,
+          "top": 0.0,
+          "right": -0.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -70.333,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bottom",
+        "path": "OverlayCamera/Adpter/bottom/bottom",
+        "sprite": "mask1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 720.0,
+          "right": 1280.0,
+          "bottom": 860.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 790.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "right",
+        "path": "OverlayCamera/Adpter/right/right",
+        "sprite": "mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1280.0,
+          "top": 0.0,
+          "right": 1420.667,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1350.333,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      }
+    ],
+    "globe_geometry": {
+      "schema": "alas-headless.globe-geometry/v1",
+      "status": 0,
+      "truncated": false,
+      "error_count": 0,
+      "camera_path": "",
+      "objects": []
+    },
+    "lua_globe_diagnostic": {
+      "schema": "alas-headless.lua-globe-diagnostic/v1",
+      "status": 0,
+      "stage": 0,
+      "truncated": false,
+      "stack_balanced": false,
+      "registry_visited": 0,
+      "inspection_count": 0,
+      "world_candidates": 0,
+      "drag_candidates": 0,
+      "colors": [],
+      "dragging": [],
+      "drag_pointer_instance_ids": [],
+      "drag_trigger_instance_ids": [],
+      "active_pointer_instance_id": 0
+    },
+    "shipyard_strengthen": {
+      "status": 0,
+      "stage": 0,
+      "truncated": false,
+      "stack_balanced": false,
+      "blueprint_id": 0,
+      "ship_id": 0,
+      "ship_index": 0,
+      "series": 0,
+      "rarity": 0,
+      "pursuing": false,
+      "purchased": 0,
+      "coins": 0,
+      "gems_known": false,
+      "paid_gems": 0,
+      "free_gems": 0,
+      "level": 0,
+      "fate_level": -1,
+      "exp": 0
+    },
+    "activity_identity": {
+      "status": 1,
+      "stack_balanced": true,
+      "archives": {
+        "status": 1,
+        "expected_count": 50,
+        "truncated": false,
+        "records": [
+          {
+            "id": 1,
+            "activity_type": 1,
+            "name": "红染常驻复刻",
+            "bg": "temp_hongran"
+          },
+          {
+            "id": 2,
+            "activity_type": 2,
+            "name": "Z舰队常驻复刻",
+            "bg": "temp_zjiandui"
+          },
+          {
+            "id": 4,
+            "activity_type": 1,
+            "name": "凛冬常驻复刻",
+            "bg": "temp_lingdong"
+          },
+          {
+            "id": 5,
+            "activity_type": 2,
+            "name": "围剿斯佩伯爵』常驻复刻",
+            "bg": "temp_sipei"
+          },
+          {
+            "id": 6,
+            "activity_type": 1,
+            "name": "异色格常驻复刻",
+            "bg": "temp_yisege"
+          },
+          {
+            "id": 7,
+            "activity_type": 1,
+            "name": "坠落之翼常驻复刻",
+            "bg": "temp_zhuiluo"
+          },
+          {
+            "id": 8,
+            "activity_type": 1,
+            "name": "鸢尾之华常驻复刻",
+            "bg": "temp_yuanwei"
+          },
+          {
+            "id": 9,
+            "activity_type": 1,
+            "name": "墨染的钢铁之花常驻复刻",
+            "bg": "temp_moran"
+          },
+          {
+            "id": 10,
+            "activity_type": 2,
+            "name": "光荣的一战常驻复刻",
+            "bg": "temp_guangrong"
+          },
+          {
+            "id": 11,
+            "activity_type": 1,
+            "name": "苍红的回响常驻复刻",
+            "bg": "temp_tiancheng"
+          },
+          {
+            "id": 12,
+            "activity_type": 2,
+            "name": "月光下的序曲常驻复刻",
+            "bg": "temp_xinaoerliang"
+          },
+          {
+            "id": 13,
+            "activity_type": 1,
+            "name": "俾斯麦常驻复刻",
+            "bg": "temp_bisimai"
+          },
+          {
+            "id": 14,
+            "activity_type": 2,
+            "name": "偶像一期常驻复刻",
+            "bg": "temp_ouxiang"
+          },
+          {
+            "id": 15,
+            "activity_type": 1,
+            "name": "神圣的悲喜剧常驻复刻",
+            "bg": "temp_beixiju"
+          },
+          {
+            "id": 16,
+            "activity_type": 2,
+            "name": "斯图尔特的硝烟常驻复刻",
+            "bg": "temp_longxiang"
+          },
+          {
+            "id": 17,
+            "activity_type": 1,
+            "name": "箱庭疗法常驻复刻",
+            "bg": "temp_xiangting"
+          },
+          {
+            "id": 18,
+            "activity_type": 1,
+            "name": "浮樱影华常驻复刻",
+            "bg": "temp_fuying"
+          },
+          {
+            "id": 19,
+            "activity_type": 2,
+            "name": "最珍贵的宝物常驻复刻",
+            "bg": "temp_u110"
+          },
+          {
+            "id": 20,
+            "activity_type": 2,
+            "name": "偶像二期常驻复刻",
+            "bg": "temp_ouxiang2"
+          },
+          {
+            "id": 21,
+            "activity_type": 1,
+            "name": "微层混合常驻复刻",
+            "bg": "temp_weiceng"
+          },
+          {
+            "id": 22,
+            "activity_type": 2,
+            "name": "峡湾间的星辰常驻复刻",
+            "bg": "temp_yonggan"
+          },
+          {
+            "id": 23,
+            "activity_type": 1,
+            "name": "穹顶下的圣咏曲常驻复刻",
+            "bg": "temp_zhende"
+          },
+          {
+            "id": 24,
+            "activity_type": 2,
+            "name": "夜幕下的归途常驻复刻",
+            "bg": "temp_taertu"
+          },
+          {
+            "id": 25,
+            "activity_type": 1,
+            "name": "北境序曲常驻复刻",
+            "bg": "temp_qiaba"
+          },
+          {
+            "id": 26,
+            "activity_type": 1,
+            "name": "永夜幻光常驻复刻",
+            "bg": "temp_hemin"
+          },
+          {
+            "id": 27,
+            "activity_type": 2,
+            "name": "峡湾间的反击常驻复刻",
+            "bg": "temp_aisijimoren"
+          },
+          {
+            "id": 28,
+            "activity_type": 1,
+            "name": "负象限作战常驻复刻",
+            "bg": "temp_u37"
+          },
+          {
+            "id": 29,
+            "activity_type": 1,
+            "name": "蝶海梦花常驻复刻",
+            "bg": "temp_xinnong"
+          },
+          {
+            "id": 30,
+            "activity_type": 1,
+            "name": "镜位螺旋常驻复刻",
+            "bg": "temp_xinzexi"
+          },
+          {
+            "id": 31,
+            "activity_type": 1,
+            "name": "破晓冰华常驻复刻",
+            "bg": "temp_talin"
+          },
+          {
+            "id": 32,
+            "activity_type": 2,
+            "name": "划破海空之翼常驻复刻",
+            "bg": "temp_pulinsidun"
+          },
+          {
+            "id": 33,
+            "activity_type": 2,
+            "name": "杰诺瓦的焰火常驻复刻",
+            "bg": "temp_fuxv"
+          },
+          {
+            "id": 34,
+            "activity_type": 1,
+            "name": "碧海光粼常驻复刻",
+            "bg": "temp_daofeng"
+          },
+          {
+            "id": 35,
+            "activity_type": 1,
+            "name": "复兴的赞美诗常驻复刻",
+            "bg": "temp_weineituo"
+          },
+          {
+            "id": 36,
+            "activity_type": 1,
+            "name": "逆转彩虹之塔常驻复刻",
+            "bg": "temp_huteng"
+          },
+          {
+            "id": 37,
+            "activity_type": 1,
+            "name": "深度回音常驻复刻",
+            "bg": "temp_kalangshitade"
+          },
+          {
+            "id": 38,
+            "activity_type": 2,
+            "name": "虚像构筑之塔常驻复刻",
+            "bg": "temp_diguo"
+          },
+          {
+            "id": 39,
+            "activity_type": 1,
+            "name": "泠誓光庭常驻复刻",
+            "bg": "temp_qianwei"
+          },
+          {
+            "id": 40,
+            "activity_type": 1,
+            "name": "雄鹰的叙事歌常驻复刻",
+            "bg": "temp_luoma"
+          },
+          {
+            "id": 41,
+            "activity_type": 1,
+            "name": "虹彩的终幕曲常驻复刻",
+            "bg": "temp_aimudeng"
+          },
+          {
+            "id": 42,
+            "activity_type": 2,
+            "name": "飓风与青春之泉常驻复刻",
+            "bg": "temp_fengfanv1"
+          },
+          {
+            "id": 43,
+            "activity_type": 1,
+            "name": "紫绛槿岚常驻复刻",
+            "bg": "temp_wuzang"
+          },
+          {
+            "id": 44,
+            "activity_type": 1,
+            "name": "定向折叠常驻复刻",
+            "bg": "temp_yuekechengII"
+          },
+          {
+            "id": 45,
+            "activity_type": 1,
+            "name": "湮烬尘墟常驻复刻",
+            "bg": "temp_yuanchou"
+          },
+          {
+            "id": 46,
+            "activity_type": 2,
+            "name": "远汇点作战常驻复刻",
+            "bg": "temp_bulunxierde"
+          },
+          {
+            "id": 47,
+            "activity_type": 2,
+            "name": "奏响鸢尾之歌常驻复刻",
+            "bg": "temp_masaiqu"
+          },
+          {
+            "id": 48,
+            "activity_type": 1,
+            "name": "空相交汇点常驻复刻",
+            "bg": "temp_bisimaiz"
+          },
+          {
+            "id": 49,
+            "activity_type": 2,
+            "name": "幻梦间奏曲常驻复刻",
+            "bg": "temp_sitelasibao"
+          },
+          {
+            "id": 50,
+            "activity_type": 3,
+            "name": "极地风暴常驻复刻",
+            "bg": "temp_kuersike"
+          },
+          {
+            "id": 51,
+            "activity_type": 3,
+            "name": "童心学院常驻复刻",
+            "bg": "temp_yaerweite"
+          }
+        ]
+      },
+      "raids": {
+        "status": 1,
+        "stage": 14,
+        "proxy_count": 29,
+        "matched_count": 29,
+        "failed_id": 0,
+        "expected_count": 0,
+        "truncated": false,
+        "records": []
+      }
+    },
+    "operation_siren_map_drag": {
+      "status": 0,
+      "handler_instance_id": 0,
+      "endpoints": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "handler_path": "",
+      "samples": []
+    },
+    "private_quarters_physics": {
+      "schema": "alas-headless.private-colliders/v1",
+      "status": 0,
+      "truncated": false,
+      "error_count": 0,
+      "camera_path": "",
+      "colliders": []
+    }
+  }
+}

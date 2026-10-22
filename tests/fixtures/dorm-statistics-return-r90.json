@@ -1,0 +1,2370 @@
+{
+  "source": "goal-scheduler-r90.json",
+  "source_sha256": "26433e52e0248cb62554a35782bf2895d541f990c1ad387e13b1bd94baf572c2",
+  "scope": "Retained later diagnostic frame1779 following accepted close1725; does not represent original failed guard1739 or fresh live evidence",
+  "snapshot": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 22787,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "abi": "x86_64",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "snapshot_schema": 1,
+    "snapshot_struct_size": 104,
+    "generation": 1779,
+    "scene_generation": 2,
+    "semantic_generation": 2,
+    "snapshot_monotonic_ns": 34832312779918,
+    "response_monotonic_ns": 34832560821468,
+    "age_ms": 248,
+    "observer_tid": 22818,
+    "assembly_count": 129,
+    "semantic_code": 1,
+    "width": 1280,
+    "height": 720,
+    "flags": 15,
+    "observer_attached": false,
+    "main_thread": true,
+    "button_count": 215,
+    "active_button_count": 51,
+    "interactable_button_count": 215,
+    "scene_handle": -76,
+    "ui_stage": 100,
+    "ui_method_mask": 15
+  },
+  "buttons": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.buttons/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 22787,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 344104,
+    "generation": 1779,
+    "snapshot_monotonic_ns": 34832312779918,
+    "response_monotonic_ns": 34832560835789,
+    "age_ms": 248,
+    "button_count": 51,
+    "truncated": false,
+    "error_count": 0,
+    "buttons": [
+      {
+        "name": "34130400_7",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/wall/34130400_7",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -77140,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -19.23,
+          "y": -1.837,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": 2.51,
+          "y": 89.76,
+          "width": 251.0,
+          "height": 264.0
+        },
+        "screen_point": {
+          "x": -225.364,
+          "y": 277.326
+        },
+        "adb_point": {
+          "x": -225.364,
+          "y": 442.674
+        },
+        "screen_bounds": {
+          "left": -222.958,
+          "bottom": 363.376,
+          "right": 17.668,
+          "top": 616.464
+        },
+        "adb_bounds": {
+          "left": -222.958,
+          "top": 103.536,
+          "right": 17.668,
+          "bottom": 356.624
+        }
+      },
+      {
+        "name": "34130301_8",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/wall/34130301_8",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -77108,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 19.087,
+          "y": -1.837,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": 18.41,
+          "y": 158.2,
+          "width": 263.0,
+          "height": 226.0
+        },
+        "screen_point": {
+          "x": 1498.894,
+          "y": 277.326
+        },
+        "adb_point": {
+          "x": 1498.894,
+          "y": 442.674
+        },
+        "screen_bounds": {
+          "left": 1229.115,
+          "bottom": 428.987,
+          "right": 1481.245,
+          "top": 645.646
+        },
+        "adb_bounds": {
+          "left": 1229.115,
+          "top": 74.354,
+          "right": 1481.245,
+          "bottom": 291.013
+        }
+      },
+      {
+        "name": "34130300_0",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/wall/34130300_0",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -77076,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 6.592,
+          "y": 4.394,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": 18.41,
+          "y": 158.2,
+          "width": 263.0,
+          "height": 226.0
+        },
+        "screen_point": {
+          "x": 936.636,
+          "y": 557.736
+        },
+        "adb_point": {
+          "x": 936.636,
+          "y": 162.264
+        },
+        "screen_bounds": {
+          "left": 666.858,
+          "bottom": 709.397,
+          "right": 918.987,
+          "top": 926.056
+        },
+        "adb_bounds": {
+          "left": 666.858,
+          "top": -206.056,
+          "right": 918.987,
+          "bottom": 10.603
+        }
+      },
+      {
+        "name": "34130200_2",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/wall/34130200_2",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -77044,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -9.235,
+          "y": 3.148,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": 24.156,
+          "y": 161.498,
+          "width": 70.0,
+          "height": 73.0
+        },
+        "screen_point": {
+          "x": 224.442,
+          "y": 501.654
+        },
+        "adb_point": {
+          "x": 224.442,
+          "y": 218.346
+        },
+        "screen_bounds": {
+          "left": 247.6,
+          "bottom": 656.477,
+          "right": 314.707,
+          "top": 726.46
+        },
+        "adb_bounds": {
+          "left": 247.6,
+          "top": -6.46,
+          "right": 314.707,
+          "bottom": 63.523
+        }
+      },
+      {
+        "name": "34130100_4",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/wall/34130100_4",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -77012,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 11.59,
+          "y": 1.902,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": 32.22,
+          "y": 143.52,
+          "width": 179.0,
+          "height": 184.0
+        },
+        "screen_point": {
+          "x": 1161.539,
+          "y": 445.572
+        },
+        "adb_point": {
+          "x": 1161.539,
+          "y": 274.428
+        },
+        "screen_bounds": {
+          "left": 959.05,
+          "bottom": 583.16,
+          "right": 1130.651,
+          "top": 759.555
+        },
+        "adb_bounds": {
+          "left": 959.05,
+          "top": -39.555,
+          "right": 1130.651,
+          "bottom": 136.84
+        }
+      },
+      {
+        "name": "34111800_17",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34111800_17",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76980,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 18.254,
+          "y": -3.083,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -61.5,
+          "y": 22.119,
+          "width": 123.0,
+          "height": 184.0
+        },
+        "screen_point": {
+          "x": 1461.41,
+          "y": 221.244
+        },
+        "adb_point": {
+          "x": 1461.41,
+          "y": 498.756
+        },
+        "screen_bounds": {
+          "left": 1402.452,
+          "bottom": 242.449,
+          "right": 1520.368,
+          "top": 418.844
+        },
+        "adb_bounds": {
+          "left": 1402.452,
+          "top": 301.156,
+          "right": 1520.368,
+          "bottom": 477.551
+        }
+      },
+      {
+        "name": "34111700_24",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34111700_24",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76948,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -12.567,
+          "y": -5.161,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -93.16,
+          "y": -0.0,
+          "width": 137.0,
+          "height": 148.0
+        },
+        "screen_point": {
+          "x": 74.507,
+          "y": 127.774
+        },
+        "adb_point": {
+          "x": 74.507,
+          "y": 592.226
+        },
+        "screen_bounds": {
+          "left": -14.802,
+          "bottom": 127.774,
+          "right": 116.535,
+          "top": 269.657
+        },
+        "adb_bounds": {
+          "left": -14.802,
+          "top": 450.343,
+          "right": 116.535,
+          "bottom": 592.226
+        }
+      },
+      {
+        "name": "34111600_6",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34111600_6",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76868,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 5.759,
+          "y": 3.148,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -45.0,
+          "y": 13.65,
+          "width": 90.0,
+          "height": 273.0
+        },
+        "screen_point": {
+          "x": 899.152,
+          "y": 501.654
+        },
+        "adb_point": {
+          "x": 899.152,
+          "y": 218.346
+        },
+        "screen_bounds": {
+          "left": 856.012,
+          "bottom": 514.74,
+          "right": 942.292,
+          "top": 776.456
+        },
+        "adb_bounds": {
+          "left": 856.012,
+          "top": -56.456,
+          "right": 942.292,
+          "bottom": 205.26
+        }
+      },
+      {
+        "name": "34111500_22",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34111500_22",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76836,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -12.567,
+          "y": -0.176,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -67.5,
+          "y": 2.99,
+          "width": 135.0,
+          "height": 299.0
+        },
+        "screen_point": {
+          "x": 74.507,
+          "y": 352.102
+        },
+        "adb_point": {
+          "x": 74.507,
+          "y": 367.898
+        },
+        "screen_bounds": {
+          "left": 9.797,
+          "bottom": 354.969,
+          "right": 139.217,
+          "top": 641.61
+        },
+        "adb_bounds": {
+          "left": 9.797,
+          "top": 78.39,
+          "right": 139.217,
+          "bottom": 365.031
+        }
+      },
+      {
+        "name": "34111400_29",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34111400_29",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76804,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 5.759,
+          "y": -9.315,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -135.32,
+          "y": 3.21,
+          "width": 199.0,
+          "height": 321.0
+        },
+        "screen_point": {
+          "x": 899.152,
+          "y": -59.166
+        },
+        "adb_point": {
+          "x": 899.152,
+          "y": 779.166
+        },
+        "screen_bounds": {
+          "left": 769.425,
+          "bottom": -56.089,
+          "right": 960.2,
+          "top": 251.643
+        },
+        "adb_bounds": {
+          "left": 769.425,
+          "top": 468.357,
+          "right": 960.2,
+          "bottom": 776.089
+        }
+      },
+      {
+        "name": "34111300_3",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34111300_3",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76772,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 2.427,
+          "y": 4.81,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -78.72,
+          "y": 4.65,
+          "width": 164.0,
+          "height": 155.0
+        },
+        "screen_point": {
+          "x": 749.217,
+          "y": 576.43
+        },
+        "adb_point": {
+          "x": 749.217,
+          "y": 143.57
+        },
+        "screen_bounds": {
+          "left": 673.75,
+          "bottom": 580.888,
+          "right": 830.972,
+          "top": 729.481
+        },
+        "adb_bounds": {
+          "left": 673.75,
+          "top": -9.481,
+          "right": 830.972,
+          "bottom": 139.112
+        }
+      },
+      {
+        "name": "34111200_19",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34111200_19",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76740,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 10.757,
+          "y": -6.822,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -113.168,
+          "y": 17.147,
+          "width": 250.0,
+          "height": 259.0
+        },
+        "screen_point": {
+          "x": 1124.055,
+          "y": 52.998
+        },
+        "adb_point": {
+          "x": 1124.055,
+          "y": 667.002
+        },
+        "screen_bounds": {
+          "left": 1015.564,
+          "bottom": 69.437,
+          "right": 1255.231,
+          "top": 317.731
+        },
+        "adb_bounds": {
+          "left": 1015.564,
+          "top": 402.269,
+          "right": 1255.231,
+          "bottom": 650.563
+        }
+      },
+      {
+        "name": "34111100_15",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34111100_15",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76708,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 11.59,
+          "y": -2.253,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -54.59,
+          "y": 1.54,
+          "width": 103.0,
+          "height": 154.0
+        },
+        "screen_point": {
+          "x": 1161.539,
+          "y": 258.632
+        },
+        "adb_point": {
+          "x": 1161.539,
+          "y": 461.368
+        },
+        "screen_bounds": {
+          "left": 1109.206,
+          "bottom": 260.109,
+          "right": 1207.948,
+          "top": 407.743
+        },
+        "adb_bounds": {
+          "left": 1109.206,
+          "top": 312.257,
+          "right": 1207.948,
+          "bottom": 459.891
+        }
+      },
+      {
+        "name": "34111000_23",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34111000_23",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76676,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -8.402,
+          "y": -4.745,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -127.437,
+          "y": 9.317,
+          "width": 192.005,
+          "height": 184.004
+        },
+        "screen_point": {
+          "x": 261.926,
+          "y": 146.468
+        },
+        "adb_point": {
+          "x": 261.926,
+          "y": 573.532
+        },
+        "screen_bounds": {
+          "left": 139.757,
+          "bottom": 155.4,
+          "right": 323.825,
+          "top": 331.798
+        },
+        "adb_bounds": {
+          "left": 139.757,
+          "top": 388.202,
+          "right": 323.825,
+          "bottom": 564.6
+        }
+      },
+      {
+        "name": "34110900_28",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34110900_28",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76166,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -1.738,
+          "y": -8.899,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -66.001,
+          "y": -5.722,
+          "width": 132.002,
+          "height": 145.404
+        },
+        "screen_point": {
+          "x": 561.797,
+          "y": -40.472
+        },
+        "adb_point": {
+          "x": 561.797,
+          "y": 760.472
+        },
+        "screen_bounds": {
+          "left": 498.524,
+          "bottom": -45.957,
+          "right": 625.07,
+          "top": 93.437
+        },
+        "adb_bounds": {
+          "left": 498.524,
+          "top": 626.563,
+          "right": 625.07,
+          "bottom": 765.957
+        }
+      },
+      {
+        "name": "34110801_12",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34110801_12",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76134,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 9.924,
+          "y": -0.591,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -61.77,
+          "y": -0.0,
+          "width": 213.0,
+          "height": 318.0
+        },
+        "screen_point": {
+          "x": 1086.571,
+          "y": 333.408
+        },
+        "adb_point": {
+          "x": 1086.571,
+          "y": 386.592
+        },
+        "screen_bounds": {
+          "left": 1027.355,
+          "bottom": 333.408,
+          "right": 1231.551,
+          "top": 638.264
+        },
+        "adb_bounds": {
+          "left": 1027.355,
+          "top": 81.736,
+          "right": 1231.551,
+          "bottom": 386.592
+        }
+      },
+      {
+        "name": "34110800_5",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34110800_5",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76102,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 2.427,
+          "y": 3.148,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -61.77,
+          "y": -0.0,
+          "width": 213.0,
+          "height": 318.0
+        },
+        "screen_point": {
+          "x": 749.217,
+          "y": 501.654
+        },
+        "adb_point": {
+          "x": 749.217,
+          "y": 218.346
+        },
+        "screen_bounds": {
+          "left": 690.0,
+          "bottom": 501.654,
+          "right": 894.196,
+          "top": 806.51
+        },
+        "adb_bounds": {
+          "left": 690.0,
+          "top": -86.51,
+          "right": 894.196,
+          "bottom": 218.346
+        }
+      },
+      {
+        "name": "34110700_27",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34110700_27",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76070,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -5.903,
+          "y": -9.315,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -161.189,
+          "y": 0.0,
+          "width": 274.0,
+          "height": 221.0
+        },
+        "screen_point": {
+          "x": 374.378,
+          "y": -59.166
+        },
+        "adb_point": {
+          "x": 374.378,
+          "y": 779.166
+        },
+        "screen_bounds": {
+          "left": 219.851,
+          "bottom": -59.166,
+          "right": 482.526,
+          "top": 152.699
+        },
+        "adb_bounds": {
+          "left": 219.851,
+          "top": 567.301,
+          "right": 482.526,
+          "bottom": 779.166
+        }
+      },
+      {
+        "name": "34110600_10",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34110600_10",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76038,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 9.924,
+          "y": 1.071,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -55.59,
+          "y": 12.7,
+          "width": 109.0,
+          "height": 127.0
+        },
+        "screen_point": {
+          "x": 1086.571,
+          "y": 408.184
+        },
+        "adb_point": {
+          "x": 1086.571,
+          "y": 311.816
+        },
+        "screen_bounds": {
+          "left": 1033.279,
+          "bottom": 420.359,
+          "right": 1137.774,
+          "top": 542.11
+        },
+        "adb_bounds": {
+          "left": 1033.279,
+          "top": 177.89,
+          "right": 1137.774,
+          "bottom": 299.641
+        }
+      },
+      {
+        "name": "34110500_26",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34110500_26",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76006,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 1.594,
+          "y": -7.238,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -128.76,
+          "y": 1.78,
+          "width": 222.0,
+          "height": 178.0
+        },
+        "screen_point": {
+          "x": 711.733,
+          "y": 34.304
+        },
+        "adb_point": {
+          "x": 711.733,
+          "y": 685.696
+        },
+        "screen_bounds": {
+          "left": 588.295,
+          "bottom": 36.011,
+          "right": 801.119,
+          "top": 206.653
+        },
+        "adb_bounds": {
+          "left": 588.295,
+          "top": 513.347,
+          "right": 801.119,
+          "bottom": 683.989
+        }
+      },
+      {
+        "name": "34110400_21",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34110400_21",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -75974,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 7.425,
+          "y": -8.484,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -946.169,
+          "y": -0.0,
+          "width": 984.002,
+          "height": 760.004
+        },
+        "screen_point": {
+          "x": 974.12,
+          "y": -21.778
+        },
+        "adb_point": {
+          "x": 974.12,
+          "y": 741.778
+        },
+        "screen_bounds": {
+          "left": 67.059,
+          "bottom": -21.778,
+          "right": 1010.389,
+          "top": 706.813
+        },
+        "adb_bounds": {
+          "left": 67.059,
+          "top": 13.187,
+          "right": 1010.389,
+          "bottom": 741.778
+        }
+      },
+      {
+        "name": "intimacy",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/11607_11/intimacy",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -78064,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 0.589,
+          "y": 3.101,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -31.0,
+          "y": -26.5,
+          "width": 62.0,
+          "height": 53.0
+        },
+        "screen_point": {
+          "x": 666.494,
+          "y": 499.553
+        },
+        "adb_point": {
+          "x": 666.494,
+          "y": 220.447
+        },
+        "screen_bounds": {
+          "left": 636.775,
+          "bottom": 474.148,
+          "right": 696.212,
+          "top": 524.958
+        },
+        "adb_bounds": {
+          "left": 636.775,
+          "top": 195.042,
+          "right": 696.212,
+          "bottom": 245.852
+        }
+      },
+      {
+        "name": "click",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/11607_11/click",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -78054,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -0.956,
+          "y": 1.184,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -75.0,
+          "y": -142.5,
+          "width": 150.0,
+          "height": 285.0
+        },
+        "screen_point": {
+          "x": 596.99,
+          "y": 413.273
+        },
+        "adb_point": {
+          "x": 596.99,
+          "y": 306.727
+        },
+        "screen_bounds": {
+          "left": 561.04,
+          "bottom": 344.968,
+          "right": 632.94,
+          "top": 481.578
+        },
+        "adb_bounds": {
+          "left": 561.04,
+          "top": 238.422,
+          "right": 632.94,
+          "bottom": 375.032
+        }
+      },
+      {
+        "name": "34110300_14",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34110300_14",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -75942,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 14.089,
+          "y": -1.837,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -80.255,
+          "y": -1.158,
+          "width": 199.0,
+          "height": 214.0
+        },
+        "screen_point": {
+          "x": 1273.991,
+          "y": 277.326
+        },
+        "adb_point": {
+          "x": 1273.991,
+          "y": 442.674
+        },
+        "screen_bounds": {
+          "left": 1197.053,
+          "bottom": 276.216,
+          "right": 1387.828,
+          "top": 481.37
+        },
+        "adb_bounds": {
+          "left": 1197.053,
+          "top": 238.63,
+          "right": 1387.828,
+          "bottom": 443.784
+        }
+      },
+      {
+        "name": "money",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/65930_13/money",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -77886,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 1.121,
+          "y": 1.609,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -31.0,
+          "y": -26.5,
+          "width": 62.0,
+          "height": 53.0
+        },
+        "screen_point": {
+          "x": 690.442,
+          "y": 432.406
+        },
+        "adb_point": {
+          "x": 690.442,
+          "y": 287.594
+        },
+        "screen_bounds": {
+          "left": 660.723,
+          "bottom": 407.002,
+          "right": 720.16,
+          "top": 457.811
+        },
+        "adb_bounds": {
+          "left": 660.723,
+          "top": 262.189,
+          "right": 720.16,
+          "bottom": 312.998
+        }
+      },
+      {
+        "name": "click",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/65930_13/click",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -77856,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -0.424,
+          "y": -0.212,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -75.0,
+          "y": -142.5,
+          "width": 150.0,
+          "height": 285.0
+        },
+        "screen_point": {
+          "x": 620.938,
+          "y": 350.44
+        },
+        "adb_point": {
+          "x": 620.938,
+          "y": 369.56
+        },
+        "screen_bounds": {
+          "left": 584.988,
+          "bottom": 282.135,
+          "right": 656.888,
+          "top": 418.745
+        },
+        "adb_bounds": {
+          "left": 584.988,
+          "top": 301.255,
+          "right": 656.888,
+          "bottom": 437.865
+        }
+      },
+      {
+        "name": "click",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/109319_18/click",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -77688,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 8.249,
+          "y": -4.196,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -75.0,
+          "y": -142.5,
+          "width": 150.0,
+          "height": 285.0
+        },
+        "screen_point": {
+          "x": 1011.187,
+          "y": 171.186
+        },
+        "adb_point": {
+          "x": 1011.187,
+          "y": 548.814
+        },
+        "screen_bounds": {
+          "left": 975.237,
+          "bottom": 102.881,
+          "right": 1047.137,
+          "top": 239.491
+        },
+        "adb_bounds": {
+          "left": 975.237,
+          "top": 480.509,
+          "right": 1047.137,
+          "bottom": 617.119
+        }
+      },
+      {
+        "name": "click",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/1551_25/click",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -77482,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -3.404,
+          "y": -5.853,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -75.0,
+          "y": -142.5,
+          "width": 150.0,
+          "height": 285.0
+        },
+        "screen_point": {
+          "x": 486.83,
+          "y": 96.617
+        },
+        "adb_point": {
+          "x": 486.83,
+          "y": 623.383
+        },
+        "screen_bounds": {
+          "left": 450.88,
+          "bottom": 28.312,
+          "right": 522.779,
+          "top": 164.922
+        },
+        "adb_bounds": {
+          "left": 450.88,
+          "top": 555.078,
+          "right": 522.779,
+          "bottom": 691.688
+        }
+      },
+      {
+        "name": "34110200_1",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34110200_1",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -75910,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 0.761,
+          "y": 5.64,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -98.159,
+          "y": 0.0,
+          "width": 169.0,
+          "height": 264.0
+        },
+        "screen_point": {
+          "x": 674.249,
+          "y": 613.818
+        },
+        "adb_point": {
+          "x": 674.249,
+          "y": 106.182
+        },
+        "screen_bounds": {
+          "left": 580.147,
+          "bottom": 613.818,
+          "right": 742.162,
+          "top": 866.906
+        },
+        "adb_bounds": {
+          "left": 580.147,
+          "top": -146.906,
+          "right": 742.162,
+          "bottom": 106.182
+        }
+      },
+      {
+        "name": "click",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/68791_20/click",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -77284,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 6.67,
+          "y": -4.983,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -75.0,
+          "y": -142.5,
+          "width": 150.0,
+          "height": 285.0
+        },
+        "screen_point": {
+          "x": 940.134,
+          "y": 135.75
+        },
+        "adb_point": {
+          "x": 940.134,
+          "y": 584.25
+        },
+        "screen_bounds": {
+          "left": 904.184,
+          "bottom": 67.445,
+          "right": 976.084,
+          "top": 204.055
+        },
+        "adb_bounds": {
+          "left": 904.184,
+          "top": 515.945,
+          "right": 976.084,
+          "bottom": 652.555
+        }
+      },
+      {
+        "name": "34110100_9",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/34110100_9",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -75878,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 5.759,
+          "y": 0.655,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -97.56,
+          "y": 9.6,
+          "width": 271.0,
+          "height": 240.0
+        },
+        "screen_point": {
+          "x": 899.152,
+          "y": 389.49
+        },
+        "adb_point": {
+          "x": 899.152,
+          "y": 330.51
+        },
+        "screen_bounds": {
+          "left": 805.625,
+          "bottom": 398.693,
+          "right": 1065.423,
+          "top": 628.773
+        },
+        "adb_bounds": {
+          "left": 805.625,
+          "top": 91.227,
+          "right": 1065.423,
+          "bottom": 321.307
+        }
+      },
+      {
+        "name": "money",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/105081_16/money",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76558,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 17.299,
+          "y": 1.273,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -31.0,
+          "y": -26.5,
+          "width": 62.0,
+          "height": 53.0
+        },
+        "screen_point": {
+          "x": 1418.462,
+          "y": 417.291
+        },
+        "adb_point": {
+          "x": 1418.462,
+          "y": 302.709
+        },
+        "screen_bounds": {
+          "left": 1388.743,
+          "bottom": 391.887,
+          "right": 1448.181,
+          "top": 442.696
+        },
+        "adb_bounds": {
+          "left": 1388.743,
+          "top": 277.304,
+          "right": 1448.181,
+          "bottom": 328.113
+        }
+      },
+      {
+        "name": "click",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/bg/rect/floor/105081_16/click",
+        "canvas": "CourtYardStoreyModule(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76528,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 15.755,
+          "y": -0.452,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -75.0,
+          "y": -142.5,
+          "width": 150.0,
+          "height": 285.0
+        },
+        "screen_point": {
+          "x": 1348.958,
+          "y": 339.639
+        },
+        "adb_point": {
+          "x": 1348.958,
+          "y": 380.361
+        },
+        "screen_bounds": {
+          "left": 1313.008,
+          "bottom": 271.335,
+          "right": 1384.908,
+          "top": 407.945
+        },
+        "adb_bounds": {
+          "left": 1313.008,
+          "top": 312.055,
+          "right": 1384.908,
+          "bottom": 448.665
+        }
+      },
+      {
+        "name": "money",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/root/CourtYardShip(Clone)/money",
+        "canvas": "root",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76388,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 150.296,
+          "y": 152.444,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -31.0,
+          "y": -26.5,
+          "width": 62.0,
+          "height": 53.0
+        },
+        "screen_point": {
+          "x": 7403.334,
+          "y": 7220.0
+        },
+        "adb_point": {
+          "x": 7403.334,
+          "y": -6500.0
+        },
+        "screen_bounds": {
+          "left": 7403.334,
+          "bottom": 7220.0,
+          "right": 7403.334,
+          "top": 7220.0
+        },
+        "adb_bounds": {
+          "left": 7403.334,
+          "top": -6500.0,
+          "right": 7403.334,
+          "bottom": -6500.0
+        }
+      },
+      {
+        "name": "intimacy",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/root/CourtYardShip(Clone)/intimacy",
+        "canvas": "root",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76368,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 150.296,
+          "y": 152.444,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -31.0,
+          "y": -26.5,
+          "width": 62.0,
+          "height": 53.0
+        },
+        "screen_point": {
+          "x": 7403.334,
+          "y": 7220.0
+        },
+        "adb_point": {
+          "x": 7403.334,
+          "y": -6500.0
+        },
+        "screen_bounds": {
+          "left": 7403.334,
+          "bottom": 7220.0,
+          "right": 7403.334,
+          "top": 7220.0
+        },
+        "adb_bounds": {
+          "left": 7403.334,
+          "top": -6500.0,
+          "right": 7403.334,
+          "bottom": -6500.0
+        }
+      },
+      {
+        "name": "click",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/root/CourtYardShip(Clone)/click",
+        "canvas": "root",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -76358,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 148.148,
+          "y": 150.074,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -75.0,
+          "y": -142.5,
+          "width": 150.0,
+          "height": 285.0
+        },
+        "screen_point": {
+          "x": 7306.667,
+          "y": 7113.333
+        },
+        "adb_point": {
+          "x": 7306.667,
+          "y": -6393.333
+        },
+        "screen_bounds": {
+          "left": 7256.667,
+          "bottom": 7018.333,
+          "right": 7356.667,
+          "top": 7208.334
+        },
+        "adb_bounds": {
+          "left": 7256.667,
+          "top": -6488.334,
+          "right": 7356.667,
+          "bottom": -6298.333
+        }
+      },
+      {
+        "name": "rotation",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/root/drag/panel/animroot/rotation",
+        "canvas": "root",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -75764,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 148.148,
+          "y": 150.002,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -59.0,
+          "y": -59.0,
+          "width": 118.0,
+          "height": 118.0
+        },
+        "screen_point": {
+          "x": 7306.667,
+          "y": 7110.097
+        },
+        "adb_point": {
+          "x": 7306.667,
+          "y": -6390.097
+        },
+        "screen_bounds": {
+          "left": 7275.2,
+          "bottom": 7078.63,
+          "right": 7338.134,
+          "top": 7141.563
+        },
+        "adb_bounds": {
+          "left": 7275.2,
+          "top": -6421.563,
+          "right": 7338.134,
+          "bottom": -6358.63
+        }
+      },
+      {
+        "name": "cancel",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/root/drag/panel/animroot/cancel",
+        "canvas": "root",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -75754,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 146.316,
+          "y": 148.148,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -59.0,
+          "y": -59.0,
+          "width": 118.0,
+          "height": 118.0
+        },
+        "screen_point": {
+          "x": 7224.223,
+          "y": 7026.667
+        },
+        "adb_point": {
+          "x": 7224.223,
+          "y": -6306.667
+        },
+        "screen_bounds": {
+          "left": 7192.756,
+          "bottom": 6995.2,
+          "right": 7255.69,
+          "top": 7058.134
+        },
+        "adb_bounds": {
+          "left": 7192.756,
+          "top": -6338.134,
+          "right": 7255.69,
+          "bottom": -6275.2
+        }
+      },
+      {
+        "name": "ok",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/CourtYardStoreyModule(Clone)/root/drag/panel/animroot/ok",
+        "canvas": "root",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -75744,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 149.98,
+          "y": 148.148,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -59.0,
+          "y": -59.0,
+          "width": 118.0,
+          "height": 118.0
+        },
+        "screen_point": {
+          "x": 7389.11,
+          "y": 7026.667
+        },
+        "adb_point": {
+          "x": 7389.11,
+          "y": -6306.667
+        },
+        "screen_bounds": {
+          "left": 7357.644,
+          "bottom": 6995.2,
+          "right": 7420.577,
+          "top": 7058.134
+        },
+        "adb_bounds": {
+          "left": 7357.644,
+          "top": -6338.134,
+          "right": 7420.577,
+          "bottom": -6275.2
+        }
+      },
+      {
+        "name": "train_btn",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/main/bottomPanel/bottomleft/train_btn",
+        "canvas": "Canvas",
+        "flags": 7679,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "canvas_render_mode": 1,
+        "instance_id": -74856,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -11.733,
+          "y": -6.022,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -137.831,
+          "y": -99.802,
+          "width": 275.661,
+          "height": 199.603
+        },
+        "screen_point": {
+          "x": 112.0,
+          "y": 88.996
+        },
+        "adb_point": {
+          "x": 112.0,
+          "y": 631.004
+        },
+        "screen_bounds": {
+          "left": 20.113,
+          "bottom": 22.462,
+          "right": 203.887,
+          "top": 155.53
+        },
+        "adb_bounds": {
+          "left": 20.113,
+          "top": 564.47,
+          "right": 203.887,
+          "bottom": 697.538
+        }
+      },
+      {
+        "name": "feed_btn",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/main/bottomPanel/bottomleft/feed_btn",
+        "canvas": "Canvas",
+        "flags": 7679,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "canvas_render_mode": 1,
+        "instance_id": -74918,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -7.467,
+          "y": -6.022,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -137.541,
+          "y": -99.801,
+          "width": 275.082,
+          "height": 199.603
+        },
+        "screen_point": {
+          "x": 304.0,
+          "y": 88.996
+        },
+        "adb_point": {
+          "x": 304.0,
+          "y": 631.004
+        },
+        "screen_bounds": {
+          "left": 212.306,
+          "bottom": 22.462,
+          "right": 395.694,
+          "top": 155.53
+        },
+        "adb_bounds": {
+          "left": 212.306,
+          "top": 564.47,
+          "right": 395.694,
+          "bottom": 697.538
+        }
+      },
+      {
+        "name": "switch",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/main/topPanel/btns/topright/switch",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -75264,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 11.504,
+          "y": 6.874,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -160.176,
+          "y": -44.0,
+          "width": 320.352,
+          "height": 88.0
+        },
+        "screen_point": {
+          "x": 1157.673,
+          "y": 669.333
+        },
+        "adb_point": {
+          "x": 1157.673,
+          "y": 50.667
+        },
+        "screen_bounds": {
+          "left": 1050.889,
+          "bottom": 640.0,
+          "right": 1264.457,
+          "top": 698.667
+        },
+        "adb_bounds": {
+          "left": 1050.889,
+          "top": 21.333,
+          "right": 1264.457,
+          "bottom": 80.0
+        }
+      },
+      {
+        "name": "comfortable",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/main/topPanel/btns/topright/comfortable",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -75222,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 6.815,
+          "y": 6.883,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -131.68,
+          "y": -44.0,
+          "width": 263.361,
+          "height": 88.0
+        },
+        "screen_point": {
+          "x": 946.66,
+          "y": 669.72
+        },
+        "adb_point": {
+          "x": 946.66,
+          "y": 50.28
+        },
+        "screen_bounds": {
+          "left": 858.873,
+          "bottom": 640.387,
+          "right": 1034.447,
+          "top": 699.053
+        },
+        "adb_bounds": {
+          "left": 858.873,
+          "top": 20.947,
+          "right": 1034.447,
+          "bottom": 79.613
+        }
+      },
+      {
+        "name": "return",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/main/topPanel/btns/topleft/return",
+        "canvas": "Canvas",
+        "flags": 7679,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "canvas_render_mode": 1,
+        "instance_id": -75338,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -13.098,
+          "y": 7.014,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -52.342,
+          "y": -51.48,
+          "width": 104.685,
+          "height": 102.961
+        },
+        "screen_point": {
+          "x": 50.573,
+          "y": 675.613
+        },
+        "adb_point": {
+          "x": 50.573,
+          "y": 44.387
+        },
+        "screen_bounds": {
+          "left": 15.678,
+          "bottom": 641.293,
+          "right": 85.468,
+          "top": 709.934
+        },
+        "adb_bounds": {
+          "left": 15.678,
+          "top": 10.066,
+          "right": 85.468,
+          "bottom": 78.707
+        }
+      },
+      {
+        "name": "name",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/main/topPanel/btns/topleft/name",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -75312,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -8.911,
+          "y": 7.224,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -357.986,
+          "y": -52.0,
+          "width": 715.973,
+          "height": 104.0
+        },
+        "screen_point": {
+          "x": 239.013,
+          "y": 685.078
+        },
+        "adb_point": {
+          "x": 239.013,
+          "y": 34.922
+        },
+        "screen_bounds": {
+          "left": 0.356,
+          "bottom": 650.411,
+          "right": 477.671,
+          "top": 719.745
+        },
+        "adb_bounds": {
+          "left": 0.356,
+          "top": 0.255,
+          "right": 477.671,
+          "bottom": 69.589
+        }
+      },
+      {
+        "name": "onekey",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/main/rightPanel/onekey",
+        "canvas": "Canvas",
+        "flags": 7679,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "canvas_render_mode": 1,
+        "instance_id": -75194,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 12.667,
+          "y": -3.316,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -86.0,
+          "y": -84.0,
+          "width": 172.0,
+          "height": 168.0
+        },
+        "screen_point": {
+          "x": 1210.0,
+          "y": 210.78
+        },
+        "adb_point": {
+          "x": 1210.0,
+          "y": 509.22
+        },
+        "screen_bounds": {
+          "left": 1152.667,
+          "bottom": 154.78,
+          "right": 1267.333,
+          "top": 266.78
+        },
+        "adb_bounds": {
+          "left": 1152.667,
+          "top": 453.22,
+          "right": 1267.333,
+          "bottom": 565.22
+        }
+      },
+      {
+        "name": "buff",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/main/rightPanel/buff",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -75184,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 13.161,
+          "y": 4.948,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -61.0,
+          "y": -61.0,
+          "width": 122.0,
+          "height": 122.0
+        },
+        "screen_point": {
+          "x": 1232.267,
+          "y": 582.647
+        },
+        "adb_point": {
+          "x": 1232.267,
+          "y": 137.353
+        },
+        "screen_bounds": {
+          "left": 1191.6,
+          "bottom": 541.98,
+          "right": 1272.933,
+          "top": 623.313
+        },
+        "adb_bounds": {
+          "left": 1191.6,
+          "top": 96.687,
+          "right": 1272.933,
+          "bottom": 178.02
+        }
+      },
+      {
+        "name": "share_btn",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/main/bottomPanel/bottomright/share_btn",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -75126,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 12.689,
+          "y": -6.246,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -80.0,
+          "y": -88.0,
+          "width": 160.0,
+          "height": 176.0
+        },
+        "screen_point": {
+          "x": 1211.0,
+          "y": 78.943
+        },
+        "adb_point": {
+          "x": 1211.0,
+          "y": 641.057
+        },
+        "screen_bounds": {
+          "left": 1157.667,
+          "bottom": 20.276,
+          "right": 1264.333,
+          "top": 137.609
+        },
+        "adb_bounds": {
+          "left": 1157.667,
+          "top": 582.391,
+          "right": 1264.333,
+          "bottom": 699.724
+        }
+      },
+      {
+        "name": "theme_template_btn",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/main/bottomPanel/bottomright/theme_template_btn",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -75088,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 4.859,
+          "y": -6.23,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -80.0,
+          "y": -88.0,
+          "width": 160.0,
+          "height": 176.0
+        },
+        "screen_point": {
+          "x": 858.667,
+          "y": 79.669
+        },
+        "adb_point": {
+          "x": 858.667,
+          "y": 640.331
+        },
+        "screen_bounds": {
+          "left": 805.333,
+          "bottom": 21.003,
+          "right": 912.0,
+          "top": 138.336
+        },
+        "adb_bounds": {
+          "left": 805.333,
+          "top": 581.664,
+          "right": 912.0,
+          "bottom": 698.997
+        }
+      },
+      {
+        "name": "decorate_btn",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/main/bottomPanel/bottomright/decorate_btn",
+        "canvas": "Canvas",
+        "flags": 7679,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "canvas_render_mode": 1,
+        "instance_id": -75050,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 7.456,
+          "y": -6.23,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -80.0,
+          "y": -88.0,
+          "width": 160.0,
+          "height": 176.0
+        },
+        "screen_point": {
+          "x": 975.533,
+          "y": 79.669
+        },
+        "adb_point": {
+          "x": 975.533,
+          "y": 640.331
+        },
+        "screen_bounds": {
+          "left": 922.2,
+          "bottom": 21.003,
+          "right": 1028.867,
+          "top": 138.336
+        },
+        "adb_bounds": {
+          "left": 922.2,
+          "top": 581.664,
+          "right": 1028.867,
+          "bottom": 698.997
+        }
+      },
+      {
+        "name": "shop_btn",
+        "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/main/bottomPanel/bottomright/shop_btn",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -75004,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 10.077,
+          "y": -6.23,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -80.0,
+          "y": -88.0,
+          "width": 160.0,
+          "height": 176.0
+        },
+        "screen_point": {
+          "x": 1093.473,
+          "y": 79.669
+        },
+        "adb_point": {
+          "x": 1093.473,
+          "y": 640.331
+        },
+        "screen_bounds": {
+          "left": 1040.14,
+          "bottom": 21.003,
+          "right": 1146.807,
+          "top": 138.336
+        },
+        "adb_bounds": {
+          "left": 1040.14,
+          "top": 581.664,
+          "right": 1146.807,
+          "bottom": 698.997
+        }
+      }
+    ]
+  },
+  "previous_receipt": {
+    "semantic_id": "dorm/statistics/confirm",
+    "generation": 1725,
+    "point": {
+      "x": 1106.667,
+      "y": 629.333
+    },
+    "bounds": {
+      "left": 1015.667,
+      "top": 595.667,
+      "right": 1197.667,
+      "bottom": 663.0
+    },
+    "path": "OverlayCamera/Overlay/UIMain/BackYardStatisticsUI(Clone)/painting/confirm_btn",
+    "policy_sha256": null,
+    "capability_id": null
+  }
+}

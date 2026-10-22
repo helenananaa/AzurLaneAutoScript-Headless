@@ -1,0 +1,37 @@
+F.....................................................                   [100%]
+================================== FAILURES ===================================
+_ test_character_back_requires_owner_and_preserves_header_contract[None-True] _
+
+raycast = None, allowed = True
+
+    @pytest.mark.parametrize('raycast,allowed', [(None, True), (False, False)])
+    def test_character_back_requires_owner_and_preserves_header_contract(raycast, allowed):
+        b = character_backend()
+        path = 'OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back'
+        b.buttons['buttons'].append(make_button('back', path, raycast_top=raycast))
+        b.buttons['button_count'] += 1
+        o = make_oracle(b)
+        if allowed:
+>           assert o.click_meta_character_back().semantic_id == 'meta/character/back'
+
+tests\test_meta_reward_entry.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alas_headless.semantic_oracle.SemanticOracle object at 0x000002A2B43DA3C0>
+
+    def click_meta_character_back(self) -> ActionReceipt:
+        if not self.meta_character_page_visible():
+            raise SemanticGateClosed('META character page is absent')
+        state = self.read_state()
+        target = self._unique(state, 'meta/character/back')
+        if (not target.actionable or target.raycast_top is False
+                or target.point is None or target.bounds is None
+                or not target.bounds.contains(target.point)
+                or self._blocking_rules(state, 'meta/character/back')):
+>           raise SemanticGateClosed('META character back is not actionable')
+E           alas_headless.oracle.errors.SemanticGateClosed: META character back is not actionable
+
+python\alas_headless\oracle\meta.py:64: SemanticGateClosed
+=========================== short test summary info ===========================
+FAILED tests/test_meta_reward_entry.py::test_character_back_requires_owner_and_preserves_header_contract[None-True]
+1 failed, 53 passed in 1.24s

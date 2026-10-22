@@ -1,0 +1,84 @@
+{
+  "schema": "alas-headless.campaign-empty-movement-assessment/v1",
+  "passed": true,
+  "final_receipt": "live-r12.json",
+  "event": "war_archives_20190321_en",
+  "stage": "A1",
+  "resumed_map_before": false,
+  "movement_proofs": [
+    {
+      "stage": "a1",
+      "fleet_index": 2,
+      "target": "C2",
+      "battle_count_before": 0,
+      "battle_count_after": 0,
+      "ammo_before": 5,
+      "ammo_after": 5,
+      "input_generation": 500583,
+      "map_generation": 500782,
+      "input_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_3_3"
+    }
+  ],
+  "battle_proofs": [
+    {
+      "stage_code": "a1",
+      "battle_count_before": 0,
+      "battle_count_after": 1,
+      "fleet_index": 1,
+      "fleet_marker": "cell_fleet_waerpalaisuo",
+      "target_node": "C3",
+      "enemy_object_id": 1030005,
+      "ammo_before": 5,
+      "ammo_after": 4,
+      "input_generation": 501557,
+      "map_generation": 502377,
+      "input_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_3"
+    }
+  ],
+  "run_count_after": 0,
+  "scheduler_enabled_after": false,
+  "final_state": {
+    "chapter": true,
+    "oil": 9151,
+    "keys": [
+      280,
+      300
+    ],
+    "pid": 1953,
+    "generation": 503475
+  },
+  "qualified_flow": "Original WarArchives entry -> empty movement C2 -> fleet 1 -> one battle C3 -> fresh HP -> original withdrawal",
+  "full_boss_clear_qualified": false,
+  "final_run_oil_before": 9230,
+  "final_run_oil_after": 9151,
+  "final_run_oil_used": 79,
+  "total_archive_oil_before": 9329,
+  "total_archive_oil_used": 178,
+  "archive_keys_used": 20,
+  "total_archive_battles": 2,
+  "total_request_battles": 3,
+  "total_request_oil_before": 9371,
+  "total_request_oil_used": 220,
+  "premium_spending": 0,
+  "retirements": 0,
+  "repairs": 0,
+  "prior_failures": [
+    "r1-r4: archive navigation and shared detail mode reads",
+    "r5: enemy-coverage contract applied to empty destination",
+    "r6: original map init reset retained fleet selection",
+    "r7: combat observer masked empty-move arrival",
+    "live-final: pending fleet switch missing from preview",
+    "r9: stale screenshot frame after battle",
+    "r10: repeated archive entry from old UI frame",
+    "r11: ConnectionReset; explicit typed recovery, no resource deduction"
+  ],
+  "limits": [
+    "One controlled battle and withdrawal, not Boss clear or all archive stages",
+    "Sparse live recovery qualified separately; map-only sparse restart still lacks independent roster identity",
+    "Mid-map full-dock uninterrupted chain still awaits its natural condition"
+  ],
+  "patch_member_count": 111,
+  "combined_patch_sha256": "706ca3726f0b17e2932c91ae637d75b4e1eb9a8d390e9cc8c90c35a85fc41f6e",
+  "focused_tests": 253,
+  "integration_tests": 49
+}

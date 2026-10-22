@@ -1,0 +1,57 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 17:46:32.326 │ [Server] cn                                 
+read: ./config\semantic_e2e.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 17:46:32.336 │ Bind task ['General', 'Alas']               
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 17:46:32.340 │ DEVICE                                      
+INFO     2026-09-12 17:46:32.342 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 17:46:32.344 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 17:46:32.347 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 17:46:32.349 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 17:46:32.351 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 17:46:32.353 │ emulator-5580                               
+INFO     2026-09-12 17:46:32.356 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 17:46:32.358 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 17:46:32.364 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 17:46:32.366 │ [Server] cn                                 
+WARNING  2026-09-12 17:46:32.368 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 17:46:32.369 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 17:46:32.558 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 17:46:32.560 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 17:46:32.563 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 17:46:32.565 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 17:46:51.933 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 17:46:51.935 │ handle_app_login                            
+INFO     2026-09-12 17:46:51.937 │ Screenshot interval set to 1.0s             
+INFO     2026-09-12 17:46:51.939 │ <<< APP LOGIN >>>                           
+INFO     2026-09-12 17:46:52.119 │ [Device Orientation] 0 (Normal)             
+INFO     2026-09-12 17:47:03.429 │ Semantic click login/enter @                
+         UICamera/Canvas/UIMain/LoginUI2(Clone)                                
+INFO     2026-09-12 17:47:03.433 │ Login success                               
+INFO     2026-09-12 17:47:38.735 │ Login to main confirm                       
+INFO     2026-09-12 17:47:38.737 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 17:48:23.322 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+─────────────────────────────── INTERACT START ────────────────────────────────
+INFO     2026-09-12 17:48:23.325 │ INTERACT START                              
+INFO     2026-09-12 17:48:26.551 │ Semantic click                              
+         private-quarters/character/new-jersey @                               
+         xinzexi_noshoes(Clone)/all/Bip001/Bip001 Pelvis/Bip001 Spine/Bip001   
+         Spine1/BodyCollider                                                   
+INFO     2026-09-12 17:48:28.542 │ <<< INTERACT LOOP 1/3 >>>                   
+PASSED False

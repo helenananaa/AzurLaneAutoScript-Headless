@@ -303,6 +303,7 @@ def verify_event_general_config(alas_root: Path) -> dict[str, Any]:
         ("task_balancer_task_call", "Reward"),
     ):
         values = _defaults()
+        values["task_balancer_enable"] = True
         values[field] = value
         try:
             validate_alas_event_general_config(**values)

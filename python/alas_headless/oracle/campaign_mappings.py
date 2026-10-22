@@ -392,6 +392,8 @@ _CAMPAIGN_FLEET_INPUT_TARGETS = tuple(
         "roles/fleet2/boss",
         "roles/fleet2/all",
         "roles/fleet2/standby",
+        "roles/submarine/sub_auto_call",
+        "roles/submarine/sub_standby",
         "sortie",
         "option/1",
         "option/2",

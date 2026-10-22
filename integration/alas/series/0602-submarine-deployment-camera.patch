@@ -1,0 +1,15 @@
+diff --git a/module/map/fleet.py b/module/map/fleet.py
+index a1fa10f..369fb91 100644
+--- a/module/map/fleet.py
++++ b/module/map/fleet.py
+@@ -1169,6 +1169,10 @@ class Fleet(Camera, AmbushHandler):
+         while 1:
+             if semantic_adapter is not None:
+                 grid = semantic_adapter.campaign_submarine_grid(location)
++                self.update()
++                self.in_sight(location, sight=self._walk_sight)
++                self.focus_to_grid_center()
++                grid = semantic_adapter.campaign_submarine_grid(location)
+             else:
+                 self.in_sight(location, sight=self._walk_sight)
+                 self.focus_to_grid_center()

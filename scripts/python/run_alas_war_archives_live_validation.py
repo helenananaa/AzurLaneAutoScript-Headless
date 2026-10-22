@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import dataclasses
 import json
 import os
 import sys
@@ -86,7 +87,8 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
         "ALAS_SEMANTIC_DRIVER_REVISION": args.driver_revision,
         "ALAS_SEMANTIC_ADB": args.adb,
         "ALAS_SEMANTIC_CAMPAIGN_STAGE_ENTRY_BUDGET": "1",
-        "ALAS_SEMANTIC_CAMPAIGN_FLEET_MUTATION_BUDGET": "4",
+        # Two fleet selections plus ALAS's move-and-return fleet switches.
+        "ALAS_SEMANTIC_CAMPAIGN_FLEET_MUTATION_BUDGET": "8",
         "ALAS_SEMANTIC_CAMPAIGN_SORTIE_BUDGET": "1",
         "ALAS_SEMANTIC_CAMPAIGN_COMBAT_BUDGET": "24",
         "ALAS_SEMANTIC_CAMPAIGN_VIEWPORT_SWIPE_BUDGET": "24",
@@ -104,10 +106,25 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
     navigation: list[dict[str, Any]] = []
     counters: list[tuple[int, int]] = []
     entry_confirmations: list[dict[str, Any]] = []
+    movement_proofs: list[dict[str, Any]] = []
+    battle_proofs: list[dict[str, Any]] = []
+    execute_restore = None
     resumed_map_before = False
     try:
         os.chdir(alas_root)
         from alas import AzurLaneAutoScript
+        from module.campaign.campaign_base import CampaignBase
+
+        if getattr(args, 'max_probe_battles', 0):
+            execute_restore = CampaignBase.execute_a_battle
+            def bounded_battle(host):
+                result = execute_restore(host)
+                if host.battle_count >= args.max_probe_battles:
+                    proof = host.device.semantic_adapter.confirm_campaign_combat(host.battle_count)
+                    battle_proofs.append(dataclasses.asdict(proof))
+                    host.withdraw(skip_first_screenshot=False)
+                return result
+            CampaignBase.execute_a_battle = bounded_battle
 
         instance = AzurLaneAutoScript(config_name)
         instance.config.init_task("WarArchives")
@@ -119,6 +136,19 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
         original_open = session.open_war_archives_campaign
         original_counter = session.war_archives_data_key_count
         original_confirm = session.confirm_war_archives_entry_if_present
+        original_finish_movement = session.finish_campaign_movement
+
+        def record_movement(battle_count):
+            proof = original_finish_movement(battle_count)
+            if proof is not None:
+                movement_proofs.append(dict(stage=proof.stage_code,
+                    fleet_index=proof.fleet_index, target=proof.target_node,
+                    battle_count_before=proof.battle_count_before,
+                    battle_count_after=proof.battle_count_after,
+                    ammo_before=proof.ammo_before, ammo_after=proof.ammo_after,
+                    input_generation=proof.input_generation, map_generation=proof.map_generation,
+                    input_path=proof.input_path))
+            return proof
 
         def record_open(event: str, category: str):
             receipt = original_open(event, category)
@@ -153,6 +183,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
         session.open_war_archives_campaign = record_open
         session.war_archives_data_key_count = record_counter
         session.confirm_war_archives_entry_if_present = record_confirm
+        session.finish_campaign_movement = record_movement
         result_value = instance.run("war_archives")
         completion = session.last_campaign_auto_search_completion()
         post = _load(config_path)["WarArchives"]
@@ -160,6 +191,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             result_value is True
             and ((navigation and counters) or resumed_map_before)
             and post["StopCondition"]["RunCount"] == 0
+            and (not getattr(args, 'max_probe_battles', 0) or bool(battle_proofs))
         )
         return {
             "schema": SCHEMA,
@@ -173,6 +205,9 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             "mode": args.mode,
             "auto_search": args.auto_search,
             "task_result": result_value,
+            "movement_proofs": movement_proofs,
+            "battle_proofs": battle_proofs,
+            "max_probe_battles": getattr(args, 'max_probe_battles', 0),
             "resumed_map_before": resumed_map_before,
             "navigation": navigation,
             "entry_confirmations": entry_confirmations,
@@ -214,10 +249,15 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
                 for current, total in counters
             ],
             "error": f"{type(exc).__name__}: {exc}",
+            "movement_proofs": movement_proofs,
+            "battle_proofs": battle_proofs,
+            "max_probe_battles": getattr(args, 'max_probe_battles', 0),
             "traceback": traceback.format_exc(),
             "raw_input_fallback_used": False,
         }
     finally:
+        if execute_restore is not None:
+            CampaignBase.execute_a_battle = execute_restore
         if instance is not None:
             device = getattr(instance, "__dict__", {}).get("device")
             session = getattr(device, "__dict__", {}).get("semantic_adapter")
@@ -244,8 +284,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--mode", default="normal", choices=("normal", "hard"))
     parser.add_argument("--auto-search", action="store_true")
     parser.add_argument("--oil-limit", type=int, default=1000)
+    parser.add_argument('--max-probe-battles', type=int, default=0,
+                        help='Qualification only: verify the last battle and use original withdrawal at this count')
     parser.add_argument("--output", type=Path)
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.max_probe_battles < 0:
+        parser.error('--max-probe-battles must be nonnegative')
+    return args
 
 
 def main() -> int:

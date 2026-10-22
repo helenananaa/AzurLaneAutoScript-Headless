@@ -15,6 +15,20 @@ from tests.semantic_support.oracle_cases import SemanticOracleTestsSupport
 
 
 class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
+    def test_result_absence_ignores_unrelated_partial_dock_toggles(self):
+        backend = FakeBackend([])
+        backend.ui = make_ui([])
+        backend.ui['toggle_truncated'] = True
+        oracle = make_oracle(backend)
+        self.assertFalse(oracle.daily_battle_result_visible())
+        self.assertFalse(oracle.enabled('overlay/login-data-expired/confirm'))
+        with self.assertRaisesRegex(SemanticGateClosed, 'toggle snapshot'):
+            _ = oracle.read_ui_state().toggles
+        backend.ui['text_truncated'] = True
+        with self.assertRaisesRegex(SemanticGateClosed, 'text snapshot'):
+            oracle.daily_battle_result_visible()
+        self.assertEqual(backend.taps, [])
+
     def test_daily_battle_result_rejects_ambiguous_or_obscured_target(self):
         path = (
             "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/"

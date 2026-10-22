@@ -783,15 +783,72 @@ class OperationSirenSemanticOracleTests(OperationSirenSemanticOracleTestsSupport
         )
         oracle = make_oracle(backend)
 
+        for image in backend.ui["images"]:
+            bounds = image["adb_bounds"]
+            image["adb_point"] = {"x": (bounds["left"] + bounds["right"])/2,
+                                  "y": (bounds["top"] + bounds["bottom"])/2}
+        for row, y in ((5, 360), (4, 290)):
+            image = make_image(
+                f"LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/"
+                f"world_quad_{row}_16/walk_quad", "cell_white",
+                {"left": 615., "right": 665., "top": y-15., "bottom": y+15.})
+            image["adb_point"] = {"x": 640., "y": float(y)}
+            backend.ui["images"].append(image)
+        backend.ui["image_count"] = len(backend.ui["images"])
+
         receipt = oracle.click_operation_siren_radar_guidepost((0, -1))
 
         self.assertEqual(receipt.semantic_id, "os/map/guidepost/relative/0/-1")
         self.assertEqual(backend.taps, [(640, 290)])
 
-        backend.ui["images"].append(copy.deepcopy(backend.ui["images"][-1]))
+        backend.ui["images"].append(copy.deepcopy(backend.ui["images"][3]))
         backend.ui["image_count"] += 1
         with self.assertRaisesRegex(SemanticGateClosed, "absent or ambiguous"):
             oracle.click_operation_siren_radar_guidepost((0, -1))
+
+    def test_fog_guidepost_uses_unique_native_walk_cell_without_model(self):
+        backend = FakeBackend([
+            make_button("back_button", "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button"),
+            make_button("fleet_bar", "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/fleet_bar"),
+            make_button("gold", "OverlayCamera/Overlay/UIMain/top/adapt/top_stage/resources/WorldResPanel(Clone)/gold"),
+        ])
+        def projected(path, sprite, x, y):
+            image = make_image(path, sprite, {"left": x-20., "right": x+20.,
+                                             "top": y-15., "bottom": y+15.})
+            image["adb_point"] = {"x": x, "y": y}
+            return image
+        root = "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/"
+        backend.ui = make_ui([], images=[
+            make_image("root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/fleet_bar/text_selected/x", "1"),
+            projected(root+"cells/fleet_1/shadow", "shadow", 640., 360.),
+            projected(root+"quads/world_quad_4_4/walk_quad", "cell_white", 640., 360.),
+            projected(root+"quads/world_quad_4_5/walk_quad", "cell_white", 742.45, 360.),
+            projected("OverlayCamera/Overlay/UIMain/top/adapt/right_stage/compass_panel/ring/compass/range/5403", "guidepost", 1152.667, 226.867),
+        ])
+        oracle = make_oracle(backend)
+        receipt = oracle.click_operation_siren_radar_guidepost((1, 0))
+        self.assertEqual(backend.taps, [(742, 360)])
+        self.assertTrue(receipt.path.endswith("world_quad_4_5/walk_quad"))
+        backend.taps.clear()
+        target = backend.ui["images"][3]
+        for mutation in ("duplicate", "missing-projection", "foreign-foreground", "blocker"):
+            with self.subTest(mutation=mutation):
+                saved = copy.deepcopy(backend.ui)
+                if mutation == "duplicate":
+                    backend.ui["images"].append(copy.deepcopy(target))
+                    backend.ui["image_count"] += 1
+                elif mutation == "missing-projection":
+                    backend.ui["images"][3].pop("adb_point")
+                elif mutation == "foreign-foreground":
+                    oracle._foreground_component = mock.Mock(return_value="foreign/activity")
+                else:
+                    oracle._blocking_rules = mock.Mock(return_value=[object()])
+                with self.assertRaises(SemanticGateClosed):
+                    oracle.click_operation_siren_radar_guidepost((1, 0))
+                self.assertEqual(backend.taps, [])
+                backend.ui = saved
+                oracle._foreground_component = mock.Mock(return_value=oracle.fingerprint.component)
+                oracle._blocking_rules = mock.Mock(return_value=[])
 
     def test_obscure_exit_passage_uses_exact_tip_portal_and_radar_step(self):
         backend = FakeBackend(

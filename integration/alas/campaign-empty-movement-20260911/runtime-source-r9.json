@@ -1,0 +1,8 @@
+{
+  "compared_files": 150,
+  "differences": [
+    "module/campaign/run.py"
+  ],
+  "patch_sha256": "e220744d3cce99fc1dbb6c1b5ea8ecc27bde70167d14a68eef97a14e8e66f2e0",
+  "note": "Only retained event_20240425_cn mu-sp alias encoding differs; that branch is outside this run"
+}

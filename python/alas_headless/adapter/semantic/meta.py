@@ -3,28 +3,77 @@
 from __future__ import annotations
 
 from typing import Tuple
+import time
 from ...semantic_oracle import (
     ActionReceipt,
     MetaAssistState,
     MetaCurrentDetailState,
     MetaEntranceState,
     SemanticGateClosed,
+    SemanticOracle,
 )
 from .dispatch_result import UNHANDLED
+from .contracts import AlasSemanticUnmapped
 from .resources import REWARD_RESOURCE_FIELDS
 
 
 class MetaAdapterPorts:
     """Meta ports on the shared adapter context."""
 
+    def begin_meta_assist(self) -> None:
+        self._package_gate()
+        self._meta_assist_active = True
+
+    def end_meta_assist(self) -> None:
+        self._meta_assist_active = False
+        self._meta_reward_close_receipt = None
+        self._operation_siren_combat_active = False
+        self._meta_precombat_start_receipt = None
+        self._meta_precombat_start_until = 0.0
+        self._meta_precombat_back_receipt = None
+        self._meta_precombat_back_until = 0.0
+        self._meta_assist_entry_receipt = None
+        self._meta_assist_entry_until = 0.0
+
+    def complete_meta_assist_combat(self) -> None:
+        self._package_gate()
+        summary = self.oracle.meta_assist_state()
+        if (summary.remaining_attempts != 0 or self.oracle.daily_precombat_visible()
+                or self.oracle.daily_combat_visible() or self.oracle.daily_battle_result_visible()):
+            raise SemanticGateClosed('META assist combat has no proven exhausted return')
+        self._operation_siren_combat_active = False
+        self._meta_precombat_start_receipt = None
+        self._meta_precombat_start_until = 0.0
+
+    def click_meta_assist_entry(self) -> ActionReceipt:
+        self._package_gate()
+        prior = self._meta_assist_entry_receipt
+        if (self._meta_assist_active and prior is not None
+                and time.monotonic() <= self._meta_assist_entry_until
+                and self.oracle.daily_precombat_visible()
+                and self.oracle.read_state().generation > prior.generation):
+            return prior
+        receipt = self.oracle.click_meta_assist_start()
+        if self._meta_assist_active:
+            self._meta_assist_entry_receipt = receipt
+            self._meta_assist_entry_until = time.monotonic() + 20.0
+        return receipt
+
     def begin_meta_beacon(self) -> None:
         """Own one complete META beacon task until its explicit finally block."""
 
         self._package_gate()
         self._meta_beacon_active = True
+        self._meta_dossier_sync_open_receipt = None
+        self._meta_current_create_handoff = None
 
     def end_meta_beacon(self) -> None:
         self._meta_beacon_active = False
+        self._meta_current_create_handoff = None
+        self._meta_dossier_sync_open_receipt = None
+        self._meta_reward_close_receipt = None
+        self._meta_precombat_start_receipt = None
+        self._meta_precombat_start_until = 0.0
 
     def meta_beacon_active(self) -> bool:
         return self._meta_beacon_active
@@ -47,7 +96,13 @@ class MetaAdapterPorts:
 
     def meta_assist_state(self) -> MetaAssistState:
         self._package_gate()
-        return self.oracle.meta_assist_state()
+        for attempt in range(5):
+            try:
+                return self.oracle.meta_assist_state()
+            except SemanticGateClosed as exc:
+                if str(exc) != 'META assist snapshots are not coherent' or attempt == 4:
+                    raise
+                time.sleep(.05)
 
     def click_meta_assist_next_candidate(
         self, *, expected_index: int, expected_level: int
@@ -60,7 +115,34 @@ class MetaAdapterPorts:
 
     def meta_current_empty_points(self) -> Tuple[int, int]:
         self._package_gate()
-        return self.oracle.meta_current_empty_points()
+        return self._frame_or_live_observation_oracle().meta_current_empty_points()
+
+    def _click_meta_current_create(self) -> ActionReceipt:
+        """Submit one create input; native META polling owns its page change."""
+        self._package_gate()
+        reader = self._fresh_input_oracle()
+        previous = self._meta_current_create_handoff
+        if previous is not None and self.oracle.input_dispatch_count == previous[1]:
+            state = reader.read_state()
+            blockers = reader._blocking_rules(state, 'meta/home')
+            if blockers and all(rule.blocker_id == 'loading' for rule in blockers):
+                return previous[0]
+            try:
+                reader.meta_current_detail_state()
+            except SemanticGateClosed:
+                # The accepted create may still leave its exact empty page
+                # mounted. Do not spend another beacon while ALAS polls it.
+                reader.meta_current_empty_points(require_create=True)
+            # This is the same accepted input, not another create or a claim
+            # of task success. Unknown pages and blockers cannot reach here.
+            return previous[0]
+        receipt = reader.click_meta_current_create()
+        self._meta_current_create_handoff = (receipt, self.oracle.input_dispatch_count)
+        return receipt
+
+    def meta_dossier_empty_points(self) -> Tuple[int, int]:
+        self._package_gate()
+        return self._frame_or_live_observation_oracle().meta_dossier_empty_points()
 
     def meta_current_detail_state(self) -> MetaCurrentDetailState:
         self._package_gate()
@@ -72,28 +154,159 @@ class MetaAdapterPorts:
 
     def click_meta_precombat_start(self) -> ActionReceipt:
         self._package_gate()
+        if (self._meta_assist_active and self._meta_precombat_start_receipt is not None
+                and time.monotonic() < self._meta_precombat_start_until):
+            return self._meta_precombat_start_receipt
+        prior = self._meta_precombat_start_receipt
+        if (self._meta_beacon_active and prior is not None
+                and time.monotonic() < self._meta_precombat_start_until):
+            # The original loop can request start again from its prior frame
+            # while the live UI has already accepted this sortie.
+            deadline = self._meta_precombat_start_until
+            while True:
+                state = self.oracle.read_state()
+                blockers = self.oracle._blocking_rules(state, 'daily/precombat/start')
+                if state.generation > prior.generation and (
+                        self.oracle.daily_combat_visible()
+                        or getattr(self.oracle, 'daily_battle_loading_visible', lambda: False)()
+                        or self.oracle.daily_battle_result_visible()
+                        or self.oracle.meta_assist_sortie_prompt_visible()
+                        or (blockers and all(b.blocker_id == 'loading' for b in blockers))):
+                    return prior
+                if time.monotonic() >= deadline:
+                    break
+                time.sleep(.1)
+            raise SemanticGateClosed(
+                'META sortie start did not reach a reviewed transition: '
+                f'generation={state.generation}, start={prior.generation}, '
+                f'blockers={[b.blocker_id for b in blockers]}'
+            )
+        if self._meta_assist_active:
+            self._require_action_grant('meta.assist')
         if not self.oracle.meta_precombat_fleet_ready():
             raise SemanticGateClosed(
                 "META precombat requires non-empty main and vanguard fleets"
             )
-        receipt = self.oracle.click_daily_precombat_start()
+        operation = (self.oracle.click_meta_assist_precombat_start
+                     if self._meta_assist_active else self.oracle.click_daily_precombat_start)
+        if isinstance(self.oracle, SemanticOracle) and self._input_frame_refresher is not None:
+            live_operation = operation
+            operation = lambda: live_operation(input_frame=self._fresh_input_oracle)
+        if self._meta_assist_active:
+            receipt = self._dispatch_mutation('meta.assist', operation)
+        else:
+            receipt = operation()
+        if self._meta_assist_active or self._meta_beacon_active:
+            self._meta_precombat_start_receipt = receipt
+            self._meta_precombat_start_until = time.monotonic() + 20.0
         self._operation_siren_combat_active = True
         return receipt
 
     def click_meta_precombat_back(self) -> ActionReceipt:
         self._package_gate()
-        return self.oracle.click_daily_precombat_back()
+        receipt = (self._fresh_input_oracle().click_meta_assist_precombat_back()
+                   if self._meta_assist_active else self.oracle.click_daily_precombat_back())
+        if self._meta_assist_active:
+            self._meta_precombat_back_receipt = receipt
+            self._meta_precombat_back_until = time.monotonic() + 20.0
+        return receipt
 
     def _appear_meta(self, name, semantic_id):
+        if ((self._meta_beacon_active or self._meta_assist_active)
+                and name in ('ASH_SHOWDOWN', 'BEACON_LIST', 'DOSSIER_LIST',
+                             'HELP_ENTER', 'BEACON_REWARD', 'BATTLE_START',
+                             'META_AUTO_CONFIRM', 'META_AUTO_ATTACK_START',
+                             'META_AUTO_ATTACKING', 'META_AUTO_ATTACK_CONFIRM')):
+            loading_probe_target = 'meta/home'
+            if (name == 'META_AUTO_CONFIRM'
+                    and self.oracle.observation_target_present('meta/dossier/auto/result/confirm')):
+                # The completed result is itself a foreground blocker for
+                # meta/home. Its reviewed confirm owns this passive probe.
+                loading_probe_target = 'meta/dossier/auto/result/confirm'
+            blockers = self.oracle._blocking_rules(
+                self.oracle.read_state(), loading_probe_target)
+            if blockers and all(rule.blocker_id == 'loading' for rule in blockers):
+                # The original META loop must take its next screenshot before
+                # classifying a detail page covered by the loading curtain.
+                # META's own page markers allow meta/home; they protect other
+                # tasks and must not turn this passive loading yield fatal.
+                return False
+        if ((self._meta_beacon_active or self._meta_assist_active)
+                and name in ('ASH_SHOWDOWN', 'BEACON_LIST', 'DOSSIER_LIST',
+                             'HELP_ENTER', 'BEACON_REWARD', 'BATTLE_START',
+                             'META_AUTO_ATTACK_START', 'META_AUTO_ATTACKING',
+                             'META_AUTO_ATTACK_CONFIRM')
+                and (self.oracle.observation_target_present('meta/dossier/auto/result/confirm')
+                     or any(rule.blocker_id == 'meta-dossier-auto-result'
+                            for rule in self.oracle._blocking_rules(
+                                self.oracle.read_state(), 'ui/absence-probe')))):
+            # The original map-event handler owns this result before the
+            # covered detail can classify a new challenge or claim rewards.
+            # Its root can mount before the confirm child is published; the
+            # full result reader still owns confirmation on a later frame.
+            return False
+        if (self._meta_beacon_active or self._meta_assist_active) and name == 'META_AUTO_CONFIRM':
+            return self.oracle.meta_dossier_auto_result() is not None
+        if self._meta_beacon_active and name in ('META_AUTO_ATTACK_START', 'META_AUTO_ATTACKING', 'META_AUTO_ATTACK_CONFIRM'):
+            prompt = self.oracle.meta_dossier_auto_prompt() is not None
+            summary = self.oracle.meta_dossier_detail_state(allow_auto_prompt=prompt)
+            if summary.current_hp == 0 and summary.auto_sprite is None:
+                return False
+            if summary.auto_sprite == 'auto_01':
+                return summary.current_hp > 0 and (name == 'META_AUTO_ATTACK_START'
+                    or (name == 'META_AUTO_ATTACK_CONFIRM' and prompt))
+            if summary.auto_sprite == 'auto_02':
+                return name == 'META_AUTO_ATTACKING' and self.oracle.meta_dossier_auto_remaining_seconds() is not None
+            if summary.auto_sprite != 'auto_03':
+                raise AlasSemanticUnmapped('META dossier auto phase is unsupported: '+str(summary.auto_sprite))
+            # The captured client tooltip proves auto_03 is locked until one
+            # ordinary challenge completes. ALAS owns that challenge branch.
+            return False
+        if name == 'META_MENU_CHECK':
+            return self.oracle.meta_character_menu_visible()
+        if name == 'META_CHECK':
+            return (self.oracle.meta_character_page_visible()
+                    or self.oracle.meta_character_menu_visible())
+        if name in ('SYNC_ENTER', 'SYNC_ENTER2', 'SYNC_REWARD_NOTICE', 'SYNC_TAP',
+                    'META_REWARD_NOTICE', 'REWARD_ENTER'):
+            if self.oracle.award_info_page_visible():
+                return False
+            if self.oracle.meta_character_sync_page_visible():
+                _, eligible, claimed = self.oracle.meta_character_sync_rewards()
+                if name == 'SYNC_REWARD_NOTICE':
+                    return eligible > claimed
+                return name == 'REWARD_ENTER' and eligible == claimed
+            # These belong to MetaCharacterUI, never WorldBoss's reward preview.
+            self.oracle.meta_character_pending_sync()
+            return name == 'SYNC_ENTER'
+        if name == 'BEACON_MY':
+            try:
+                self.oracle.meta_assist_state()
+                return True
+            except SemanticGateClosed:
+                return False
+        if semantic_id == 'meta/current/list' and getattr(self.oracle, 'meta_dossier_assist_visible', lambda: False)():
+            return True
+        if semantic_id == 'meta/dossier/list':
+            if self.oracle.meta_dossier_detail_visible():
+                return True
+            try:
+                self.oracle.meta_dossier_empty_points()
+                return True
+            except SemanticGateClosed:
+                return False
         if semantic_id == "reward/meta/enter":
             return self.oracle.meta_entrance_available()
         if name in REWARD_RESOURCE_FIELDS:
             return self.oracle.reward_resource_available(
                 REWARD_RESOURCE_FIELDS[name]
             )
+        if semantic_id == 'meta/category/back':
+            if not self.oracle.observation_target_present(semantic_id):
+                return False
+            self.oracle.meta_category_back_control()
+            return True
         if semantic_id == "meta/page/back":
-            if name == "META_CHECK":
-                return self.oracle.meta_page_visible()
             try:
                 self.oracle.meta_entrance_state()
                 return True
@@ -117,20 +330,36 @@ class MetaAdapterPorts:
             except SemanticGateClosed:
                 return False
         if semantic_id == "meta/current/create":
+            if self._meta_beacon_active:
+                try:
+                    self.oracle.meta_dossier_empty_points(require_create=True)
+                    return True
+                except SemanticGateClosed:
+                    pass
             try:
-                self.oracle.meta_current_empty_points()
+                self.oracle.meta_current_empty_points(require_create=True)
                 return True
             except SemanticGateClosed:
                 return False
         if semantic_id == "meta/current/help":
+            if self._meta_beacon_active and self.oracle.meta_dossier_detail_visible():
+                return self.oracle.meta_dossier_detail_state(
+                    allow_auto_prompt=self.oracle.meta_dossier_auto_prompt() is not None).current_hp > 0
             try:
-                self.oracle.meta_current_detail_state()
-                return True
+                return self.oracle.meta_current_detail_state().current_hp > 0
             except SemanticGateClosed:
                 return False
+        if semantic_id == "meta/current/reward":
+            if self._meta_beacon_active and self.oracle.meta_dossier_auto_prompt() is not None:
+                return False
+            if self._meta_beacon_active and self.oracle.meta_dossier_detail_visible():
+                return self.oracle.meta_dossier_reward_visible()
+            return self.oracle.meta_current_reward_visible()
         if semantic_id is not None and semantic_id.startswith("meta/help/"):
             return self.oracle.meta_help_visible()
         if semantic_id == "meta/assist/start":
+            if self._meta_beacon_active and self.oracle.meta_dossier_detail_visible():
+                return self.oracle.meta_dossier_detail_state().current_hp > 0
             try:
                 self.oracle.meta_current_detail_state()
                 return True

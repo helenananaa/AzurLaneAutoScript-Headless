@@ -1,0 +1,16 @@
+diff --git a/module/ui/ui.py b/module/ui/ui.py
+--- a/module/ui/ui.py
++++ b/module/ui/ui.py
+@@ -522,6 +522,12 @@
+         if self.ui_page_os_popups():
+             return True
+ 
++        # Semantic withdrawal still uses the original typed confirmation
++        # handler, which requires this campaign's opening action receipt.
++        if (getattr(self.device, 'semantic_adapter', None) is not None
++                and self.handle_popup_confirm('WITHDRAW')):
++            return True
++
+         # Research popup, lost connection popup
+         if self.handle_popup_confirm("UI_ADDITIONAL"):
+             return True

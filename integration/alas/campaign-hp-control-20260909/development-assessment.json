@@ -1,0 +1,36 @@
+{
+  "schema": "alas-headless.campaign-hp-development-assessment/v1",
+  "retained_directory": "artifacts/campaign-hp-control",
+  "successful_main": "main-live.json",
+  "rejected_qualification": [
+    {
+      "receipt": "hp-repair-main-r6.json",
+      "runner_passed": true,
+      "qualification_passed": false,
+      "reason": "Map Image.fillAmount was an unused 0.191 prefab value. This run withdrew on an invalid HP observation and is not qualifying evidence."
+    }
+  ],
+  "failed_attempts": [
+    "map-observation-r1.json",
+    "low-hp-main-r1.json",
+    "low-hp-main-r2.json",
+    "hp-repair-main-r7.json",
+    "hp-repair-main-r8.json",
+    "hp-repair-main-r9.json",
+    "hp-repair-main-r10.json",
+    "hp-repair-main-r11.json",
+    "hp-repair-main-r12.json",
+    "followup-main-navigation.json"
+  ],
+  "stopped_attempt_logs": [
+    "hp-repair-main-r4.log",
+    "hp-repair-main-r5.log"
+  ],
+  "remaining": [
+    "nonzero emergency-repair use has offline coverage only",
+    "scout-position drag is explicitly unsupported at its own input boundary",
+    "sparse fleets, the default 0.3 positive retreat and other stages are not live-qualified",
+    "natural dock-full retirement and map resume were not triggered",
+    "retained 12-4 map reentry hit enemy-covered target ambiguity; this HP change does not qualify that branch"
+  ]
+}

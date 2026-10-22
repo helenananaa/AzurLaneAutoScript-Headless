@@ -104,6 +104,7 @@ def observation_prompt_kind(oracle):
     if text.startswith("深渊海域作战难度较高且不可重复进入，"):
         return "opsi-abyssal-entry"
     if (text.startswith(("需要暂时离开大型作战么？", "当前海域无法通过边界区域离开。", "离开当前海域后，潜艇舰队会自动返回"))
+            or text == "正在进行搜寻作业的指挥喵将被强制召回！\n是否结束搜寻并离开当前海域？"
             or (text.startswith("是否确定从") and "离开？" in text)):
         return "opsi-exit"
     return None

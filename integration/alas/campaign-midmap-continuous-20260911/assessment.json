@@ -1,0 +1,45 @@
+{
+  "schema": "alas-headless.campaign-midmap-continuous-assessment/v1",
+  "single_process_chain_passed": false,
+  "recovery_continuation_passed": true,
+  "stage": "10-2",
+  "fleet1": 2,
+  "fleet2": 1,
+  "initial_dock_used": 929,
+  "dock_capacity": 930,
+  "full_dock_used": 930,
+  "dock_after_retirement": 858,
+  "retired_ships": 72,
+  "equipment_preservation_confirmed": true,
+  "equipment_quantity": 115,
+  "first_run_battles": 2,
+  "continuation_battles": 1,
+  "continuation_new_preparations": 0,
+  "run_count_after": 0,
+  "scheduler_enabled_after": false,
+  "oil_before": 6299,
+  "oil_after": 6193,
+  "oil_used": 106,
+  "repair_items_used": 0,
+  "premium_spent": 0,
+  "final": {
+    "chapter": true,
+    "oil": 6193,
+    "pid": 1614,
+    "generation": 20965
+  },
+  "fixes": [
+    "Refresh immutable screenshot frame before reclassifying a live ambiguous dock popup",
+    "Wait for fresh equipment deselection without repeated toggle input"
+  ],
+  "validation": {
+    "focused_tests": 80,
+    "retirement_tests": 20
+  },
+  "limits": [
+    "Natural trigger, retirement and continuation used separate processes; do not promote uninterrupted full-chain support",
+    "Delayed equipment deselection repair has focused regression coverage; the retained equipment dialog was finished separately",
+    "Next natural mid-map full-dock condition is required for the final uninterrupted run"
+  ],
+  "combined_patch_sha256": "706ca3726f0b17e2932c91ae637d75b4e1eb9a8d390e9cc8c90c35a85fc41f6e"
+}

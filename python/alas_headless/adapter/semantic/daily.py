@@ -45,6 +45,7 @@ class DailyAdapterPorts:
         self._daily_stage = None
         self._daily_pending_stage_receipt = None
         self._daily_stage_confirmed = False
+        self._daily_quick_reward_closed = False
         return receipt
 
     def click_daily_stage(self, index: int) -> ActionReceipt:
@@ -62,6 +63,7 @@ class DailyAdapterPorts:
         self._daily_pending_receipt = None
         self._daily_pending_stage_receipt = receipt
         self._daily_stage_confirmed = False
+        self._daily_quick_reward_closed = False
         self._daily_transition_until = time.monotonic() + 45.0
         return receipt
 
@@ -100,7 +102,7 @@ class DailyAdapterPorts:
 
     def click_exercise_precombat_start(self) -> ActionReceipt:
         self._package_gate()
-        if not self._exercise_pending:
+        if not (self._exercise_pending or self._exercise_execution_active):
             raise SemanticGateClosed("exercise execution intent is incomplete")
         receipt = self._dispatch_mutation(
             "exercise.execute", self.oracle.click_daily_precombat_start
@@ -186,6 +188,34 @@ class DailyAdapterPorts:
     def daily_execution_receipts(self) -> Tuple[ActionReceipt, ...]:
         return tuple(self._daily_execution_receipts)
 
+    def daily_quick_consumed(self) -> bool:
+        """Prove this session's skip spent the selected card's final count."""
+        self._package_gate()
+        receipt = self._daily_pending_receipt
+        kind = self._daily_kind
+        if (
+            receipt is None
+            or kind is None
+            or receipt.semantic_id != "daily/execute/{0}/stage/{1}/quick/all".format(
+                kind, self._daily_stage
+            )
+        ):
+            return False
+        state = self.oracle.read_state()
+        return bool(
+            state.generation > receipt.generation
+            and self.oracle.daily_page_visible()
+            and self.oracle.daily_remaining_for_kind(kind) == 0
+        )
+
+    def daily_quick_complete(self) -> bool:
+        """Release ALAS' loop only after the correlated reward was closed."""
+        return bool(
+            self.daily_quick_consumed()
+            and self._daily_quick_reward_closed
+            and self._award_close_target() is None
+        )
+
     def daily_execution_active(self) -> bool:
         """Return whether the result owner is the bounded Daily flow."""
 
@@ -200,6 +230,18 @@ class DailyAdapterPorts:
         return self.oracle.click_daily_precombat_back()
 
     def _click_daily(self, name):
+        if name in ('GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3') and self.daily_execution_active():
+            target = self._award_close_target()
+            if target is not None:
+                receipt = self.oracle.click(target)
+                pending = self._daily_pending_receipt
+                if (
+                    pending is not None
+                    and pending.semantic_id.endswith('/quick/all')
+                    and receipt.generation > pending.generation
+                ):
+                    self._daily_quick_reward_closed = True
+                return receipt
         if name == "DAILY_ENTER":
             return self.click_daily_current_card()
         if name.startswith("DAILY_MISSION_"):

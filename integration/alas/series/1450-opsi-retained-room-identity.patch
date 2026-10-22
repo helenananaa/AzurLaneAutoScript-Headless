@@ -1,0 +1,13 @@
+diff --git a/module/os/map.py b/module/os/map.py
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -160,6 +160,9 @@
+         in_month_boss_room = bool(
+             semantic_adapter is not None
+             and semantic_adapter.appear(MAP_EXIT)
++            and semantic_adapter.operation_siren_state().zone_name.startswith(
++                ('普通难度:', '普通难度：', '困难难度:', '困难难度：')
++            )
+         )
+         in_shop = False
+         if semantic_adapter is not None:

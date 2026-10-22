@@ -1,0 +1,14 @@
+diff --git a/module/os/camera.py b/module/os/camera.py
+--- a/module/os/camera.py
++++ b/module/os/camera.py
+@@ -27,6 +27,10 @@
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is None:
+             return super()._update_view()
++        from module.os_handler.assets import AUTO_SEARCH_REWARD
++        if self.appear(AUTO_SEARCH_REWARD, offset=(50, 50)):
++            # Camera._update_view owns reward dismissal and the next refresh.
++            raise MapDetectionError('AUTO_SEARCH_REWARD covers the semantic map')
+         from alas_headless.alas_opsi_camera_view import install_alas_opsi_camera_view
+         shape = location_ensure(self.zone.shape)
+         geometry = semantic_adapter.operation_siren_map_geometry(

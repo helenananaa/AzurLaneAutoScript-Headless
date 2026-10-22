@@ -1,5 +1,4 @@
 import ast
-import ast
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
@@ -70,11 +69,25 @@ class AlasEventGeneralConfigTests(unittest.TestCase):
             ("task_balancer_task_call", "Reward"),
         ):
             config = defaults()
+            config["task_balancer_enable"] = True
             config[field] = value
             with self.subTest(field=field, value=value), self.assertRaises(
                 SemanticGateClosed
             ):
                 validate_alas_event_general_config(**config)
+
+    def test_disabled_balancer_does_not_block_event_limits_with_inactive_task_call(self):
+        for target in (None, "future-upstream-task", []):
+            config = defaults()
+            config["task_balancer_task_call"] = target
+            with self.subTest(target=target):
+                snapshot = validate_alas_event_general_config(**config)
+                self.assertIsNone(snapshot.task_balancer_task_call)
+                self.assertEqual(snapshot.task_balancer_coin_limit, 10_000)
+                with self.assertRaises(SemanticGateClosed):
+                    validate_alas_event_general_config(**{**config, "task_balancer_enable": True})
+                with self.assertRaises(SemanticGateClosed):
+                    validate_alas_event_general_config(**{**config, "task_balancer_coin_limit": -1})
 
     def test_patch_gates_every_original_decision_method(self):
         patch = ROOT.joinpath(

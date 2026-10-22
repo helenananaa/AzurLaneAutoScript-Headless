@@ -1,0 +1,262 @@
+�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+                                     START                                     
+�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+WARNING  2026-09-12 19:01:07.785 �� Research Series 3 is limited to indexes 1-5,
+         cannot set focus to index 6                                           
+WARNING  2026-09-12 19:01:07.791 �� Research Series 4 is limited to indexes 1-5,
+         cannot set focus to index 6                                           
+WARNING  2026-09-12 19:01:07.793 �� Research Series 5 is limited to indexes 1-5,
+         cannot set focus to index 6                                           
+WARNING  2026-09-12 19:01:07.794 �� Research Series 6 is limited to indexes 1-5,
+         cannot set focus to index 6                                           
+INFO     2026-09-12 19:01:07.800 �� Can buy all 15 BPs                          
+INFO     2026-09-12 19:01:07.802 �� Can only buy up to 14 of the 15 BPs         
+INFO     2026-09-12 19:01:07.804 �� Can buy all 15 BPs                          
+INFO     2026-09-12 19:01:07.806 �� Can only buy up to 14 of the 15 BPs         
+INFO     2026-09-12 19:01:07.807 �� <<< SHIPYARD_BUY >>>                        
+INFO     2026-09-12 19:01:07.809 �� Can buy all 2 BPs                           
+INFO     2026-09-12 19:01:07.810 �� <<< SHIPYARD_BUY >>>                        
+INFO     2026-09-12 19:01:07.811 �� Can buy all 2 BPs                           
+{
+  "schema": "alas-headless.shipyard-config-replay/v1",
+  "passed": true,
+  "field_count": 8,
+  "accepted_case_count": 1437,
+  "invalid_case_count": 58,
+  "focus_matrix": {
+    "success": 32,
+    "disabled": 6,
+    "series_restricted": 4
+  },
+  "original_dispatch": {
+    "normal": [
+      [
+        "DR",
+        2,
+        1,
+        2
+      ],
+      [
+        "PR",
+        1,
+        1,
+        2
+      ],
+      [
+        "task_delay",
+        {
+          "server_update": true
+        }
+      ]
+    ],
+    "exact_boundary_runs": [
+      [
+        "DR",
+        2,
+        1,
+        2
+      ],
+      [
+        "PR",
+        1,
+        1,
+        2
+      ],
+      [
+        "task_delay",
+        {
+          "server_update": true
+        }
+      ]
+    ],
+    "dr_already_run": [
+      [
+        "PR",
+        1,
+        1,
+        2
+      ],
+      [
+        "task_delay",
+        {
+          "server_update": true
+        }
+      ]
+    ],
+    "pr_already_run": [
+      [
+        "DR",
+        2,
+        1,
+        2
+      ],
+      [
+        "task_delay",
+        {
+          "server_update": true
+        }
+      ],
+      "task_stop",
+      [
+        "task_delay",
+        {
+          "server_update": true
+        }
+      ]
+    ],
+    "both_disabled": [
+      "task_stop",
+      [
+        "DR",
+        2,
+        1,
+        0
+      ],
+      [
+        "PR",
+        1,
+        1,
+        0
+      ],
+      [
+        "task_delay",
+        {
+          "server_update": true
+        }
+      ]
+    ],
+    "independent_amounts": [
+      [
+        "DR",
+        2,
+        1,
+        1
+      ],
+      [
+        "PR",
+        1,
+        1,
+        15
+      ],
+      [
+        "task_delay",
+        {
+          "server_update": true
+        }
+      ]
+    ]
+  },
+  "price_calculation": {
+    "PR": {
+      "prices_1_to_16": [
+        0,
+        0,
+        150,
+        150,
+        300,
+        300,
+        300,
+        600,
+        600,
+        600,
+        1050,
+        1050,
+        1050,
+        1050,
+        1050,
+        1500
+      ],
+      "total_1_to_15": 8250
+    },
+    "DR": {
+      "prices_1_to_16": [
+        0,
+        0,
+        600,
+        600,
+        600,
+        600,
+        1200,
+        1200,
+        1200,
+        1200,
+        3000,
+        3000,
+        3000,
+        3000,
+        3000,
+        6000
+      ],
+      "total_1_to_15": 22200
+    }
+  },
+  "last_run_write": {
+    "DR": {
+      "last_run": "2026-08-15T07:00:00",
+      "events": [
+        [
+          "confirm_stub",
+          "BP_BUY"
+        ]
+      ]
+    },
+    "PR": {
+      "last_run": "2026-08-15T07:00:00",
+      "events": [
+        [
+          "confirm_stub",
+          "BP_BUY"
+        ]
+      ]
+    }
+  },
+  "runtime_consumers": {
+    "Shipyard_ResearchSeries": [
+      "run"
+    ],
+    "Shipyard_ShipIndex": [
+      "run"
+    ],
+    "Shipyard_BuyAmount": [
+      "run"
+    ],
+    "Shipyard_LastRun": [
+      "run"
+    ],
+    "ShipyardDr_ResearchSeries": [
+      "run"
+    ],
+    "ShipyardDr_ShipIndex": [
+      "run"
+    ],
+    "ShipyardDr_BuyAmount": [
+      "run"
+    ],
+    "ShipyardDr_LastRun": [
+      "run"
+    ]
+  },
+  "patched_guard_present": true,
+  "invalid_entry_events": {
+    "Shipyard_ResearchSeries": [],
+    "Shipyard_ShipIndex": [],
+    "Shipyard_BuyAmount": [],
+    "Shipyard_LastRun": [],
+    "ShipyardDr_ResearchSeries": [],
+    "ShipyardDr_ShipIndex": [],
+    "ShipyardDr_BuyAmount": [],
+    "ShipyardDr_LastRun": []
+  },
+  "temporary_config_only": true,
+  "mutation_budget": 0,
+  "real_blueprints_consumed": false,
+  "real_coin_consumed": false,
+  "real_navigation_performed": false,
+  "purchase_confirms_stubbed": true,
+  "android_input_injected": false,
+  "source_sha256": {
+    "args": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+    "reward": "45dac98506c7e35da401f1a27107533a61ca7f8bbccb6048e16d49ac62221993",
+    "ui": "93d805fc31d34ce1f100e567c8cc6306d464a79ada36003f39cd632efe562876"
+  }
+}

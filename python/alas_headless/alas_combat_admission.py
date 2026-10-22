@@ -1,14 +1,14 @@
-"""Decision-bound admission data for one ALAS-owned campaign combat.
+"""Decision-bound admission for ALAS-owned campaign movement and combat.
 
 This module does not execute movement or combat.  It validates the exact
 ordered grid-input sequence selected by ALAS: zero or more empty waypoints,
-followed by the fighting enemy.  The adapter owns the separate input budget
+followed by an enemy or an empty destination. The adapter owns the input budget
 and the native ALAS state machine remains the only execution owner.
 """
 
 import re
 from dataclasses import dataclass
-from typing import Any, Tuple
+from typing import Any, Optional, Tuple
 
 from .alas_decision_preview import AlasCampaignDecisionPreview
 from .semantic_oracle import (
@@ -32,15 +32,16 @@ class AlasCampaignCombatAdmission:
     target_node: str
     route_nodes: Tuple[str, ...]
     input_nodes: Tuple[str, ...]
-    enemy_object_id: int
-    enemy_sprite: str
-    enemy_level: int
+    enemy_object_id: Optional[int]
+    enemy_sprite: Optional[str]
+    enemy_level: Optional[int]
     ammo_before: int
     cell_path: str
     point: Point
     bounds: Bounds
     decision_signature: Tuple[Any, ...]
     map_signature: Tuple[Any, ...]
+    target_kind: str = 'enemy'
 
     @property
     def signature(self) -> Tuple[Any, ...]:
@@ -65,6 +66,7 @@ class AlasCampaignCombatAdmission:
             self.bounds,
             self.decision_signature,
             self.map_signature,
+            self.target_kind,
         )
 
 
@@ -76,7 +78,7 @@ class AlasCampaignCombatProof:
     fleet_index: int
     fleet_marker: str
     target_node: str
-    enemy_object_id: int
+    enemy_object_id: Optional[int]
     ammo_before: int
     ammo_after: int
     input_generation: int
@@ -98,7 +100,8 @@ def prepare_alas_campaign_combat_admission(
     ordered click nodes; permit that case only when the fleet has a different
     marker and ALAS does not click its cell. A decision may select the other
     already-projected fleet; the adapter must prove that exact fleet switch
-    before admitting the first grid input. Ammunition pickups, portals, and
+    before admitting the first grid input. Empty destinations preserve battle
+    count, ammunition and all unrelated map state. Ammunition pickups, portals, and
     diagonal routes remain outside this contract.
     """
 
@@ -116,12 +119,13 @@ def prepare_alas_campaign_combat_admission(
         raise SemanticGateClosed("campaign combat decision generation changed")
     if decision.stage_code != state.stage_code:
         raise SemanticGateClosed("campaign combat stage identity changed")
-    if decision.target_kind != "enemy" or decision.expected not in (
+    movement = decision.target_kind == 'move' and decision.expected == ''
+    if not movement and (decision.target_kind != "enemy" or decision.expected not in (
         "combat",
         "boss",
         "combat_boss",
         "combat_siren",
-    ):
+    )):
         raise SemanticGateClosed(
             "campaign combat target is not an enemy: kind={0}, expected={1}".format(
                 decision.target_kind,
@@ -210,15 +214,17 @@ def prepare_alas_campaign_combat_admission(
     )
     if len(cells) != 1:
         raise SemanticGateClosed("campaign combat target cell is absent or ambiguous")
-    if len(enemies) != 1 or enemies[0].fighting != same_cell:
+    if movement and (enemies or same_cell):
+        raise SemanticGateClosed('campaign movement target must be an empty destination')
+    if not movement and (len(enemies) != 1 or enemies[0].fighting != same_cell):
         raise SemanticGateClosed(
             "campaign combat target fighting state disagrees with the route"
         )
-    if (decision.expected == "combat_siren") != enemies[0].is_siren:
+    if not movement and (decision.expected == "combat_siren") != enemies[0].is_siren:
         raise SemanticGateClosed(
             "campaign combat target kind disagrees with the enemy identity"
         )
-    if (decision.expected in ("boss", "combat_boss")) != (
+    if not movement and (decision.expected in ("boss", "combat_boss")) != (
         enemies[0].genre == "Boss"
     ):
         raise SemanticGateClosed(
@@ -258,7 +264,7 @@ def prepare_alas_campaign_combat_admission(
         raise SemanticGateClosed("campaign combat target has a conflicting occupant")
 
     cell = cells[0]
-    enemy = enemies[0]
+    enemy = enemies[0] if enemies else None
     return AlasCampaignCombatAdmission(
         generation=state.generation,
         input_generation=input_generation,
@@ -271,15 +277,16 @@ def prepare_alas_campaign_combat_admission(
         target_node=decision.target_node,
         route_nodes=decision.route_nodes,
         input_nodes=input_nodes,
-        enemy_object_id=enemy.object_id,
-        enemy_sprite=enemy.sprite,
-        enemy_level=enemy.level,
+        enemy_object_id=enemy.object_id if enemy else None,
+        enemy_sprite=enemy.sprite if enemy else None,
+        enemy_level=enemy.level if enemy else None,
         ammo_before=fleets[0].ammo,
         cell_path=cell.button_path,
         point=cell.point,
         bounds=cell.bounds,
         decision_signature=decision.signature,
         map_signature=state.signature,
+        target_kind='move' if movement else 'enemy',
     )
 
 
@@ -299,7 +306,7 @@ def prove_alas_campaign_combat_transition(
     if (
         isinstance(battle_count_after, bool)
         or not isinstance(battle_count_after, int)
-        or battle_count_after != admission.battle_count + 1
+        or battle_count_after != admission.battle_count + (admission.target_kind != 'move')
     ):
         raise SemanticGateClosed("ALAS battle count did not advance exactly once")
     if state.stage_code != admission.stage_code:
@@ -322,13 +329,29 @@ def prove_alas_campaign_combat_transition(
     if len(fleets) != 1 or state.current_fleet_marker != admission.fleet_marker:
         raise SemanticGateClosed("campaign combat fleet did not remain on target")
     ammo_after = fleets[0].ammo
-    expected_ammo_after = max(0, admission.ammo_before - 1)
+    expected_ammo_after = (admission.ammo_before if admission.target_kind == 'move'
+                           else max(0, admission.ammo_before - 1))
     if ammo_after != expected_ammo_after:
         raise SemanticGateClosed(
             "campaign combat ammunition did not apply one bounded decrement"
         )
     if input_path != admission.cell_path:
         raise SemanticGateClosed("campaign combat input path changed")
+
+    if admission.target_kind == 'move':
+        # An empty move cannot consume ammunition, erase enemies or move another
+        # fleet. Compare all non-position map state, allowing sibling reordering.
+        baseline = admission.map_signature
+        fleets_before = tuple(sorted(baseline[5]))
+        fleets_after = tuple(sorted((f.marker, admission.origin_node if f.marker == admission.fleet_marker
+            else f.node, f.ammo, f.ammo_capacity) for f in state.fleets))
+        if (fleets_before != fleets_after or state.land_nodes != tuple(baseline[4])
+                or tuple(sorted(state.signature[6])) != tuple(sorted(baseline[6]))
+                or tuple(sorted(state.signature[7])) != tuple(sorted(baseline[7]))
+                or state.displayed_fleet_index != admission.fleet_index
+                or state.signature[11:] != baseline[11:]
+                or (baseline[8] == admission.fleet_index and state.signature[10] != baseline[10])):
+            raise SemanticGateClosed('campaign empty movement changed unrelated map state')
 
     return AlasCampaignCombatProof(
         stage_code=admission.stage_code,

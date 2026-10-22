@@ -198,6 +198,10 @@ def install_import_stubs(
 
 
 class ReplayOracle:
+    def read_state(self):
+        # Login fixtures contain no active Campaign map controls.
+        return types.SimpleNamespace(generation=7, buttons=())
+
     def __init__(self, scenario: str) -> None:
         self.scenario = scenario
         self.events: list[tuple[str, str]] = []
@@ -214,6 +218,9 @@ class ReplayOracle:
     def observation_surface_present(self, surface) -> bool:
         # These login scenarios contain no task-owned modal or combat surface.
         return False
+
+    def observation_target_present(self, semantic_id: str) -> bool:
+        return self.enabled_values.get(semantic_id, False)
 
     def enabled(self, semantic_id: str) -> bool:
         self.events.append(("enabled", semantic_id))

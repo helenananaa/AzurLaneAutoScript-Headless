@@ -18,10 +18,90 @@ from .errors import SemanticGateClosed, SemanticOracleError
 class MissionOracle:
     """Mission operations sharing the oracle frame and input boundary."""
 
+    def _mission_overflow_prompt(self):
+        state = self.read_state()
+        root = 'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/'
+        if not any(b.active_in_hierarchy and b.path == root+'button_container/custom_button_1(Clone)'
+                   for b in state.buttons):
+            return None
+        ui = self._stable_msgbox_ui_state(state)
+
+        def text(path):
+            values = [t.text for t in ui.texts if t.path == root+path
+                      and t.active_in_hierarchy and t.active_and_enabled and not t.truncated]
+            if len(values) > 1:
+                raise SemanticGateClosed('mission overflow text is ambiguous')
+            return re.sub(r'<[^>]*>', '', values[0]).strip() if values else None
+
+        message = text('item_panel/Text')
+        if message != '以下奖励因超出上限而无法获得，是否仍要领取？':
+            return None
+        if (''.join((text('button_container/custom_button_1(Clone)/pic') or '').split()) != '确定'
+                or ''.join((text('button_container/custom_button_2(Clone)/pic') or '').split()) != '取消'):
+            raise SemanticGateClosed('mission overflow choice labels are unsupported')
+        # The modal must belong to the existing mission page. A similarly
+        # worded mail or shop dialog does not acquire this task's authority.
+        self._unique(state, 'task/page/back')
+        items = []
+        item_paths = set()
+        prefix = root+'item_panel/scrollview/list/'
+        for t in ui.texts:
+            if (t.path.startswith(prefix) and t.path.endswith('/IconTpl/name')
+                    and t.active_in_hierarchy and t.active_and_enabled):
+                if t.truncated or not t.text.strip():
+                    raise SemanticGateClosed('mission overflow item is unreadable')
+                if t.path in item_paths:
+                    raise SemanticGateClosed('mission overflow item path is ambiguous')
+                item_paths.add(t.path)
+                item_root = t.path[:-len('name')]
+                count = text(item_root[len(root):]+'icon_bg/count')
+                if count is None or re.fullmatch(r'[1-9][0-9]*', count) is None:
+                    raise SemanticGateClosed('mission overflow item count is unsupported')
+                items.append((t.text.strip(), int(count)))
+        if not items:
+            raise SemanticGateClosed('mission overflow items are absent')
+        return state, tuple(items)
+
+    def mission_overflow_prompt_visible(self) -> bool:
+        return self._mission_overflow_prompt() is not None
+
+    def click_mission_overflow_confirm(self) -> ActionReceipt:
+        prompt = self._mission_overflow_prompt()
+        if prompt is None:
+            raise SemanticGateClosed('mission overflow prompt is absent')
+        state, _ = prompt
+        path = 'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)'
+        choices = [b for b in state.buttons if b.path == path]
+        if len(choices) != 1 or not choices[0].actionable:
+            raise SemanticGateClosed('mission overflow confirm is not actionable')
+        target = choices[0]
+        if target.point is None or target.bounds is None or not target.bounds.contains(target.point):
+            raise SemanticGateClosed('mission overflow confirm point is not proven')
+        if not (0 <= round(target.point.x) < self.fingerprint.width
+                and 0 <= round(target.point.y) < self.fingerprint.height):
+            raise SemanticGateClosed('mission overflow confirm is outside the screen')
+        blockers = [r for r in self._blocking_rules(state, 'task/claim/all')
+                    if 'Msgbox(Clone)' not in r.path_fragment]
+        if blockers:
+            raise SemanticGateClosed('mission overflow confirm is blocked')
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed before mission overflow confirm')
+        self._tap(round(target.point.x), round(target.point.y))
+        receipt = ActionReceipt('task/overflow/confirm', state.generation,
+                                target.point, target.bounds, target.path)
+        def completed():
+            after = self.read_state()
+            if after.generation <= state.generation or any(
+                    b.active_in_hierarchy and '/Msgbox(Clone)/' in b.path for b in after.buttons):
+                raise SemanticGateClosed('mission overflow confirmation did not dismiss')
+            return True
+        self._retry_transition_read(completed, attempts=20, interval_seconds=0.25)
+        return receipt
+
     @staticmethod
     def _mission_rows(state: OracleState, button_name: str) -> Tuple[ButtonState, ...]:
         pattern = re.compile(
-            r"(?:^|/)TaskScene\(Clone\)/pages/TaskListPage\(Clone\)/"
+            r"(?:^|/)TaskScene\(Clone\)/pages/TaskList(?:ForWeek)?Page\(Clone\)/"
             r"right_panel/content/([0-9]+)/frame/" + re.escape(button_name) + r"$"
         )
         rows = []
@@ -89,6 +169,21 @@ class MissionOracle:
         actionable_claim_rows = tuple(
             button for button in claim_rows if button.actionable
         )
+        progress_path = 'TaskScene(Clone)/pages/TaskListForWeekPage(Clone)/task_progress/get_btn'
+        if any(button.path.endswith(progress_path) for button in state.buttons):
+            progress = self._weekly_mission_progress_claim_target_once(state, ui_state)
+            if progress is not None:
+                # This reviewed control delegates its target to the exact
+                # enabled Image inside the native Button bounds.
+                actionable_claim_rows += (progress,)
+        weekly_selected = tuple(image for image in ui_state.images
+                                if image.path.endswith('TaskScene(Clone)/blur_panel/adapt/left_length/frame/tagRoot/weekly/selected/Image')
+                                and image.sprite == 'icon_week_sel' and image.active_in_hierarchy
+                                and image.active_and_enabled and not image.truncated and image.bounds is not None)
+        weekly_unfinished = tuple(image for image in ui_state.images
+                                 if re.search(r'/TaskListForWeekPage\(Clone\)/right_panel/content/[0-9]+/frame/unfinish_bg$', image.path)
+                                 and image.sprite == 'unfinish_frame' and image.active_in_hierarchy
+                                 and image.active_and_enabled and not image.truncated and image.bounds is not None)
         actionable_unfinished_rows = tuple(
             button for button in unfinished_rows if button.actionable
         )
@@ -101,6 +196,9 @@ class MissionOracle:
             # a safe click, and it must not be misreported as no work.
             disposition = MissionDisposition.UNKNOWN
         elif actionable_unfinished_rows:
+            disposition = MissionDisposition.UNFINISHED
+        elif (len(weekly_selected) == 1 and weekly_unfinished
+              and not ui_state.image_truncated):
             disposition = MissionDisposition.UNFINISHED
         elif empty_markers:
             disposition = MissionDisposition.EMPTY
@@ -154,9 +252,10 @@ class MissionOracle:
         )
 
     def _weekly_mission_progress_claim_target_once(
-        self,
+        self, state=None, ui_state=None,
     ) -> Optional[ButtonState]:
-        state = self.read_state()
+        if state is None:
+            state = self.read_state()
         back = self._unique(state, "task/page/back")
         if not back.actionable or self._blocking_rules(state, "task/page/back"):
             raise SemanticGateClosed("mission page identity is not safely actionable")
@@ -183,10 +282,12 @@ class MissionOracle:
         ):
             return None
 
-        ui_state = self.read_ui_state()
+        if ui_state is None:
+            ui_state = self.read_ui_state()
         if (
             ui_state.generation < state.generation
             or ui_state.generation > state.generation + 2
+            or ui_state.image_truncated
         ):
             raise SemanticGateClosed(
                 "weekly mission button and UI snapshots are not coherent"
@@ -232,7 +333,9 @@ class MissionOracle:
         )
         if len(weekly_selected) != 1:
             raise SemanticGateClosed("weekly mission tab identity is absent or ambiguous")
-        if len(button_images) != 1 or len(enabled_images) != 1:
+        if len(button_images) != 1 or len(enabled_images) > 1:
+            raise SemanticGateClosed("weekly mission claim images are absent or ambiguous")
+        if not enabled_images:
             return None
         return target
 
@@ -306,6 +409,8 @@ class MissionOracle:
 
         if not isinstance(expected_path, str) or not expected_path:
             raise ValueError("mission claim row path must be non-empty")
+        if expected_path.endswith('TaskScene(Clone)/pages/TaskListForWeekPage(Clone)/task_progress/get_btn'):
+            return self.click_weekly_mission_progress_claim()
         page = self.mission_page_state()
         if page.disposition != MissionDisposition.CLAIMABLE_ROW:
             raise SemanticGateClosed("mission page is not row-claimable")

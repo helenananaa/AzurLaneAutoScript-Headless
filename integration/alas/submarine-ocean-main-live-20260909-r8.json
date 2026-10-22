@@ -1,0 +1,126 @@
+{
+  "schema": "alas-headless.main-task-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-09-09T03:27:40.373515Z",
+  "finished_at": "2026-09-09T03:32:12.294068Z",
+  "task": "Main",
+  "stage": "10-2",
+  "event": "campaign_main",
+  "mode": "normal",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "scheduler_command": "Main",
+  "run_result": false,
+  "run_count_before": 1,
+  "run_count_after": 1,
+  "scheduler_enabled_after": true,
+  "use_auto_search": false,
+  "use_2x_book": false,
+  "auto_menu_observations": [],
+  "completed_sorties": [],
+  "continuation_receipts": [],
+  "submarine_observations": [],
+  "submarine_calls": [],
+  "combat_admissions": [
+    {
+      "generation": 87230,
+      "battle_count": 0,
+      "target": "B6",
+      "expected": "combat",
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "E3",
+        "ammo": 6,
+        "ammo_capacity": 6
+      },
+      "hunting_nodes": [
+        "B3",
+        "B4",
+        "D2",
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "F3",
+        "F4",
+        "G2",
+        "G3",
+        "G4",
+        "H5"
+      ],
+      "submarine_destination": null
+    },
+    {
+      "generation": 88144,
+      "battle_count": 1,
+      "target": "E5",
+      "expected": "combat",
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "E3",
+        "ammo": 6,
+        "ammo_capacity": 6
+      },
+      "hunting_nodes": [
+        "B3",
+        "B4",
+        "D2",
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "F3",
+        "F4",
+        "G2",
+        "G3",
+        "G4",
+        "H5"
+      ],
+      "submarine_destination": null
+    }
+  ],
+  "observe_submarine_range": true,
+  "submarine_configuration": {
+    "Fleet": 2,
+    "Mode": "boss_only",
+    "AutoSearchMode": "sub_standby",
+    "DistanceToBoss": "use_open_ocean_support"
+  },
+  "preparations": [
+    {
+      "generation": 86207,
+      "mode": "prep",
+      "use_2x_book": false,
+      "book_selected": false,
+      "book_count": 564
+    }
+  ],
+  "auto_book_checks": [],
+  "fleet_order": "fleet1_mob_fleet2_boss",
+  "auto_search_completion": null,
+  "login_recovery_performed": false,
+  "starting_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "campaign_entry": false,
+    "generation": 84952
+  },
+  "budgets": {
+    "stage_entry": 1,
+    "fleet_mutation": 8,
+    "sortie": 1,
+    "combat": 24,
+    "viewport_swipe": 16
+  },
+  "observer": {
+    "generation": 89361,
+    "scene_handle": -76,
+    "button_count": 64
+  },
+  "final_surface": {
+    "main_page": false,
+    "campaign_map": true,
+    "campaign_entry": false
+  },
+  "raw_input_fallback_used": false
+}

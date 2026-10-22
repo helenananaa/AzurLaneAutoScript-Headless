@@ -1,0 +1,41 @@
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -338,6 +338,8 @@
+                         logger.info('Semantic pre-sortie: map preparation active')
+                         observed_mode = (
+                             semantic_adapter.campaign_map_preparation_mode_state()
++                            if self.config.MAP_HAS_MODE_SWITCH
++                            else self.config.Campaign_Mode
+                         )
+                         if observed_mode != self.config.Campaign_Mode:
+                             receipt = (
+@@ -354,13 +356,21 @@
+                             # hierarchy. Re-read every subsequent decision from
+                             # the new immutable semantic frame.
+                             continue
+-                        self.map_clear_percentage = (
+-                            semantic_adapter.campaign_map_clear_percentage()
+-                        )
+-                        self.map_is_100_percent_clear = self.map_clear_percentage > 0.95
+-                        self.map_has_clear_mode = (
+-                            self.map_is_100_percent_clear
+-                            and semantic_adapter.campaign_clear_mode_available())
++                        if (self.config.MAP_IS_ONE_TIME_STAGE
++                                and self.config.Campaign_Name.lower() == 'sp'):
++                            # Original SP uses AUTO_SEARCH, not a progress bar,
++                            # to identify clear mode. Keep its native decision.
++                            self.map_has_clear_mode = (
++                                semantic_adapter.campaign_auto_search_selected()
++                                and semantic_adapter.campaign_clear_mode_available())
++                        else:
++                            self.map_clear_percentage = (
++                                semantic_adapter.campaign_map_clear_percentage()
++                            )
++                            self.map_is_100_percent_clear = self.map_clear_percentage > 0.95
++                            self.map_has_clear_mode = (
++                                self.map_is_100_percent_clear
++                                and semantic_adapter.campaign_clear_mode_available())
+                         self.handle_fast_forward()
+                         auto_search_selected = (
+                             semantic_adapter.campaign_auto_search_selected()

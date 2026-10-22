@@ -7,7 +7,7 @@ from ...alas_mail_config_contract import (
     AlasMailConfigSnapshot,
     validate_alas_mail_config,
 )
-from ...semantic_oracle import SemanticGateClosed
+from ...semantic_oracle import SemanticGateClosed, SemanticTargetMissing
 from .contracts import AlasSemanticUnmapped, _MailFlowContext
 from .dispatch_result import UNHANDLED
 from .resources import (
@@ -114,6 +114,13 @@ class MailAdapterPorts:
         return UNHANDLED
 
     def _appear_mail(self, name):
+        if (self._mail_context is None and name == "GOTO_MAIN_WHITE"
+                and any(self.oracle.observation_target_present(target)
+                        and self.oracle.enabled(target)
+                        for target in ('mail/manage/back', 'mail/page/back'))):
+            # Other tasks can inherit this overlay. The native page recovery
+            # owns its exact back edge, then rediscovers the underlying MailUI.
+            return True
         if self._mail_context is not None and name == "MAIL_MANAGE":
             return bool(
                 self.oracle.enabled("mail/manage")
@@ -181,6 +188,12 @@ class MailAdapterPorts:
             if name == "MAIL_BATCH_DELETE":
                 return self.oracle.enabled("mail/manage/delete")
             if name == "MAIL_WHITE_EMPTY":
+                if (self.oracle.exists("mail/manage/back")
+                        and self.oracle.enabled("mail/manage/back")):
+                    # The manager can finish mounting between ALAS' claim
+                    # probe and this empty-page probe. The next native loop
+                    # owns its claim sentinel; never read the covered page.
+                    return False
                 # MailWhite probes this while it is still waiting for the
                 # navigation click to mount MailUI.  An empty-mail reading
                 # needs the exact page tree (and its count text), whereas a
@@ -195,6 +208,11 @@ class MailAdapterPorts:
             and name in MAIL_VIRTUAL_RESOURCES
             and name not in MISSION_VIRTUAL_RESOURCES
         ):
+            if self._inherited_login_allows_passive_probe():
+                # Native page discovery can inherit LoginUI2 while another
+                # task still owns the adapter. This is only a mail absence
+                # probe; the reviewed login input port keeps its own checks.
+                return False
             if (
                 self.oracle.daily_page_visible()
                 or self.oracle.daily_precombat_visible()
@@ -241,7 +259,12 @@ class MailAdapterPorts:
             # reconnect confirmation.
             context = self._mail_context
             kind = self.oracle.mail_confirmation_kind()
-            if kind is None or not (
+            if kind is None:
+                # The positive screenshot may precede an already accepted
+                # confirmation producing its reward. No current prompt means
+                # no input; native click_if_present returns to its own loop.
+                raise SemanticTargetMissing('mail confirmation disappeared before input')
+            if not (
                 kind == context.pending_confirmation
                 or (
                     kind == "empty"
@@ -262,6 +285,33 @@ class MailAdapterPorts:
         return UNHANDLED
 
     def _click_mail(self, name):
+        if (name == "GOTO_MAIN_WHITE" and self._mail_context is None
+                and self.oracle.observation_target_present("mail/manage/back")
+                and self.oracle.enabled("mail/manage/back")):
+            receipt = self.oracle.click("mail/manage/back")
+            deadline = time.monotonic() + 12.0
+            while time.monotonic() < deadline:
+                if (self.oracle.read_state().generation > receipt.generation
+                        and not self.oracle.observation_target_present("mail/manage/back")
+                        and self.oracle.enabled("mail/page/back")):
+                    return receipt
+                time.sleep(0.2)
+            raise SemanticGateClosed("mail manager return did not restore mail page")
+        if (name == "GOTO_MAIN_WHITE" and self._mail_context is None
+                and self.oracle.observation_target_present("mail/page/back")
+                and self.oracle.enabled("mail/page/back")):
+            # ALAS may start another task while an earlier Mail invocation
+            # left its page open. The generic page graph still owns this
+            # exact return edge; it need not enter the Mail reward flow.
+            receipt = self.oracle.click("mail/page/back")
+            deadline = time.monotonic() + 12.0
+            while time.monotonic() < deadline:
+                if (self.oracle.read_state().generation > receipt.generation
+                        and self.oracle.main_page_visible()
+                        and not self.oracle.observation_target_present("mail/page/back")):
+                    return receipt
+                time.sleep(0.2)
+            raise SemanticGateClosed("mail page return did not reach main")
         if self._mail_context is not None and name in MAIL_CLICK_RESOURCES:
             toggle_target = MAIL_TOGGLE_TARGETS.get(name)
             if toggle_target is not None:
@@ -282,10 +332,6 @@ class MailAdapterPorts:
                     award_target = self._award_close_target()
                     if award_target is not None:
                         return self.oracle.click(award_target)
-                if not self._action_ledger.allowed("mail.mutation"):
-                    raise SemanticGateClosed(
-                        "mail mutation requires the separate explicit opt-in"
-                    )
                 receipt = self._dispatch_mutation(
                     "mail.mutation",
                     lambda: self.oracle.click(target),

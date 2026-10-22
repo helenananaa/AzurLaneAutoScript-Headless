@@ -166,20 +166,24 @@ def test_zone_entrance_never_enters_a_different_pin():
 
 
 def test_slow_unpin_publication_does_not_send_a_second_drag():
-    backend = FakeBackend([make_button('back_button',
-        'root/OverlayCamera/Overlay/UIMain/top/adapt/top_chapter/back_button')])
-    backend.ui = make_ui([], images=[make_image(
+    from tests.test_semantic_oracle_opsi_port_geometry import fixture
+    backend, oracle = fixture()
+    backend.ui['globe_geometry']['objects'][0]['ui_top_path'] = ''
+    backend.ui['images'] = [make_image(
         'root/OverlayCamera/Overlay/UIMain/top/SVFloatPanel(Clone)/point',
-        'click_point_safe', {'left': 470, 'top': 396, 'right': 546, 'bottom': 455})])
+        'click_point_safe', {'left': 470, 'top': 396, 'right': 546, 'bottom': 455})]
+    backend.ui['image_count'] = 1
     def publish_later():
-        backend.ui_sequence = [backend.ui] * 7 + [make_ui([], generation=12)]
-        backend.buttons['generation'] = 12
-        backend.snapshot['generation'] = 12
+        backend.ui_sequence = [backend.ui] * 7 + [make_ui([], generation=12), make_ui([], generation=13)]
+        backend.buttons['generation'] = 13
+        backend.snapshot['generation'] = 13
     backend.on_swipe = publish_later
-    oracle = make_oracle(backend)
-    with mock.patch.object(oracle, 'operation_siren_globe_state'):
+    # Native Plane gesture ownership is covered in test_opsi_native_globe_drag;
+    # this test isolates late publication after one already-proven gesture.
+    with mock.patch.object(oracle, 'operation_siren_globe_state'), mock.patch.object(
+            oracle, 'operation_siren_globe_drag_owned', return_value=True):
         receipt = oracle.operation_siren_globe_unpin()
-    assert receipt.post_generation == 12
+    assert receipt.post_generation == 13
     assert len(backend.swipes) == 1
 
 
@@ -262,14 +266,12 @@ def test_unselected_globe_is_ready_but_loading_underlay_is_not():
 
 
 def test_globe_selection_rechecks_overlay_at_dispatch():
-    back = make_button('back_button', 'OverlayCamera/Overlay/UIMain/top/adapt/top_chapter/back_button')
-    backend = FakeBackend([back])
-    backend.ui = make_ui([], generation=10)
-    oracle = make_oracle(backend)
+    from tests.test_semantic_oracle_opsi_port_geometry import fixture
+    backend, oracle = fixture()
     # The initial globe check passed, then a loading overlay mounted.
     with mock.patch.object(oracle, '_blocking_rules', side_effect=[(), ('loading',)]):
-        with pytest.raises(SemanticGateClosed, match='obscured before selection'):
-            oracle.click_operation_siren_globe_zone('西大陆架D', (647.0, 355.0))
+        with pytest.raises(SemanticGateClosed, match='port is obscured'):
+            oracle.click_operation_siren_globe_port('Gibraltar', 2)
     assert backend.taps == []
 
 

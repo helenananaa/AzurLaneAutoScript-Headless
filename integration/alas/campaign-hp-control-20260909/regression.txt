@@ -1,0 +1,21 @@
+........................................................................ [ 11%]
+........................................................................ [ 22%]
+........................................................................ [ 33%]
+........................................................................ [ 45%]
+........................................................................ [ 56%]
+........................................................................ [ 67%]
+........................................................................ [ 78%]
+........................................................................ [ 90%]
+...............................................................          [100%]
+============================== warnings summary ===============================
+tests/test_alas_configuration_attack_matrix.py::AlasConfigurationAttackMatrixTests::test_clean_pinned_upstream_matrix_is_deterministic_and_zero_input
+tests/test_alas_configuration_attack_matrix.py::AlasConfigurationAttackMatrixTests::test_clean_pinned_upstream_matrix_is_deterministic_and_zero_input
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-upstream-readonly\module\device\method\minitouch.py:467: DeprecationWarning: websockets.WebSocketClientProtocol is deprecated
+    _minitouch_ws: websockets.WebSocketClientProtocol
+
+tests/test_alas_configuration_attack_matrix.py::AlasConfigurationAttackMatrixTests::test_clean_pinned_upstream_matrix_is_deterministic_and_zero_input
+  D:\anaconda\Lib\site-packages\websockets\legacy\__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+    warnings.warn(  # deprecated in 14.0 - 2024-11-09
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+639 passed, 3 warnings in 15.94s

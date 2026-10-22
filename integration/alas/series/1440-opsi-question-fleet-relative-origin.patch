@@ -1,0 +1,11 @@
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -1001,6 +1001,7 @@
+                     semantic_session.click_operation_siren_relative_grid(
+                         tuple(int(value) for value in grid),
+                         prefer_adjacent_event=True,
++                        fleet_relative=True,
+                     )
+                 except SemanticGateClosed:
+                     logger.info('Refocus fleet before typed question movement')

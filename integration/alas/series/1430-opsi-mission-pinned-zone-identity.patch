@@ -1,0 +1,29 @@
+diff --git a/module/os_handler/mission.py b/module/os_handler/mission.py
+--- a/module/os_handler/mission.py
++++ b/module/os_handler/mission.py
+@@ -188,7 +188,11 @@
+                     return 'pinned_at_archive_zone'
+                 else:
+                     logger.info('Pinned at mission zone')
+-                    self.globe_enter(zone=self.name_to_zone(72))
++                    # Mission checkout pins the real destination; 72 is only
++                    # the upstream placeholder for its original AP flow.
++                    zone = (self.name_to_zone(semantic_oracle.operation_siren_globe_state().zone_name)
++                            if semantic_oracle is not None else self.name_to_zone(72))
++                    self.globe_enter(zone=zone)
+                     return 'pinned_at_mission_zone'
+             if self.is_in_map() and self.info_bar_count():
+                 logger.info('Already at mission zone')
+@@ -216,7 +220,11 @@
+                                 self.globe_enter(zone=self.name_to_zone(72))
+                                 return 'pinned_at_archive_zone'
+                             logger.info('Pinned at mission zone')
+-                            self.globe_enter(zone=self.name_to_zone(72))
++                            # Mission checkout pins the real destination; 72 is only
++                            # the upstream placeholder for its original AP flow.
++                            zone = (self.name_to_zone(semantic_oracle.operation_siren_globe_state().zone_name)
++                                    if semantic_oracle is not None else self.name_to_zone(72))
++                            self.globe_enter(zone=zone)
+                             return 'pinned_at_mission_zone'
+                         if self.is_in_map() and self.info_bar_count():
+                             logger.info('Already at mission zone')

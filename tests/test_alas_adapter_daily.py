@@ -2,13 +2,53 @@
 
 import time
 import unittest
-from alas_headless import SemanticGateClosed
+from contextlib import nullcontext
+from alas_headless import AlasSemanticSession, SemanticGateClosed
 from tests.semantic_support.adapter_cases import AlasSemanticAdapterTestsSupport
 from tests.semantic_support.adapter_fixtures import NamedButton
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_hard_detail_notice_absence_does_not_admit_a_start_action(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_campaign_pre_sortie('12-4', mode='hard')
+        oracle.observation_target_present = lambda target: target in ('campaign/map-preparation/cancel','campaign/map-preparation/proceed-clear')
+        oracle.campaign_map_preparation_state = Mock(side_effect=SemanticGateClosed('pending hard progress'))
+        self.assertFalse(adapter.appear(NamedButton('GET_MISSION')))
+        oracle.campaign_map_preparation_state.assert_not_called()
+        self.assertEqual(oracle.click_calls, [])
+    def test_session_reward_dispatch_preserves_daily_quick_owner(self):
+        for quick, campaign in ((True, False), (False, False), (True, True)):
+            with self.subTest(quick=quick, campaign=campaign):
+                adapter, oracle, _ = self.make_adapter()
+                adapter._daily_kind = "fierce_assault"
+                adapter._daily_stage = 1
+                if quick:
+                    adapter._daily_pending_receipt = oracle.click_receipt(
+                        "daily/execute/fierce_assault/stage/1/quick/all", generation=6
+                    )
+                if campaign:
+                    adapter.begin_campaign_pre_sortie("11-4", mode="hard")
+                oracle.enabled_values["reward/award-info/close"] = True
+                oracle.award_info_page_visible_value = True
+                oracle.campaign_battle_reward_visible = lambda: True
+                adapter.prepared_input_frame = lambda provider: nullcontext()
+                session = AlasSemanticSession.__new__(AlasSemanticSession)
+                session.adapter = adapter
+                session.open = lambda: adapter
+                session.refresh_frame = Mock()
+                session._combat_result_action_oracle = lambda owner: oracle
+                session._arm_combat_result_transition = Mock()
+
+                session.click(NamedButton("GET_ITEMS_1"))
+
+                self.assertEqual(adapter._daily_quick_reward_closed, quick and not campaign)
+                self.assertEqual(oracle.click_calls, ["reward/award-info/close"])
+                self.assertEqual(session.refresh_frame.call_count, int(quick and not campaign))
+                self.assertEqual(session._arm_combat_result_transition.call_count,
+                                 int(not quick or campaign))
+
     def test_current_raid_result_returns_to_raid_not_daily_page(self):
         adapter, oracle, _ = self.make_adapter(campaign_sortie_budget=1)
         self.assertFalse(adapter.current_raid_result_active())
@@ -76,6 +116,58 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         oracle.campaign_page_error = SemanticGateClosed("not a campaign page")
 
         self.assertFalse(adapter.appear(NamedButton("IN_MAP")))
+
+    def test_quick_completion_requires_own_receipt_zero_count_and_closed_award(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.daily_page_visible_value = True
+        oracle.daily_remaining_for_kind = lambda kind: 0
+        adapter._daily_kind = "tactical_training"
+        adapter._daily_stage = 1
+        self.assertFalse(adapter.daily_quick_complete())
+
+        adapter._daily_pending_receipt = oracle.click_receipt(
+            "daily/execute/tactical_training/stage/1/quick/all", generation=10
+        )
+        oracle.enabled_values["reward/award-info/close"] = True
+        self.assertFalse(adapter.daily_quick_complete())
+        oracle.enabled_values["reward/award-info/close"] = False
+        self.assertFalse(adapter.daily_quick_complete())
+        adapter._daily_quick_reward_closed = True
+        oracle.daily_remaining_for_kind = lambda kind: 1
+        self.assertFalse(adapter.daily_quick_complete())
+        oracle.daily_remaining_for_kind = lambda kind: 0
+        oracle.state_generation = 10
+        self.assertFalse(adapter.daily_quick_complete())
+        oracle.state_generation = 11
+        self.assertTrue(adapter.daily_quick_complete())
+
+    def test_quick_award_close_is_correlated_with_pending_dispatch(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter._daily_kind = "fierce_assault"
+        adapter._daily_stage = 1
+        adapter._daily_pending_receipt = oracle.click_receipt(
+            "daily/execute/fierce_assault/stage/1/quick/all", generation=6
+        )
+        oracle.enabled_values["reward/award-info/close"] = True
+        adapter._click_daily("GET_ITEMS_1")
+        self.assertTrue(adapter._daily_quick_reward_closed)
+        self.assertEqual(oracle.click_calls, ["reward/award-info/close"])
+
+    def test_spent_quick_card_is_not_reselected_while_reward_is_pending(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter._daily_kind = "fierce_assault"
+        adapter._daily_stage = 1
+        adapter._daily_pending_receipt = oracle.click_receipt(
+            "daily/execute/fierce_assault/stage/1/quick/all", generation=7
+        )
+        oracle.state_generation = 8
+        oracle.daily_page_visible_value = True
+        oracle.daily_detail_visible_value = True
+        oracle.daily_remaining_for_kind = lambda kind: 0
+        self.assertTrue(adapter.daily_quick_consumed())
+        self.assertFalse(adapter.appear(NamedButton("DAILY_ENTER_CHECK")))
+        oracle.daily_remaining_for_kind = lambda kind: 1
+        self.assertTrue(adapter.appear(NamedButton("DAILY_ENTER_CHECK")))
 
     def test_daily_result_owner_is_disabled_during_campaign_combat(self):
         adapter, _, _ = self.make_adapter()

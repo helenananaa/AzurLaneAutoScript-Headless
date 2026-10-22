@@ -1,0 +1,9 @@
+{
+  "schema": "alas-headless.authorized-retirement-live/v1",
+  "passed": false,
+  "serial": "emulator-5580",
+  "observer_apk_sha256": "dad26171386fae7daa99bc8e02c33264045df5f5e29bb830df06273108655511",
+  "transaction_budget": 1,
+  "premium_spending_authorized": false,
+  "error": "SemanticGateClosed: retirement selection page is incomplete"
+}

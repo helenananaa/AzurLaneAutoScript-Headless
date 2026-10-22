@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
+from dataclasses import replace
 from typing import Optional, Tuple
 from .contracts import (
     ActionReceipt,
@@ -18,6 +20,7 @@ from .contracts import (
     WAR_ARCHIVES_CAMPAIGN_CARDS,
 )
 from .errors import SemanticGateClosed
+from .activity_identity import archive_identity
 
 
 class ArchivesOracle:
@@ -58,16 +61,15 @@ class ArchivesOracle:
             raise SemanticGateClosed("war archives data-key counter is invalid")
         return True
 
-    @staticmethod
-    def war_archives_campaign_identity(event: str) -> Tuple[str, str]:
-        """Return the reviewed category and banner sprite for one ALAS folder."""
-
-        try:
-            return WAR_ARCHIVES_CAMPAIGN_CARDS[event]
-        except KeyError as exc:
-            raise SemanticGateClosed(
-                "war archives campaign is unavailable in the pinned game: " + str(event)
-            ) from exc
+    def war_archives_campaign_identity(self, event: str) -> Tuple[str, str]:
+        """Resolve a new folder through the current game's own archive table."""
+        reviewed = WAR_ARCHIVES_CAMPAIGN_CARDS.get(event)
+        snapshot = self.read_ui_snapshot()
+        identity = snapshot.get("activity_identity")
+        family = identity.get("archives") if isinstance(identity, Mapping) else None
+        if reviewed is not None and (not isinstance(family, Mapping) or family.get("status") != 1):
+            return reviewed  # Original reviewed input proof remains available.
+        return archive_identity(snapshot, event, self.fingerprint.package, reviewed)
 
     def war_archives_category(self) -> str:
         """Return the exactly selected EX/SP landing-page category."""
@@ -144,9 +146,10 @@ class ArchivesOracle:
             path=target.path,
         )
 
-    def _war_archives_campaign_card(
+    def _war_archives_campaign_image(
         self, event: str
-    ) -> Tuple[OracleState, ImageState, ButtonState]:
+    ) -> Tuple[OracleState, ImageState]:
+        """Observe one card while it may still be moving with the scroll view."""
         expected_category, sprite = self.war_archives_campaign_identity(event)
         if self.war_archives_category() != expected_category:
             raise SemanticGateClosed("war archives campaign category is not selected")
@@ -175,8 +178,14 @@ class ArchivesOracle:
             raise SemanticGateClosed(
                 "war archives campaign card is absent or ambiguous: " + event
             )
-        image = images[0]
-        buttons = tuple(
+        return button_state, images[0]
+
+    def _war_archives_campaign_card(
+        self, event: str
+    ) -> Tuple[OracleState, ImageState, ButtonState]:
+        """Require exact current button/image alignment only for card input."""
+        button_state, image = self._war_archives_campaign_image(event)
+        candidates = tuple(
             button
             for button in button_state.buttons
             if button.path == image.path
@@ -184,8 +193,11 @@ class ArchivesOracle:
             and button.active_in_hierarchy
             and button.active_and_enabled
             and button.interactable
-            and button.bounds == image.bounds
+            and button.bounds is not None
         )
+        buttons = tuple(button for button in candidates if button.bounds == image.bounds)
+        if candidates and not buttons:
+            raise SemanticGateClosed("war archives campaign control is not aligned")
         if len(buttons) != 1:
             raise SemanticGateClosed("war archives campaign control is ambiguous")
         return button_state, image, buttons[0]
@@ -193,13 +205,15 @@ class ArchivesOracle:
     def war_archives_campaign_card_position(self, event: str) -> str:
         """Classify an exact campaign card relative to the safe list viewport."""
 
-        _state, image, _button = self._war_archives_campaign_card(event)
+        _state, image = self._war_archives_campaign_image(event)
         assert image.bounds is not None
         if image.bounds.top >= 110.0 and image.bounds.bottom <= 680.0:
             return "visible"
-        if image.bounds.bottom < 110.0:
+        if image.bounds.bottom - image.bounds.top > 570.0:
+            raise SemanticGateClosed("war archives campaign card exceeds the safe viewport")
+        if image.bounds.top < 110.0:
             return "above"
-        if image.bounds.top > 680.0:
+        if image.bounds.bottom > 680.0:
             return "below"
         raise SemanticGateClosed("war archives campaign card clips the safe viewport")
 
@@ -208,7 +222,7 @@ class ArchivesOracle:
     ) -> Tuple[int, Bounds]:
         """Return the coherent generation and exact card bounds."""
 
-        state, image, _button = self._war_archives_campaign_card(event)
+        state, image = self._war_archives_campaign_image(event)
         assert image.bounds is not None
         return state.generation, image.bounds
 
@@ -217,7 +231,7 @@ class ArchivesOracle:
 
         if self._swipe is None:
             raise SemanticGateClosed("war archives campaign search requires typed swipe")
-        button_state, _image, _button = self._war_archives_campaign_card(event)
+        button_state, _image = self._war_archives_campaign_image(event)
         position = self.war_archives_campaign_card_position(event)
         if position == "visible":
             raise SemanticGateClosed("war archives campaign card is already visible")
@@ -271,19 +285,35 @@ class ArchivesOracle:
             target.point is None
             or target.bounds is None
             or not target.bounds.contains(target.point)
-            or target.raycast_top is not None
+            or target.raycast_top not in (True, None)
         ):
             raise SemanticGateClosed("war archives campaign card is not actionable")
+        # A positive raycast proves the publisher's point; do not move it.
+        # Older publishers expose only a transform pivot, which can round
+        # outside an edge. bg/icon owns the game's onButton handler, so its
+        # strictly matched live rectangle supplies an interior point there.
+        if target.raycast_top is True:
+            point = Point(round(target.point.x), round(target.point.y))
+        else:
+            point = Point(
+                round((target.bounds.left + target.bounds.right) / 2.0),
+                round((target.bounds.top + target.bounds.bottom) / 2.0),
+            )
+        if not (
+            target.bounds.left < point.x < target.bounds.right
+            and target.bounds.top < point.y < target.bounds.bottom
+        ):
+            raise SemanticGateClosed("war archives campaign card has no interior input point")
         semantic_id = "archive/campaign/" + event
         if self._blocking_rules(state, semantic_id):
             raise SemanticGateClosed("war archives campaign input is blocked")
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed before archive campaign input")
-        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        self._tap(int(point.x), int(point.y))
         return ActionReceipt(
             semantic_id=semantic_id,
             generation=state.generation,
-            point=target.point,
+            point=point,
             bounds=target.bounds,
             path=target.path,
         )
@@ -499,7 +529,7 @@ class ArchivesOracle:
     def _war_archives_campaign_page_state(
         self, button_state: OracleState, ui_state: UiState
     ) -> CampaignPageState:
-        """Read the letter-coded stage nodes mounted in LevelMainScene."""
+        """Read archive labels on the known chapter and shared event layouts."""
 
         counters = self._war_archives_campaign_counter_records(ui_state)
         if len(counters) != 1 or re.fullmatch(
@@ -520,11 +550,21 @@ class ArchivesOracle:
             raise SemanticGateClosed(
                 "war archives campaign title is absent or ambiguous"
             )
-        prefix = "LevelMainScene(Clone)/float/levels/items/Chapter_"
-        control_pattern = re.compile(re.escape(prefix) + r"([1-9][0-9]*)/main$")
+        page_root = titles[0].path.removesuffix("top/top_chapter/title_chapter/name")
+        if counters[0].path != page_root + "main/right_chapter/event_btns/tickets/Text":
+            raise SemanticGateClosed("war archives campaign page ownership is ambiguous")
+        # Newer archives reuse the existing event selector prefab. Bind both
+        # known layouts to the exact titled page, rather than scanning for
+        # arbitrary Chapter nodes or hardcoding an archive date/stage ID.
+        control_pattern = re.compile(
+            re.escape(page_root)
+            + r"(float/levels/items|LevelSelectSPFullUI\(Clone\)/Battle/Nodes)"
+            + r"/Chapter_([1-9][0-9]*)/main"
+        )
         controls = []
+        layouts = set()
         for button in button_state.buttons:
-            match = control_pattern.search(button.path)
+            match = control_pattern.fullmatch(button.path)
             if match is None or button.name != "main":
                 continue
             if (
@@ -533,10 +573,25 @@ class ArchivesOracle:
                 or button.bounds is None
             ):
                 continue
-            controls.append((int(match.group(1)), button))
-        if not controls or len({stage_id for stage_id, _ in controls}) != len(controls):
+            layouts.add(match.group(1))
+            controls.append((int(match.group(2)), button))
+        if (
+            not controls
+            or len(layouts) != 1
+            or len({stage_id for stage_id, _ in controls}) != len(controls)
+        ):
             raise SemanticGateClosed(
                 "war archives campaign stages are absent or ambiguous"
+            )
+        if layouts == {"LevelSelectSPFullUI(Clone)/Battle/Nodes"}:
+            # Keep the shared prefab's parent-node and stage-text proof in its
+            # existing reader, scoped to the archive page just identified.
+            return self._event_campaign_page_state(
+                replace(button_state, buttons=tuple(
+                    button for button in button_state.buttons
+                    if button.path.startswith(page_root)
+                )),
+                ui_state,
             )
         stages = []
         for stage_id, button in sorted(controls, key=lambda item: item[0]):
@@ -617,6 +672,13 @@ class ArchivesOracle:
 
         state = self.read_state()
         if not any("/Msgbox(Clone)/" in button.path for button in state.buttons):
+            return None
+        # Campaign calls this optional probe during every sortie. A generic
+        # Msgbox is not an archive identity: the archive-only key HUD must
+        # also be present before this branch parses/claims the confirmation.
+        if not self._war_archives_campaign_counter_records(
+            self.read_ui_state(check_foreground=False)
+        ):
             return None
         parts = self._msgbox_prompt_parts(state)
         if parts is None:

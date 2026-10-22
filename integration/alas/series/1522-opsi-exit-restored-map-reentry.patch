@@ -1,0 +1,21 @@
+diff --git a/module/os/map_operation.py b/module/os/map_operation.py
+--- a/module/os/map_operation.py
++++ b/module/os/map_operation.py
+@@ -291,8 +291,15 @@
+         confirm_timer = Timer(1, count=2)
+         changed = False
+         for _ in self.loop():
+-            # End
+-            if changed and self.is_in_map():
++            # End. A resumed semantic invocation may inherit an already
++            # restored map without owning the earlier confirmation receipt.
++            # Observe the native exit marker in this screenshot; keep the
++            # original map identity and confirmation timer as the completion.
++            semantic_returned = (
++                semantic_adapter is not None
++                and not self.appear(MAP_EXIT, offset=(20, 20))
++            )
++            if (changed or semantic_returned) and self.is_in_map():
+                 if confirm_timer.reached():
+                     break
+             else:

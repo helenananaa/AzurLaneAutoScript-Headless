@@ -18,7 +18,7 @@ from .contracts import (
     ToggleState,
     UiState,
 )
-from .errors import SemanticGateClosed, SemanticTargetMissing
+from .errors import SemanticGateClosed, SemanticTargetMissing, SemanticTargetNotActionable
 
 
 class TargetsOracle:
@@ -41,6 +41,11 @@ class TargetsOracle:
             ) from exc
 
     def _toggle_mapping(self, semantic_id: str) -> SemanticToggleTarget:
+        fleet = re.fullmatch(r'guild/formation/fleet/([1-9][0-9]*|add)', semantic_id)
+        if fleet:
+            name = fleet.group(1)
+            return SemanticToggleTarget(semantic_id, name,
+                'GuildMissionFormationPage(Clone)/frame/single/dot/' + name)
         try:
             return self._toggle_targets[semantic_id]
         except KeyError as exc:
@@ -142,12 +147,19 @@ class TargetsOracle:
         delegated_build_pool = self._build_pool_delegated_raycast_proven(
             button_state, ui_state, semantic_id
         )
+        delegated_build_origin_nav = self._build_origin_pool_navigation_proven(
+            button_state, ui_state, semantic_id, matches
+        )
         delegated_guild_nav = self._guild_nav_delegated_raycast_proven(
             button_state,
             ui_state,
             semantic_id,
             matches,
         )
+        delegated_guild_fleet = self._guild_formation_fleet_control_proven(
+            button_state, ui_state, semantic_id, matches)
+        if semantic_id.startswith('guild/formation/fleet/') and not delegated_guild_fleet:
+            raise SemanticGateClosed('guild formation fleet target changed or is not actionable')
         delegated_campaign_auto = False
         delegated_campaign_event_auto = False
         if semantic_id == "campaign/map-preparation/auto-search" and len(matches) == 1:
@@ -228,12 +240,25 @@ class TargetsOracle:
         if len(matches) != 1 or (
             not matches[0].actionable
             and not delegated_build_pool
+            and not delegated_build_origin_nav
             and not delegated_campaign_auto
             and not delegated_campaign_event_auto
             and not delegated_operation_siren_strategic
             and not delegated_shop_nav
             and not delegated_guild_nav
+            and not delegated_guild_fleet
         ):
+            if (semantic_id == 'campaign/fleet-preparation/roles/tab'
+                    and len(matches) == 1
+                    and matches[0].active_in_hierarchy and matches[0].active_and_enabled
+                    and matches[0].interactable and matches[0].raycast_top is False
+                    and matches[0].point is not None and matches[0].bounds is not None
+                    and matches[0].bounds.contains(matches[0].point)
+                    and all(rule.blocker_id == 'loading' for rule in
+                            self._blocking_rules(button_state, semantic_id))):
+                # This unique duty tab is still covered while its fleet view
+                # mounts. Classify the existing refusal; no input is admitted.
+                raise SemanticTargetNotActionable(semantic_id, ui_state.generation)
             raise SemanticGateClosed("semantic toggle target is not actionable")
         toggle = matches[0]
         if self._blocking_rules(button_state, semantic_id):
@@ -326,7 +351,8 @@ class TargetsOracle:
             return False
         raise SemanticGateClosed("semantic image target sprite is unexpected")
 
-    def click_image(self, semantic_id: str) -> ActionReceipt:
+    def _coherent_image_input_states(self) -> Tuple[OracleState, UiState]:
+        """Read both endpoints again before input when a transition splits them."""
         button_state = self.read_state()
         ui_state = self.read_ui_state()
         if ui_state.image_truncated or ui_state.method_mask & 0x8 == 0:
@@ -336,6 +362,12 @@ class TargetsOracle:
             or ui_state.generation > button_state.generation + 2
         ):
             raise SemanticGateClosed("button and image snapshots are not coherent")
+        return button_state, ui_state
+
+    def click_image(self, semantic_id: str) -> ActionReceipt:
+        button_state, ui_state = self._retry_transition_read(
+            self._coherent_image_input_states
+        )
         matches = self._image_matches(ui_state, semantic_id)
         if len(matches) != 1:
             raise SemanticGateClosed("semantic image target is absent or ambiguous")
@@ -392,7 +424,13 @@ class TargetsOracle:
         return tuple(
             button
             for button in state.buttons
-            if button.name == target.name and button.path.endswith(suffixes)
+            if (button.name == target.name and button.path.endswith(suffixes))
+            or (semantic_id == 'event-list/page/back'
+                and button.name == 'btnBack'
+                and button.path.endswith('ActivityMainUI(Clone)/adapt/blur_panel/adapt/top/btnBack'))
+            or (semantic_id == 'daily/page/back'
+                and button.name == 'back_btn'
+                and button.path.endswith('DailyLevelUI(Clone)/blur_panel/adapt/top/back_btn'))
         )
 
     def _unique(self, state: OracleState, semantic_id: str) -> ButtonState:
@@ -424,12 +462,19 @@ class TargetsOracle:
             for rule in self._blockers
             if semantic_id not in rule.allowed_target_ids
             and not (
+                rule.blocker_id == 'meta-current-detail'
+                and semantic_id in ('daily/precombat/start', 'daily/precombat/back')
+                and self._daily_precombat_visible(state)
+            )
+            and not (
                 rule.blocker_id == "tactical-dock"
                 and (
                     semantic_id.startswith("enhancement/dock/")
                     or semantic_id.startswith("awaken/")
                     or semantic_id.startswith("os/port/dock/")
                     or semantic_id.startswith("gems-farming/dock/")
+                    or semantic_id.startswith("retirement/")
+                    or semantic_id == "dock/page/back"
                 )
             )
             and not (
@@ -487,6 +532,11 @@ class TargetsOracle:
         cancel = exact_text(
             "Msgbox(Clone)/window/button_container/custom_button_2(Clone)/pic"
         )
+        # Multi-choice dialogs (including dock-full recovery) reuse the same
+        # confirm prefab for several choices. They are not this two-button
+        # prompt; leave them to their task-specific typed parser.
+        if content is None or cancel is None:
+            return None
         confirm = exact_text(
             "Msgbox(Clone)/window/button_container/custom_button_1(Clone)/pic"
         )
@@ -595,7 +645,7 @@ class TargetsOracle:
         buttons = self._matches(state, "overlay/network-reconnect/confirm")
         return bool(
             len(content) == 1
-            and content[0].text.strip() == "船坞已满，请前往整理或扩展"
+            and content[0].text.strip() in {"船坞已满，请前往整理或扩展", "船坞已满，请先进行整理"}
             and len(buttons) == 3
             and sorted("".join(label.text.split()) for label in labels)
             == sorted(("整理", "拓展", "强化"))
@@ -614,6 +664,8 @@ class TargetsOracle:
         matches = self._matches(state, semantic_id)
         if semantic_id == "tactical/continue/cancel":
             return bool(matches and self._tactical_continue_prompt_matches(state))
+        if semantic_id == "tactical/completion/ack":
+            return bool(matches and self._tactical_completion_prompt_matches(state))
         if semantic_id in (
             "overlay/network-reconnect/cancel",
             "overlay/network-reconnect/confirm",
@@ -631,9 +683,13 @@ class TargetsOracle:
         if semantic_id in ("tactical/course/cancel", "tactical/course/confirm"):
             return bool(matches and self._tactical_course_prompt_matches(state))
         if semantic_id in ("research/start/cancel", "research/start/confirm"):
-            return bool(matches and self._research_start_prompt_cost(state) is not None)
+            return bool(matches and self._research_start_prompt_costs(state) is not None)
+        if semantic_id in ("research/progress/confirm", "research/progress/cancel"):
+            return bool(matches and self._research_progress_prompt_matches(state))
         if semantic_id in ("research/queue/cancel", "research/queue/confirm"):
             return bool(matches and self._research_queue_prompt_matches(state))
+        if semantic_id in ("research/stop/cancel", "research/stop/confirm"):
+            return bool(matches and self._research_stop_prompt_matches(state))
         if semantic_id in ("guild/dispatch/cancel", "guild/dispatch/confirm"):
             return bool(matches and self._guild_dispatch_prompt_matches(state))
         if semantic_id in ("guild/exchange/cancel", "guild/exchange/confirm"):
@@ -645,9 +701,20 @@ class TargetsOracle:
 
     def _enabled_once(self, semantic_id: str) -> bool:
         state = self.read_state()
+        if semantic_id == 'archive/activity-list/home':
+            return self._activity_archive_home_proven(state)
+        if semantic_id == 'player/profile/back':
+            return bool(self._player_profile_back_proven(state)
+                        and not self._blocking_rules(state, semantic_id))
+        if semantic_id == 'os/auto-search/reward/close':
+            return self._operation_siren_auto_search_reward_control_proven(state)
         if semantic_id in ("os/order/back", "os/order/scan", "os/order/submarine"):
             if self._operation_siren_order_prompt_mounted(state):
                 return False
+            if semantic_id == 'os/order/back':
+                backs = self._matches(state, semantic_id)
+                return (len(backs) == 1 and backs[0].actionable
+                        and not self._blocking_rules(state, semantic_id))
         if semantic_id == "main/raid":
             return bool(
                 self._main_raid_entry_proven(state)
@@ -673,7 +740,7 @@ class TargetsOracle:
                 and matches[0].active_in_hierarchy
                 and matches[0].active_and_enabled
                 and matches[0].interactable
-                and matches[0].raycast_top is None
+                and matches[0].raycast_top is not False
                 and matches[0].point is not None
                 and matches[0].bounds is not None
                 and matches[0].bounds.contains(matches[0].point)
@@ -780,7 +847,7 @@ class TargetsOracle:
                 and matches[0].bounds is not None
             )
         if semantic_id == "login/update/download":
-            return self._login_update_download_prompt_matches(state)
+            return self._login_update_action_prompt_matches(state)
         if semantic_id == "mail/manage/back":
             return self._mail_manager_back_delegated_raycast_proven(state)
         if semantic_id == "exercise/opponent/start":
@@ -801,7 +868,7 @@ class TargetsOracle:
             return False
         if (
             semantic_id == "overlay/login-data-expired/confirm"
-            and not self._login_data_expired_prompt_matches(state)
+            and (not matches or not self._login_data_expired_prompt_matches(state))
         ):
             return False
         if len(matches) > 1:
@@ -894,6 +961,9 @@ class TargetsOracle:
             )
         if semantic_id == "dorm/empty-food/cancel":
             return self._dorm_empty_food_cancel_proven(state)
+        if semantic_id in ('dorm/feed/shop/open', 'dorm/feed/shop/plus',
+                           'dorm/feed/shop/minus', 'dorm/feed/shop/cancel', 'dorm/feed/shop/confirm'):
+            return self._dorm_food_shop_control_proven(state, semantic_id)
         if semantic_id in ("dorm/feed", "dorm/collect"):
             return self._dorm_page_control_proven(state, semantic_id)
         if semantic_id in (
@@ -911,7 +981,7 @@ class TargetsOracle:
                 and matches[0].active_in_hierarchy
                 and matches[0].active_and_enabled
                 and matches[0].interactable
-                and matches[0].raycast_top is None
+                and matches[0].raycast_top is not False
                 and matches[0].point is not None
                 and matches[0].bounds is not None
                 and matches[0].bounds.contains(matches[0].point)
@@ -945,6 +1015,9 @@ class TargetsOracle:
             and not self._tactical_continue_prompt_matches(state)
         ):
             return False
+        if (semantic_id == "tactical/completion/ack"
+                and not self._tactical_completion_prompt_matches(state)):
+            return False
         if semantic_id in (
             "overlay/network-reconnect/cancel",
             "overlay/network-reconnect/confirm",
@@ -965,15 +1038,23 @@ class TargetsOracle:
             "tactical/course/confirm",
         ) and not self._tactical_course_prompt_matches(state):
             return False
+        if semantic_id in ("research/progress/confirm", "research/progress/cancel") and not self._research_progress_prompt_matches(state):
+            return False
         if (
             semantic_id in ("research/start/cancel", "research/start/confirm")
-            and self._research_start_prompt_cost(state) is None
+            and self._research_start_prompt_costs(state) is None
         ):
             return False
         if semantic_id in (
             "research/queue/cancel",
             "research/queue/confirm",
         ) and not self._research_queue_prompt_matches(state):
+            return False
+        if (semantic_id in ("research/stop/cancel", "research/stop/confirm")
+                and not self._research_stop_prompt_matches(state)):
+            return False
+        if (semantic_id == 'campaign/map-timeout/confirm'
+                and not self.campaign_timeout_prompt_visible(state)):
             return False
         if semantic_id in (
             "guild/dispatch/cancel",
@@ -985,7 +1066,7 @@ class TargetsOracle:
             "guild/exchange/confirm",
         ) and not self._guild_exchange_prompt_matches(state):
             return False
-        if semantic_id in (
+        if semantic_id == 'event-list/page/back' or semantic_id in (
             "os/map/auto-search/off",
             "os/map/auto-search/on",
             "os/map/mission-list",
@@ -1012,7 +1093,7 @@ class TargetsOracle:
                 and matches[0].active_in_hierarchy
                 and matches[0].active_and_enabled
                 and matches[0].interactable
-                and matches[0].raycast_top is None
+                and matches[0].raycast_top is not False
                 and matches[0].point is not None
                 and matches[0].bounds is not None
                 and matches[0].bounds.contains(matches[0].point)
@@ -1024,7 +1105,7 @@ class TargetsOracle:
                 and matches[0].active_in_hierarchy
                 and matches[0].active_and_enabled
                 and matches[0].interactable
-                and matches[0].raycast_top is None
+                and matches[0].raycast_top is not False
                 and matches[0].point is not None
                 and matches[0].bounds is not None
                 and matches[0].bounds.contains(matches[0].point)

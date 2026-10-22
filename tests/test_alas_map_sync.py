@@ -405,6 +405,20 @@ def make_zero_distance_state():
 
 
 class AlasCampaignMapSyncTests(unittest.TestCase):
+    def test_observation_refresh_does_not_reset_original_progress(self):
+        campaign = FakeCampaign()
+        original = campaign.map_data_init
+        counts = dict(battle_count=3, mystery_count=1, carrier_count=2, siren_count=1)
+        def resetting_init(map_):
+            original(map_)
+            for name in counts:
+                setattr(campaign, name, 0)
+        campaign.map_data_init = resetting_init
+        for name, value in counts.items():
+            setattr(campaign, name, value)
+        synchronize_alas_campaign_map(campaign, make_state())
+        self.assertEqual({name:getattr(campaign,name) for name in counts}, counts)
+
     def test_event_stage_identity_is_case_normalized(self):
         campaign = FakeCampaign()
         campaign.MAP.name = "A1"
@@ -612,7 +626,7 @@ class AlasCampaignMapSyncTests(unittest.TestCase):
 
         self.assertTrue(campaign.map[(0, 0)].is_siren)
         self.assertFalse(campaign.map[(0, 0)].is_enemy)
-        self.assertEqual(campaign.siren_count, 1)
+        self.assertEqual(campaign.siren_count, 0)  # Observing a live siren is not defeating it.
 
     def test_projects_eventsp_movable_siren_off_its_static_spawn(self):
         campaign = FakeCampaign()
@@ -701,6 +715,31 @@ class AlasCampaignMapSyncTests(unittest.TestCase):
 
 
 class AlasCampaignDecisionPreviewTests(unittest.TestCase):
+    def test_submarine_move_is_planned_without_device_input_before_combat(self):
+        class SubmarineCampaign(FakeCampaign):
+            def battle_function(self):
+                self.submarine_goto((2,0))
+                return super().battle_function()
+        campaign = SubmarineCampaign()
+        state = replace(make_state(), submarine=CampaignMapFleetState('submarine','C2',6,6))
+        projection = synchronize_alas_campaign_map(campaign,state)
+        original_location = campaign.fleet_submarine_location
+        decision = preview_alas_campaign_decision(campaign,projection)
+        self.assertEqual(decision.submarine_destination_node,'C1')
+        self.assertEqual(decision.target_node,'A1')
+        self.assertEqual(campaign.fleet_submarine_location,original_location)
+
+    def test_submarine_preview_rejects_land_destination(self):
+        class SubmarineCampaign(FakeCampaign):
+            def battle_function(self):
+                self.submarine_goto((1,0))
+                return super().battle_function()
+        campaign = SubmarineCampaign()
+        state = replace(make_state(), submarine=CampaignMapFleetState('submarine','C2',6,6))
+        projection = synchronize_alas_campaign_map(campaign,state)
+        with self.assertRaisesRegex(SemanticGateClosed,'navigable topology'):
+            preview_alas_campaign_decision(campaign,projection)
+
     def test_runs_original_branch_and_captures_first_goto_without_input(self):
         campaign = FakeCampaign()
         projection = synchronize_alas_campaign_map(campaign, make_state())

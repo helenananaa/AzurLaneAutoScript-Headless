@@ -18,6 +18,24 @@ from tests.semantic_support.oracle_cases import SemanticOracleTestsSupport
 
 
 class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
+    def test_resource_close_coverage_is_classified_without_allowing_input(self):
+        page = "root/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)"
+        backend = FakeBackend([
+            make_button("CommissionInfoUI4Mellow(Clone)", page, 827, 622, raycast_top=False),
+            make_button("bubble", page + "/frame/resources/merchant/bubble"),
+        ])
+        oracle = make_oracle(backend)
+        with self.assertRaisesRegex(SemanticGateClosed, "close is temporarily covered"):
+            oracle._reward_resource_state_once("coin")
+        backend.buttons = make_buttons([
+            make_button("CommissionInfoUI4Mellow(Clone)", page, 827, 622, raycast_top=False),
+            make_button("custom_button_1(Clone)",
+                "root/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)"),
+        ])
+        with self.assertRaisesRegex(SemanticGateClosed, "page identity is not proven"):
+            oracle._reward_resource_state_once("coin")
+        self.assertEqual(backend.taps, [])
+
     def test_free_weekly_supply_pack_click_excludes_paid_cards(self):
         root = "OverlayCamera/Overlay/UIMain/"
         free = root + "ChargeGiftShopUI(Clone)/lScrollRect/content/0"

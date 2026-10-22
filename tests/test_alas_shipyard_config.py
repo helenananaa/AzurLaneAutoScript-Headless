@@ -3,6 +3,8 @@ from datetime import datetime, timezone
 import itertools
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import Mock
 
 from alas_headless.alas_shipyard_config_contract import (
     SHIPYARD_DR_SERIES,
@@ -20,6 +22,49 @@ LIVE_ALAS = Path(r"E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live
 
 
 class AlasShipyardConfigTests(unittest.TestCase):
+    def test_native_entry_passes_installed_series_options_to_the_contract(self):
+        from tests.test_alas_config_branch_compatibility import method
+
+        config = SimpleNamespace(
+            Shipyard_ResearchSeries=9, Shipyard_ShipIndex=1, Shipyard_BuyAmount=2,
+            Shipyard_LastRun=datetime(2020, 1, 1),
+            ShipyardDr_ResearchSeries=8, ShipyardDr_ShipIndex=1, ShipyardDr_BuyAmount=2,
+            ShipyardDr_LastRun=datetime(2020, 1, 1), task_delay=Mock(),
+            args={"Shipyard": {
+                "Shipyard": {"ResearchSeries": {"option": [1, 9]}},
+                "ShipyardDr": {"ResearchSeries": {"option": [2, 8]}},
+            }},
+        )
+        host = SimpleNamespace(config=config, shipyard_run=Mock())
+        run = method("module/shipyard/shipyard_reward.py", "RewardShipyard", "run",
+                     get_server_last_update=lambda _: datetime(2026, 10, 2))
+        run(host)
+        self.assertEqual(
+            [call.kwargs for call in host.shipyard_run.call_args_list],
+            [{"series": 8, "index": 1, "count": 2},
+             {"series": 9, "index": 1, "count": 2}],
+        )
+        # ALAS still owns dispatch. An undeclared choice stops before either
+        # branch, while this controlled test never navigates or buys anything.
+        config.args = {}
+        host.shipyard_run.reset_mock()
+        with self.assertRaises(SemanticGateClosed):
+            run(host)
+        host.shipyard_run.assert_not_called()
+
+    def test_installed_upstream_options_admit_new_series_without_enabling_unproven_costs(self):
+        case = dict(pr_series=9, pr_index=1, pr_buy_amount=2, pr_last_run=datetime(2020, 1, 1),
+                    dr_series=8, dr_index=1, dr_buy_amount=2, dr_last_run=datetime(2020, 1, 1))
+        with self.assertRaises(SemanticGateClosed):
+            validate_alas_shipyard_config(**case)
+        options = dict(pr_options={'ResearchSeries': {'option': [1, 9]}},
+                       dr_options={'ResearchSeries': {'option': [2, 8]}})
+        state = validate_alas_shipyard_config(**case, **options)
+        self.assertEqual((state.pr_series, state.dr_series), (9, 8))
+        for change in ({'pr_series': 10}, {'pr_series': True}, {'pr_buy_amount': 16}):
+            with self.subTest(change=change), self.assertRaises(SemanticGateClosed):
+                validate_alas_shipyard_config(**{**case, **change}, **options)
+
     def test_exact_live_tree_replay_when_available(self):
         if not LIVE_ALAS.joinpath("module/shipyard/shipyard_reward.py").is_file():
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")
@@ -126,6 +171,37 @@ class AlasShipyardConfigTests(unittest.TestCase):
                     SemanticGateClosed
                 ):
                     validate_alas_shipyard_config(**case)
+
+    def test_disabled_rarity_does_not_block_the_other_shipyard_branch(self):
+        defaults = {
+            "pr_series": 1,
+            "pr_index": 1,
+            "pr_buy_amount": 2,
+            "pr_last_run": datetime(2020, 1, 1),
+            "dr_series": 2,
+            "dr_index": 1,
+            "dr_buy_amount": 2,
+            "dr_last_run": datetime(2020, 1, 1),
+        }
+        for disabled, active in (("pr", "dr"), ("dr", "pr")):
+            with self.subTest(disabled=disabled):
+                case = {
+                    **defaults,
+                    f"{disabled}_buy_amount": 0,
+                    f"{disabled}_series": "obsolete-series",
+                    f"{disabled}_index": None,
+                }
+                snapshot = validate_alas_shipyard_config(**case)
+                self.assertIsNone(getattr(snapshot, f"{disabled}_series"))
+                self.assertIsNone(getattr(snapshot, f"{disabled}_index"))
+                self.assertEqual(getattr(snapshot, f"{active}_buy_amount"), 2)
+                # Re-enabling the branch restores its identity checks.
+                with self.assertRaises(SemanticGateClosed):
+                    validate_alas_shipyard_config(**{**case, f"{disabled}_buy_amount": 2})
+                # The original run still reads both LastRun fields even when
+                # only one rarity is enabled.
+                with self.assertRaises(SemanticGateClosed):
+                    validate_alas_shipyard_config(**{**case, f"{disabled}_last_run": None})
 
     def test_patch_gates_original_shipyard_entry(self):
         patch = ROOT.joinpath(

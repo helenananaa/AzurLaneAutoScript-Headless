@@ -1,0 +1,14 @@
+--- a/module/minigame/new_year_challenge.py
++++ b/module/minigame/new_year_challenge.py
+@@ -162,11 +162,6 @@
+                 last_attack = time.time()
+ 
+     def exit_game(self, skip_first_screenshot=True):
+-        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+-        if semantic_adapter is not None:
+-            receipts = semantic_adapter.minigame_exit_new_year()
+-            logger.info(f"New year challenge exit receipts: {receipts}")
+-            return
+         while 1:
+             if skip_first_screenshot:
+                 skip_first_screenshot = False

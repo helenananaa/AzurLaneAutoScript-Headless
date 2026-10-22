@@ -42,7 +42,7 @@ class AlasPrivateQuartersConfigTests(unittest.TestCase):
             {"buy_roses": 1},
             {"buy_cake": "false"},
             {"target_interact": None},
-            {"target_ship": "Anchorage"},
+            {"target_ship": ""},
         ):
             with self.subTest(settings=settings), self.assertRaises(SemanticGateClosed):
                 values = {

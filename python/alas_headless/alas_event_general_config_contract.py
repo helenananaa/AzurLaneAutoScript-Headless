@@ -22,7 +22,7 @@ class AlasEventGeneralConfigSnapshot:
     time_limit: datetime
     task_balancer_enable: bool
     task_balancer_coin_limit: int
-    task_balancer_task_call: str
+    task_balancer_task_call: str | None
 
 
 def _pt_limit(value: object) -> int:
@@ -79,7 +79,10 @@ def validate_alas_event_general_config(
         )
     if type(task_balancer_enable) is not bool:
         raise SemanticGateClosed("TaskBalancer.Enable must be a bool")
-    if (
+    # The original task calls its balancer handler only when enabled.  Coin
+    # limits are read independently during auto-search, so validate those even
+    # when the optional task-switch destination is inactive.
+    if task_balancer_enable and (
         not isinstance(task_balancer_task_call, str)
         or task_balancer_task_call not in TASK_BALANCER_CALLS
     ):
@@ -93,5 +96,5 @@ def validate_alas_event_general_config(
         task_balancer_coin_limit=_bounded_integer(
             "TaskBalancer.CoinLimit", task_balancer_coin_limit
         ),
-        task_balancer_task_call=task_balancer_task_call,
+        task_balancer_task_call=task_balancer_task_call if task_balancer_enable else None,
     )

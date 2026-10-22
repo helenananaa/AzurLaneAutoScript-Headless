@@ -28,8 +28,73 @@ from ...semantic_oracle import (
 )
 
 
+@dataclass(frozen=True)
+class GuildFormationFleetButton:
+    """ALAS navigation button whose area comes from an observed Unity Toggle."""
+    name: str
+    area: Tuple[float, float, float, float]
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class AlasSemanticUnmapped(SemanticGateClosed):
     """An ALAS resource has no reviewed semantic mapping."""
+
+
+@dataclass(frozen=True)
+class StorageBoxCandidate:
+    """An inspected list-cell identity, never an authorized box-use target."""
+    slot: str
+    display_label: str
+    icon_sprite: str
+    rarity: int
+    quantity: int
+
+    @property
+    def name(self):
+        return 'STORAGE_BOX_' + self.slot
+
+    def __str__(self):
+        return self.name
+
+
+class AlasSemanticActionDeferred(SemanticGateClosed):
+    """No input was dispatched because the task's action grant is exhausted."""
+
+
+class AlasSemanticDormFeedResultUnproven(SemanticGateClosed):
+    """Accepted food input, healthy typed panel, but its resource proof failed."""
+
+    def __init__(self, message, receipt, requested_count, consumed, food):
+        self.receipt = receipt
+        self.requested_count = requested_count
+        self.observed_consumed = consumed
+        self.observed_food = food
+        super().__init__(f'{message} (native request={requested_count}, inventory debit={consumed}, food={food})')
+
+
+class AlasSemanticCommissionStartUnproven(SemanticGateClosed):
+    """One start input stopped on a fresh, exact pending commission detail."""
+
+    def __init__(self, receipt, generation, signature, rejection=None):
+        self.receipt = receipt
+        self.generation = generation
+        self.signature = tuple(signature)
+        self.rejection = rejection
+        reason = (f'commission start rejected: {rejection}; ' if rejection is not None
+                  else 'commission start did not reach running state; ')
+        super().__init__(reason +
+                         'exact pending detail remains; no start input repeated')
+
+
+class AlasSemanticGuildDispatchUnproven(SemanticGateClosed):
+    """An accepted Guild confirmation has no proven completion; never replay it."""
+
+    def __init__(self, receipt):
+        self.receipt = receipt
+        super().__init__('Guild dispatch did not advance to in-progress state; '
+                         'confirmation input accepted, completion unproven; no input repeated')
 
 
 class MissionClaimableDetected(SemanticGateClosed):
@@ -118,6 +183,8 @@ class CampaignSortieProof:
     map_generation: int
     map_root_path: str
     oil_cost_source: str = "observed-fleet-summary"
+    submarine_auto_mode: Optional[str] = None
+
 
 
 @dataclass
@@ -133,11 +200,13 @@ class _MissionFlowContext:
     last_generation: int = -1
     stable_generations: int = 0
     stable_state: Optional[MissionPageState] = None
+    award_close_receipt: Optional[ActionReceipt] = None
 
 
 @dataclass
 class _MailFlowContext:
     entry_clicked: bool = False
+    entry_receipt: Optional[ActionReceipt] = None
     recovered_existing_page: bool = False
     initial_surface_probed: bool = False
     surface_kind: Optional[str] = None
@@ -153,6 +222,8 @@ class _CommissionFlowContext:
     reward_detected_count: Optional[int] = None
     reward_claim_receipt: Optional[ActionReceipt] = None
     reward_close_receipts: List[ActionReceipt] = field(default_factory=list)
+    reward_prior_claims: List[Tuple[ActionReceipt, Tuple[ActionReceipt, ...], Optional[int]]] = field(default_factory=list)
+    ship_exp_observation_generation: Optional[int] = None
     reward_proof: Optional[CommissionRewardProof] = None
     selected_signature: Optional[Tuple[Union[int, str], ...]] = None
     selected_at: float = 0.0
@@ -164,13 +235,22 @@ class _CommissionFlowContext:
     passive_transition_until: float = 0.0
     cancelled_tactical_prompts: Set[str] = field(default_factory=set)
     tactical_back_receipt: Optional[ActionReceipt] = None
+    navigation_back_receipt: Optional[ActionReceipt] = None
+    tactical_empty_slot_receipt: Optional[ActionReceipt] = None
+    tactical_skill_confirm_receipt: Optional[ActionReceipt] = None
     tactical_reward_receipt: Optional[ActionReceipt] = None
+    tactical_entry_receipt: Optional[ActionReceipt] = None
+    tactical_entry_input_count: Optional[int] = None
+    tactical_confirm_receipt: Optional[ActionReceipt] = None
+    tactical_confirm_before_slots: Optional[Set[Tuple[int, int]]] = None
+    tactical_confirmed_at: float = 0.0
 
 
 @dataclass
 class _ResearchFlowContext:
     selected_slot: Optional[int] = None
     selected_code: Optional[str] = None
+    selected_series: Optional[int] = None
     selected_status: Optional[ResearchProjectStatus] = None
     start_receipt: Optional[ActionReceipt] = None
     start_confirm_receipt: Optional[ActionReceipt] = None
@@ -188,6 +268,8 @@ class _ResearchFlowContext:
     queue_add_receipt: Optional[ActionReceipt] = None
     queue_confirm_receipt: Optional[ActionReceipt] = None
     queue_add_requires_start_grant: bool = False
+    stop_receipt: Optional[ActionReceipt] = None
+    stop_confirm_receipt: Optional[ActionReceipt] = None
 
 
 def _research_detail_costs(detail: object) -> Tuple[Tuple[str, int, int], ...]:
@@ -220,16 +302,20 @@ class _DormFlowContext:
     passive_transition_until: float = 0.0
     navigation_receipts: Dict[str, ActionReceipt] = field(default_factory=dict)
     feed_entry_receipt: Optional[ActionReceipt] = None
+    statistics_confirm_receipt: Optional[ActionReceipt] = None
     feed_panel_observed: bool = False
 
 
 @dataclass
 class _BuildFlowContext:
+    entry_receipt: Optional[ActionReceipt] = None
+    queue_entry_receipt: Optional[ActionReceipt] = None
     prep_opened: bool = False
     prep_validated: bool = False
     warning_confirmed: bool = False
     coins_owned: Optional[int] = None
     submit_receipt: Optional[ActionReceipt] = None
+    submit_transition_until: float = 0.0
     passive_transition_until: float = 0.0
     queue_finish_transition_until: float = 0.0
 
@@ -261,6 +347,7 @@ class _DataKeyFlowContext:
 class _MinigameFlowContext:
     passive_transition_until: float = 0.0
     ticket_prompt_confirmed: bool = False
+    ticket_confirm_receipt: Optional[ActionReceipt] = None
     entry_receipt: Optional[ActionReceipt] = None
     play_receipt: Optional[ActionReceipt] = None
     selected_tickets: int = 0
@@ -301,7 +388,7 @@ class CampaignAutoSearchCompletionProof:
     fleet2_role: str
     waited_seconds: float
     combat_auto_generation: int
-    result_exit_receipt: ActionReceipt
+    result_exit_receipt: Optional[ActionReceipt]
     combat_auto_proven: bool = True
     passive_after_sortie: bool = True
 
@@ -322,8 +409,19 @@ class CampaignAutoSearchEvidenceBundle:
 @dataclass
 class _CampaignFlowContext:
     stage_code: str
+    withdrawal_open_receipt: Optional[ActionReceipt] = None
+    withdrawal_confirm_receipt: Optional[ActionReceipt] = None
+    repair_open_receipt: Optional[ActionReceipt] = None
+    repair_use_receipt: Optional[ActionReceipt] = None
+    repair_count_before: Optional[int] = None
+    repair_hp_before: Optional[Tuple[float, ...]] = None
+    repair_post_deadline: float = 0.0
+    repair_history: List[Any] = field(default_factory=list)
+    scout_drag_pending: Optional[Any] = None
+    scout_swap_history: List[Any] = field(default_factory=list)
     mode: str = "normal"
     menu_entry_receipt: Optional[ActionReceipt] = None
+    archive_menu_entry_receipt: Optional[ActionReceipt] = None
     entry_receipt: Optional[ActionReceipt] = None
     map_preparation_receipt: Optional[ActionReceipt] = None
     auto_search_toggle_receipt: Optional[ActionReceipt] = None
@@ -339,11 +437,14 @@ class _CampaignFlowContext:
     proof: Optional[CampaignPreSortieProof] = None
     initial_fleet_state: Optional[CampaignFleetSelectionState] = None
     prepared_fleet_state: Optional[CampaignFleetSelectionState] = None
+    inherited_fleet_identity: Optional[Tuple[Tuple[str, ...], Tuple[str, ...]]] = None
+    inherited_fleet_index: Optional[int] = None
     requested_fleets: Optional[Tuple[int, int, int]] = None
     required_fleet_mutations: int = 0
     expected_fleet_mutations: Tuple[str, ...] = ()
     gems_farming_hard_pending_roles: Tuple[str, ...] = ()
     fleet_mutation_receipts: List[ActionReceipt] = field(default_factory=list)
+    hard_recommend_confirmation_receipts: List[ActionReceipt] = field(default_factory=list)
     auto_search_role_receipts: List[ActionReceipt] = field(default_factory=list)
     auto_search_role_state: Optional[CampaignAutoSearchRoleState] = None
     fleet_dropdown_row: Optional[str] = None
@@ -351,6 +452,27 @@ class _CampaignFlowContext:
     fleet_proof: Optional[CampaignFleetPreparationProof] = None
     oil_before_sortie: Optional[int] = None
     sortie_authorized: bool = False
+    sortie_budget_before: Optional[int] = None
+    use_2x_book: bool = False
+    book_confirmation_receipt: Optional[ActionReceipt] = None
+    book_toggle_from: Optional[Tuple[str, bool]] = None
+    continuation_authorized: bool = False
+    submarine_auto_mode: Optional[str] = None
+    submarine_mode: str = 'do_not_use'
+    declared_submarine_fleet: int = 0
+    submarine_strategy_pending: Dict[str, bool] = field(default_factory=dict)
+    submarine_strategy_receipts: List[ActionReceipt] = field(default_factory=list)
+    submarine_call_receipts: Dict[int, ActionReceipt] = field(default_factory=dict)
+    submarine_move_entry: Optional[ActionReceipt] = None
+    submarine_move_destination: Optional[ActionReceipt] = None
+    submarine_move_confirm: Optional[ActionReceipt] = None
+    submarine_move_oil: Optional[ActionReceipt] = None
+    submarine_move_history: List[dict] = field(default_factory=list)
+    submarine_viewport_proofs: List[CampaignMapViewportSwipeProof] = field(default_factory=list)
+    manual_result_exit_receipt: Optional[ActionReceipt] = None
+    submarine_planned_destination: Optional[str] = None
+    ambush_receipt: Optional[ActionReceipt] = None
+    fleet_lock_receipt: Optional[ActionReceipt] = None
     sortie_receipt: Optional[ActionReceipt] = None
     archive_entry_confirm_receipt: Optional[ActionReceipt] = None
     map_entry_state: Optional[CampaignMapEntryState] = None
@@ -383,6 +505,10 @@ class _CampaignFlowContext:
     combat_input_retry_count: int = 0
     combat_proof: Optional[AlasCampaignCombatProof] = None
     auto_search_completion: Optional[CampaignAutoSearchCompletionProof] = None
+    auto_search_combat_generation: Optional[int] = None
+    auto_search_started_at: float = 0.0
+    auto_search_start_input_count: Optional[int] = None
+    manual_completion_proven: bool = False
     passive_transition_until: float = 0.0
 
 
@@ -390,5 +516,5 @@ class _CampaignFlowContext:
 class _OperationSirenGlobeSwipeIntent:
     name: str
     pixel_vector: Tuple[float, float]
-    box: Tuple[int, int, int, int]
+    box: Tuple[float, float, float, float]
     duration_range: Tuple[float, float]

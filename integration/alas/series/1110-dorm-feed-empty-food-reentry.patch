@@ -1,0 +1,24 @@
+--- a/module/dorm/dorm.py
++++ b/module/dorm/dorm.py
+@@ -302,8 +302,19 @@
+         semantic_session = current_semantic_session()
+         if semantic_session is not None:
+             index = self._dorm_food.buttons.index(button)
+-            semantic_session.dorm_feed_food(index, count)
+-            return
++            for _ in self.loop(skip_first=True):
++                try:
++                    semantic_session.dorm_feed_food(index, count)
++                    return
++                except SemanticTargetNotActionable as exc:
++                    oracle = semantic_session.open().oracle
++                    if (exc.semantic_id != f'dorm/feed/item/{50001 + index}'
++                            or oracle.read_state().generation < exc.generation
++                            or not oracle.dorm_empty_food_cancel_available()):
++                        raise
++                    # The entire card batch was refused before any food input.
++                    # Reuse ALAS' existing entry loop and popup cancel owner.
++                    self.dorm_feed_enter()
+         logger.info(f'Dorm feed {button} x {count}')
+         if count <= 3:
+             for _ in range(count):

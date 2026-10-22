@@ -1,0 +1,27 @@
+diff --git a/module/ui/scroll.py b/module/ui/scroll.py
+--- a/module/ui/scroll.py
++++ b/module/ui/scroll.py
+@@ -163,7 +163,9 @@
+                 main.device.screenshot()
+ 
+             current = self.cal_position(main)
+-            if abs(position - current) < self.drag_threshold:
++            tolerance = (.001 if semantic_adapter is not None and self.name == 'METERIAL_SCROLL'
++                         and position in (0, 1) else self.drag_threshold)
++            if abs(position - current) < tolerance:
+                 break
+             if self.length:
+                 self.drag_timeout.reset()
+diff --git a/module/storage/storage.py b/module/storage/storage.py
+--- a/module/storage/storage.py
++++ b/module/storage/storage.py
+@@ -208,6 +208,9 @@
+             in: MATERIAL_CHECK
+             out: MATERIAL_CHECK
+         """
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            from alas_headless import AlasSemanticUnmapped
++            raise AlasSemanticUnmapped('Storage equipment-box recognition needs typed item/detail mapping')
+         used = 0
+         timeout = Timer(1.5, count=3).start()
+         while 1:

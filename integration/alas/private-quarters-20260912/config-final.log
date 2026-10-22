@@ -1,0 +1,57 @@
+{
+  "schema": "alas-headless.private-quarters-config-replay/v1",
+  "passed": true,
+  "field_count": 4,
+  "accepted_case_count": 56,
+  "invalid_case_count": 25,
+  "runtime_consumers": {
+    "PrivateQuarters.BuyRoses": [
+      "PrivateQuarters.run",
+      "PQShop.shop_filter",
+      "PQShop.shop_check_item"
+    ],
+    "PrivateQuarters.BuyCake": [
+      "PrivateQuarters.run",
+      "PQShop.shop_filter",
+      "PQShop.shop_check_item"
+    ],
+    "PrivateQuarters.TargetInteract": [
+      "PrivateQuarters.run",
+      "PQShop.shop_filter",
+      "PQShop.shop_check_item"
+    ],
+    "PrivateQuarters.TargetShip": [
+      "PrivateQuarters.run",
+      "PQShop.shop_filter",
+      "PQShop.shop_check_item"
+    ]
+  },
+  "patched_guard_present": true,
+  "original_decisions": {
+    "run_forwarded_case_count": 56,
+    "invalid_run_events": [],
+    "shop_filters": {
+      "none": "",
+      "roses": "GiftRoses",
+      "cake": "GiftCake",
+      "both": "GiftRoses > GiftCake"
+    },
+    "shop_item_decisions": {
+      "roses_exact": true,
+      "roses_short": false,
+      "cake_exact": true,
+      "cake_short": false,
+      "disabled": false
+    }
+  },
+  "mutation_budget": 0,
+  "android_input_injected": false,
+  "source_sha256": {
+    "task": "19e6464aaa1e92913ba9f31de590096a09b101638969c41e14c70dd1a4eb6c5a",
+    "args": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+    "template": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
+    "generated": "e0788531f22a64fdcd041b8d116c61b52b71e631236f2e40ad9176452287d423",
+    "private_quarters": "df7fc61052ddf43dd65e322fc641146ac105d406764253b112fb4401c147d8bf",
+    "shop": "25da28cc11680d150ce38594fb455509fd5d05e928c5c9a18d04fdc349c31bbb"
+  }
+}

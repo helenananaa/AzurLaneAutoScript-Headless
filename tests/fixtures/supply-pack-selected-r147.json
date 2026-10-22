@@ -1,0 +1,6162 @@
+{
+  "source": "r147 original Freebies input failure; leased button generation 7762, diagnostic UI 7764, no generation relabel",
+  "snapshot": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 17531,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "abi": "x86_64",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "snapshot_schema": 1,
+    "snapshot_struct_size": 104,
+    "generation": 7762,
+    "scene_generation": 2,
+    "semantic_generation": 2,
+    "snapshot_monotonic_ns": 6251865147044,
+    "response_monotonic_ns": 6252009862752,
+    "age_ms": 144,
+    "observer_tid": 17562,
+    "assembly_count": 129,
+    "semantic_code": 1,
+    "width": 1280,
+    "height": 720,
+    "flags": 15,
+    "observer_attached": false,
+    "main_thread": true,
+    "button_count": 163,
+    "active_button_count": 12,
+    "interactable_button_count": 163,
+    "scene_handle": -76,
+    "ui_stage": 100,
+    "ui_method_mask": 15
+  },
+  "buttons": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.buttons/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 17531,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 344104,
+    "generation": 7762,
+    "snapshot_monotonic_ns": 6251865147044,
+    "response_monotonic_ns": 6252009888253,
+    "age_ms": 144,
+    "button_count": 12,
+    "truncated": false,
+    "error_count": 0,
+    "buttons": [
+      {
+        "name": "3",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -207216,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 9.496,
+          "y": -1.491,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -194.0,
+          "y": -375.0,
+          "width": 388.0,
+          "height": 750.0
+        },
+        "screen_point": {
+          "x": 1067.33,
+          "y": 292.92
+        },
+        "adb_point": {
+          "x": 1067.33,
+          "y": 427.08
+        },
+        "screen_bounds": {
+          "left": 937.997,
+          "bottom": 42.92,
+          "right": 1196.663,
+          "top": 542.92
+        },
+        "adb_bounds": {
+          "left": 937.997,
+          "top": 177.08,
+          "right": 1196.663,
+          "bottom": 677.08
+        }
+      },
+      {
+        "name": "2",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -204934,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 4.015,
+          "y": -1.491,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -194.0,
+          "y": -375.0,
+          "width": 388.0,
+          "height": 750.0
+        },
+        "screen_point": {
+          "x": 820.663,
+          "y": 292.92
+        },
+        "adb_point": {
+          "x": 820.663,
+          "y": 427.08
+        },
+        "screen_bounds": {
+          "left": 691.33,
+          "bottom": 42.92,
+          "right": 949.997,
+          "top": 542.92
+        },
+        "adb_bounds": {
+          "left": 691.33,
+          "top": 177.08,
+          "right": 949.997,
+          "bottom": 677.08
+        }
+      },
+      {
+        "name": "1",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -202652,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -1.467,
+          "y": -1.491,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -194.0,
+          "y": -375.0,
+          "width": 388.0,
+          "height": 750.0
+        },
+        "screen_point": {
+          "x": 573.997,
+          "y": 292.92
+        },
+        "adb_point": {
+          "x": 573.997,
+          "y": 427.08
+        },
+        "screen_bounds": {
+          "left": 444.663,
+          "bottom": 42.92,
+          "right": 703.33,
+          "top": 542.92
+        },
+        "adb_bounds": {
+          "left": 444.663,
+          "top": 177.08,
+          "right": 703.33,
+          "bottom": 677.08
+        }
+      },
+      {
+        "name": "0",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -200370,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -6.948,
+          "y": -1.491,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -194.0,
+          "y": -375.0,
+          "width": 388.0,
+          "height": 750.0
+        },
+        "screen_point": {
+          "x": 327.33,
+          "y": 292.92
+        },
+        "adb_point": {
+          "x": 327.33,
+          "y": 427.08
+        },
+        "screen_bounds": {
+          "left": 197.997,
+          "bottom": 42.92,
+          "right": 456.663,
+          "top": 542.92
+        },
+        "adb_bounds": {
+          "left": 197.997,
+          "top": 177.08,
+          "right": 456.663,
+          "bottom": 677.08
+        }
+      },
+      {
+        "name": "Toggle(Clone)",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/toggleGroup/Toggle(Clone)",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -200304,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 5.128,
+          "y": 4.881,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -328.818,
+          "y": -43.55,
+          "width": 657.635,
+          "height": 87.1
+        },
+        "screen_point": {
+          "x": 870.75,
+          "y": 579.667
+        },
+        "adb_point": {
+          "x": 870.75,
+          "y": 140.333
+        },
+        "screen_bounds": {
+          "left": 651.609,
+          "bottom": 550.643,
+          "right": 1089.89,
+          "top": 608.691
+        },
+        "adb_bounds": {
+          "left": 651.609,
+          "top": 111.309,
+          "right": 1089.89,
+          "bottom": 169.357
+        }
+      },
+      {
+        "name": "Toggle",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/toggleGroup/Toggle",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -197930,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -4.952,
+          "y": 4.881,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -328.818,
+          "y": -43.55,
+          "width": 657.635,
+          "height": 87.1
+        },
+        "screen_point": {
+          "x": 417.14,
+          "y": 579.667
+        },
+        "adb_point": {
+          "x": 417.14,
+          "y": 140.333
+        },
+        "screen_bounds": {
+          "left": 198.0,
+          "bottom": 550.643,
+          "right": 636.281,
+          "top": 608.691
+        },
+        "adb_bounds": {
+          "left": 198.0,
+          "top": 111.309,
+          "right": 636.281,
+          "bottom": 169.357
+        }
+      },
+      {
+        "name": "painting",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/frame/painting",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -192106,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 10.715,
+          "y": -1.852,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -470.5,
+          "y": -630.0,
+          "width": 941.0,
+          "height": 1260.0
+        },
+        "screen_point": {
+          "x": 1122.167,
+          "y": 276.667
+        },
+        "adb_point": {
+          "x": 1122.167,
+          "y": 443.333
+        },
+        "screen_bounds": {
+          "left": 808.5,
+          "bottom": -143.333,
+          "right": 1435.833,
+          "top": 696.667
+        },
+        "adb_bounds": {
+          "left": 808.5,
+          "top": 23.333,
+          "right": 1435.833,
+          "bottom": 863.333
+        }
+      },
+      {
+        "name": "oil",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/oil",
+        "canvas": "Overlay",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -192460,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 1.879,
+          "y": 7.224,
+          "z": -389.985
+        },
+        "local_rect": {
+          "x": -128.235,
+          "y": -18.47,
+          "width": 256.47,
+          "height": 36.94
+        },
+        "screen_point": {
+          "x": 724.561,
+          "y": 685.067
+        },
+        "adb_point": {
+          "x": 724.561,
+          "y": 34.933
+        },
+        "screen_bounds": {
+          "left": 639.043,
+          "bottom": 672.749,
+          "right": 810.078,
+          "top": 697.384
+        },
+        "adb_bounds": {
+          "left": 639.043,
+          "top": 22.616,
+          "right": 810.078,
+          "bottom": 47.251
+        }
+      },
+      {
+        "name": "gold",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/gold",
+        "canvas": "Overlay",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -192506,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 5.679,
+          "y": 7.224,
+          "z": -389.985
+        },
+        "local_rect": {
+          "x": -128.235,
+          "y": -18.47,
+          "width": 256.47,
+          "height": 36.94
+        },
+        "screen_point": {
+          "x": 895.541,
+          "y": 685.067
+        },
+        "adb_point": {
+          "x": 895.541,
+          "y": 34.933
+        },
+        "screen_bounds": {
+          "left": 810.023,
+          "bottom": 672.749,
+          "right": 981.058,
+          "top": 697.384
+        },
+        "adb_bounds": {
+          "left": 810.023,
+          "top": 22.616,
+          "right": 981.058,
+          "bottom": 47.251
+        }
+      },
+      {
+        "name": "homeBtn",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/homeBtn",
+        "canvas": "Overlay",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -192642,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 12.938,
+          "y": 7.147,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -76.5,
+          "y": -47.0,
+          "width": 153.0,
+          "height": 94.0
+        },
+        "screen_point": {
+          "x": 1222.211,
+          "y": 681.629
+        },
+        "adb_point": {
+          "x": 1222.211,
+          "y": 38.371
+        },
+        "screen_bounds": {
+          "left": 1171.227,
+          "bottom": 650.306,
+          "right": 1273.194,
+          "top": 712.952
+        },
+        "adb_bounds": {
+          "left": 1171.227,
+          "top": 7.048,
+          "right": 1273.194,
+          "bottom": 69.694
+        }
+      },
+      {
+        "name": "closeBtn",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/closeBtn",
+        "canvas": "Overlay",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -192630,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -13.074,
+          "y": 6.918,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -102.5,
+          "y": -54.0,
+          "width": 205.0,
+          "height": 108.0
+        },
+        "screen_point": {
+          "x": 51.658,
+          "y": 671.299
+        },
+        "adb_point": {
+          "x": 51.658,
+          "y": 48.701
+        },
+        "screen_bounds": {
+          "left": -16.653,
+          "bottom": 635.311,
+          "right": 119.969,
+          "top": 707.287
+        },
+        "adb_bounds": {
+          "left": -16.653,
+          "top": 12.713,
+          "right": 119.969,
+          "bottom": 84.689
+        }
+      },
+      {
+        "name": "gem",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/gem",
+        "canvas": "Overlay",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -192552,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 9.478,
+          "y": 7.224,
+          "z": -389.985
+        },
+        "local_rect": {
+          "x": -128.235,
+          "y": -18.47,
+          "width": 256.47,
+          "height": 36.94
+        },
+        "screen_point": {
+          "x": 1066.521,
+          "y": 685.067
+        },
+        "adb_point": {
+          "x": 1066.521,
+          "y": 34.933
+        },
+        "screen_bounds": {
+          "left": 981.003,
+          "bottom": 672.749,
+          "right": 1152.038,
+          "top": 697.384
+        },
+        "adb_bounds": {
+          "left": 981.003,
+          "top": 22.616,
+          "right": 1152.038,
+          "bottom": 47.251
+        }
+      }
+    ]
+  },
+  "ui": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.ui/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 17531,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 4466248,
+    "generation": 7764,
+    "snapshot_monotonic_ns": 6252252502630,
+    "response_monotonic_ns": 6252630920486,
+    "age_ms": 378,
+    "method_mask": 15,
+    "toggle_count": 7,
+    "text_count": 55,
+    "image_count": 139,
+    "toggle_truncated": false,
+    "text_truncated": false,
+    "image_truncated": false,
+    "error_count": 0,
+    "error_counts": {
+      "toggle": 0,
+      "text": 0,
+      "image": 0,
+      "shared": 0
+    },
+    "skipped_count": 0,
+    "image_source_count": 2560,
+    "image_source_capacity": 16384,
+    "toggles": [
+      {
+        "kind": "toggle",
+        "name": "shop1Tg",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/diamondShop/shop1Tg",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 97.39,
+          "y": 515.977
+        },
+        "adb_bounds": {
+          "left": 1.0,
+          "top": 487.977,
+          "right": 193.78,
+          "bottom": 543.977
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "shop1Tg",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/functionalItemShop/shop1Tg",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 97.39,
+          "y": 449.977
+        },
+        "adb_bounds": {
+          "left": 1.0,
+          "top": 421.977,
+          "right": 193.78,
+          "bottom": 477.977
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "shop1Tg",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/supplyShop/shop1Tg",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 97.39,
+          "y": 386.643
+        },
+        "adb_bounds": {
+          "left": 1.0,
+          "top": 361.31,
+          "right": 193.78,
+          "bottom": 411.977
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "shop1Tg",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/giftPackShop/shop1Tg",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": true,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 97.39,
+          "y": 323.31
+        },
+        "adb_bounds": {
+          "left": 1.0,
+          "top": 295.31,
+          "right": 193.78,
+          "bottom": 351.31
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "shop1Tg",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/specialShop/shop1Tg",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 97.39,
+          "y": 257.31
+        },
+        "adb_bounds": {
+          "left": 1.0,
+          "top": 229.31,
+          "right": 193.78,
+          "bottom": 285.31
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "shop1Tg",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/skinShop/shop1Tg",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 97.39,
+          "y": 193.977
+        },
+        "adb_bounds": {
+          "left": 1.0,
+          "top": 168.643,
+          "right": 193.78,
+          "bottom": 219.31
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "shop1Tg",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/recommendation/shop1Tg",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 97.39,
+          "y": 130.643
+        },
+        "adb_bounds": {
+          "left": 1.0,
+          "top": 102.643,
+          "right": 193.78,
+          "bottom": 158.643
+        }
+      }
+    ],
+    "texts": [
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/Price/Text",
+        "text": "780",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1064.577,
+          "top": 615.343,
+          "right": 1102.577,
+          "bottom": 638.017
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "LimitText",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/LimitText",
+        "text": "可购买次数：1/1",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 950.663,
+          "top": 580.677,
+          "right": 1176.197,
+          "bottom": 604.31
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_3/itemBg/item/icon_bg/count",
+        "text": "30",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1124.77,
+          "top": 527.207,
+          "right": 1138.45,
+          "bottom": 542.407
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_2/itemBg/item/icon_bg/count",
+        "text": "15",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1070.803,
+          "top": 527.207,
+          "right": 1082.583,
+          "bottom": 542.407
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_1/itemBg/item/icon_bg/count",
+        "text": "30",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1013.037,
+          "top": 527.207,
+          "right": 1026.716,
+          "bottom": 542.407
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/Tip/Text",
+        "text": "大量材料",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 977.797,
+          "top": 424.087,
+          "right": 1150.463,
+          "bottom": 449.42
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "item_name",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/item_name_mask/item_name",
+        "text": "30级礼包",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 950.663,
+          "top": 227.08,
+          "right": 1176.197,
+          "bottom": 260.413
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/Price/Text",
+        "text": "330",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 815.91,
+          "top": 615.343,
+          "right": 857.91,
+          "bottom": 638.017
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "LimitText",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/LimitText",
+        "text": "可购买次数：1/1",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 703.997,
+          "top": 580.677,
+          "right": 929.53,
+          "bottom": 604.31
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_3/itemBg/item/icon_bg/count",
+        "text": "30",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 878.103,
+          "top": 527.207,
+          "right": 891.783,
+          "bottom": 542.407
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_2/itemBg/item/icon_bg/count",
+        "text": "10",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 824.136,
+          "top": 527.207,
+          "right": 835.917,
+          "bottom": 542.407
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_1/itemBg/item/icon_bg/count",
+        "text": "20",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 766.75,
+          "top": 527.207,
+          "right": 780.05,
+          "bottom": 542.407
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/Tip/Text",
+        "text": "大量材料",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 731.13,
+          "top": 424.087,
+          "right": 903.796,
+          "bottom": 449.42
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "item_name",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/item_name_mask/item_name",
+        "text": "20级礼包",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 703.997,
+          "top": 227.08,
+          "right": 929.53,
+          "bottom": 260.413
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/Price/Text",
+        "text": "150",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 571.243,
+          "top": 615.343,
+          "right": 609.243,
+          "bottom": 638.017
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "LimitText",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/LimitText",
+        "text": "可购买次数：1/1",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 457.33,
+          "top": 580.677,
+          "right": 682.863,
+          "bottom": 604.31
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_3/itemBg/item/icon_bg/count",
+        "text": "30",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 631.437,
+          "top": 527.207,
+          "right": 645.117,
+          "bottom": 542.407
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_2/itemBg/item/icon_bg/count",
+        "text": "5",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 582.41,
+          "top": 527.207,
+          "right": 589.25,
+          "bottom": 542.407
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_1/itemBg/item/icon_bg/count",
+        "text": "10",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 521.603,
+          "top": 527.207,
+          "right": 533.383,
+          "bottom": 542.407
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/Tip/Text",
+        "text": "大量材料",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 484.463,
+          "top": 424.087,
+          "right": 657.13,
+          "bottom": 449.42
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "item_name",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/item_name_mask/item_name",
+        "text": "10级礼包",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 457.33,
+          "top": 227.08,
+          "right": 682.863,
+          "bottom": 260.413
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/Price/Text",
+        "text": "1380",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 317.576,
+          "top": 615.343,
+          "right": 369.576,
+          "bottom": 638.017
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "LimitText",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/LimitText",
+        "text": "可购买次数：2/2",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 210.663,
+          "top": 580.677,
+          "right": 436.196,
+          "bottom": 604.31
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item_2/itemBg/item/icon_bg/count",
+        "text": "30000",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 365.92,
+          "top": 501.737,
+          "right": 400.109,
+          "bottom": 516.932
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item_1/itemBg/item/icon_bg/count",
+        "text": "20",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 330.947,
+          "top": 501.737,
+          "right": 344.243,
+          "bottom": 516.932
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item/itemBg/item/icon_bg/count",
+        "text": "40",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 275.46,
+          "top": 501.737,
+          "right": 288.376,
+          "bottom": 516.932
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/Tip/Text",
+        "text": "礼包内容",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 237.13,
+          "top": 436.42,
+          "right": 407.796,
+          "bottom": 457.087
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "leftTimeText",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/leftTimeText",
+        "text": "剩余41天",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 221.353,
+          "top": 254.213,
+          "right": 425.507,
+          "bottom": 280.88
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "item_name",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/item_name_mask/item_name",
+        "text": "限时建造补给(高级)",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 210.663,
+          "top": 227.08,
+          "right": 436.196,
+          "bottom": 260.413
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Label",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/toggleGroup/Toggle(Clone)/unselected/Label",
+        "text": "等级礼包",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 829.43,
+          "top": 112.426,
+          "right": 901.406,
+          "bottom": 156.645
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "enText",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/toggleGroup/Toggle/selected/enText",
+        "text": "AllPacks",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 200.456,
+          "top": 137.431,
+          "right": 622.509,
+          "bottom": 153.446
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Label",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/toggleGroup/Toggle/selected/Label",
+        "text": "全部",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 198.0,
+          "top": 109.227,
+          "right": 622.512,
+          "bottom": 153.446
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "en",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/diamondShop/shop1Tg/name/en",
+        "text": "Diamond",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 61.4,
+          "top": 519.49,
+          "right": 168.067,
+          "bottom": 539.49
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/diamondShop/shop1Tg/name",
+        "text": "购买钻石",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 60.333,
+          "top": 486.09,
+          "right": 160.333,
+          "bottom": 539.423
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "en",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/functionalItemShop/shop1Tg/name/en",
+        "text": "Item",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 61.4,
+          "top": 453.49,
+          "right": 168.067,
+          "bottom": 473.49
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/functionalItemShop/shop1Tg/name",
+        "text": "功能道具",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 60.333,
+          "top": 420.09,
+          "right": 160.333,
+          "bottom": 473.423
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "en",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/supplyShop/shop1Tg/name/en",
+        "text": "Props",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 61.4,
+          "top": 390.157,
+          "right": 168.067,
+          "bottom": 410.157
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/supplyShop/shop1Tg/name",
+        "text": "补给道具",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 60.333,
+          "top": 356.757,
+          "right": 160.333,
+          "bottom": 410.09
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "en",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/giftPackShop/shop1Tg/name/en",
+        "text": "Pack",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 61.4,
+          "top": 326.823,
+          "right": 168.067,
+          "bottom": 346.823
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/giftPackShop/shop1Tg/name",
+        "text": "优惠礼包",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 60.333,
+          "top": 293.423,
+          "right": 160.333,
+          "bottom": 346.757
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "en",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/specialShop/shop1Tg/name/en",
+        "text": "RecommendShop",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 61.4,
+          "top": 260.823,
+          "right": 168.067,
+          "bottom": 280.823
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/specialShop/shop1Tg/name",
+        "text": "茗的精选",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 60.333,
+          "top": 227.423,
+          "right": 160.333,
+          "bottom": 280.757
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "en",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/skinShop/shop1Tg/name/en",
+        "text": "NewClothes",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 61.4,
+          "top": 197.49,
+          "right": 168.067,
+          "bottom": 217.49
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/skinShop/shop1Tg/name",
+        "text": "换装商店",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 60.333,
+          "top": 164.09,
+          "right": 160.333,
+          "bottom": 217.423
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "en",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/recommendation/shop1Tg/name/en",
+        "text": "Recommend",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 61.4,
+          "top": 134.157,
+          "right": 168.067,
+          "bottom": 154.157
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/recommendation/shop1Tg/name",
+        "text": "推荐",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 60.333,
+          "top": 100.757,
+          "right": 160.333,
+          "bottom": 154.09
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "en",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/title/Text/en",
+        "text": " S H O P",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 199.009,
+          "top": 40.036,
+          "right": 217.003,
+          "bottom": 45.034
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/title/Text",
+        "text": "商店",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 147.427,
+          "top": 22.143,
+          "right": 193.412,
+          "bottom": 45.136
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "max",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/gem/max",
+        "text": "",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1033.176,
+          "top": 8.711,
+          "right": 1121.125,
+          "bottom": 22.616
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/gem/Text",
+        "text": "5070",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1033.176,
+          "top": 22.616,
+          "right": 1121.125,
+          "bottom": 47.251
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "max",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/gold/max",
+        "text": "MAX: 108300",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 862.196,
+          "top": 8.711,
+          "right": 950.145,
+          "bottom": 22.616
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/gold/Text",
+        "text": "2324",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 862.196,
+          "top": 22.616,
+          "right": 950.145,
+          "bottom": 47.251
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "max",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/oil/max",
+        "text": "MAX: 17450",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 691.216,
+          "top": 8.711,
+          "right": 779.165,
+          "bottom": 22.616
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/oil/Text",
+        "text": "24853",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 691.216,
+          "top": 22.616,
+          "right": 779.165,
+          "bottom": 47.251
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "FpsPanel",
+        "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+        "text": "",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 573.333,
+          "top": 0.0,
+          "right": 706.667,
+          "bottom": 34.667
+        }
+      }
+    ],
+    "images": [
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/Price/icon_gem/icon",
+        "sprite": "gem_g",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1024.647,
+          "top": 612.025,
+          "right": 1064.506,
+          "bottom": 645.38
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1044.577,
+          "y": 628.703
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "priceBg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/priceBg",
+        "sprite": "btn",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 960.576,
+          "top": 608.253,
+          "right": 1170.603,
+          "bottom": 653.173
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1065.59,
+          "y": 630.713
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ImagMask",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_3/ImagMask",
+        "sprite": "itemFrame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1089.84,
+          "top": 491.41,
+          "right": 1142.26,
+          "bottom": 544.31
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1116.05,
+          "y": 517.86
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_3/itemBg/item/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 0.905882,
+          "blue": 0.262745,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1092.343,
+          "top": 493.767,
+          "right": 1140.983,
+          "bottom": 542.407
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1116.663,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_3/itemBg/item/icon_bg/icon",
+        "sprite": "42000",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1092.85,
+          "top": 494.273,
+          "right": 1140.477,
+          "bottom": 541.9
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1116.663,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_3/itemBg/item/icon_bg",
+        "sprite": "bg4",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1092.343,
+          "top": 493.767,
+          "right": 1140.983,
+          "bottom": 542.407
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1116.663,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "item",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_3/itemBg/item",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1090.823,
+          "top": 491.993,
+          "right": 1142.503,
+          "bottom": 544.18
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1116.663,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "itemBg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_3/itemBg",
+        "sprite": "itemBg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1091.063,
+          "top": 492.78,
+          "right": 1142.263,
+          "bottom": 543.393
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1116.663,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ImagMask",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_2/ImagMask",
+        "sprite": "itemFrame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1033.973,
+          "top": 491.41,
+          "right": 1086.393,
+          "bottom": 544.31
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1060.183,
+          "y": 517.86
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_2/itemBg/item/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.74902,
+          "green": 0.639216,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1036.477,
+          "top": 493.767,
+          "right": 1085.117,
+          "bottom": 542.407
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1060.797,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_2/itemBg/item/icon_bg/icon",
+        "sprite": "15003",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1036.983,
+          "top": 494.273,
+          "right": 1084.61,
+          "bottom": 541.9
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1060.797,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_2/itemBg/item/icon_bg",
+        "sprite": "bg3",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1036.477,
+          "top": 493.767,
+          "right": 1085.117,
+          "bottom": 542.407
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1060.797,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "item",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_2/itemBg/item",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1034.957,
+          "top": 491.993,
+          "right": 1086.636,
+          "bottom": 544.18
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1060.797,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "itemBg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_2/itemBg",
+        "sprite": "itemBg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1035.197,
+          "top": 492.78,
+          "right": 1086.396,
+          "bottom": 543.393
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1060.797,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ImagMask",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_1/ImagMask",
+        "sprite": "itemFrame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 978.107,
+          "top": 491.41,
+          "right": 1030.527,
+          "bottom": 544.31
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1004.317,
+          "y": 517.86
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_1/itemBg/item/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 0.905882,
+          "blue": 0.262745,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 980.61,
+          "top": 493.767,
+          "right": 1029.25,
+          "bottom": 542.407
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1004.93,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_1/itemBg/item/icon_bg/icon",
+        "sprite": "20001",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 981.117,
+          "top": 494.273,
+          "right": 1028.743,
+          "bottom": 541.9
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1004.93,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_1/itemBg/item/icon_bg",
+        "sprite": "bg4",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 980.61,
+          "top": 493.767,
+          "right": 1029.25,
+          "bottom": 542.407
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1004.93,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "item",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_1/itemBg/item",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 979.09,
+          "top": 491.993,
+          "right": 1030.77,
+          "bottom": 544.18
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1004.93,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "itemBg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/grid/item_1/itemBg",
+        "sprite": "itemBg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 979.33,
+          "top": 492.78,
+          "right": 1030.53,
+          "bottom": 543.393
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1004.93,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "addImg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/addImg",
+        "sprite": "gift_add",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1054.13,
+          "top": 465.02,
+          "right": 1070.797,
+          "bottom": 481.687
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1062.463,
+          "y": 473.353
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Tip",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/itemPanel2/Tip",
+        "sprite": "titleBg2",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 977.797,
+          "top": 424.087,
+          "right": 1150.463,
+          "bottom": 449.42
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1150.463,
+          "y": 449.42
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "item_icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/item_icon",
+        "sprite": "newboxLv30",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1009.33,
+          "top": 280.88,
+          "right": 1125.33,
+          "bottom": 396.88
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1067.33,
+          "y": 338.88
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "hot",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl/tag/hot",
+        "sprite": "2",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 947.33,
+          "top": 186.947,
+          "right": 1049.996,
+          "bottom": 213.613
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 947.33,
+          "y": 186.947
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "real_tpl",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/3/real_tpl",
+        "sprite": "gift_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 937.997,
+          "top": 177.08,
+          "right": 1196.663,
+          "bottom": 677.08
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1067.33,
+          "y": 427.08
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/Price/icon_gem/icon",
+        "sprite": "gem_g",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 775.981,
+          "top": 612.025,
+          "right": 815.839,
+          "bottom": 645.38
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 795.91,
+          "y": 628.703
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "priceBg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/priceBg",
+        "sprite": "btn",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 713.91,
+          "top": 608.253,
+          "right": 923.936,
+          "bottom": 653.173
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 818.923,
+          "y": 630.713
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ImagMask",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_3/ImagMask",
+        "sprite": "itemFrame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 843.173,
+          "top": 491.41,
+          "right": 895.593,
+          "bottom": 544.31
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 869.383,
+          "y": 517.86
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_3/itemBg/item/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.396078,
+          "green": 0.780392,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 845.677,
+          "top": 493.767,
+          "right": 894.316,
+          "bottom": 542.407
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 869.996,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_3/itemBg/item/icon_bg/icon",
+        "sprite": "30112",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 846.183,
+          "top": 494.273,
+          "right": 893.81,
+          "bottom": 541.9
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 869.996,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_3/itemBg/item/icon_bg",
+        "sprite": "bg2",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 845.677,
+          "top": 493.767,
+          "right": 894.316,
+          "bottom": 542.407
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 869.996,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "item",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_3/itemBg/item",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 844.156,
+          "top": 491.993,
+          "right": 895.836,
+          "bottom": 544.18
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 869.996,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "itemBg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_3/itemBg",
+        "sprite": "itemBg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 844.396,
+          "top": 492.78,
+          "right": 895.597,
+          "bottom": 543.393
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 869.996,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ImagMask",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_2/ImagMask",
+        "sprite": "itemFrame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 787.307,
+          "top": 491.41,
+          "right": 839.727,
+          "bottom": 544.31
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 813.517,
+          "y": 517.86
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_2/itemBg/item/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.74902,
+          "green": 0.639216,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 789.81,
+          "top": 493.767,
+          "right": 838.45,
+          "bottom": 542.407
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 814.13,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_2/itemBg/item/icon_bg/icon",
+        "sprite": "15003",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 790.316,
+          "top": 494.273,
+          "right": 837.943,
+          "bottom": 541.9
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 814.13,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_2/itemBg/item/icon_bg",
+        "sprite": "bg3",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 789.81,
+          "top": 493.767,
+          "right": 838.45,
+          "bottom": 542.407
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 814.13,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "item",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_2/itemBg/item",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 788.29,
+          "top": 491.993,
+          "right": 839.97,
+          "bottom": 544.18
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 814.13,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "itemBg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_2/itemBg",
+        "sprite": "itemBg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 788.53,
+          "top": 492.78,
+          "right": 839.73,
+          "bottom": 543.393
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 814.13,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ImagMask",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_1/ImagMask",
+        "sprite": "itemFrame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 731.44,
+          "top": 491.41,
+          "right": 783.86,
+          "bottom": 544.31
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 757.65,
+          "y": 517.86
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_1/itemBg/item/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 0.905882,
+          "blue": 0.262745,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 733.943,
+          "top": 493.767,
+          "right": 782.583,
+          "bottom": 542.407
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 758.263,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_1/itemBg/item/icon_bg/icon",
+        "sprite": "20001",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 734.45,
+          "top": 494.273,
+          "right": 782.076,
+          "bottom": 541.9
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 758.263,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_1/itemBg/item/icon_bg",
+        "sprite": "bg4",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 733.943,
+          "top": 493.767,
+          "right": 782.583,
+          "bottom": 542.407
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 758.263,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "item",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_1/itemBg/item",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 732.423,
+          "top": 491.993,
+          "right": 784.103,
+          "bottom": 544.18
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 758.263,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "itemBg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/grid/item_1/itemBg",
+        "sprite": "itemBg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 732.663,
+          "top": 492.78,
+          "right": 783.863,
+          "bottom": 543.393
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 758.263,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "addImg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/addImg",
+        "sprite": "gift_add",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 807.463,
+          "top": 465.02,
+          "right": 824.13,
+          "bottom": 481.687
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 815.797,
+          "y": 473.353
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Tip",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/itemPanel2/Tip",
+        "sprite": "titleBg2",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 731.13,
+          "top": 424.087,
+          "right": 903.796,
+          "bottom": 449.42
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 903.796,
+          "y": 449.42
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "item_icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/item_icon",
+        "sprite": "newboxLv20",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 762.663,
+          "top": 280.88,
+          "right": 878.663,
+          "bottom": 396.88
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 820.663,
+          "y": 338.88
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "hot",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl/tag/hot",
+        "sprite": "2",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 700.663,
+          "top": 186.947,
+          "right": 803.33,
+          "bottom": 213.613
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 700.663,
+          "y": 186.947
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "real_tpl",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/2/real_tpl",
+        "sprite": "gift_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 691.33,
+          "top": 177.08,
+          "right": 949.996,
+          "bottom": 677.08
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 820.663,
+          "y": 427.08
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/Price/icon_gem/icon",
+        "sprite": "gem_g",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 531.314,
+          "top": 612.025,
+          "right": 571.172,
+          "bottom": 645.38
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 551.243,
+          "y": 628.703
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "priceBg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/priceBg",
+        "sprite": "btn",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 467.243,
+          "top": 608.253,
+          "right": 677.27,
+          "bottom": 653.173
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 572.256,
+          "y": 630.713
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ImagMask",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_3/ImagMask",
+        "sprite": "itemFrame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 596.506,
+          "top": 491.41,
+          "right": 648.927,
+          "bottom": 544.31
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 622.717,
+          "y": 517.86
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_3/itemBg/item/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.741176,
+          "green": 0.741176,
+          "blue": 0.741176,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 599.01,
+          "top": 493.767,
+          "right": 647.65,
+          "bottom": 542.407
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 623.33,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_3/itemBg/item/icon_bg/icon",
+        "sprite": "30111",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 599.516,
+          "top": 494.273,
+          "right": 647.143,
+          "bottom": 541.9
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 623.33,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_3/itemBg/item/icon_bg",
+        "sprite": "bg1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 599.01,
+          "top": 493.767,
+          "right": 647.65,
+          "bottom": 542.407
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 623.33,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "item",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_3/itemBg/item",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 597.49,
+          "top": 491.993,
+          "right": 649.17,
+          "bottom": 544.18
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 623.33,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "itemBg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_3/itemBg",
+        "sprite": "itemBg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 597.73,
+          "top": 492.78,
+          "right": 648.93,
+          "bottom": 543.393
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 623.33,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ImagMask",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_2/ImagMask",
+        "sprite": "itemFrame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 540.64,
+          "top": 491.41,
+          "right": 593.06,
+          "bottom": 544.31
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 566.85,
+          "y": 517.86
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_2/itemBg/item/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.74902,
+          "green": 0.639216,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 543.143,
+          "top": 493.767,
+          "right": 591.783,
+          "bottom": 542.407
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 567.463,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_2/itemBg/item/icon_bg/icon",
+        "sprite": "15003",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 543.65,
+          "top": 494.273,
+          "right": 591.276,
+          "bottom": 541.9
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 567.463,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_2/itemBg/item/icon_bg",
+        "sprite": "bg3",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 543.143,
+          "top": 493.767,
+          "right": 591.783,
+          "bottom": 542.407
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 567.463,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "item",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_2/itemBg/item",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 541.623,
+          "top": 491.993,
+          "right": 593.303,
+          "bottom": 544.18
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 567.463,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "itemBg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_2/itemBg",
+        "sprite": "itemBg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 541.863,
+          "top": 492.78,
+          "right": 593.063,
+          "bottom": 543.393
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 567.463,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ImagMask",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_1/ImagMask",
+        "sprite": "itemFrame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 484.773,
+          "top": 491.41,
+          "right": 537.193,
+          "bottom": 544.31
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 510.983,
+          "y": 517.86
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_1/itemBg/item/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 0.905882,
+          "blue": 0.262745,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 487.276,
+          "top": 493.767,
+          "right": 535.917,
+          "bottom": 542.407
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 511.597,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_1/itemBg/item/icon_bg/icon",
+        "sprite": "20001",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 487.783,
+          "top": 494.273,
+          "right": 535.41,
+          "bottom": 541.9
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 511.597,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_1/itemBg/item/icon_bg",
+        "sprite": "bg4",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 487.276,
+          "top": 493.767,
+          "right": 535.917,
+          "bottom": 542.407
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 511.597,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "item",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_1/itemBg/item",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 485.757,
+          "top": 491.993,
+          "right": 537.437,
+          "bottom": 544.18
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 511.597,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "itemBg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/grid/item_1/itemBg",
+        "sprite": "itemBg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 485.996,
+          "top": 492.78,
+          "right": 537.197,
+          "bottom": 543.393
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 511.597,
+          "y": 518.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "addImg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/addImg",
+        "sprite": "gift_add",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 560.797,
+          "top": 465.02,
+          "right": 577.463,
+          "bottom": 481.687
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 569.13,
+          "y": 473.353
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Tip",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/itemPanel2/Tip",
+        "sprite": "titleBg2",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 484.463,
+          "top": 424.087,
+          "right": 657.13,
+          "bottom": 449.42
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 657.13,
+          "y": 449.42
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "item_icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/item_icon",
+        "sprite": "newboxLv10",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 515.996,
+          "top": 280.88,
+          "right": 631.997,
+          "bottom": 396.88
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 573.997,
+          "y": 338.88
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "hot",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl/tag/hot",
+        "sprite": "2",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 453.997,
+          "top": 186.947,
+          "right": 556.663,
+          "bottom": 213.613
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 453.997,
+          "y": 186.947
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "real_tpl",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/1/real_tpl",
+        "sprite": "gift_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 444.663,
+          "top": 177.08,
+          "right": 703.33,
+          "bottom": 677.08
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 573.997,
+          "y": 427.08
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/Price/icon_gem/icon",
+        "sprite": "gem_g",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 277.647,
+          "top": 612.025,
+          "right": 317.506,
+          "bottom": 645.38
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 297.576,
+          "y": 628.703
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "priceBg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/priceBg",
+        "sprite": "btn",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 220.576,
+          "top": 608.253,
+          "right": 430.603,
+          "bottom": 653.173
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 325.59,
+          "y": 630.713
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ImagMask",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item_2/ImagMask",
+        "sprite": "itemFrame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 351.515,
+          "top": 465.952,
+          "right": 403.918,
+          "bottom": 518.835
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 377.717,
+          "y": 492.393
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item_2/itemBg/item/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.741176,
+          "green": 0.741176,
+          "blue": 0.741176,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 354.018,
+          "top": 468.308,
+          "right": 402.642,
+          "bottom": 516.932
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 378.33,
+          "y": 492.62
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item_2/itemBg/item/icon_bg/icon",
+        "sprite": "gold",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 354.524,
+          "top": 468.814,
+          "right": 402.135,
+          "bottom": 516.426
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 378.33,
+          "y": 492.62
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item_2/itemBg/item/icon_bg",
+        "sprite": "bg1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 354.018,
+          "top": 468.308,
+          "right": 402.642,
+          "bottom": 516.932
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 378.33,
+          "y": 492.62
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "item",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item_2/itemBg/item",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 352.498,
+          "top": 466.535,
+          "right": 404.161,
+          "bottom": 518.705
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 378.33,
+          "y": 492.62
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "itemBg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item_2/itemBg",
+        "sprite": "itemBg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 352.738,
+          "top": 467.322,
+          "right": 403.922,
+          "bottom": 517.918
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 378.33,
+          "y": 492.62
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ImagMask",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item_1/ImagMask",
+        "sprite": "itemFrame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 295.649,
+          "top": 465.952,
+          "right": 348.052,
+          "bottom": 518.835
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 321.85,
+          "y": 492.393
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item_1/itemBg/item/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.74902,
+          "green": 0.639216,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 298.151,
+          "top": 468.308,
+          "right": 346.775,
+          "bottom": 516.932
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 322.463,
+          "y": 492.62
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item_1/itemBg/item/icon_bg/icon",
+        "sprite": "15003",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 298.658,
+          "top": 468.814,
+          "right": 346.269,
+          "bottom": 516.426
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 322.463,
+          "y": 492.62
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item_1/itemBg/item/icon_bg",
+        "sprite": "bg3",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 298.151,
+          "top": 468.308,
+          "right": 346.775,
+          "bottom": 516.932
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 322.463,
+          "y": 492.62
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "item",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item_1/itemBg/item",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 296.632,
+          "top": 466.535,
+          "right": 348.295,
+          "bottom": 518.705
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 322.463,
+          "y": 492.62
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "itemBg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item_1/itemBg",
+        "sprite": "itemBg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 296.871,
+          "top": 467.322,
+          "right": 348.055,
+          "bottom": 517.918
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 322.463,
+          "y": 492.62
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ImagMask",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item/ImagMask",
+        "sprite": "itemFrame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 239.782,
+          "top": 465.952,
+          "right": 292.185,
+          "bottom": 518.835
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 265.983,
+          "y": 492.393
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item/itemBg/item/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 0.905882,
+          "blue": 0.262745,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 242.284,
+          "top": 468.308,
+          "right": 290.909,
+          "bottom": 516.932
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 266.596,
+          "y": 492.62
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item/itemBg/item/icon_bg/icon",
+        "sprite": "20001",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 242.791,
+          "top": 468.814,
+          "right": 290.402,
+          "bottom": 516.426
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 266.596,
+          "y": 492.62
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item/itemBg/item/icon_bg",
+        "sprite": "bg4",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 242.284,
+          "top": 468.308,
+          "right": 290.909,
+          "bottom": 516.932
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 266.596,
+          "y": 492.62
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "item",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item/itemBg/item",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 240.765,
+          "top": 466.535,
+          "right": 292.428,
+          "bottom": 518.705
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 266.596,
+          "y": 492.62
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "itemBg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/grid/item/itemBg",
+        "sprite": "itemBg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 241.005,
+          "top": 467.322,
+          "right": 292.188,
+          "bottom": 517.918
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 266.597,
+          "y": 492.62
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Tip",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/itemPanel3/Tip",
+        "sprite": "titleBg1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 237.13,
+          "top": 436.42,
+          "right": 407.796,
+          "bottom": 457.087
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 407.796,
+          "y": 457.087
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "item_icon",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/item_icon",
+        "sprite": "boxBuild2",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 269.33,
+          "top": 280.88,
+          "right": 385.33,
+          "bottom": 396.88
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 327.33,
+          "y": 338.88
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "new",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl/tag/new",
+        "sprite": "4",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 207.33,
+          "top": 186.947,
+          "right": 309.996,
+          "bottom": 213.613
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 207.33,
+          "y": 186.947
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "real_tpl",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/lScrollRect/content/0/real_tpl",
+        "sprite": "gift_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 197.997,
+          "top": 177.08,
+          "right": 456.663,
+          "bottom": 677.08
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 327.33,
+          "y": 427.08
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/toggleGroup/Toggle(Clone)/Image",
+        "sprite": "gift_toggle_line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1091.816,
+          "top": 124.472,
+          "right": 1093.149,
+          "bottom": 145.798
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1092.483,
+          "y": 135.135
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/toggleGroup/Toggle/Image",
+        "sprite": "gift_toggle_line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 638.207,
+          "top": 124.472,
+          "right": 639.54,
+          "bottom": 145.798
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 638.873,
+          "y": 135.135
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "selected",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/toggleGroup/Toggle/selected",
+        "sprite": "gift_toggle_selected",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 198.0,
+          "top": 111.309,
+          "right": 633.562,
+          "bottom": 169.357
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 415.781,
+          "y": 140.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "toggleGroup",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/viewContainer/ChargeGiftShopUI(Clone)/toggleGroup",
+        "sprite": "gift_toggle_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 198.0,
+          "top": 111.596,
+          "right": 1084.558,
+          "bottom": 169.071
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 198.0,
+          "y": 140.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/diamondShop/shop1Tg/icon",
+        "sprite": "diamond",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 22.247,
+          "top": 505.31,
+          "right": 43.58,
+          "bottom": 526.643
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 32.913,
+          "y": 515.977
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "shop1Tg",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/diamondShop/shop1Tg",
+        "sprite": "shop1Tg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1.0,
+          "top": 487.977,
+          "right": 193.78,
+          "bottom": 543.977
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 97.39,
+          "y": 515.977
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/functionalItemShop/shop1Tg/icon",
+        "sprite": "item",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 22.247,
+          "top": 439.31,
+          "right": 43.58,
+          "bottom": 460.643
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 32.913,
+          "y": 449.977
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "shop1Tg",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/functionalItemShop/shop1Tg",
+        "sprite": "shop1Tg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1.0,
+          "top": 421.977,
+          "right": 193.78,
+          "bottom": 477.977
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 97.39,
+          "y": 449.977
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/supplyShop/shop1Tg/icon",
+        "sprite": "supply",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 22.247,
+          "top": 375.977,
+          "right": 43.58,
+          "bottom": 397.31
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 32.913,
+          "y": 386.643
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "shop1Tg",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/supplyShop/shop1Tg",
+        "sprite": "shop1Tg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1.0,
+          "top": 361.31,
+          "right": 193.78,
+          "bottom": 411.977
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 97.39,
+          "y": 386.643
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/giftPackShop/shop1Tg/icon",
+        "sprite": "gift",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 22.247,
+          "top": 312.643,
+          "right": 43.58,
+          "bottom": 333.977
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 32.913,
+          "y": 323.31
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "selected",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/giftPackShop/shop1Tg/selected",
+        "sprite": "shop1TgSelect",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1.397,
+          "top": 295.31,
+          "right": 193.523,
+          "bottom": 351.31
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 97.46,
+          "y": 323.31
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "shop1Tg",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/giftPackShop/shop1Tg",
+        "sprite": "shop1Tg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1.0,
+          "top": 295.31,
+          "right": 193.78,
+          "bottom": 351.31
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 97.39,
+          "y": 323.31
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tip",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/specialShop/shop1Tg/tip",
+        "sprite": "red",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 160.847,
+          "top": 218.51,
+          "right": 193.513,
+          "bottom": 251.177
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 177.18,
+          "y": 234.843
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/specialShop/shop1Tg/icon",
+        "sprite": "special",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 22.247,
+          "top": 246.643,
+          "right": 43.58,
+          "bottom": 267.977
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 32.913,
+          "y": 257.31
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "shop1Tg",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/specialShop/shop1Tg",
+        "sprite": "shop1Tg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1.0,
+          "top": 229.31,
+          "right": 193.78,
+          "bottom": 285.31
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 97.39,
+          "y": 257.31
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/skinShop/shop1Tg/icon",
+        "sprite": "skin",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 22.247,
+          "top": 183.31,
+          "right": 43.58,
+          "bottom": 204.643
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 32.913,
+          "y": 193.977
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "shop1Tg",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/skinShop/shop1Tg",
+        "sprite": "shop1Tg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1.0,
+          "top": 168.643,
+          "right": 193.78,
+          "bottom": 219.31
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 97.39,
+          "y": 193.977
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/recommendation/shop1Tg/icon",
+        "sprite": "recommendation",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 22.247,
+          "top": 119.977,
+          "right": 43.58,
+          "bottom": 141.31
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 32.913,
+          "y": 130.643
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "shop1Tg",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/shop1List/recommendation/shop1Tg",
+        "sprite": "shop1Tg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1.0,
+          "top": 102.643,
+          "right": 193.78,
+          "bottom": 158.643
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 97.39,
+          "y": 130.643
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "homeBtn",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/homeBtn",
+        "sprite": "home",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1171.227,
+          "top": 7.048,
+          "right": 1273.194,
+          "bottom": 69.694
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1222.211,
+          "y": 38.371
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "closeBtn",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/closeBtn",
+        "sprite": "back",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -16.653,
+          "top": 12.713,
+          "right": 119.969,
+          "bottom": 84.689
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.658,
+          "y": 48.701
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "title",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/title",
+        "sprite": "title",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -27.916,
+          "top": 7.048,
+          "right": 370.621,
+          "bottom": 67.029
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 171.352,
+          "y": 37.038
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "add",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/gem/add",
+        "sprite": "res_add",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1126.007,
+          "top": 21.596,
+          "right": 1152.682,
+          "bottom": 48.271
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1139.344,
+          "y": 34.933
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/gem/icon",
+        "sprite": "gem",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1002.833,
+          "top": 18.261,
+          "right": 1036.177,
+          "bottom": 51.605
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1019.505,
+          "y": 34.933
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "add",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/gold/add",
+        "sprite": "res_add",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 955.027,
+          "top": 21.596,
+          "right": 981.702,
+          "bottom": 48.271
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 968.364,
+          "y": 34.933
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/gold/bg",
+        "sprite": "resource_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 846.325,
+          "top": 0.922,
+          "right": 955.027,
+          "bottom": 23.596
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 900.676,
+          "y": 12.259
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/gold/icon",
+        "sprite": "gold",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 827.385,
+          "top": 18.261,
+          "right": 860.729,
+          "bottom": 51.605
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 844.057,
+          "y": 34.933
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "add",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/oil/add",
+        "sprite": "res_add",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 784.047,
+          "top": 21.596,
+          "right": 810.722,
+          "bottom": 48.271
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 797.384,
+          "y": 34.933
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/oil/bg",
+        "sprite": "resource_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 675.345,
+          "top": 0.922,
+          "right": 784.047,
+          "bottom": 23.596
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 729.696,
+          "y": 12.259
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/oil/icon",
+        "sprite": "oil",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 656.405,
+          "top": 18.261,
+          "right": 689.749,
+          "bottom": 51.605
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 673.077,
+          "y": 34.933
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "resources",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/top/resources",
+        "sprite": "white_dot",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 0.298039
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 665.737,
+          "top": 22.62,
+          "right": 1180.011,
+          "bottom": 47.247
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1180.011,
+          "y": 34.933
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "leftBg",
+        "path": "OverlayCamera/Overlay/UIMain/buttonList/leftBg",
+        "sprite": "leftBg",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 190.567,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -0.0,
+          "y": 0.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "live2d",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/frame/painting/live2d",
+        "sprite": "bg",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 962.167,
+          "top": 116.667,
+          "right": 1428.833,
+          "bottom": 716.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1195.5,
+          "y": 416.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bgDecoration",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/bgDecoration",
+        "sprite": "bgDecoration",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 152.133,
+          "top": 702.867,
+          "right": 302.8,
+          "bottom": 706.867
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 227.467,
+          "y": 704.867
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/NewShopUI(Clone)/bg/bg",
+        "sprite": "bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "top",
+        "path": "OverlayCamera/Adpter/top/top",
+        "sprite": "mask1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": -140.667,
+          "right": 1280.0,
+          "bottom": 0.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": -70.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "left",
+        "path": "OverlayCamera/Adpter/left/left",
+        "sprite": "mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -140.667,
+          "top": 0.0,
+          "right": -0.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -70.333,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bottom",
+        "path": "OverlayCamera/Adpter/bottom/bottom",
+        "sprite": "mask1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 720.0,
+          "right": 1280.0,
+          "bottom": 860.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 790.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "right",
+        "path": "OverlayCamera/Adpter/right/right",
+        "sprite": "mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1280.0,
+          "top": 0.0,
+          "right": 1420.667,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1350.333,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      }
+    ],
+    "globe_geometry": {
+      "schema": "alas-headless.globe-geometry/v1",
+      "status": 0,
+      "truncated": false,
+      "error_count": 0,
+      "camera_path": "",
+      "objects": []
+    },
+    "lua_globe_diagnostic": {
+      "schema": "alas-headless.lua-globe-diagnostic/v1",
+      "status": 0,
+      "stage": 0,
+      "truncated": false,
+      "stack_balanced": false,
+      "registry_visited": 0,
+      "inspection_count": 0,
+      "world_candidates": 0,
+      "drag_candidates": 0,
+      "colors": [],
+      "dragging": [],
+      "drag_pointer_instance_ids": [],
+      "drag_trigger_instance_ids": [],
+      "active_pointer_instance_id": 0
+    },
+    "shipyard_strengthen": {
+      "status": 0,
+      "stage": 0,
+      "truncated": false,
+      "stack_balanced": false,
+      "blueprint_id": 0,
+      "ship_id": 0,
+      "ship_index": 0,
+      "series": 0,
+      "rarity": 0,
+      "pursuing": false,
+      "purchased": 0,
+      "coins": 0,
+      "gems_known": false,
+      "paid_gems": 0,
+      "free_gems": 0,
+      "level": 0,
+      "fate_level": -1,
+      "exp": 0
+    },
+    "activity_identity": {
+      "status": 1,
+      "stack_balanced": true,
+      "archives": {
+        "status": 1,
+        "expected_count": 50,
+        "truncated": false,
+        "records": [
+          {
+            "id": 1,
+            "activity_type": 1,
+            "name": "红染常驻复刻",
+            "bg": "temp_hongran"
+          },
+          {
+            "id": 2,
+            "activity_type": 2,
+            "name": "Z舰队常驻复刻",
+            "bg": "temp_zjiandui"
+          },
+          {
+            "id": 4,
+            "activity_type": 1,
+            "name": "凛冬常驻复刻",
+            "bg": "temp_lingdong"
+          },
+          {
+            "id": 5,
+            "activity_type": 2,
+            "name": "围剿斯佩伯爵』常驻复刻",
+            "bg": "temp_sipei"
+          },
+          {
+            "id": 6,
+            "activity_type": 1,
+            "name": "异色格常驻复刻",
+            "bg": "temp_yisege"
+          },
+          {
+            "id": 7,
+            "activity_type": 1,
+            "name": "坠落之翼常驻复刻",
+            "bg": "temp_zhuiluo"
+          },
+          {
+            "id": 8,
+            "activity_type": 1,
+            "name": "鸢尾之华常驻复刻",
+            "bg": "temp_yuanwei"
+          },
+          {
+            "id": 9,
+            "activity_type": 1,
+            "name": "墨染的钢铁之花常驻复刻",
+            "bg": "temp_moran"
+          },
+          {
+            "id": 10,
+            "activity_type": 2,
+            "name": "光荣的一战常驻复刻",
+            "bg": "temp_guangrong"
+          },
+          {
+            "id": 11,
+            "activity_type": 1,
+            "name": "苍红的回响常驻复刻",
+            "bg": "temp_tiancheng"
+          },
+          {
+            "id": 12,
+            "activity_type": 2,
+            "name": "月光下的序曲常驻复刻",
+            "bg": "temp_xinaoerliang"
+          },
+          {
+            "id": 13,
+            "activity_type": 1,
+            "name": "俾斯麦常驻复刻",
+            "bg": "temp_bisimai"
+          },
+          {
+            "id": 14,
+            "activity_type": 2,
+            "name": "偶像一期常驻复刻",
+            "bg": "temp_ouxiang"
+          },
+          {
+            "id": 15,
+            "activity_type": 1,
+            "name": "神圣的悲喜剧常驻复刻",
+            "bg": "temp_beixiju"
+          },
+          {
+            "id": 16,
+            "activity_type": 2,
+            "name": "斯图尔特的硝烟常驻复刻",
+            "bg": "temp_longxiang"
+          },
+          {
+            "id": 17,
+            "activity_type": 1,
+            "name": "箱庭疗法常驻复刻",
+            "bg": "temp_xiangting"
+          },
+          {
+            "id": 18,
+            "activity_type": 1,
+            "name": "浮樱影华常驻复刻",
+            "bg": "temp_fuying"
+          },
+          {
+            "id": 19,
+            "activity_type": 2,
+            "name": "最珍贵的宝物常驻复刻",
+            "bg": "temp_u110"
+          },
+          {
+            "id": 20,
+            "activity_type": 2,
+            "name": "偶像二期常驻复刻",
+            "bg": "temp_ouxiang2"
+          },
+          {
+            "id": 21,
+            "activity_type": 1,
+            "name": "微层混合常驻复刻",
+            "bg": "temp_weiceng"
+          },
+          {
+            "id": 22,
+            "activity_type": 2,
+            "name": "峡湾间的星辰常驻复刻",
+            "bg": "temp_yonggan"
+          },
+          {
+            "id": 23,
+            "activity_type": 1,
+            "name": "穹顶下的圣咏曲常驻复刻",
+            "bg": "temp_zhende"
+          },
+          {
+            "id": 24,
+            "activity_type": 2,
+            "name": "夜幕下的归途常驻复刻",
+            "bg": "temp_taertu"
+          },
+          {
+            "id": 25,
+            "activity_type": 1,
+            "name": "北境序曲常驻复刻",
+            "bg": "temp_qiaba"
+          },
+          {
+            "id": 26,
+            "activity_type": 1,
+            "name": "永夜幻光常驻复刻",
+            "bg": "temp_hemin"
+          },
+          {
+            "id": 27,
+            "activity_type": 2,
+            "name": "峡湾间的反击常驻复刻",
+            "bg": "temp_aisijimoren"
+          },
+          {
+            "id": 28,
+            "activity_type": 1,
+            "name": "负象限作战常驻复刻",
+            "bg": "temp_u37"
+          },
+          {
+            "id": 29,
+            "activity_type": 1,
+            "name": "蝶海梦花常驻复刻",
+            "bg": "temp_xinnong"
+          },
+          {
+            "id": 30,
+            "activity_type": 1,
+            "name": "镜位螺旋常驻复刻",
+            "bg": "temp_xinzexi"
+          },
+          {
+            "id": 31,
+            "activity_type": 1,
+            "name": "破晓冰华常驻复刻",
+            "bg": "temp_talin"
+          },
+          {
+            "id": 32,
+            "activity_type": 2,
+            "name": "划破海空之翼常驻复刻",
+            "bg": "temp_pulinsidun"
+          },
+          {
+            "id": 33,
+            "activity_type": 2,
+            "name": "杰诺瓦的焰火常驻复刻",
+            "bg": "temp_fuxv"
+          },
+          {
+            "id": 34,
+            "activity_type": 1,
+            "name": "碧海光粼常驻复刻",
+            "bg": "temp_daofeng"
+          },
+          {
+            "id": 35,
+            "activity_type": 1,
+            "name": "复兴的赞美诗常驻复刻",
+            "bg": "temp_weineituo"
+          },
+          {
+            "id": 36,
+            "activity_type": 1,
+            "name": "逆转彩虹之塔常驻复刻",
+            "bg": "temp_huteng"
+          },
+          {
+            "id": 37,
+            "activity_type": 1,
+            "name": "深度回音常驻复刻",
+            "bg": "temp_kalangshitade"
+          },
+          {
+            "id": 38,
+            "activity_type": 2,
+            "name": "虚像构筑之塔常驻复刻",
+            "bg": "temp_diguo"
+          },
+          {
+            "id": 39,
+            "activity_type": 1,
+            "name": "泠誓光庭常驻复刻",
+            "bg": "temp_qianwei"
+          },
+          {
+            "id": 40,
+            "activity_type": 1,
+            "name": "雄鹰的叙事歌常驻复刻",
+            "bg": "temp_luoma"
+          },
+          {
+            "id": 41,
+            "activity_type": 1,
+            "name": "虹彩的终幕曲常驻复刻",
+            "bg": "temp_aimudeng"
+          },
+          {
+            "id": 42,
+            "activity_type": 2,
+            "name": "飓风与青春之泉常驻复刻",
+            "bg": "temp_fengfanv1"
+          },
+          {
+            "id": 43,
+            "activity_type": 1,
+            "name": "紫绛槿岚常驻复刻",
+            "bg": "temp_wuzang"
+          },
+          {
+            "id": 44,
+            "activity_type": 1,
+            "name": "定向折叠常驻复刻",
+            "bg": "temp_yuekechengII"
+          },
+          {
+            "id": 45,
+            "activity_type": 1,
+            "name": "湮烬尘墟常驻复刻",
+            "bg": "temp_yuanchou"
+          },
+          {
+            "id": 46,
+            "activity_type": 2,
+            "name": "远汇点作战常驻复刻",
+            "bg": "temp_bulunxierde"
+          },
+          {
+            "id": 47,
+            "activity_type": 2,
+            "name": "奏响鸢尾之歌常驻复刻",
+            "bg": "temp_masaiqu"
+          },
+          {
+            "id": 48,
+            "activity_type": 1,
+            "name": "空相交汇点常驻复刻",
+            "bg": "temp_bisimaiz"
+          },
+          {
+            "id": 49,
+            "activity_type": 2,
+            "name": "幻梦间奏曲常驻复刻",
+            "bg": "temp_sitelasibao"
+          },
+          {
+            "id": 50,
+            "activity_type": 3,
+            "name": "极地风暴常驻复刻",
+            "bg": "temp_kuersike"
+          },
+          {
+            "id": 51,
+            "activity_type": 3,
+            "name": "童心学院常驻复刻",
+            "bg": "temp_yaerweite"
+          }
+        ]
+      },
+      "raids": {
+        "status": 1,
+        "stage": 14,
+        "proxy_count": 29,
+        "matched_count": 29,
+        "failed_id": 0,
+        "expected_count": 0,
+        "truncated": false,
+        "records": []
+      }
+    },
+    "operation_siren_map_drag": {
+      "status": 0,
+      "handler_instance_id": 0,
+      "endpoints": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "handler_path": "",
+      "samples": []
+    },
+    "private_quarters_physics": {
+      "schema": "alas-headless.private-colliders/v1",
+      "status": 0,
+      "truncated": false,
+      "error_count": 0,
+      "camera_path": "",
+      "colliders": []
+    }
+  }
+}

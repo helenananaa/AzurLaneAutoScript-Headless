@@ -1,0 +1,26 @@
+diff --git a/module/os/map_fleet_selector.py b/module/os/map_fleet_selector.py
+--- a/module/os/map_fleet_selector.py
++++ b/module/os/map_fleet_selector.py
+@@ -196,6 +196,11 @@
+                         opened, selected = refresh_selector_state()
+                         if opened:
+                             return
++                        if selected == index:
++                            # The requested fleet arrived while the dropdown
++                            # was closing. Its fresh typed state is already
++                            # the original selection postcondition.
++                            return True
+                         if selected != current:
+                             raise SemanticGateClosed(
+                                 'Operation Siren fleet changed while opening selector'
+@@ -208,7 +213,9 @@
+                 )
+ 
+             for attempt in range(3):
+-                open_selector()
++                if open_selector():
++                    logger.info(f'Ensure fleet to be {index}')
++                    return True
+                 semantic_session.click_operation_siren_fleet_selector(index)
+                 for _ in range(6):
+                     opened, selected = refresh_selector_state()

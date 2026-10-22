@@ -25,10 +25,13 @@ from ...semantic_oracle import (
     CampaignMapState,
     ObserverTransportError,
     SemanticGateClosed,
+    SemanticTargetMissing,
     request_observer_state,
 )
 from .adapter import AlasSemanticAdapter
 from .contracts import CampaignMapTargetRecheckProof
+from ...oracle.errors import SemanticExerciseHpNotReady
+from ...oracle.surfaces import ObservationSurface
 
 
 class SessionCombatPorts:
@@ -44,21 +47,21 @@ class SessionCombatPorts:
             )
             manifest = load_alas_combat_observer_manifest(path)
             if manifest.driver_revision != self.driver_revision:
-                compatibility = (
-                    manifest.driver_revision,
-                    self.driver_revision,
-                )
-                if compatibility not in self._LIVE_COMBAT_DRIVER_COMPATIBILITY:
-                    raise SemanticGateClosed(
-                        "combat observer manifest is not qualified for the "
-                        "active driver revision"
+                # The retained manifest qualifies selector evidence at its
+                # baseline. Runtime compatibility is decided by fresh endpoint
+                # schemas and those selectors, not a list of successor hashes.
+                # Keep every endpoint bound to the configured active driver;
+                # input still proves package/PID, freshness, blockers, unique
+                # actionable targets and the existing action contract.
+                if self.trace is not None:
+                    self.trace.emit(
+                        "semantic.combat.compatibility",
+                        fields={
+                            "status": "best-effort",
+                            "baseline_driver_revision": manifest.driver_revision,
+                            "active_driver_revision": self.driver_revision,
+                        },
                     )
-                # 506b is the reviewed image-capacity successor of the G27
-                # driver.  It retains the endpoint schemas and Unity selector
-                # contract, while increasing the rolling image reserve needed
-                # by large Operation Siren maps.  Rebind only this exact,
-                # checked compatibility edge so raw endpoint identity remains
-                # pinned to the active runtime below.
                 manifest = replace(
                     manifest,
                     driver_revision=self.driver_revision,
@@ -73,7 +76,7 @@ class SessionCombatPorts:
             or adapter.operation_siren_combat_committed()
         ):
             raise SemanticGateClosed(
-                "live combat observation requires one committed ALAS grid input"
+                "live combat observation requires a committed ALAS combat entry or official auto-search sortie"
             )
         handle = self._runtime_handle
         if handle is None:
@@ -91,9 +94,41 @@ class SessionCombatPorts:
         return snapshot
 
     def _live_combat_visible(self) -> Tuple[str, ...]:
-        return alas_combat_visible_resource_names(
-            self._live_combat_snapshot(), self._live_combat_manifest()
-        )
+        official_state = self._official_auto_search_combat_state(self.open())
+        if official_state == (False, False):
+            # Auto-search's native loops probe optional combat popups before
+            # their map/result checks. The current typed non-combat owner wins
+            # over a still-mounted CombatUI; its dedicated ports remain active.
+            return ()
+        try:
+            return alas_combat_visible_resource_names(
+                self._live_combat_snapshot(), self._live_combat_manifest()
+            )
+        except SemanticGateClosed as exc:
+            adapter = self.open()
+            result_path = ('OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/'
+                           'NewBattleResultStatisticsPage(Clone)/bottom/confirmBtn')
+            if (adapter.meta_beacon_active() and str(exc) ==
+                    'combat action control is not exact top-raycast actionable: '
+                    + result_path + ', raycast_top=False'):
+                state = adapter.oracle.read_state()
+                results = [b for b in state.buttons if b.path == result_path]
+                if (len(results) == 1 and results[0].active_in_hierarchy
+                        and results[0].active_and_enabled
+                        and results[0].raycast_top is False
+                        and results[0].point is not None and results[0].bounds is not None
+                        and results[0].bounds.contains(results[0].point)):
+                    # A covered/mounting statistics control is absent for this
+                    # passive poll. The original loop waits; input still needs
+                    # the independent actionable result proof.
+                    return ()
+                if len(results) == 1 and results[0].actionable:
+                    return alas_combat_visible_resource_names(
+                        self._live_combat_snapshot(), self._live_combat_manifest()
+                    )
+                if not results and adapter.oracle.meta_page_visible():
+                    return ()
+            raise
 
     def _campaign_combat_transition_error(self, exc: Exception) -> bool:
         adapter = self.adapter
@@ -141,9 +176,49 @@ class SessionCombatPorts:
                 return None
             raise
 
+    def _official_auto_search_combat_state(self, adapter: AlasSemanticAdapter):
+        """Classify one ALAS frame, leaving polling and recovery to ALAS.
+
+        Official auto-search keeps its sortie owner across maps, rewards and
+        reconnect prompts. Those surfaces must not turn the retained CombatUI
+        underneath them into another positive combat/loading observation.
+        """
+        if not getattr(adapter, "campaign_auto_search_owned", lambda: False)():
+            return None
+        oracle = adapter._frame_or_live_observation_oracle()
+        state = oracle.read_state()
+        if oracle.observation_surface_present(ObservationSurface.BATTLE_RESULT):
+            return False, False
+        if (oracle.observation_target_present('os/precombat/info/confirm')
+                and oracle.combat_automation_info_visible()
+                and not oracle._blocking_rules(state, 'os/precombat/info/confirm')):
+            # Original auto_search_moving must hand this known information
+            # page to auto_search_combat_execute, whose first handler owns it.
+            # It is preparation, not an unobscured executing battle.
+            return True, False
+        if oracle._blocking_rules(state, "campaign/combat/observation"):
+            return False, False
+        if oracle.daily_combat_visible():
+            return True, True
+        if oracle.daily_battle_loading_visible():
+            return True, False
+        try:
+            surface = oracle.campaign_auto_search_active_state()
+        except SemanticTargetMissing:
+            # A map, retirement page or restored stage is not a combat loader.
+            # Their original handlers own the next observation and decision.
+            return False, False
+        return surface.root_path.endswith("/ChapterPreCombatUI(Clone)"), False
+
     def combat_is_loading(self) -> bool:
         adapter = self.open()
-        oracle = adapter.oracle
+        official_state = self._official_auto_search_combat_state(adapter)
+        if official_state is not None:
+            return official_state[0]
+        # These are PAUSE/loading observations in ALAS' current screenshot
+        # scan. Re-reading live state here both splits that scan and repeats
+        # foreground/state/UI round trips for every combat-loop iteration.
+        oracle = adapter._frame_or_live_observation_oracle()
         if getattr(
             oracle,
             "daily_battle_result_visible",
@@ -151,6 +226,8 @@ class SessionCombatPorts:
         )():
             return False
         if oracle.daily_combat_visible():
+            return True
+        if getattr(oracle, 'daily_battle_loading_visible', lambda: False)():
             return True
         if adapter.campaign_combat_committed():
             try:
@@ -196,17 +273,40 @@ class SessionCombatPorts:
 
     def combat_is_executing(self) -> bool:
         try:
+            adapter = self.open()
+            if getattr(adapter, "_exercise_execution_active", False):
+                # Exercise's native HP daemon follows the pause probe from
+                # this screenshot. Both observations must use its immutable
+                # frame even if the live client has entered result loading.
+                frame = adapter._frame_or_live_observation_oracle()
+                if not frame.daily_combat_visible():
+                    return False
+                try:
+                    frame.exercise_duel_hp()
+                except SemanticExerciseHpNotReady:
+                    # Pause can mount before the duel bars. ALAS owns the next
+                    # screenshot; do not make an HP decision from this frame.
+                    return False
+                return True
+            official_state = self._official_auto_search_combat_state(adapter)
+            if official_state is not None:
+                return official_state[1]
+            oracle = adapter._frame_or_live_observation_oracle()
             if getattr(
-                self.open().oracle,
+                oracle,
                 "daily_battle_result_visible",
                 lambda: False,
             )():
                 return False
-            if self.open().oracle.daily_combat_visible():
+            if oracle.daily_combat_visible():
+                # Native combat loops keep polling PAUSE after their one-time
+                # auto-toggle check. Tie the existing post-combat observation
+                # window to that proven battle, not its much older first scan.
+                self._daily_combat_seen_at = time.monotonic()
                 return True
             if not (
-                self.open().campaign_combat_committed()
-                or self.open().operation_siren_combat_committed()
+                adapter.campaign_combat_committed()
+                or adapter.operation_siren_combat_committed()
             ):
                 return False
             return "PAUSE" in self._live_combat_visible()
@@ -241,14 +341,32 @@ class SessionCombatPorts:
             or adapter.operation_siren_combat_committed()
         ):
             raise SemanticGateClosed(
-                "live combat input requires one committed ALAS grid input"
+                "live combat input requires a committed ALAS combat entry or official auto-search sortie"
             )
+        if adapter.meta_beacon_active() and resource_name == 'BATTLE_STATUS_S':
+            # META's shared grade/Worldboss statistics stack has a reviewed
+            # typed result port; its artwork is not the campaign grade asset.
+            self.refresh_tactical_input_frame()
+            oracle = self.open().oracle
+            receipt = oracle.click_daily_battle_result()
+            self._combat_last_generation = receipt.generation
+            self._combat_last_result_receipt = receipt
+            self._arm_combat_result_transition(adapter)
+            return receipt
         handle = self._runtime_handle
         if handle is None:
             raise SemanticGateClosed("semantic runtime handle is unavailable")
         targets = ALAS_COMBAT_RESOURCE_ACTION_TARGETS.get(resource_name, ())
         if action_name is None and resource_name in targets:
             action_name = resource_name
+        # This path dispatches through the runtime handle after proving two
+        # independent fresh combat snapshots. It bypasses Oracle's ordinary
+        # input preflight, so release ALAS' prior screenshot lease before it
+        # can send input. The next original loop must observe the destination,
+        # including when the backend raises during an uncertain dispatch.
+        frame_clock = getattr(self, '_frame_clock', None)
+        if frame_clock is not None and frame_clock.current_frame_id is not None:
+            frame_clock.invalidate(frame_clock.current_frame_id)
         commit = commit_alas_combat_resource_action_for_evidence(
             self,
             self._live_combat_manifest(),
@@ -279,6 +397,8 @@ class SessionCombatPorts:
         ):
             self._combat_last_result_receipt = commit.receipt
             self._arm_combat_result_transition(adapter)
+            if commit.action_name == "GET_ITEMS_1":
+                self._combat_reward_close_pending = commit.receipt
         return commit.receipt
 
     def _arm_combat_result_transition(
@@ -336,22 +456,50 @@ class SessionCombatPorts:
         """Advance one exact pause/leave/confirm step during task handoff."""
 
         adapter = self.open()
-        if not adapter.operation_siren_combat_committed():
+        startup_recovery = bool(
+            getattr(adapter, '_operation_siren_startup_search_provisional', False)
+            and time.monotonic() <= adapter._operation_siren_entry_transition_until
+        )
+        if not (adapter.operation_siren_combat_committed() or startup_recovery):
             return False
-        oracle = adapter.oracle
+        oracle = adapter._frame_or_live_observation_oracle()
+        action = None
         if oracle.exercise_combat_quit_confirm_visible():
-            oracle.click_exercise_combat_quit_confirm()
-            return True
-        if oracle.exercise_combat_pause_menu_visible():
-            oracle.click_exercise_combat_leave()
-            return True
-        if oracle.combat_pause_visible():
-            oracle.click_combat_pause()
-            return True
-        return False
+            action = 'click_exercise_combat_quit_confirm'
+        elif oracle.exercise_combat_pause_menu_visible():
+            action = 'click_exercise_combat_leave'
+        elif oracle.combat_pause_visible():
+            action = 'click_combat_pause'
+        if action is None:
+            return False
+        receipts = getattr(self, '_operation_siren_interrupt_receipts', None)
+        previous = receipts[-1].semantic_id if receipts else None
+        if (previous == 'exercise/combat/quit-confirm'
+                or previous == 'exercise/combat/leave' and action != 'click_exercise_combat_quit_confirm'
+                or previous == 'combat/pause' and action == 'click_combat_pause'):
+            # A committed input can leave its source mounted during the fade.
+            # Native interrupt owns the next screenshot; never toggle pause
+            # again or cancel a submitted leave/confirmation.
+            return False
+        fresh = adapter._fresh_input_oracle()
+        visible = {'click_combat_pause': 'combat_pause_visible',
+                   'click_exercise_combat_leave': 'exercise_combat_pause_menu_visible',
+                   'click_exercise_combat_quit_confirm': 'exercise_combat_quit_confirm_visible'}[action]
+        if not getattr(fresh, visible)():
+            return False
+        receipt = getattr(fresh, action)()
+        if receipts is None:
+            receipts = self._operation_siren_interrupt_receipts = []
+        receipts.append(receipt)
+        return True
 
     def begin_operation_siren_boss_combat(self) -> None:
         self.open().begin_operation_siren_boss_combat()
+        # A previous boss's accepted result must not retire this newly
+        # proven encounter while its departing map is still observable.
+        self._combat_last_result_receipt = None
+        self._combat_result_observation = None
+        self._combat_result_transition_until = 0.0
 
     def mark_operation_siren_combat_fleet_defeated(self) -> None:
         self.open().mark_operation_siren_combat_fleet_defeated()
@@ -374,6 +522,12 @@ class SessionCombatPorts:
 
     def campaign_combat_committed(self) -> bool:
         return self.open().campaign_combat_committed()
+
+    def campaign_movement_completed(self) -> bool:
+        return self.open().campaign_movement_completed()
+
+    def finish_campaign_movement(self, battle_count: int):
+        return self.open().finish_campaign_movement(battle_count)
 
     def campaign_combat_active(self) -> bool:
         return self.open().campaign_combat_active()
@@ -427,6 +581,10 @@ class SessionCombatPorts:
     def click_daily_precombat_start(self) -> ActionReceipt:
         self.refresh_tactical_input_frame()
         adapter = self.open()
+        if getattr(self, '_meta_assist_active', False):
+            if not adapter._meta_assist_active:
+                adapter.begin_meta_assist()
+            return adapter.click_meta_precombat_start()
         if self._meta_beacon_active:
             if not adapter.meta_beacon_active():
                 adapter.begin_meta_beacon()
@@ -444,7 +602,7 @@ class SessionCombatPorts:
             or getattr(adapter, "_exercise_execution_active", False)
         ):
             return False
-        oracle = adapter.oracle
+        oracle = self._combat_result_action_oracle(adapter)
         return bool(
             oracle.daily_battle_result_visible()
             or oracle.campaign_battle_reward_visible()
@@ -487,6 +645,8 @@ class SessionCombatPorts:
                 or oracle.daily_page_visible()
                 or oracle.main_page_visible()
                 or oracle.event_campaign_page_visible()
+                or oracle.meta_page_visible()
+                or oracle.exercise_page_visible()
             ):
                 return tuple(receipts)
             if current_raid_event is not None:

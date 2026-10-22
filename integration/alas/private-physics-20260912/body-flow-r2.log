@@ -1,0 +1,53 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 15:14:11.241 │ [Server] cn                                 
+read: ./config\semantic_e2e.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 15:14:11.250 │ Bind task ['General', 'Alas']               
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 15:14:11.254 │ DEVICE                                      
+INFO     2026-09-12 15:14:11.255 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 15:14:11.257 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 15:14:11.259 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 15:14:11.262 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 15:14:11.264 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 15:14:11.267 │ emulator-5580                               
+INFO     2026-09-12 15:14:11.270 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 15:14:11.272 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 15:14:11.282 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 15:14:11.284 │ [Server] cn                                 
+WARNING  2026-09-12 15:14:11.287 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 15:14:11.289 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 15:14:11.358 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 15:14:11.360 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 15:14:11.363 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 15:14:11.364 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 15:14:12.970 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 15:14:12.973 │ handle_app_login                            
+INFO     2026-09-12 15:14:12.975 │ Screenshot interval set to 1.0s             
+INFO     2026-09-12 15:14:12.977 │ <<< APP LOGIN >>>                           
+INFO     2026-09-12 15:14:13.028 │ [Device Orientation] 0 (Normal)             
+INFO     2026-09-12 15:14:17.583 │ Semantic click login/enter @                
+         UICamera/Canvas/UIMain/LoginUI2(Clone)                                
+INFO     2026-09-12 15:14:17.585 │ Login success                               
+INFO     2026-09-12 15:14:54.317 │ Login to main confirm                       
+INFO     2026-09-12 15:14:54.320 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 15:15:59.368 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 15:16:01.537 │ <<< UI CLICK >>>                            
+INFO     2026-09-12 15:16:05.067 │ Semantic click private-quarters/room/back @ 
+         UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/btn_back           
+PASSED True

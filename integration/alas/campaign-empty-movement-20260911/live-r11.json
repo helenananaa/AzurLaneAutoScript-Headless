@@ -1,0 +1,34 @@
+{
+  "schema": "alas-headless.war-archives-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-09-11T10:05:54.366268Z",
+  "finished_at": "2026-09-11T10:08:15.962196Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "war_archives_20190321_en",
+  "stage": "A1",
+  "mode": "normal",
+  "resumed_map_before": false,
+  "navigation": [
+    {
+      "event": "war_archives_20190321_en",
+      "category": "ex",
+      "semantic_id": "archive/campaign/war_archives_20190321_en",
+      "generation": 491867,
+      "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item/bg/icon"
+    }
+  ],
+  "entry_confirmations": [],
+  "data_key_observations": [
+    {
+      "current": 285,
+      "total": 300
+    }
+  ],
+  "error": "SystemExit: 1",
+  "movement_proofs": [],
+  "battle_proofs": [],
+  "max_probe_battles": 1,
+  "traceback": "Traceback (most recent call last):\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\alas.py\", line 74, in run\n    self.__getattribute__(command)()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\alas.py\", line 273, in war_archives\n    CampaignWarArchives(config=self.config, device=self.device).run(\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\war_archives\\war_archives.py\", line 57, in run\n    super().run(name, folder, mode, total)\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\campaign\\run.py\", line 452, in run\n    return self._run(name, folder=folder, mode=mode, total=total)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\campaign\\run.py\", line 576, in _run\n    self.campaign.run()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\campaign\\campaign_base.py\", line 234, in run\n    self.enter_map(self.ENTRANCE, mode=self.config.Campaign_Mode)\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\map\\map_operation.py\", line 142, in enter_map\n    and self.handle_popup_confirm('CAMPAIGN_RECONNECT')\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\handler\\info_handler.py\", line 119, in handle_popup_confirm\n    self.device.click(POPUP_CONFIRM)\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\device\\control.py\", line 57, in click\n    receipt = semantic_adapter.click(button)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\python\\alas_headless\\adapter\\semantic\\session_dispatch.py\", line 603, in click\n    return self.open().click(button)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\python\\alas_headless\\adapter\\semantic\\dispatch.py\", line 219, in click\n    result = self._click_mapped(name, semantic_id)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\python\\alas_headless\\adapter\\semantic\\dispatch_actions.py\", line 667, in _click_mapped\n    receipt = self.oracle.click(semantic_id)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\python\\alas_headless\\oracle\\actions.py\", line 78, in click\n    raise SemanticGateClosed(\nalas_headless.oracle.errors.SemanticGateClosed: network reconnect prompt identity is not proven\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\scripts\\python\\run_alas_war_archives_live_validation.py\", line 187, in run\n    result_value = instance.run(\"war_archives\")\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\alas.py\", line 144, in run\n    exit(1)\n  File \"<frozen _sitebuiltins>\", line 26, in __call__\nSystemExit: 1\n",
+  "raw_input_fallback_used": false
+}

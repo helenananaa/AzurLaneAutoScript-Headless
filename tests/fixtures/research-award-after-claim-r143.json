@@ -1,0 +1,6945 @@
+{
+  "buttons": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.buttons/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 20702,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 344104,
+    "generation": 27018,
+    "snapshot_monotonic_ns": 24996945077653,
+    "response_monotonic_ns": 24997334995054,
+    "age_ms": 389,
+    "button_count": 24,
+    "truncated": false,
+    "error_count": 0,
+    "buttons": [
+      {
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg",
+        "canvas": "AwardInfoUI(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -4911962,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 5.689,
+          "y": 1.467,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -102.0,
+          "y": -206.0,
+          "width": 204.0,
+          "height": 206.0
+        },
+        "screen_point": {
+          "x": 896.0,
+          "y": 426.0
+        },
+        "adb_point": {
+          "x": 896.0,
+          "y": 294.0
+        },
+        "screen_bounds": {
+          "left": 845.0,
+          "bottom": 323.0,
+          "right": 947.0,
+          "top": 426.0
+        },
+        "adb_bounds": {
+          "left": 845.0,
+          "top": 294.0,
+          "right": 947.0,
+          "bottom": 397.0
+        }
+      },
+      {
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg",
+        "canvas": "AwardInfoUI(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -4911754,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 2.844,
+          "y": 1.467,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -102.0,
+          "y": -206.0,
+          "width": 204.0,
+          "height": 206.0
+        },
+        "screen_point": {
+          "x": 768.0,
+          "y": 426.0
+        },
+        "adb_point": {
+          "x": 768.0,
+          "y": 294.0
+        },
+        "screen_bounds": {
+          "left": 717.0,
+          "bottom": 323.0,
+          "right": 819.0,
+          "top": 426.0
+        },
+        "adb_bounds": {
+          "left": 717.0,
+          "top": 294.0,
+          "right": 819.0,
+          "bottom": 397.0
+        }
+      },
+      {
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg",
+        "canvas": "AwardInfoUI(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -4911546,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 0.0,
+          "y": 1.467,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -102.0,
+          "y": -206.0,
+          "width": 204.0,
+          "height": 206.0
+        },
+        "screen_point": {
+          "x": 640.0,
+          "y": 426.0
+        },
+        "adb_point": {
+          "x": 640.0,
+          "y": 294.0
+        },
+        "screen_bounds": {
+          "left": 589.0,
+          "bottom": 323.0,
+          "right": 691.0,
+          "top": 426.0
+        },
+        "adb_bounds": {
+          "left": 589.0,
+          "top": 294.0,
+          "right": 691.0,
+          "bottom": 397.0
+        }
+      },
+      {
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg",
+        "canvas": "AwardInfoUI(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -4911338,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -2.844,
+          "y": 1.467,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -102.0,
+          "y": -206.0,
+          "width": 204.0,
+          "height": 206.0
+        },
+        "screen_point": {
+          "x": 512.0,
+          "y": 426.0
+        },
+        "adb_point": {
+          "x": 512.0,
+          "y": 294.0
+        },
+        "screen_bounds": {
+          "left": 461.0,
+          "bottom": 323.0,
+          "right": 563.0,
+          "top": 426.0
+        },
+        "adb_bounds": {
+          "left": 461.0,
+          "top": 294.0,
+          "right": 563.0,
+          "bottom": 397.0
+        }
+      },
+      {
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg",
+        "canvas": "AwardInfoUI(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -4911130,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -5.689,
+          "y": 1.467,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -102.0,
+          "y": -206.0,
+          "width": 204.0,
+          "height": 206.0
+        },
+        "screen_point": {
+          "x": 384.0,
+          "y": 426.0
+        },
+        "adb_point": {
+          "x": 384.0,
+          "y": 294.0
+        },
+        "screen_bounds": {
+          "left": 333.0,
+          "bottom": 323.0,
+          "right": 435.0,
+          "top": 426.0
+        },
+        "adb_bounds": {
+          "left": 333.0,
+          "top": 294.0,
+          "right": 435.0,
+          "bottom": 397.0
+        }
+      },
+      {
+        "name": "item_tpl",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/item_container/2/item_tpl",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -4910508,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 4.967,
+          "y": -3.869,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -36.0,
+          "y": -36.0,
+          "width": 72.0,
+          "height": 72.0
+        },
+        "screen_point": {
+          "x": 863.5,
+          "y": 185.9
+        },
+        "adb_point": {
+          "x": 863.5,
+          "y": 534.1
+        },
+        "screen_bounds": {
+          "left": 829.305,
+          "bottom": 151.705,
+          "right": 897.695,
+          "top": 220.095
+        },
+        "adb_bounds": {
+          "left": 829.305,
+          "top": 499.905,
+          "right": 897.695,
+          "bottom": 568.295
+        }
+      },
+      {
+        "name": "item_tpl",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/item_container/1/item_tpl",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -4910460,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 5.832,
+          "y": -2.18,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -36.0,
+          "y": -36.0,
+          "width": 72.0,
+          "height": 72.0
+        },
+        "screen_point": {
+          "x": 902.45,
+          "y": 261.9
+        },
+        "adb_point": {
+          "x": 902.45,
+          "y": 458.1
+        },
+        "screen_bounds": {
+          "left": 868.255,
+          "bottom": 227.705,
+          "right": 936.645,
+          "top": 296.095
+        },
+        "adb_bounds": {
+          "left": 868.255,
+          "top": 423.905,
+          "right": 936.645,
+          "bottom": 492.295
+        }
+      },
+      {
+        "name": "item_tpl",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/item_container/1/item_tpl",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -4910420,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 4.101,
+          "y": -2.18,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -36.0,
+          "y": -36.0,
+          "width": 72.0,
+          "height": 72.0
+        },
+        "screen_point": {
+          "x": 824.55,
+          "y": 261.9
+        },
+        "adb_point": {
+          "x": 824.55,
+          "y": 458.1
+        },
+        "screen_bounds": {
+          "left": 790.35,
+          "bottom": 227.7,
+          "right": 858.75,
+          "top": 296.1
+        },
+        "adb_bounds": {
+          "left": 790.35,
+          "top": 423.9,
+          "right": 858.75,
+          "bottom": 492.3
+        }
+      },
+      {
+        "name": "item_tpl",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/item_container/2/item_tpl",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -4910140,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -0.106,
+          "y": -3.869,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -36.0,
+          "y": -36.0,
+          "width": 72.0,
+          "height": 72.0
+        },
+        "screen_point": {
+          "x": 635.25,
+          "y": 185.9
+        },
+        "adb_point": {
+          "x": 635.25,
+          "y": 534.1
+        },
+        "screen_bounds": {
+          "left": 601.055,
+          "bottom": 151.705,
+          "right": 669.445,
+          "top": 220.095
+        },
+        "adb_bounds": {
+          "left": 601.055,
+          "top": 499.905,
+          "right": 669.445,
+          "bottom": 568.295
+        }
+      },
+      {
+        "name": "item_tpl",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/item_container/1/item_tpl",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -4910092,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 0.76,
+          "y": -2.18,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -36.0,
+          "y": -36.0,
+          "width": 72.0,
+          "height": 72.0
+        },
+        "screen_point": {
+          "x": 674.2,
+          "y": 261.9
+        },
+        "adb_point": {
+          "x": 674.2,
+          "y": 458.1
+        },
+        "screen_bounds": {
+          "left": 640.005,
+          "bottom": 227.705,
+          "right": 708.395,
+          "top": 296.095
+        },
+        "adb_bounds": {
+          "left": 640.005,
+          "top": 423.905,
+          "right": 708.395,
+          "bottom": 492.295
+        }
+      },
+      {
+        "name": "item_tpl",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/item_container/1/item_tpl",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -4910052,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -0.971,
+          "y": -2.18,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -36.0,
+          "y": -36.0,
+          "width": 72.0,
+          "height": 72.0
+        },
+        "screen_point": {
+          "x": 596.3,
+          "y": 261.9
+        },
+        "adb_point": {
+          "x": 596.3,
+          "y": 458.1
+        },
+        "screen_bounds": {
+          "left": 562.1,
+          "bottom": 227.7,
+          "right": 630.5,
+          "top": 296.1
+        },
+        "adb_bounds": {
+          "left": 562.1,
+          "top": 423.9,
+          "right": 630.5,
+          "bottom": 492.3
+        }
+      },
+      {
+        "name": "item_tpl",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/item_container/2/item_tpl",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -4909772,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -5.178,
+          "y": -3.869,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -36.0,
+          "y": -36.0,
+          "width": 72.0,
+          "height": 72.0
+        },
+        "screen_point": {
+          "x": 407.0,
+          "y": 185.9
+        },
+        "adb_point": {
+          "x": 407.0,
+          "y": 534.1
+        },
+        "screen_bounds": {
+          "left": 372.805,
+          "bottom": 151.705,
+          "right": 441.195,
+          "top": 220.095
+        },
+        "adb_bounds": {
+          "left": 372.805,
+          "top": 499.905,
+          "right": 441.195,
+          "bottom": 568.295
+        }
+      },
+      {
+        "name": "item_tpl",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/item_container/1/item_tpl",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -4909724,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -4.312,
+          "y": -2.18,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -36.0,
+          "y": -36.0,
+          "width": 72.0,
+          "height": 72.0
+        },
+        "screen_point": {
+          "x": 445.95,
+          "y": 261.9
+        },
+        "adb_point": {
+          "x": 445.95,
+          "y": 458.1
+        },
+        "screen_bounds": {
+          "left": 411.755,
+          "bottom": 227.705,
+          "right": 480.145,
+          "top": 296.095
+        },
+        "adb_bounds": {
+          "left": 411.755,
+          "top": 423.905,
+          "right": 480.145,
+          "bottom": 492.295
+        }
+      },
+      {
+        "name": "item_tpl",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/item_container/1/item_tpl",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -4909684,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -6.043,
+          "y": -2.18,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -36.0,
+          "y": -36.0,
+          "width": 72.0,
+          "height": 72.0
+        },
+        "screen_point": {
+          "x": 368.05,
+          "y": 261.9
+        },
+        "adb_point": {
+          "x": 368.05,
+          "y": 458.1
+        },
+        "screen_bounds": {
+          "left": 333.85,
+          "bottom": 227.7,
+          "right": 402.25,
+          "top": 296.1
+        },
+        "adb_bounds": {
+          "left": 333.85,
+          "top": 423.9,
+          "right": 402.25,
+          "bottom": 492.3
+        }
+      },
+      {
+        "name": "item_tpl",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/item_container/2/item_tpl",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -4907174,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -10.25,
+          "y": -3.869,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -36.0,
+          "y": -36.0,
+          "width": 72.0,
+          "height": 72.0
+        },
+        "screen_point": {
+          "x": 178.75,
+          "y": 185.9
+        },
+        "adb_point": {
+          "x": 178.75,
+          "y": 534.1
+        },
+        "screen_bounds": {
+          "left": 144.555,
+          "bottom": 151.705,
+          "right": 212.945,
+          "top": 220.095
+        },
+        "adb_bounds": {
+          "left": 144.555,
+          "top": 499.905,
+          "right": 212.945,
+          "bottom": 568.295
+        }
+      },
+      {
+        "name": "item_tpl",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/item_container/1/item_tpl",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -4907126,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -9.384,
+          "y": -2.18,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -36.0,
+          "y": -36.0,
+          "width": 72.0,
+          "height": 72.0
+        },
+        "screen_point": {
+          "x": 217.7,
+          "y": 261.9
+        },
+        "adb_point": {
+          "x": 217.7,
+          "y": 458.1
+        },
+        "screen_bounds": {
+          "left": 183.505,
+          "bottom": 227.705,
+          "right": 251.895,
+          "top": 296.095
+        },
+        "adb_bounds": {
+          "left": 183.505,
+          "top": 423.905,
+          "right": 251.895,
+          "bottom": 492.295
+        }
+      },
+      {
+        "name": "item_tpl",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/item_container/1/item_tpl",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -4907086,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -11.116,
+          "y": -2.18,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -36.0,
+          "y": -36.0,
+          "width": 72.0,
+          "height": 72.0
+        },
+        "screen_point": {
+          "x": 139.8,
+          "y": 261.9
+        },
+        "adb_point": {
+          "x": 139.8,
+          "y": 458.1
+        },
+        "screen_bounds": {
+          "left": 105.6,
+          "bottom": 227.7,
+          "right": 174.0,
+          "top": 296.1
+        },
+        "adb_bounds": {
+          "left": 105.6,
+          "top": 423.9,
+          "right": 174.0,
+          "bottom": 492.3
+        }
+      },
+      {
+        "name": "option",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/blur_panel/adapt/top/option",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -4907496,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 13.079,
+          "y": 7.129,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -46.0,
+          "y": -53.5,
+          "width": 92.0,
+          "height": 107.0
+        },
+        "screen_point": {
+          "x": 1228.539,
+          "y": 680.786
+        },
+        "adb_point": {
+          "x": 1228.539,
+          "y": 39.214
+        },
+        "screen_bounds": {
+          "left": 1197.872,
+          "bottom": 645.119,
+          "right": 1259.207,
+          "top": 716.454
+        },
+        "adb_bounds": {
+          "left": 1197.872,
+          "top": 3.546,
+          "right": 1259.207,
+          "bottom": 74.881
+        }
+      },
+      {
+        "name": "back",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/blur_panel/adapt/top/back",
+        "canvas": "Canvas",
+        "flags": 3583,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": false,
+        "canvas_render_mode": 1,
+        "instance_id": -4907470,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -12.953,
+          "y": 6.785,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -65.255,
+          "y": -55.7,
+          "width": 130.51,
+          "height": 111.4
+        },
+        "screen_point": {
+          "x": 57.129,
+          "y": 665.314
+        },
+        "adb_point": {
+          "x": 57.129,
+          "y": 54.686
+        },
+        "screen_bounds": {
+          "left": 0.091,
+          "bottom": 608.276,
+          "right": 114.168,
+          "top": 722.353
+        },
+        "adb_bounds": {
+          "left": 0.091,
+          "top": -2.353,
+          "right": 114.168,
+          "bottom": 111.724
+        }
+      },
+      {
+        "name": "close",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close",
+        "canvas": "AwardInfoUI(Clone)",
+        "flags": 7679,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "canvas_render_mode": 1,
+        "instance_id": -43094,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 0.0,
+          "y": -2.713,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -113.0,
+          "y": -25.0,
+          "width": 226.0,
+          "height": 50.0
+        },
+        "screen_point": {
+          "x": 640.0,
+          "y": 237.933
+        },
+        "adb_point": {
+          "x": 640.0,
+          "y": 482.067
+        },
+        "screen_bounds": {
+          "left": 564.667,
+          "bottom": 221.267,
+          "right": 715.333,
+          "top": 254.6
+        },
+        "adb_bounds": {
+          "left": 564.667,
+          "top": 465.4,
+          "right": 715.333,
+          "bottom": 498.733
+        }
+      },
+      {
+        "name": "AwardInfoUI(Clone)",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)",
+        "canvas": "AwardInfoUI(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -42988,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -960.0,
+          "y": -540.0,
+          "width": 1920.0,
+          "height": 1080.0
+        },
+        "screen_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "screen_bounds": {
+          "left": -0.0,
+          "bottom": 0.0,
+          "right": 1280.0,
+          "top": 720.0
+        },
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        }
+      },
+      {
+        "name": "gem",
+        "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gem",
+        "canvas": "ResPanel(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -37544,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 11.915,
+          "y": 7.216,
+          "z": 10.015
+        },
+        "local_rect": {
+          "x": -275.7,
+          "y": -30.0,
+          "width": 275.7,
+          "height": 60.0
+        },
+        "screen_point": {
+          "x": 1176.167,
+          "y": 684.711
+        },
+        "adb_point": {
+          "x": 1176.167,
+          "y": 35.289
+        },
+        "screen_bounds": {
+          "left": 992.367,
+          "bottom": 664.711,
+          "right": 1176.167,
+          "top": 704.711
+        },
+        "adb_bounds": {
+          "left": 992.367,
+          "top": 15.289,
+          "right": 1176.167,
+          "bottom": 55.289
+        }
+      },
+      {
+        "name": "gold",
+        "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gold",
+        "canvas": "ResPanel(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -37498,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 5.225,
+          "y": 7.216,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -137.85,
+          "y": -30.0,
+          "width": 275.7,
+          "height": 60.0
+        },
+        "screen_point": {
+          "x": 875.133,
+          "y": 684.711
+        },
+        "adb_point": {
+          "x": 875.133,
+          "y": 35.289
+        },
+        "screen_bounds": {
+          "left": 783.233,
+          "bottom": 664.711,
+          "right": 967.033,
+          "top": 704.711
+        },
+        "adb_bounds": {
+          "left": 783.233,
+          "top": 15.289,
+          "right": 967.033,
+          "bottom": 55.289
+        }
+      },
+      {
+        "name": "oil",
+        "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/oil",
+        "canvas": "ResPanel(Clone)",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -37448,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 0.578,
+          "y": 7.216,
+          "z": 10.015
+        },
+        "local_rect": {
+          "x": -137.85,
+          "y": -30.0,
+          "width": 275.7,
+          "height": 60.0
+        },
+        "screen_point": {
+          "x": 666.0,
+          "y": 684.711
+        },
+        "adb_point": {
+          "x": 666.0,
+          "y": 35.289
+        },
+        "screen_bounds": {
+          "left": 574.1,
+          "bottom": 664.711,
+          "right": 757.9,
+          "top": 704.711
+        },
+        "adb_bounds": {
+          "left": 574.1,
+          "top": 15.289,
+          "right": 757.9,
+          "bottom": 55.289
+        }
+      }
+    ]
+  },
+  "snapshot": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 20702,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "abi": "x86_64",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "snapshot_schema": 1,
+    "snapshot_struct_size": 104,
+    "generation": 27018,
+    "scene_generation": 8,
+    "semantic_generation": 2,
+    "snapshot_monotonic_ns": 24996945077653,
+    "response_monotonic_ns": 24997334979194,
+    "age_ms": 389,
+    "observer_tid": 20734,
+    "assembly_count": 129,
+    "semantic_code": 1,
+    "width": 1280,
+    "height": 720,
+    "flags": 15,
+    "observer_attached": false,
+    "main_thread": true,
+    "button_count": 326,
+    "active_button_count": 24,
+    "interactable_button_count": 326,
+    "scene_handle": -76,
+    "ui_stage": 100,
+    "ui_method_mask": 15
+  },
+  "ui": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.ui/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 20702,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 4472768,
+    "generation": 27018,
+    "snapshot_monotonic_ns": 24996945077653,
+    "response_monotonic_ns": 24997552793206,
+    "age_ms": 607,
+    "method_mask": 15,
+    "toggle_count": 0,
+    "text_count": 33,
+    "image_count": 162,
+    "toggle_truncated": false,
+    "text_truncated": false,
+    "image_truncated": false,
+    "error_count": 0,
+    "error_counts": {
+      "toggle": 0,
+      "text": 0,
+      "image": 0,
+      "shared": 0
+    },
+    "skipped_count": 0,
+    "image_source_count": 3058,
+    "image_source_capacity": 16384,
+    "toggles": [],
+    "texts": [
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/name_mask/name",
+        "text": "蓝图：纳希莫夫海军上将",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 758.666,
+          "top": 407.0,
+          "right": 989.666,
+          "bottom": 427.2
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/count",
+        "text": "1",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 929.75,
+          "top": 369.25,
+          "right": 936.5,
+          "bottom": 391.0
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/name_mask/name",
+        "text": "双联152mm主炮T3设计图",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 639.0,
+          "top": 407.0,
+          "right": 885.75,
+          "bottom": 427.2
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/count",
+        "text": "1",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 801.75,
+          "top": 369.25,
+          "right": 808.5,
+          "bottom": 391.0
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/name_mask/name",
+        "text": "410mm连装炮T3设计图",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 587.167,
+          "top": 407.0,
+          "right": 812.917,
+          "bottom": 427.2
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/count",
+        "text": "1",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 673.75,
+          "top": 369.25,
+          "right": 680.5,
+          "bottom": 391.0
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/name_mask/name",
+        "text": "物资",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 461.0,
+          "top": 407.0,
+          "right": 563.0,
+          "bottom": 427.2
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/count",
+        "text": "62",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 533.75,
+          "top": 369.25,
+          "right": 552.5,
+          "bottom": 391.0
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "name",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/name_mask/name",
+        "text": "特装原型",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 333.0,
+          "top": 407.0,
+          "right": 435.0,
+          "bottom": 427.2
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/count",
+        "text": "2",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 415.5,
+          "top": 369.25,
+          "right": 424.5,
+          "bottom": 391.0
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "time",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/marks/time",
+        "text": "01:30:00",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 780.85,
+          "top": 603.45,
+          "right": 956.6,
+          "bottom": 620.55
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/marks/Text",
+        "text": "<color=#4B7BC6FF>等待进行</color>",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 860.65,
+          "top": 577.753,
+          "right": 957.55,
+          "bottom": 604.828
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "sub_name",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/sub_name",
+        "text": "小型项目",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 749.12,
+          "top": 337.688,
+          "right": 955.745,
+          "bottom": 390.413
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/name_bg/Text",
+        "text": "G-412-MI",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 747.125,
+          "top": 294.32,
+          "right": 952.8,
+          "bottom": 332.32
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "time",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/marks/time",
+        "text": "01:30:00",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 552.6,
+          "top": 603.45,
+          "right": 728.35,
+          "bottom": 620.55
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/marks/Text",
+        "text": "<color=#4B7BC6FF>等待进行</color>",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 632.4,
+          "top": 577.753,
+          "right": 729.3,
+          "bottom": 604.828
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "sub_name",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/sub_name",
+        "text": "小型项目",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 520.87,
+          "top": 337.688,
+          "right": 727.495,
+          "bottom": 390.413
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/name_bg/Text",
+        "text": "G-412-MI",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 518.875,
+          "top": 294.32,
+          "right": 724.55,
+          "bottom": 332.32
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "time",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/marks/time",
+        "text": "02:30:00",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 324.35,
+          "top": 603.45,
+          "right": 500.1,
+          "bottom": 620.55
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/marks/Text",
+        "text": "<color=#4B7BC6FF>等待进行</color>",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 404.15,
+          "top": 577.753,
+          "right": 501.05,
+          "bottom": 604.828
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "sub_name",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/sub_name",
+        "text": "小型项目",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 292.62,
+          "top": 337.688,
+          "right": 499.245,
+          "bottom": 390.413
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/name_bg/Text",
+        "text": "D-740-MI",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 290.625,
+          "top": 294.32,
+          "right": 496.3,
+          "bottom": 332.32
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/blur_panel/adapt/right/btn_award_disable/Text",
+        "text": "领取奖励",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1232.667,
+          "top": 290.167,
+          "right": 1266.0,
+          "bottom": 411.167
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "time",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/marks/time",
+        "text": "00:54:41",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 96.1,
+          "top": 603.45,
+          "right": 271.85,
+          "bottom": 620.55
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/marks/Text",
+        "text": "<color=#4B7BC6FF>进行中</color>",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 200.125,
+          "top": 577.753,
+          "right": 272.8,
+          "bottom": 604.828
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "sub_name",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/sub_name",
+        "text": "小型项目",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 64.37,
+          "top": 337.688,
+          "right": 270.995,
+          "bottom": 390.413
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/name_bg/Text",
+        "text": "Q-368-MI",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 62.375,
+          "top": 294.32,
+          "right": 268.05,
+          "bottom": 332.32
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "gem_value",
+        "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gem/gem_value",
+        "text": "3470",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1048.174,
+          "top": 23.919,
+          "right": 1132.426,
+          "bottom": 44.659
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "gold_value",
+        "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gold/gold_value",
+        "text": "12307",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 832.057,
+          "top": 24.052,
+          "right": 921.409,
+          "bottom": 44.792
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "gold_max_value",
+        "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gold/gold_max_value",
+        "text": "MAX: 108300",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 834.945,
+          "top": -1.308,
+          "right": 941.433,
+          "bottom": 17.619
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "oil_value",
+        "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/oil/oil_value",
+        "text": "14115",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 626.591,
+          "top": 24.586,
+          "right": 715.943,
+          "bottom": 45.326
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "oil_max_value",
+        "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/oil/oil_max_value",
+        "text": "MAX: 17450",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 628.799,
+          "top": -0.961,
+          "right": 732.567,
+          "bottom": 16.606
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "FpsPanel",
+        "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+        "text": "",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 573.333,
+          "top": 0.0,
+          "right": 706.667,
+          "bottom": 34.667
+        }
+      }
+    ],
+    "images": [
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/frame/IconColorful(Clone)/Image",
+        "sprite": "IconColorfulring01",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 848.0,
+          "top": 297.5,
+          "right": 944.0,
+          "bottom": 393.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 896.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image0",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/frame/IconColorful(Clone)/Image0",
+        "sprite": "IconColorfulring02",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 848.0,
+          "top": 297.5,
+          "right": 944.0,
+          "bottom": 393.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 896.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/frame/IconColorful(Clone)/Image",
+        "sprite": "IconColorfulring01",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 336.0,
+          "top": 297.5,
+          "right": 432.0,
+          "bottom": 393.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 384.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image0",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/frame/IconColorful(Clone)/Image0",
+        "sprite": "IconColorfulring02",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 336.0,
+          "top": 297.5,
+          "right": 432.0,
+          "bottom": 393.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 384.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "specialFrame",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/frame/specialFrame",
+        "sprite": "frame_design",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 711.75,
+          "top": 289.25,
+          "right": 817.75,
+          "bottom": 394.75
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 764.75,
+          "y": 342.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "specialFrame",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/frame/specialFrame",
+        "sprite": "frame_design",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 583.75,
+          "top": 289.25,
+          "right": 689.75,
+          "bottom": 394.75
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 636.75,
+          "y": 342.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bonus_catchup",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/bonus_catchup",
+        "sprite": "catchup",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 846.005,
+          "top": 294.005,
+          "right": 945.995,
+          "bottom": 395.495
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 896.0,
+          "y": 344.75
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 848.0,
+          "top": 297.5,
+          "right": 944.0,
+          "bottom": 393.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 896.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/icon",
+        "sprite": "42064",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 849.0,
+          "top": 298.5,
+          "right": 943.0,
+          "bottom": 392.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 896.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg",
+        "sprite": "bg5",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 848.0,
+          "top": 297.5,
+          "right": 944.0,
+          "bottom": 393.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 896.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.101961,
+          "green": 0.117647,
+          "blue": 0.192157,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 847.0,
+          "top": 296.5,
+          "right": 945.0,
+          "bottom": 394.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 896.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/line",
+        "sprite": "line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 857.25,
+          "top": 404.5,
+          "right": 934.75,
+          "bottom": 405.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 896.0,
+          "y": 404.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 845.0,
+          "top": 294.0,
+          "right": 947.0,
+          "bottom": 397.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 896.0,
+          "y": 294.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 720.0,
+          "top": 297.5,
+          "right": 816.0,
+          "bottom": 393.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 768.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/icon",
+        "sprite": "12000",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 721.0,
+          "top": 298.5,
+          "right": 815.0,
+          "bottom": 392.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 768.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg",
+        "sprite": "bg2",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 720.0,
+          "top": 297.5,
+          "right": 816.0,
+          "bottom": 393.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 768.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.101961,
+          "green": 0.117647,
+          "blue": 0.192157,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 719.0,
+          "top": 296.5,
+          "right": 817.0,
+          "bottom": 394.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 768.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/line",
+        "sprite": "line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 729.25,
+          "top": 404.5,
+          "right": 806.75,
+          "bottom": 405.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 768.0,
+          "y": 404.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 717.0,
+          "top": 294.0,
+          "right": 819.0,
+          "bottom": 397.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 768.0,
+          "y": 294.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 592.0,
+          "top": 297.5,
+          "right": 688.0,
+          "bottom": 393.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/icon",
+        "sprite": "34100",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 593.0,
+          "top": 298.5,
+          "right": 687.0,
+          "bottom": 392.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg",
+        "sprite": "bg3",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 592.0,
+          "top": 297.5,
+          "right": 688.0,
+          "bottom": 393.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.101961,
+          "green": 0.117647,
+          "blue": 0.192157,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 591.0,
+          "top": 296.5,
+          "right": 689.0,
+          "bottom": 394.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/line",
+        "sprite": "line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 601.25,
+          "top": 404.5,
+          "right": 678.75,
+          "bottom": 405.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 404.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 589.0,
+          "top": 294.0,
+          "right": 691.0,
+          "bottom": 397.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 294.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.741176,
+          "green": 0.741176,
+          "blue": 0.741176,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 464.0,
+          "top": 297.5,
+          "right": 560.0,
+          "bottom": 393.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 512.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/icon",
+        "sprite": "gold",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 465.0,
+          "top": 298.5,
+          "right": 559.0,
+          "bottom": 392.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 512.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg",
+        "sprite": "bg1",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 464.0,
+          "top": 297.5,
+          "right": 560.0,
+          "bottom": 393.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 512.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.101961,
+          "green": 0.117647,
+          "blue": 0.192157,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 463.0,
+          "top": 296.5,
+          "right": 561.0,
+          "bottom": 394.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 512.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/line",
+        "sprite": "line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 473.25,
+          "top": 404.5,
+          "right": 550.75,
+          "bottom": 405.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 512.0,
+          "y": 404.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 461.0,
+          "top": 294.0,
+          "right": 563.0,
+          "bottom": 397.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 512.0,
+          "y": 294.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 336.0,
+          "top": 297.5,
+          "right": 432.0,
+          "bottom": 393.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 384.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg/icon",
+        "sprite": "specialarmor_prt",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 337.0,
+          "top": 298.5,
+          "right": 431.0,
+          "bottom": 392.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 384.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/icon_bg",
+        "sprite": "bg5",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 336.0,
+          "top": 297.5,
+          "right": 432.0,
+          "bottom": 393.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 384.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/bg",
+        "sprite": "white_dot",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.101961,
+          "green": 0.117647,
+          "blue": 0.192157,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 335.0,
+          "top": 296.5,
+          "right": 433.0,
+          "bottom": 394.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 384.0,
+          "y": 345.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/line",
+        "sprite": "line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 345.25,
+          "top": 404.5,
+          "right": 422.75,
+          "bottom": 405.5
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 384.0,
+          "y": 404.5
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg",
+        "sprite": "icon_frame_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 333.0,
+          "top": 294.0,
+          "right": 435.0,
+          "bottom": 397.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 384.0,
+          "y": 294.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image (2)",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/5/empty/Image (2)",
+        "sprite": "card_empty_line_down",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1107.167,
+          "top": 417.0,
+          "right": 1193.167,
+          "bottom": 647.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1193.167,
+          "y": 647.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image (1)",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/5/empty/Image (1)",
+        "sprite": "card_empty_line_up",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 994.5,
+          "top": 115.667,
+          "right": 1073.833,
+          "bottom": 327.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 994.5,
+          "y": 115.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/5/empty/Image",
+        "sprite": "card_empty_mark",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 998.5,
+          "top": 328.667,
+          "right": 1194.5,
+          "bottom": 417.333
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1096.5,
+          "y": 373.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "empty",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/5/empty",
+        "sprite": "card_empty_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 994.5,
+          "top": 115.667,
+          "right": 1198.5,
+          "bottom": 652.333
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1096.5,
+          "y": 384.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "mask",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/mask",
+        "sprite": "card_mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 749.613,
+          "top": 114.962,
+          "right": 962.947,
+          "bottom": 645.628
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 856.28,
+          "y": 380.295
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/top/label/text",
+        "sprite": "tag_g",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 797.76,
+          "top": 129.685,
+          "right": 874.71,
+          "bottom": 147.735
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 836.235,
+          "y": 138.71
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "version",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/top/label/version",
+        "sprite": "version_9",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 759.76,
+          "top": 125.885,
+          "right": 785.41,
+          "bottom": 151.535
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 772.585,
+          "y": 138.71
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "label",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/top/label",
+        "sprite": "tag_red",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 750.735,
+          "top": 115.91,
+          "right": 891.335,
+          "bottom": 161.51
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 821.035,
+          "y": 138.71
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/top/pick_up/Image",
+        "sprite": "text_pick_up",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 888.675,
+          "top": 119.33,
+          "right": 957.075,
+          "bottom": 130.73
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 957.075,
+          "y": 125.03
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "pick_up",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/top/pick_up",
+        "sprite": "bg_pick_up",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.945098,
+          "green": 0.372549,
+          "blue": 0.203922,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 766.125,
+          "top": 115.15,
+          "right": 962.775,
+          "bottom": 134.91
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 864.45,
+          "y": 125.03
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blue",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/marks/line/blue",
+        "sprite": "status_bg_blue",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 780.85,
+          "top": 609.15,
+          "right": 970.85,
+          "bottom": 620.55
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 875.85,
+          "y": 620.55
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/item_container/2/item_tpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.74902,
+          "green": 0.639216,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 829.305,
+          "top": 499.905,
+          "right": 897.695,
+          "bottom": 568.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 863.5,
+          "y": 534.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/item_container/2/item_tpl/icon_bg/icon",
+        "sprite": "55000",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 830.018,
+          "top": 500.618,
+          "right": 896.982,
+          "bottom": 567.583
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 863.5,
+          "y": 534.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/item_container/2/item_tpl/icon_bg",
+        "sprite": "bg3",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 829.305,
+          "top": 499.905,
+          "right": 897.695,
+          "bottom": 568.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 863.5,
+          "y": 534.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/item_container/2/item_tpl/bg",
+        "sprite": "",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 829.305,
+          "top": 499.905,
+          "right": 897.695,
+          "bottom": 568.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 863.5,
+          "y": 534.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/item_container/1/item_tpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 0.905882,
+          "blue": 0.262745,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 868.255,
+          "top": 423.905,
+          "right": 936.645,
+          "bottom": 492.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 902.45,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/item_container/1/item_tpl/icon_bg/icon",
+        "sprite": "55000",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 868.968,
+          "top": 424.617,
+          "right": 935.932,
+          "bottom": 491.582
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 902.45,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/item_container/1/item_tpl/icon_bg",
+        "sprite": "bg4",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 868.255,
+          "top": 423.905,
+          "right": 936.645,
+          "bottom": 492.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 902.45,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/item_container/1/item_tpl/bg",
+        "sprite": "",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 868.255,
+          "top": 423.905,
+          "right": 936.645,
+          "bottom": 492.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 902.45,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/item_container/1/item_tpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 0.905882,
+          "blue": 0.262745,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 790.35,
+          "top": 423.9,
+          "right": 858.75,
+          "bottom": 492.3
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 824.55,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/item_container/1/item_tpl/icon_bg/icon",
+        "sprite": "52001",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 791.062,
+          "top": 424.613,
+          "right": 858.037,
+          "bottom": 491.587
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 824.55,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/item_container/1/item_tpl/icon_bg",
+        "sprite": "bg4",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 790.35,
+          "top": 423.9,
+          "right": 858.75,
+          "bottom": 492.3
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 824.55,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/item_container/1/item_tpl/bg",
+        "sprite": "",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 790.35,
+          "top": 423.9,
+          "right": 858.75,
+          "bottom": 492.3
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 824.55,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame/icon_mask/icon",
+        "sprite": "gold_1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 834.051,
+          "top": 152.865,
+          "right": 983.201,
+          "bottom": 281.115
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 968.286,
+          "y": 197.753
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/4/frame",
+        "sprite": "1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 766.125,
+          "top": 115.15,
+          "right": 970.375,
+          "bottom": 652.85
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 868.25,
+          "y": 384.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "mask",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/mask",
+        "sprite": "card_mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 521.363,
+          "top": 114.962,
+          "right": 734.697,
+          "bottom": 645.628
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 628.03,
+          "y": 380.295
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/top/label/text",
+        "sprite": "tag_g",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 569.51,
+          "top": 129.685,
+          "right": 646.46,
+          "bottom": 147.735
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 607.985,
+          "y": 138.71
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "version",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/top/label/version",
+        "sprite": "version_9",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 531.51,
+          "top": 125.885,
+          "right": 557.16,
+          "bottom": 151.535
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 544.335,
+          "y": 138.71
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "label",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/top/label",
+        "sprite": "tag_red",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 522.485,
+          "top": 115.91,
+          "right": 663.085,
+          "bottom": 161.51
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 592.785,
+          "y": 138.71
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/top/pick_up/Image",
+        "sprite": "text_pick_up",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 660.425,
+          "top": 119.33,
+          "right": 728.825,
+          "bottom": 130.73
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 728.825,
+          "y": 125.03
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "pick_up",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/top/pick_up",
+        "sprite": "bg_pick_up",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.945098,
+          "green": 0.372549,
+          "blue": 0.203922,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 537.875,
+          "top": 115.15,
+          "right": 734.525,
+          "bottom": 134.91
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 636.2,
+          "y": 125.03
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blue",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/marks/line/blue",
+        "sprite": "status_bg_blue",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 552.6,
+          "top": 609.15,
+          "right": 742.6,
+          "bottom": 620.55
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 647.6,
+          "y": 620.55
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/item_container/2/item_tpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.74902,
+          "green": 0.639216,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 601.055,
+          "top": 499.905,
+          "right": 669.445,
+          "bottom": 568.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 635.25,
+          "y": 534.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/item_container/2/item_tpl/icon_bg/icon",
+        "sprite": "55000",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 601.768,
+          "top": 500.618,
+          "right": 668.732,
+          "bottom": 567.583
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 635.25,
+          "y": 534.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/item_container/2/item_tpl/icon_bg",
+        "sprite": "bg3",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 601.055,
+          "top": 499.905,
+          "right": 669.445,
+          "bottom": 568.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 635.25,
+          "y": 534.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/item_container/2/item_tpl/bg",
+        "sprite": "",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 601.055,
+          "top": 499.905,
+          "right": 669.445,
+          "bottom": 568.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 635.25,
+          "y": 534.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/item_container/1/item_tpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 0.905882,
+          "blue": 0.262745,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 640.005,
+          "top": 423.905,
+          "right": 708.395,
+          "bottom": 492.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 674.2,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/item_container/1/item_tpl/icon_bg/icon",
+        "sprite": "55000",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 640.718,
+          "top": 424.617,
+          "right": 707.682,
+          "bottom": 491.582
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 674.2,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/item_container/1/item_tpl/icon_bg",
+        "sprite": "bg4",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 640.005,
+          "top": 423.905,
+          "right": 708.395,
+          "bottom": 492.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 674.2,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/item_container/1/item_tpl/bg",
+        "sprite": "",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 640.005,
+          "top": 423.905,
+          "right": 708.395,
+          "bottom": 492.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 674.2,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/item_container/1/item_tpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 0.905882,
+          "blue": 0.262745,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 562.1,
+          "top": 423.9,
+          "right": 630.5,
+          "bottom": 492.3
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 596.3,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/item_container/1/item_tpl/icon_bg/icon",
+        "sprite": "52001",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 562.812,
+          "top": 424.613,
+          "right": 629.788,
+          "bottom": 491.587
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 596.3,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/item_container/1/item_tpl/icon_bg",
+        "sprite": "bg4",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 562.1,
+          "top": 423.9,
+          "right": 630.5,
+          "bottom": 492.3
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 596.3,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/item_container/1/item_tpl/bg",
+        "sprite": "",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 562.1,
+          "top": 423.9,
+          "right": 630.5,
+          "bottom": 492.3
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 596.3,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame/icon_mask/icon",
+        "sprite": "gold_1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 605.801,
+          "top": 152.865,
+          "right": 754.951,
+          "bottom": 281.115
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 740.036,
+          "y": 197.753
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/3/frame",
+        "sprite": "1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 537.875,
+          "top": 115.15,
+          "right": 742.125,
+          "bottom": 652.85
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 384.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "mask",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/mask",
+        "sprite": "card_mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 293.113,
+          "top": 114.962,
+          "right": 506.447,
+          "bottom": 645.628
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 399.78,
+          "y": 380.295
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/top/label/text",
+        "sprite": "tag_sp",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 341.735,
+          "top": 129.21,
+          "right": 417.735,
+          "bottom": 148.21
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 379.735,
+          "y": 138.71
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "version",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/top/label/version",
+        "sprite": "version_9",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 303.26,
+          "top": 125.885,
+          "right": 328.91,
+          "bottom": 151.535
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 316.085,
+          "y": 138.71
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "label",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/top/label",
+        "sprite": "tag_red",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 294.235,
+          "top": 115.91,
+          "right": 434.835,
+          "bottom": 161.51
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 364.535,
+          "y": 138.71
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/top/pick_up/Image",
+        "sprite": "text_pick_up",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 432.175,
+          "top": 119.33,
+          "right": 500.575,
+          "bottom": 130.73
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 500.575,
+          "y": 125.03
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "pick_up",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/top/pick_up",
+        "sprite": "bg_pick_up",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.945098,
+          "green": 0.372549,
+          "blue": 0.203922,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 309.625,
+          "top": 115.15,
+          "right": 506.275,
+          "bottom": 134.91
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 407.95,
+          "y": 125.03
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blue",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/marks/line/blue",
+        "sprite": "status_bg_blue",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 324.35,
+          "top": 609.15,
+          "right": 514.35,
+          "bottom": 620.55
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 419.35,
+          "y": 620.55
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/item_container/2/item_tpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.74902,
+          "green": 0.639216,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 372.805,
+          "top": 499.905,
+          "right": 441.195,
+          "bottom": 568.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 407.0,
+          "y": 534.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/item_container/2/item_tpl/icon_bg/icon",
+        "sprite": "55000",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 373.518,
+          "top": 500.618,
+          "right": 440.482,
+          "bottom": 567.583
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 407.0,
+          "y": 534.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/item_container/2/item_tpl/icon_bg",
+        "sprite": "bg3",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 372.805,
+          "top": 499.905,
+          "right": 441.195,
+          "bottom": 568.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 407.0,
+          "y": 534.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/item_container/2/item_tpl/bg",
+        "sprite": "",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 372.805,
+          "top": 499.905,
+          "right": 441.195,
+          "bottom": 568.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 407.0,
+          "y": 534.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/item_container/1/item_tpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 0.905882,
+          "blue": 0.262745,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 411.755,
+          "top": 423.905,
+          "right": 480.145,
+          "bottom": 492.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 445.95,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/item_container/1/item_tpl/icon_bg/icon",
+        "sprite": "55000",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 412.467,
+          "top": 424.617,
+          "right": 479.432,
+          "bottom": 491.582
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 445.95,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/item_container/1/item_tpl/icon_bg",
+        "sprite": "bg4",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 411.755,
+          "top": 423.905,
+          "right": 480.145,
+          "bottom": 492.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 445.95,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/item_container/1/item_tpl/bg",
+        "sprite": "",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 411.755,
+          "top": 423.905,
+          "right": 480.145,
+          "bottom": 492.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 445.95,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/item_container/1/item_tpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 0.905882,
+          "blue": 0.262745,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 333.85,
+          "top": 423.9,
+          "right": 402.25,
+          "bottom": 492.3
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 368.05,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/item_container/1/item_tpl/icon_bg/icon",
+        "sprite": "42082",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 334.562,
+          "top": 424.613,
+          "right": 401.537,
+          "bottom": 491.587
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 368.05,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/item_container/1/item_tpl/icon_bg",
+        "sprite": "bg4",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 333.85,
+          "top": 423.9,
+          "right": 402.25,
+          "bottom": 492.3
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 368.05,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/item_container/1/item_tpl/bg",
+        "sprite": "",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 333.85,
+          "top": 423.9,
+          "right": 402.25,
+          "bottom": 492.3
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 368.05,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame/icon_mask/icon",
+        "sprite": "chara_gaoliang",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 292.906,
+          "top": 112.633,
+          "right": 536.106,
+          "bottom": 355.832
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 511.786,
+          "y": 197.753
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/2/frame",
+        "sprite": "1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 309.625,
+          "top": 115.15,
+          "right": 513.875,
+          "bottom": 652.85
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 411.75,
+          "y": 384.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "btn_award_disable",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/blur_panel/adapt/right/btn_award_disable",
+        "sprite": "btn_award_disable",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1218.667,
+          "top": 252.667,
+          "right": 1280.0,
+          "bottom": 467.333
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1280.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "option",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/blur_panel/adapt/top/option",
+        "sprite": "viewall_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1197.872,
+          "top": 3.546,
+          "right": 1259.207,
+          "bottom": 74.881
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1228.539,
+          "y": 39.214
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/blur_panel/adapt/top/back/mask/Image",
+        "sprite": "back_btn",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 22.584,
+          "top": 19.34,
+          "right": 93.942,
+          "bottom": 89.365
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 58.263,
+          "y": 54.352
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "mask",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/blur_panel/adapt/top/back/mask",
+        "sprite": "icon_bg_mask_1920",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.140138,
+          "green": 0.125541,
+          "blue": 0.198529,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 11.113,
+          "top": 8.67,
+          "right": 103.145,
+          "bottom": 100.702
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 57.129,
+          "y": 54.686
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "back",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/blur_panel/adapt/top/back",
+        "sprite": "icon_bg_front_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 0.091,
+          "top": -2.353,
+          "right": 114.168,
+          "bottom": 111.724
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 57.129,
+          "y": 54.686
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "title_queue",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/blur_panel/adapt/top/title_queue",
+        "sprite": "title_queue",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 106.08,
+          "top": 3.735,
+          "right": 281.475,
+          "bottom": 50.418
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 106.08,
+          "y": 27.076
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "line",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/blur_panel/adapt/top/line",
+        "sprite": "top_line",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.588235
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -213.833,
+          "top": 53.333,
+          "right": 1493.833,
+          "bottom": 54.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 54.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "print",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/blur_panel/adapt/top/print",
+        "sprite": "player_info_bg1_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 98.757,
+          "top": 27.933,
+          "right": 363.91,
+          "bottom": 45.267
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 231.333,
+          "y": 36.6
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "print_bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/blur_panel/adapt/top/print_bg",
+        "sprite": "player_info_bg2_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 94.141,
+          "top": 9.001,
+          "right": 412.792,
+          "bottom": 47.666
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 253.467,
+          "y": 28.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "print_top",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/blur_panel/adapt/top/print_top",
+        "sprite": "icon_bg_top_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 56.064,
+          "top": -0.001,
+          "right": 114.069,
+          "bottom": 25.334
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 85.067,
+          "y": 12.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "top_bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/blur_panel/top_bg",
+        "sprite": "top_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.399,
+          "top": 0.0,
+          "right": 1280.399,
+          "bottom": 56.035
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 0.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "text",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/top/label/text",
+        "sprite": "tag_q",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 113.485,
+          "top": 129.21,
+          "right": 189.485,
+          "bottom": 148.21
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 151.485,
+          "y": 138.71
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "version",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/top/label/version",
+        "sprite": "version_9",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 75.01,
+          "top": 125.885,
+          "right": 100.66,
+          "bottom": 151.535
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 87.835,
+          "y": 138.71
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "label",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/top/label",
+        "sprite": "tag_blue",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 65.985,
+          "top": 115.91,
+          "right": 206.585,
+          "bottom": 161.51
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 136.285,
+          "y": 138.71
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/top/pick_up/Image",
+        "sprite": "text_pick_up",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 203.925,
+          "top": 119.33,
+          "right": 272.325,
+          "bottom": 130.73
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 272.325,
+          "y": 125.03
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "pick_up",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/top/pick_up",
+        "sprite": "bg_pick_up",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.145098,
+          "green": 0.254902,
+          "blue": 0.890196,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 81.375,
+          "top": 115.15,
+          "right": 278.025,
+          "bottom": 134.91
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 179.7,
+          "y": 125.03
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "blue",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/marks/line/blue",
+        "sprite": "status_bg_blue",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 96.1,
+          "top": 609.15,
+          "right": 286.1,
+          "bottom": 620.55
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 191.1,
+          "y": 620.55
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/item_container/2/item_tpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.741176,
+          "green": 0.741176,
+          "blue": 0.741176,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 144.555,
+          "top": 499.905,
+          "right": 212.945,
+          "bottom": 568.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 178.75,
+          "y": 534.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/item_container/2/item_tpl/icon_bg/icon",
+        "sprite": "gold",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 145.267,
+          "top": 500.618,
+          "right": 212.232,
+          "bottom": 567.583
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 178.75,
+          "y": 534.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/item_container/2/item_tpl/icon_bg",
+        "sprite": "bg1",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 144.555,
+          "top": 499.905,
+          "right": 212.945,
+          "bottom": 568.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 178.75,
+          "y": 534.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/item_container/2/item_tpl/bg",
+        "sprite": "",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 144.555,
+          "top": 499.905,
+          "right": 212.945,
+          "bottom": 568.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 178.75,
+          "y": 534.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/item_container/1/item_tpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 0.74902,
+          "green": 0.639216,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 183.505,
+          "top": 423.905,
+          "right": 251.895,
+          "bottom": 492.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 217.7,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/item_container/1/item_tpl/icon_bg/icon",
+        "sprite": "55000",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 184.217,
+          "top": 424.617,
+          "right": 251.182,
+          "bottom": 491.582
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 217.7,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/item_container/1/item_tpl/icon_bg",
+        "sprite": "bg3",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 183.505,
+          "top": 423.905,
+          "right": 251.895,
+          "bottom": 492.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 217.7,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/item_container/1/item_tpl/bg",
+        "sprite": "",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 183.505,
+          "top": 423.905,
+          "right": 251.895,
+          "bottom": 492.295
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 217.7,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/item_container/1/item_tpl/icon_bg/frame",
+        "sprite": "frame",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 0.905882,
+          "blue": 0.262745,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 105.6,
+          "top": 423.9,
+          "right": 174.0,
+          "bottom": 492.3
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 139.8,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/item_container/1/item_tpl/icon_bg/icon",
+        "sprite": "55000",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 106.312,
+          "top": 424.613,
+          "right": 173.287,
+          "bottom": 491.587
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 139.8,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon_bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/item_container/1/item_tpl/icon_bg",
+        "sprite": "bg4",
+        "flags": 12719,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 105.6,
+          "top": 423.9,
+          "right": 174.0,
+          "bottom": 492.3
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 139.8,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/item_container/1/item_tpl/bg",
+        "sprite": "",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 105.6,
+          "top": 423.9,
+          "right": 174.0,
+          "bottom": 492.3
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 139.8,
+          "y": 458.1
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame/icon_mask/icon",
+        "sprite": "gold_1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 149.301,
+          "top": 152.865,
+          "right": 298.451,
+          "bottom": 281.115
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 283.536,
+          "y": 197.753
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "frame",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/queue_page/queue_rect/content/1/frame",
+        "sprite": "1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 81.375,
+          "top": 115.15,
+          "right": 285.625,
+          "bottom": 652.85
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 183.5,
+          "y": 384.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/bg",
+        "sprite": "technology_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "TechnologyUI(Clone)",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)",
+        "sprite": "",
+        "flags": 12775,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 0.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "title_item",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/titles/title_item",
+        "sprite": "get_item",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 564.933,
+          "top": 205.333,
+          "right": 723.6,
+          "bottom": 253.333
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 644.267,
+          "y": 253.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "titles",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/titles",
+        "sprite": "bar01",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 499.667,
+          "top": 217.333,
+          "right": 780.333,
+          "bottom": 253.333
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 253.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "close",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close",
+        "sprite": "touch_to_continue",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 564.667,
+          "top": 465.4,
+          "right": 715.333,
+          "bottom": 498.733
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 482.067
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bot_line",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/bot_line",
+        "sprite": "line01",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 583.267,
+          "top": 473.333,
+          "right": 1280.067,
+          "bottom": 474.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 931.667,
+          "y": 473.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "top_line",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/top_line",
+        "sprite": "line01",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 246.667,
+          "right": 640.0,
+          "bottom": 248.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 320.0,
+          "y": 246.667
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "items",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items",
+        "sprite": "awardinfo_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 246.667,
+          "right": 1280.0,
+          "bottom": 473.333
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "3",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/decorations/down/3",
+        "sprite": "tiao3",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 357.493,
+          "top": 356.626,
+          "right": 644.107,
+          "bottom": 643.24
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 500.8,
+          "y": 499.933
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "2",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/decorations/down/2",
+        "sprite": "tiao2",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 358.501,
+          "top": 242.834,
+          "right": 477.766,
+          "bottom": 362.099
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 418.133,
+          "y": 302.467
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "1",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/decorations/down/1",
+        "sprite": "tiao1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 636.412,
+          "top": 553.619,
+          "right": 725.508,
+          "bottom": 642.714
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 680.96,
+          "y": 598.167
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "3",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/decorations/up/3",
+        "sprite": "tiao3",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 635.893,
+          "top": 76.76,
+          "right": 922.507,
+          "bottom": 363.374
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 779.2,
+          "y": 220.067
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "2",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/decorations/up/2",
+        "sprite": "tiao2",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 802.234,
+          "top": 357.901,
+          "right": 921.499,
+          "bottom": 477.166
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 861.867,
+          "y": 417.533
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "1",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/decorations/up/1",
+        "sprite": "tiao1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 554.492,
+          "top": 77.286,
+          "right": 643.588,
+          "bottom": 166.381
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 599.04,
+          "y": 121.833
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "AwardInfoUI(Clone)",
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)",
+        "sprite": "white_dot",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 0.470588
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gem/icon",
+        "sprite": "res_diamond",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 975.533,
+          "top": 7.889,
+          "right": 1023.0,
+          "bottom": 62.689
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 999.267,
+          "y": 35.289
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "gem",
+        "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gem",
+        "sprite": "res_bg_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 992.367,
+          "top": 15.289,
+          "right": 1176.167,
+          "bottom": 55.289
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1176.167,
+          "y": 35.289
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "max_bg2",
+        "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gold/max_bg2",
+        "sprite": "max_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 839.945,
+          "top": -0.976,
+          "right": 943.255,
+          "bottom": 17.687
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 891.6,
+          "y": 8.355
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gold/icon",
+        "sprite": "res_gold",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 769.1,
+          "top": 13.622,
+          "right": 813.1,
+          "bottom": 58.956
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 791.1,
+          "y": 36.289
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "gold",
+        "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/gold",
+        "sprite": "res_bg_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 783.233,
+          "top": 15.289,
+          "right": 967.033,
+          "bottom": 55.289
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 875.133,
+          "y": 35.289
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "max_bg",
+        "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/oil/max_bg",
+        "sprite": "max_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 633.533,
+          "top": -0.978,
+          "right": 736.867,
+          "bottom": 17.689
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 685.2,
+          "y": 8.356
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "icon",
+        "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/oil/icon",
+        "sprite": "res_oil",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 555.213,
+          "top": 6.818,
+          "right": 609.254,
+          "bottom": 66.559
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 582.233,
+          "y": 36.689
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "oil",
+        "path": "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/oil",
+        "sprite": "res_bg_1920",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 574.1,
+          "top": 15.289,
+          "right": 757.9,
+          "bottom": 55.289
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 666.0,
+          "y": 35.289
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "top",
+        "path": "OverlayCamera/Adpter/top/top",
+        "sprite": "mask1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": -140.667,
+          "right": 1280.0,
+          "bottom": 0.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": -70.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "left",
+        "path": "OverlayCamera/Adpter/left/left",
+        "sprite": "mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -140.667,
+          "top": 0.0,
+          "right": -0.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -70.333,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bottom",
+        "path": "OverlayCamera/Adpter/bottom/bottom",
+        "sprite": "mask1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 720.0,
+          "right": 1280.0,
+          "bottom": 860.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 790.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "right",
+        "path": "OverlayCamera/Adpter/right/right",
+        "sprite": "mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1280.0,
+          "top": 0.0,
+          "right": 1420.667,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1350.333,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      }
+    ],
+    "globe_geometry": {
+      "schema": "alas-headless.globe-geometry/v1",
+      "status": 0,
+      "truncated": false,
+      "error_count": 0,
+      "camera_path": "",
+      "objects": []
+    },
+    "lua_globe_diagnostic": {
+      "schema": "alas-headless.lua-globe-diagnostic/v1",
+      "status": 0,
+      "stage": 0,
+      "truncated": false,
+      "stack_balanced": false,
+      "registry_visited": 0,
+      "inspection_count": 0,
+      "world_candidates": 0,
+      "drag_candidates": 0,
+      "colors": [],
+      "dragging": [],
+      "drag_pointer_instance_ids": [],
+      "drag_trigger_instance_ids": [],
+      "active_pointer_instance_id": 0
+    },
+    "shipyard_strengthen": {
+      "status": 0,
+      "stage": 0,
+      "truncated": false,
+      "stack_balanced": false,
+      "blueprint_id": 0,
+      "ship_id": 0,
+      "ship_index": 0,
+      "series": 0,
+      "rarity": 0,
+      "pursuing": false,
+      "purchased": 0,
+      "coins": 0,
+      "gems_known": false,
+      "paid_gems": 0,
+      "free_gems": 0,
+      "level": 0,
+      "fate_level": -1,
+      "exp": 0
+    },
+    "activity_identity": {
+      "status": 1,
+      "stack_balanced": true,
+      "archives": {
+        "status": 1,
+        "expected_count": 52,
+        "truncated": false,
+        "records": [
+          {
+            "id": 1,
+            "activity_type": 1,
+            "name": "红染常驻复刻",
+            "bg": "temp_hongran"
+          },
+          {
+            "id": 2,
+            "activity_type": 2,
+            "name": "Z舰队常驻复刻",
+            "bg": "temp_zjiandui"
+          },
+          {
+            "id": 4,
+            "activity_type": 1,
+            "name": "凛冬常驻复刻",
+            "bg": "temp_lingdong"
+          },
+          {
+            "id": 5,
+            "activity_type": 2,
+            "name": "围剿斯佩伯爵』常驻复刻",
+            "bg": "temp_sipei"
+          },
+          {
+            "id": 6,
+            "activity_type": 1,
+            "name": "异色格常驻复刻",
+            "bg": "temp_yisege"
+          },
+          {
+            "id": 7,
+            "activity_type": 1,
+            "name": "坠落之翼常驻复刻",
+            "bg": "temp_zhuiluo"
+          },
+          {
+            "id": 8,
+            "activity_type": 1,
+            "name": "鸢尾之华常驻复刻",
+            "bg": "temp_yuanwei"
+          },
+          {
+            "id": 9,
+            "activity_type": 1,
+            "name": "墨染的钢铁之花常驻复刻",
+            "bg": "temp_moran"
+          },
+          {
+            "id": 10,
+            "activity_type": 2,
+            "name": "光荣的一战常驻复刻",
+            "bg": "temp_guangrong"
+          },
+          {
+            "id": 11,
+            "activity_type": 1,
+            "name": "苍红的回响常驻复刻",
+            "bg": "temp_tiancheng"
+          },
+          {
+            "id": 12,
+            "activity_type": 2,
+            "name": "月光下的序曲常驻复刻",
+            "bg": "temp_xinaoerliang"
+          },
+          {
+            "id": 13,
+            "activity_type": 1,
+            "name": "俾斯麦常驻复刻",
+            "bg": "temp_bisimai"
+          },
+          {
+            "id": 14,
+            "activity_type": 2,
+            "name": "偶像一期常驻复刻",
+            "bg": "temp_ouxiang"
+          },
+          {
+            "id": 15,
+            "activity_type": 1,
+            "name": "神圣的悲喜剧常驻复刻",
+            "bg": "temp_beixiju"
+          },
+          {
+            "id": 16,
+            "activity_type": 2,
+            "name": "斯图尔特的硝烟常驻复刻",
+            "bg": "temp_longxiang"
+          },
+          {
+            "id": 17,
+            "activity_type": 1,
+            "name": "箱庭疗法常驻复刻",
+            "bg": "temp_xiangting"
+          },
+          {
+            "id": 18,
+            "activity_type": 1,
+            "name": "浮樱影华常驻复刻",
+            "bg": "temp_fuying"
+          },
+          {
+            "id": 19,
+            "activity_type": 2,
+            "name": "最珍贵的宝物常驻复刻",
+            "bg": "temp_u110"
+          },
+          {
+            "id": 20,
+            "activity_type": 2,
+            "name": "偶像二期常驻复刻",
+            "bg": "temp_ouxiang2"
+          },
+          {
+            "id": 21,
+            "activity_type": 1,
+            "name": "微层混合常驻复刻",
+            "bg": "temp_weiceng"
+          },
+          {
+            "id": 22,
+            "activity_type": 2,
+            "name": "峡湾间的星辰常驻复刻",
+            "bg": "temp_yonggan"
+          },
+          {
+            "id": 23,
+            "activity_type": 1,
+            "name": "穹顶下的圣咏曲常驻复刻",
+            "bg": "temp_zhende"
+          },
+          {
+            "id": 24,
+            "activity_type": 2,
+            "name": "夜幕下的归途常驻复刻",
+            "bg": "temp_taertu"
+          },
+          {
+            "id": 25,
+            "activity_type": 1,
+            "name": "北境序曲常驻复刻",
+            "bg": "temp_qiaba"
+          },
+          {
+            "id": 26,
+            "activity_type": 1,
+            "name": "永夜幻光常驻复刻",
+            "bg": "temp_hemin"
+          },
+          {
+            "id": 27,
+            "activity_type": 2,
+            "name": "峡湾间的反击常驻复刻",
+            "bg": "temp_aisijimoren"
+          },
+          {
+            "id": 28,
+            "activity_type": 1,
+            "name": "负象限作战常驻复刻",
+            "bg": "temp_u37"
+          },
+          {
+            "id": 29,
+            "activity_type": 1,
+            "name": "蝶海梦花常驻复刻",
+            "bg": "temp_xinnong"
+          },
+          {
+            "id": 30,
+            "activity_type": 1,
+            "name": "镜位螺旋常驻复刻",
+            "bg": "temp_xinzexi"
+          },
+          {
+            "id": 31,
+            "activity_type": 1,
+            "name": "破晓冰华常驻复刻",
+            "bg": "temp_talin"
+          },
+          {
+            "id": 32,
+            "activity_type": 2,
+            "name": "划破海空之翼常驻复刻",
+            "bg": "temp_pulinsidun"
+          },
+          {
+            "id": 33,
+            "activity_type": 2,
+            "name": "杰诺瓦的焰火常驻复刻",
+            "bg": "temp_fuxv"
+          },
+          {
+            "id": 34,
+            "activity_type": 1,
+            "name": "碧海光粼常驻复刻",
+            "bg": "temp_daofeng"
+          },
+          {
+            "id": 35,
+            "activity_type": 1,
+            "name": "复兴的赞美诗常驻复刻",
+            "bg": "temp_weineituo"
+          },
+          {
+            "id": 36,
+            "activity_type": 1,
+            "name": "逆转彩虹之塔常驻复刻",
+            "bg": "temp_huteng"
+          },
+          {
+            "id": 37,
+            "activity_type": 1,
+            "name": "深度回音常驻复刻",
+            "bg": "temp_kalangshitade"
+          },
+          {
+            "id": 38,
+            "activity_type": 2,
+            "name": "虚像构筑之塔常驻复刻",
+            "bg": "temp_diguo"
+          },
+          {
+            "id": 39,
+            "activity_type": 1,
+            "name": "泠誓光庭常驻复刻",
+            "bg": "temp_qianwei"
+          },
+          {
+            "id": 40,
+            "activity_type": 1,
+            "name": "雄鹰的叙事歌常驻复刻",
+            "bg": "temp_luoma"
+          },
+          {
+            "id": 41,
+            "activity_type": 1,
+            "name": "虹彩的终幕曲常驻复刻",
+            "bg": "temp_aimudeng"
+          },
+          {
+            "id": 42,
+            "activity_type": 2,
+            "name": "飓风与青春之泉常驻复刻",
+            "bg": "temp_fengfanv1"
+          },
+          {
+            "id": 43,
+            "activity_type": 1,
+            "name": "紫绛槿岚常驻复刻",
+            "bg": "temp_wuzang"
+          },
+          {
+            "id": 44,
+            "activity_type": 1,
+            "name": "定向折叠常驻复刻",
+            "bg": "temp_yuekechengII"
+          },
+          {
+            "id": 45,
+            "activity_type": 1,
+            "name": "湮烬尘墟常驻复刻",
+            "bg": "temp_yuanchou"
+          },
+          {
+            "id": 46,
+            "activity_type": 2,
+            "name": "远汇点作战常驻复刻",
+            "bg": "temp_bulunxierde"
+          },
+          {
+            "id": 47,
+            "activity_type": 2,
+            "name": "奏响鸢尾之歌常驻复刻",
+            "bg": "temp_masaiqu"
+          },
+          {
+            "id": 48,
+            "activity_type": 1,
+            "name": "空相交汇点常驻复刻",
+            "bg": "temp_bisimaiz"
+          },
+          {
+            "id": 49,
+            "activity_type": 2,
+            "name": "幻梦间奏曲常驻复刻",
+            "bg": "temp_sitelasibao"
+          },
+          {
+            "id": 50,
+            "activity_type": 3,
+            "name": "极地风暴常驻复刻",
+            "bg": "temp_kuersike"
+          },
+          {
+            "id": 51,
+            "activity_type": 3,
+            "name": "童心学院常驻复刻",
+            "bg": "temp_yaerweite"
+          },
+          {
+            "id": 52,
+            "activity_type": 2,
+            "name": "飓风与沉眠之海常驻复刻",
+            "bg": "temp_fengfanv2"
+          },
+          {
+            "id": 53,
+            "activity_type": 2,
+            "name": "飓风与自由群岛常驻复刻",
+            "bg": "temp_fengfanv3"
+          }
+        ]
+      },
+      "raids": {
+        "status": 1,
+        "stage": 14,
+        "proxy_count": 34,
+        "matched_count": 34,
+        "failed_id": 0,
+        "expected_count": 0,
+        "truncated": false,
+        "records": []
+      }
+    },
+    "operation_siren_map_drag": {
+      "status": 0,
+      "handler_instance_id": 0,
+      "endpoints": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "handler_path": "",
+      "samples": []
+    },
+    "storage_scroll": {
+      "schema": "alas-headless.storage-scroll/v1",
+      "status": 0,
+      "matches": 0,
+      "controls": [],
+      "scrollbar": {
+        "schema": "alas-headless.storage-scrollbar/v1",
+        "status": 0,
+        "matches": 0,
+        "class_found": false,
+        "source_count": 0,
+        "controls": [],
+        "input": {
+          "schema": "alas-headless.storage-scrollbar-input/v1",
+          "status": 0
+        }
+      }
+    },
+    "private_quarters_physics": {
+      "schema": "alas-headless.private-colliders/v1",
+      "status": 0,
+      "truncated": false,
+      "error_count": 0,
+      "camera_path": "",
+      "colliders": []
+    }
+  },
+  "ui_source_generation": 27018,
+  "source": "Fresh read-only coherent AwardInfo after r143 accepted research queue claim; no controller active"
+}

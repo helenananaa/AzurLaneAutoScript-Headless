@@ -6,6 +6,7 @@ import ast
 import copy
 import hashlib
 import json
+from types import SimpleNamespace
 from pathlib import Path
 from typing import Any
 
@@ -153,6 +154,9 @@ def _verify_contract() -> tuple[int, int]:
 
 def _run_entry(run_type: type[Any], **values: object) -> list[str]:
     host = run_type(); host.config = _config(**values); events: list[str] = []
+    # This recorder checks native configuration decisions. Semantic frame
+    # refresh ordering has separate actual-source coverage.
+    host.device = SimpleNamespace(semantic_adapter=None)
     host.ui_ensure = lambda *_args: events.append("ensure")
     host.guild_lobby = lambda: events.append("lobby")
     host.guild_logistics = lambda: events.append("logistics") or True

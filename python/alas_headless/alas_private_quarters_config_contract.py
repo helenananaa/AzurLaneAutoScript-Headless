@@ -36,8 +36,12 @@ def validate_alas_private_quarters_config(
     ):
         if type(value) is not bool:
             raise SemanticGateClosed("PrivateQuarters." + name + " must be a boolean")
-    if type(target_ship) is not str or target_ship not in PRIVATE_QUARTERS_SHIPS:
-        raise SemanticGateClosed("PrivateQuarters.TargetShip is outside the pinned enum")
+    # ALAS logs the name even with interaction disabled, then consults its own
+    # available_targets at the interaction branch. New upstream roles need not
+    # be copied into a second configuration catalog; typed inputs still require
+    # a supported, unique target at the actual room-navigation boundary.
+    if type(target_ship) is not str or not target_ship.strip():
+        raise SemanticGateClosed("PrivateQuarters.TargetShip must be non-empty text")
     return AlasPrivateQuartersConfigSnapshot(
         buy_roses=buy_roses,
         buy_cake=buy_cake,

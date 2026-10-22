@@ -22,7 +22,7 @@ from .semantic_oracle import SemanticGateClosed
 
 
 SCHEMA = "alas-headless.commission-config-replay/v1"
-INVALID_PRESET_VALUES = (None, True, 1, "", "unknown", [])
+INVALID_PRESET_VALUES = (None, True, 1, "", [])
 INVALID_BOOL_VALUES = (0, 1, None, "true", [], {})
 INVALID_CUSTOM_FILTERS = (
     None,
@@ -352,7 +352,7 @@ def _verify_contract(custom_filter: str) -> tuple[int, int]:
     for value in INVALID_CUSTOM_FILTERS:
         try:
             validate_alas_commission_config(
-                preset_filter="cube",
+                preset_filter="custom",
                 custom_filter=value,
                 do_major_commission=False,
             )
@@ -475,7 +475,7 @@ def _verify_entry(module: Any, guard_present: bool, custom_filter: str):
     invalid = {}
     cases = {
         "Commission_PresetFilter": (None, custom_filter, False),
-        "Commission_CustomFilter": ("cube", "unknown", False),
+        "Commission_CustomFilter": ("custom", "unknown", False),
         "Commission_DoMajorCommission": ("cube", custom_filter, None),
     }
     for field, (preset, custom, do_major) in cases.items():

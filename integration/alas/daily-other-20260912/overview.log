@@ -1,0 +1,59 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 18:07:28.287 │ [Server] cn                                 
+read: ./config\semantic_e2e.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 18:07:28.297 │ Bind task ['General', 'Alas']               
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 18:07:28.301 │ DEVICE                                      
+INFO     2026-09-12 18:07:28.303 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 18:07:28.305 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 18:07:28.309 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 18:07:28.311 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 18:07:28.312 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 18:07:28.315 │ emulator-5580                               
+INFO     2026-09-12 18:07:28.318 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 18:07:28.319 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 18:07:28.324 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 18:07:28.325 │ [Server] cn                                 
+WARNING  2026-09-12 18:07:28.328 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 18:07:28.331 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 18:07:28.387 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 18:07:28.389 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 18:07:28.393 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 18:07:28.395 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 18:07:29.552 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 18:07:29.553 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 18:07:31.311 │ UI get current page                         
+INFO     2026-09-12 18:07:33.191 │ [UI] page_main                              
+INFO     2026-09-12 18:07:33.193 │ Goto page_daily                             
+INFO     2026-09-12 18:07:33.196 │ <<< UI GOTO PAGE_DAILY >>>                  
+INFO     2026-09-12 18:07:36.406 │ Page switch: page_main -> page_campaign_menu
+INFO     2026-09-12 18:07:37.093 │ Semantic click main/battle @                
+         OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/right/1/b
+         attle                                                                 
+INFO     2026-09-12 18:07:45.217 │ Page switch: page_main_white ->             
+         page_campaign_menu                                                    
+INFO     2026-09-12 18:07:45.763 │ Semantic click main/battle @                
+         OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/right/1/b
+         attle                                                                 
+INFO     2026-09-12 18:07:50.175 │ Page switch: page_campaign_menu ->          
+         page_daily                                                            
+INFO     2026-09-12 18:07:50.925 │ Semantic click campaign-menu/daily @        
+         UICamera/Canvas/UIMain/LevelMainScene(Clone)/entrance/btns/btn_daily  
+INFO     2026-09-12 18:07:58.481 │ Page switch: page_campaign_menu ->          
+         page_daily                                                            
+campaign daily entrance is not actionable

@@ -18,6 +18,7 @@ from ...adapter import (
     PixelAccessRecord,
     RecoveryPolicy,
     RunPolicy,
+    RunPolicyError,
     RuntimeHandlePackageGate,
     RuntimeHandlePort,
     SemanticFrame,
@@ -33,6 +34,7 @@ from ...adapter import (
 )
 from ...alas_combat_observer import AlasCombatObserverManifest
 from ...alas_package_process_lease import AlasPackageProcessLease
+from ...oracle.errors import SemanticSnapshotStale
 from ...runtime_trace import RuntimeTraceRecorder
 from ...semantic_oracle import (
     ActionReceipt,
@@ -57,15 +59,6 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
     _LOGIN_STARTUP_UPDATE_STALE_RETRY_ATTEMPTS = 2399
 
     _INITIAL_GAME_STARTUP_RETRY_ATTEMPTS = 799
-
-    _LIVE_COMBAT_DRIVER_COMPATIBILITY = frozenset(
-        {
-            (
-                "be80ce591a481c12d60c50d6040d40c035b40a2b",
-                "506b76f698b5089aaa29c4e7908b48edb8532a44",
-            ),
-        }
-    )
 
     def __init__(
         self,
@@ -165,15 +158,6 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
         self.package = package
         self.component = component
         self.required_primary_abi = required_primary_abi
-        self.allow_mission_claim_once = bool(allow_mission_claim_once)
-        self.allow_mail_mutations = bool(allow_mail_mutations)
-        self.mail_mutation_budget = mail_mutation_budget
-        self.minigame_play_budget = minigame_play_budget
-        self.meta_assist_budget = meta_assist_budget
-        self.operation_siren_coordinate_checkout_budget = (
-            operation_siren_coordinate_checkout_budget
-        )
-        self.allow_tactical_rewards = bool(allow_tactical_rewards)
         for label, budget in (
             ("mail mutation", mail_mutation_budget),
             ("minigame play", minigame_play_budget),
@@ -212,33 +196,6 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                 raise ValueError(
                     "{0} budget must be a non-negative integer".format(label)
                 )
-        if campaign_camera_positioning_budget > 2:
-            raise ValueError(
-                "campaign camera positioning budget must be at most two"
-            )
-        self.commission_reward_budget = commission_reward_budget
-        self.tactical_assign_budget = tactical_assign_budget
-        self.commission_start_budget = commission_start_budget
-        self.daily_execute_budget = daily_execute_budget
-        self.exercise_execute_budget = exercise_execute_budget
-        self.exercise_refresh_budget = exercise_refresh_budget
-        self.research_reward_budget = research_reward_budget
-        self.research_start_budget = research_start_budget
-        self.dorm_collect_budget = dorm_collect_budget
-        self.dorm_feed_budget = dorm_feed_budget
-        self.awaken_budget = awaken_budget
-        self.enhancement_budget = enhancement_budget
-        self.build_submit_budget = build_submit_budget
-        self.retirement_budget = retirement_budget
-        self.shop_purchase_budget = shop_purchase_budget
-        self.campaign_stage_entry_budget = campaign_stage_entry_budget
-        self.campaign_fleet_mutation_budget = campaign_fleet_mutation_budget
-        self.campaign_sortie_budget = campaign_sortie_budget
-        self.campaign_combat_budget = campaign_combat_budget
-        self.campaign_viewport_swipe_budget = campaign_viewport_swipe_budget
-        self.campaign_camera_positioning_budget = (
-            campaign_camera_positioning_budget
-        )
         self.package_process_lease = package_process_lease
         self.observer_max_age_ms = observer_max_age_ms
         self.trace = trace
@@ -279,8 +236,48 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
             campaign_viewport_swipe_budget=campaign_viewport_swipe_budget,
             campaign_camera_positioning_budget=campaign_camera_positioning_budget,
         )
-        effective_grants = dict(policy_grants or legacy_grants)
+        if run_policy is not None:
+            # The immutable policy owns its receipt hash and the actual grants.
+            # A compatibility copy cannot silently widen or narrow that policy.
+            if policy_grants is not None and dict(policy_grants) != dict(run_policy.grants):
+                raise RunPolicyError()
+            effective_grants = dict(run_policy.grants)
+        else:
+            effective_grants = dict(legacy_grants if policy_grants is None else policy_grants)
         self.policy_grants = MappingProxyType(effective_grants)
+        # Legacy task ports still consume these constructor attributes. Derive
+        # them from the same authority as the ledger, including explicit zeros.
+        self.allow_mission_claim_once = effective_grants.get("mission.claim", 0) > 0
+        self.allow_mail_mutations = effective_grants.get("mail.mutation", 0) > 0
+        self.allow_tactical_rewards = effective_grants.get("tactical.reward", 0) > 0
+        for attribute, capability in (
+            ("mail_mutation_budget", "mail.mutation"),
+            ("minigame_play_budget", "minigame.play"),
+            ("meta_assist_budget", "meta.assist"),
+            ("operation_siren_coordinate_checkout_budget", "operation_siren.coordinate_checkout"),
+            ("tactical_assign_budget", "tactical.assign"),
+            ("commission_reward_budget", "commission.reward"),
+            ("commission_start_budget", "commission.start"),
+            ("daily_execute_budget", "daily.execute"),
+            ("exercise_execute_budget", "exercise.execute"),
+            ("exercise_refresh_budget", "exercise.refresh"),
+            ("research_reward_budget", "research.reward"),
+            ("research_start_budget", "research.start"),
+            ("dorm_collect_budget", "dorm.collect"),
+            ("dorm_feed_budget", "dorm.feed"),
+            ("awaken_budget", "awaken.execute"),
+            ("enhancement_budget", "enhancement.execute"),
+            ("build_submit_budget", "build.submit"),
+            ("retirement_budget", "retirement.execute"),
+            ("shop_purchase_budget", "shop.purchase"),
+            ("campaign_stage_entry_budget", "campaign.stage_entry"),
+            ("campaign_fleet_mutation_budget", "campaign.fleet_mutation"),
+            ("campaign_sortie_budget", "campaign.sortie"),
+            ("campaign_combat_budget", "campaign.grid_click"),
+            ("campaign_viewport_swipe_budget", "campaign.viewport_swipe"),
+            ("campaign_camera_positioning_budget", "campaign.camera_positioning"),
+        ):
+            setattr(self, attribute, effective_grants.get(capability, 0))
         if capability_profile is not None and not isinstance(
             capability_profile, TaskCapabilityProfile
         ):
@@ -296,7 +293,10 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
         )
         if capability_profile is None:
             capability_profile = (
-                TaskCapabilityProfile(profile_id=run_policy.profile_id)
+                compatibility_profile(
+                    run_policy.profile_id, effective_grants, recovery_policy,
+                    run_policy.task_config_sha256,
+                )
                 if run_policy is not None
                 else compatibility_profile("legacy-session", effective_grants)
             )
@@ -360,12 +360,14 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
         # ownership lease on the session so rebuilding the Oracle/adapter does
         # not silently turn an own-beacon confirmation into an assist action.
         self._meta_beacon_active = False
+        self._meta_assist_active = False
         self._combat_manifest: Optional[AlasCombatObserverManifest] = None
         self._combat_last_generation = 0
         self._combat_automation_source: Optional[str] = None
         self._combat_result_transition_until = 0.0
         self._combat_result_observation: Optional[Tuple[str, float]] = None
         self._combat_last_result_receipt: Optional[ActionReceipt] = None
+        self._combat_reward_close_pending: Optional[ActionReceipt] = None
         self._login_update_restart_performed = False
         self._game_manager_restart_pending = False
 
@@ -376,12 +378,16 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
         if self._frame_clock is not None:
             self._frame_clock.release_frame()
         self._meta_beacon_active = False
+        self._meta_assist_active = False
         self._opsi_sample_use = None
         self._combat_automation_source = None
         self._combat_result_observation = None
         self._combat_last_result_receipt = None
+        self._combat_reward_close_pending = None
         self._combat_result_transition_until = 0.0
+        self._retirement_return_receipt = None
         self._daily_combat_seen_at = float("-inf")
+        self._operation_siren_interrupt_receipts = []
         self._login_update_restart_performed = False
         self._game_manager_restart_pending = False
 
@@ -446,6 +452,7 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
         return handle
 
     def _release_owned_runtime_handle(self) -> None:
+        self._retirement_return_receipt = None
         if self._frame_clock is not None:
             self._frame_clock.close()
         self._frame_clock = None
@@ -498,6 +505,12 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
             package_gate()
 
             def invalidate_current_frame() -> None:
+                # ADB's attached observer PID is a cache. Recheck the actual
+                # package process before using a frame across a game restart.
+                # Other runtime handles retain their existing PID contract.
+                validate_process = getattr(handle, "validate_input_process", None)
+                if validate_process is not None:
+                    validate_process()
                 frame_clock = self._frame_clock
                 if frame_clock is None or frame_clock.current_frame_id is None:
                     return
@@ -508,24 +521,10 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                 frame_clock.borrow(frame_id, require_fresh=True)
                 frame_clock.invalidate(frame_id)
 
-            def invalidate_then_tap(x: int, y: int) -> None:
-                invalidate_current_frame()
-                handle.tap(x, y)
-
-            def invalidate_then_swipe(
-                x1: int,
-                y1: int,
-                x2: int,
-                y2: int,
-                duration_ms: int,
-            ) -> None:
-                invalidate_current_frame()
-                handle.swipe(x1, y1, x2, y2, duration_ms)
-
             oracle = SemanticOracle(
                 handle.observer_request,
                 handle.foreground_component,
-                invalidate_then_tap,
+                handle.tap,
                 OracleFingerprint(
                     package=self.package,
                     component=self.component,
@@ -533,7 +532,8 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                     expected_pid=handle.pid,
                     max_age_ms=self.observer_max_age_ms,
                 ),
-                swipe=invalidate_then_swipe,
+                swipe=handle.swipe,
+                input_preflight=invalidate_current_frame,
             )
             self._frame_clock = SemanticFrameClock(handle, oracle)
             self._frame_reader = SemanticFrameReader(self._frame_clock, oracle)
@@ -584,6 +584,8 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
             )
             if self._meta_beacon_active:
                 self.adapter.begin_meta_beacon()
+            if self._meta_assist_active:
+                self.adapter.begin_meta_assist()
             if self.trace is not None:
                 self.trace.emit(
                     "semantic.session.open",
@@ -601,6 +603,7 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
             raise
 
     def close(self) -> None:
+        self._retirement_return_receipt = None
         self.adapter = None
         self.action_ledger.close()
         self._release_owned_runtime_handle()
@@ -612,6 +615,21 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
         if self._frame_clock is None:
             raise StaleFrameError()
         previous_frame_id = self._frame_clock.current_frame_id
+        # A complete publication can temporarily age while Unity changes pages.
+        # Waiting for a genuinely fresh frame is observation I/O, independent
+        # of which task owns that page. Keep the existing 30s bound; retries
+        # never accept old data or renew their own acquisition deadline.
+        stale_observation_deadline = time.monotonic() + 30.0
+        # A running native OS or META combat can enter a Unity loading gap
+        # without another adapter click. Use the last proven CombatUI probe
+        # to cover that handoff with the existing 30s OS observation window.
+        # Capture once: stale retries cannot renew their own deadline.
+        combat_observation_deadline = (
+            getattr(self, '_daily_combat_seen_at', float('-inf')) + 30.0
+            if any(getattr(self.adapter, name, False) for name in (
+                '_operation_siren_auto_search_active', '_meta_beacon_active', '_meta_assist_active'))
+            else 0.0
+        )
         # A Unity transition can keep changing the full hierarchy while the
         # atomic Button/state endpoint is already healthy.  ALAS screenshots
         # are polling boundaries, so retry only this explicit cross-generation
@@ -627,6 +645,11 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                 ObserverTransportError,
             ) as exc:
                 message = str(exc)
+                passive_stale_retry = bool(
+                    isinstance(exc, SemanticSnapshotStale)
+                    and not exc.input_outcome_uncertain
+                    and time.monotonic() <= stale_observation_deadline
+                )
                 # Legacy observers may publish every two seconds. After a
                 # committed input, wait for a newer generation instead of
                 # retrying the same invalidated frame only for 300 ms.
@@ -729,9 +752,24 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                     and attempt < 199
                 )
                 semantic_adapter = self.open()
+                tactical_context = getattr(semantic_adapter, "_commission_context", None)
+                tactical_transition_retry = bool(
+                    tactical_context is not None
+                    and tactical_context.flow_kind == "tactical"
+                    and time.monotonic() <= tactical_context.passive_transition_until
+                    and (
+                        isinstance(exc, StaleFrameError)
+                        or isinstance(exc, SemanticGateClosed) and message in (
+                            "observer snapshot is stale",
+                            "observer endpoints are not generation-coherent",
+                            "semantic frame mixes UI and state generations",
+                        )
+                    )
+                )
                 in_operation_siren_transition = bool(
                     time.monotonic()
                     <= max(
+                        combat_observation_deadline,
                         float(
                             getattr(
                                 semantic_adapter,
@@ -771,7 +809,6 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                             )
                         )
                     )
-                    and attempt < 79
                 )
                 retryable = retryable or bool(
                     in_login_transition and isinstance(exc, ObserverTransportError)
@@ -792,15 +829,27 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
                     )
                 )
                 retryable = retryable or initial_game_startup_retry
+                private_room_retry = bool(
+                    time.monotonic() <= getattr(self.adapter, '_private_quarters_transition_until', 0.0)
+                    and isinstance(exc, SemanticGateClosed)
+                    and message in ('observer snapshot is stale',
+                                    'observer endpoints are not generation-coherent',
+                                    'semantic frame mixes UI and state generations',
+                                    'typed main-thread UI probe is incomplete')
+                )
+                retryable = retryable or private_room_retry
                 if not retryable or (
                     attempt >= 2
                     and not input_generation_retry
+                    and not passive_stale_retry
                     and not initial_game_startup_retry
                     and not extended_login_retry
                     and not stale_login_update_wait
                     and not extended_combat_result_retry
                     and not extended_campaign_retry
                     and not extended_operation_siren_retry
+                    and not tactical_transition_retry
+                    and not private_room_retry
                 ):
                     raise
                 attempt += 1
@@ -831,12 +880,17 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
         if self._login_update_restart_performed:
             return False
         adapter = self.open()
-        if adapter.oracle.enabled("overlay/network-reconnect/confirm"):
-            # The exact NetworkDown prompt is mutually exclusive with the
-            # reviewed update-restart contract.  Let the original following
-            # handle_popup_confirm("UI_ADDITIONAL") branch consume it.
-            return False
         try:
+            if getattr(adapter._frame_or_live_observation_oracle(),
+                       'operation_siren_energy_submission_prompt_visible', lambda: False)():
+                # This reviewed item-panel Msgbox reuses the update dialog's
+                # custom button. Its native popup handler owns it; it is not
+                # an incomplete login restart candidate.
+                return False
+            if adapter.oracle.enabled("overlay/network-reconnect/confirm"):
+                # Probe within the same boot grace as the update owner. The
+                # following original popup branch owns actual reconnect input.
+                return False
             explicit_prompt = adapter.login_update_restart_prompt_available()
         except (SemanticGateClosed, ObserverTransportError) as exc:
             if self._login_probe_is_transient(adapter, exc):

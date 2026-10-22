@@ -1,0 +1,8 @@
+{
+  "compared_files": 150,
+  "differences": [
+    "module/campaign/run.py"
+  ],
+  "combined_patch_sha256": "706ca3726f0b17e2932c91ae637d75b4e1eb9a8d390e9cc8c90c35a85fc41f6e",
+  "note": "Retained mu-sp alias encoding in event_20240425_cn is unrelated and was not changed or exercised"
+}

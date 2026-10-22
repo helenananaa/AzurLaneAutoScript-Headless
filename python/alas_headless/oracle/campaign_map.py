@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import re
-from typing import Dict, Tuple
+from typing import Dict, Mapping, Tuple
 from .contracts import (
     CampaignMapCellState,
     CampaignMapEnemyState,
     CampaignMapFleetState,
+    CampaignMapSubmarineState,
     CampaignMapPickupState,
     CampaignMapState,
 )
@@ -25,10 +26,11 @@ class CampaignMapOracle:
         rows: int,
         land: Tuple[Tuple[int, int], ...],
         expected_fleet_count: int,
+        allow_deployment: bool = False,
     ) -> CampaignMapState:
         button_state = self.read_state()
         ui_state = self.read_ui_state()
-        entry = self._campaign_map_entry_state_from_snapshots(button_state, ui_state)
+        entry = self._campaign_map_entry_state_from_snapshots(button_state, ui_state, allow_deployment=allow_deployment)
         if ui_state.image_truncated:
             raise SemanticGateClosed("campaign map Image snapshot is truncated")
 
@@ -99,7 +101,7 @@ class CampaignMapOracle:
             ):
                 raise SemanticGateClosed("campaign map grid topology is invalid")
             world_value = button.raw.get("world_position")
-            if not isinstance(world_value, dict):
+            if not isinstance(world_value, Mapping):
                 raise SemanticGateClosed("campaign map grid world position is absent")
             cell_world_positions[coordinate] = tuple(
                 self._finite_number(
@@ -180,9 +182,9 @@ class CampaignMapOracle:
             # remains a separate typed-node contract; this prefix alone must
             # never set ``is_siren``.
             sprite_match = re.fullmatch(r"(?:sr)?(qx|qz|zl|hm|ys)([123])", image.sprite)
-            emotion_match = re.fullmatch(r"emotion_(qx|qz|zl|hm|ys)", image.sprite)
+            emotion_match = re.fullmatch(r"(?:emotion_|ghost)(qx|qz|zl|hm|ys)", image.sprite)
             cleared_sprite_match = re.fullmatch(
-                r"(?:(?:sr)?(?:qx|qz|zl|hm|ys)[123]|emotion_(?:qx|qz|zl|hm|ys))_d_blue",
+                r"(?:(?:sr)?(?:qx|qz|zl|hm|ys)[123]|(?:emotion_|ghost)(?:qx|qz|zl|hm|ys))_d_blue",
                 image.sprite,
             )
             boss_title_images = tuple(
@@ -422,6 +424,19 @@ class CampaignMapOracle:
         if attachment_roots != enemy_roots | cleared_enemy_roots | supply_roots:
             raise SemanticGateClosed("campaign map contains an unsupported attachment")
 
+        submarine_destination_node = None
+        if allow_deployment:
+            destination_pattern = re.compile(re.escape(cell_root) + r'chapter_cell_([0-9]+)_([0-9]+)/Tpl_Destination_Mark\(Clone\)$')
+            destinations = [image for image in active_images if destination_pattern.fullmatch(image.path)
+                            and image.sprite == 'destination_mark']
+            if len(destinations) > 1:
+                raise SemanticGateClosed('submarine destination is ambiguous')
+            if destinations:
+                match = destination_pattern.fullmatch(destinations[0].path)
+                row, column = logical_coordinate(int(match.group(1)), int(match.group(2)))
+                if (row, column) not in cells_by_coordinate:
+                    raise SemanticGateClosed('submarine destination is outside ALAS topology')
+                submarine_destination_node = cells_by_coordinate[(row, column)].node
         fleet_marker_pattern = re.compile(
             re.escape(cell_root) + r"(cell_fleet_[A-Za-z0-9_]+)/"
         )
@@ -431,11 +446,19 @@ class CampaignMapOracle:
             for match in (fleet_marker_pattern.match(item.path),)
             if match is not None
         }
+        submarine_markers = {marker for marker in fleet_markers if any(
+            image.path == cell_root + marker + '/mark' and image.sprite == 'qianting_icon'
+            for image in active_images)}
+        if len(submarine_markers) > 1:
+            raise SemanticGateClosed('campaign submarine identity is ambiguous')
+        all_fleet_markers = fleet_markers
+        fleet_markers = fleet_markers - submarine_markers
         if len(fleet_markers) != expected_fleet_count:
             raise SemanticGateClosed("campaign map fleet count is unexpected")
         fleets = []
+        submarine = None
         occupied_nodes = set()
-        for marker in sorted(fleet_markers):
+        for marker in sorted(all_fleet_markers):
             root = cell_root + marker
             ammo_matches = tuple(
                 item for item in active_texts if item.path == root + "/ammo/text"
@@ -443,26 +466,36 @@ class CampaignMapOracle:
             anchor_matches = tuple(
                 image for image in active_images if image.path == root + "/ammo/bg"
             )
+            hidden_submarine_ammo = (marker in submarine_markers
+                                     and not ammo_matches and not anchor_matches)
+            if hidden_submarine_ammo:
+                # Both widgets are hidden during hunting. The observer exports
+                # the same cell_fleet ancestor position on its exact sub mark.
+                anchor_matches = tuple(image for image in active_images
+                    if image.path == root + '/mark' and image.sprite == 'qianting_icon')
             if (
-                len(ammo_matches) != 1
+                (not hidden_submarine_ammo and len(ammo_matches) != 1)
                 or len(anchor_matches) != 1
-                or anchor_matches[0].sprite != "danyao_bar"
+                or (not hidden_submarine_ammo and anchor_matches[0].sprite != "danyao_bar")
             ):
                 raise SemanticGateClosed("campaign map fleet details are incomplete")
-            ammo_text = ammo_matches[0].text.strip()
-            zero_ammo = re.fullmatch(
-                r"<color=#FF5C5CFF>(0/[1-9][0-9]*)</color>", ammo_text
-            )
-            if zero_ammo is not None:
-                ammo_text = zero_ammo.group(1)
-            ammo_match = re.fullmatch(r"([0-9]+)/([1-9][0-9]*)", ammo_text)
-            if ammo_match is None:
-                raise SemanticGateClosed("campaign map fleet ammo is malformed")
-            ammo, capacity = map(int, ammo_match.groups())
-            if ammo > capacity:
-                raise SemanticGateClosed("campaign map fleet ammo exceeds capacity")
+            if hidden_submarine_ammo:
+                ammo = capacity = None
+            else:
+                ammo_text = ammo_matches[0].text.strip()
+                zero_ammo = re.fullmatch(
+                    r"<color=#FF5C5CFF>(0/[1-9][0-9]*)</color>", ammo_text
+                )
+                if zero_ammo is not None:
+                    ammo_text = zero_ammo.group(1)
+                ammo_match = re.fullmatch(r"([0-9]+)/([1-9][0-9]*)", ammo_text)
+                if ammo_match is None:
+                    raise SemanticGateClosed("campaign map fleet ammo is malformed")
+                ammo, capacity = map(int, ammo_match.groups())
+                if ammo > capacity:
+                    raise SemanticGateClosed("campaign map fleet ammo exceeds capacity")
             anchor_value = anchor_matches[0].raw.get("anchor_world_position")
-            if not isinstance(anchor_value, dict):
+            if not isinstance(anchor_value, Mapping):
                 raise SemanticGateClosed("campaign map fleet world anchor is absent")
             anchor = tuple(
                 self._finite_number(
@@ -482,6 +515,12 @@ class CampaignMapOracle:
             if len(distances) > 1 and abs(distances[1][0] - distances[0][0]) <= 0.05**2:
                 raise SemanticGateClosed("campaign map fleet world anchor is ambiguous")
             matched_cell = cells_by_coordinate[distances[0][1]]
+            if marker in submarine_markers:
+                # A submarine may share a cell with a surface fleet; it is
+                # not a third surface fleet or a duplicate map model.
+                submarine = CampaignMapSubmarineState(marker=marker, node=matched_cell.node,
+                    ammo=ammo, ammo_capacity=capacity)
+                continue
             if matched_cell.node in occupied_nodes:
                 raise SemanticGateClosed("campaign map fleet location is ambiguous")
             fleets.append(
@@ -574,6 +613,14 @@ class CampaignMapOracle:
                 "campaign map fighting enemy disagrees with current fleet"
             )
 
+        hunting_nodes = set()
+        for image in active_images:
+            match = re.fullmatch(re.escape(grid_root) + r'/DragLayer/plane/buttomMarks/chapter_cell_mark_([0-9]+)_([0-9]+)#[0-9]+', image.path)
+            if match and image.sprite == 'cell_hunting_range':
+                coordinate = logical_coordinate(*map(int, match.groups()))
+                if coordinate not in expected_cells:
+                    raise SemanticGateClosed('submarine hunting range lies outside the map')
+                hunting_nodes.add(self._campaign_map_node(*coordinate))
         return CampaignMapState(
             generation=max(button_state.generation, ui_state.generation),
             stage_code=stage_code,
@@ -597,6 +644,9 @@ class CampaignMapOracle:
             displayed_fleet_index=displayed_fleet_index,
             current_fleet_marker=current_fleet_marker,
             current_fleet_roster_sprites=roster_sprites,
+            submarine=submarine,
+            submarine_destination_node=submarine_destination_node,
+            submarine_hunting_nodes=tuple(sorted(hunting_nodes)) if hunting_nodes else None,
         )
 
     def campaign_is_in_map(self) -> bool:
@@ -627,6 +677,17 @@ class CampaignMapOracle:
         if self.daily_battle_result_visible():
             return False
 
+        # A scheduler task can inherit the ready Operation Siren globe.
+        # Report this reviewed non-campaign surface to ALAS; its own UI graph
+        # chooses how to leave it before starting the campaign.
+        if self.operation_siren_globe_visible():
+            return False
+
+        if self.retirement_selection_visible() or self.enhancement_dock_visible():
+            # Original retirement recovery navigates through these exact
+            # non-map surfaces before returning to the campaign map.
+            return False
+
         state = self.read_state()
         non_map_targets = (
             "login/enter",
@@ -645,6 +706,7 @@ class CampaignMapOracle:
             "research-menu/page/back",
             "research/page/back",
             "tactical/page/back",
+            "daily/page/back",
         )
         observed = tuple(
             semantic_id
@@ -652,5 +714,16 @@ class CampaignMapOracle:
             if self._matches(state, semantic_id)
         )
         if observed:
+            return False
+        if (self._matches(state, "shop/home")
+                and self.recommendation_shop_visible()):
+            # Freebies leaves the reviewed Shop shell mounted. The native
+            # Campaign page graph owns leaving it before stage admission.
+            return False
+        if (self.meta_character_page_visible() or self.meta_character_menu_visible()
+                or self.meta_page_visible()):
+            # A native Campaign run may inherit any already reviewed META
+            # page. This passive absence lets ALAS use its existing UI graph;
+            # it grants neither map entry nor an input to the inherited page.
             return False
         raise SemanticGateClosed("campaign startup surface is not reviewed")

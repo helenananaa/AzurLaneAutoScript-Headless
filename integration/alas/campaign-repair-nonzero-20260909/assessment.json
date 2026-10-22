@@ -1,0 +1,92 @@
+{
+  "schema": "alas-headless.campaign-repair-assessment/v1",
+  "passed": true,
+  "scope": "original Main recovery on retained 10-2 map from r7; one repair and withdrawal, not a fresh-sortie single-process qualification",
+  "fleet": [
+    6,
+    1,
+    0
+  ],
+  "game_package": "com.bilibili.azurlane",
+  "version_name": "9.7.10",
+  "version_code": 9710,
+  "repair": {
+    "open": {
+      "semantic_id": "campaign/repair/open",
+      "generation": 43116,
+      "point": {
+        "x": 118.8,
+        "y": 534.133
+      },
+      "bounds": {
+        "left": 88.4,
+        "top": 503.733,
+        "right": 149.2,
+        "bottom": 564.533
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ChapterPreCombatUI(Clone)/adapt/middle/strategy",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    "use": {
+      "semantic_id": "campaign/repair/use",
+      "generation": 43153,
+      "point": {
+        "x": 755.667,
+        "y": 450.4
+      },
+      "bounds": {
+        "left": 664.667,
+        "top": 416.733,
+        "right": 846.667,
+        "bottom": 484.067
+      },
+      "path": "OverlayCamera/Overlay/UIMain/strategy_info/window/panel/actions/use_button",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    "count_before": 3,
+    "count_after": 2,
+    "hp_before": [
+      1.0,
+      1.0,
+      1.0,
+      0.99,
+      0.9934,
+      0.9844
+    ],
+    "hp_after": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "post_generation": 43189
+  },
+  "initial_oil": 13790,
+  "final_oil": 13580,
+  "oil_net_consumed": 210,
+  "completed_battles_all_attempts": 5,
+  "repair_items_used": 1,
+  "tests_passed": 151,
+  "failures": {
+    "r1": "unreviewed all-fleet role configuration, before sortie",
+    "r2": "transient repair hit target unavailable after first battle",
+    "r3": "retained enemy-covered grid ambiguity",
+    "r4": "session defensive observer hid repair confirmation",
+    "r5": "session generic combat action rejected repair confirmation",
+    "r6": "diagnostic withdrawal ran before transient preparation matched",
+    "r7": "navigation budget exhausted after first battle"
+  },
+  "sha256": {
+    "python/alas_headless/adapter/semantic/campaign_health.py": "f85d7f9c3a2527a2ad15f51c9c1e68a7724cdfcd3f8f19a07044f64bd3999103",
+    "python/alas_headless/adapter/semantic/session_dispatch.py": "c83bb888caed93cad6d0cbcdda2273100613bc263530c1524dea7cfc0f718ab6",
+    "scripts/python/run_alas_main_task_live_validation.py": "e018acc2859815b1110daecf8dd84b53b85051181709e7eadeb5b69af46cfcae",
+    "integration/alas/series/series.json": "f40b2ae57d392303b1ca924f89510ced92624ca0cad9319453e1a715d84de32b",
+    "integration/alas/0001-semantic-oracle-hooks.patch": "4e72555a0d99be9d910bc44e08889cb460a6d040de3304e08174be011b58651c",
+    "python/alas_headless/alas_hp_control_config_replay.py": "1aca845f6a6f9fdfef3f023db2723573b2bad9c77ed717935a452b605b83fb1b"
+  },
+  "support_matrix_tests_passed": 8
+}

@@ -168,7 +168,7 @@ class AwakenOracle:
         require_entry: bool = True,
     ) -> AwakenDetailState:
         state = self.read_state()
-        ui_state = self.read_ui_state()
+        ui_state = self.read_ui_state(check_foreground=False)
         if not state.generation <= ui_state.generation <= state.generation + 2:
             raise SemanticGateClosed("awaken detail snapshots are not coherent")
         name = self._awaken_text(
@@ -227,7 +227,7 @@ class AwakenOracle:
         for attempt in range(30):
             state = self.read_state()
             try:
-                ui_state = self.read_ui_state()
+                ui_state = self.read_ui_state(check_foreground=False)
                 break
             except SemanticGateClosed as exc:
                 last_error = exc
@@ -342,7 +342,9 @@ class AwakenOracle:
             expected_level=detail.level,
         )
         state = self.read_state()
-        ui_state = self.read_ui_state()
+        ui_state = self.read_ui_state(check_foreground=False)
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed('awaken entry snapshots are not coherent')
         tip_path = "/ShipDetailView(Clone)/attrs/attrs/property/level_bg/tip"
         tips = tuple(
             item
@@ -402,8 +404,15 @@ class AwakenOracle:
     def awaken_cost_state(self, ship_id: int, ship_name: str) -> AwakenCostState:
         """Read exact currencies and level transition from the open modal."""
 
+        return self._retry_transition_read(
+            lambda: self._awaken_cost_state_once(ship_id, ship_name),
+            attempts=4, interval_seconds=0.05,
+        )
+
+    def _awaken_cost_state_once(self, ship_id: int, ship_name: str) -> AwakenCostState:
+
         state = self.read_state()
-        ui_state = self.read_ui_state()
+        ui_state = self.read_ui_state(check_foreground=False)
         if not state.generation <= ui_state.generation <= state.generation + 2:
             raise SemanticGateClosed("awaken modal snapshots are not coherent")
         root = "OverlayCamera/Overlay/UIMain/ShipCustomMsgBox(Clone)"
@@ -493,7 +502,9 @@ class AwakenOracle:
         self, semantic_id: str, name: str, label: str
     ) -> ActionReceipt:
         state = self.read_state()
-        ui_state = self.read_ui_state()
+        ui_state = self.read_ui_state(check_foreground=False)
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed('awaken input snapshots are not coherent')
         path = (
             "OverlayCamera/Overlay/UIMain/ShipCustomMsgBox(Clone)/frame/btns/"
             + name
@@ -523,6 +534,8 @@ class AwakenOracle:
             raise SemanticGateClosed(semantic_id + " is incomplete")
         target = buttons[0]
         assert target.point is not None and target.bounds is not None
+        if target.raycast_top is False or self._blocking_rules(state, semantic_id):
+            raise SemanticGateClosed('awaken modal input is covered')
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("game activity changed before awaken modal input")
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
@@ -608,7 +621,10 @@ class AwakenOracle:
         )
         while time.monotonic() < deadline:
             state = self.read_state()
-            ui_state = self.read_ui_state()
+            ui_state = self.read_ui_state(check_foreground=False)
+            if not state.generation <= ui_state.generation <= state.generation + 2:
+                self._sleep(0.1)
+                continue
             messages = tuple(
                 item
                 for item in ui_state.texts

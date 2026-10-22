@@ -1,0 +1,51 @@
+{
+  "completed_battles_before": 0,
+  "selection_before": {
+    "generation": 15724,
+    "capacity_used": 930,
+    "capacity_total": 930,
+    "selected_count": 0
+  },
+  "map_ui_objects_before": {
+    "pid": 1614,
+    "cells": {
+      "chapter_cell_quad_7_8": -210068,
+      "chapter_cell_quad_7_7": -210036,
+      "chapter_cell_quad_7_5": -209990,
+      "chapter_cell_quad_7_4": -209958,
+      "chapter_cell_quad_7_3": -209926,
+      "chapter_cell_quad_7_2": -209894,
+      "chapter_cell_quad_7_1": -209862,
+      "chapter_cell_quad_6_8": -209830,
+      "chapter_cell_quad_6_7": -209798,
+      "chapter_cell_quad_6_5": -209752,
+      "chapter_cell_quad_6_4": -209720,
+      "chapter_cell_quad_6_1": -209660,
+      "chapter_cell_quad_5_7": -209614,
+      "chapter_cell_quad_5_6": -209582,
+      "chapter_cell_quad_5_5": -209550,
+      "chapter_cell_quad_5_2": -209490,
+      "chapter_cell_quad_5_1": -209458,
+      "chapter_cell_quad_4_7": -209412,
+      "chapter_cell_quad_4_6": -209380,
+      "chapter_cell_quad_4_5": -209348,
+      "chapter_cell_quad_4_2": -209288,
+      "chapter_cell_quad_4_1": -209256,
+      "chapter_cell_quad_3_8": -209224,
+      "chapter_cell_quad_3_7": -209192,
+      "chapter_cell_quad_3_5": -209146,
+      "chapter_cell_quad_3_4": -209114,
+      "chapter_cell_quad_3_1": -209054,
+      "chapter_cell_quad_2_8": -209022,
+      "chapter_cell_quad_2_7": -208990,
+      "chapter_cell_quad_2_5": -208944,
+      "chapter_cell_quad_2_4": -208912,
+      "chapter_cell_quad_2_3": -208880,
+      "chapter_cell_quad_2_2": -208848,
+      "chapter_cell_quad_2_1": -208816
+    }
+  },
+  "sortie_generation_before": null,
+  "map_before": null,
+  "error": "SemanticGateClosed('equipment selection did not clear')"
+}

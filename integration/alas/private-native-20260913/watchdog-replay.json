@@ -1,0 +1,8 @@
+{
+  "old_alias_collision_rejected": true,
+  "distinct_views_allowed": true,
+  "repeated_same_control_rejected": true,
+  "two_control_loop_rejected": true,
+  "source_sha256": "c2e6d737d1b412038c53c7d62b86bccb1ab644b13714bf002b52ad63f066749d",
+  "passed": true
+}

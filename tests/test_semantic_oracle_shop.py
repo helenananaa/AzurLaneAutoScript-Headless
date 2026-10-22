@@ -1,11 +1,14 @@
 """Shop regression cases for the oracle."""
 
+import copy
 import unittest
+from unittest import mock
 from alas_headless.semantic_oracle import SemanticGateClosed
 from tests.semantic_support.observer_fixtures import (
     FakeBackend,
     make_button,
     make_buttons,
+    make_snapshot,
     make_image,
     make_oracle,
     make_text,
@@ -168,6 +171,34 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         self.assertEqual((items[9].cost, items[9].price), ("Gems", 80))
         self.assertEqual(oracle.shop_currency_balance("Coins"), 35709)
         self.assertEqual(oracle.shop_currency_balance("Gems"), 5022)
+
+        # Re-read both snapshots after an actual generation split; no tap and
+        # no widened coherence tolerance. Supply-page identity is unchanged.
+        original_visible = oracle.munitions_page_visible
+        oracle.munitions_page_visible = mock.Mock(return_value=True)
+        split = copy.deepcopy(backend.ui)
+        split["generation"] = 13
+        settled = copy.deepcopy(backend.ui)
+        settled["generation"] = 20
+        backend.snapshot_sequence = [make_snapshot(generation=10), make_snapshot(generation=20)]
+        backend.ui_sequence = [split, settled]
+        recovered = oracle.general_shop_items()
+        self.assertEqual(len(recovered), 10)
+        self.assertEqual(recovered[1].price, 2000)
+        self.assertEqual(backend.taps, [])
+        backend.snapshot_sequence = [make_snapshot(generation=g) for g in (30,40,50,60)]
+        backend.ui_sequence = []
+        for generation in (33,43,53,63):
+            split_frame = copy.deepcopy(split)
+            split_frame["generation"] = generation
+            backend.ui_sequence.append(split_frame)
+        with self.assertRaisesRegex(SemanticGateClosed, "snapshots are not coherent"):
+            oracle.general_shop_items()
+        self.assertEqual(backend.taps, [])
+        oracle.munitions_page_visible = original_visible
+        backend.snapshot = make_snapshot(generation=70)
+        backend.buttons["generation"] = 70
+        backend.ui["generation"] = 70
 
         backend.ui["images"][-2]["sprite"] = "unknown"
         with self.assertRaisesRegex(SemanticGateClosed, "currency is unknown"):

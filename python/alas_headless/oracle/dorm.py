@@ -9,6 +9,7 @@ from .contracts import (
     ButtonState,
     DormFeedState,
     DormFoodState,
+    DormFoodShopState,
     DormFurniturePurchaseState,
     DormFurnitureShopBalance,
     DormFurnitureThemePurchaseState,
@@ -23,8 +24,100 @@ from .errors import SemanticGateClosed
 class DormOracle:
     """Dorm operations sharing the oracle frame and input boundary."""
 
+    def _dorm_food_shop_control_proven(self, state, semantic_id, ui_state=None):
+        if semantic_id not in ('dorm/feed/shop/open', 'dorm/feed/shop/plus',
+                               'dorm/feed/shop/minus', 'dorm/feed/shop/cancel', 'dorm/feed/shop/confirm'):
+            return False
+        if not self._matches(state, semantic_id):
+            return False
+        target = self._unique(state, semantic_id)
+        if (target.raycast_top is False or not target.active_in_hierarchy
+                or not target.active_and_enabled or not target.interactable
+                or target.point is None or target.bounds is None
+                or not target.bounds.contains(target.point)
+                or not (0 <= target.point.x < self.fingerprint.width
+                        and 0 <= target.point.y < self.fingerprint.height)
+                or self._blocking_rules(state, semantic_id)):
+            return False
+        if target.actionable:
+            return True
+        owner_id = ('dorm/feed/close' if semantic_id.endswith('/open')
+                    else 'dorm/feed/shop/cancel')
+        if not self._matches(state, owner_id):
+            return False
+        owner = self._unique(state, owner_id)
+        if (not owner.active_in_hierarchy or not owner.active_and_enabled
+                or not owner.interactable or owner.point is None or owner.bounds is None
+                or not owner.bounds.contains(owner.point) or owner.raycast_top is False):
+            return False
+        ui = ui_state if ui_state is not None else self.read_ui_state()
+        if ui.image_truncated or not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('dorm food control snapshots are incomplete')
+        for button in (target, owner):
+            if button.actionable:
+                continue
+            images = tuple(i for i in ui.images if i.path == button.path
+                           and i.active_in_hierarchy and i.active_and_enabled)
+            if len(images) != 1:
+                raise SemanticGateClosed('dorm food control image is absent or ambiguous')
+            image = images[0]
+            if (image.truncated or not image.sprite or not image.raycast_target
+                    or image.raycast_top is False or image.bounds is None
+                    or not image.bounds.contains(button.point)):
+                return False
+        return True
+
+    def dorm_food_shop_visible(self) -> bool:
+        return self.enabled('dorm/feed/shop/cancel')
+
+    def dorm_food_shop_curry_stock(self):
+        ui = self.read_ui_state()
+        counts = tuple(text for text in ui.texts if text.path.endswith(
+            'BackYardFeedUI(Clone)/frame/food_50004/icon_bg/count')
+            and text.active_in_hierarchy and text.active_and_enabled
+            and not text.truncated and text.bounds is not None)
+        if len(counts) != 1 or not re.fullmatch(r'[0-9]+', counts[0].text.strip()):
+            raise SemanticGateClosed('dorm purchase curry stock is absent or ambiguous')
+        return int(counts[0].text.strip())
+
+    def dorm_food_shop_state(self) -> DormFoodShopState:
+        state = self.read_state()
+        cancel = self._unique(state, 'dorm/feed/shop/cancel')
+        ui = self.read_ui_state()
+        if (not cancel.actionable and not self._dorm_food_shop_control_proven(
+                state, 'dorm/feed/shop/cancel', ui)) or self._blocking_rules(state, 'dorm/feed/shop/cancel'):
+            raise SemanticGateClosed('dorm food shop identity is not proven')
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('dorm food shop snapshots are not coherent')
+        prefix = 'BackYardFeedUI(Clone)/BackYardFeedShopPanel(Clone)/frame/'
+        def text(suffix):
+            matches = [t for t in ui.texts if t.path.endswith(prefix + suffix)
+                       and t.active_in_hierarchy and t.active_and_enabled
+                       and not t.truncated and t.bounds is not None]
+            if len(matches) != 1:
+                raise SemanticGateClosed('dorm food shop text is absent or ambiguous: ' + suffix)
+            return re.sub(r'<[^>]*>', '', matches[0].text).strip()
+        def sprite(suffix):
+            matches = [i for i in ui.images if i.path.endswith(prefix + suffix)
+                       and i.active_in_hierarchy and i.active_and_enabled
+                       and not i.truncated and i.sprite]
+            if ui.image_truncated or len(matches) != 1:
+                raise SemanticGateClosed('dorm food shop sprite is absent or ambiguous: ' + suffix)
+            return matches[0].sprite
+        quantity, total = text('cal_panel/value/Text'), text('cal_panel/total/Text')
+        if not re.fullmatch(r'[1-9][0-9]*', quantity) or not re.fullmatch(r'[0-9]+', total):
+            raise SemanticGateClosed('dorm food shop quantity or cost is malformed')
+        return DormFoodShopState(state.generation, text('name'), int(quantity), int(total),
+                                 sprite('cal_panel/total/icon'), sprite('icon_bg/icon'))
+
     def dorm_state(self) -> DormState:
         """Read the dorm summary without opening a mutating sub-page."""
+
+        # A one-click collection briefly covers the summary with native tips.
+        # Wait for the complete read to pass; never repeat the collection input.
+        return self._retry_transition_read(self._dorm_state_once, attempts=24)
+
+    def _dorm_state_once(self) -> DormState:
 
         button_state = self.read_state()
         page = self._unique(button_state, "dorm/page/manage")

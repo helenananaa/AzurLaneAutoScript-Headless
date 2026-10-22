@@ -237,7 +237,7 @@ def _verify_contract() -> tuple[int, int]:
                 invalid += 1
             else:
                 raise AssertionError("invalid PrivateQuarters boolean was admitted")
-    for value in ("Anchorage", "anchorage ", None, True, 0, [], {}):
+    for value in ("", " ", None, True, 0, [], {}):
         try:
             validate_alas_private_quarters_config(
                 **_settings(target_ship=value)
@@ -387,7 +387,7 @@ def verify_private_quarters_config(alas_root: Path) -> dict[str, object]:
         } or invalid_run:
             raise AssertionError("PrivateQuarters shop eligibility or gate order drifted")
         try:
-            _shop_item_case(item_type, genre="roses", currency=0, gems=0, **_settings(target_ship="invalid"))
+            _shop_item_case(item_type, genre="roses", currency=0, gems=0, **_settings(target_ship=""))
         except SemanticGateClosed:
             pass
         else:

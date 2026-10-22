@@ -60,7 +60,7 @@ class AlasHardConfigTests(unittest.TestCase):
 
     def test_invalid_stage_and_fleet_values_fail_closed(self):
         for field, value in (
-            ("stage", "17-1"),
+            ("stage", "-1-1"),
             ("stage", "1-5"),
             ("stage", "campaign_1_1junk"),
             ("stage", None),

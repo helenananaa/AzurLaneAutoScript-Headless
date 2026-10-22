@@ -1,0 +1,21 @@
+diff --git a/module/dorm/dorm.py b/module/dorm/dorm.py
+--- a/module/dorm/dorm.py
++++ b/module/dorm/dorm.py
+@@ -549,6 +549,17 @@
+                 continue
+ 
+     def dorm_food_run(self, amount):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is None or amount <= 0:
++            return self._dorm_food_run_alas_state_machine(amount)
++        semantic_adapter.begin_dorm(commission_recovery=True)
++        try:
++            # Original Commission still owns OilMaxed and the food quantity.
++            return self._dorm_food_run_alas_state_machine(amount)
++        finally:
++            semantic_adapter.end_dorm()
++
++    def _dorm_food_run_alas_state_machine(self, amount):
+         """
+         Args:
+             amount (int): amount of food to buy

@@ -23,28 +23,32 @@ def write_json(path: Path, value: object) -> None:
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def validate(alas_root: Path, seed_config: str, driver_revision: str, mode: str,
-             low_hp_threshold: float, expect_outcome: str,
-             execute_budget: int, refresh_budget: int) -> dict:
+def validate(alas_root: Path, seed_config: str, serial: str,
+             driver_revision: str, mode: str, strategy: str,
+             opponent_trial: int, low_hp_threshold: float, expect_outcome: str,
+             execute_budget: int, refresh_budget: int,
+             navigate_from_chapter: bool = False) -> dict:
     seed = json.loads((alas_root / "config" / (seed_config + ".json")).read_text(encoding="utf-8"))
-    serial = seed["Alas"]["Emulator"]["Serial"]
     package = seed["Alas"]["Emulator"]["PackageName"]
     subprocess.run(("adb", "-s", serial, "shell", "pidof", package), check=True,
                    capture_output=True, timeout=30)
     payload = copy.deepcopy(seed)
+    payload["Alas"]["Emulator"]["Serial"] = serial
     payload["Alas"]["Error"].update({"HandleError": False, "SaveError": False})
     payload["Exercise"]["Scheduler"]["Enable"] = False
     payload["Exercise"]["Exercise"].update({
-        "ExerciseStrategy": "aggressive",
+        "ExerciseStrategy": strategy,
         "OpponentChooseMode": mode,
-        "OpponentTrial": 1,
+        "OpponentTrial": opponent_trial,
         "LowHpThreshold": low_hp_threshold,
     })
     name = "codex_exercise_live_" + uuid.uuid4().hex
     config_path = alas_root / "config" / (name + ".json")
     write_json(config_path, payload)
-    result = {"passed": False, "mode": mode, "serial": serial,
+    result = {"passed": False, "mode": mode, "strategy": strategy,
+              "opponent_trial": opponent_trial, "serial": serial,
               "expect_outcome": expect_outcome,
+              "navigate_from_chapter": navigate_from_chapter,
               "execute_budget": execute_budget,
               "refresh_budget": refresh_budget}
     instance = None
@@ -69,6 +73,16 @@ def validate(alas_root: Path, seed_config: str, driver_revision: str, mode: str,
         instance = AzurLaneAutoScript(name)
         instance.config.bind("Exercise")
         instance.config.task = name_to_function("Exercise")
+        from module.exercise.exercise import Exercise
+        from module.ui.page import page_campaign, page_exercise
+
+        exercise = Exercise(config=instance.config, device=instance.device)
+        if navigate_from_chapter:
+            exercise.ui_ensure(page_campaign)
+            if not instance.device.semantic_adapter.open().oracle.campaign_page_is_normal():
+                raise RuntimeError("original ALAS did not reach a campaign chapter")
+            result["chapter_navigation_confirmed"] = True
+        exercise.ui_ensure(page_exercise)
         adapter = instance.device.semantic_adapter.open()
         if adapter.oracle.campaign_menu_is_entry():
             adapter.oracle.click_campaign_exercise_entrance()
@@ -134,6 +148,10 @@ def validate(alas_root: Path, seed_config: str, driver_revision: str, mode: str,
         started = time.monotonic()
         result["task_result"] = instance.run("exercise", skip_first_screenshot=False)
         result["elapsed_seconds"] = round(time.monotonic() - started, 3)
+        result["result_stack_receipts"] = [
+            receipt.semantic_id
+            for receipt in instance.device.semantic_adapter.complete_exercise_battle_result()
+        ]
         instance.device.semantic_adapter.exercise_wait_overview()
         after = adapter.oracle.exercise_remaining()
         result["remaining_after"] = after
@@ -141,11 +159,13 @@ def validate(alas_root: Path, seed_config: str, driver_revision: str, mode: str,
         result["refresh_grant_remaining"] = adapter._action_ledger.remaining("exercise.refresh")
         result["observed_outcome"] = (
             "complete" if after == before - 1 else
+            "no-action" if (after == before
+                            and result["execute_grant_remaining"] == execute_budget) else
             "low-hp-quit" if after == before else "unexpected"
         )
         expected_after = (
             (before - 1,) if expect_outcome == "complete" else
-            (before,) if expect_outcome == "low-hp-quit" else
+            (before,) if expect_outcome in ("low-hp-quit", "no-action") else
             (before - 1, before)
         )
         if result["task_result"] is not True or after not in expected_after:
@@ -154,8 +174,19 @@ def validate(alas_root: Path, seed_config: str, driver_revision: str, mode: str,
                     expect_outcome
                 )
             )
-        if result["execute_grant_remaining"] != 0 or result["refresh_grant_remaining"] != 0:
-            raise AssertionError("Exercise action budget did not close exactly")
+        expected_execute_remaining = (
+            execute_budget if result["observed_outcome"] == "no-action" else 0
+        )
+        if result["execute_grant_remaining"] != expected_execute_remaining:
+            raise AssertionError("Exercise execution budget did not match the outcome")
+        if expect_outcome == "auto" and result["observed_outcome"] not in (
+            "complete", "low-hp-quit", "no-action"
+        ):
+            raise AssertionError("Exercise automatic outcome is not classified")
+        if result["observed_outcome"] == "no-action" and strategy != "aggressive" and before > 5:
+            raise AssertionError("Exercise retained attempts without a proven preserve threshold")
+        if result["refresh_grant_remaining"] > refresh_budget:
+            raise AssertionError("Exercise refresh budget increased")
         result["passed"] = True
     except BaseException as exc:
         result["error"] = type(exc).__name__ + ": " + str(exc)
@@ -180,20 +211,26 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--alas-root", type=Path, required=True)
     parser.add_argument("--seed-config", default="semantic_e2e")
+    parser.add_argument("--serial", required=True)
     parser.add_argument("--driver-revision", required=True)
+    parser.add_argument("--strategy", choices=("aggressive", "sun18", "sun12", "sun0", "sat18", "sat12", "sat0", "fri18"), default="aggressive")
+    parser.add_argument("--opponent-trial", type=int, default=1)
     parser.add_argument("--mode", choices=("leftmost", "easiest", "max_exp", "easiest_else_exp"), default="easiest")
     parser.add_argument("--low-hp-threshold", type=float, default=0.0)
     parser.add_argument("--expect-outcome",
-                        choices=("complete", "low-hp-quit", "retry-terminal"),
+                        choices=("complete", "low-hp-quit", "retry-terminal", "no-action", "auto"),
                         default="complete")
     parser.add_argument("--execute-budget", type=int, default=1)
     parser.add_argument("--refresh-budget", type=int, default=0)
+    parser.add_argument("--navigate-from-chapter", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     output = args.output.resolve()
-    result = validate(args.alas_root.resolve(), args.seed_config, args.driver_revision,
-                      args.mode, args.low_hp_threshold, args.expect_outcome,
-                      args.execute_budget, args.refresh_budget)
+    result = validate(args.alas_root.resolve(), args.seed_config, args.serial,
+                      args.driver_revision, args.mode, args.strategy,
+                      args.opponent_trial, args.low_hp_threshold, args.expect_outcome,
+                      args.execute_budget, args.refresh_budget,
+                      args.navigate_from_chapter)
     output.parent.mkdir(parents=True, exist_ok=True)
     write_json(output, result)
     print(json.dumps(result, ensure_ascii=False, indent=2))

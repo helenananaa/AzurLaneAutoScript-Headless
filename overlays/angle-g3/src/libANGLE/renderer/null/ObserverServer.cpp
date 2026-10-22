@@ -72,6 +72,32 @@ bool SendAll(int socket, std::string_view response) {
   return true;
 }
 
+template <size_t Capacity>
+std::string_view ReceiveRequestLine(int client, char (&buffer)[Capacity]) {
+  static_assert(Capacity >= 2);
+  size_t used = 0;
+  while (used + 1 < Capacity) {
+    const ssize_t received = ANGLE_UNSAFE_BUFFERS(
+        recv(client, buffer + used, Capacity - used - 1, 0));
+    if (received < 0 && errno == EINTR) {
+      continue;
+    }
+    if (received <= 0) {
+      break;
+    }
+    used += static_cast<size_t>(received);
+    ANGLE_UNSAFE_BUFFERS(buffer[used] = '\0');
+    const std::string_view request(buffer, used);
+    if (request.find('\n') != std::string_view::npos) {
+      return request;
+    }
+  }
+  // EOF, timeout or a full unterminated line is never a request prefix.
+  // Clear it too: the parameter parsers below also inspect this C string.
+  buffer[0] = '\0';
+  return {};
+}
+
 void AppendJsonString(std::string *output, std::string_view value) {
   output->push_back('"');
   for (const unsigned char byte : value) {
@@ -229,7 +255,7 @@ std::string SemanticResponseFor(uid_t peerUid, const std::string &package,
     const int fieldCount = ANGLE_UNSAFE_TODO(std::snprintf(
         fields, sizeof(fields),
         ",\"flags\":%u,\"active_in_hierarchy\":%s,\"active_and_enabled\":%s,"
-        "\"interactable\":%s,\"raycast_top\":%s,\"canvas_render_mode\":%d,"
+        "\"interactable\":%s,\"raycast_top\":%s,\"canvas_render_mode\":%d,\"instance_id\":%d,\"click_listener_count\":%d,\"runtime_click_listener_count\":%d,"
         "\"world_position\":%s,\"local_rect\":%s,\"screen_point\":%s,"
         "\"adb_point\":%s,\"screen_bounds\":%s,\"adb_bounds\":%s}",
         button.flags, (button.flags & 0x1u) != 0 ? "true" : "false",
@@ -238,7 +264,8 @@ std::string SemanticResponseFor(uid_t peerUid, const std::string &package,
         (button.flags & 0x800u) != 0
             ? ((button.flags & 0x1000u) != 0 ? "true" : "false")
             : "null",
-        button.canvasRenderMode, (button.flags & 0x20u) != 0 ? "{}" : "null",
+        button.canvasRenderMode, button.instanceId, button.clickListenerCount, button.runtimeClickListenerCount,
+        (button.flags & 0x20u) != 0 ? "{}" : "null",
         (button.flags & 0x40u) != 0 ? "{}" : "null",
         (button.flags & 0x100u) != 0 ? "{}" : "null",
         (button.flags & 0x100u) != 0 ? "{}" : "null",
@@ -348,6 +375,7 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
       ",\"method_mask\":%u,\"toggle_count\":%u,\"text_count\":%u,"
       "\"image_count\":%u,\"toggle_truncated\":%s,\"text_truncated\":%s,"
       "\"image_truncated\":%s,\"error_count\":%u,"
+      "\"error_counts\":{\"toggle\":%u,\"text\":%u,\"image\":%u,\"shared\":%u},"
       "\"skipped_count\":%u,\"image_source_count\":%u,"
       "\"image_source_capacity\":%u,"
       "\"toggles\":[",
@@ -358,6 +386,9 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
       snapshot.imageCount, snapshot.toggleTruncated != 0 ? "true" : "false",
       snapshot.textTruncated != 0 ? "true" : "false",
       snapshot.imageTruncated != 0 ? "true" : "false", snapshot.errorCount,
+      snapshot.toggleErrorCount, snapshot.textErrorCount, snapshot.imageErrorCount,
+      snapshot.errorCount - snapshot.toggleErrorCount - snapshot.textErrorCount -
+          snapshot.imageErrorCount,
       snapshot.skippedCount, snapshot.imageSourceCount,
       snapshot.imageSourceCapacity));
   if (headerCount <= 0 || static_cast<size_t>(headerCount) >= sizeof(header)) {
@@ -490,7 +521,9 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
     response.append(",\"path\":");
     AppendJsonString(&response, BoundedStringView(record.path));
     response.append(",\"sprite\":");
-    AppendJsonString(&response, BoundedStringView(record.spriteName));
+    AppendJsonString(&response, (record.flags & 0x8u) != 0
+                                    ? BoundedStringView(record.spriteName)
+                                    : std::string_view());
     char fields[768];
     const int fieldCount = ANGLE_UNSAFE_TODO(std::snprintf(
         fields, sizeof(fields),
@@ -498,7 +531,7 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
         "\"active_and_enabled\":%s,\"raycast_target\":%s,\"raycast_top\":%s,"
         "\"color\":{\"red\":%.6f,\"green\":%.6f,\"blue\":%.6f,"
         "\"alpha\":%.6f},\"fill_amount\":%.6f,\"adb_bounds\":%s,"
-        "\"anchor_world_position\":%s}",
+        "\"anchor_world_position\":%s,\"adb_point\":%s}",
         record.flags, (record.flags & 0x1u) != 0 ? "true" : "false",
         (record.flags & 0x2u) != 0 ? "true" : "false",
         (record.flags & 0x40u) != 0 ? "true" : "false",
@@ -507,11 +540,30 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
             : "null",
         record.red, record.green, record.blue, record.alpha, record.fillAmount,
         (record.flags & 0x4u) != 0 ? "{}" : "null",
-        (record.flags & 0x800u) != 0 ? "{}" : "null"));
+        (record.flags & 0x800u) != 0 ? "{}" : "null",
+        (record.flags & 0x1000u) != 0 ? "{}" : "null"));
     if (fieldCount <= 0 || static_cast<size_t>(fieldCount) >= sizeof(fields)) {
       return {};
     }
     response.append(fields, static_cast<size_t>(fieldCount));
+    response.insert(response.size()-1, ",\"inherited_alpha\":");
+    if ((record.flags & 0x2000u) != 0) {
+      char alpha[64];
+      const int count = ANGLE_UNSAFE_TODO(std::snprintf(alpha, sizeof(alpha), "%.6f", record.inheritedAlpha));
+      if (count <= 0 || static_cast<size_t>(count) >= sizeof(alpha)) return {};
+      response.insert(response.size()-1, alpha, static_cast<size_t>(count));
+    } else response.insert(response.size()-1, "null");
+    if ((record.flags & 0x1000u) != 0) {
+      const std::string marker = "\"adb_point\":{}";
+      const size_t position = response.rfind(marker);
+      char value[128];
+      const int count = ANGLE_UNSAFE_TODO(std::snprintf(
+          value, sizeof(value), "\"adb_point\":{\"x\":%.3f,\"y\":%.3f}",
+          record.adbX, record.adbY));
+      if (position == std::string::npos || count <= 0 ||
+          static_cast<size_t>(count) >= sizeof(value)) return {};
+      response.replace(position, marker.size(), value, static_cast<size_t>(count));
+    }
     if ((record.flags & 0x4u) != 0) {
       const std::string marker = "\"adb_bounds\":{}";
       const size_t position = response.rfind(marker);
@@ -544,7 +596,294 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
                        static_cast<size_t>(count));
     }
   }
-  response.append("]}\n");
+  response.append("],\"globe_geometry\":{");
+  char globeFields[256];
+  const int globeCount = ANGLE_UNSAFE_TODO(std::snprintf(globeFields, sizeof(globeFields),
+      "\"schema\":\"alas-headless.globe-geometry/v1\",\"status\":%u,\"truncated\":%s,\"error_count\":%u,\"camera_path\":",
+      snapshot.globeObjectStatus, snapshot.globeObjectTruncated ? "true" : "false", snapshot.globeObjectErrors));
+  if (globeCount <= 0 || static_cast<size_t>(globeCount) >= sizeof(globeFields)) return {};
+  response.append(globeFields, static_cast<size_t>(globeCount));
+  AppendJsonString(&response, BoundedStringView(snapshot.globeCameraPath));
+  response.append(",\"objects\":[");
+  for (size_t i = 0; i < std::min(static_cast<size_t>(snapshot.globeObjectCount), snapshot.globeObjects.size()); ++i) {
+    const auto &record = snapshot.globeObjects[i];
+    if (i) response.push_back(',');
+    response.append("{\"name\":"); AppendJsonString(&response, BoundedStringView(record.name));
+    response.append(",\"path\":"); AppendJsonString(&response, BoundedStringView(record.path));
+    response.append(",\"ui_top_path\":"); AppendJsonString(&response, BoundedStringView(record.uiTopPath));
+    char values[768];
+    const int count = ANGLE_UNSAFE_TODO(std::snprintf(values, sizeof(values),
+        ",\"instance_id\":%d,\"truncated\":%s,\"world_center\":[%.6f,%.6f,%.6f],\"extents\":[%.6f,%.6f,%.6f],\"screen\":",
+        record.instanceId, (record.flags & 1u) ? "false" : "true", record.center[0], record.center[1], record.center[2],
+        record.extents[0], record.extents[1], record.extents[2]));
+    if (count <= 0 || static_cast<size_t>(count) >= sizeof(values)) return {};
+    response.append(values, static_cast<size_t>(count));
+    if (record.flags & 2u) {
+      const int n = ANGLE_UNSAFE_TODO(std::snprintf(values, sizeof(values), "[%.6f,%.6f,%.6f]", record.screen[0], record.screen[1], record.screen[2]));
+      if (n <= 0 || static_cast<size_t>(n) >= sizeof(values)) return {};
+      response.append(values, static_cast<size_t>(n));
+    } else response.append("null");
+    response.append(",\"port_anchor\":");
+    if (record.flags & 16u) {
+      const int n = ANGLE_UNSAFE_TODO(std::snprintf(values, sizeof(values), "[%.6f,%.6f,%.6f]", record.portAnchor[0], record.portAnchor[1], record.portAnchor[2]));
+      if (n <= 0 || static_cast<size_t>(n) >= sizeof(values)) return {};
+      response.append(values, static_cast<size_t>(n));
+    } else response.append("null");
+    const int inputCount = ANGLE_UNSAFE_TODO(std::snprintf(values, sizeof(values),
+        ",\"plane_hit\":%s,\"ui_clear\":%s,\"plane_instance_id\":%d,\"input_point\":",
+        (record.flags & 4u) ? "true" : "false", (record.flags & 8u) ? "true" : "false", record.planeInstanceId));
+    if (inputCount <= 0 || static_cast<size_t>(inputCount) >= sizeof(values)) return {};
+    response.append(values, static_cast<size_t>(inputCount));
+    if ((record.flags & 12u) == 12u) {
+      const int n = ANGLE_UNSAFE_TODO(std::snprintf(values, sizeof(values), "[%.0f,%.0f]", record.inputX, record.inputY));
+      if (n <= 0 || static_cast<size_t>(n) >= sizeof(values)) return {};
+      response.append(values, static_cast<size_t>(n));
+    } else response.append("null");
+    // Retain the legacy rounded-point proof. This additional port-only proof
+    // is raycast independently at the actual floating-point root projection.
+    if (record.flags & 16u) {
+      response.append(",\"precise_input\":");
+      if (record.preciseFlags & 1u) {
+        const int n = ANGLE_UNSAFE_TODO(std::snprintf(values, sizeof(values),
+            "{\"point\":[%.9g,%.9g],\"plane_hit\":%s,\"ui_clear\":%s,\"plane_instance_id\":%d}",
+            record.preciseInputX, record.preciseInputY,
+            (record.preciseFlags & 4u) ? "true" : "false",
+            (record.preciseFlags & 8u) ? "true" : "false", record.precisePlaneInstanceId));
+        if (n <= 0 || static_cast<size_t>(n) >= sizeof(values)) return {};
+        response.append(values, static_cast<size_t>(n));
+      } else response.append("null");
+    }
+    if (record.inputEntrance) {
+      const int n = ANGLE_UNSAFE_TODO(std::snprintf(values, sizeof(values),
+          ",\"game_input\":{\"entrance_id\":%u,\"mask_color\":\"%s\"}",
+          record.inputEntrance, record.inputMaskColor.data()));
+      if (n <= 0 || static_cast<size_t>(n) >= sizeof(values)) return {};
+      response.append(values, static_cast<size_t>(n));
+    }
+    response.push_back('}');
+  }
+  response.append("]},\"lua_globe_diagnostic\":{");
+  const auto &lua = snapshot.luaGlobe;
+  char luaFields[384];
+  const int luaCount = ANGLE_UNSAFE_TODO(std::snprintf(luaFields, sizeof(luaFields),
+      "\"schema\":\"alas-headless.lua-globe-diagnostic/v1\",\"status\":%u,\"stage\":%u,\"truncated\":%s,\"stack_balanced\":%s,\"registry_visited\":%u,\"inspection_count\":%u,\"world_candidates\":%u,\"drag_candidates\":%u,\"colors\":[",
+      lua.status, lua.stage, lua.truncated ? "true" : "false", lua.stackBalanced ? "true" : "false",
+      lua.registryVisited, lua.inspectionCount, lua.worldCandidates, lua.dragCandidates));
+  if (luaCount <= 0 || static_cast<size_t>(luaCount) >= sizeof(luaFields)) return {};
+  response.append(luaFields, static_cast<size_t>(luaCount));
+  for (size_t i = 0; i < std::min(static_cast<size_t>(lua.colorCount), lua.colors.size()); ++i) {
+    if (i) response.push_back(',');
+    response.append("{\"hex\":");
+    AppendJsonString(&response, BoundedStringView(lua.colors[i].hex));
+    const int n = ANGLE_UNSAFE_TODO(std::snprintf(luaFields, sizeof(luaFields),
+        ",\"entrance\":%u,\"owner\":%u}", lua.colors[i].entrance, lua.colors[i].owner));
+    if (n <= 0 || static_cast<size_t>(n) >= sizeof(luaFields)) return {};
+    response.append(luaFields, static_cast<size_t>(n));
+  }
+  response.append("],\"dragging\":[");
+  for (size_t i = 0; i < std::min(static_cast<size_t>(lua.dragCandidates), lua.dragging.size()); ++i) {
+    if (i) response.push_back(',');
+    response.append(lua.dragging[i] ? "true" : "false");
+  }
+  response.append("],\"drag_pointer_instance_ids\":[");
+  for (size_t i = 0; i < std::min(static_cast<size_t>(lua.dragCandidates), lua.dragPointerIds.size()); ++i) {
+    if (i) response.push_back(',');
+    response.append(std::to_string(lua.dragPointerIds[i]));
+  }
+  response.append("],\"drag_trigger_instance_ids\":[");
+  for (size_t i = 0; i < std::min(static_cast<size_t>(lua.dragCandidates), lua.dragTriggerIds.size()); ++i) {
+    if (i) response.push_back(',');
+    response.append(std::to_string(lua.dragTriggerIds[i]));
+  }
+  response.append("],\"active_pointer_instance_id\":");
+  response.append(std::to_string(lua.activePointerId));
+  response.append("},\"shipyard_strengthen\":{");
+  const auto &shipyard = snapshot.shipyard;
+  char shipyardFields[768];
+  const int shipyardCount = ANGLE_UNSAFE_TODO(std::snprintf(shipyardFields, sizeof(shipyardFields),
+      "\"status\":%u,\"stage\":%u,\"truncated\":%s,\"stack_balanced\":%s,\"blueprint_id\":%u,\"ship_id\":%u,\"ship_index\":%u,\"series\":%u,\"rarity\":%u,\"pursuing\":%s,\"purchased\":%u,\"coins\":%u,\"gems_known\":%s,\"paid_gems\":%u,\"free_gems\":%u,\"level\":%u,\"fate_level\":%d,\"exp\":%u",
+      shipyard.status, shipyard.stage, shipyard.truncated ? "true" : "false",
+      shipyard.stackBalanced ? "true" : "false", shipyard.blueprintId, shipyard.shipId,
+      shipyard.shipIndex, shipyard.series, shipyard.rarity, shipyard.pursuing ? "true" : "false",
+      shipyard.purchased, shipyard.coins, shipyard.gemsKnown ? "true" : "false",
+      shipyard.paidGems, shipyard.freeGems, shipyard.level, shipyard.fateLevel, shipyard.exp));
+  if (shipyardCount <= 0 || static_cast<size_t>(shipyardCount) >= sizeof(shipyardFields)) return {};
+  response.append(shipyardFields, static_cast<size_t>(shipyardCount));
+  response.append("},\"activity_identity\":{");
+  const auto &activity = snapshot.activityIdentity;
+  response.append("\"status\":"); response.append(std::to_string(activity.status));
+  response.append(",\"stack_balanced\":"); response.append(activity.stackBalanced ? "true" : "false");
+  response.append(",\"archives\":{\"status\":"); response.append(std::to_string(activity.archives.status));
+  response.append(",\"expected_count\":"); response.append(std::to_string(activity.archives.expectedCount));
+  response.append(",\"truncated\":"); response.append(activity.archives.truncated ? "true" : "false");
+  response.append(",\"records\":[");
+  for (size_t i = 0; i < std::min(static_cast<size_t>(activity.archives.count), activity.archives.records.size()); ++i) {
+    if (i) response.push_back(',');
+    const auto &record = activity.archives.records[i];
+    response.append("{\"id\":"); response.append(std::to_string(record.id));
+    response.append(",\"activity_type\":"); response.append(std::to_string(record.activityType));
+    response.append(",\"name\":"); AppendJsonString(&response, BoundedStringView(record.name));
+    response.append(",\"bg\":"); AppendJsonString(&response, BoundedStringView(record.bg));
+    response.push_back('}');
+  }
+  response.append("]},\"raids\":{\"status\":"); response.append(std::to_string(activity.raids.status));
+  response.append(",\"stage\":"); response.append(std::to_string(activity.raids.stage));
+  response.append(",\"proxy_count\":"); response.append(std::to_string(activity.raids.proxyCount));
+  response.append(",\"matched_count\":"); response.append(std::to_string(activity.raids.matchedCount));
+  response.append(",\"failed_id\":"); response.append(std::to_string(activity.raids.failedId));
+  response.append(",\"expected_count\":"); response.append(std::to_string(activity.raids.expectedCount));
+  response.append(",\"truncated\":"); response.append(activity.raids.truncated ? "true" : "false");
+  response.append(",\"records\":[");
+  for (size_t i = 0; i < std::min(static_cast<size_t>(activity.raids.count), activity.raids.records.size()); ++i) {
+    if (i) response.push_back(',');
+    const auto &record = activity.raids.records[i];
+    response.append("{\"id\":"); response.append(std::to_string(record.id));
+    response.append(",\"mark\":"); response.append(std::to_string(record.mark));
+    response.append(",\"activity_type\":"); response.append(std::to_string(record.activityType));
+    response.append(",\"page_core\":"); AppendJsonString(&response, BoundedStringView(record.pageCore));
+    response.push_back('}');
+  }
+  response.append("]}");
+  const auto &drag = snapshot.mapDrag;
+  response.append(drag.scope == 2 ? "},\"operation_siren_globe_drag\":{"
+                                  : "},\"operation_siren_map_drag\":{");
+  char dragFields[256];
+  const int dragCount = ANGLE_UNSAFE_TODO(std::snprintf(dragFields, sizeof(dragFields),
+      "\"status\":%u,\"handler_instance_id\":%d,\"endpoints\":[%.3f,%.3f,%.3f,%.3f],\"handler_path\":",
+      drag.status, drag.handlerInstanceId, drag.endpoints[0], drag.endpoints[1], drag.endpoints[2], drag.endpoints[3]));
+  if (dragCount <= 0 || static_cast<size_t>(dragCount) >= sizeof(dragFields)) return {};
+  response.append(dragFields, static_cast<size_t>(dragCount));
+  AppendJsonString(&response, BoundedStringView(drag.handlerPath));
+  response.append(",\"samples\":[");
+  if (drag.status != 0) {
+    for (size_t i = 0; i < drag.samples.size(); ++i) {
+      if (i) response.push_back(',');
+      const auto &sample = drag.samples[i];
+      const int count = ANGLE_UNSAFE_TODO(std::snprintf(dragFields, sizeof(dragFields),
+          "{\"x\":%.3f,\"y\":%.3f,\"owned\":%s,\"top_path\":", sample.x, sample.y, sample.owned ? "true" : "false"));
+      if (count <= 0 || static_cast<size_t>(count) >= sizeof(dragFields)) return {};
+      response.append(dragFields, static_cast<size_t>(count));
+      AppendJsonString(&response, BoundedStringView(sample.topPath));
+      response.push_back('}');
+    }
+  }
+  response.append("]},\"storage_scroll\":{\"schema\":\"alas-headless.storage-scroll/v1\",\"status\":");
+  const auto &storage = snapshot.storageScroll;
+  response.append(std::to_string(storage.status));
+  response.append(",\"matches\":"); response.append(std::to_string(storage.matches));
+  char storageFields[512];
+  if (storage.status == 1) {
+    const int count = ANGLE_UNSAFE_TODO(std::snprintf(storageFields, sizeof(storageFields),
+        ",\"direction\":%d,\"vertical\":%s,\"horizontal\":%s,\"normalized_position\":[%.6f,%.6f],\"value\":%.6f,\"size\":%.6f",
+        storage.direction, storage.vertical ? "true" : "false", storage.horizontal ? "true" : "false",
+        storage.normalizedX, storage.normalizedY, storage.value, storage.size));
+    if (count <= 0 || static_cast<size_t>(count) >= sizeof(storageFields)) return {};
+    response.append(storageFields, static_cast<size_t>(count));
+  }
+  response.append(",\"controls\":[");
+  constexpr std::array<const char *, 6> storageRoles = {"scroll", "viewport", "content", "bar", "handle", "track"};
+  if (storage.status == 1) {
+    for (size_t i = 0; i < storage.controls.size(); ++i) {
+      if (i) response.push_back(',');
+      const auto &record = storage.controls[i];
+      response.append("{\"role\":"); AppendJsonString(&response, storageRoles[i]);
+      response.append(",\"path\":"); AppendJsonString(&response, BoundedStringView(record.path));
+      const int count = ANGLE_UNSAFE_TODO(std::snprintf(storageFields, sizeof(storageFields),
+          ",\"instance_id\":%d,\"active_in_hierarchy\":%s,\"adb_bounds\":{\"left\":%.3f,\"top\":%.3f,\"right\":%.3f,\"bottom\":%.3f}}",
+          record.instanceId, (record.flags & 1u) ? "true" : "false",
+          record.adbLeft, record.adbTop, record.adbRight, record.adbBottom));
+      if (count <= 0 || static_cast<size_t>(count) >= sizeof(storageFields)) return {};
+      response.append(storageFields, static_cast<size_t>(count));
+    }
+  }
+    response.append("],\"scrollbar\":{\"schema\":\"alas-headless.storage-scrollbar/v1\",\"status\":");
+    response.append(std::to_string(storage.scrollbarStatus));
+    response.append(",\"matches\":"); response.append(std::to_string(storage.scrollbarMatches));
+    response.append(",\"class_found\":"); response.append(storage.scrollbarClassFound ? "true" : "false");
+    response.append(",\"source_count\":"); response.append(std::to_string(storage.scrollbarSourceCount));
+    if (storage.scrollbarStatus == 1) {
+      const int count = ANGLE_UNSAFE_TODO(std::snprintf(storageFields, sizeof(storageFields),
+          ",\"direction\":%d,\"value\":%.6f,\"size\":%.6f",
+          storage.scrollbarDirection, storage.scrollbarValue, storage.scrollbarSize));
+      if (count <= 0 || static_cast<size_t>(count) >= sizeof(storageFields)) return {};
+      response.append(storageFields, static_cast<size_t>(count));
+    }
+    response.append(",\"controls\":[");
+    constexpr std::array<const char *, 3> storageBarRoles = {"bar", "handle", "track"};
+    if (storage.scrollbarStatus == 1) {
+      for (size_t i = 0; i < storage.scrollbarControls.size(); ++i) {
+        if (i) response.push_back(',');
+        const auto &record = storage.scrollbarControls[i];
+        response.append("{\"role\":"); AppendJsonString(&response, storageBarRoles[i]);
+        response.append(",\"path\":"); AppendJsonString(&response, BoundedStringView(record.path));
+        const int count = ANGLE_UNSAFE_TODO(std::snprintf(storageFields, sizeof(storageFields),
+            ",\"instance_id\":%d,\"active_in_hierarchy\":%s,\"adb_bounds\":{\"left\":%.3f,\"top\":%.3f,\"right\":%.3f,\"bottom\":%.3f}}",
+            record.instanceId, (record.flags & 1u) ? "true" : "false",
+            record.adbLeft, record.adbTop, record.adbRight, record.adbBottom));
+        if (count <= 0 || static_cast<size_t>(count) >= sizeof(storageFields)) return {};
+        response.append(storageFields, static_cast<size_t>(count));
+      }
+    }
+    response.append("],\"input\":{\"schema\":\"alas-headless.storage-scrollbar-input/v1\",\"status\":");
+    response.append(std::to_string(storage.inputStatus));
+    if (storage.inputStatus != 0) {
+      const int count = ANGLE_UNSAFE_TODO(std::snprintf(storageFields, sizeof(storageFields),
+          ",\"point\":[%.3f,%.3f],\"enabled\":%s,\"interactable\":%s,\"owned\":%s,\"handler_instance_id\":%d,\"top_path\":",
+          storage.inputX, storage.inputY, storage.inputEnabled ? "true" : "false",
+          storage.inputInteractable ? "true" : "false", storage.inputOwned ? "true" : "false",
+          storage.inputHandlerInstanceId));
+      if (count <= 0 || static_cast<size_t>(count) >= sizeof(storageFields)) return {};
+      response.append(storageFields, static_cast<size_t>(count));
+      AppendJsonString(&response, BoundedStringView(storage.inputTopPath));
+    }
+    response.append("}}},\"private_quarters_physics\":{");
+  char physicsFields[256];
+  const int physicsCount = ANGLE_UNSAFE_TODO(std::snprintf(
+      physicsFields, sizeof(physicsFields),
+      "\"schema\":\"alas-headless.private-colliders/v1\",\"status\":%u,\"truncated\":%s,\"error_count\":%u,\"camera_path\":",
+      snapshot.privatePhysicsStatus, snapshot.colliderTruncated ? "true" : "false", snapshot.colliderErrors));
+  if (physicsCount <= 0 || static_cast<size_t>(physicsCount) >= sizeof(physicsFields)) return {};
+  response.append(physicsFields, static_cast<size_t>(physicsCount));
+  AppendJsonString(&response, BoundedStringView(snapshot.physicsCameraPath));
+  response.append(",\"colliders\":[");
+  const size_t colliderCount = std::min(static_cast<size_t>(snapshot.colliderCount), snapshot.colliders.size());
+  for (size_t i = 0; i < colliderCount; ++i) {
+    const auto &record = snapshot.colliders[i];
+    if (i) response.push_back(',');
+    response.append("{\"name\":");
+    AppendJsonString(&response, BoundedStringView(record.name));
+    response.append(",\"path\":");
+    AppendJsonString(&response, BoundedStringView(record.path));
+    char values[768];
+    const int count = ANGLE_UNSAFE_TODO(std::snprintf(values, sizeof(values),
+        ",\"instance_id\":%d,\"is_trigger\":%s,\"truncated\":%s,\"world_center\":[%.6f,%.6f,%.6f],\"extents\":[%.6f,%.6f,%.6f],\"screen\":",
+        record.instanceId, (record.flags & 1u) ? "true" : "false", (record.flags & 4u) ? "true" : "false",
+        record.center[0], record.center[1], record.center[2], record.extents[0], record.extents[1], record.extents[2]));
+    if (count <= 0 || static_cast<size_t>(count) >= sizeof(values)) return {};
+    response.append(values, static_cast<size_t>(count));
+    if (record.flags & 2u) {
+      const int projected = ANGLE_UNSAFE_TODO(std::snprintf(values, sizeof(values), "[%.6f,%.6f,%.6f]", record.screen[0], record.screen[1], record.screen[2]));
+      if (projected <= 0 || static_cast<size_t>(projected) >= sizeof(values)) return {};
+      response.append(values, static_cast<size_t>(projected));
+    } else response.append("null");
+    response.append(",\"ui_top_path\":");
+    AppendJsonString(&response, BoundedStringView(record.uiTopPath));
+    char hitFields[384];
+    const int hitCount = ANGLE_UNSAFE_TODO(std::snprintf(hitFields, sizeof(hitFields),
+        ",\"sweep_status\":%u,\"nearest_id\":%d,\"raycast_top\":%s,\"ui_clear\":%s,\"input_point\":",
+        record.sweepStatus, record.nearestId,
+        (record.flags & 8u) ? ((record.flags & 16u) ? "true" : "false") : "null",
+        (record.flags & 32u) ? ((record.flags & 64u) ? "true" : "false") : "null"));
+    if (hitCount <= 0 || static_cast<size_t>(hitCount) >= sizeof(hitFields)) return {};
+    response.append(hitFields, static_cast<size_t>(hitCount));
+    if (record.flags & 128u) {
+      const int n = ANGLE_UNSAFE_TODO(std::snprintf(hitFields, sizeof(hitFields), "[%.0f,%.0f]", record.inputX, record.inputY));
+      if (n <= 0 || static_cast<size_t>(n) >= sizeof(hitFields)) return {};
+      response.append(hitFields, static_cast<size_t>(n));
+    } else response.append("null");
+    response.push_back('}');
+  }
+  response.append("]}}\n");
   return response;
 }
 
@@ -655,10 +994,7 @@ void ServeObserver() {
     }
 
     char requestBuffer[128] = {};
-    const ssize_t received =
-        recv(client, requestBuffer, sizeof(requestBuffer) - 1, 0);
-    const std::string_view request(
-        requestBuffer, received > 0 ? static_cast<size_t>(received) : 0u);
+    const std::string_view request = ReceiveRequestLine(client, requestBuffer);
     const bool snapshotRequest =
         request == "GET /v1/snapshot\n" || request == "GET /v1/snapshot\r\n";
     const bool semanticRequest =
@@ -667,7 +1003,46 @@ void ServeObserver() {
         request == "GET /v1/ui\n" || request == "GET /v1/ui\r\n";
     const bool stateRequest =
         request == "GET /v1/state\n" || request == "GET /v1/state\r\n";
-    if (!snapshotRequest && !semanticRequest && !uiRequest && !stateRequest) {
+    float dragX1 = 0, dragY1 = 0, dragX2 = 0, dragY2 = 0;
+    int dragEnd = 0;
+    const bool dragRequest =
+        ANGLE_UNSAFE_BUFFERS(sscanf(requestBuffer, "GET /v1/os-map-drag %f %f %f %f%n", &dragX1, &dragY1, &dragX2, &dragY2, &dragEnd)) == 4 &&
+        (request.substr(dragEnd) == "\n" || request.substr(dragEnd) == "\r\n");
+    float globeDragX1 = 0, globeDragY1 = 0, globeDragX2 = 0, globeDragY2 = 0;
+    int globeDragEnd = 0;
+    const bool globeDragRequest =
+        ANGLE_UNSAFE_BUFFERS(sscanf(requestBuffer, "GET /v1/globe-map-drag %f %f %f %f%n", &globeDragX1, &globeDragY1, &globeDragX2, &globeDragY2, &globeDragEnd)) == 4 &&
+        (request.substr(globeDragEnd) == "\n" || request.substr(globeDragEnd) == "\r\n");
+    float storageX = 0, storageY = 0;
+    int storageEnd = 0;
+    const bool storageInputRequest =
+        ANGLE_UNSAFE_BUFFERS(sscanf(requestBuffer, "GET /v1/storage-scrollbar-input %f %f%n", &storageX, &storageY, &storageEnd)) == 2 &&
+        (request.substr(storageEnd) == "\n" || request.substr(storageEnd) == "\r\n");
+    float mapX = 0, mapY = 0;
+    int projectionEnd = 0;
+    const bool projectionRequest =
+        ANGLE_UNSAFE_BUFFERS(sscanf(requestBuffer, "GET /v1/globe-projection %f %f%n", &mapX, &mapY, &projectionEnd)) == 2 &&
+        (request.substr(projectionEnd) == "\n" || request.substr(projectionEnd) == "\r\n");
+    unsigned int portEntrance = 0; int portInputEnd = 0;
+    const bool portInputRequest =
+        ANGLE_UNSAFE_BUFFERS(sscanf(requestBuffer, "GET /v1/globe-port-input %u%n", &portEntrance, &portInputEnd)) == 1 &&
+        (request.substr(portInputEnd) == "\n" || request.substr(portInputEnd) == "\r\n");
+    if (dragRequest && RequestOperationSirenMapDrag(dragX1, dragY1, dragX2, dragY2)) {
+      SendAll(client, "{\"protocol_schema\":\"alas-headless.observer/v1\","
+                      "\"status\":\"ok\",\"scope\":\"read-only-os-map-drag\"}\n");
+    } else if (globeDragRequest && RequestOperationSirenMapDrag(globeDragX1, globeDragY1, globeDragX2, globeDragY2, true)) {
+      SendAll(client, "{\"protocol_schema\":\"alas-headless.observer/v1\","
+                      "\"status\":\"ok\",\"scope\":\"read-only-globe-map-drag\"}\n");
+    } else if (storageInputRequest && RequestStorageScrollbarInput(storageX, storageY)) {
+      SendAll(client, "{\"protocol_schema\":\"alas-headless.observer/v1\","
+                      "\"status\":\"ok\",\"scope\":\"read-only-storage-scrollbar-input\"}\n");
+    } else if (projectionRequest && RequestGlobeMapProjection(mapX, mapY)) {
+      SendAll(client, "{\"protocol_schema\":\"alas-headless.observer/v1\","
+                      "\"status\":\"ok\",\"scope\":\"read-only-map-projection\"}\n");
+    } else if (portInputRequest && RequestGlobePortInput(portEntrance)) {
+      SendAll(client, "{\"protocol_schema\":\"alas-headless.observer/v1\","
+                      "\"status\":\"ok\",\"scope\":\"read-only-port-input\"}\n");
+    } else if (!snapshotRequest && !semanticRequest && !uiRequest && !stateRequest) {
       SendAll(client, "{\"protocol_schema\":\"alas-headless.observer/v1\","
                       "\"status\":\"bad-request\"}\n");
     } else if (snapshotRequest) {

@@ -11,6 +11,43 @@ from .errors import SemanticGateClosed, SemanticOracleError, SemanticTargetMissi
 class MinigameOracle:
     """Minigame operations sharing the oracle frame and input boundary."""
 
+    def poke_minigame_prepare_visible(self) -> bool:
+        state = self.read_state()
+        if not any(b.active_in_hierarchy and b.active_and_enabled
+                   for b in self._matches(state, 'minigame/poke/back')):
+            return False
+        root = 'GameRoomPokeUI(Clone)/pop/menuUI/'
+        for name in ('btnStart', 'btnRule', 'btnBack'):
+            matches = [b for b in state.buttons if b.name == name
+                       and b.path.endswith(root + name)
+                       and b.active_in_hierarchy and b.active_and_enabled
+                       and b.interactable and b.point is not None
+                       and b.bounds is not None and b.bounds.contains(b.point)]
+            if len(matches) != 1:
+                raise SemanticGateClosed('Poke prepare controls are incomplete or ambiguous')
+        return True
+
+    def click_poke_minigame_back(self) -> ActionReceipt:
+        if not self.poke_minigame_prepare_visible():
+            raise SemanticTargetMissing('Poke prepare page is absent')
+        state = self.read_state()
+        target = self._unique(state, 'minigame/poke/back')
+        if (target.raycast_top is False or self._blocking_rules(state, 'minigame/poke/back')
+                or not target.active_in_hierarchy or not target.active_and_enabled
+                or not target.interactable or target.point is None or target.bounds is None
+                or not target.bounds.contains(target.point)):
+            raise SemanticGateClosed('Poke prepare back is blocked or not actionable')
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed before Poke prepare back')
+        # This button's native pivot is its top-left corner. Rounding that
+        # boundary point can land outside its RectTransform; use its exact
+        # exported bounds centre after proving the unique prepare owner.
+        point = Point((target.bounds.left + target.bounds.right) / 2.0,
+                      (target.bounds.top + target.bounds.bottom) / 2.0)
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(semantic_id='minigame/poke/back', generation=state.generation,
+                             point=point, bounds=target.bounds, path=target.path)
+
     def game_room_page_visible(self) -> bool:
         """Identify the game room without treating its list overlay as a new page."""
 
@@ -73,6 +110,12 @@ class MinigameOracle:
             raise SemanticTargetMissing("shooting minigame pre-start panel is absent")
         state = self.read_state()
         target = self._unique(state, "minigame/shooting/back")
+        if (target.raycast_top is False or not target.active_in_hierarchy
+                or not target.active_and_enabled or not target.interactable
+                or target.point is None or target.bounds is None
+                or not target.bounds.contains(target.point)
+                or self._blocking_rules(state, 'minigame/shooting/back')):
+            raise SemanticGateClosed('shooting prepare back is blocked or not actionable')
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed before shooting minigame back")
         assert target.point is not None and target.bounds is not None
@@ -230,11 +273,13 @@ class MinigameOracle:
             self._sleep(0.2)
         raise SemanticGateClosed("game-room scrollbar transition was not proven")
 
-    def click_new_year_challenge_entry(self) -> ActionReceipt:
+    def new_year_challenge_entry_target(self):
         if not self.game_room_list_visible():
-            raise SemanticGateClosed("game-room list identity is absent")
+            raise SemanticTargetMissing("game-room list identity is absent")
         state = self.read_state()
         ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed('new-year entry snapshots are not coherent')
         icons = tuple(
             image
             for image in ui_state.images
@@ -270,15 +315,28 @@ class MinigameOracle:
             raise SemanticGateClosed("new-year challenge list item is ambiguous")
         target = buttons[0]
         assert target.bounds is not None
-        left = max(0.0, target.bounds.left)
-        top = max(0.0, target.bounds.top)
-        right = min(float(self.fingerprint.width), target.bounds.right)
-        bottom = min(float(self.fingerprint.height), target.bounds.bottom)
-        if right - left < 100 or bottom - top < 100:
+        viewports = [image for image in ui_state.images
+                     if image.path == root_path.rsplit('/content/', 1)[0]
+                     and image.active_in_hierarchy and image.active_and_enabled
+                     and image.bounds is not None]
+        if len(viewports) != 1:
+            raise SemanticGateClosed('new-year entry viewport is absent or ambiguous')
+        if target.raycast_top is False:
+            raise SemanticGateClosed('new-year entry is obscured')
+        if (target.point is None or not target.bounds.contains(target.point)
+                or not viewports[0].bounds.contains(target.point)
+                or not 0 <= round(target.point.x) < self.fingerprint.width
+                or not 0 <= round(target.point.y) < self.fingerprint.height):
             raise SemanticTargetMissing(
                 "new-year challenge entry is outside the viewport"
             )
-        point = Point((left + right) / 2.0, (top + bottom) / 2.0)
+        return state, target
+
+    def click_new_year_challenge_entry(self) -> ActionReceipt:
+        state, target = self.new_year_challenge_entry_target()
+        if self._blocking_rules(state, 'minigame/new-year/entry'):
+            raise SemanticGateClosed('new-year entry is blocked')
+        point = target.point
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed before minigame entry")
         self._tap(int(round(point.x)), int(round(point.y)))
@@ -322,7 +380,6 @@ class MinigameOracle:
                 and button.path.endswith(suffix)
                 and button.active_in_hierarchy
                 and button.active_and_enabled
-                and button.interactable
                 and button.bounds is not None
                 and button.point is not None
             )
@@ -362,6 +419,29 @@ class MinigameOracle:
             )
         return selected, owned
 
+    def new_year_challenge_prepare_visible(self) -> bool:
+        state = self.read_state()
+        if not any(button.active_in_hierarchy and button.active_and_enabled
+                   for button in self._matches(state, 'minigame/new-year/back')):
+            return False
+        self.new_year_challenge_ticket_count()
+        return True
+
+    def new_year_challenge_home_visible(self) -> bool:
+        """Identify Fushun's idle home, independently of its coin selector."""
+        state = self.read_state()
+        if any(b.active_in_hierarchy and b.active_and_enabled
+               and '/FushunAdventureGame(Clone)/' in b.path for b in state.buttons):
+            return False
+        for name in ('back', 'btn_start', 'btn_help'):
+            matches = tuple(b for b in state.buttons if b.name == name
+                            and b.path.endswith('GameRoomFushun2UI(Clone)/' + name)
+                            and b.active_in_hierarchy and b.active_and_enabled
+                            and b.interactable and b.bounds is not None)
+            if len(matches) != 1:
+                return False
+        return True
+
     def click_new_year_challenge_prepare_control(self, control: str) -> ActionReceipt:
         """Click one exact Fushun prepare control in the current Unity layout."""
 
@@ -377,7 +457,12 @@ class MinigameOracle:
             raise SemanticGateClosed(
                 "unsupported new-year challenge prepare control"
             ) from exc
-        progress, monthly_limit = self.new_year_challenge_ticket_count()
+        if control == 'back':
+            if not self.new_year_challenge_home_visible():
+                raise SemanticGateClosed('new-year challenge idle home is not proven')
+            progress, monthly_limit = 0, 0
+        else:
+            progress, monthly_limit = self.new_year_challenge_ticket_count()
         if control == "add" and progress >= monthly_limit:
             raise SemanticGateClosed(
                 "new-year challenge monthly progress is already complete"
@@ -387,6 +472,8 @@ class MinigameOracle:
                 "new-year challenge monthly progress is inconsistent"
             )
         state = self.read_state()
+        if self._blocking_rules(state, 'minigame/new-year/' + control):
+            raise SemanticGateClosed('new-year challenge prepare input is blocked')
         matches = tuple(
             button
             for button in state.buttons
@@ -449,6 +536,8 @@ class MinigameOracle:
         if len(closes) != 1:
             raise SemanticGateClosed("new-year challenge result close is ambiguous")
         ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed('new-year challenge result snapshots are not coherent')
         values = {}
         for label, suffix in (
             (
@@ -482,6 +571,8 @@ class MinigameOracle:
         if result is None:
             raise SemanticTargetMissing("new-year challenge result is absent")
         state = self.read_state()
+        if self._blocking_rules(state, 'minigame/new-year/result-close'):
+            raise SemanticGateClosed('new-year challenge result close is blocked')
         matches = tuple(
             button
             for button in state.buttons

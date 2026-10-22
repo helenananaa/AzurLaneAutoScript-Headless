@@ -1,0 +1,15 @@
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -300,6 +300,11 @@
+                 logger.attr('Globe_pinned', zone)
+                 return
+             if state is not None:
++                pinned_zone = self.name_to_zone(state.zone_name)
++                if pinned_zone.zone_id > 7:
++                    # The globe opens centered on the previous local zone.
++                    # Its native plane point owns unpin before reanchoring.
++                    semantic_adapter.operation_siren_globe_map_projection(pinned_zone.area_pos)
+                 semantic_adapter.operation_siren_globe_unpin()
+             for attempt in range(3):
+                 self.globe_in_sight(zone)

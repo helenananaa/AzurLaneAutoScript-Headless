@@ -1,0 +1,75 @@
+{
+  "schema": "alas-headless.campaign-sparse-resume-assessment/v1",
+  "passed": true,
+  "stage": "10-2",
+  "fleet1": 6,
+  "fleet2": 1,
+  "shape": "2 main + 2 vanguard",
+  "inherited_precombat_back": 1,
+  "new_preparations": 0,
+  "completed_battles": 1,
+  "hp_observations": [
+    {
+      "fleet_index": 1,
+      "vitals": [
+        [
+          1.0,
+          1.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0
+        ],
+        [
+          true,
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "fleet_index": 1,
+      "vitals": [
+        [
+          0.8679993366800839,
+          1.0,
+          0.0,
+          0.8749038939894171,
+          0.9774018964919422,
+          0.0
+        ],
+        [
+          true,
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    }
+  ],
+  "run_count_after": 0,
+  "scheduler_enabled_after": false,
+  "final_surface": {
+    "campaign_stage": true,
+    "main_page": false,
+    "campaign_map": false,
+    "campaign_entry": false
+  },
+  "oil_before": 9371,
+  "oil_after": 9329,
+  "oil_used": 42,
+  "repairs": 0,
+  "retirement": 0,
+  "premium": 0,
+  "limits": [
+    "Recovery begins on inherited precombat with independent hero and map identity",
+    "Map-only process restart without preparation identity remains unqualified",
+    "Live scope is fleet 6, 2+2 on 10-2; other slot patterns are not live-qualified",
+    "Live sparse recovery predates the separate empty-movement integration"
+  ]
+}

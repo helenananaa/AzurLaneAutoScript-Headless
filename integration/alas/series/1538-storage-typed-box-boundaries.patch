@@ -1,0 +1,74 @@
+diff --git a/module/storage/storage.py b/module/storage/storage.py
+--- a/module/storage/storage.py
++++ b/module/storage/storage.py
+@@ -55,6 +55,7 @@
+         Pages:
+             in: SHOP_BUY_CONFIRM_AMOUNT
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         logger.info(f'Set box amount')
+ 
+         # same code from shop clerk
+@@ -76,7 +77,8 @@
+         current = 0
+         timeout = Timer(1, count=3).start()
+         for _ in self.loop():
+-            current = ocr.ocr(self.device.image)
++            current = (semantic_adapter.storage_box_amount_quantity() if semantic_adapter is not None
++                       else ocr.ocr(self.device.image))
+             if 1 <= current <= amount + 10:
+                 break
+             if timeout.reached():
+@@ -93,7 +95,8 @@
+             if skip_first:
+                 skip_first = False
+             else:
+-                current = ocr.ocr(self.device.image)
++                current = (semantic_adapter.storage_box_amount_quantity() if semantic_adapter is not None
++                       else ocr.ocr(self.device.image))
+             diff = amount - current
+             if diff == 0:
+                 break
+@@ -208,10 +211,8 @@
+             in: MATERIAL_CHECK
+             out: MATERIAL_CHECK
+         """
+-        if getattr(self.device, 'semantic_adapter', None) is not None:
+-            from alas_headless import AlasSemanticUnmapped
+-            raise AlasSemanticUnmapped('Storage equipment-box recognition needs typed item/detail mapping')
+         used = 0
++        pending_observation = None
+         timeout = Timer(1.5, count=3).start()
+         while 1:
+             logger.attr('Used', f'{used}/{amount}')
+@@ -219,6 +220,8 @@
+                 logger.info('Reached target amount, stop')
+                 break
+             if timeout.reached():
++                if pending_observation is not None:
++                    raise pending_observation
+                 logger.info('No more boxes on this page, stop')
+                 break
+ 
+@@ -227,8 +230,19 @@
+             else:
+                 self.device.screenshot()
+ 
+-            image = rgb2gray(self.device.image)
+-            sim, box_button = self._storage_box_template(rarity).match_result(image)
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if semantic_adapter is not None:
++                from alas_headless.oracle.storage import StorageMaterialItemsPending
++                try:
++                    box_button = semantic_adapter.storage_box_candidate(rarity)
++                except StorageMaterialItemsPending as exc:
++                    pending_observation = exc
++                    continue
++                pending_observation = None
++                sim = 1.0 if box_button is not None else 0.0
++            else:
++                image = rgb2gray(self.device.image)
++                sim, box_button = self._storage_box_template(rarity).match_result(image)
+             if sim > 0.9:
+                 used += self._storage_use_one_box(box_button, amount)
+                 continue

@@ -345,7 +345,8 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
                     y=522,
                     bounds=bounds,
                     raycast_top=None,
-                )
+                ),
+                make_button("close", "root/UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/close", raycast_top=False),
             ]
         )
         images = [
@@ -436,6 +437,13 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         oracle.click("dorm/feed")
         oracle.click("dorm/collect")
         self.assertEqual(backend.taps, [(269, 603), (1210, 509)])
+
+        # A natively proven Button point must not be redirected to a
+        # decorative child Image whose raycast_target is false.
+        backend.buttons['buttons'][2]['raycast_top'] = True
+        oracle.click('dorm/feed')
+        self.assertEqual(backend.taps[-1], (304, 631))
+        backend.buttons['buttons'][2]['raycast_top'] = False
 
         backend.ui["texts"][0]["text"] = "unexpected"
         self.assertFalse(oracle.enabled("dorm/feed"))

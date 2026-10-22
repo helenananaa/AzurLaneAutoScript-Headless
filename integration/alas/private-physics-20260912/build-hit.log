@@ -1,0 +1,58 @@
+offline mode
+ninja: Entering directory `out/AndroidNullObserverX64'
+
+
+disable fast local for non-interactive: fastlocal=1->0
+ use `--fast_local` to enable fast local with non-interactive mode
+schedule pending:1+ready:0 (node:5637 edge:2)
+build start: Ready 1 Pending 1
+rebuild manifest finished
+
+loading build.ninja... done 223.285407ms
+load siso config done 75.320478ms
+schedule pending:1+ready:0 (node:23134 edge:2)
+build start: Ready 1 Pending 1
+rebuild manifest finished
+schedule pending:1+ready:0 (node:23134 edge:8)
+build start: Ready 252 Pending 1877
+[0/908] 0.54s S ACTION //:angle_program_version_id(//build/toolchain/android:android_clang_x64)
+[0/296] 0.54s S CXX obj/src/libANGLE/renderer/null/angle_null_backend/Il2CppNamespaceProbe.o obj/src/libANGLE/renderer/null/angle_null_backend/Il2CppNamespaceProbe.dwo
+[0/265] 0.54s S CXX obj/src/libANGLE/renderer/null/angle_null_backend/DisplayNULL.o obj/src/libANGLE/renderer/null/angle_null_backend/DisplayNULL.dwo
+[0/261] 0.54s S CXX obj/src/libANGLE/renderer/null/angle_null_backend/SurfaceNULL.o obj/src/libANGLE/renderer/null/angle_null_backend/SurfaceNULL.dwo
+[0/260] 0.54s S CXX obj/src/libANGLE/renderer/null/angle_null_backend/ObserverServer.o obj/src/libANGLE/renderer/null/angle_null_backend/ObserverServer.dwo
+[0/246] 1.21s F ACTION //:angle_program_version_id(//build/toolchain/android:android_clang_x64)
+[1/237] 1.21s S CXX obj/angle_version_info/angle_version_info.o obj/angle_version_info/angle_version_info.dwo
+[1/43] 1.99s F CXX obj/angle_version_info/angle_version_info.o obj/angle_version_info/angle_version_info.dwo
+[2/41] 2.84s F CXX obj/src/libANGLE/renderer/null/angle_null_backend/ObserverServer.o obj/src/libANGLE/renderer/null/angle_null_backend/ObserverServer.dwo
+[3/41] 3.54s F CXX obj/src/libANGLE/renderer/null/angle_null_backend/Il2CppNamespaceProbe.o obj/src/libANGLE/renderer/null/angle_null_backend/Il2CppNamespaceProbe.dwo
+[4/41] 4.35s F CXX obj/src/libANGLE/renderer/null/angle_null_backend/SurfaceNULL.o obj/src/libANGLE/renderer/null/angle_null_backend/SurfaceNULL.dwo
+[5/41] 5.38s F CXX obj/src/libANGLE/renderer/null/angle_null_backend/DisplayNULL.o obj/src/libANGLE/renderer/null/angle_null_backend/DisplayNULL.dwo
+[6/38] 5.39s S SOLINK ./libGLESv2_angle.so
+[6/38] 6.12s F SOLINK ./libGLESv2_angle.so
+[7/32] 6.12s S ACTION //:compressed_symbols(//build/toolchain/android:android_clang_x64)
+[7/32] 6.71s F ACTION //:compressed_symbols(//build/toolchain/android:android_clang_x64)
+[8/31] 6.71s S ACTION //:angle_chromium_apk__compile_resources(//build/toolchain/android:android_clang_x64)
+[8/31] 9.10s F ACTION //:angle_chromium_apk__compile_resources(//build/toolchain/android:android_clang_x64)
+[9/26] 9.11s S ACTION //:angle_chromium_apk__java__header(//build/toolchain/android:android_clang_x64)
+[9/26] 10.08s F ACTION //:angle_chromium_apk__java__header(//build/toolchain/android:android_clang_x64)
+[10/25] 10.08s S ACTION //:angle_chromium_apk__compile_java(//build/toolchain/android:android_clang_x64)
+[10/25] 10.08s S ACTION //:angle_chromium_apk__errorprone(//build/toolchain/android:android_clang_x64)
+[10/25] 10.28s F ACTION //:angle_chromium_apk__compile_java(//build/toolchain/android:android_clang_x64)
+[11/23] 10.28s S ACTION //:angle_chromium_apk__java__validate_deps(//build/toolchain/android:android_clang_x64)
+[11/21] 10.29s S ACTION //:angle_chromium_apk__final_dex(//build/toolchain/android:android_clang_x64)
+[11/21] 10.42s F ACTION //:angle_chromium_apk__final_dex(//build/toolchain/android:android_clang_x64)
+[12/20] 10.42s S ACTION //:angle_chromium_apk__create(//build/toolchain/android:android_clang_x64)
+[12/20] 11.16s F ACTION //:angle_chromium_apk__java__validate_deps(//build/toolchain/android:android_clang_x64)
+[13/19] 11.37s F ACTION //:angle_chromium_apk__create(//build/toolchain/android:android_clang_x64)
+[14/16] 13.30s F ACTION //:angle_chromium_apk__errorprone(//build/toolchain/android:android_clang_x64)
+build finished
+
+	
+noexec:0 local:15 remote:0 cache:0 skip:2114
+  cache-write:0(err:0) fallback:0 retry:0
+fs: ops: 254(err:12) / r:85(err:0) 121.29MiB / w:2(err:0) 80.13KiB
+
+
+shutdown cloud logging/monitoring done 35.508µs
+
+13.38s Build Succeeded: 15 steps - 1.12/s

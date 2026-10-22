@@ -3,6 +3,7 @@
 import unittest
 from alas_headless import Bounds, Point, SemanticGateClosed
 from tests.semantic_support.adapter_cases import AlasSemanticAdapterTestsSupport
+from alas_headless.adapter.semantic.contracts import AlasSemanticActionDeferred
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -162,7 +163,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
     def test_enhancement_task_is_default_denied_before_navigation(self):
         adapter, oracle, _ = self.make_adapter()
 
-        with self.assertRaisesRegex(SemanticGateClosed, "positive transaction budget"):
+        with self.assertRaises(AlasSemanticActionDeferred):
             adapter.begin_enhancement_task("all", 5, None)
 
         self.assertEqual(oracle.enhancement_calls, [])

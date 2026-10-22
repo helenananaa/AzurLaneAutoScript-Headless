@@ -26,10 +26,55 @@ from .errors import SemanticGateClosed
 class EnhancementOracle:
     """Enhancement operations sharing the oracle frame and input boundary."""
 
+    def enhancement_dock_visible(self) -> bool:
+        state = self.read_state()
+        path = 'OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/index_button'
+        if not any(b.path == path and b.active_in_hierarchy and b.active_and_enabled
+                   for b in state.buttons):
+            return False
+        self._enhancement_dock_records()
+        return True
+
+    def enhancement_dock_back_control(self):
+        state = self.read_state()
+        filter_path = 'OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/index_button'
+        if not any(b.path == filter_path and b.active_in_hierarchy for b in state.buttons):
+            return None
+        state, ui = self._enhancement_dock_records()
+        path = 'OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back'
+        matches = tuple(i for i in ui.images if i.path == path
+                        and i.sprite == 'icon_bg_front_1920'
+                        and i.active_in_hierarchy and i.active_and_enabled)
+        if len(matches) != 1:
+            raise SemanticGateClosed('Dock back Image is absent or ambiguous')
+        target = matches[0]
+        if (target.raycast_top is False or not target.raycast_target
+                or target.truncated or target.bounds is None
+                or self._blocking_rules(state, 'enhancement/dock/exit')):
+            raise SemanticGateClosed('Dock back Image is not actionable')
+        return state, target
+
+    def click_enhancement_dock_back(self) -> ActionReceipt:
+        control = self.enhancement_dock_back_control()
+        if control is None:
+            raise SemanticGateClosed('Dock page is absent')
+        receipt = self._click_exact_image(*control, 'enhancement/dock/exit')
+
+        def departed():
+            state = self.read_state()
+            if state.generation <= receipt.generation or any(
+                b.active_in_hierarchy and 'DockyardUI(Clone)/' in b.path
+                for b in state.buttons
+            ):
+                raise SemanticGateClosed('Dock exit has not advanced')
+            return state
+
+        self._retry_transition_read(departed, attempts=30, interval_seconds=0.1)
+        return receipt
+
     def _enhancement_dock_records(self) -> Tuple[OracleState, UiState]:
         """Read a coherent Dock page before enhancement navigation."""
 
-        last_error: Optional[SemanticGateClosed] = None
         capacity_path = (
             "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/capacity/Text"
         )
@@ -39,7 +84,7 @@ class EnhancementOracle:
         filter_path = (
             "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/index_button"
         )
-        for attempt in range(8):
+        def read_records() -> Tuple[OracleState, UiState]:
             state, ui_state = self._retirement_records()
             capacity = tuple(
                 item
@@ -88,10 +133,14 @@ class EnhancementOracle:
                 and filter_images[0].bounds.contains(filter_buttons[0].point)
             ):
                 return state, ui_state
-            last_error = SemanticGateClosed("enhancement Dock identity is incomplete")
-            if attempt < 7:
-                self._sleep(0.05)
-        raise SemanticGateClosed("enhancement Dock snapshots did not stabilize") from last_error
+            raise SemanticGateClosed("enhancement Dock identity is incomplete")
+
+        # A leased screenshot is immutable. Its transition reader performs
+        # one attempt, allowing ALAS to refresh at its next screenshot; live
+        # readers retain the bounded settling retry.
+        return self._retry_transition_read(
+            read_records, attempts=8, interval_seconds=0.05
+        )
 
     @staticmethod
     def _enhancement_filter_option(
@@ -1260,13 +1309,27 @@ class EnhancementOracle:
                 target_name=last_stable.target_name,
                 recommendation=recommendation,
             )
+        initial_attributes = {item.index: item for item in initial.attributes}
+
+        def partial_experience_gain(item: EnhancementAttributeState) -> int:
+            before = initial_attributes.get(item.index)
+            if (before is None or item.addition != 0
+                    or item.name != before.name or item.current != before.current
+                    or item.maximum != before.maximum
+                    or item.exp_total is None or item.exp_total != before.exp_total
+                    or item.exp_current is None or before.exp_current is None
+                    or not 0 <= before.exp_current < item.exp_current < item.exp_total):
+                return 0
+            return item.exp_current - before.exp_current
+
         materials_safe = bool(
             selected.material_protection_proven
             and all(
                 material.level == 1 and material.rarity_sprite == "bg1"
                 for material in selected.materials
             )
-            and any(attribute.addition > 0 for attribute in selected.attributes)
+            and any(attribute.addition > 0 or partial_experience_gain(attribute) > 0
+                    for attribute in selected.attributes)
         )
         if not materials_safe:
             try:
@@ -1300,6 +1363,12 @@ class EnhancementOracle:
                 ):
                     return None
                 gain += after.current - before.current
+                experience_gain = partial_experience_gain(before)
+                if experience_gain:
+                    if (after.exp_current != before.exp_current
+                            or after.exp_total != before.exp_total):
+                        return None
+                    gain += experience_gain
             return gain if gain > 0 else None
 
         deadline = time.monotonic() + timeout_seconds

@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
+
 import time
+import sys
+from ...oracle.errors import SemanticSnapshotStale
 from dataclasses import replace
 from typing import Any, Callable, List, Mapping, Optional, Set, Tuple, Union
 from ...adapter import (
+    ActionGrantExhausted,
     ActionLedger,
     ActionNotDispatched,
     DEFAULT_CAPABILITY_INVENTORY,
@@ -30,6 +35,7 @@ from ...semantic_oracle import (
     SemanticOracle,
 )
 from .contracts import (
+    AlasSemanticActionDeferred,
     AlasSemanticUnmapped,
     CampaignAutoSearchCompletionProof,
     CampaignAutoSearchEvidenceBundle,
@@ -166,10 +172,6 @@ class CoreAdapterPorts:
                 raise ValueError(
                     "{0} budget must be a non-negative integer".format(label)
                 )
-        if campaign_camera_positioning_budget > 2:
-            raise ValueError(
-                "campaign camera positioning budget must be at most two"
-            )
         if action_ledger is None:
             grants = _legacy_action_grants(
                 allow_mission_claim_once=allow_mission_claim_once,
@@ -271,11 +273,19 @@ class CoreAdapterPorts:
 
     def reset_task_state(self) -> None:
         """Discard task-owned contexts and proofs, retaining grants and runtime."""
+
+        self._prepared_input_oracle = None
+        self._storage_box_candidate = None
+        self._storage_box_use_receipt = None
+        self._storage_box_use_quantity = None
+        self._storage_box_equipment_receipt = None
+        self._storage_box_destroy_receipt = None
         self._mission_context: Optional[_MissionFlowContext] = None
         self._mail_context: Optional[_MailFlowContext] = None
         self._commission_context: Optional[_CommissionFlowContext] = None
         self._research_context: Optional[_ResearchFlowContext] = None
         self._dorm_context: Optional[_DormFlowContext] = None
+        self._dorm_parent_commission: Optional[_CommissionFlowContext] = None
         self._build_context: Optional[_BuildFlowContext] = None
         self._supply_pack_context: Optional[_SupplyPackFlowContext] = None
         self._battle_pass_context: Optional[_BattlePassFlowContext] = None
@@ -288,18 +298,31 @@ class CoreAdapterPorts:
         self._daily_kind: Optional[str] = None
         self._daily_stage: Optional[int] = None
         self._daily_pending_receipt: Optional[ActionReceipt] = None
+        self._daily_quick_reward_closed = False
         self._daily_pending_stage_receipt: Optional[ActionReceipt] = None
         self._daily_stage_confirmed = False
         self._daily_transition_until = 0.0
         self._current_raid_result_event: Optional[str] = None
         self._network_reconnect_transition_until = 0.0
         self._main_battle_transition_receipt: Optional[ActionReceipt] = None
-        self._main_battle_transition_until = 0.0
+        self._main_shop_transition_receipt: Optional[ActionReceipt] = None
+        self._main_shop_transition_until = 0.0
+        self._main_dock_transition_receipt: Optional[ActionReceipt] = None
+        self._main_dock_transition_until = 0.0
         self._event_story_transition_until = 0.0
+        self._campaign_event_entry_transition_until = 0.0
         self._operation_siren_entry_transition_until = 0.0
+        self._operation_siren_exit_receipt: Optional[ActionReceipt] = None
+        self._operation_siren_exit_handoff = None
+        self._operation_siren_abyssal_entry_receipt: Optional[ActionReceipt] = None
+        self._operation_siren_abyssal_entry_input_count: Optional[int] = None
         self._operation_siren_page_remount_until = 0.0
         self._operation_siren_entry_receipt: Optional[ActionReceipt] = None
+        self._campaign_archive_entry_receipt: Optional[ActionReceipt] = None
+        self._campaign_archive_entry_transition_until = 0.0
         self._operation_siren_globe_map_receipt: Optional[ActionReceipt] = None
+        self._operation_siren_order_entry_receipt: Optional[ActionReceipt] = None
+        self._operation_siren_adaptability_info_receipt: Optional[ActionReceipt] = None
         self._operation_siren_auto_search_transition_until = 0.0
         self._operation_siren_auto_search_active = False
         self._operation_siren_startup_search_provisional = False
@@ -308,9 +331,63 @@ class CoreAdapterPorts:
         self._operation_siren_combat_fleet: Optional[int] = None
         self._operation_siren_defeated_fleets: set[int] = set()
         self._meta_beacon_active = False
+        self._meta_assist_active = False
+        self._meta_precombat_start_receipt = None
+        self._meta_precombat_start_until = 0.0
+        self._meta_precombat_back_receipt = None
+        self._meta_precombat_back_until = 0.0
+        self._meta_assist_entry_receipt = None
+        self._meta_assist_entry_until = 0.0
+        self._main_more_entry_receipt = None
+        self._main_more_entry_until = 0.0
+        self._commission_return_transition_until = 0.0
+        self._mission_page_return_transition_until = 0.0
+        self._meowfficer_return_transition_until = 0.0
+        self._build_return_transition_until = 0.0
+        self._guild_return_transition_until = 0.0
+        self._guild_message_close_receipt = None
+        self._dorm_return_transition_until = 0.0
+        self._main_guild_entry_receipt = None
+        self._main_guild_entry_until = 0.0
+        self._guild_logistics_transition_until = 0.0
+        self._shipyard_entry_receipt = None
+        self._meta_entry_receipt = None
+        self._meta_current_create_handoff = None
+        self._orphan_tactical_prompt_probe = None
+        self._meta_home_receipt = None
+        self._research_back_receipt = None
+        self._inherited_home_return_receipt = None
+        self._inherited_home_return_until = 0.0
+        self._shop_home_handoff = None
+        self._commission_navigation_handoff = None
+        self._inherited_withdraw_open_receipt = None
+        self._inherited_withdraw_confirm_receipt = None
+        self._research_progress_close_receipt = None
+        self._research_progress_close_until = 0.0
+        self._meta_current_entry_receipt = None
+        self._meta_dossier_entry_receipt = None
+        self._meta_reward_close_receipt = None
+        self._operation_siren_reward_close_receipt = None
+        self._meta_character_entry_receipt = None
+        self._daily_entry_receipt = None
+        self._daily_entry_transition_until = 0.0
+        self._main_tech_entry_receipt = None
+        self._main_storage_entry_receipt = None
+        self._main_live_entry_receipt = None
+        self._private_quarters_entry_receipt = None
+        self._private_quarters_dialogue_receipt = None
+        self._private_quarters_transition_until = 0.0
+        self._private_quarters_home_transition_until = 0.0
+        self._private_quarters_entry_transition_until = 0.0
+        self._research_menu_return_transition_until = 0.0
         self._operation_siren_pending_order: Optional[str] = None
         self._exercise_pending = False
         self._exercise_execution_active = False
+        self._exercise_chapter_back_transition_until = 0.0
+        self._exercise_entry_transition_until = 0.0
+        self._exercise_entry_receipt: Optional[ActionReceipt] = None
+        self._exercise_page_back_transition_until = 0.0
+        self._exercise_chapter_entry_transition_until = 0.0
         self._last_campaign_auto_search_completion: Optional[
             CampaignAutoSearchCompletionProof
         ] = None
@@ -321,6 +398,8 @@ class CoreAdapterPorts:
         self._operation_siren_globe_swipe_intent: Optional[
             _OperationSirenGlobeSwipeIntent
         ] = None
+        self._operation_siren_camera_geometry = None
+        self._operation_siren_map_swipe_intent = None
         self._awaken_flow_active = False
         self._enhancement_flow_active = False
         self._enhancement_current_candidate = None
@@ -328,11 +407,22 @@ class CoreAdapterPorts:
         self._observer_stale_since: Optional[float] = None
         self._login_flow.end()
 
+    def _require_action_grant(self, capability: str) -> None:
+        try:
+            self._action_ledger.require_available(capability)
+        except ActionGrantExhausted as exc:
+            raise AlasSemanticActionDeferred(
+                "{0}: task action grant is exhausted".format(capability)
+            ) from exc
+
     def _dispatch_mutation(
         self,
         capability: str,
         operation: Callable[[], Any],
     ) -> Any:
+        # Only a refusal before entering the backend is task-local. Do not
+        # translate backend errors based on a grant already burned by input.
+        self._require_action_grant(capability)
         if isinstance(self.oracle, SemanticOracle):
             dispatch_count = self.oracle.input_dispatch_count
             backend_operation = operation
@@ -343,6 +433,8 @@ class CoreAdapterPorts:
                 except Exception as exc:
                     if self.oracle.input_dispatch_count == dispatch_count:
                         raise ActionNotDispatched(exc) from exc
+                    if isinstance(exc, SemanticSnapshotStale):
+                        exc.input_outcome_uncertain = True
                     raise
 
             operation = tracked_operation
@@ -372,11 +464,35 @@ class CoreAdapterPorts:
         reader = provider()
         if reader is None:
             raise StaleFrameError()
+        # The retry limit belongs to the game session, while each ALAS
+        # screenshot boundary creates a new immutable observation reader.
+        reader._login_update_retry_attempted = (
+            getattr(self.oracle, "_login_update_retry_attempted", False)
+        )
         return reader
+
+    @contextmanager
+    def prepared_input_frame(self, provider: Callable[[], Any]):
+        """Offer the session's fresh frame to one nested input preparation."""
+        previous = self._prepared_input_oracle
+        self._prepared_input_oracle = provider
+        try:
+            yield
+        finally:
+            self._prepared_input_oracle = previous
 
     def _fresh_input_oracle(self) -> Any:
         """Bind a mutation's final semantic proof to one fresh ALAS frame."""
 
+        prepared = self._prepared_input_oracle
+        self._prepared_input_oracle = None
+        if prepared is not None:
+            try:
+                return prepared()
+            except StaleFrameError:
+                # A wait, input, refresh or runtime change can invalidate the
+                # offered frame. The usual acquisition owns recovery.
+                pass
         if (
             self._input_frame_refresher is not None
             and self._frame_observation_oracle is not None
@@ -418,17 +534,38 @@ class CoreAdapterPorts:
         name = button if isinstance(button, str) else getattr(button, "name", None)
         if not isinstance(name, str) or not name:
             raise AlasSemanticUnmapped("ALAS resource has no stable name")
+        # Native InfoHandler annotates these shared objects for logging. Their
+        # object identity, not the caller's arbitrary suffix, identifies the
+        # reviewed base resource. Do not import assets here (which could load
+        # pixel dependencies), or normalize an unrelated object/string merely
+        # because its name has the same prefix. Context and typed prompt checks
+        # remain in the normal observation/input dispatch below this seam.
+        if not isinstance(button, str):
+            assets = sys.modules.get("module.handler.assets")
+            if assets is not None:
+                for base in ("POPUP_CONFIRM", "POPUP_CONFIRM_WHITE", "POPUP_CANCEL"):
+                    if getattr(assets, base, None) is button:
+                        if base == "POPUP_CONFIRM" and name in (
+                            "POPUP_CONFIRM_GACHA_PREP", "POPUP_CONFIRM_GACHA_ORDER"
+                        ):
+                            # These reviewed native aliases distinguish warning
+                            # dismissal from resource-consuming order submission.
+                            return name
+                        return base
         # InfoHandler temporarily annotates this reviewed shared asset between
-        # its presence probe and click.  Normalize only the proven Research
-        # suffix; broad prefix stripping could admit unrelated popup inputs.
+        # its presence probe and click. Keep legacy string aliases for existing
+        # callers; newly annotated real shared assets use object identity above.
         if name in (
             "POPUP_CONFIRM_RESEARCH_START",
             "POPUP_CONFIRM_RESEARCH_QUEUE",
+            "POPUP_CONFIRM_RESEARCH_CANCEL",
             "POPUP_CONFIRM_LOGIN",
             "POPUP_CONFIRM_CAMPAIGN_RECONNECT",
             "POPUP_CONFIRM_COMBAT_EXECUTE",
             "POPUP_CONFIRM_COMBAT_STATUS",
             "POPUP_CONFIRM_WHITE_LOGIN",
+            "POPUP_CONFIRM_WHITE_UI_ADDITIONAL",
+            "POPUP_CONFIRM_WHITE_CAMPAIGN_RECONNECT",
             "POPUP_CONFIRM_UI_ADDITIONAL",
             "POPUP_CONFIRM_MAIL_CLAIM",
             "POPUP_CONFIRM_MAIL_QUIT",
@@ -436,10 +573,13 @@ class CoreAdapterPorts:
             "POPUP_CONFIRM_MINIGAME_ENTER",
             "POPUP_CONFIRM_FINISH_ORDERS",
             "POPUP_CONFIRM_TACTICAL",
+            "POPUP_CONFIRM_MISSION_REWARD",
+            "POPUP_CONFIRM_COMMISSION_START",
         ):
             return (
                 "POPUP_CONFIRM_WHITE"
-                if name == "POPUP_CONFIRM_WHITE_LOGIN"
+                if name in ("POPUP_CONFIRM_WHITE_LOGIN", "POPUP_CONFIRM_WHITE_UI_ADDITIONAL",
+                            "POPUP_CONFIRM_WHITE_CAMPAIGN_RECONNECT")
                 else "POPUP_CONFIRM"
             )
         return name

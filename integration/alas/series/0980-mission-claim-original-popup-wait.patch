@@ -1,0 +1,14 @@
+diff --git a/module/reward/reward.py b/module/reward/reward.py
+--- a/module/reward/reward.py
++++ b/module/reward/reward.py
+@@ -91,8 +91,8 @@
+                     and not semantic_adapter.mission_claim_allowed()
+                 ):
+                     logger.info(
+-                        'Mission claim submitted; semantic claim budget is now zero')
+-                    return clicked
++                        'Mission claim submitted; wait for original popup transition without another claim')
++                    continue
+                 if self.appear_then_click(MISSION_MULTI, offset=(20, 20)):
+                     click_interval.reset()
+                     clicked = True

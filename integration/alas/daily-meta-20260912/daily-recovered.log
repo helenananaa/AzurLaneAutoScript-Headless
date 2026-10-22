@@ -1,0 +1,46 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 11:29:55.984 │ [Server] cn                                 
+read: ./config\semantic_e2e.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 11:29:55.989 │ Bind task ['General', 'Alas']               
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 11:29:55.991 │ DEVICE                                      
+INFO     2026-09-12 11:29:55.992 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 11:29:55.994 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 11:29:55.994 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 11:29:55.996 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 11:29:55.997 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 11:29:55.998 │ emulator-5580                               
+INFO     2026-09-12 11:29:56.000 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 11:29:56.001 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 11:29:56.005 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 11:29:56.006 │ [Server] cn                                 
+WARNING  2026-09-12 11:29:56.008 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 11:29:56.010 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 11:29:56.039 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 11:29:56.040 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 11:29:56.041 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 11:29:56.042 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 11:29:56.042 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+items False
+remaining 0
+[('UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/lock/Image', 'frame'), ('UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/201/lock', 'suo'), ('UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301/lock/Image', 'bg1'), ('UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/301/lock', 'suo')]
+Traceback (most recent call last):
+  File "<stdin>", line 8, in <module>
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\python\alas_headless\oracle\combat.py", line 844, in click_daily_control
+    raise SemanticGateClosed("daily control is not actionable")
+alas_headless.oracle.errors.SemanticGateClosed: daily control is not actionable

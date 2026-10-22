@@ -1,0 +1,3768 @@
+{
+  "source": "goal-r158-activity-home-readonly-r1.json fresh coherent typed home review; no input",
+  "snapshot": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 19656,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "abi": "x86_64",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "snapshot_schema": 1,
+    "snapshot_struct_size": 104,
+    "generation": 4451,
+    "scene_generation": 2,
+    "semantic_generation": 2,
+    "snapshot_monotonic_ns": 44824938262441,
+    "response_monotonic_ns": 44825185708710,
+    "age_ms": 247,
+    "observer_tid": 19687,
+    "assembly_count": 129,
+    "semantic_code": 1,
+    "width": 1280,
+    "height": 720,
+    "flags": 15,
+    "observer_attached": false,
+    "main_thread": true,
+    "button_count": 159,
+    "active_button_count": 5,
+    "interactable_button_count": 159,
+    "scene_handle": -76,
+    "ui_stage": 100,
+    "ui_method_mask": 15
+  },
+  "buttons": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.buttons/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 19656,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 344104,
+    "generation": 4451,
+    "snapshot_monotonic_ns": 44824938262441,
+    "response_monotonic_ns": 44825185723372,
+    "age_ms": 247,
+    "button_count": 5,
+    "truncated": false,
+    "error_count": 0,
+    "buttons": [
+      {
+        "name": "2",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -38180,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 11.407,
+          "y": 0.446,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -330.0,
+          "y": -350.0,
+          "width": 660.0,
+          "height": 700.0
+        },
+        "screen_point": {
+          "x": 1153.333,
+          "y": 380.06
+        },
+        "adb_point": {
+          "x": 1153.333,
+          "y": 339.94
+        },
+        "screen_bounds": {
+          "left": 933.333,
+          "bottom": 146.727,
+          "right": 1373.333,
+          "top": 613.393
+        },
+        "adb_bounds": {
+          "left": 933.333,
+          "top": 106.607,
+          "right": 1373.333,
+          "bottom": 573.273
+        }
+      },
+      {
+        "name": "1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -37922,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 1.63,
+          "y": 0.446,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -330.0,
+          "y": -350.0,
+          "width": 660.0,
+          "height": 700.0
+        },
+        "screen_point": {
+          "x": 713.333,
+          "y": 380.06
+        },
+        "adb_point": {
+          "x": 713.333,
+          "y": 339.94
+        },
+        "screen_bounds": {
+          "left": 493.333,
+          "bottom": 146.727,
+          "right": 933.333,
+          "top": 613.393
+        },
+        "adb_bounds": {
+          "left": 493.333,
+          "top": 106.607,
+          "right": 933.333,
+          "bottom": 573.273
+        }
+      },
+      {
+        "name": "0",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -37664,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -8.148,
+          "y": 0.446,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -330.0,
+          "y": -350.0,
+          "width": 660.0,
+          "height": 700.0
+        },
+        "screen_point": {
+          "x": 273.333,
+          "y": 380.06
+        },
+        "adb_point": {
+          "x": 273.333,
+          "y": 339.94
+        },
+        "screen_bounds": {
+          "left": 53.333,
+          "bottom": 146.727,
+          "right": 493.333,
+          "top": 613.393
+        },
+        "adb_bounds": {
+          "left": 53.333,
+          "top": 106.607,
+          "right": 493.333,
+          "bottom": 573.273
+        }
+      },
+      {
+        "name": "homeBtn",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/top/homeBtn",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -37554,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": 13.108,
+          "y": 7.056,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -48.5,
+          "y": -48.5,
+          "width": 97.0,
+          "height": 97.0
+        },
+        "screen_point": {
+          "x": 1229.867,
+          "y": 677.533
+        },
+        "adb_point": {
+          "x": 1229.867,
+          "y": 42.467
+        },
+        "screen_bounds": {
+          "left": 1197.544,
+          "bottom": 645.211,
+          "right": 1262.189,
+          "top": 709.856
+        },
+        "adb_bounds": {
+          "left": 1197.544,
+          "top": 10.144,
+          "right": 1262.189,
+          "bottom": 74.789
+        }
+      },
+      {
+        "name": "closeBtn",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/top/closeBtn",
+        "canvas": "Canvas",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "instance_id": -37542,
+        "click_listener_count": -1,
+        "runtime_click_listener_count": -1,
+        "world_position": {
+          "x": -13.074,
+          "y": 6.918,
+          "z": 10.0
+        },
+        "local_rect": {
+          "x": -102.5,
+          "y": -54.0,
+          "width": 205.0,
+          "height": 108.0
+        },
+        "screen_point": {
+          "x": 51.658,
+          "y": 671.299
+        },
+        "adb_point": {
+          "x": 51.658,
+          "y": 48.701
+        },
+        "screen_bounds": {
+          "left": -16.653,
+          "bottom": 635.311,
+          "right": 119.969,
+          "top": 707.287
+        },
+        "adb_bounds": {
+          "left": -16.653,
+          "top": 12.713,
+          "right": 119.969,
+          "bottom": 84.689
+        }
+      }
+    ]
+  },
+  "ui": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.ui/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 19656,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 4466248,
+    "generation": 4452,
+    "snapshot_monotonic_ns": 44825328272388,
+    "response_monotonic_ns": 44825559102783,
+    "age_ms": 230,
+    "method_mask": 15,
+    "toggle_count": 3,
+    "text_count": 14,
+    "image_count": 93,
+    "toggle_truncated": false,
+    "text_truncated": false,
+    "image_truncated": false,
+    "error_count": 0,
+    "error_counts": {
+      "toggle": 0,
+      "text": 0,
+      "image": 0,
+      "shared": 0
+    },
+    "skipped_count": 0,
+    "image_source_count": 1326,
+    "image_source_capacity": 16384,
+    "toggles": [
+      {
+        "kind": "toggle",
+        "name": "finish_toggle",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/finish_toggle",
+        "flags": 1531,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": false,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 1153.333,
+          "y": 339.94
+        },
+        "adb_bounds": {
+          "left": 1153.333,
+          "top": 339.94,
+          "right": 1153.333,
+          "bottom": 339.94
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "finish_toggle",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/finish_toggle",
+        "flags": 1531,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": false,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 713.333,
+          "y": 339.94
+        },
+        "adb_bounds": {
+          "left": 713.333,
+          "top": 339.94,
+          "right": 713.333,
+          "bottom": 339.94
+        }
+      },
+      {
+        "kind": "toggle",
+        "name": "finish_toggle",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/finish_toggle",
+        "flags": 1531,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": false,
+        "checked": false,
+        "raycast_top": null,
+        "adb_point": {
+          "x": 273.333,
+          "y": 339.94
+        },
+        "adb_bounds": {
+          "left": 273.333,
+          "top": 339.94,
+          "right": 273.333,
+          "bottom": 339.94
+        }
+      }
+    ],
+    "texts": [
+      {
+        "kind": "ugui-text",
+        "name": "fur",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/fur",
+        "text": "1/1",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1217.356,
+          "top": 494.096,
+          "right": 1288.511,
+          "bottom": 565.251
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "model",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/model",
+        "text": "6/6",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 1118.156,
+          "top": 488.429,
+          "right": 1189.311,
+          "bottom": 559.584
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "label",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/label",
+        "text": "收藏进度",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 994.623,
+          "top": 479.629,
+          "right": 1065.777,
+          "bottom": 550.784
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "fur",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/fur",
+        "text": "1/1",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 777.356,
+          "top": 494.096,
+          "right": 848.511,
+          "bottom": 565.251
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "model",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/model",
+        "text": "5/5",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 678.156,
+          "top": 488.429,
+          "right": 749.311,
+          "bottom": 559.584
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "label",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/label",
+        "text": "收藏进度",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 554.623,
+          "top": 479.629,
+          "right": 625.777,
+          "bottom": 550.784
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "fur",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/fur",
+        "text": "1/1",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 337.356,
+          "top": 494.096,
+          "right": 408.511,
+          "bottom": 565.251
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "model",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/model",
+        "text": "6/6",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 238.156,
+          "top": 488.429,
+          "right": 309.311,
+          "bottom": 559.584
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "label",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/label",
+        "text": "收藏进度",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 114.623,
+          "top": 479.629,
+          "right": 185.777,
+          "bottom": 550.784
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "subText",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/prints/tip/Text/subText",
+        "text": "活动期间，可以任选一个之前未完成的活动<b><color=#faba55>开启轻量化复刻</color></b>",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 73.27,
+          "top": 646.867,
+          "right": 655.877,
+          "bottom": 713.533
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/prints/time/Text",
+        "text": "10/8-10/15 维护",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 730.067,
+          "top": 646.867,
+          "right": 796.733,
+          "bottom": 713.533
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "en",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/top/title/Text/en",
+        "text": "ACTIVITY",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 233.498,
+          "top": 40.036,
+          "right": 253.491,
+          "bottom": 45.034
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/top/title/Text",
+        "text": "轻量化复刻",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 112.938,
+          "top": 22.143,
+          "right": 227.901,
+          "bottom": 45.136
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "FpsPanel",
+        "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+        "text": "",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 573.333,
+          "top": 0.0,
+          "right": 706.667,
+          "bottom": 34.667
+        }
+      }
+    ],
+    "images": [
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl(Clone)/mask/Image",
+        "sprite": "gou",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1016.642,
+          "top": 113.429,
+          "right": 1098.993,
+          "bottom": 226.47
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1057.818,
+          "y": 169.949
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl(Clone)/ico_1",
+        "sprite": "boder_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1019.822,
+          "top": 117.668,
+          "right": 1095.563,
+          "bottom": 215.148
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1057.693,
+          "y": 166.408
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl(Clone)/ico",
+        "sprite": "telinida",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1022.579,
+          "top": 120.073,
+          "right": 1092.807,
+          "bottom": 212.743
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1057.693,
+          "y": 166.408
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl(Clone)",
+        "sprite": "border_frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1015.945,
+          "top": 113.474,
+          "right": 1102.455,
+          "bottom": 230.673
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1059.2,
+          "y": 172.073
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl(Clone)/mask/Image",
+        "sprite": "gou",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1016.642,
+          "top": 113.429,
+          "right": 1098.993,
+          "bottom": 226.47
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1057.818,
+          "y": 169.949
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl(Clone)/ico_1",
+        "sprite": "boder_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1019.822,
+          "top": 117.668,
+          "right": 1095.563,
+          "bottom": 215.148
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1057.693,
+          "y": 166.408
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl(Clone)/ico",
+        "sprite": "yongqi",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1022.579,
+          "top": 120.073,
+          "right": 1092.807,
+          "bottom": 212.743
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1057.693,
+          "y": 166.408
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl(Clone)",
+        "sprite": "border_frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1015.945,
+          "top": 113.474,
+          "right": 1102.455,
+          "bottom": 230.673
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1059.2,
+          "y": 172.073
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl(Clone)/mask/Image",
+        "sprite": "gou",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 576.642,
+          "top": 113.429,
+          "right": 658.993,
+          "bottom": 226.47
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 617.817,
+          "y": 169.949
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl(Clone)/ico_1",
+        "sprite": "boder_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 579.822,
+          "top": 117.668,
+          "right": 655.563,
+          "bottom": 215.148
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 617.693,
+          "y": 166.408
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl(Clone)/ico",
+        "sprite": "digaiteluyin",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 582.579,
+          "top": 120.073,
+          "right": 652.807,
+          "bottom": 212.743
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 617.693,
+          "y": 166.408
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl(Clone)",
+        "sprite": "border_frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 575.945,
+          "top": 113.474,
+          "right": 662.455,
+          "bottom": 230.673
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 619.2,
+          "y": 172.073
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl(Clone)/mask/Image",
+        "sprite": "gou",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 136.642,
+          "top": 113.429,
+          "right": 218.993,
+          "bottom": 226.47
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 177.817,
+          "y": 169.949
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl(Clone)/ico_1",
+        "sprite": "boder_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 139.822,
+          "top": 117.668,
+          "right": 215.563,
+          "bottom": 215.148
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 177.693,
+          "y": 166.408
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl(Clone)/ico",
+        "sprite": "miaofeng",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 142.579,
+          "top": 120.073,
+          "right": 212.807,
+          "bottom": 212.743
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 177.693,
+          "y": 166.408
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl(Clone)",
+        "sprite": "border_frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 135.946,
+          "top": 113.474,
+          "right": 222.454,
+          "bottom": 230.673
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 179.2,
+          "y": 172.073
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl(Clone)/mask/Image",
+        "sprite": "gou",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 136.642,
+          "top": 113.429,
+          "right": 218.993,
+          "bottom": 226.47
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 177.817,
+          "y": 169.949
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl(Clone)/ico_1",
+        "sprite": "boder_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 139.822,
+          "top": 117.668,
+          "right": 215.563,
+          "bottom": 215.148
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 177.693,
+          "y": 166.408
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl(Clone)/ico",
+        "sprite": "shuiwulai",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 142.579,
+          "top": 120.073,
+          "right": 212.807,
+          "bottom": 212.743
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 177.693,
+          "y": 166.408
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tpl(Clone)",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl(Clone)",
+        "sprite": "border_frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 135.946,
+          "top": 113.474,
+          "right": 222.454,
+          "bottom": 230.673
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 179.2,
+          "y": 172.073
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image_3",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl3/mask/Image_3",
+        "sprite": "gou",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 930.603,
+          "top": 129.561,
+          "right": 1041.521,
+          "bottom": 259.604
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 986.062,
+          "y": 194.583
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl3/ico_1",
+        "sprite": "boder_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 933.838,
+          "top": 134.479,
+          "right": 1033.874,
+          "bottom": 248.062
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 983.856,
+          "y": 191.271
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl3/ico",
+        "sprite": "guangrong_alter",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 937.13,
+          "top": 137.552,
+          "right": 1030.581,
+          "bottom": 244.989
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 983.856,
+          "y": 191.271
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tpl3",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl3",
+        "sprite": "border_frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 929.377,
+          "top": 128.355,
+          "right": 1045.422,
+          "bottom": 263.525
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 987.4,
+          "y": 195.94
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image_2",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl2/mask/Image_2",
+        "sprite": "gou",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1243.865,
+          "top": 379.429,
+          "right": 1340.506,
+          "bottom": 501.742
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1292.185,
+          "y": 440.586
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl2/ico_1",
+        "sprite": "boder_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1248.929,
+          "top": 383.579,
+          "right": 1336.891,
+          "bottom": 489.725
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1292.91,
+          "y": 436.652
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl2/ico",
+        "sprite": "keliaopeitela",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1251.968,
+          "top": 386.324,
+          "right": 1333.852,
+          "bottom": 486.98
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1292.91,
+          "y": 436.652
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tpl2",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl2",
+        "sprite": "border_frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1242.95,
+          "top": 378.988,
+          "right": 1344.25,
+          "bottom": 505.959
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1293.6,
+          "y": 442.473
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl1/mask/Image_1",
+        "sprite": "gou",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1289.526,
+          "top": 296.297,
+          "right": 1376.816,
+          "bottom": 412.677
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1333.171,
+          "y": 354.487
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl1/ico_1",
+        "sprite": "boder_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1292.73,
+          "top": 300.555,
+          "right": 1372.707,
+          "bottom": 401.137
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1332.719,
+          "y": 350.846
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl1/ico",
+        "sprite": "telafaerjia",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1295.587,
+          "top": 303.079,
+          "right": 1369.85,
+          "bottom": 398.613
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1332.719,
+          "y": 350.846
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tpl1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl1",
+        "sprite": "border_frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1289.122,
+          "top": 295.917,
+          "right": 1380.745,
+          "bottom": 416.63
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1334.933,
+          "y": 356.273
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl/mask/Image",
+        "sprite": "gou",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1016.642,
+          "top": 113.429,
+          "right": 1098.993,
+          "bottom": 226.47
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1057.818,
+          "y": 169.949
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl/ico_1",
+        "sprite": "boder_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1019.822,
+          "top": 117.668,
+          "right": 1095.563,
+          "bottom": 215.148
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1057.693,
+          "y": 166.408
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl/ico",
+        "sprite": "shi",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1022.579,
+          "top": 120.073,
+          "right": 1092.807,
+          "bottom": 212.743
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1057.693,
+          "y": 166.408
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tpl",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ships/tpl",
+        "sprite": "border_frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1015.945,
+          "top": 113.474,
+          "right": 1102.455,
+          "bottom": 230.673
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1059.2,
+          "y": 172.073
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "title",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/title",
+        "sprite": "title",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 994.333,
+          "top": 145.007,
+          "right": 1020.333,
+          "bottom": 474.34
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1007.333,
+          "y": 309.673
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border/ico",
+        "sprite": "banner",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1028.4,
+          "top": 171.34,
+          "right": 1305.733,
+          "bottom": 448.007
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1167.067,
+          "y": 309.673
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "border",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/border",
+        "sprite": "banner",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 986.0,
+          "top": 136.607,
+          "right": 1340.667,
+          "bottom": 488.607
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1163.333,
+          "y": 312.607
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "doing",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/2/doing",
+        "sprite": "progress_ing",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 965.55,
+          "top": 116.446,
+          "right": 1332.583,
+          "bottom": 566.234
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1149.067,
+          "y": 341.34
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image_3",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl3/mask/Image_3",
+        "sprite": "gou",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 490.603,
+          "top": 129.561,
+          "right": 601.521,
+          "bottom": 259.604
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 546.062,
+          "y": 194.583
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl3/ico_1",
+        "sprite": "boder_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 493.838,
+          "top": 134.479,
+          "right": 593.874,
+          "bottom": 248.062
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 543.856,
+          "y": 191.271
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl3/ico",
+        "sprite": "dikaina",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 497.13,
+          "top": 137.552,
+          "right": 590.581,
+          "bottom": 244.989
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 543.856,
+          "y": 191.271
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tpl3",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl3",
+        "sprite": "border_frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 489.377,
+          "top": 128.355,
+          "right": 605.422,
+          "bottom": 263.525
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 547.4,
+          "y": 195.94
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image_2",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl2/mask/Image_2",
+        "sprite": "gou",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 803.865,
+          "top": 379.429,
+          "right": 900.506,
+          "bottom": 501.742
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 852.185,
+          "y": 440.586
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl2/ico_1",
+        "sprite": "boder_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 808.929,
+          "top": 383.579,
+          "right": 896.891,
+          "bottom": 489.725
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 852.91,
+          "y": 436.652
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl2/ico",
+        "sprite": "dadan",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 811.968,
+          "top": 386.324,
+          "right": 893.852,
+          "bottom": 486.98
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 852.91,
+          "y": 436.652
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tpl2",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl2",
+        "sprite": "border_frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 802.95,
+          "top": 378.988,
+          "right": 904.25,
+          "bottom": 505.959
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 853.6,
+          "y": 442.473
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl1/mask/Image_1",
+        "sprite": "gou",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 849.526,
+          "top": 296.297,
+          "right": 936.816,
+          "bottom": 412.677
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 893.171,
+          "y": 354.487
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl1/ico_1",
+        "sprite": "boder_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 852.73,
+          "top": 300.555,
+          "right": 932.707,
+          "bottom": 401.137
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 892.719,
+          "y": 350.846
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl1/ico",
+        "sprite": "beilaosenlin",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 855.587,
+          "top": 303.079,
+          "right": 929.85,
+          "bottom": 398.613
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 892.719,
+          "y": 350.846
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tpl1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl1",
+        "sprite": "border_frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 849.122,
+          "top": 295.917,
+          "right": 940.745,
+          "bottom": 416.63
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 894.933,
+          "y": 356.273
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl/mask/Image",
+        "sprite": "gou",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 576.642,
+          "top": 113.429,
+          "right": 658.993,
+          "bottom": 226.47
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 617.817,
+          "y": 169.949
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl/ico_1",
+        "sprite": "boder_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 579.822,
+          "top": 117.668,
+          "right": 655.563,
+          "bottom": 215.148
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 617.693,
+          "y": 166.408
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl/ico",
+        "sprite": "masaina",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 582.579,
+          "top": 120.073,
+          "right": 652.807,
+          "bottom": 212.743
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 617.693,
+          "y": 166.408
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tpl",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ships/tpl",
+        "sprite": "border_frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 575.945,
+          "top": 113.474,
+          "right": 662.455,
+          "bottom": 230.673
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 619.2,
+          "y": 172.073
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "title",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/title",
+        "sprite": "title",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 554.333,
+          "top": 145.007,
+          "right": 580.333,
+          "bottom": 474.34
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 567.333,
+          "y": 309.673
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border/ico",
+        "sprite": "banner",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 588.4,
+          "top": 171.34,
+          "right": 865.733,
+          "bottom": 448.007
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 727.067,
+          "y": 309.673
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "border",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/border",
+        "sprite": "banner",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 546.0,
+          "top": 136.607,
+          "right": 900.667,
+          "bottom": 488.607
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 723.333,
+          "y": 312.607
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "doing",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/1/doing",
+        "sprite": "progress_ing",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 525.55,
+          "top": 116.446,
+          "right": 892.583,
+          "bottom": 566.234
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 709.067,
+          "y": 341.34
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image_3",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl3/mask/Image_3",
+        "sprite": "gou",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 50.602,
+          "top": 129.561,
+          "right": 161.521,
+          "bottom": 259.604
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 106.062,
+          "y": 194.583
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl3/ico_1",
+        "sprite": "boder_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 53.838,
+          "top": 134.479,
+          "right": 153.874,
+          "bottom": 248.062
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 103.856,
+          "y": 191.271
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl3/ico",
+        "sprite": "qianjian",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 57.13,
+          "top": 137.552,
+          "right": 150.581,
+          "bottom": 244.989
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 103.856,
+          "y": 191.271
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tpl3",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl3",
+        "sprite": "border_frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 49.377,
+          "top": 128.355,
+          "right": 165.423,
+          "bottom": 263.525
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 107.4,
+          "y": 195.94
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image_2",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl2/mask/Image_2",
+        "sprite": "gou",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 363.865,
+          "top": 379.429,
+          "right": 460.506,
+          "bottom": 501.742
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 412.185,
+          "y": 440.586
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl2/ico_1",
+        "sprite": "boder_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 368.929,
+          "top": 383.579,
+          "right": 456.891,
+          "bottom": 489.725
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 412.91,
+          "y": 436.652
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl2/ico",
+        "sprite": "jinjiang",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 371.968,
+          "top": 386.324,
+          "right": 453.852,
+          "bottom": 486.98
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 412.91,
+          "y": 436.652
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tpl2",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl2",
+        "sprite": "border_frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 362.95,
+          "top": 378.988,
+          "right": 464.25,
+          "bottom": 505.959
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 413.6,
+          "y": 442.473
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl1/mask/Image_1",
+        "sprite": "gou",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 409.526,
+          "top": 296.297,
+          "right": 496.816,
+          "bottom": 412.677
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 453.171,
+          "y": 354.487
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl1/ico_1",
+        "sprite": "boder_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 412.73,
+          "top": 300.555,
+          "right": 492.707,
+          "bottom": 401.137
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 452.719,
+          "y": 350.846
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl1/ico",
+        "sprite": "I404",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 415.587,
+          "top": 303.079,
+          "right": 489.85,
+          "bottom": 398.613
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 452.719,
+          "y": 350.846
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tpl1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl1",
+        "sprite": "border_frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 409.121,
+          "top": 295.917,
+          "right": 500.745,
+          "bottom": 416.63
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 454.933,
+          "y": 356.273
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "Image",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl/mask/Image",
+        "sprite": "gou",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 136.642,
+          "top": 113.429,
+          "right": 218.993,
+          "bottom": 226.47
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 177.817,
+          "y": 169.949
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico_1",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl/ico_1",
+        "sprite": "boder_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 139.822,
+          "top": 117.668,
+          "right": 215.563,
+          "bottom": 215.148
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 177.693,
+          "y": 166.408
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl/ico",
+        "sprite": "baifeng",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 142.579,
+          "top": 120.073,
+          "right": 212.807,
+          "bottom": 212.743
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 177.693,
+          "y": 166.408
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tpl",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ships/tpl",
+        "sprite": "border_frame",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 135.946,
+          "top": 113.474,
+          "right": 222.454,
+          "bottom": 230.673
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 179.2,
+          "y": 172.073
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "title",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/title",
+        "sprite": "title",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 114.333,
+          "top": 145.007,
+          "right": 140.333,
+          "bottom": 474.34
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 127.333,
+          "y": 309.673
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "ico",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border/ico",
+        "sprite": "banner",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 148.4,
+          "top": 171.34,
+          "right": 425.733,
+          "bottom": 448.007
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 287.067,
+          "y": 309.673
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "border",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/border",
+        "sprite": "banner",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 106.0,
+          "top": 136.607,
+          "right": 460.667,
+          "bottom": 488.607
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 283.333,
+          "y": 312.607
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "doing",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/list/content/0/doing",
+        "sprite": "progress_ing",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 85.55,
+          "top": 116.446,
+          "right": 452.583,
+          "bottom": 566.234
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 269.067,
+          "y": 341.34
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "label",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/prints/label",
+        "sprite": "title",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1047.667,
+          "top": 670.2,
+          "right": 1247.667,
+          "bottom": 690.2
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1147.667,
+          "y": 680.2
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "time",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/prints/time",
+        "sprite": "tim",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 693.8,
+          "top": 664.533,
+          "right": 724.467,
+          "bottom": 695.867
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 709.133,
+          "y": 680.2
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "tip",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/prints/tip",
+        "sprite": "ico",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 37.0,
+          "top": 664.533,
+          "right": 67.667,
+          "bottom": 695.867
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 52.333,
+          "y": 680.2
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bar",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/srcollbar/bar",
+        "sprite": "slider_bar",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 423.21,
+          "top": 592.103,
+          "right": 594.307,
+          "bottom": 603.323
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 508.759,
+          "y": 597.713
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "srcollbar",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/srcollbar",
+        "sprite": "slider_bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 426.227,
+          "top": 595.407,
+          "right": 856.48,
+          "bottom": 600.073
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 641.353,
+          "y": 597.74
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "homeBtn",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/top/homeBtn",
+        "sprite": "btn_home",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1197.544,
+          "top": 10.144,
+          "right": 1262.189,
+          "bottom": 74.789
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1229.867,
+          "y": 42.467
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "closeBtn",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/top/closeBtn",
+        "sprite": "btn_back",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -16.653,
+          "top": 12.713,
+          "right": 119.969,
+          "bottom": 84.689
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 51.658,
+          "y": 48.701
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "title",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/top/title",
+        "sprite": "title",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -27.916,
+          "top": 7.048,
+          "right": 370.621,
+          "bottom": 67.029
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 171.352,
+          "y": 37.038
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bg",
+        "path": "UICamera/Canvas/UIMain/ActivityRemasterUI(Clone)/bg",
+        "sprite": "bg",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -140.191,
+          "top": -120.0,
+          "right": 1420.191,
+          "bottom": 840.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "top",
+        "path": "OverlayCamera/Adpter/top/top",
+        "sprite": "mask1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": -140.667,
+          "right": 1280.0,
+          "bottom": 0.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": -70.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "left",
+        "path": "OverlayCamera/Adpter/left/left",
+        "sprite": "mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -140.667,
+          "top": 0.0,
+          "right": -0.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": -70.333,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "bottom",
+        "path": "OverlayCamera/Adpter/bottom/bottom",
+        "sprite": "mask1",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 720.0,
+          "right": 1280.0,
+          "bottom": 860.667
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 640.0,
+          "y": 790.333
+        },
+        "inherited_alpha": 1.0
+      },
+      {
+        "kind": "image",
+        "name": "right",
+        "path": "OverlayCamera/Adpter/right/right",
+        "sprite": "mask",
+        "flags": 12783,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1280.0,
+          "top": 0.0,
+          "right": 1420.667,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null,
+        "adb_point": {
+          "x": 1350.333,
+          "y": 360.0
+        },
+        "inherited_alpha": 1.0
+      }
+    ],
+    "globe_geometry": {
+      "schema": "alas-headless.globe-geometry/v1",
+      "status": 0,
+      "truncated": false,
+      "error_count": 0,
+      "camera_path": "",
+      "objects": []
+    },
+    "lua_globe_diagnostic": {
+      "schema": "alas-headless.lua-globe-diagnostic/v1",
+      "status": 0,
+      "stage": 0,
+      "truncated": false,
+      "stack_balanced": false,
+      "registry_visited": 0,
+      "inspection_count": 0,
+      "world_candidates": 0,
+      "drag_candidates": 0,
+      "colors": [],
+      "dragging": [],
+      "drag_pointer_instance_ids": [],
+      "drag_trigger_instance_ids": [],
+      "active_pointer_instance_id": 0
+    },
+    "shipyard_strengthen": {
+      "status": 0,
+      "stage": 0,
+      "truncated": false,
+      "stack_balanced": false,
+      "blueprint_id": 0,
+      "ship_id": 0,
+      "ship_index": 0,
+      "series": 0,
+      "rarity": 0,
+      "pursuing": false,
+      "purchased": 0,
+      "coins": 0,
+      "gems_known": false,
+      "paid_gems": 0,
+      "free_gems": 0,
+      "level": 0,
+      "fate_level": -1,
+      "exp": 0
+    },
+    "activity_identity": {
+      "status": 1,
+      "stack_balanced": true,
+      "archives": {
+        "status": 1,
+        "expected_count": 50,
+        "truncated": false,
+        "records": [
+          {
+            "id": 1,
+            "activity_type": 1,
+            "name": "红染常驻复刻",
+            "bg": "temp_hongran"
+          },
+          {
+            "id": 2,
+            "activity_type": 2,
+            "name": "Z舰队常驻复刻",
+            "bg": "temp_zjiandui"
+          },
+          {
+            "id": 4,
+            "activity_type": 1,
+            "name": "凛冬常驻复刻",
+            "bg": "temp_lingdong"
+          },
+          {
+            "id": 5,
+            "activity_type": 2,
+            "name": "围剿斯佩伯爵』常驻复刻",
+            "bg": "temp_sipei"
+          },
+          {
+            "id": 6,
+            "activity_type": 1,
+            "name": "异色格常驻复刻",
+            "bg": "temp_yisege"
+          },
+          {
+            "id": 7,
+            "activity_type": 1,
+            "name": "坠落之翼常驻复刻",
+            "bg": "temp_zhuiluo"
+          },
+          {
+            "id": 8,
+            "activity_type": 1,
+            "name": "鸢尾之华常驻复刻",
+            "bg": "temp_yuanwei"
+          },
+          {
+            "id": 9,
+            "activity_type": 1,
+            "name": "墨染的钢铁之花常驻复刻",
+            "bg": "temp_moran"
+          },
+          {
+            "id": 10,
+            "activity_type": 2,
+            "name": "光荣的一战常驻复刻",
+            "bg": "temp_guangrong"
+          },
+          {
+            "id": 11,
+            "activity_type": 1,
+            "name": "苍红的回响常驻复刻",
+            "bg": "temp_tiancheng"
+          },
+          {
+            "id": 12,
+            "activity_type": 2,
+            "name": "月光下的序曲常驻复刻",
+            "bg": "temp_xinaoerliang"
+          },
+          {
+            "id": 13,
+            "activity_type": 1,
+            "name": "俾斯麦常驻复刻",
+            "bg": "temp_bisimai"
+          },
+          {
+            "id": 14,
+            "activity_type": 2,
+            "name": "偶像一期常驻复刻",
+            "bg": "temp_ouxiang"
+          },
+          {
+            "id": 15,
+            "activity_type": 1,
+            "name": "神圣的悲喜剧常驻复刻",
+            "bg": "temp_beixiju"
+          },
+          {
+            "id": 16,
+            "activity_type": 2,
+            "name": "斯图尔特的硝烟常驻复刻",
+            "bg": "temp_longxiang"
+          },
+          {
+            "id": 17,
+            "activity_type": 1,
+            "name": "箱庭疗法常驻复刻",
+            "bg": "temp_xiangting"
+          },
+          {
+            "id": 18,
+            "activity_type": 1,
+            "name": "浮樱影华常驻复刻",
+            "bg": "temp_fuying"
+          },
+          {
+            "id": 19,
+            "activity_type": 2,
+            "name": "最珍贵的宝物常驻复刻",
+            "bg": "temp_u110"
+          },
+          {
+            "id": 20,
+            "activity_type": 2,
+            "name": "偶像二期常驻复刻",
+            "bg": "temp_ouxiang2"
+          },
+          {
+            "id": 21,
+            "activity_type": 1,
+            "name": "微层混合常驻复刻",
+            "bg": "temp_weiceng"
+          },
+          {
+            "id": 22,
+            "activity_type": 2,
+            "name": "峡湾间的星辰常驻复刻",
+            "bg": "temp_yonggan"
+          },
+          {
+            "id": 23,
+            "activity_type": 1,
+            "name": "穹顶下的圣咏曲常驻复刻",
+            "bg": "temp_zhende"
+          },
+          {
+            "id": 24,
+            "activity_type": 2,
+            "name": "夜幕下的归途常驻复刻",
+            "bg": "temp_taertu"
+          },
+          {
+            "id": 25,
+            "activity_type": 1,
+            "name": "北境序曲常驻复刻",
+            "bg": "temp_qiaba"
+          },
+          {
+            "id": 26,
+            "activity_type": 1,
+            "name": "永夜幻光常驻复刻",
+            "bg": "temp_hemin"
+          },
+          {
+            "id": 27,
+            "activity_type": 2,
+            "name": "峡湾间的反击常驻复刻",
+            "bg": "temp_aisijimoren"
+          },
+          {
+            "id": 28,
+            "activity_type": 1,
+            "name": "负象限作战常驻复刻",
+            "bg": "temp_u37"
+          },
+          {
+            "id": 29,
+            "activity_type": 1,
+            "name": "蝶海梦花常驻复刻",
+            "bg": "temp_xinnong"
+          },
+          {
+            "id": 30,
+            "activity_type": 1,
+            "name": "镜位螺旋常驻复刻",
+            "bg": "temp_xinzexi"
+          },
+          {
+            "id": 31,
+            "activity_type": 1,
+            "name": "破晓冰华常驻复刻",
+            "bg": "temp_talin"
+          },
+          {
+            "id": 32,
+            "activity_type": 2,
+            "name": "划破海空之翼常驻复刻",
+            "bg": "temp_pulinsidun"
+          },
+          {
+            "id": 33,
+            "activity_type": 2,
+            "name": "杰诺瓦的焰火常驻复刻",
+            "bg": "temp_fuxv"
+          },
+          {
+            "id": 34,
+            "activity_type": 1,
+            "name": "碧海光粼常驻复刻",
+            "bg": "temp_daofeng"
+          },
+          {
+            "id": 35,
+            "activity_type": 1,
+            "name": "复兴的赞美诗常驻复刻",
+            "bg": "temp_weineituo"
+          },
+          {
+            "id": 36,
+            "activity_type": 1,
+            "name": "逆转彩虹之塔常驻复刻",
+            "bg": "temp_huteng"
+          },
+          {
+            "id": 37,
+            "activity_type": 1,
+            "name": "深度回音常驻复刻",
+            "bg": "temp_kalangshitade"
+          },
+          {
+            "id": 38,
+            "activity_type": 2,
+            "name": "虚像构筑之塔常驻复刻",
+            "bg": "temp_diguo"
+          },
+          {
+            "id": 39,
+            "activity_type": 1,
+            "name": "泠誓光庭常驻复刻",
+            "bg": "temp_qianwei"
+          },
+          {
+            "id": 40,
+            "activity_type": 1,
+            "name": "雄鹰的叙事歌常驻复刻",
+            "bg": "temp_luoma"
+          },
+          {
+            "id": 41,
+            "activity_type": 1,
+            "name": "虹彩的终幕曲常驻复刻",
+            "bg": "temp_aimudeng"
+          },
+          {
+            "id": 42,
+            "activity_type": 2,
+            "name": "飓风与青春之泉常驻复刻",
+            "bg": "temp_fengfanv1"
+          },
+          {
+            "id": 43,
+            "activity_type": 1,
+            "name": "紫绛槿岚常驻复刻",
+            "bg": "temp_wuzang"
+          },
+          {
+            "id": 44,
+            "activity_type": 1,
+            "name": "定向折叠常驻复刻",
+            "bg": "temp_yuekechengII"
+          },
+          {
+            "id": 45,
+            "activity_type": 1,
+            "name": "湮烬尘墟常驻复刻",
+            "bg": "temp_yuanchou"
+          },
+          {
+            "id": 46,
+            "activity_type": 2,
+            "name": "远汇点作战常驻复刻",
+            "bg": "temp_bulunxierde"
+          },
+          {
+            "id": 47,
+            "activity_type": 2,
+            "name": "奏响鸢尾之歌常驻复刻",
+            "bg": "temp_masaiqu"
+          },
+          {
+            "id": 48,
+            "activity_type": 1,
+            "name": "空相交汇点常驻复刻",
+            "bg": "temp_bisimaiz"
+          },
+          {
+            "id": 49,
+            "activity_type": 2,
+            "name": "幻梦间奏曲常驻复刻",
+            "bg": "temp_sitelasibao"
+          },
+          {
+            "id": 50,
+            "activity_type": 3,
+            "name": "极地风暴常驻复刻",
+            "bg": "temp_kuersike"
+          },
+          {
+            "id": 51,
+            "activity_type": 3,
+            "name": "童心学院常驻复刻",
+            "bg": "temp_yaerweite"
+          }
+        ]
+      },
+      "raids": {
+        "status": 1,
+        "stage": 14,
+        "proxy_count": 28,
+        "matched_count": 28,
+        "failed_id": 0,
+        "expected_count": 0,
+        "truncated": false,
+        "records": []
+      }
+    },
+    "operation_siren_map_drag": {
+      "status": 0,
+      "handler_instance_id": 0,
+      "endpoints": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "handler_path": "",
+      "samples": []
+    },
+    "private_quarters_physics": {
+      "schema": "alas-headless.private-colliders/v1",
+      "status": 0,
+      "truncated": false,
+      "error_count": 0,
+      "camera_path": "",
+      "colliders": []
+    }
+  }
+}

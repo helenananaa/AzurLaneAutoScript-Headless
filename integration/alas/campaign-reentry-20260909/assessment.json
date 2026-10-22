@@ -1,0 +1,319 @@
+{
+  "schema": "alas-headless.campaign-reentry-assessment/v1",
+  "passed": true,
+  "stage": "10-2",
+  "target": "B6",
+  "selected_fleet": "cell_fleet_zaoshen",
+  "busy_enemy": [
+    "B6",
+    1002050,
+    "zl1",
+    1,
+    "Main",
+    97,
+    true,
+    false
+  ],
+  "initial_generation": 75287,
+  "reentered_generation": 77022,
+  "original_admission": {
+    "generation": 76810,
+    "input_generation": 76915,
+    "stage_code": "10-2",
+    "battle_count": 0,
+    "branch_name": "battle_0",
+    "fleet_index": 1,
+    "fleet_marker": "cell_fleet_zaoshen",
+    "origin_node": "B6",
+    "target_node": "B6",
+    "route_nodes": [
+      "B6"
+    ],
+    "input_nodes": [
+      "B6"
+    ],
+    "enemy_object_id": 1002050,
+    "enemy_sprite": "zl1",
+    "enemy_level": 97,
+    "ammo_before": 6,
+    "cell_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_7_2",
+    "point": {
+      "x": 350.717,
+      "y": 588.906
+    },
+    "bounds": {
+      "left": 273.087,
+      "top": 536.004,
+      "right": 424.729,
+      "bottom": 644.393
+    },
+    "decision_signature": [
+      76810,
+      "10-2",
+      0,
+      "battle_0",
+      1,
+      "cell_fleet_zaoshen",
+      "B6",
+      "B6",
+      "enemy",
+      "combat",
+      0,
+      10.0,
+      [
+        "B6"
+      ],
+      [
+        "B6"
+      ],
+      false,
+      true
+    ],
+    "map_signature": [
+      "10-2",
+      6,
+      8,
+      [
+        [
+          "A1",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_2_1"
+        ],
+        [
+          "B1",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_2_2"
+        ],
+        [
+          "C1",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_2_3"
+        ],
+        [
+          "D1",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_2_4"
+        ],
+        [
+          "E1",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_2_5"
+        ],
+        [
+          "G1",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_2_7"
+        ],
+        [
+          "H1",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_2_8"
+        ],
+        [
+          "A2",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_3_1"
+        ],
+        [
+          "D2",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_3_4"
+        ],
+        [
+          "E2",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_3_5"
+        ],
+        [
+          "G2",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_3_7"
+        ],
+        [
+          "H2",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_3_8"
+        ],
+        [
+          "A3",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_1"
+        ],
+        [
+          "B3",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_2"
+        ],
+        [
+          "E3",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_5"
+        ],
+        [
+          "F3",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_6"
+        ],
+        [
+          "G3",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_7"
+        ],
+        [
+          "A4",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_5_1"
+        ],
+        [
+          "B4",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_5_2"
+        ],
+        [
+          "E4",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_5_5"
+        ],
+        [
+          "F4",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_5_6"
+        ],
+        [
+          "G4",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_5_7"
+        ],
+        [
+          "A5",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_6_1"
+        ],
+        [
+          "D5",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_6_4"
+        ],
+        [
+          "E5",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_6_5"
+        ],
+        [
+          "G5",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_6_7"
+        ],
+        [
+          "H5",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_6_8"
+        ],
+        [
+          "A6",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_7_1"
+        ],
+        [
+          "B6",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_7_2"
+        ],
+        [
+          "C6",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_7_3"
+        ],
+        [
+          "D6",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_7_4"
+        ],
+        [
+          "E6",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_7_5"
+        ],
+        [
+          "G6",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_7_7"
+        ],
+        [
+          "H6",
+          "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_7_8"
+        ]
+      ],
+      [
+        "F1",
+        "B2",
+        "C2",
+        "F2",
+        "C3",
+        "D3",
+        "H3",
+        "C4",
+        "D4",
+        "H4",
+        "B5",
+        "C5",
+        "F5",
+        "F6"
+      ],
+      [
+        [
+          "cell_fleet_waerpalaisuo",
+          "B4",
+          5,
+          5
+        ],
+        [
+          "cell_fleet_zaoshen",
+          "B6",
+          6,
+          6
+        ]
+      ],
+      [
+        [
+          "A1",
+          1002080,
+          "hm1",
+          1,
+          "Carrier",
+          97,
+          false,
+          false
+        ],
+        [
+          "G3",
+          1002080,
+          "hm1",
+          1,
+          "Carrier",
+          97,
+          false,
+          false
+        ],
+        [
+          "G4",
+          1002050,
+          "zl1",
+          1,
+          "Main",
+          97,
+          false,
+          false
+        ],
+        [
+          "B6",
+          1002050,
+          "zl1",
+          1,
+          "Main",
+          97,
+          true,
+          false
+        ]
+      ],
+      [],
+      1,
+      "cell_fleet_zaoshen",
+      [
+        "bulisituoer",
+        "haman_g",
+        "nabulesi",
+        "qibolin",
+        "zaoshen",
+        "zengkehaijunshangjiang"
+      ]
+    ]
+  },
+  "battles": 0,
+  "oil_before": 13538,
+  "oil_after": 13528,
+  "oil_consumed": 10,
+  "repair_items_used": 0,
+  "dock_capacity": "914/930",
+  "tests_passed": 243,
+  "sparse_live_condition": "user confirms every surface fleet currently has six ships; manual sparse setup required",
+  "remaining": [
+    "sparse-fleet live validation",
+    "natural default low-HP thresholds",
+    "natural dock-full retirement continuation"
+  ],
+  "source_sha256": {
+    "python/alas_headless/oracle/campaign_navigation.py": "70abb0bab5c1fa88cd32d933de762a2d63ffc3fbbc62f3ea5014667122b59485",
+    "python/alas_headless/adapter/semantic/dispatch_observation.py": "b03790ff62d48079b97402af0600b0c396a3e8a2799a5467506f47b1fa5ebc48",
+    "scripts/python/run_alas_main_task_live_validation.py": "2773c2015830beccb8a2be02da75f5351d2cf84cccb7970e7fbc96f45d052515",
+    "tests/test_campaign_busy_enemy_reentry.py": "72c58182e83c1d6abce593b399250532c0d8b202545d7572e2893c27619c0055",
+    "tests/test_semantic_task_isolation.py": "6297e7c77374f6881ff63353cc795e5b4eeec5605a6f53cd93614d4d713205c4"
+  }
+}

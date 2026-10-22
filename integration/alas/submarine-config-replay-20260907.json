@@ -1,0 +1,87 @@
+{
+  "schema": "alas-headless.submarine-config-replay/v1",
+  "passed": true,
+  "field_count": 4,
+  "panel_count": 12,
+  "panels": [
+    "Main",
+    "Main2",
+    "Main3",
+    "GemsFarming",
+    "Event",
+    "Event2",
+    "WarArchives",
+    "EventA",
+    "EventB",
+    "EventC",
+    "EventD",
+    "EventSp"
+  ],
+  "accepted_inactive_count": 40,
+  "accepted_active_configuration_count": 10,
+  "execution_admission": "capability-local; configuration is not live qualification",
+  "invalid_case_count": 6,
+  "original_decisions": {
+    "combat_call_modes": {
+      "do_not_use": false,
+      "hunt_only": false,
+      "boss_only": true,
+      "hunt_and_boss": false,
+      "every_combat": true
+    },
+    "boss_mode_mapping": {
+      "False:combat": null,
+      "False:combat_boss": null,
+      "True:combat": "do_not_use",
+      "True:combat_boss": "every_combat"
+    },
+    "auto_search_modes": {
+      "sub_standby": [
+        "sidebar:3",
+        "fleet1_mob_fleet2_boss",
+        "sub_standby"
+      ],
+      "sub_auto_call": [
+        "sidebar:3",
+        "fleet1_mob_fleet2_boss",
+        "sub_auto_call"
+      ]
+    },
+    "distance_decisions": {
+      "to_boss_position": {
+        "result": true,
+        "target": [
+          5,
+          5
+        ]
+      },
+      "1_grid_to_boss": {
+        "result": true,
+        "target": [
+          4,
+          5
+        ]
+      },
+      "2_grid_to_boss": {
+        "result": true,
+        "target": [
+          3,
+          5
+        ]
+      },
+      "use_open_ocean_support": {
+        "result": false,
+        "target": null
+      }
+    },
+    "unqualified_final_input_boundaries": 2
+  },
+  "mutation_budget": 0,
+  "android_input_injected": false,
+  "source_sha256": {
+    "args": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+    "call": "949bc37aa8ca37bc4604879d7e026f93c003c075182ee7ff118235e2070d82c0",
+    "fleet": "e6db2419b21af0c1575cf428b75fb243d43ea6d6aca9962da1be07020fbeddd4",
+    "fast": "6d92d3ec7c999482473b99f66c4fc2c40309702494c13f27f8cb12a1d8cc9186"
+  }
+}

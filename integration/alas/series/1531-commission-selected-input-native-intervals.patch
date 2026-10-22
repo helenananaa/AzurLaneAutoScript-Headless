@@ -1,0 +1,17 @@
+diff --git a/module/commission/commission.py b/module/commission/commission.py
+--- a/module/commission/commission.py
++++ b/module/commission/commission.py
+@@ -403,11 +403,11 @@
+                 if semantic_adapter.commission_selection_active():
+                     if self.handle_popup_confirm('COMMISSION_START'):
+                         continue
+-                    if semantic_adapter.appear(COMMISSION_ADVICE):
++                    if self.appear(COMMISSION_ADVICE, offset=(5, 20), interval=7):
+                         logger.info('Selected exact typed commission row')
+                         self.device.click(COMMISSION_ADVICE)
+                         count += 1
+-                    elif semantic_adapter.appear(COMMISSION_START):
++                    elif self.appear(COMMISSION_START, offset=(5, 20), interval=7):
+                         self.device.click(COMMISSION_START)
+                     continue
+             if self.info_bar_count():

@@ -1,0 +1,86 @@
+{
+  "schema": "alas-headless.campaign-clear-mode-config-replay/v1",
+  "passed": true,
+  "field_count": 1,
+  "panel_count": 16,
+  "accepted_case_count": 2,
+  "invalid_case_count": 6,
+  "runtime_consumers": [
+    "handle_fast_forward"
+  ],
+  "original_decisions": [
+    {
+      "result": false,
+      "clear_mode": false,
+      "auto_search": false,
+      "two_x_book": false,
+      "switch_calls": [],
+      "wait_calls": 0,
+      "disabled_flag_count": 0
+    },
+    {
+      "result": false,
+      "clear_mode": false,
+      "auto_search": false,
+      "two_x_book": false,
+      "switch_calls": [
+        [
+          "off",
+          true
+        ]
+      ],
+      "wait_calls": 0,
+      "disabled_flag_count": 0
+    },
+    {
+      "result": false,
+      "clear_mode": true,
+      "auto_search": true,
+      "two_x_book": true,
+      "switch_calls": [
+        [
+          "on",
+          true
+        ]
+      ],
+      "wait_calls": 0,
+      "disabled_flag_count": 10
+    },
+    {
+      "result": false,
+      "clear_mode": true,
+      "auto_search": false,
+      "two_x_book": true,
+      "switch_calls": [
+        [
+          "on",
+          true
+        ]
+      ],
+      "wait_calls": 0,
+      "disabled_flag_count": 10
+    },
+    {
+      "result": true,
+      "clear_mode": true,
+      "auto_search": true,
+      "two_x_book": true,
+      "switch_calls": [
+        [
+          "on",
+          true
+        ]
+      ],
+      "wait_calls": 1,
+      "disabled_flag_count": 10
+    }
+  ],
+  "patched_guard_present": true,
+  "temporary_config_only": true,
+  "mutation_budget": 0,
+  "android_input_injected": false,
+  "source_sha256": {
+    "args": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+    "fast_forward": "5720e90a1f977d6fdce973a7550bee5d5dbd0d43878d0a78863a800c5655ecc9"
+  }
+}

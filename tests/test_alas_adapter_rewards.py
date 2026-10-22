@@ -2,7 +2,8 @@
 
 import time
 import unittest
-from alas_headless import AlasSemanticUnmapped, MissionDisposition, SemanticGateClosed
+from unittest.mock import Mock
+from alas_headless import AlasSemanticUnmapped, MissionDisposition, SemanticGateClosed, SemanticTargetMissing
 from tests.semantic_support.adapter_cases import AlasSemanticAdapterTestsSupport
 from tests.semantic_support.adapter_fixtures import NamedButton
 from types import SimpleNamespace
@@ -81,9 +82,13 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
 
     def test_reward_summary_entry_alias_is_idempotent(self):
         adapter, oracle, _ = self.make_adapter()
+        # Abstract destination model; retained r619 frames test typed pending Main.
+        oracle._matches = lambda state, target: ()
         adapter.begin_mission_reward(daily=True, weekly=False)
 
         first = adapter.click(NamedButton("MAIN_GOTO_REWARD"))
+        oracle.enabled_values["reward/page/back"] = True
+        oracle.read_state = lambda: SimpleNamespace(generation=first.generation + 1)
         duplicate = adapter.click(NamedButton("MAIN_GOTO_REWARD_WHITE"))
 
         self.assertEqual(first, duplicate)
@@ -161,7 +166,8 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         adapter.begin_supply_pack()
 
         self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
-        self.assertTrue(adapter.appear(NamedButton("SHOP_CHECK")))
+        self.assertFalse(adapter.appear(NamedButton("SHOP_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("SUPPLY_PACK_CHECK")))
         self.assertTrue(adapter.appear(NamedButton("FREE_SUPPLY_PACK")))
         receipt = adapter.click(NamedButton("FREE_SUPPLY_PACK"))
 
@@ -169,6 +175,21 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertFalse(adapter.appear(NamedButton("FREE_SUPPLY_PACK")))
         with self.assertRaisesRegex(SemanticGateClosed, "confirmation"):
             adapter.click(NamedButton("BUY_CONFIRM"))
+
+    def test_supply_pack_navigation_skips_tab_that_became_selected(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_supply_pack()
+        oracle.gift_pack_page_visible_value = True
+        with self.assertRaisesRegex(SemanticTargetMissing, "already selected"):
+            adapter.click(NamedButton("SHOP_GOTO_SUPPLY_PACK"))
+        self.assertEqual(oracle.click_calls, [])
+
+        oracle.gift_pack_page_visible_value = False
+        oracle.click_toggle = Mock(side_effect=SemanticGateClosed("toggle changed"))
+        oracle.gift_pack_page_visible = Mock(side_effect=[False, True])
+        with self.assertRaisesRegex(SemanticTargetMissing, "became selected"):
+            adapter.click(NamedButton("SHOP_GOTO_SUPPLY_PACK"))
+        oracle.click_toggle.assert_called_once_with("shop/gift-pack")
 
     def test_data_key_limit_confirm_requires_force_and_preceding_claim(self):
         adapter, oracle, _ = self.make_adapter()

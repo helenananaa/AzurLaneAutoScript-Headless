@@ -5,15 +5,95 @@ from __future__ import annotations
 import re
 from typing import Optional, Sequence, Tuple
 from .contracts import ActionReceipt, ButtonState, OperationSirenState, Point, UiState
-from .errors import SemanticGateClosed
+from .errors import SemanticGateClosed, SemanticInputBlocked
 
 
 class OpsiStateOracle:
     """Opsi state operations sharing the oracle frame and input boundary."""
 
+    def _operation_siren_energy_submission_prompt(self):
+        state = self.read_state()
+        root = 'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/'
+        choices = [b for b in state.buttons if b.path.startswith(root+'button_container/')]
+        if not choices:
+            return None
+        owners = self._matches(state, 'os/page/back')
+        if not owners:
+            # The same generic item dialog on a different task has no OpSi
+            # authority. Leave that task's classifier in charge.
+            return None
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('OpSi item submission snapshots are incoherent')
+        def text(suffix):
+            values = [t.text.strip() for t in ui.texts if t.path == root+suffix
+                      and t.active_in_hierarchy and t.active_and_enabled and not t.truncated]
+            if len(values) > 1:
+                raise SemanticGateClosed('OpSi item submission text is ambiguous')
+            return values[0] if values else None
+        if text('item_panel/Text') != '是否提交以下物品?':
+            return None
+        paths = [root+'button_container/custom_button_'+str(i)+'(Clone)' for i in (1, 2)]
+        if len(choices) != 2 or {b.path for b in choices} != set(paths):
+            raise SemanticGateClosed('OpSi item submission choices are ambiguous')
+        if (''.join((text('button_container/custom_button_1(Clone)/pic') or '').split()) != '确定'
+                or ''.join((text('button_container/custom_button_2(Clone)/pic') or '').split()) != '取消'):
+            raise SemanticGateClosed('OpSi item submission choice labels are unsupported')
+        back = self._unique(state, 'os/page/back')
+        if not back.active_in_hierarchy or not back.active_and_enabled:
+            raise SemanticGateClosed('OpSi item submission map owner is absent')
+        prefix = root+'item_panel/scrollview/list/'
+        icons = [i for i in ui.images if i.path.startswith(prefix) and i.path.endswith('/IconTpl/icon_bg/icon')
+                 and i.active_in_hierarchy and i.active_and_enabled]
+        if (ui.image_truncated or len(icons) != 1 or icons[0].truncated
+                or icons[0].sprite != 'jingtidianchi'):
+            raise SemanticGateClosed('OpSi item submission energy item is unproven')
+        count_suffix = icons[0].path[len(root):-len('icon')]+'count'
+        if text(count_suffix) != '1':
+            raise SemanticGateClosed('OpSi item submission quantity is unsupported')
+        blockers = [b for b in self._blocking_rules(state, 'os/page/back')
+                    if b.path_fragment != '/Msgbox(Clone)/']
+        if blockers:
+            raise SemanticGateClosed('OpSi item submission has another blocker')
+        return state, choices, paths
+
+    def operation_siren_energy_submission_prompt_visible(self) -> bool:
+        return self._operation_siren_energy_submission_prompt() is not None
+
+    def click_operation_siren_energy_submission(self, *, confirm: bool) -> ActionReceipt:
+        prompt = self._operation_siren_energy_submission_prompt()
+        if prompt is None:
+            raise SemanticGateClosed('OpSi item submission prompt is absent')
+        state, choices, paths = prompt
+        target = next(b for b in choices if b.path == paths[0 if confirm else 1])
+        if (not target.actionable or target.point is None or target.bounds is None
+                or not target.bounds.contains(target.point)
+                or not 0 <= round(target.point.x) < self.fingerprint.width
+                or not 0 <= round(target.point.y) < self.fingerprint.height):
+            raise SemanticGateClosed('OpSi item submission confirm is not actionable')
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed before OpSi item submission')
+        self._tap(round(target.point.x), round(target.point.y))
+        receipt = ActionReceipt('os/map/energy-submit/'+('confirm' if confirm else 'cancel'), state.generation,
+                                target.point, target.bounds, target.path)
+        def completed():
+            after = self.read_state()
+            if (after.generation <= state.generation or any(
+                    b.active_in_hierarchy and '/Msgbox(Clone)/' in b.path for b in after.buttons)):
+                raise SemanticGateClosed('OpSi item submission did not dismiss; do not retry')
+            back = self._unique(after, 'os/page/back')
+            if not back.active_in_hierarchy or not back.active_and_enabled:
+                raise SemanticGateClosed('OpSi item submission map did not return')
+            return True
+        self._retry_transition_read(completed, attempts=20, interval_seconds=0.25)
+        return receipt
+
     def operation_siren_state(self) -> OperationSirenState:
         """Read the stable local-map header without mutating Operation Siren."""
 
+        return self._retry_transition_read(self._operation_siren_state_once)
+
+    def _operation_siren_state_once(self) -> OperationSirenState:
         button_state = self.read_state()
         back = self._unique(button_state, "os/page/back")
         if not (
@@ -559,7 +639,13 @@ class OpsiStateOracle:
             and not image.truncated
             and image.bounds is not None
         )
-        if len(anchors) != 1:
+        if len(anchors) > 1:
+            raise SemanticGateClosed(
+                "operation siren selected-fleet map anchor is ambiguous"
+            )
+        if not anchors:
+            # Retain the native initialization's existing offscreen recovery
+            # wording only for absence; duplicates must not take that branch.
             raise SemanticGateClosed(
                 "operation siren selected-fleet map anchor is absent or ambiguous"
             )
@@ -796,7 +882,10 @@ class OpsiStateOracle:
             and not item.truncated
             and item.bounds is not None
         )
-        return len(matches)
+        # Repeated start toasts are not the paired no-event notification.
+        # ALAS uses count >= 2 to end search, so count distinct reviewed
+        # messages rather than pooled duplicate Unity tooltip instances.
+        return len({item.text.strip() for item in matches})
 
     def operation_siren_fleet_lock_state(self) -> str:
         """Read the exact image-only fleet-lock switch state."""
@@ -996,9 +1085,26 @@ class OpsiStateOracle:
     def click_operation_siren_back(self) -> ActionReceipt:
         """Leave the proven local Operation Siren map through its top back."""
 
+        # The original page graph can recognize the map beneath its inventory.
+        # Close that exact overlay before the next native page-graph iteration
+        # attempts the map edge; never click its covered underlying back.
+        if self.operation_siren_storage_visible():
+            return self.click_operation_siren_storage_back()
+        exit_state = self._operation_siren_exit_prompt_state()
+        if exit_state is not None:
+            # The native screenshot may predate this modal. No map input has
+            # been sent; let the original UI loop refresh and handle it.
+            raise SemanticInputBlocked('os/page/back', exit_state.generation, ('opsi-exit',))
         self.operation_siren_state()
         state = self.read_state()
         target = self._unique(state, "os/page/back")
+        blockers = self._blocking_rules(state, "os/page/back")
+        if blockers:
+            # A modal may mount after ALAS selected the page graph edge.
+            # Its native UI loop can refresh and run the owning popup handler;
+            # classify the no-input refusal without weakening admission.
+            raise SemanticInputBlocked('os/page/back', state.generation,
+                                       tuple(rule.blocker_id for rule in blockers))
         if not (
             target.active_in_hierarchy
             and target.active_and_enabled
@@ -1007,8 +1113,11 @@ class OpsiStateOracle:
             and target.point is not None
             and target.bounds is not None
             and target.bounds.contains(target.point)
+            and not blockers
         ):
             raise SemanticGateClosed("operation siren back is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before operation siren back")
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
         return ActionReceipt(
             semantic_id="os/page/back",

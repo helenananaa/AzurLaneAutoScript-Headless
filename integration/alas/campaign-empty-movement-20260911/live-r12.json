@@ -1,0 +1,76 @@
+{
+  "schema": "alas-headless.war-archives-live-validation/v1",
+  "passed": true,
+  "started_at": "2026-09-11T10:12:07.027868Z",
+  "finished_at": "2026-09-11T10:21:41.487637Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "war_archives_20190321_en",
+  "stage": "A1",
+  "mode": "normal",
+  "auto_search": false,
+  "task_result": true,
+  "movement_proofs": [
+    {
+      "stage": "a1",
+      "fleet_index": 2,
+      "target": "C2",
+      "battle_count_before": 0,
+      "battle_count_after": 0,
+      "ammo_before": 5,
+      "ammo_after": 5,
+      "input_generation": 500583,
+      "map_generation": 500782,
+      "input_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_3_3"
+    }
+  ],
+  "battle_proofs": [
+    {
+      "stage_code": "a1",
+      "battle_count_before": 0,
+      "battle_count_after": 1,
+      "fleet_index": 1,
+      "fleet_marker": "cell_fleet_waerpalaisuo",
+      "target_node": "C3",
+      "enemy_object_id": 1030005,
+      "ammo_before": 5,
+      "ammo_after": 4,
+      "input_generation": 501557,
+      "map_generation": 502377,
+      "input_path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_4_3"
+    }
+  ],
+  "max_probe_battles": 1,
+  "resumed_map_before": false,
+  "navigation": [
+    {
+      "event": "war_archives_20190321_en",
+      "category": "ex",
+      "semantic_id": "archive/campaign/war_archives_20190321_en",
+      "generation": 498311,
+      "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item/bg/icon"
+    }
+  ],
+  "entry_confirmations": [
+    {
+      "semantic_id": "archive/entry/confirm",
+      "generation": 499234,
+      "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)"
+    }
+  ],
+  "data_key_observations": [
+    {
+      "current": 285,
+      "total": 300
+    },
+    {
+      "current": 280,
+      "total": 300
+    }
+  ],
+  "run_count_after": 0,
+  "scheduler_enabled_after": false,
+  "scheduler_next_run_after": "2020-01-01 00:00:00",
+  "auto_search_completion": null,
+  "raw_input_fallback_used": false
+}

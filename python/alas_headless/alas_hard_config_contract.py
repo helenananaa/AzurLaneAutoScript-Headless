@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from .semantic_oracle import SemanticGateClosed
 
 
+# Qualification catalog only. ALAS resolves installed map modules at runtime.
 HARD_STAGES = tuple(
     f"{chapter}-{stage}" for chapter in range(1, 17) for stage in range(1, 5)
 )
@@ -23,7 +24,7 @@ class AlasHardConfigSnapshot:
 def validate_alas_hard_config(
     *, hard_stage: object, hard_fleet: object
 ) -> AlasHardConfigSnapshot:
-    """Return canonical hard-task values from the pinned 64-stage catalog."""
+    """Canonicalize routes; ALAS module loading and typed stage proofs own support."""
 
     if type(hard_stage) is not str:
         raise SemanticGateClosed("Hard.HardStage must be text")
@@ -32,8 +33,8 @@ def validate_alas_hard_config(
     if match is None:
         raise SemanticGateClosed("Hard.HardStage has an invalid format")
     canonical = f"{int(match.group(1))}-{int(match.group(2))}"
-    if canonical not in HARD_STAGES:
-        raise SemanticGateClosed("Hard.HardStage is outside the pinned map catalog")
+    if int(match.group(1)) < 1 or not 1 <= int(match.group(2)) <= 4:
+        raise SemanticGateClosed("Hard.HardStage requires a positive chapter and section 1 to 4")
     if type(hard_fleet) is not int or hard_fleet not in (1, 2):
         raise SemanticGateClosed("Hard.HardFleet must be integer 1 or 2")
     return AlasHardConfigSnapshot(hard_stage=canonical, hard_fleet=hard_fleet)

@@ -1,4 +1,8 @@
-"""Fail-closed validation for ALAS' shared six-field Scheduler surface."""
+"""Offline qualification of the baseline ALAS six-field Scheduler surface.
+
+These checks describe a reproducible baseline; they must not gate the runtime
+queue.  Installed ALAS owns scheduler parsing, task selection and error recovery.
+"""
 
 from __future__ import annotations
 
@@ -105,7 +109,7 @@ def _validate_server_updates(value: Any, *, field: str) -> Tuple[str, ...]:
 def validate_alas_scheduler_config(
     data: Mapping[str, Any],
 ) -> Tuple[AlasSchedulerTaskSnapshot, ...]:
-    """Validate every task using the shared ALAS Scheduler before dispatch."""
+    """Inspect every task against the qualified baseline for offline replay."""
 
     if not isinstance(data, Mapping):
         raise SemanticGateClosed("ALAS scheduler configuration root is malformed")

@@ -1,0 +1,22 @@
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+index a7a43f43543aea728a4ee73fe9820fdef14ae3d4..49485d0d903441e2bc5891afa8b63e388a3025ee 100644
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -8,7 +8,7 @@
+ from module.campaign.campaign_ui import MODE_SWITCH_1
+ from module.config.config import AzurLaneConfig
+ from module.exception import CampaignEnd, RequestHumanTakeover, ScriptEnd
+-from module.handler.fast_forward import map_files, to_map_file_name
++from module.handler.fast_forward import map_files, to_map_file_name, to_map_input_name
+ from module.logger import logger
+ from module.notify import handle_notify
+ from module.ui.page import page_campaign
+@@ -456,7 +456,7 @@
+             auto_search_mode=self.config.Submarine_AutoSearchMode,
+             distance_to_boss=self.config.Submarine_DistanceToBoss,
+         )
+-        semantic_adapter.begin_campaign_pre_sortie(name, mode=mode)
++        semantic_adapter.begin_campaign_pre_sortie(to_map_input_name(name), mode=mode)
+         try:
+             return self._run(name, folder=folder, mode=mode, total=total)
+         finally:

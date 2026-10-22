@@ -1,0 +1,18 @@
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -338,9 +338,13 @@
+                 # Refresh ALAS' immutable semantic frame before selection.
+                 self.device.screenshot()
+                 try:
+-                    if 0 <= zone.zone_id <= 7:
++                    if 0 <= zone.zone_id <= 7 and attempt == 0:
+                         semantic_adapter.click_operation_siren_globe_port(zone.cn, zone.zone_id)
+                     else:
++                        # After a proven missed port-root input, reuse ALAS'
++                        # own logical zone intent and Unity's native projection.
++                        # The same fresh Plane proof and named pin postcondition
++                        # apply; no color alias, pixel search or offset is used.
+                         semantic_adapter.click_operation_siren_globe_map_zone(zone.cn, zone.area_pos)
+                 except (SemanticViewportReanchorRequired, SemanticGlobeSelectionMissed) as exc:
+                     if attempt == 2:

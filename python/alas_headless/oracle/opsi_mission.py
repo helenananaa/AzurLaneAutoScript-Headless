@@ -73,7 +73,7 @@ class OpsiMissionOracle:
     def _operation_siren_mission_overview_state(
         self,
     ) -> Tuple[
-        OracleState, ButtonState, Tuple[ButtonState, ...], Tuple[ButtonState, ...]
+        OracleState, ButtonState, Tuple[ButtonState, ...], Tuple[ButtonState, ...], UiState
     ]:
         """Read the pinned WorldDailyTaskUI without inferring from pixels."""
 
@@ -134,7 +134,7 @@ class OpsiMissionOracle:
             (active_rows if match.group(1) == "active" else inactive_rows).append(
                 candidate
             )
-        return state, back, tuple(active_rows), tuple(inactive_rows)
+        return state, back, tuple(active_rows), tuple(inactive_rows), ui_state
 
     def operation_siren_mission_overview_visible(self) -> bool:
         try:
@@ -146,19 +146,30 @@ class OpsiMissionOracle:
     def operation_siren_mission_overview_empty(self) -> bool:
         """Prove that the complete mounted list has no unaccepted task row."""
 
-        _, _, active_rows, inactive_rows = (
+        state, _, active_rows, inactive_rows, ui_state = (
             self._operation_siren_mission_overview_state()
         )
         if active_rows:
             return False
         if not inactive_rows:
+            if (state.generation <= ui_state.generation <= state.generation + 2
+                    and ui_state.snapshot.get('text_truncated') is False):
+                empty = tuple(text for text in ui_state.texts
+                    if text.path.endswith('Overlay/UIMain/blur_panel/adapt/tasks/frame/empty/Text')
+                    and text.active_in_hierarchy and text.active_and_enabled
+                    and not text.truncated and text.text.strip())
+                if len(empty) == 1:
+                    # The client explicitly renders its empty-list marker.
+                    # No rows alone is insufficient, but this existing page
+                    # and coherent typed marker prove the zero-task branch.
+                    return True
             raise SemanticGateClosed(
                 "operation siren mission overview has no typed task rows"
             )
         return True
 
     def operation_siren_mission_overview_accept_available(self) -> bool:
-        _, _, active_rows, _ = self._operation_siren_mission_overview_state()
+        _, _, active_rows, _, _ = self._operation_siren_mission_overview_state()
         return any(
             row.actionable
             and row.point is not None
@@ -168,7 +179,7 @@ class OpsiMissionOracle:
         )
 
     def click_operation_siren_mission_overview_accept(self) -> ActionReceipt:
-        state, _, active_rows, _ = self._operation_siren_mission_overview_state()
+        state, _, active_rows, _, _ = self._operation_siren_mission_overview_state()
         actionable = tuple(
             row
             for row in active_rows

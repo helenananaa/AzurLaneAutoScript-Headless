@@ -1,0 +1,31 @@
+diff --git a/module/combat/submarine.py b/module/combat/submarine.py
+index cceb381..b029a3c 100644
+--- a/module/combat/submarine.py
++++ b/module/combat/submarine.py
+@@ -21,6 +21,14 @@ class SubmarineCall(ModuleBase):
+         Returns:
+             str: If call.
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and submarine in ('every_combat', 'boss_only'):
++            battle = semantic_adapter.campaign_submarine_call_battle()
++            if battle is not False and battle != getattr(self, '_semantic_submarine_battle', None):
++                self._semantic_submarine_battle = battle
++                self.submarine_call_reset()
++            if battle is None:
++                return False
+         if self.submarine_call_flag:
+             return False
+         if submarine in ['do_not_use', 'hunt_only', 'hunt_and_boss']:
+diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
+index e6baec3..4b55dd9 100644
+--- a/module/campaign/campaign_base.py
++++ b/module/campaign/campaign_base.py
+@@ -231,6 +231,7 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+                 semantic_stage,
+                 keep_result=(self.config.Campaign_Mode == 'normal' and '-' in semantic_stage),
+                 recovery_handler=self._semantic_campaign_retirement_recovery,
++                submarine_handler=lambda: self.handle_submarine_call(self.config.Submarine_Mode),
+             )
+             logger.attr(
+                 'Semantic_Auto_Search_Result',

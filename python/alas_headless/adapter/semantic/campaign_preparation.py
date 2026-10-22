@@ -17,6 +17,7 @@ from ...semantic_oracle import (
     SemanticGateClosed,
 )
 from .contracts import (
+    AlasSemanticActionDeferred,
     CampaignAutoSearchEvidenceBundle,
     CampaignFleetPreparationProof,
     CampaignPreSortieProof,
@@ -24,10 +25,23 @@ from .contracts import (
     _CampaignFlowContext,
 )
 from .resources import CAMPAIGN_SHARED_HARD_STAGE_ENTRANCES
+from ...oracle.errors import SemanticTargetNotActionable
 
 
 class CampaignPreparationAdapterPorts:
     """Campaign preparation ports on the shared adapter context."""
+
+    @staticmethod
+    def _campaign_two_surface_fleets(fleets: Tuple[int, int, int]) -> bool:
+        """Fleet roles address slots; the selected fleet numbers may differ."""
+        return (
+            len(fleets) == 3
+            and all(type(value) is int for value in fleets)
+            and fleets[0] in range(1, 7)
+            and fleets[1] in range(1, 7)
+            and fleets[0] != fleets[1]
+            and fleets[2] in (0, 1, 2)
+        )
 
     def begin_campaign_pre_sortie(
         self, stage_code: str, mode: str = "normal"
@@ -68,6 +82,11 @@ class CampaignPreparationAdapterPorts:
             mode=mode,
             passive_transition_until=time.monotonic() + 20.0,
         )
+        submarine_config = getattr(self, '_next_submarine_config', None)
+        self._next_submarine_config = None
+        if submarine_config is not None:
+            self._campaign_context.declared_submarine_fleet = submarine_config.fleet
+            self._campaign_context.submarine_mode = submarine_config.mode
         # Begin always invalidates an unconsumed prior bundle.  The live runner
         # binds its task owner immediately before ALAS starts this transaction.
         self._campaign_evidence_sequence += 1
@@ -83,6 +102,42 @@ class CampaignPreparationAdapterPorts:
     def end_campaign_pre_sortie(self) -> None:
         self._campaign_context = None
 
+    def prepare_campaign_run(self) -> None:
+        """Refresh per-sortie observations when ALAS chooses another run.
+
+        The task ledger is deliberately retained: a fresh preparation is not
+        a new resource authorization. Incomplete runs must use ALAS recovery.
+        """
+        self._package_gate()
+        context = self._require_campaign_context()
+        completed = context.auto_search_completion is not None or context.manual_completion_proven
+        if context.sortie_receipt is None and not completed:
+            return
+        if not completed:
+            raise SemanticGateClosed("campaign next run requires proven completion")
+        if (context.auto_search_completion is not None
+                and context.auto_search_completion.result_exit_receipt is None
+                and self.oracle.enabled("reward/campaign-total/exit")):
+            # ALAS chose another run from its own retained result menu. The
+            # previously selected fleets stay in game; Continue rechecks fuel,
+            # book selection and the remaining task grant before new input.
+            context.continuation_authorized = False
+            return
+        if not self.oracle.campaign_page_is_normal():
+            raise SemanticGateClosed("campaign next run requires return to stage")
+        self._campaign_context = _CampaignFlowContext(
+            stage_code=context.stage_code, mode=context.mode,
+            declared_submarine_fleet=context.declared_submarine_fleet,
+            submarine_mode=context.submarine_mode,
+            passive_transition_until=time.monotonic() + 20.0,
+        )
+        self._campaign_evidence_sequence += 1
+        self._campaign_evidence_bundle = CampaignAutoSearchEvidenceBundle(
+            transaction_id=self._campaign_evidence_sequence,
+            owner=self._campaign_evidence_bundle.owner if self._campaign_evidence_bundle else "alas-campaign",
+            stage_code=context.stage_code, mode=context.mode,
+        )
+
     def campaign_pre_sortie_active(self) -> bool:
         return self._campaign_context is not None
 
@@ -97,6 +152,52 @@ class CampaignPreparationAdapterPorts:
     def campaign_sortie_committed(self) -> bool:
         context = self._require_campaign_context()
         return context.sortie_receipt is not None
+
+    def campaign_clear_mode_available(self) -> bool:
+        self._package_gate()
+        self._require_campaign_context()
+        if self._campaign_preparation_kind() != "map":
+            return False
+        return self.oracle.campaign_clear_mode_selected() is not None
+
+    def campaign_2x_book_selected(self) -> bool:
+        self._package_gate()
+        context = self._require_campaign_context()
+        selected = self._frame_or_live_observation_oracle().campaign_2x_book_selected()
+        if selected is None:
+            raise SemanticGateClosed("campaign 2x-book control is absent")
+        if context.book_toggle_from is not None and selected is not context.book_toggle_from[1]:
+            context.book_toggle_from = None
+        return selected
+
+    def _click_campaign_book(self, mode: str) -> ActionReceipt:
+        context = self._require_campaign_context()
+        selected = self.oracle.campaign_2x_book_selected(mode=mode)
+        if type(selected) is not bool:
+            raise SemanticGateClosed("campaign book control is absent")
+        if context.book_toggle_from == (mode, selected):
+            raise SemanticGateClosed("campaign book selection did not advance after input")
+        receipt = self.oracle.click_campaign_2x_book(selected, mode=mode)
+        context.book_toggle_from = (mode, selected)
+        return receipt
+
+    def handle_campaign_2x_book_popup(self) -> bool:
+        self._package_gate()
+        context = self._require_campaign_context()
+        observation = self._frame_or_live_observation_oracle()
+        if observation.campaign_2x_book_cancelled():
+            raise SemanticGateClosed("game cancelled 2x book; return to fleet preparation and select it after fleet roles")
+        if not observation.campaign_2x_book_prompt_visible():
+            return False
+        if not context.use_2x_book or context.sortie_receipt is None:
+            raise SemanticGateClosed("2x-book confirmation requires the owned configured sortie")
+        if context.book_confirmation_receipt is not None:
+            if time.monotonic() <= context.passive_transition_until:
+                return True
+            raise SemanticGateClosed("2x-book confirmation did not advance")
+        context.book_confirmation_receipt = self.oracle.click_campaign_2x_book_prompt(True)
+        context.passive_transition_until = time.monotonic() + 20.0
+        return True
 
     def authorize_daemon_campaign_sortie(
         self,
@@ -266,7 +367,9 @@ class CampaignPreparationAdapterPorts:
         context.requested_fleets = (fleet1, fleet2, submarine)
 
         if context.mode == "hard":
-            if (fleet1, fleet2, submarine) != (1, 2, 0):
+            if (not all(isinstance(value, int) and not isinstance(value, bool)
+                        and value > 0 for value in (fleet1, fleet2))
+                    or submarine != 0):
                 raise SemanticGateClosed(
                     "hard campaign requires the two fixed surface fleet rows"
                 )
@@ -274,6 +377,11 @@ class CampaignPreparationAdapterPorts:
                 raise SemanticGateClosed(
                     "hard campaign fleet restrictions are not present"
                 )
+            # Original ALAS fleet_preparation() treats enabled surface fleet
+            # settings as booleans on a proven hard panel, then keeps the
+            # game's two fixed presets. Ordinary fleet indices (e.g. 5/6)
+            # are not dropdown selections on this surface.
+            context.requested_fleets = (1, 2, 0)
             rows = {row.row_key: row for row in initial.rows}
             if set(rows) != {"fleet1", "fleet2", "submarine"}:
                 raise SemanticGateClosed("hard campaign fleet rows are incomplete")
@@ -336,7 +444,8 @@ class CampaignPreparationAdapterPorts:
             context.expected_fleet_mutations = tuple(operations)
             remaining = self._action_ledger.remaining("campaign.fleet_mutation")
             if operations and remaining < len(operations):
-                raise SemanticGateClosed(
+                self._require_action_grant("campaign.fleet_mutation")
+                raise AlasSemanticActionDeferred(
                     "campaign fleet mutation budget is below the hard fleet "
                     "recommendation requirement: {0} < {1}".format(
                         remaining, len(operations)
@@ -411,7 +520,8 @@ class CampaignPreparationAdapterPorts:
         context.expected_fleet_mutations = tuple(operations)
         remaining = self._action_ledger.remaining("campaign.fleet_mutation")
         if operations and remaining < len(operations):
-            raise SemanticGateClosed(
+            self._require_action_grant("campaign.fleet_mutation")
+            raise AlasSemanticActionDeferred(
                 "campaign fleet mutation budget is below the preflight requirement: "
                 "{0} < {1}".format(remaining, len(operations))
             )
@@ -459,14 +569,31 @@ class CampaignPreparationAdapterPorts:
             context.fleet_mutation_receipts.append(receipt)
             context.passive_transition_until = time.monotonic() + 5.0
             deadline = time.monotonic() + 8.0
+            confirmed = False
             while True:
-                observed = self.oracle.campaign_fleet_selection_state(
-                    self._campaign_resolved_entrance_stage(),
-                    fallback_oil_cost=context.map_preparation_oil_cost,
-                )
-                row = next(item for item in observed.rows if item.row_key == row_key)
-                if row.hard_satisfied is True:
-                    break
+                if self.oracle.campaign_hard_recommend_prompt_present():
+                    if not confirmed:
+                        confirm_receipt = (
+                            self.oracle.confirm_campaign_hard_recommend_prompt()
+                        )
+                        context.hard_recommend_confirmation_receipts.append(
+                            confirm_receipt
+                        )
+                        confirmed = True
+                else:
+                    try:
+                        observed = self.oracle.campaign_fleet_selection_state(
+                            self._campaign_resolved_entrance_stage(),
+                            fallback_oil_cost=context.map_preparation_oil_cost,
+                        )
+                    except SemanticGateClosed:
+                        observed = None
+                    if observed is not None:
+                        row = next(
+                            item for item in observed.rows if item.row_key == row_key
+                        )
+                        if row.hard_satisfied is True:
+                            break
                 if time.monotonic() >= deadline:
                     raise SemanticGateClosed(
                         "hard campaign fleet recommendation did not settle: "
@@ -550,6 +677,18 @@ class CampaignPreparationAdapterPorts:
             receipt.semantic_id for receipt in context.fleet_mutation_receipts
         ) != context.expected_fleet_mutations:
             raise SemanticGateClosed("campaign fleet mutation sequence changed")
+        if context.mode == "hard" and (
+            len(context.hard_recommend_confirmation_receipts)
+            > sum(
+                receipt.semantic_id.endswith("/recommend")
+                for receipt in context.fleet_mutation_receipts
+            )
+            or any(
+                receipt.semantic_id != "campaign/hard/recommend/confirm"
+                for receipt in context.hard_recommend_confirmation_receipts
+            )
+        ):
+            raise SemanticGateClosed("hard recommendation confirmation changed")
         if (
             context.required_fleet_mutations > 0
             and prepared.generation <= context.initial_fleet_state.generation
@@ -578,29 +717,62 @@ class CampaignPreparationAdapterPorts:
                 return self._require_frame_observation_oracle()
             return self.oracle
 
+        def ready_role_state() -> CampaignAutoSearchRoleState:
+            deadline = time.monotonic() + 5.0
+            while True:
+                try:
+                    return fresh_role_oracle().campaign_auto_search_role_state()
+                except SemanticGateClosed as exc:
+                    if (str(exc) != 'campaign auto-search role control is incomplete'
+                            or time.monotonic() >= deadline):
+                        raise
+                    # A checked duty tab can precede its actionable role rows.
+                    # Refresh observation only; retain every original input gate.
+                    time.sleep(0.2)
+
+        def click_role_tab(*, mutation: bool) -> ActionReceipt:
+            # The same bounded settling window used by the role rows also
+            # covers the tab's raycast mount. Retry only a classified refusal
+            # before input; unknown state and accepted-input failures escape.
+            deadline = time.monotonic() + 5.0
+            while True:
+                if self._input_frame_refresher is not None:
+                    self._input_frame_refresher()
+                dispatch_count = getattr(self.oracle, 'input_dispatch_count', None)
+                try:
+                    if mutation:
+                        return self._dispatch_mutation(
+                            'campaign.fleet_mutation',
+                            lambda: self.oracle.click_toggle(
+                                'campaign/fleet-preparation/roles/tab'))
+                    return self.oracle.click_toggle('campaign/fleet-preparation/roles/tab')
+                except SemanticTargetNotActionable as exc:
+                    if (exc.semantic_id != 'campaign/fleet-preparation/roles/tab'
+                            or dispatch_count is None
+                            or self.oracle.input_dispatch_count != dispatch_count):
+                        raise
+                    if time.monotonic() >= deadline:
+                        raise AlasSemanticActionDeferred(
+                            'campaign duty tab remains covered; no tab input submitted; '
+                            're-enter when the typed fleet duty tab becomes actionable') from exc
+                    time.sleep(0.2)
+
         self._package_gate()
         context = self._require_campaign_context()
         if context.prepared_fleet_state is None or context.requested_fleets is None:
             raise SemanticGateClosed(
                 "campaign auto-search roles require proven fleet selection"
             )
-        if context.requested_fleets != (1, 2, 0):
+        if not self._campaign_two_surface_fleets(context.requested_fleets):
             raise SemanticGateClosed(
-                "campaign auto-search roles require fleet 1 and fleet 2 only"
+                "campaign auto-search roles require two distinct surface fleets and a valid optional submarine"
             )
         if context.mode == "normal":
-            if (
-                context.stage_code != "12-4"
-                and re.fullmatch(r"(?:[abcd][1-3]|sp)", context.stage_code)
-                is None
-            ):
-                raise SemanticGateClosed(
-                    "normal campaign auto-search roles are not qualified for "
-                    + context.stage_code
-                )
             expected = {
                 "fleet1_mob_fleet2_boss": ("mob", "boss"),
                 "fleet1_boss_fleet2_mob": ("boss", "mob"),
+                "fleet1_all_fleet2_standby": ("all", "standby"),
+                "fleet1_standby_fleet2_all": ("standby", "all"),
             }.get(fleet_order)
         elif context.mode == "hard":
             if re.fullmatch(r"[cd][1-3]", context.stage_code):
@@ -608,7 +780,7 @@ class CampaignPreparationAdapterPorts:
                     "fleet1_mob_fleet2_boss": ("mob", "boss"),
                     "fleet1_boss_fleet2_mob": ("boss", "mob"),
                 }.get(fleet_order)
-            elif context.stage_code not in ("11-4", "12-1"):
+            elif re.fullmatch(r"[1-9]\d*-[1-4]", context.stage_code) is None:
                 raise SemanticGateClosed(
                     "hard campaign auto-search roles are not qualified for this stage"
                 )
@@ -693,11 +865,7 @@ class CampaignPreparationAdapterPorts:
                 # is required before a zero-mutation no-op can be proven.  Keep
                 # this exception scoped to a typed hard event surface and
                 # never use it to authorize either of the role controls.
-                if self._input_frame_refresher is not None:
-                    self._input_frame_refresher()
-                receipt = self.oracle.click_toggle(
-                    "campaign/fleet-preparation/roles/tab"
-                )
+                receipt = click_role_tab(mutation=False)
                 context.auto_search_role_receipts.append(receipt)
                 context.passive_transition_until = time.monotonic() + 3.0
                 deadline = time.monotonic() + 5.0
@@ -723,14 +891,7 @@ class CampaignPreparationAdapterPorts:
         if not role_oracle.toggle_selected(
             "campaign/fleet-preparation/roles/tab"
         ):
-            if self._input_frame_refresher is not None:
-                self._input_frame_refresher()
-            receipt = self._dispatch_mutation(
-                "campaign.fleet_mutation",
-                lambda: self.oracle.click_toggle(
-                    "campaign/fleet-preparation/roles/tab"
-                ),
-            )
+            receipt = click_role_tab(mutation=True)
             context.auto_search_role_receipts.append(receipt)
             context.passive_transition_until = time.monotonic() + 3.0
 
@@ -752,7 +913,7 @@ class CampaignPreparationAdapterPorts:
                     )
                 time.sleep(0.2)
 
-        state = fresh_role_oracle().campaign_auto_search_role_state()
+        state = ready_role_state()
         for fleet_index, (actual, target) in enumerate(
             zip((state.fleet1_role, state.fleet2_role), expected), 1
         ):
@@ -771,7 +932,7 @@ class CampaignPreparationAdapterPorts:
             context.passive_transition_until = time.monotonic() + 3.0
             deadline = time.monotonic() + 5.0
             while True:
-                state = fresh_role_oracle().campaign_auto_search_role_state()
+                state = ready_role_state()
                 observed = (
                     state.fleet1_role
                     if fleet_index == 1
@@ -792,6 +953,39 @@ class CampaignPreparationAdapterPorts:
         context.auto_search_role_state = state
         return state
 
+    def ensure_campaign_submarine_auto_mode(self, desired: str) -> str:
+        self._package_gate()
+        context = self._require_campaign_context()
+        if desired not in ('sub_standby', 'sub_auto_call'):
+            raise SemanticGateClosed('submarine AUTO mode is invalid')
+        if not context.requested_fleets or not context.requested_fleets[2] or context.prepared_fleet_state is None:
+            raise SemanticGateClosed('submarine AUTO mode requires a prepared submarine fleet')
+        if not self.oracle.toggle_selected('campaign/fleet-preparation/roles/tab'):
+            if self._input_frame_refresher is not None:
+                self._input_frame_refresher()
+            receipt = self._dispatch_mutation('campaign.fleet_mutation',
+                lambda: self.oracle.click_toggle('campaign/fleet-preparation/roles/tab'))
+            context.auto_search_role_receipts.append(receipt)
+            deadline = time.monotonic() + 10.0
+            while not self.oracle.toggle_selected('campaign/fleet-preparation/roles/tab'):
+                if time.monotonic() >= deadline:
+                    raise SemanticGateClosed('submarine duty tab did not open')
+                time.sleep(.2)
+        actual = self.oracle.campaign_submarine_auto_mode()
+        if actual != desired:
+            if self._input_frame_refresher is not None:
+                self._input_frame_refresher()
+            receipt = self._dispatch_mutation('campaign.fleet_mutation',
+                lambda: self.oracle.click_campaign_submarine_auto_mode(actual, desired))
+            context.auto_search_role_receipts.append(receipt)
+            deadline = time.monotonic() + 10.0
+            while self.oracle.campaign_submarine_auto_mode() != desired:
+                if time.monotonic() >= deadline:
+                    raise SemanticGateClosed('submarine AUTO mode did not advance')
+                time.sleep(.2)
+        context.submarine_auto_mode = desired
+        return desired
+
     def authorize_campaign_sortie(
         self,
         *,
@@ -809,19 +1003,11 @@ class CampaignPreparationAdapterPorts:
         if not self._action_ledger.allowed("campaign.sortie"):
             return False
         remaining_sorties = self._action_ledger.remaining("campaign.sortie")
-        if context.mode == "normal" and remaining_sorties != 1:
-            raise SemanticGateClosed(
-                "campaign sortie is qualified only with an exact budget of one"
-            )
-        if context.mode == "hard" and remaining_sorties not in (1, 2, 3):
-            raise SemanticGateClosed(
-                "hard campaign sortie budget must match one through three remaining runs"
-            )
         if context.mode not in ("normal", "hard"):
             raise SemanticGateClosed("campaign sortie mode is not reviewed")
         if context.prepared_fleet_state is None or context.requested_fleets is None:
             raise SemanticGateClosed("campaign fleet selection was not proven")
-        if context.requested_fleets == (1, 2, 0):
+        if self._campaign_two_surface_fleets(context.requested_fleets):
             expected_fleet_order = (
                 "fleet1_all_fleet2_standby"
                 if context.mode == "hard" and context.stage_code == "12-1"
@@ -844,8 +1030,11 @@ class CampaignPreparationAdapterPorts:
             raise SemanticGateClosed(
                 "campaign sortie fleet profile is not reviewed"
             )
-        if use_2x_book is not False:
-            raise SemanticGateClosed("campaign sortie requires 2x book disabled")
+        if type(use_2x_book) is not bool:
+            raise SemanticGateClosed("campaign 2x-book setting must be bool")
+        selected_book = self.oracle.campaign_2x_book_selected()
+        if (use_2x_book and selected_book is not True) or (not use_2x_book and selected_book is True):
+            raise SemanticGateClosed("campaign 2x-book selection was not proven")
         if use_auto_search:
             hard_event_stage = bool(
                 context.mode == "hard"
@@ -853,17 +1042,7 @@ class CampaignPreparationAdapterPorts:
             )
             if (
                 context.mode == "normal"
-                and (
-                    (
-                        context.stage_code != "12-4"
-                        and re.fullmatch(
-                            r"(?:[abcd][1-3]|sp)",
-                            context.stage_code,
-                        )
-                        is None
-                    )
-                    or context.requested_fleets != (1, 2, 0)
-                )
+                and not self._campaign_two_surface_fleets(context.requested_fleets)
             ):
                 raise SemanticGateClosed(
                     "campaign auto-search sortie is not qualified for the "
@@ -873,7 +1052,7 @@ class CampaignPreparationAdapterPorts:
                 context.mode == "hard"
                 and (
                     (
-                        context.stage_code not in ("11-4", "12-1")
+                        re.fullmatch(r"[1-9]\d*-[1-4]", context.stage_code) is None
                         and not hard_event_stage
                     )
                     or context.requested_fleets != (1, 2, 0)
@@ -886,6 +1065,8 @@ class CampaignPreparationAdapterPorts:
                 {
                     "fleet1_mob_fleet2_boss": ("mob", "boss"),
                     "fleet1_boss_fleet2_mob": ("boss", "mob"),
+                    "fleet1_all_fleet2_standby": ("all", "standby"),
+                    "fleet1_standby_fleet2_all": ("standby", "all"),
                 }
                 if context.mode == "normal" or hard_event_stage
                 else {
@@ -936,16 +1117,28 @@ class CampaignPreparationAdapterPorts:
             raise SemanticGateClosed(
                 "manual hard campaign configuration is not reviewed"
             )
-        if submarine_mode != "do_not_use":
+        from ...alas_submarine_config_contract import SUBMARINE_MODES
+        if submarine_mode not in SUBMARINE_MODES:
+            raise SemanticGateClosed('campaign submarine mode is invalid')
+        if context.requested_fleets[2] and context.mode != 'normal':
             raise SemanticGateClosed(
-                "campaign sortie requires submarine mode do_not_use"
+                "hard submarine sortie requires its own fleet requirement ports"
             )
+        if use_auto_search and context.requested_fleets[2] and context.submarine_auto_mode not in ('sub_standby', 'sub_auto_call'):
+            raise SemanticGateClosed('campaign submarine AUTO duty is not proven')
+        if (use_auto_search and context.requested_fleets[2] and context.submarine_auto_mode == 'sub_standby'
+                and submarine_mode in ('every_combat', 'boss_only')):
+            if not any(type(b.raw.get('instance_id')) is int and b.raw['instance_id'] != 0
+                       for b in getattr(self.oracle.read_state(), 'buttons', ())):
+                raise SemanticGateClosed('submarine combat-call port requires observer object identity')
         if not use_auto_search and fleet_order != expected_fleet_order:
             raise SemanticGateClosed(
                 "campaign sortie fleet order does not match the reviewed profile"
             )
 
         prepared = context.prepared_fleet_state
+        if self._campaign_fleet_tuple(prepared) != context.requested_fleets:
+            raise SemanticGateClosed("campaign sortie fleet identity changed")
         if context.mode == "hard":
             hard_rows = {row.row_key: row for row in prepared.rows}
             if not prepared.hard_mode or any(
@@ -969,7 +1162,7 @@ class CampaignPreparationAdapterPorts:
             raise SemanticGateClosed("campaign sortie fleet 1 has no proven ships")
         if bool(rows["fleet2"].ship_levels) != bool(context.requested_fleets[1]):
             raise SemanticGateClosed("campaign sortie fleet 2 occupancy changed")
-        if rows["submarine"].ship_levels:
+        if bool(rows["submarine"].ship_levels) != bool(context.requested_fleets[2]):
             raise SemanticGateClosed("campaign sortie submarine occupancy changed")
         if (
             len(prepared.surface_fleets) != 2
@@ -979,7 +1172,7 @@ class CampaignPreparationAdapterPorts:
         ):
             raise SemanticGateClosed("campaign sortie surface fleet count changed")
         if (
-            prepared.submarine_fleets[0] != 0
+            prepared.submarine_fleets[0] != int(bool(context.requested_fleets[2]))
             or prepared.submarine_fleets[1] not in (0, 1)
         ):
             raise SemanticGateClosed("campaign sortie submarine fleet count changed")
@@ -991,11 +1184,16 @@ class CampaignPreparationAdapterPorts:
             raise SemanticGateClosed(
                 "campaign sortie oil requirement is not proven"
             ) from exc
+        if use_2x_book:
+            required_oil *= 2
         if required_oil <= 0 or context.oil_before_sortie < required_oil:
             raise SemanticGateClosed("campaign sortie oil precondition failed")
         if not prepared.sortie_button.actionable:
             raise SemanticGateClosed("campaign sortie target is not actionable")
         context.sortie_authorized = True
+        context.submarine_mode = submarine_mode
+        context.sortie_budget_before = remaining_sorties
+        context.use_2x_book = use_2x_book
         return True
 
     def confirm_campaign_sortie(self) -> CampaignSortieProof:
@@ -1008,7 +1206,8 @@ class CampaignPreparationAdapterPorts:
         if (
             not context.sortie_authorized
             or context.sortie_receipt is None
-            or self._action_ledger.remaining("campaign.sortie") != 0
+            or context.sortie_budget_before is None
+            or self._action_ledger.remaining("campaign.sortie") != context.sortie_budget_before - 1
             or context.initial_fleet_state is None
             or context.prepared_fleet_state is None
             or context.requested_fleets is None
@@ -1034,7 +1233,7 @@ class CampaignPreparationAdapterPorts:
                 receipt.semantic_id for receipt in context.fleet_mutation_receipts
             ),
             oil_before_sortie=context.oil_before_sortie,
-            required_oil=required_oil,
+            required_oil=required_oil * (2 if context.use_2x_book else 1),
             sortie_generation=context.sortie_receipt.generation,
             map_generation=entered.generation,
             map_root_path=entered.root_path,
@@ -1120,10 +1319,14 @@ class CampaignPreparationAdapterPorts:
 
     def _campaign_preparation_state_with_stage(
         self,
+        *,
+        reader: Optional[Any] = None,
     ) -> Tuple[Optional[Any], str]:
         """Resolve an event hard stage through its reviewed shared entrance."""
 
         context = self._require_campaign_context()
+        if reader is None:
+            reader = self.oracle
         candidates = [context.stage_code]
         shared = CAMPAIGN_SHARED_HARD_STAGE_ENTRANCES.get(context.stage_code)
         if shared is not None:
@@ -1131,7 +1334,7 @@ class CampaignPreparationAdapterPorts:
         last_identity_error: Optional[SemanticGateClosed] = None
         for stage_code in candidates:
             try:
-                return self.oracle.campaign_preparation_state(stage_code), stage_code
+                return reader.campaign_preparation_state(stage_code), stage_code
             except SemanticGateClosed as exc:
                 if not str(exc).endswith("stage identity changed"):
                     raise
@@ -1246,7 +1449,27 @@ class CampaignPreparationAdapterPorts:
             )
         )
         context.passive_transition_until = time.monotonic() + 20.0
-        return receipt
+        # Difficulty changes update title, level, achievements and controls
+        # across several Unity frames. Close this input's postcondition before
+        # the next ALAS preparation probe consumes an intermediate frame.
+        last_error = None
+        for _ in range(20):
+            time.sleep(0.25)
+            if self._input_frame_refresher is not None:
+                self._input_frame_refresher()
+            try:
+                after = self.oracle.campaign_preparation_state(context.resolved_stage_code)
+                if (after is not None and after.kind == "map"
+                        and after.generation > receipt.generation
+                        and self.oracle.campaign_map_preparation_mode_state(
+                            context.resolved_stage_code) == destination):
+                    return receipt
+            except SemanticGateClosed as exc:
+                last_error = exc
+        raise SemanticGateClosed(
+            "campaign difficulty switch postcondition was not proven"
+            + (": " + str(last_error) if last_error is not None else "")
+        )
 
     def confirm_campaign_pre_sortie(self) -> CampaignPreSortieProof:
         """Prove entry, fleet-preparation cancel, and exact stage restoration."""
@@ -1291,6 +1514,20 @@ class CampaignPreparationAdapterPorts:
         )
         return context.proof
 
+    def _campaign_vitals_kwargs(self, fleet_index):
+        context = self._require_campaign_context()
+        prepared = context.prepared_fleet_state
+        if prepared is None:
+            identity = context.inherited_fleet_identity
+            if identity is not None and context.inherited_fleet_index == fleet_index:
+                return {'expected_occupied': sum(map(len, identity)), 'expected_identity': identity}
+            return {}
+        rows = [row for row in prepared.rows if row.row_key == f'fleet{fleet_index}']
+        if len(rows) != 1:
+            raise SemanticGateClosed('campaign HP prepared fleet identity is ambiguous')
+        count = len(rows[0].ship_levels)
+        return {'expected_occupied': count} if count < 6 else {}
+
     def campaign_fleet_hp(self) -> Tuple[float, ...]:
         self._package_gate()
         operation_siren_map = self.oracle.operation_siren_page_visible()
@@ -1327,10 +1564,35 @@ class CampaignPreparationAdapterPorts:
                         except SemanticGateClosed:
                             raise exc
                     time.sleep(0.25)
-        self._require_campaign_context()
+        context = self._require_campaign_context()
+        if context.prepared_fleet_state is not None or context.inherited_fleet_identity is not None:
+            oracle = self._frame_or_live_observation_oracle()
+            index = oracle.campaign_map_displayed_fleet_index()
+            kwargs = self._campaign_vitals_kwargs(index)
+            if kwargs:
+                return oracle.campaign_hp_control_snapshot(index, **kwargs)[0]
         return self.oracle.campaign_fleet_hp()
+
+    def campaign_hp_control_snapshot(self, fleet_index: int):
+        self._package_gate()
+        if self._campaign_context is None:
+            return None
+        oracle = self._frame_or_live_observation_oracle()
+        precombat = oracle.campaign_emergency_repair_state() is not None
+        if precombat:
+            admission = self._campaign_context.combat_admission
+            if admission is None or admission.fleet_index != fleet_index:
+                raise SemanticGateClosed('campaign precombat HP has no matching fleet admission')
+        return oracle.campaign_hp_control_snapshot(fleet_index, precombat=precombat,
+            **self._campaign_vitals_kwargs(fleet_index))
 
     def campaign_fleet_levels(self) -> Tuple[int, ...]:
         self._package_gate()
-        self._require_campaign_context()
-        return self.oracle.campaign_fleet_levels()
+        context = self._require_campaign_context()
+        if context.prepared_fleet_state is not None or context.inherited_fleet_identity is not None:
+            oracle = self._frame_or_live_observation_oracle()
+            index = oracle.campaign_map_displayed_fleet_index()
+            kwargs = self._campaign_vitals_kwargs(index)
+            if kwargs:
+                return oracle.campaign_sparse_fleet_levels(index, **kwargs)
+        return self._frame_or_live_observation_oracle().campaign_fleet_levels()

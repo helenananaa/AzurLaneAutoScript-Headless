@@ -61,7 +61,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
             (0, "高阶自主训练", 50, 10 * 60 * 60, "pending", "jianduixunlian"),
         )
 
-    def test_commission_rows_retry_a_transitional_missing_image(self):
+    def test_commission_missing_type_is_unavailable_until_next_observation(self):
         page = "root/UICamera/Canvas/UIMain/EventUI(Clone)"
         row = page + "/scrollRect$/content/0"
         backend = FakeBackend(
@@ -90,10 +90,16 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         )
         backend.ui_sequence = [incomplete, complete]
 
-        rows = make_oracle(backend).commission_rows()
+        oracle = make_oracle(backend)
+        rows = oracle.commission_rows()
 
         self.assertEqual(len(rows), 1)
-        self.assertEqual(rows[0].type_sprite, "jianduixunlian")
+        self.assertIsNone(rows[0].type_sprite)
+        with self.assertRaisesRegex(SemanticGateClosed, 'type is unavailable'):
+            oracle.click_commission_row(rows[0].signature)
+        backend.snapshot['generation'] = backend.buttons['generation'] = 11
+        self.assertEqual(oracle.commission_rows()[0].type_sprite, "jianduixunlian")
+        self.assertEqual(backend.taps, [])
 
     def test_commission_scroll_uses_exact_handle_and_proves_row_change(self):
         backend = FakeBackend([])
@@ -132,7 +138,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         )
         self.assertEqual(len(backend.swipes), 1)
         self.assertEqual(backend.swipes[0][0], backend.swipes[0][2])
-        self.assertEqual(backend.swipes[0][4], 500)
+        self.assertEqual(backend.swipes[0][4], 1500)
 
     def test_commission_scroll_refuses_handle_without_top_raycast(self):
         backend = FakeBackend([])

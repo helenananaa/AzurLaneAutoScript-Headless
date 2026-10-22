@@ -372,8 +372,8 @@ class OpsiShopOracle:
             ),
             key=lambda button: (button.bounds.top, button.bounds.left),
         )
-        if len(cards) != 22:
-            raise SemanticGateClosed("Operation Siren voucher must expose 22 cards")
+        if not cards:
+            raise SemanticGateClosed("Operation Siren voucher has no identifiable cards")
 
         def card_text(card: ButtonState, suffix: str, pattern: str) -> str:
             assert card.bounds is not None
@@ -513,7 +513,7 @@ class OpsiShopOracle:
     ) -> ActionReceipt:
         """Open one exact, visible Operation Siren voucher card."""
 
-        if isinstance(index, bool) or not isinstance(index, int) or not 0 <= index < 22:
+        if isinstance(index, bool) or not isinstance(index, int) or index < 0:
             raise SemanticGateClosed("Operation Siren voucher item index is invalid")
         items = self._retry_transition_read(
             self.operation_siren_voucher_items,

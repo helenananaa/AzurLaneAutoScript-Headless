@@ -6,7 +6,6 @@ import importlib
 import io
 import os
 import json
-import py_compile
 import subprocess
 import sys
 import tempfile
@@ -34,7 +33,6 @@ from alas_headless.runner_supervision import (
     SeedSource,
     WorkerControl,
     WorkerHandles,
-    binding_digest,
     bind_record,
     build_config_ownership,
     canonical_json_bytes,
@@ -55,7 +53,6 @@ from scripts.python.run_alas_event_task_live_validation import (
     MATERIALIZED_ALAS_CAPABILITY_ID,
     MATERIALIZED_ALAS_CANONICAL_SOURCE_SHA256,
     MATERIALIZED_ALAS_CHANGED,
-    MATERIALIZED_ALAS_CONTROL_ENV,
     MATERIALIZED_ALAS_LOADED_SCHEMA,
     MATERIALIZED_ALAS_LOADER_ID,
     MATERIALIZED_ALAS_MODULE_NAME,
@@ -75,8 +72,9 @@ from scripts.python.run_alas_event_task_live_validation import (
     _failure_isolated_worker_cleanup,
     _finish_worker_terminal,
     _finalize_parent_resources,
-    _confirm_verified_map_operation_loaded,
-    _install_verified_map_operation_importer,
+    _inspect_loaded_map_operation,
+    _read_materialized_source_audit,
+    _validate_loaded_materialized_alas,
     _limit_resources,
     _materialization_control_record,
     _materialized_alas_proof,
@@ -200,7 +198,7 @@ def replace_source_once(source: str, old: str, new: str) -> str:
     return source.replace(old, new, 1)
 
 
-def loaded_materialization(proof: dict[str, str], *, load_count: int = 1):
+def loaded_materialization(proof: dict[str, str]):
     return {
         "schema": MATERIALIZED_ALAS_LOADED_SCHEMA,
         "capability_id": MATERIALIZED_ALAS_CAPABILITY_ID,
@@ -210,7 +208,6 @@ def loaded_materialization(proof: dict[str, str], *, load_count: int = 1):
         "canonical_source_sha256": proof["canonical_source_sha256"],
         "semantic_branch_sha256": proof["semantic_branch_sha256"],
         "support_classification": _materialized_alas_support_classification(proof),
-        "load_count": load_count,
         "proof": proof,
     }
 
@@ -293,7 +290,6 @@ def synthetic_execution_budgets() -> dict[str, int]:
 
 
 def bind_test_control(control: WorkerControl) -> WorkerControl:
-    control.bind_activation_token(TEST_TOKEN, verified=False)
     return control
 
 
@@ -746,7 +742,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                 run_id = uuid.uuid4().hex
                 binding = RunBinding(
                     run_id=run_id,
-                    token_digest=hashlib.sha256(TEST_TOKEN).hexdigest(),
                     task="EventSp",
                     stage="SP",
                     event="event_20260813_cn",
@@ -785,7 +780,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             run_id = uuid.uuid4().hex
             binding = RunBinding(
                 run_id=run_id,
-                token_digest=hashlib.sha256(TEST_TOKEN).hexdigest(),
                 task="EventSp",
                 stage="SP",
                 event="event_20260813_cn",
@@ -811,7 +805,7 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                 synthetic_materialization_control(binding),
                 synthetic_execution_budgets(),
             )
-            control.bind_activation_token(TEST_TOKEN, verified=True)
+            control.mark_activated()
             seed_file.close_parent()
             original = root / "config-original"
             source.root_path.rename(original)
@@ -840,7 +834,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             run_id = uuid.uuid4().hex
             binding = RunBinding(
                 run_id=run_id,
-                token_digest=hashlib.sha256(TEST_TOKEN).hexdigest(),
                 task="EventSp",
                 stage="SP",
                 event="event_20260813_cn",
@@ -868,7 +861,7 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                 synthetic_materialization_control(binding),
                 synthetic_execution_budgets(),
             )
-            control.bind_activation_token(TEST_TOKEN, verified=True)
+            control.mark_activated()
             try:
                 with self.assertRaises(PermissionError):
                     template.write_bytes(before)
@@ -893,7 +886,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             run_id = uuid.uuid4().hex
             binding = RunBinding(
                 run_id=run_id,
-                token_digest=hashlib.sha256(TEST_TOKEN).hexdigest(),
                 task="EventSp",
                 stage="SP",
                 event="event_20260813_cn",
@@ -939,7 +931,7 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                     synthetic_materialization_control(binding),
                     synthetic_execution_budgets(),
                 )
-                control.bind_activation_token(TEST_TOKEN, verified=True)
+                control.mark_activated()
                 with (
                     self.subTest(label=label),
                     patch(
@@ -968,7 +960,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             run_id = uuid.uuid4().hex
             binding = RunBinding(
                 run_id=run_id,
-                token_digest=hashlib.sha256(TEST_TOKEN).hexdigest(),
                 task="EventSp",
                 stage="SP",
                 event="event_20260813_cn",
@@ -1031,39 +1022,29 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                 self.assertEqual(budgets["viewport_swipe"], 4)
                 self.assertIsNone(budgets["recovery_total"])
 
-    def test_materialized_fleet_noop_guard_accepts_authoritative_shape(self):
+    def test_materialized_fleet_noop_guard_accepts_current_canonical_source(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory).resolve()
             target = write_materialized_map_operation(root)
-            self.assertEqual(
-                target.read_text(encoding="utf-8").count("self.fleet_preparation()"),
-                2,
-            )
-
             proof = _materialized_alas_proof(root)
-
             self.assertEqual(proof["capability_id"], MATERIALIZED_ALAS_CAPABILITY_ID)
             self.assertEqual(proof["relative_path"], "module/map/map_operation.py")
             self.assertEqual(
                 proof["semantic_branch_sha256"],
-                MATERIALIZED_ALAS_SEMANTIC_BRANCH_SHA256,
-            )
-            self.assertEqual(
-                MATERIALIZED_ALAS_SEMANTIC_BRANCH_SHA256,
-                "a0ac35cb40e6ad29711c0200598a77a18c88ec0060666adace3d46f30301f4d6",
-            )
-            self.assertEqual(
-                proof["canonical_source_sha256"],
-                MATERIALIZED_ALAS_CANONICAL_SOURCE_SHA256,
-            )
-            self.assertEqual(
-                MATERIALIZED_ALAS_CANONICAL_SOURCE_SHA256,
-                "0ddeec74cde1a94e686830d0504f07fc789aab85b7552073f4226779992e57f8",
+                semantic_branch_digest(MATERIALIZED_MAP_OPERATION_POSITIVE),
             )
             self.assertEqual(
                 proof["canonical_source_sha256"],
                 hashlib.sha256(target.read_bytes()).hexdigest(),
             )
+            # Baseline hashes remain frozen evidence, not current-source gates.
+            baseline = dict(proof, canonical_source_sha256=MATERIALIZED_ALAS_CANONICAL_SOURCE_SHA256,
+                            semantic_branch_sha256=MATERIALIZED_ALAS_SEMANTIC_BRANCH_SHA256)
+            self.assertEqual(_materialized_alas_support_classification(baseline),
+                             "fully_qualified_baseline")
+            drifted = dict(proof, canonical_source_sha256="0" * 64)
+            self.assertEqual(_materialized_alas_support_classification(drifted),
+                             "best_effort_compatible")
             canonical = target.read_bytes()
             self.assertNotIn(b"\r", canonical)
             target.write_bytes(canonical.replace(b"\n", b"\r\n"))
@@ -1072,240 +1053,96 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, MATERIALIZED_ALAS_UNPROVEN):
                 _materialized_alas_proof(root)
 
-    def test_materialized_fleet_noop_guard_rejects_unsupported_ast_drift(self):
+    def test_materialized_fleet_noop_guard_tolerates_unrelated_upstream_drift(self):
         guarded = (
             "                                if semantic_adapter.campaign_fleet_preparation_required():\n"
             "                                    self.fleet_preparation()\n"
-        )
-        confirm = "                                semantic_adapter.confirm_campaign_fleet_selection()\n"
-        moved_after_confirm = replace_authoritative_once(
-            guarded + confirm, confirm + guarded
-        )
-        enter_map_header = (
-            "    def enter_map(self, button, mode='normal', "
-            "skip_first_screenshot=True):\n"
-        )
-        duplicate_method = replace_authoritative_once(
-            enter_map_header,
-            "    def enter_map(self):\n        pass\n\n" + enter_map_header,
-        )
-        direct_assignment = (
-            "        self.map_clear_percentage_timer.reset()\n"
-            "        semantic_adapter = getattr(self.device, "
-            "'semantic_adapter', None)\n"
         )
         semantic_log = (
             "                    logger.info("
             "'Semantic pre-sortie: scan fleet preparation')\n"
         )
-        class_wrapper = replace_source_once(
-            MATERIALIZED_MAP_OPERATION_POSITIVE,
-            enter_map_header,
-            "    def _reviewer_fleet_wrapper(self):\n"
-            "        self.fleet_preparation()\n\n" + enter_map_header,
-        )
-        class_wrapper = replace_source_once(
-            class_wrapper,
-            semantic_log,
-            "                    self._reviewer_fleet_wrapper()\n" + semantic_log,
-        )
-        module_wrapper = replace_source_once(
-            MATERIALIZED_MAP_OPERATION_POSITIVE,
-            "class MapOperation(",
-            "def reviewer_fleet_wrapper(owner):\n"
-            "    owner.fleet_preparation()\n\n\n"
-            "class MapOperation(",
-        )
-        module_wrapper = replace_source_once(
-            module_wrapper,
-            semantic_log,
-            "                    reviewer_fleet_wrapper(self)\n" + semantic_log,
-        )
-        decorated_wrapper = replace_source_once(
-            MATERIALIZED_MAP_OPERATION_POSITIVE,
-            "class MapOperation(",
-            "def reviewer_decorator(function):\n"
-            "    return function\n\n\n"
-            "@reviewer_decorator\n"
-            "def reviewer_decorated_wrapper(owner):\n"
-            "    owner.fleet_preparation()\n\n\n"
-            "class MapOperation(",
-        )
-        decorated_wrapper = replace_source_once(
-            decorated_wrapper,
-            semantic_log,
-            "                    reviewer_decorated_wrapper(self)\n" + semantic_log,
-        )
-        callable_wrapper = replace_source_once(
-            MATERIALIZED_MAP_OPERATION_POSITIVE,
-            "class MapOperation(",
-            "class ReviewerFleetCallable:\n"
-            "    def __call__(self, owner):\n"
-            "        owner.fleet_preparation()\n\n\n"
-            "REVIEWER_FLEET_CALLABLE = ReviewerFleetCallable()\n\n\n"
-            "class MapOperation(",
-        )
-        callable_wrapper = replace_source_once(
-            callable_wrapper,
-            semantic_log,
-            "                    REVIEWER_FLEET_CALLABLE(self)\n" + semantic_log,
-        )
-        branch_tail = (
-            "                    if (\n"
-            "                        not self.is_in_auto_search_menu()\n"
-            "                        and semantic_adapter.campaign_map_preparation_committed()\n"
-            "                    ):\n"
-            "                        continue\n"
-        )
-        call_target_override = replace_source_once(
-            MATERIALIZED_MAP_OPERATION_POSITIVE,
-            enter_map_header,
-            "    def handle_auto_search_setting(self):\n"
-            "        self.fleet_preparation()\n\n" + enter_map_header,
-        )
-        decorated_enter_map = replace_source_once(
-            MATERIALIZED_MAP_OPERATION_POSITIVE,
-            "class MapOperation(",
-            "def reviewer_enter_map_decorator(function):\n"
-            "    return function\n\n\n"
-            "class MapOperation(",
-        )
-        decorated_enter_map = replace_source_once(
-            decorated_enter_map,
-            enter_map_header,
-            "    @reviewer_enter_map_decorator\n" + enter_map_header,
-        )
-        dunder_getattribute_override = replace_source_once(
-            MATERIALIZED_MAP_OPERATION_POSITIVE,
-            enter_map_header,
-            "    def __getattribute__(self, name):\n"
-            "        if name == 'handle_auto_search_setting':\n"
-            "            return lambda: self.fleet_preparation()\n"
-            "        return super().__getattribute__(name)\n\n" + enter_map_header,
-        )
-        module_monkeypatch = (
-            MATERIALIZED_MAP_OPERATION_POSITIVE
-            + "\nMapOperation.handle_auto_search_setting = (\n"
-            "    lambda self: self.fleet_preparation())\n"
-        )
-        unchanged_branch_attacks = {
-            "class-call-target-override": call_target_override,
-            "enter-map-decorator": decorated_enter_map,
-            "dunder-getattribute-override": dunder_getattribute_override,
-            "module-monkeypatch": module_monkeypatch,
-        }
-        compatible_drift = {
-            "comment-byte-drift": (
-                MATERIALIZED_MAP_OPERATION_POSITIVE
-                + "\n# unreviewed qualification comment\n"
+        renamed = (MATERIALIZED_MAP_OPERATION_POSITIVE
+                   .replace("semantic_adapter =", "port =")
+                   .replace("if semantic_adapter is", "if port is")
+                   .replace("semantic_adapter.", "port.")
+                   .replace("fleet_authorized", "selection_authorized")
+                   .replace("sortie_clicked", "sortie_started"))
+        variants = {
+            "comment": MATERIALIZED_MAP_OPERATION_POSITIVE + "\n# upstream note\n",
+            "local-renames": renamed,
+            "native-recovery-and-watchdog": replace_authoritative_once(
+                semantic_log,
+                "                    self.handle_auto_search_map_option()\n"
+                "                    self.device.stuck_record_add('fleet preparation')\n"
+                + semantic_log,
             ),
-            "whitespace-byte-drift": replace_authoritative_once(
-                "import cv2\n", "import cv2  \n"
+            "logging-inside-guard": replace_authoritative_once(
+                guarded,
+                guarded.replace("                                    self.fleet_preparation()",
+                                "                                    logger.info('reconcile fleet')\n"
+                                "                                    self.fleet_preparation()"),
+            ),
+            "logging-after-authorize": replace_authoritative_once(
+                "                            if fleet_authorized:\n",
+                "                            logger.info('fleet authorization completed')\n"
+                "                            if fleet_authorized:\n",
+            ),
+            "unrelated-wrapper": MATERIALIZED_MAP_OPERATION_POSITIVE + (
+                "\ndef unused_fleet_helper(owner):\n"
+                "    return owner.fleet_preparation()\n"
             ),
         }
-        for source in unchanged_branch_attacks.values():
-            self.assertEqual(
-                semantic_branch_digest(source),
-                MATERIALIZED_ALAS_SEMANTIC_BRANCH_SHA256,
-            )
-        for source in compatible_drift.values():
-            self.assertEqual(
-                semantic_branch_digest(source),
-                MATERIALIZED_ALAS_SEMANTIC_BRANCH_SHA256,
-            )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            for label, source in variants.items():
+                with self.subTest(label=label):
+                    target = write_materialized_map_operation(root, source)
+                    proof = _materialized_alas_proof(root)
+                    self.assertEqual(proof["canonical_source_sha256"],
+                                     hashlib.sha256(target.read_bytes()).hexdigest())
+                    self.assertEqual(proof["semantic_branch_sha256"],
+                                     semantic_branch_digest(source))
+                    self.assertEqual(_materialized_alas_support_classification(proof),
+                                     "best_effort_compatible")
+
+    def test_materialized_fleet_noop_guard_rejects_broken_local_contract(self):
+        guarded = (
+            "                                if semantic_adapter.campaign_fleet_preparation_required():\n"
+            "                                    self.fleet_preparation()\n"
+        )
+        confirm = "                                semantic_adapter.confirm_campaign_fleet_selection()\n"
+        header = "    def enter_map(self, button, mode='normal', skip_first_screenshot=True):\n"
         variants = {
             "syntax": "class MapOperation:\n    def enter_map(:\n        pass\n",
             "duplicate-class": MATERIALIZED_MAP_OPERATION_POSITIVE * 2,
-            "duplicate-method": duplicate_method,
+            "duplicate-method": replace_authoritative_once(
+                header, "    def enter_map(self):\n        pass\n\n" + header),
             "stale-unconditional": MATERIALIZED_MAP_OPERATION_STALE,
+            "missing-guard-and-call": replace_authoritative_once(guarded, ""),
             "guard-inversion": replace_authoritative_once(
                 "if semantic_adapter.campaign_fleet_preparation_required():",
-                "if not semantic_adapter.campaign_fleet_preparation_required():",
-            ),
-            "guard-alias": replace_authoritative_once(
+                "if not semantic_adapter.campaign_fleet_preparation_required():"),
+            "wrong-guard-receiver": replace_authoritative_once(
                 "semantic_adapter.campaign_fleet_preparation_required()",
-                "adapter.campaign_fleet_preparation_required()",
-            ),
-            "adapter-alias": replace_authoritative_once(
-                direct_assignment,
-                "        self.map_clear_percentage_timer.reset()\n"
-                "        semantic_adapter = adapter\n",
-            ),
-            "dead-adapter-assignment": replace_authoritative_once(
-                direct_assignment,
-                "        self.map_clear_percentage_timer.reset()\n"
-                "        if False:\n"
-                "            semantic_adapter = getattr(\n"
-                "                self.device, 'semantic_adapter', None)\n",
-            ),
+                "other_adapter.campaign_fleet_preparation_required()"),
             "wrong-authorize-receiver": replace_authoritative_once(
                 "semantic_adapter.authorize_campaign_fleet_preparation(",
-                "adapter.authorize_campaign_fleet_preparation(",
-            ),
-            "wrong-authorize-method": replace_authoritative_once(
-                "authorize_campaign_fleet_preparation(",
-                "authorize_campaign_fleets(",
-            ),
-            "moved-after-confirm": moved_after_confirm,
+                "other_adapter.authorize_campaign_fleet_preparation("),
+            "authorization-result-ignored": replace_authoritative_once(
+                "                            if fleet_authorized:\n",
+                "                            if True:\n"),
+            "moved-after-confirm": replace_authoritative_once(
+                guarded + confirm, confirm + guarded),
             "sibling-unconditional": replace_authoritative_once(
-                confirm,
-                "                                self.fleet_preparation()\n" + confirm,
-            ),
-            "getattr-unconditional": replace_authoritative_once(
-                confirm,
-                "                                getattr(\n"
-                "                                    self, 'fleet_preparation')()\n"
-                + confirm,
-            ),
-            "alias-unconditional": replace_authoritative_once(
-                confirm,
-                "                                prepare = self.fleet_preparation\n"
-                "                                prepare()\n" + confirm,
-            ),
-            "lambda-wrapper": replace_authoritative_once(
-                confirm,
-                "                                prepare = (\n"
-                "                                    lambda: self.fleet_preparation())\n"
-                "                                prepare()\n" + confirm,
-            ),
-            **unchanged_branch_attacks,
-            "class-level-wrapper-call": class_wrapper,
-            "module-level-wrapper-call": module_wrapper,
-            "split-getattr-name": replace_authoritative_once(
-                semantic_log,
-                "                    getattr(\n"
-                "                        self, 'fleet_' + 'preparation')()\n"
-                + semantic_log,
-            ),
-            "dunder-dict": replace_authoritative_once(
-                semantic_log,
-                "                    self.__dict__['fleet_preparation']()\n"
-                + semantic_log,
-            ),
-            "dunder-getattribute": replace_authoritative_once(
-                semantic_log,
-                "                    self.__getattribute__(\n"
-                "                        'fleet_preparation')()\n" + semantic_log,
-            ),
-            "decorated-wrapper-call": decorated_wrapper,
-            "callable-object": callable_wrapper,
-            "added-call-before-authorized": replace_authoritative_once(
-                semantic_log,
-                "                    self.unreviewed_before()\n" + semantic_log,
-            ),
-            "added-call-after-authorized": replace_authoritative_once(
-                branch_tail,
-                branch_tail + "                    self.unreviewed_after()\n",
-            ),
-            "downstream-missing": replace_authoritative_once(
-                "                                self.handle_auto_search_setting()\n",
-                "",
-            ),
-            "rollback-stale-frame": replace_authoritative_once(
-                "                                    self.enter_map_cancel("
-                "skip_first_screenshot=False)\n",
-                "                                    self.enter_map_cancel()\n",
-            ),
+                confirm, "                                self.fleet_preparation()\n" + confirm),
+            "negative-arm-call": replace_authoritative_once(
+                guarded,
+                "                                if semantic_adapter.campaign_fleet_preparation_required():\n"
+                "                                    pass\n"
+                "                                else:\n"
+                "                                    self.fleet_preparation()\n"),
+            "missing-confirmation": replace_authoritative_once(confirm, ""),
         }
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory).resolve()
@@ -1314,25 +1151,8 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             for label, source in variants.items():
                 with self.subTest(label=label):
                     write_materialized_map_operation(root, source)
-                    try:
+                    with self.assertRaisesRegex(RuntimeError, MATERIALIZED_ALAS_UNPROVEN):
                         _materialized_alas_proof(root)
-                    except RuntimeError as exc:
-                        self.assertRegex(str(exc), MATERIALIZED_ALAS_UNPROVEN)
-                    else:
-                        self.fail(f"unsupported materialized drift admitted: {label}")
-
-            for label, source in compatible_drift.items():
-                with self.subTest(label=label):
-                    target = write_materialized_map_operation(root, source)
-                    proof = _materialized_alas_proof(root)
-                    self.assertEqual(
-                        proof["canonical_source_sha256"],
-                        hashlib.sha256(target.read_bytes()).hexdigest(),
-                    )
-                    self.assertEqual(
-                        proof["semantic_branch_sha256"],
-                        MATERIALIZED_ALAS_SEMANTIC_BRANCH_SHA256,
-                    )
 
     def test_materialized_guard_rejects_before_adb_temp_job_or_worker(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -1388,7 +1208,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             run_id = uuid.uuid4().hex
             binding = RunBinding(
                 run_id=run_id,
-                token_digest=hashlib.sha256(TEST_TOKEN).hexdigest(),
                 task="EventSp",
                 stage="SP",
                 event="event_20260813_cn",
@@ -1424,9 +1243,9 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                 record,
                 synthetic_execution_budgets(),
             )
-            control.bind_activation_token(TEST_TOKEN, verified=True)
+            control.mark_activated()
             environment = {
-                MATERIALIZED_ALAS_CONTROL_ENV: json.dumps(
+                "ALAS_EVENT_RUNNER_INTERNAL_MATERIALIZATION": json.dumps(
                     record, separators=(",", ":"), sort_keys=True
                 )
             }
@@ -1437,21 +1256,17 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             )
             self.assertEqual(verified.proof, proof)
             self.assertEqual(verified.source, target.read_bytes())
-            tampered = dict(record)
-            tampered["proof"] = {
-                **proof,
-                "canonical_source_sha256": "0" * 64,
-            }
-            with self.assertRaisesRegex(RuntimeError, MATERIALIZED_ALAS_UNPROVEN):
+            self.assertEqual(
+                _worker_materialization_admission({}, control=control, args=args).proof,
+                proof,
+            )
+            self.assertEqual(
                 _worker_materialization_admission(
-                    {
-                        MATERIALIZED_ALAS_CONTROL_ENV: json.dumps(
-                            tampered, separators=(",", ":"), sort_keys=True
-                        )
-                    },
-                    control=control,
-                    args=args,
-                )
+                    {"ALAS_EVENT_RUNNER_INTERNAL_MATERIALIZATION": "obsolete duplicate"},
+                    control=control, args=args,
+                ).proof,
+                proof,
+            )
 
             target.write_text(
                 MATERIALIZED_MAP_OPERATION_STALE, encoding="utf-8", newline="\n"
@@ -1461,70 +1276,13 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                     environment, control=control, args=args
                 )
 
-    def test_verified_loader_ignores_replaced_source_and_timestamp_valid_pyc(self):
+    def test_standard_import_keeps_compatible_source_drift_and_checks_origin(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory).resolve()
-            config_root = root / "config"
-            config_root.mkdir()
             target = write_materialized_map_operation(root)
-            proof = _materialized_alas_proof(root)
-            run_id = uuid.uuid4().hex
-            binding = RunBinding(
-                run_id=run_id,
-                token_digest=hashlib.sha256(TEST_TOKEN).hexdigest(),
-                task="EventSp",
-                stage="SP",
-                event="event_20260813_cn",
-                deadline_seconds=120,
-                parent_pid=1,
-                parent_identity="1:1",
-                worker_pid=2,
-                config_path=config_root
-                / ("_codex_event_live_eventsp_" + run_id + ".json"),
-                control_path=root / "control.json",
-                result_path=root / "result.json",
-                cleanup_path=root / "cleanup.json",
-                lease_path=root / "lease.json",
-            )
-            record = _materialization_control_record(
-                proof,
-                run_id=run_id,
-                task="EventSp",
-                stage="SP",
-                event="event_20260813_cn",
-                deadline_seconds=120,
-                parent_pid=1,
-                alas_root=root,
-            )
-            control = WorkerControl(
-                binding,
-                synthetic_ownership(binding),
-                synthetic_seed_source(binding),
-                "emulator-5580",
-                2703,
-                (),
-                WorkerHandles(100, 101, 102, 103, 104, 105),
-                record,
-                synthetic_execution_budgets(),
-            )
-            control.bind_activation_token(TEST_TOKEN, verified=True)
-            verified = _worker_materialization_admission(
-                {
-                    MATERIALIZED_ALAS_CONTROL_ENV: json.dumps(
-                        record, separators=(",", ":"), sort_keys=True
-                    )
-                },
-                control=control,
-                args=self.event_sp_args(alas_root=root),
-            )
-            importer = _install_verified_map_operation_importer(verified)
-            malicious = b"LOADED_FROM_DRIFT = True\n"
-            malicious += b"#" * (len(verified.source) - len(malicious))
-            target.write_bytes(malicious)
-            pyc = Path(importlib.util.cache_from_source(str(target)))
-            pyc.parent.mkdir(exist_ok=True)
-            py_compile.compile(str(target), cfile=str(pyc), doraise=True)
-            self.assertTrue(pyc.is_file())
+            admitted = _read_materialized_source_audit(root, classification=MATERIALIZED_ALAS_UNPROVEN)
+            original_meta_path = tuple(sys.meta_path)
+            target.write_text(MATERIALIZED_MAP_OPERATION_POSITIVE + "\n# compatible edit\n", encoding="utf-8")
 
             class Timer:
                 def __init__(self, *_args, **_kwargs):
@@ -1578,19 +1336,23 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                 sys.modules.pop(MATERIALIZED_ALAS_MODULE_NAME, None)
                 with patch.dict(sys.modules, modules, clear=False):
                     loaded = importlib.import_module(MATERIALIZED_ALAS_MODULE_NAME)
-                    self.assertFalse(hasattr(loaded, "LOADED_FROM_DRIFT"))
-                    receipt = _confirm_verified_map_operation_loaded(importer)
-                    self.assertEqual(receipt, loaded_materialization(proof))
+                    receipt = _inspect_loaded_map_operation(admitted)
+                    self.assertEqual(tuple(sys.meta_path), original_meta_path)
+                    self.assertNotEqual(receipt["proof"], admitted.proof)
+                    self.assertEqual(receipt, loaded_materialization(_materialized_alas_proof(root)))
+                    self.assertEqual(_validate_loaded_materialized_alas(
+                        receipt, expected_proof=admitted.proof), receipt)
                     reloaded = importlib.reload(loaded)
-                    self.assertIs(reloaded.__loader__, importer)
-                    receipt = _confirm_verified_map_operation_loaded(importer)
-                    self.assertEqual(
-                        receipt, loaded_materialization(proof, load_count=2)
-                    )
+                    self.assertIs(reloaded, loaded)
+                    self.assertEqual(_inspect_loaded_map_operation(admitted), receipt)
+                    with patch.object(loaded, "__file__", str(root / "config/template.json")):
+                        with self.assertRaisesRegex(RuntimeError, MATERIALIZED_ALAS_CHANGED):
+                            _inspect_loaded_map_operation(admitted)
+                    target.write_text(MATERIALIZED_MAP_OPERATION_STALE, encoding="utf-8")
+                    with self.assertRaisesRegex(RuntimeError, MATERIALIZED_ALAS_CHANGED):
+                        _inspect_loaded_map_operation(admitted)
             finally:
                 sys.modules.pop(MATERIALIZED_ALAS_MODULE_NAME, None)
-                if importer in sys.meta_path:
-                    sys.meta_path.remove(importer)
 
     def test_materialization_check_is_inside_total_deadline_and_before_side_effects(
         self,
@@ -1725,7 +1487,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             run_id = uuid.uuid4().hex
             binding = RunBinding(
                 run_id=run_id,
-                token_digest=hashlib.sha256(TEST_TOKEN).hexdigest(),
                 task="EventSp",
                 stage="SP",
                 event="event_20260813_cn",
@@ -2039,7 +1800,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             }
             binding = RunBinding(
                 run_id=run_id,
-                token_digest=hashlib.sha256(TEST_TOKEN).hexdigest(),
                 task="EventSp",
                 stage="SP",
                 event="event_20260813_cn",
@@ -2182,7 +1942,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                     {
                         "schema": WORKER_CLEANUP_SCHEMA,
                         "binding": binding,
-                        "binding_digest": binding_digest(control_object.binding),
                         "cleanup": cleanup,
                     },
                 )
@@ -2224,9 +1983,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                             {
                                 "schema": WORKER_RESULT_SCHEMA,
                                 "binding": binding,
-                                "binding_digest": binding_digest(
-                                    control_object.binding
-                                ),
                                 "terminal_kind": "completed",
                                 "result": payload,
                             },
@@ -2289,7 +2045,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             run_id = uuid.uuid4().hex
             binding = RunBinding(
                 run_id=run_id,
-                token_digest=hashlib.sha256(TEST_TOKEN).hexdigest(),
                 task="EventSp",
                 stage="SP",
                 event="event_20260813_cn",
@@ -2325,7 +2080,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                     minimal, control, self._supervisor_args(root), {}
                 )
             mutations = {
-                "token_digest": "0" * 64,
                 "task": "EventB",
                 "stage": "sp",
                 "event": "event_other",
@@ -2352,7 +2106,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                             {
                                 "schema": WORKER_RESULT_SCHEMA,
                                 "binding": wrong,
-                                "binding_digest": binding_digest(binding),
                                 "terminal_kind": "completed",
                                 "result": {},
                             },
@@ -2957,7 +2710,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                         {
                             "schema": WORKER_CLEANUP_SCHEMA,
                             "binding": binding,
-                            "binding_digest": binding_digest(control_object.binding),
                             "cleanup": cleanup,
                         },
                     )
@@ -2975,7 +2727,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                         {
                             "schema": WORKER_RESULT_SCHEMA,
                             "binding": binding,
-                            "binding_digest": binding_digest(control_object.binding),
                             "terminal_kind": "completed",
                             "result": "scalar",
                         },
@@ -3927,7 +3678,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             run_id = uuid.uuid4().hex
             binding = RunBinding(
                 run_id=run_id,
-                token_digest=hashlib.sha256(TEST_TOKEN).hexdigest(),
                 task="EventSp",
                 stage="SP",
                 event="event_20260813_cn",
@@ -4131,7 +3881,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             run_id = uuid.uuid4().hex
             binding = RunBinding(
                 run_id=run_id,
-                token_digest=hashlib.sha256(TEST_TOKEN).hexdigest(),
                 task="EventSp",
                 stage="SP",
                 event="event_20260813_cn",
@@ -4207,7 +3956,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             run_id = uuid.uuid4().hex
             binding = RunBinding(
                 run_id=run_id,
-                token_digest=hashlib.sha256(TEST_TOKEN).hexdigest(),
                 task="EventSp",
                 stage="SP",
                 event="event_20260813_cn",
@@ -4252,7 +4000,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                 {
                     "schema": WORKER_CLEANUP_SCHEMA,
                     "binding": binding.to_mapping(),
-                    "binding_digest": binding_digest(binding),
                     "cleanup": cleanup,
                 },
             )
@@ -4284,7 +4031,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                     {
                         "schema": WORKER_RESULT_SCHEMA,
                         "binding": binding.to_mapping(),
-                        "binding_digest": binding_digest(binding),
                         "terminal_kind": "completed",
                         "result": {
                             "run_error": _public_error(
@@ -4403,17 +4149,10 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             for token_form in token_forms:
                 self.assertNotIn(token_form, joined)
 
-    def test_final_receipt_redacts_secret_from_finalization_failure(self):
-        token_forms = (
-            TEST_TOKEN.decode("ascii"),
-            TEST_TOKEN.hex(),
-            TEST_TOKEN.hex().upper(),
-            base64.b64encode(TEST_TOKEN).decode("ascii"),
-            base64.urlsafe_b64encode(TEST_TOKEN).decode("ascii").rstrip("="),
-        )
+    def test_final_receipt_preserves_public_run_metadata_and_cleanup_failure(self):
+        run_note = "public-run-correlation"
 
         def fake_impl(_args, *, _ownership, **_kwargs):
-            _ownership.activation_token = TEST_TOKEN
             return {
                 "schema": "alas-headless.event-task-live-validation/v1",
                 "passed": False,
@@ -4428,14 +4167,14 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                         "details": {},
                     }
                 },
-                "leak_probe": list(token_forms),
+                "run_note": run_note,
             }
 
         finalization_errors = [
             {
                 "item": "job_close",
                 "type": "RuntimeError",
-                "message": "finalizer-" + token_forms[2],
+                "message": "finalizer failed",
             }
         ]
         args = self.event_sp_args()
@@ -4468,9 +4207,10 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
         serialized = stdout.getvalue() + stderr.getvalue()
         result = json.loads(stdout.getvalue())
         self.assertEqual(result["execution_state"], "unknown")
-        for token_form in token_forms:
-            self.assertNotIn(token_form, serialized)
-        self.assertIn("[redacted-secret]", serialized)
+        self.assertEqual(result["run_note"], run_note)
+        self.assertFalse(result["passed"])
+        self.assertIn("job_close", serialized)
+        self.assertNotIn("[redacted-secret]", serialized)
 
     def test_parent_accepts_bound_fatal_without_inventing_execution(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -4478,7 +4218,6 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             run_id = uuid.uuid4().hex
             binding = RunBinding(
                 run_id=run_id,
-                token_digest=hashlib.sha256(TEST_TOKEN).hexdigest(),
                 task="EventSp",
                 stage="SP",
                 event="event_20260813_cn",

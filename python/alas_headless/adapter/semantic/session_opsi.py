@@ -21,6 +21,15 @@ from .contracts import _OperationSirenGlobeSwipeIntent
 class SessionOpsiPorts:
     """Session opsi on the shared immutable frame."""
 
+    def operation_siren_map_swipe_owned(self):
+        return self.open().operation_siren_map_swipe_owned()
+
+    def begin_operation_siren_map_swipe_vector(self,vector,**options):
+        return self.open().begin_operation_siren_map_swipe_vector(vector,**options)
+
+    def end_operation_siren_map_swipe_vector(self,intent):
+        self.open().end_operation_siren_map_swipe_vector(intent)
+
     def operation_siren_shop_items(self):
         for attempt in range(8):
             try:
@@ -97,6 +106,9 @@ class SessionOpsiPorts:
 
     def operation_siren_state(self) -> OperationSirenState:
         return self.open().operation_siren_state()
+
+    def operation_siren_map_geometry(self, zone_name: str, *, rows: int, columns: int):
+        return self.open().operation_siren_map_geometry(zone_name, rows=rows, columns=columns)
 
     def operation_siren_mission_entry_available(self) -> bool:
         return self.open().operation_siren_mission_entry_available()
@@ -281,15 +293,17 @@ class SessionOpsiPorts:
 
     def click_operation_siren_reward_close(self) -> ActionReceipt:
         self.refresh_frame()
-        return self.open().click_operation_siren_reward_close()
+        adapter = self.open()
+        with adapter.prepared_input_frame(adapter._require_frame_observation_oracle):
+            return adapter.click_operation_siren_reward_close()
 
     def try_click_operation_siren_reward_close(self) -> Optional[ActionReceipt]:
         """Atomically re-observe and close, or accept a passive unmount."""
 
         self.refresh_frame()
-        if not self.open().operation_siren_reward_visible():
-            return None
-        return self.open().click_operation_siren_reward_close()
+        adapter = self.open()
+        with adapter.prepared_input_frame(adapter._require_frame_observation_oracle):
+            return adapter.try_click_operation_siren_reward_close()
 
     def operation_siren_radar_targets(
         self, target_kind: str
@@ -341,10 +355,12 @@ class SessionOpsiPorts:
         relative_position: Tuple[int, int],
         *,
         prefer_adjacent_event: bool = False,
+        fleet_relative: bool = False,
     ) -> ActionReceipt:
         return self.open().click_operation_siren_relative_grid(
             relative_position,
             prefer_adjacent_event=prefer_adjacent_event,
+            fleet_relative=fleet_relative,
         )
 
     def operation_siren_daemon_move_allowed(self) -> bool:
@@ -371,6 +387,9 @@ class SessionOpsiPorts:
     ) -> ActionReceipt:
         return self.open().click_operation_siren_fleet_selector(fleet_index)
 
+    def click_operation_siren_globe_zone_enter(self, expected_zone_name=None) -> ActionReceipt:
+        return self.open().click_operation_siren_globe_zone_enter(expected_zone_name)
+
     def operation_siren_map_visible(self) -> bool:
         return self.open().operation_siren_map_visible()
 
@@ -381,7 +400,13 @@ class SessionOpsiPorts:
         return self.open().operation_siren_globe_visible()
 
     def operation_siren_globe_unpin(self) -> OperationSirenGlobeSwipeReceipt:
-        return self.open().operation_siren_globe_unpin()
+        # Native globe focusing reads the pinned zone and its projection first.
+        # That work can outlive its entry screenshot. Reacquire the input lease;
+        # the live oracle still owns path proof, the one drag and its postcondition.
+        self.refresh_frame()
+        adapter = self.open()
+        return adapter.operation_siren_globe_unpin(
+            precondition_oracle=adapter._require_frame_observation_oracle())
 
     def operation_siren_storage_visible(self) -> bool:
         return self.open().operation_siren_storage_visible()
@@ -402,7 +427,7 @@ class SessionOpsiPorts:
 
     def operation_siren_storage_scroll_for_abyssal(
         self,
-    ) -> OperationSirenStorageScrollReceipt:
+    ) -> Optional[OperationSirenStorageScrollReceipt]:
         return self.open().operation_siren_storage_scroll_for_abyssal()
 
     def click_operation_siren_storage_back(self) -> ActionReceipt:
@@ -436,6 +461,30 @@ class SessionOpsiPorts:
         self,
     ) -> Optional[ActionReceipt]:
         return self.open().try_click_operation_siren_map_exit_confirm()
+
+    def operation_siren_globe_port_projection(self, zone_id: int):
+        return self.open().operation_siren_globe_port_projection(zone_id)
+
+    def operation_siren_globe_drag_owned(self, start, end):
+        return self.open().operation_siren_globe_drag_owned(start,end)
+
+    def operation_siren_globe_drag_candidate(self, start, end, *, box):
+        return self.open().operation_siren_globe_drag_candidate(start, end, box=box)
+
+    def operation_siren_globe_map_projection(self, area_pos):
+        return self.open().operation_siren_globe_map_projection(area_pos)
+
+    def click_operation_siren_globe_map_zone(self, expected_zone_name, area_pos):
+        # Native projection/focus follows a swipe or a passive wait. Refresh
+        # its input lease before recomputing the full current zone proof;
+        # never dispatch from the invalidated navigation screenshot.
+        self.refresh_frame()
+        return self.open().click_operation_siren_globe_map_zone(expected_zone_name, area_pos)
+
+    def click_operation_siren_globe_port(self, expected_zone_name: str, zone_id: int, *, native_mask=False) -> ActionReceipt:
+        if native_mask:
+            return self.open().click_operation_siren_globe_port(expected_zone_name, zone_id, native_mask=True)
+        return self.open().click_operation_siren_globe_port(expected_zone_name, zone_id)
 
     def click_operation_siren_globe_zone(
         self, expected_zone_name: str, point: Tuple[float, float]
@@ -496,7 +545,9 @@ class SessionOpsiPorts:
         self, use: bool
     ) -> ActionReceipt:
         self.refresh_frame()
-        receipt = self.open().click_operation_siren_action_point_control(use)
+        adapter = self.open()
+        with adapter.prepared_input_frame(adapter._require_frame_observation_oracle):
+            receipt = adapter.click_operation_siren_action_point_control(use)
         if use:
             self.refresh_frame()
             return receipt
@@ -507,11 +558,8 @@ class SessionOpsiPorts:
             if not adapter.operation_siren_action_point_visible():
                 if adapter.oracle.operation_siren_local_map_visible():
                     return receipt
-                try:
-                    adapter.oracle.operation_siren_globe_state()
+                if adapter.oracle.operation_siren_globe_visible():
                     return receipt
-                except SemanticGateClosed:
-                    pass
         raise SemanticGateClosed("operation siren action point panel did not close")
 
     def operation_siren_action_point_use_allowed(self) -> bool:

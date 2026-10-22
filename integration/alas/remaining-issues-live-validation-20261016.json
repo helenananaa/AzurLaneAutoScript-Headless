@@ -1,0 +1,384 @@
+{
+  "schema": "alas-headless.remaining-issues-live-validation/v1",
+  "created_at": "2026-10-16T12:07:19.433131+00:00",
+  "base_commit": "bb9708ae87b9b88adffba7f46283b3e279541ab0",
+  "runtime_sources_sha256": {
+    "python/alas_headless/adapter/semantic/campaign.py": "041a2d73d28f674fb38ebba1cd9cc74f8bbaa7100aeed16d476c3bebe3be3da7",
+    "python/alas_headless/adapter/semantic/campaign_preparation.py": "9342703bcbb74d20b1d7e6428946526dc74b526c28f5ee66fa6b2da11d0d2348",
+    "python/alas_headless/adapter/semantic/dispatch_observation.py": "71bb3fe7a9659990874a87abae1d6e078cf1dcf238037cc8d2b628800611de9e",
+    "python/alas_headless/adapter/semantic/research.py": "bc85e1006aeec4f328c34b257877e28f2f1e14f933ec50afe115648d84db62b6",
+    "python/alas_headless/adapter/semantic/session_dispatch.py": "afd9f7bc9403bab1a72f715a6348dbebf2adad5063e3072e28ef3b4d52bfe106",
+    "python/alas_headless/adapter/semantic/session_tasks.py": "82b2e81f0a2c2c8b2dea03919ea013a82e8f8e9424c828862bb947fdfe3f4d4a",
+    "python/alas_headless/oracle/actions.py": "f95d047712baf5bb5343ab5ce8cfda5c142f4a9ed8301cf47dd90b1fcf39d696",
+    "python/alas_headless/oracle/campaign_navigation.py": "8b7ba15592b65fb6e7b893322b836b53352c056f77f08680848e2419b1f33af9",
+    "python/alas_headless/oracle/research.py": "5be1df4f350a64c8a8f2aaba7889f1e4165d5dbb41f8c9f5b3a8405260f5acd4"
+  },
+  "test_source_sha256": "e7a7e74a9ede4df623555ac9086b9e619f83926906bd3f133f2540ee7ae27ce5",
+  "serial": "emulator-5554",
+  "avd": "alas_game_api32_x64",
+  "cold_start": {
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "unity_extra": "-force-gfx-st",
+    "observed_am_start_launch_state": "COLD"
+  },
+  "game_version": "9.7.398",
+  "pid": 1984,
+  "observer_apk_sha256": "a70a3cba50df617b2ed06cd8b34923048de64ef4a33e00670dff5c66299e5ad6",
+  "account_name_unchanged": true,
+  "support_status_promoted": false,
+  "confirmed_defect": "Session result-owner and existing single-refresh fallback consumed a later live oracle instead of the screenshot frame. Controlled original native execute replay exits before the result screenshot on old code; fixed code waits for the actual result frame.",
+  "fix_scope": "Two observation oracle selections; original ALAS loops, state machines, timers, scheduling, input guards and recovery remain intact.",
+  "before_fix_regressions": {
+    "tests": 13,
+    "errors": 0,
+    "failures": 13,
+    "skipped": 0
+  },
+  "final_focused_regressions": {
+    "tests": 358,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "patch_series_check": {
+    "byte_count": 905644,
+    "combined_sha256": "3f8ba2642c587b1133def00cd59b8130bb63b15be17af0001d504d64e130cdef",
+    "generated_path": "integration/alas/0001-semantic-oracle-hooks.patch",
+    "member_count": 214,
+    "schema": "alas-headless.alas-patch-series-check/v1",
+    "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
+  },
+  "support_matrix_configuration_verified": true,
+  "runs": [
+    {
+      "passed": true,
+      "stage": "3-4",
+      "native_completed_runs": 2,
+      "native_continue_successes": 1,
+      "sortie_grants_spent": 2,
+      "completion_proofs": [
+        {
+          "stage_code": "3-4",
+          "result_generation": 5043,
+          "result_path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit",
+          "fleet1_role": "mob",
+          "fleet2_role": "boss",
+          "waited_seconds": 208.015,
+          "combat_auto_generation": 5008,
+          "result_exit_receipt": null,
+          "combat_auto_proven": true,
+          "passive_after_sortie": true
+        },
+        {
+          "stage_code": "3-4",
+          "result_generation": 7811,
+          "result_path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit",
+          "fleet1_role": "mob",
+          "fleet2_role": "boss",
+          "waited_seconds": 217.5,
+          "combat_auto_generation": 7756,
+          "result_exit_receipt": null,
+          "combat_auto_proven": true,
+          "passive_after_sortie": true
+        }
+      ],
+      "continue_receipts": [
+        {
+          "semantic_id": "reward/campaign-total/go",
+          "generation": 5158,
+          "point": {
+            "x": 916.067,
+            "y": 625.593
+          },
+          "bounds": {
+            "left": 838.813,
+            "top": 596.13,
+            "right": 993.32,
+            "bottom": 655.057
+          },
+          "path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonGO",
+          "policy_sha256": "19e12a1cefe9d3a79439e8e887261875800661d9c27e07bd6a5bc4b6e5976f12",
+          "capability_id": "campaign.sortie"
+        }
+      ],
+      "final_exit": {
+        "semantic_id": "reward/campaign-total/exit",
+        "generation": 7880,
+        "point": {
+          "x": 376.527,
+          "y": 625.793
+        },
+        "bounds": {
+          "left": 298.53,
+          "top": 597.287,
+          "right": 454.523,
+          "bottom": 654.3
+        },
+        "path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      "after_exit": {
+        "pid": 1984,
+        "generation": 7914,
+        "main_visible": false,
+        "commission_back": false,
+        "campaign_stage_visible": true
+      },
+      "actual_positive_probes_replayed": [
+        {
+          "resource": "BATTLE_STATUS_S",
+          "generation": 3349,
+          "result_roots": [
+            "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)"
+          ],
+          "replayed_true": true,
+          "inputs": 0
+        },
+        {
+          "resource": "BATTLE_STATUS_S",
+          "generation": 3892,
+          "result_roots": [
+            "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)"
+          ],
+          "replayed_true": true,
+          "inputs": 0
+        },
+        {
+          "resource": "BATTLE_STATUS_S",
+          "generation": 4385,
+          "result_roots": [
+            "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)"
+          ],
+          "replayed_true": true,
+          "inputs": 0
+        },
+        {
+          "resource": "BATTLE_STATUS_S",
+          "generation": 4982,
+          "result_roots": [
+            "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)"
+          ],
+          "replayed_true": true,
+          "inputs": 0
+        },
+        {
+          "resource": "BATTLE_STATUS_S",
+          "generation": 5632,
+          "result_roots": [
+            "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)"
+          ],
+          "replayed_true": true,
+          "inputs": 0
+        },
+        {
+          "resource": "BATTLE_STATUS_S",
+          "generation": 6103,
+          "result_roots": [
+            "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)"
+          ],
+          "replayed_true": true,
+          "inputs": 0
+        },
+        {
+          "resource": "BATTLE_STATUS_S",
+          "generation": 6622,
+          "result_roots": [
+            "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)"
+          ],
+          "replayed_true": true,
+          "inputs": 0
+        },
+        {
+          "resource": "BATTLE_STATUS_S",
+          "generation": 7163,
+          "result_roots": [
+            "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)"
+          ],
+          "replayed_true": true,
+          "inputs": 0
+        },
+        {
+          "resource": "BATTLE_STATUS_S",
+          "generation": 7725,
+          "result_roots": [
+            "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)"
+          ],
+          "replayed_true": true,
+          "inputs": 0
+        }
+      ],
+      "final_RunCount": 0,
+      "temporary_config_removed": true,
+      "cleanup_errors": []
+    },
+    {
+      "passed": true,
+      "stage": "12-4",
+      "native_completed_runs": 1,
+      "native_continue_successes": 0,
+      "sortie_grants_spent": 1,
+      "completion_proofs": [
+        {
+          "stage_code": "12-4",
+          "result_generation": 13514,
+          "result_path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit",
+          "fleet1_role": "mob",
+          "fleet2_role": "boss",
+          "waited_seconds": 513.828,
+          "combat_auto_generation": 13483,
+          "result_exit_receipt": null,
+          "combat_auto_proven": true,
+          "passive_after_sortie": true
+        }
+      ],
+      "continue_receipts": [],
+      "final_exit": {
+        "semantic_id": "reward/campaign-total/exit",
+        "generation": 13592,
+        "point": {
+          "x": 376.527,
+          "y": 625.793
+        },
+        "bounds": {
+          "left": 298.53,
+          "top": 597.287,
+          "right": 454.523,
+          "bottom": 654.3
+        },
+        "path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      "after_exit": {
+        "pid": 1984,
+        "generation": 13628,
+        "main_visible": false,
+        "commission_back": false,
+        "campaign_stage_visible": true
+      },
+      "actual_positive_probes_replayed": [
+        {
+          "resource": "BATTLE_STATUS_S",
+          "generation": 9606,
+          "result_roots": [
+            "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)"
+          ],
+          "replayed_true": true,
+          "inputs": 0
+        },
+        {
+          "resource": "BATTLE_STATUS_S",
+          "generation": 10241,
+          "result_roots": [
+            "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)"
+          ],
+          "replayed_true": true,
+          "inputs": 0
+        },
+        {
+          "resource": "BATTLE_STATUS_S",
+          "generation": 10833,
+          "result_roots": [
+            "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)"
+          ],
+          "replayed_true": true,
+          "inputs": 0
+        },
+        {
+          "resource": "BATTLE_STATUS_S",
+          "generation": 11411,
+          "result_roots": [
+            "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)"
+          ],
+          "replayed_true": true,
+          "inputs": 0
+        },
+        {
+          "resource": "BATTLE_STATUS_S",
+          "generation": 11944,
+          "result_roots": [
+            "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)"
+          ],
+          "replayed_true": true,
+          "inputs": 0
+        },
+        {
+          "resource": "BATTLE_STATUS_S",
+          "generation": 12521,
+          "result_roots": [
+            "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)"
+          ],
+          "replayed_true": true,
+          "inputs": 0
+        },
+        {
+          "resource": "BATTLE_STATUS_S",
+          "generation": 13456,
+          "result_roots": [
+            "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)"
+          ],
+          "replayed_true": true,
+          "inputs": 0
+        }
+      ],
+      "final_RunCount": 0,
+      "temporary_config_removed": true,
+      "cleanup_errors": []
+    }
+  ],
+  "final_native_return_to_main": {
+    "passed": true,
+    "input_dispatch_count": 2,
+    "action_ids": [
+      "campaign-menu/page/back",
+      "campaign-menu/page/back"
+    ]
+  },
+  "resources": {
+    "before": {
+      "oil": 7291,
+      "gold": 9401,
+      "gem": 3470
+    },
+    "after": {
+      "oil": 6186,
+      "gold": 11791,
+      "gem": 3470
+    },
+    "net_change": {
+      "oil": -1105,
+      "gold": 2390,
+      "gem": 0
+    },
+    "actual_sorties": 3,
+    "scope": "Net wallet observations include ordinary combat gains/costs; required_oil reserve is not measured spend."
+  },
+  "retained_initial_login_failure": {
+    "receipt": "login-r1.json",
+    "error": "ALAS virtual resource has no active semantic flow: GAME_ROOM_CHECK",
+    "reentry": "Original LoginHandler and native UI retry reached Main in login-r2.json; the initial unmounted transition frame was not retained, so no specific fix is claimed."
+  },
+  "historical_timeout_scope": "The old r6 timeout lacks its exact positive decision frame. This reproducible cross-frame defect is fixed, but the historical single incident cannot be conclusively attributed to it. Subsequent bounded success is not a soak or universal reliability proof.",
+  "remaining_limits": [
+    "Single account/configuration/local x86_64/game version only.",
+    "No forced live Image valid-to-null mutation or extreme fractional target; their prior controlled tests remain the evidence.",
+    "No support-matrix promotion, rollback execution, ARM64 or clean Android image build qualification."
+  ],
+  "source_receipts_sha256": {
+    "artifacts/adapter-remaining-live-20261016/preflight.json": "e945fe36d1eae28df772a6405e239110ac23b5e9ece89738db84954af7032f26",
+    "artifacts/adapter-remaining-live-20261016/login-r2.json": "6f349a290a84a0fd69de43860a5df9ab538a40e449efefe45946b042f5c03b92",
+    "artifacts/adapter-remaining-live-20261016/frame-regression-before-r2.xml": "b557a33d20afcfb24d3c7039bc1942c2a248dabe8362d4145d40cee7d161553c",
+    "artifacts/adapter-remaining-live-20261016/focused-final.xml": "95d9c92a25afadbeb5703d46c261cd1735b38df7ce3f4ec93185f4fcdfdad2a4",
+    "artifacts/adapter-remaining-live-20261016/main-3-4-r1.json": "e4cb23cdca9d092d3095779f6b86163188a987aa5ef6e08c70a9b21cd67018a3",
+    "artifacts/adapter-remaining-live-20261016/main-3-4-r1-instrumentation.json": "127e281d694cf067a0534f41e0988e1041219573c8dca5231f7e81f3d53340f1",
+    "artifacts/adapter-remaining-live-20261016/main-12-4-r1.json": "0d7ab95b814291e75b34ccd7f857756fb31b52ec37751f75f476bc4408348954",
+    "artifacts/adapter-remaining-live-20261016/main-12-4-r1-instrumentation.json": "c8099415f8e4db410c4cd181c5c620a4b50011677b465a896d3cba445bf0b13c",
+    "artifacts/adapter-remaining-live-20261016/patch-series-check.json": "4a214050e80a50fd020be0aafb3ebd65a374de2cb42752e668d51fa881be52b9",
+    "artifacts/adapter-remaining-live-20261016/support-matrix-check.json": "d9a483b657d8d7b9c6eb66a6cf9913e8824c105ce44b2e221bac12b05a6ca00b",
+    "artifacts/adapter-remaining-live-20261016/wallet-after.json": "3809e058a1ce3d333bc13291f0d7dea9810ea5bc25c0623905f7cbfa4fdf13f6",
+    "artifacts/adapter-remaining-live-20261016/return-main.json": "b0bdd238e9a1dad86bc245683ca91c4405f2602a5e1afcc56d24bdc59a663bc0",
+    "artifacts/adapter-remaining-live-20261016/login-r1.json": "4365e9bb46d466e274c0a15f9a581a737fd33c015935fb70e2ce0ad7e72263f0"
+  },
+  "curation_script_sha256": "dc29c20c81fba8d6916d975aabca904e39669c4ebd8a200204e8166a62b68dc1"
+}

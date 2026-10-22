@@ -1,0 +1,46 @@
+{
+  "schema": "alas-headless.main-task-live-validation/v1",
+  "passed": true,
+  "started_at": "2026-09-06T07:16:12.850400Z",
+  "finished_at": "2026-09-06T07:23:53.726508Z",
+  "task": "Main",
+  "stage": "12-4",
+  "event": "campaign_main",
+  "mode": "normal",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "scheduler_command": "Main",
+  "run_result": true,
+  "run_count_before": 1,
+  "run_count_after": 0,
+  "scheduler_enabled_after": false,
+  "use_auto_search": true,
+  "use_2x_book": true,
+  "fleet_order": "fleet1_mob_fleet2_boss",
+  "auto_search_completion": null,
+  "login_recovery_performed": false,
+  "starting_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "campaign_entry": false,
+    "generation": 39704
+  },
+  "budgets": {
+    "stage_entry": 1,
+    "fleet_mutation": 6,
+    "sortie": 1,
+    "combat": 0,
+    "viewport_swipe": 0
+  },
+  "observer": {
+    "generation": 47111,
+    "scene_handle": -76,
+    "button_count": 21
+  },
+  "final_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "campaign_entry": false
+  },
+  "raw_input_fallback_used": false
+}

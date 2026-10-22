@@ -18,11 +18,35 @@ from .contracts import (
     Point,
     TextState,
 )
-from .errors import SemanticGateClosed
+from .errors import (SemanticCommissionRowIncomplete, SemanticGateClosed,
+                     SemanticNavigationPending)
 
 
 class CommissionOracle:
     """Commission operations sharing the oracle frame and input boundary."""
+
+    def commission_reward_oil_maxed(self) -> bool:
+        """Expose the client's exact commission rejection to native ALAS."""
+        state = self.read_state()
+        targets = self._matches(state, 'reward/commission/finish')
+        if not targets:
+            return False
+        if len(targets) != 1:
+            raise SemanticGateClosed('commission finish owner is ambiguous')
+        if (not targets[0].active_in_hierarchy or not targets[0].active_and_enabled
+                or self._blocking_rules(state, 'reward/commission/finish')):
+            return False
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('commission oil rejection snapshots are incoherent')
+        tips = [t for t in ui.texts if t.path.endswith(
+            'UIOverlay/TipPanel(Clone)/Grid/toolTip(Clone)/Text')
+            and t.active_in_hierarchy and t.active_and_enabled]
+        if any(t.truncated for t in tips):
+            raise SemanticGateClosed('commission oil rejection text is incomplete')
+        messages = [re.sub(r'\s+', '', re.sub(r'<[^>]*>', '', t.text))
+                    for t in tips if t.bounds is not None]
+        return '石油已经达到上限无法领取委托奖励' in messages
 
     def commission_rows(self) -> Tuple[CommissionRowState, ...]:
         """Read visible commission rows without inferring hidden or unknown state.
@@ -45,15 +69,16 @@ class CommissionOracle:
             raise SemanticGateClosed("commission page identity is not proven")
 
         row_pattern = re.compile(
-            r"(?:^|/)EventUI\(Clone\)/scrollRect\$/content/([0-9]+)/bgNormal\$$"
+            r"(?:^|/)EventUI\(Clone\)/scrollRect\$/content/([0-9]+)/(?:bgNormal|bgEmergence)\$$"
         )
         indexed_buttons: Dict[int, ButtonState] = {}
         row_roots: Dict[int, str] = {}
         for button in button_state.buttons:
-            if button.name != "bgNormal$":
+            if button.name not in ("bgNormal$", "bgEmergence$"):
                 continue
             match = row_pattern.search(button.path)
-            if match is None or not button.active_in_hierarchy:
+            if (match is None or not button.path.endswith("/" + button.name)
+                    or not button.active_in_hierarchy):
                 continue
             index = int(match.group(1))
             if index in indexed_buttons:
@@ -61,7 +86,7 @@ class CommissionOracle:
                     "commission row Button index is ambiguous: {0}".format(index)
                 )
             indexed_buttons[index] = button
-            row_roots[index] = button.path[: -len("/bgNormal$")]
+            row_roots[index] = button.path[: -(len(button.name) + 1)]
 
         if not indexed_buttons:
             if self.commission_is_empty():
@@ -106,6 +131,8 @@ class CommissionOracle:
                 and item.bounds is not None
             )
             if len(matches) != 1:
+                if not matches and path.endswith('/iconType$'):
+                    raise SemanticCommissionRowIncomplete(path, ui_state.generation)
                 raise SemanticGateClosed(
                     "commission row image is absent or ambiguous: " + path
                 )
@@ -116,6 +143,7 @@ class CommissionOracle:
             # exercised on the pinned CN 9.7.10 build. New sprites remain closed.
             "kongxian_bg": CommissionStatus.PENDING,
             "tag_ongoing": CommissionStatus.RUNNING,
+            "tag_finish": CommissionStatus.FINISHED,
         }
         rows = []
         for index in sorted(indexed_buttons):
@@ -130,7 +158,6 @@ class CommissionOracle:
             root = row_roots[index]
             name = exact_text(root + "/labelName$").text.strip()
             level_text = exact_text(root + "/level/labelLv$").text.strip()
-            duration_text = exact_text(root + "/labelTime$/Text").text.strip()
             status_matches = tuple(
                 item
                 for item in ui_state.images
@@ -138,6 +165,7 @@ class CommissionOracle:
                 in (
                     root + "/iconState$/0",
                     root + "/iconState$/1",
+                    root + "/iconState$/2",
                 )
                 and item.active_in_hierarchy
                 and item.active_and_enabled
@@ -149,7 +177,6 @@ class CommissionOracle:
                     "commission row status image is absent or ambiguous: " + root
                 )
             status_image = status_matches[0]
-            type_image = exact_image(root + "/iconType$")
             if not name or re.fullmatch(r"[0-9]{1,3}", level_text) is None:
                 raise SemanticGateClosed("commission row identity is malformed")
             level = int(level_text)
@@ -162,16 +189,31 @@ class CommissionOracle:
                     "commission row status sprite is not reviewed: "
                     + status_image.sprite
                 ) from exc
-            if not type_image.sprite:
-                raise SemanticGateClosed("commission row type sprite is empty")
+            # A completed row replaces its countdown with tag_finish. That
+            # exact status proves zero remaining time; ALAS filters finished
+            # rows and retains ownership of reward collection and scheduling.
+            duration_seconds = (0 if status == CommissionStatus.FINISHED else
+                self.parse_countdown_seconds(
+                    exact_text(root + "/labelTime$/Text").text.strip()))
+            try:
+                type_image = exact_image(root + "/iconType$")
+            except SemanticCommissionRowIncomplete:
+                # Preserve this row and its known occupancy for native ALAS.
+                # None is an unavailable field, never an inferred genre or an
+                # input authority. Native invalid-row filtering owns exclusion.
+                type_sprite = None
+            else:
+                if not type_image.sprite:
+                    raise SemanticGateClosed("commission row type sprite is empty")
+                type_sprite = type_image.sprite
             rows.append(
                 CommissionRowState(
                     index=index,
                     name=name,
                     level=level,
-                    duration_seconds=self.parse_countdown_seconds(duration_text),
+                    duration_seconds=duration_seconds,
                     status=status,
-                    type_sprite=type_image.sprite,
+                    type_sprite=type_sprite,
                     button=button,
                 )
             )
@@ -279,7 +321,7 @@ class CommissionOracle:
     @staticmethod
     def _commission_row_signatures(
         rows: Sequence[CommissionRowState],
-    ) -> Tuple[Tuple[Union[int, str], ...], ...]:
+    ) -> Tuple[Tuple[Union[int, str, None], ...], ...]:
         # Countdown and lifecycle status can change independently of a
         # gesture.  Neither is evidence that a different row entered the
         # actionable viewport.
@@ -298,6 +340,8 @@ class CommissionOracle:
         target_position: float,
         direction: str,
         timeout_seconds: float = 12.0,
+        *,
+        precondition_oracle=None,
     ) -> Optional[CommissionScrollProof]:
         if direction not in ("top", "next"):
             raise ValueError("commission scroll direction is not supported")
@@ -305,8 +349,9 @@ class CommissionOracle:
             raise ValueError("commission scroll target must be within [0, 1]")
         if self._swipe is None:
             raise SemanticGateClosed("semantic commission swipe backend is unavailable")
-        before = self.commission_scroll_state()
-        before_rows = self.commission_rows()
+        source = precondition_oracle if precondition_oracle is not None else self
+        before = source.commission_scroll_state()
+        before_rows = source.commission_rows()
         before_signatures = self._commission_row_signatures(before_rows)
         if not before.scrollable:
             return None
@@ -343,18 +388,23 @@ class CommissionOracle:
             )
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("game activity changed before commission scroll")
+        # Short drags have returned a fresh unchanged owning list on the
+        # contended headless client. Allow more Unity input frames without
+        # adding another gesture or relaxing the movement postcondition.
+        duration_ms = 1500
         self._swipe(
             int(round(start.x)),
             int(round(start.y)),
             int(round(end.x)),
             int(round(end.y)),
-            500,
+            duration_ms,
         )
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("game activity changed after commission scroll")
 
         deadline = self._monotonic() + timeout_seconds
         last_error: Optional[SemanticGateClosed] = None
+        after = None
         while self._monotonic() < deadline:
             self._sleep(0.25)
             try:
@@ -381,12 +431,34 @@ class CommissionOracle:
                 )
         if last_error is not None:
             raise last_error
+        if (after is not None and after.generation > before.generation
+                and after.handle_path == before.handle_path
+                and abs(after.position - before.position) <= 0.03
+                and len(after_signatures) == len(before_signatures)
+                and all(old[:3] == new[:3]
+                        and (old[3] is None or new[3] is None or old[3] == new[3])
+                        for old, new in zip(before_signatures, after_signatures))):
+            # A missed scrollbar drag must not imply list exhaustion or shut
+            # down unrelated tasks. The existing complete page/row reads prove
+            # the same fresh source; a type Image mounting/unmounting alone is
+            # not a changed viewport. ALAS owns its failure interval/re-entry.
+            raise SemanticNavigationPending(
+                "commission/scroll", {
+                    "direction": direction,
+                    "before_generation": before.generation,
+                    "before_position": before.position,
+                    "after_position": after.position,
+                    "points": (int(round(start.x)), int(round(start.y)),
+                               int(round(end.x)), int(round(end.y)), duration_ms),
+                }, after.generation,
+                "commission scrollbar did not move on the fresh owning list")
         raise SemanticGateClosed("commission scrollbar transition was not proven")
 
-    def commission_scroll_next(self) -> Optional[CommissionScrollProof]:
-        state = self.commission_scroll_state()
+    def commission_scroll_next(self, *, precondition_oracle=None) -> Optional[CommissionScrollProof]:
+        source = precondition_oracle if precondition_oracle is not None else self
+        state = source.commission_scroll_state()
         target = min(1.0, state.position + max(0.25, state.page_fraction * 0.8))
-        proof = self._commission_scroll_to(target, "next")
+        proof = self._commission_scroll_to(target, "next", precondition_oracle=source)
         if (
             proof is not None
             and proof.before_row_signatures == proof.after_row_signatures
@@ -397,16 +469,17 @@ class CommissionOracle:
             return None
         return proof
 
-    def commission_scroll_to_top(self) -> Optional[CommissionScrollProof]:
-        before = self.commission_scroll_state()
-        before_signatures = self._commission_row_signatures(self.commission_rows())
+    def commission_scroll_to_top(self, *, precondition_oracle_factory=None) -> Optional[CommissionScrollProof]:
+        source = precondition_oracle_factory() if precondition_oracle_factory is not None else self
+        before = source.commission_scroll_state()
+        before_signatures = self._commission_row_signatures(source.commission_rows())
         if not before.scrollable or before.at_top:
             return None
 
         after = before
         after_signatures = before_signatures
         for _ in range(6):
-            step = self._commission_scroll_to(0.0, "top")
+            step = self._commission_scroll_to(0.0, "top", precondition_oracle=source)
             if step is None:
                 break
             after = self.commission_scroll_state()
@@ -421,6 +494,7 @@ class CommissionOracle:
                     before_row_signatures=before_signatures,
                     after_row_signatures=after_signatures,
                 )
+            source = precondition_oracle_factory() if precondition_oracle_factory is not None else self
         raise SemanticGateClosed("commission scrollbar did not reach the exact top")
 
     def commission_is_empty(self) -> bool:
@@ -457,12 +531,12 @@ class CommissionOracle:
         if matches:
             row_pattern = re.compile(
                 r"(?:^|/)EventUI\(Clone\)/scrollRect\$/content/([0-9]+)/"
-                r"bgNormal\$$"
+                r"(?:bgNormal|bgEmergence)\$$"
             )
             visible_rows = tuple(
                 button
                 for button in button_state.buttons
-                if button.name == "bgNormal$"
+                if button.name in ("bgNormal$", "bgEmergence$")
                 and row_pattern.search(button.path) is not None
                 and button.actionable
                 and button.point is not None
@@ -483,6 +557,8 @@ class CommissionOracle:
         expected = tuple(expected_signature)
         if len(expected) != 6:
             raise SemanticGateClosed("commission row signature is malformed")
+        if not isinstance(expected[5], str) or not expected[5]:
+            raise SemanticGateClosed("commission row type is unavailable for input")
         rows = self.commission_rows()
         matches = tuple(row for row in rows if row.signature == expected)
         if len(matches) != 1:
@@ -520,6 +596,8 @@ class CommissionOracle:
         expected = tuple(expected_signature)
         if len(expected) != 6 or expected[4] != CommissionStatus.RUNNING.value:
             raise SemanticGateClosed("running commission signature is malformed")
+        if not isinstance(expected[5], str) or not expected[5]:
+            raise SemanticGateClosed("commission row type is unavailable for input")
         rows = self.commission_rows()
         matches = tuple(
             row
@@ -602,6 +680,9 @@ class CommissionOracle:
     def commission_detail_state(self) -> CommissionDetailState:
         """Read the exact selected commission and ship-assignment state."""
 
+        return self._retry_transition_read(self._commission_detail_state_once)
+
+    def _commission_detail_state_once(self) -> CommissionDetailState:
         button_state = self.read_state()
         back = self._unique(button_state, "commission/detail/back")
         recommend = self._unique(button_state, "commission/detail/recommend")
@@ -739,6 +820,86 @@ class CommissionOracle:
             require_assigned_ships=True,
         )
 
+    def commission_start_oil_rejection_generation(
+        self, expected_signature, expected_oil_cost, input_generation
+    ):
+        """Classify a fresh client rejection without authorizing recovery input."""
+        state = self.read_state()
+        ui = self.read_ui_state()
+        tips = tuple(t for t in ui.texts if t.path.endswith(
+            'UIOverlay/TipPanel(Clone)/Grid/toolTip(Clone)/Text')
+            and t.active_in_hierarchy and t.active_and_enabled)
+        messages = tuple(re.sub(r'\s+', '', re.sub(r'<[^>]*>', '', t.text))
+                         for t in tips)
+        if '石油已经达到上限无法接受委托' not in messages:
+            return None
+        if len(tips) != 1 or tips[0].truncated:
+            raise SemanticGateClosed('commission start rejection text is incomplete or ambiguous')
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('commission start rejection snapshots are incoherent')
+        if min(state.generation, ui.generation) <= input_generation:
+            return None
+        pending = self.commission_start_pending_generation(expected_signature, expected_oil_cost)
+        return pending if pending is not None and pending > input_generation else None
+
+    def commission_start_pending_generation(self, expected_signature, expected_oil_cost):
+        """Read the exact healthy pending owner after an unproven start.
+
+        This permits only task-local failure, never success or another input.
+        A missing or changed owner keeps the original uncertainty fatal.
+        """
+        expected = tuple(expected_signature)
+        if len(expected) != 6 or expected[4] != CommissionStatus.PENDING.value:
+            raise SemanticGateClosed('commission pending signature is malformed')
+        state = self.read_state()
+        if self._matches(state, 'commission/page/back'):
+            return None
+        back = self._unique(state, 'commission/detail/back')
+        start = self._unique(state, 'commission/detail/start')
+        if (not back.actionable
+                or not start.active_in_hierarchy or not start.active_and_enabled
+                or not start.interactable or start.point is None or start.bounds is None
+                or start.raycast_top is False
+                or self._blocking_rules(state, 'commission/detail/back')
+                or self._blocking_rules(state, 'commission/detail/start')):
+            raise SemanticGateClosed('pending commission detail is blocked')
+        ui = self.read_ui_state()
+        if (ui.image_truncated or ui.method_mask & 0x8 == 0
+                or not state.generation <= ui.generation <= state.generation + 2):
+            raise SemanticGateClosed('pending commission detail snapshot is incomplete or incoherent')
+        root = 'Overlay/UIMain/blur_panel/scrollItem'
+
+        def active(records, suffix):
+            matches = tuple(item for item in records
+                            if item.path.endswith(root + suffix)
+                            and item.active_in_hierarchy and item.active_and_enabled)
+            if any(item.truncated for item in matches):
+                raise SemanticGateClosed('pending commission detail field is truncated')
+            return matches
+
+        def text(suffix):
+            matches = active(ui.texts, suffix)
+            if len(matches) != 1:
+                raise SemanticGateClosed('pending commission detail text is absent or ambiguous')
+            return re.sub(r'<[^<>]{1,128}>', '', matches[0].text).strip()
+
+        types = active(ui.images, '/iconType$')
+        pending = active(ui.images, '/iconState$/0')
+        if len(types) != 1 or len(pending) != 1:
+            return None
+        if (active(ui.images, '/iconState$/1')
+                or active(ui.texts, '/maskDetail/detailPanel/btn/giveup/text')):
+            return None
+        if (text('/labelName$') != expected[1]
+                or text('/level/labelLv$') != str(expected[2])
+                or self.parse_countdown_seconds(text('/labelTime$/Text')) != expected[3]
+                or types[0].sprite != expected[5]
+                or pending[0].sprite != 'kongxian_bg'
+                or text('/maskDetail/detailPanel/btn/start/text') != '开始'
+                or text('/maskDetail/detailPanel/consume/Text') != str(expected_oil_cost)):
+            raise SemanticGateClosed('pending commission detail identity changed')
+        return state.generation
+
     def commission_start_transition(
         self, expected_signature: Sequence[Union[int, str]]
     ) -> CommissionStartProof:
@@ -850,8 +1011,8 @@ class CommissionOracle:
         row_buttons = tuple(
             button
             for button in button_state.buttons
-            if button.name == "bgNormal$"
-            and button.path.endswith(root + "/bgNormal$")
+            if button.name in ("bgNormal$", "bgEmergence$")
+            and button.path.endswith(root + "/" + button.name)
             and button.active_in_hierarchy
         )
         if len(row_buttons) != 1:
@@ -927,6 +1088,11 @@ class CommissionOracle:
         )
 
     def commission_start_prompt_cost(self) -> Optional[int]:
+        # Rebind the whole button/text sandwich after an opening animation;
+        # its original snapshot may have different modal button geometry.
+        return self._retry_transition_read(self._commission_start_prompt_cost_once)
+
+    def _commission_start_prompt_cost_once(self) -> Optional[int]:
         state = self.read_state()
         parts = self._msgbox_prompt_parts(state)
         if parts is None:

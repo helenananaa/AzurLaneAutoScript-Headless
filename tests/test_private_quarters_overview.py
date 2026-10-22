@@ -1,0 +1,414 @@
+from types import SimpleNamespace
+import pytest
+from alas_headless import AlasSemanticAdapter, SemanticGateClosed
+from alas_headless.oracle.private_quarters import ROOT
+from tests.semantic_support.observer_fixtures import FakeBackend, make_button, make_text, make_ui, make_oracle, make_image
+
+
+def backend(count='3/3', raycast=True):
+    b = FakeBackend([make_button('btn_back', ROOT+'Main/btn_back'),
+                     make_button('home', ROOT+'Main/option/home', raycast_top=raycast)])
+    b.ui = make_ui([make_text(count, ROOT+'Main/stamina/Text'),
+                   make_text('PRIVATE QUARTERS', ROOT+'Main/title/Text/en'),
+                   make_text('locale with additive content', ROOT+'Main/btn_switch/switch/currentName')])
+    return b
+
+
+def test_native_loft_seek_uses_visible_floor_not_localized_title():
+    b = backend()
+    b.buttons['buttons'].append(make_button('Xinzexi', ROOT+'Map/floor_2/Xinzexi'))
+    b.buttons['button_count'] += 1
+    a = AlasSemanticAdapter(make_oracle(b), package_gate=lambda: None)
+    assert a.appear(SimpleNamespace(name='PRIVATE_QUARTERS_PAGE_LOCALE_LOFT'))
+    b.buttons['buttons'][-1]['path'] = ROOT+'Map/floor_1/Xinzexi'
+    assert not a.appear(SimpleNamespace(name='PRIVATE_QUARTERS_PAGE_LOCALE_LOFT'))
+    b.buttons['buttons'].append(make_button('Xinzexi', ROOT+'Map/floor_2/Xinzexi'))
+    b.buttons['button_count'] += 1
+    with pytest.raises(SemanticGateClosed, match='ambiguous'):
+        a.appear(SimpleNamespace(name='PRIVATE_QUARTERS_PAGE_LOCALE_LOFT'))
+    assert b.taps == []
+
+
+def test_loading_and_arrived_room_are_distinct_observations():
+    b = backend()
+    o = make_oracle(b)
+    assert not o.private_quarters_loading_visible()
+    assert not o.private_quarters_entry_destination_visible()
+    b = FakeBackend([make_button('Loading(Clone)', 'OverlayCamera/Overlay/UIOverlay/Loading(Clone)')])
+    assert make_oracle(b).private_quarters_loading_visible()
+    b = FakeBackend([make_button('btn_back', 'UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/btn_back')])
+    assert make_oracle(b).private_quarters_entry_destination_visible()
+    assert not make_oracle(b).private_quarters_loading_visible()
+    with pytest.raises(SemanticGateClosed, match='not yet identified'):
+        make_oracle(FakeBackend([])).private_quarters_loading_visible()
+
+
+def test_room_transition_background_is_passive_loading_only_with_exact_identity():
+    path = 'UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/bg/bottom'
+    b = FakeBackend([])
+    b.ui = make_ui([], images=[make_image(path, 'bg_mask')])
+    assert make_oracle(b).private_quarters_loading_visible()
+    b.ui = make_ui([], images=[make_image(path, 'other')])
+    with pytest.raises(SemanticGateClosed, match='not yet identified'):
+        make_oracle(b).private_quarters_loading_visible()
+
+
+@pytest.mark.parametrize('hit,sprite,allowed', [
+    (True, 'timeline_touch_btn', True),
+    (False, 'timeline_touch_btn', False),
+    (True, 'other', False),
+])
+def test_room_timeline_continuation_uses_reviewed_button(hit, sprite, allowed):
+    path = ('UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/ExtraScreen/'
+            'TimelineScreen/TimelineTouch/content/clickTpl')
+    b = FakeBackend([make_button('clickTpl', path, raycast_top=hit)])
+    b.ui = make_ui([], images=[make_image(path, sprite)])
+    o = make_oracle(b)
+    assert not o.private_quarters_loading_visible()
+    if allowed:
+        assert o.click_private_quarters_new_jersey_dialogue().path == path
+        assert len(b.taps) == 1
+    else:
+        with pytest.raises(SemanticGateClosed):
+            o.click_private_quarters_new_jersey_dialogue()
+        assert b.taps == []
+
+
+def test_missing_dialogue_yields_to_original_presence_loop():
+    from alas_headless.oracle.errors import SemanticTargetMissing
+    b = FakeBackend([])
+    with pytest.raises(SemanticTargetMissing):
+        make_oracle(b).click_private_quarters_new_jersey_dialogue()
+    assert b.taps == []
+
+
+def test_repeated_dialogue_acknowledges_only_proven_arrival_after_actual_input():
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    o = FakeOracle()
+    o.observation_target_present = lambda target: False
+    o.private_quarters_room_visible = lambda: True
+    o.enabled = lambda target: True
+    o.read_state = lambda: SimpleNamespace(generation=11)
+    a = AlasSemanticAdapter(o, package_gate=lambda: None)
+    prior = SimpleNamespace(generation=10)
+    a._private_quarters_dialogue_receipt = prior
+    assert a._click_mapped('PRIVATE_QUARTERS_ROOM_SAFE_CLICK_AREA', 'private-quarters/dialogue/continue') is prior
+    assert o.click_calls == []
+    a.reset_task_state()
+    assert a._private_quarters_dialogue_receipt is None
+
+
+def test_nonmax_intimacy_is_read_without_guessing_full_or_unknown_bar():
+    root = 'UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/'
+    b = FakeBackend([make_button('btn_back', root+'btn_back')])
+    b.ui = make_ui([make_text('<color=#ff6698>60</color>/400', root+'top/favor_level/Text')])
+    o = make_oracle(b)
+    assert not o.private_quarters_intimacy_max()
+    for value in ('400/400', '500/400', 'unknown', '0/0'):
+        b.ui['texts'][0]['text'] = value
+        with pytest.raises(SemanticGateClosed):
+            o.private_quarters_intimacy_max()
+    assert b.taps == []
+
+
+@pytest.mark.parametrize('raycast', [True, False, None])
+def test_native_page_navigation_requires_actionable_exact_control(raycast):
+    b = backend()
+    b.buttons['buttons'].append(make_button('left', ROOT+'Main/btn_switch/left', raycast_top=raycast))
+    b.buttons['button_count'] += 1
+    a = AlasSemanticAdapter(make_oracle(b), package_gate=lambda: None)
+    if raycast is True:
+        assert a.click(SimpleNamespace(name='PRIVATE_QUARTERS_PAGE_LEFT')).semantic_id == 'private-quarters/page/left'
+    else:
+        with pytest.raises(SemanticGateClosed):
+            a.click(SimpleNamespace(name='PRIVATE_QUARTERS_PAGE_LEFT'))
+        assert b.taps == []
+
+
+def test_live_area_overlay_wins_over_the_main_underlay():
+    b = FakeBackend([make_button('MainLiveAreaUI(Clone)', 'OverlayCamera/Overlay/UIMain/MainLiveAreaUI(Clone)', raycast_top=None)])
+    a = AlasSemanticAdapter(make_oracle(b), package_gate=lambda: None)
+    assert a.appear(SimpleNamespace(name='DORMMENU_CHECK'))
+    assert not a.appear(SimpleNamespace(name='MAIN_GOTO_CAMPAIGN'))
+
+
+@pytest.mark.parametrize('transition', ['_private_quarters_home_transition_until',
+                                      '_private_quarters_entry_transition_until'])
+@pytest.mark.parametrize('name', ['MAP_PREPARATION', 'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION', 'WITHDRAW'])
+def test_home_transition_allows_passive_preparation_probe_but_not_input(transition, name):
+    import time
+    from alas_headless import AlasSemanticUnmapped
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    oracle = FakeOracle()
+    oracle.operation_siren_world_overview_visible = lambda: False
+    oracle.inherited_campaign_withdraw_control = lambda **kwargs: None
+    a = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    button = SimpleNamespace(name=name)
+    with pytest.raises(AlasSemanticUnmapped):
+        a.appear(button)
+    setattr(a, transition, time.monotonic() + 30)
+    assert not a.appear(button)
+    with pytest.raises(SemanticGateClosed):
+        a.click(button)
+    setattr(a, transition, time.monotonic() - 1)
+    with pytest.raises(AlasSemanticUnmapped):
+        a.appear(button)
+
+
+def test_private_quarters_navigation_probes_preserve_real_notice_and_reward():
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    o = FakeOracle()
+    o.private_quarters_page_visible = lambda: True
+    a = AlasSemanticAdapter(o, package_gate=lambda: None)
+    for name in ('GET_MISSION', 'GET_ITEMS_1', 'MAP_PREPARATION'):
+        assert not a.appear(SimpleNamespace(name=name))
+    o._campaign_urgent_notice_matches = lambda state: True
+    with pytest.raises(SemanticGateClosed, match='urgent commission'):
+        a.appear(SimpleNamespace(name='GET_MISSION'))
+    o.enabled_values['reward/award-info/close'] = True
+    from alas_headless import AlasSemanticUnmapped
+    with pytest.raises(AlasSemanticUnmapped):
+        a.appear(SimpleNamespace(name='GET_ITEMS_1'))
+
+
+def test_overview_optional_popup_probe_requires_unobscured_page():
+    from alas_headless import AlasSemanticUnmapped
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    o = FakeOracle()
+    o.private_quarters_page_visible = lambda: True
+    o.enabled_values['private-quarters/home'] = True
+    a = AlasSemanticAdapter(o, package_gate=lambda: None)
+    button = SimpleNamespace(name='MONTHLY_PASS_NOTICE')
+    assert not a.appear(button)
+    o._blocking_rules = lambda state, semantic_id: [SimpleNamespace(blocker_id='unknown-modal')]
+    with pytest.raises(AlasSemanticUnmapped):
+        a.appear(button)
+
+
+def test_repeated_live_entry_reuses_only_a_real_receipt_at_its_destination():
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    o = FakeOracle()
+    o.observation_target_present = lambda target: target == 'dorm-menu/dorm'
+    o.enabled = lambda target: True
+    o.read_state = lambda: SimpleNamespace(generation=11)
+    a = AlasSemanticAdapter(o, package_gate=lambda: None)
+    prior = SimpleNamespace(generation=10)
+    a._main_live_entry_receipt = prior
+    assert a._click_mapped('MAIN_GOTO_DORMMENU', 'main/live') is prior
+    assert o.click_calls == []
+    a.reset_task_state()
+    assert a._main_live_entry_receipt is None
+
+
+@pytest.mark.parametrize('entry,generation,visible,enabled,ack', [
+    (11, 12, True, True, True), (None, 12, True, True, False),
+    (9, 12, True, True, False), (11, 11, True, True, False),
+    (11, 12, False, True, False), (11, 12, True, False, False),
+])
+def test_fading_main_entry_after_private_quarters_requires_observed_arrival(entry, generation, visible, enabled, ack):
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    from alas_headless.oracle.errors import SemanticTargetMissing
+    o = FakeOracle()
+    o.observation_target_present = lambda target: False
+    o.private_quarters_page_visible = lambda: visible
+    o.enabled = lambda target: enabled
+    o.read_state = lambda: SimpleNamespace(generation=generation)
+    def reject_input(target):
+        raise SemanticTargetMissing('main/live is absent')
+    o.click = reject_input
+    a = AlasSemanticAdapter(o, package_gate=lambda: None)
+    a._main_live_entry_receipt = SimpleNamespace(generation=10)
+    a._private_quarters_entry_receipt = None if entry is None else SimpleNamespace(generation=entry)
+    if ack:
+        assert a._click_mapped('MAIN_GOTO_DORMMENU', 'main/live') is a._private_quarters_entry_receipt
+    else:
+        with pytest.raises(SemanticTargetMissing):
+            a._click_mapped('MAIN_GOTO_DORMMENU', 'main/live')
+
+
+@pytest.mark.parametrize('count,remaining', [('3/3',3),('0/3',0),('2/5',2)])
+def test_real_counter_and_capacity_are_preserved(count, remaining):
+    b = backend(count)
+    b.ui['texts'].append(make_text('new field', ROOT+'Main/new/text'))
+    b.ui['text_count'] += 1
+    o = make_oracle(b)
+    assert o.private_quarters_overview().remaining == remaining
+    a = AlasSemanticAdapter(o, package_gate=lambda: None)
+    assert a.appear(SimpleNamespace(name='PRIVATE_QUARTERS_CHECK'))
+    assert not a.appear(SimpleNamespace(name='FLEET_CHECK'))
+
+
+@pytest.mark.parametrize('count', ['', '0/0', '4/3', '3', 'unknown'])
+def test_unknown_count_is_not_zero(count):
+    b = backend(count)
+    with pytest.raises(SemanticGateClosed, match='malformed'):
+        make_oracle(b).private_quarters_overview()
+    assert b.taps == []
+
+
+@pytest.mark.parametrize('raycast', [False, None])
+def test_home_does_not_accept_unknown_or_blocked_hit(raycast):
+    b = backend(raycast=raycast)
+    with pytest.raises(SemanticGateClosed, match='actionable'):
+        make_oracle(b).click_private_quarters_home()
+    assert b.taps == []
+
+
+def test_home_uses_reviewed_target_and_other_popup_blocks_it():
+    b = backend()
+    assert make_oracle(b).click_private_quarters_home().semantic_id == 'private-quarters/home'
+    assert len(b.taps) == 1
+    b.buttons['buttons'].append(make_button('confirm','root/Msgbox(Clone)/window/button_container/custom_button_1(Clone)'))
+    b.buttons['button_count'] += 1
+    with pytest.raises(SemanticGateClosed, match='actionable'):
+        make_oracle(b).click_private_quarters_home()
+    assert len(b.taps) == 1
+
+
+def test_counter_drift_does_not_disable_independent_home_navigation():
+    b = backend('unknown')
+    o = make_oracle(b)
+    with pytest.raises(SemanticGateClosed, match='malformed'):
+        o.private_quarters_overview()
+    assert o.click_private_quarters_home().semantic_id == 'private-quarters/home'
+
+
+@pytest.mark.parametrize('mode', ['base', 'watch', 'ik'])
+@pytest.mark.parametrize('hit', [True, False, None])
+def test_room_back_alias_requires_exact_hit(hit, mode):
+    path = f'UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/{mode}/btn_back'
+    b = FakeBackend([make_button('btn_back', path, raycast_top=hit)])
+    a = AlasSemanticAdapter(make_oracle(b), package_gate=lambda: None)
+    if hit:
+        assert a.appear(SimpleNamespace(name='PRIVATE_QUARTERS_ROOM_CHECK'))
+        assert a.click(SimpleNamespace(name='PRIVATE_QUARTERS_ROOM_BACK')).path == path
+    else:
+        with pytest.raises(SemanticGateClosed):
+            a.click(SimpleNamespace(name='PRIVATE_QUARTERS_ROOM_BACK'))
+        assert b.taps == []
+
+
+@pytest.mark.parametrize('locked', [True, False])
+def test_room_requires_positive_unlock_state(locked):
+    b = backend()
+    path = ROOT+'Map/floor_2/Xinzexi'
+    b.buttons['buttons'].append(make_button('Xinzexi', path))
+    b.buttons['button_count'] += 1
+    b.ui['images'] = [make_image(path+'/icon', 'room_icon_xinzexi')]
+    if locked:
+        b.ui['images'].append(make_image(path+'/front/lock/Image', 'state_lock'))
+    else:
+        b.ui['texts'].append(make_text('2', path+'/front/complete/favor/Text'))
+        b.ui['text_count'] += 1
+    b.ui['image_count'] = len(b.ui['images'])
+    o = make_oracle(b)
+    assert o.private_quarters_new_jersey_unlocked() is (not locked)
+    if locked:
+        with pytest.raises(SemanticGateClosed, match='locked'):
+            o.click_private_quarters_new_jersey()
+        assert b.taps == []
+    else:
+        assert o.click_private_quarters_new_jersey().path == path
+
+
+@pytest.mark.parametrize('hits,icon,status,locked,allowed', [
+    ((True, False), 'room_icon_xinzexi', 'state_main', False, True),
+    ((True, True), 'room_icon_xinzexi', 'state_main', False, False),
+    ((False, False), 'room_icon_xinzexi', 'state_main', False, False),
+    ((True, None), 'room_icon_xinzexi', 'state_main', False, False),
+    ((True, False), 'room_icon_other', 'state_main', False, False),
+    ((True, False), 'room_icon_xinzexi', 'state_other', False, False),
+    ((True, False), 'room_icon_xinzexi', 'state_main', True, False),
+])
+def test_special_room_requires_unique_real_hit_and_reviewed_identity(hits, icon, status, locked, allowed):
+    b = backend()
+    path = ROOT+'Map/floor_2/Xinzexi_special'
+    b.buttons['buttons'].extend(make_button('Xinzexi_special', path, raycast_top=hit) for hit in hits)
+    b.buttons['button_count'] = len(b.buttons['buttons'])
+    b.ui['images'] = ([make_image(path+'/icon', icon), make_image(path+'/icon', icon),
+                       make_image(path+'/front/complete/tip/main', status),
+                       make_image(path+'/front/complete/tip/main', status)]
+                      + ([make_image(path+'/front/lock/Image', 'state_lock')] if locked else []))
+    b.ui['image_count'] = len(b.ui['images'])
+    o = make_oracle(b)
+    if allowed:
+        assert o.private_quarters_new_jersey_unlocked()
+        assert o.click_private_quarters_new_jersey().path == path
+        assert len(b.taps) == 1
+    else:
+        with pytest.raises(SemanticGateClosed):
+            o.click_private_quarters_new_jersey()
+        assert b.taps == []
+
+
+@pytest.mark.parametrize('speaker,choice,allowed', [('新泽西',False,True),('其他角色',False,False),('新泽西',True,False)])
+def test_dialogue_requires_reviewed_speaker_and_no_choices(speaker, choice, allowed):
+    path = 'OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)'
+    b = FakeBackend([make_button('NewStoryUI(Clone)', path)])
+    b.ui = make_ui([make_text(speaker,path+'/front/dialogue/2/content/name/Text'),
+                   make_text('A greeting',path+'/front/dialogue/2/content')])
+    if choice:
+        b.buttons['buttons'].append(make_button('option', path+'/front/options/1'))
+        b.buttons['button_count'] += 1
+    if allowed:
+        assert make_oracle(b).click_private_quarters_new_jersey_dialogue().semantic_id == 'private-quarters/dialogue/continue'
+        assert len(b.taps) == 1
+    else:
+        with pytest.raises(SemanticGateClosed):
+            make_oracle(b).click_private_quarters_new_jersey_dialogue()
+        with pytest.raises(SemanticGateClosed):
+            make_oracle(b).click('private-quarters/dialogue/continue')
+        assert b.taps == []
+
+
+def test_ik_check_requires_both_controls_and_preserves_unrelated_navigation():
+    root = 'UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/ik/'
+    b = FakeBackend([make_button('btn_back', root+'btn_back'),
+                     make_button('btn_camera', root+'Right/btn_camera')])
+    o = make_oracle(b)
+    a = AlasSemanticAdapter(o, package_gate=lambda: None)
+    assert a.appear(SimpleNamespace(name='PRIVATE_QUARTERS_INTERACT_CHECK'))
+    b.buttons['buttons'].pop()
+    b.buttons['button_count'] -= 1
+    with pytest.raises(SemanticGateClosed, match='incomplete'):
+        o.private_quarters_interact_check_visible()
+    assert o.click_private_quarters_room_back().path == root+'btn_back'
+
+
+def test_touch_identity_drift_rejects_input():
+    root = 'UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/watch/Role/Touch/tpl'
+    b = FakeBackend([make_button('tpl', root)])
+    b.ui = make_ui([make_text('触摸（日光棉岛）',root+'/bg/Text')],
+                   images=[make_image(path=root+'/bg/Image',sprite='icon_touch')])
+    o = make_oracle(b)
+    assert o.private_quarters_interact_visible()
+    assert o.click_private_quarters_interact().path == root
+    b.ui['texts'][0]['text'] = '购买'
+    with pytest.raises(SemanticGateClosed, match='identity'):
+        o.click_private_quarters_interact()
+    assert len(b.taps) == 1
+
+
+
+def test_absent_touch_yields_to_original_presence_loop():
+    from alas_headless.oracle.errors import SemanticTargetMissing
+    b = FakeBackend([])
+    with pytest.raises(SemanticTargetMissing):
+        make_oracle(b).click_private_quarters_interact()
+    assert b.taps == []
+
+
+def test_room_control_identity_distinguishes_views_and_rejects_ambiguity():
+    root = 'UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/'
+    identities = []
+    for path in ('ik/btn_back', 'watch/btn_back', 'base/btn_back'):
+        b = FakeBackend([make_button('btn_back', root+path)])
+        o = make_oracle(b)
+        identities.append(o.private_quarters_room_back_control_identity())
+        assert b.taps == []
+    assert len(set(identities)) == 3
+    b.buttons['buttons'].append(make_button('btn_back', root+'ik/btn_back'))
+    b.buttons['button_count'] += 1
+    with pytest.raises(SemanticGateClosed):
+        make_oracle(b).private_quarters_room_back_control_identity()
+    assert b.taps == []

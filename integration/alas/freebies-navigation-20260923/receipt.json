@@ -1,0 +1,45 @@
+{
+  "schema": "alas-headless.freebies-navigation-continuity/v1",
+  "date": "2026-09-23",
+  "serial": "emulator-5554",
+  "package": "com.bilibili.azurlane",
+  "pid": 18011,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "opsi_daily": {
+    "task_result": true,
+    "finished_total": 0,
+    "only_monthly_boss_observed": true,
+    "next_run": "2026-09-24 00:00:00"
+  },
+  "freebies_full_attempts": [
+    {"run": "r1", "interrupted": true, "blocker": "operation siren exit confirmation", "receipt_written": false},
+    {"run": "r2", "task_result": false, "blocker": "repeated archive entrance after archive page mounted"},
+    {"run": "r3", "task_result": false, "blocker": "gift pack tab became selected before input"}
+  ],
+  "freebies_supply_only": {
+    "task_result": true,
+    "elapsed_seconds": 34.438,
+    "free_weekly_pack_available_precheck": false,
+    "claim_actions": 0,
+    "next_run": "2026-09-24 00:00:00",
+    "temporary_config_removed": true
+  },
+  "freebies_full_r4": {
+    "task_result": true,
+    "elapsed_seconds": 669.125,
+    "battle_pass_reward_available": false,
+    "data_key_text": "300/300",
+    "free_weekly_pack_available_precheck": false,
+    "claim_actions": 0,
+    "next_run": "2026-09-24 00:00:00",
+    "temporary_config_removed": true
+  },
+  "support_promoted": false,
+  "raw_artifact_sha256": {
+    "opsi_daily": "a720276ebe8ec1827759dc7b6be3c273c1be1fdeb4d95f243f9043818695f442",
+    "freebies_r2": "cc9fb8fa1c87923f68ec0826cbad713340c99020ac6e88041aa48667279c0f1a",
+    "freebies_r3": "ace7153639ac4f3b1dc97c4e515eb422744b9c5004dc57c0c2aaf57593c89d27",
+    "supply_only_r1": "02e2efa5b22dfe73dc474a996078eb643f5c281956330b72f7113bfeb05559c8",
+    "freebies_r4": "2a560de95849cb674ea6b5eb33e59b2b0c7e6bd70e9390f6eeb91f9bb550c9d1"
+  }
+}

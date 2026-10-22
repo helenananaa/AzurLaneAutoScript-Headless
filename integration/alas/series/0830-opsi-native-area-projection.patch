@@ -1,0 +1,42 @@
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -201,11 +201,15 @@
+ 
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
++            def project():
++                if 0 <= zone.zone_id <= 7:
++                    return semantic_adapter.operation_siren_globe_port_projection(zone.zone_id)
++                return semantic_adapter.operation_siren_globe_map_projection(zone.area_pos)
+             for _ in range(6):
+-                point = semantic_adapter.operation_siren_globe_port_projection(zone.zone_id)
++                point = project()
+                 if point_in_area((point.x, point.y), area=sight):
+                     self.device.sleep(0.5)
+-                    settled = semantic_adapter.operation_siren_globe_port_projection(zone.zone_id)
++                    settled = project()
+                     if (point_in_area((settled.x, settled.y), area=sight)
+                             and np.linalg.norm((settled.x-point.x, settled.y-point.y)) < 3):
+                         return
+@@ -213,7 +217,7 @@
+                 vector = np.clip(np.array((500.0 - point.x, 420.0 - point.y)), -300, 300)
+                 self.device.swipe_vector(tuple(vector), name=f'GLOBE_SWIPE_{int(vector[0])}_{int(vector[1])}', box=sight)
+                 self.device.sleep(1)
+-                after = semantic_adapter.operation_siren_globe_port_projection(zone.zone_id)
++                after = project()
+                 if np.linalg.norm(np.array((after.x-point.x, after.y-point.y))) < 10:
+                     raise GameStuckError('Semantic globe port did not move after camera swipe')
+             raise GameStuckError('Semantic globe port did not enter the map sight')
+@@ -290,7 +294,10 @@
+             if state is not None:
+                 semantic_adapter.operation_siren_globe_unpin()
+             self.globe_in_sight(zone)
+-            semantic_adapter.click_operation_siren_globe_port(zone.cn, zone.zone_id)
++            if 0 <= zone.zone_id <= 7:
++                semantic_adapter.click_operation_siren_globe_port(zone.cn, zone.zone_id)
++            else:
++                semantic_adapter.click_operation_siren_globe_map_zone(zone.cn, zone.area_pos)
+             logger.attr('Globe_pinned', zone)
+             return
+ 

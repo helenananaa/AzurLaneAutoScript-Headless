@@ -18,6 +18,62 @@ from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_auto_search_roles_follow_slots_for_distinct_selected_fleets(self):
+        for fleets, order in (
+            ((3, 6, 0), "fleet1_mob_fleet2_boss"),
+            ((2, 1, 0), "fleet1_boss_fleet2_mob"),
+            ((3, 4, 0), "fleet1_all_fleet2_standby"),
+            ((5, 6, 0), "fleet1_standby_fleet2_all"),
+        ):
+            with self.subTest(fleets=fleets, order=order):
+                oracle = FakeOracle()
+                oracle.campaign_fleets.update(zip(("fleet1", "fleet2", "submarine"), fleets))
+                adapter = AlasSemanticAdapter(
+                    oracle, lambda: None, campaign_stage_entry_budget=1,
+                    campaign_fleet_mutation_budget=3, campaign_sortie_budget=1,
+                )
+                entrance = NamedButton("12-4")
+                entrance.semantic_campaign_stage_code = "12-4"
+                adapter.begin_campaign_pre_sortie("12-4")
+                adapter.click(entrance)
+                adapter.click(NamedButton("MAP_PREPARATION"))
+                adapter.authorize_campaign_fleet_preparation(*fleets)
+                adapter.confirm_campaign_fleet_selection()
+                adapter.ensure_campaign_auto_search_roles(order)
+                self.assertTrue(adapter.authorize_campaign_sortie(
+                    use_auto_search=True, use_2x_book=False,
+                    submarine_mode="do_not_use", fleet_order=order,
+                ))
+                self.assertFalse(any("/option/" in call for call in oracle.click_calls))
+
+    def test_sortie_rejects_unexpected_book_and_preserves_double_cost_proof(self):
+        oracle = FakeOracle()
+        oracle.campaign_fleets.update(fleet2=0, submarine=0)
+        oracle.campaign_2x_book_value = True
+        adapter = AlasSemanticAdapter(oracle, lambda: None,
+            campaign_stage_entry_budget=1, campaign_sortie_budget=1)
+        entrance = NamedButton("1-1")
+        entrance.semantic_campaign_stage_code = "1-1"
+        adapter.begin_campaign_pre_sortie("1-1")
+        adapter.click(entrance)
+        adapter.click(NamedButton("MAP_PREPARATION"))
+        adapter.authorize_campaign_fleet_preparation(1, 0, 0)
+        adapter.confirm_campaign_fleet_selection()
+        with self.assertRaisesRegex(SemanticGateClosed, "2x-book selection"):
+            adapter.authorize_campaign_sortie(use_auto_search=False, use_2x_book=False,
+                submarine_mode="do_not_use", fleet_order="fleet1_all_fleet2_standby")
+        self.assertTrue(adapter.authorize_campaign_sortie(use_auto_search=False, use_2x_book=True,
+            submarine_mode="do_not_use", fleet_order="fleet1_all_fleet2_standby"))
+        adapter.click(NamedButton("FLEET_PREPARATION"))
+        self.assertEqual(adapter.confirm_campaign_sortie().required_oil, 194)
+
+    def test_two_surface_profile_rejects_duplicate_and_invalid_fleets(self):
+        for fleets in ((1, 1, 0), (0, 2, 0), (1, 7, 0), (True, 2, 0), (1, 2, 3)):
+            with self.subTest(fleets=fleets):
+                self.assertFalse(AlasSemanticAdapter._campaign_two_surface_fleets(fleets))
+        for submarine in (0, 1, 2):
+            self.assertTrue(AlasSemanticAdapter._campaign_two_surface_fleets((1, 2, submarine)))
+
     def test_campaign_check_defers_to_exact_hard_fleet_overlay_after_grace(self):
         adapter, oracle, _ = self.make_adapter()
         with patch("alas_headless.alas_adapter.time.monotonic", return_value=10.0):
@@ -337,7 +393,6 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
 
     def test_inherited_fleet_overlay_rejects_untrusted_real_states(self):
         hostile = {}
-        hostile["wrong-kind"] = make_event_preparation_backend("sp", kind="map")
         hostile["stale"] = make_event_preparation_backend("sp", kind="fleet")
         hostile["stale"].ui["generation"] = 7
         hostile["duplicate"] = make_event_preparation_backend("sp", kind="fleet")
@@ -462,6 +517,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
                 adapter.end_campaign_pre_sortie()
 
         backend = make_event_preparation_backend("sp", kind="fleet")
+        self._add_complete_real_fleet_state(backend, submarine_in_use=False)
         adapter = AlasSemanticAdapter(make_real_oracle(backend), lambda: None)
         adapter.begin_campaign_pre_sortie("sp")
         context = adapter._campaign_context

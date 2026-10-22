@@ -1,0 +1,71 @@
+diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
+index 4136e33..e6baec3 100644
+--- a/module/campaign/campaign_base.py
++++ b/module/campaign/campaign_base.py
+@@ -228,7 +228,9 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+         if self.map_is_auto_search and semantic_adapter is not None:
+             semantic_stage = semantic_adapter.campaign_pre_sortie_stage_code()
+             proof = semantic_adapter.wait_campaign_auto_search_completion(
+-                semantic_stage
++                semantic_stage,
++                keep_result=(self.config.Campaign_Mode == 'normal' and '-' in semantic_stage),
++                recovery_handler=self._semantic_campaign_retirement_recovery,
+             )
+             logger.attr(
+                 'Semantic_Auto_Search_Result',
+@@ -287,6 +289,16 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+         logger.warning('No boss data found in spawn_data')
+         return 0
+ 
++    def _semantic_campaign_retirement_recovery(self):
++        # The existing ALAS retirement handler owns configuration, retries,
++        # quit and continuation; the observer only detects the interruption.
++        self.device.screenshot()
++        handled = self.handle_retirement()
++        if handled and self.is_in_map():
++            self.device.screenshot()
++            self.handle_auto_search_map_option()
++        return handled
++
+     def auto_search_execute_a_battle(self):
+         logger.hr(f'{self.FUNCTION_NAME_BASE}{self.battle_count}', level=2)
+         self.auto_search_moving()
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+index 660e5f2..9361a5e 100644
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -174,12 +174,14 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+                     and semantic_adapter.campaign_pre_sortie_active()
+                 ):
+                     logger.info('Semantic pre-sortie: scan fleet preparation')
+-                    if semantic_adapter.campaign_dock_full_visible():
++                    if (semantic_adapter.campaign_dock_full_visible()
++                            or semantic_adapter.campaign_retirement_visible()):
+                         # Preserve ALAS's configured one-click-retire versus
+                         # enhancement state machine. The adapter maps only the
+                         # exact labelled non-premium entry choices; dock
+                         # expansion remains unavailable.
+-                        self.handle_retirement()
++                        if self.handle_retirement() and self.is_in_map():
++                            self.handle_auto_search_map_option()
+                         campaign_timer.reset()
+                         fleet_timer.reset()
+                         continue
+diff --git a/module/handler/fast_forward.py b/module/handler/fast_forward.py
+index 5e819b9..58edee5 100644
+--- a/module/handler/fast_forward.py
++++ b/module/handler/fast_forward.py
+@@ -368,6 +368,13 @@ class FastForwardHandler(AutoSearchHandler):
+         if self.appear(AUTO_SEARCH_MENU_CONTINUE, offset=self._auto_search_menu_offset, interval=2):
+             self.map_is_2x_book = self.config.Campaign_Use2xBook
+             self.handle_2x_book_setting(mode='auto')
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if semantic_adapter is not None:
++                semantic_adapter.authorize_campaign_auto_search_continue(
++                    use_2x_book=self.map_is_2x_book,
++                    fleet1=self.config.Fleet_Fleet1, fleet2=self.config.Fleet_Fleet2,
++                    fleet_order=self.config.Fleet_FleetOrder,
++                )
+             if self.appear_then_click(AUTO_SEARCH_MENU_CONTINUE, offset=self._auto_search_menu_offset):
+                 self.interval_reset(AUTO_SEARCH_MENU_CONTINUE)
+             else:

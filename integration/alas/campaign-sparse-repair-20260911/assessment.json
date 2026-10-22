@@ -1,0 +1,48 @@
+{
+  "schema": "alas-headless.campaign-sparse-repair-assessment/v1",
+  "sparse_2_plus_2_combat_passed": true,
+  "two_scout_exchange_and_restore_passed": true,
+  "sparse_repair_controlled_passed": true,
+  "natural_repair_trigger_qualified": false,
+  "natural_probe_battles": 4,
+  "controlled_probe_battles": 1,
+  "controlled_thresholds": [
+    1.0,
+    1.0
+  ],
+  "default_thresholds": [
+    0.3,
+    0.6
+  ],
+  "repair_count_before": 3,
+  "repair_count_after": 2,
+  "hp_before": [
+    0.9528,
+    0.9953,
+    0.0,
+    0.9862,
+    0.9805,
+    0.0
+  ],
+  "hp_after": [
+    1.0,
+    1.0,
+    0.0,
+    1.0,
+    1.0,
+    0.0
+  ],
+  "oil_before": 9561,
+  "oil_after": 9371,
+  "oil_consumed": 190,
+  "final_chapter": true,
+  "limits": [
+    "10-2, fleet1=6 with 2 main and 2 vanguard, fleet2=1",
+    "Default repair thresholds did not trigger within four battles",
+    "Sparse cross-process recovery and other slot combinations remain unqualified"
+  ],
+  "prior_failures": [
+    "Initial top-resumed gate rejected startup",
+    "Scout probe retained weighted HP after restoring config; repaired and retested; stock stayed 3"
+  ]
+}

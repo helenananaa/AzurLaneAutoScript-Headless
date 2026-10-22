@@ -1,0 +1,40 @@
+{
+  "open": {
+    "semantic_id": "main/dock",
+    "generation": 10425,
+    "point": {
+      "x": 248.694,
+      "y": 683.572
+    },
+    "bounds": {
+      "left": 165.721,
+      "top": 650.25,
+      "right": 331.667,
+      "bottom": 716.895
+    },
+    "path": "OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/bottom/frame/dock",
+    "policy_sha256": null,
+    "capability_id": null
+  },
+  "capacity": "929/930",
+  "generation": 10446,
+  "back": {
+    "semantic_id": "dock/page/back",
+    "generation": 10454,
+    "point": {
+      "x": 57.856,
+      "y": 54.099
+    },
+    "bounds": {
+      "left": 0.852,
+      "top": -2.905,
+      "right": 114.86,
+      "bottom": 111.104
+    },
+    "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back",
+    "policy_sha256": null,
+    "capability_id": null
+  },
+  "main": true,
+  "oil": 9783
+}

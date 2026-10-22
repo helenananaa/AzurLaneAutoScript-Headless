@@ -16,6 +16,15 @@ _LEGACY_TASK_CONFIG_SHA256 = (
 # These aliases are intentionally asymmetric.  For example, BACK_ARROW is not
 # mapped to settings/back because ALAS reuses that asset on many unrelated pages.
 DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
+    'PRIVATE_QUARTERS_ROOM_SAFE_CLICK_AREA': 'private-quarters/dialogue/continue',
+    'PRIVATE_QUARTERS_PAGE_LEFT': 'private-quarters/page/left',
+    'PRIVATE_QUARTERS_PAGE_RIGHT': 'private-quarters/page/right',
+    'PRIVATE_QUARTERS_SHIP_NEW_JERSEY': 'private-quarters/room/new-jersey',
+    'PQ_GOTO_MAIN': 'private-quarters/home',
+    'PRIVATE_QUARTERS_INTERACT': 'private-quarters/interact',
+    'PRIVATE_QUARTERS_ROOM_TARGET_CLICK_AREA': 'private-quarters/character/new-jersey',
+    'PRIVATE_QUARTERS_ROOM_BACK': 'private-quarters/room/back',
+    'PRIVATE_QUARTERS_ROOM_CHECK': 'private-quarters/room/back',
     "LOGIN_CHECK": "login/enter",
     "POPUP_CONFIRM_WHITE": "overlay/login-data-expired/confirm",
     "MAIN_GOTO_CAMPAIGN": "main/battle",
@@ -27,6 +36,8 @@ DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
     "CAMPAIGN_MENU_GOTO_EVENT": "campaign-menu/event",
     "SWITCH_20241219_COMBAT": "event/mode/battle",
     "SWITCH_20241219_STORY": "event/mode/story",
+    "MAIN_GOTO_STORAGE": "main/storage",
+    "MAIN_GOTO_STORAGE_WHITE": "main/storage",
     "MAIN_GOTO_BUILD": "main/build",
     "MAIN_GOTO_BUILD_WHITE": "main/build",
     "MAIN_GOTO_GUILD": "main/guild",
@@ -36,6 +47,7 @@ DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
     "MAIN_GOTO_RESHMENU": "main/tech",
     "MAIN_GOTO_RESHMENU_WHITE": "main/tech",
     "DORMMENU_GOTO_ACADEMY": "dorm-menu/academy",
+    "DORMMENU_GOTO_MAIN": "dorm-menu/back",
     "DORMMENU_GOTO_DORM": "dorm-menu/dorm",
     "DORMMENU_GOTO_MEOWFFICER": "dorm-menu/meowfficer",
     "DORMMENU_GOTO_PRIVATE_QUARTERS": "dorm-menu/private-quarters",
@@ -138,6 +150,7 @@ DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
     "SHIPYARD_SERIES_GRID_1_2": "shipyard/series/8",
     "SHIPYARD_SERIES_GRID_2_2": "shipyard/series/9",
     "RESHMENU_GOTO_META": "research-menu/meta",
+    "META_MENU_SYNC": "meta/character/sync",
     "ENTRANCE_1": "research/project/1",
     "ENTRANCE_2": "research/project/2",
     "ENTRANCE_3": "research/project/3",
@@ -164,10 +177,18 @@ DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
     "META_ENTRANCE": "reward/meta/enter",
     "META_CHECK": "meta/page/back",
     "ASH_SHOWDOWN": "meta/page/back",
+    "ASH_QUIT": "meta/category/back",
     "META_MAIN_BEACON_ENTRANCE": "meta/current/open",
     "META_MAIN_DOSSIER_ENTRANCE": "meta/dossier/open",
     "BEACON_LIST": "meta/current/list",
+    "BEACON_REWARD": "meta/current/reward",
+    "DOSSIER_LIST": "meta/dossier/list",
+    "DOSSIER_REWARD_ENTER": "meta/dossier/sync/open",
+    "DOSSIER_REWARD_RECEIVE": "meta/dossier/sync/rewards",
     "META_BEGIN_ENTRANCE": "meta/current/create",
+    "META_AUTO_ATTACK_START": "meta/dossier/auto/start",
+    "META_AUTO_ATTACK_CONFIRM": "meta/dossier/auto/confirm",
+    "META_AUTO_CONFIRM": "meta/dossier/auto/result/confirm",
     "ASH_START": "meta/assist/start",
     "HELP_ENTER": "meta/current/help",
     "HELP_CONFIRM": "meta/help/confirm",
@@ -452,7 +473,9 @@ CAMPAIGN_STRATEGY_FORMATION_RESOURCES: Mapping[str, str] = {
 
 
 CAMPAIGN_STRATEGY_RESOURCES = frozenset(
-    {"STRATEGY_OPENED", *CAMPAIGN_STRATEGY_FORMATION_RESOURCES.keys()}
+    {"STRATEGY_OPENED", *CAMPAIGN_STRATEGY_FORMATION_RESOURCES.keys(),
+     'SUBMARINE_HUNT_ON', 'SUBMARINE_HUNT_OFF', 'SUBMARINE_VIEW_ON', 'SUBMARINE_VIEW_OFF',
+     'SUBMARINE_MOVE_ENTER', 'SUBMARINE_MOVE_CONFIRM', 'SUBMARINE_MOVE_CANCEL'}
 )
 
 
@@ -466,6 +489,20 @@ EVENT_CAMPAIGN_ASIDE_RESOURCES: Mapping[str, str] = {
 
 CAMPAIGN_VIRTUAL_RESOURCES = frozenset(
     {
+        "AUTO_SEARCH_MAP_OPTION_OFF",
+        "AUTO_SEARCH_MAP_OPTION_ON",
+        "WITHDRAW",
+        "CAMPAIGN_WITHDRAW_CONFIRM",
+        "EMERGENCY_REPAIR_AVAILABLE",
+        "EMERGENCY_REPAIR_CONFIRM",
+        "MAP_AMBUSH_EVADE",
+        "MAP_AMBUSH_ATTACK",
+        "FLEET_LOCKED",
+        "FLEET_UNLOCKED",
+        "BOOK_CHECK_PREP",
+        "BOOK_CHECK_AUTO",
+        "FAST_FORWARD_ON",
+        "FAST_FORWARD_OFF",
         "CAMPAIGN_CHECK",
         "CAMPAIGN_MENU_CHECK",
         "CAMPAIGN_MENU_NO_EVENT",
@@ -495,6 +532,23 @@ CAMPAIGN_VIRTUAL_RESOURCES = frozenset(
 
 CAMPAIGN_CLICK_RESOURCES = frozenset(
     {
+        "AUTO_SEARCH_MAP_OPTION_OFF",
+        "EMERGENCY_REPAIR_AVAILABLE",
+        "EMERGENCY_REPAIR_CONFIRM",
+        "WITHDRAW",
+        "CAMPAIGN_WITHDRAW_CONFIRM",
+        'POPUP_CONFIRM_SUBMARINE_MOVE', 'POPUP_CANCEL_SUBMARINE_MOVE',
+        'POPUP_CONFIRM_CAMPAIGN_MAP',
+        "MAP_AMBUSH_EVADE",
+        "MAP_AMBUSH_ATTACK",
+        "FLEET_LOCKED",
+        "FLEET_UNLOCKED",
+        "BOOK_BOX_PREP",
+        "BOOK_BOX_AUTO",
+        "RETIRE_APPEAR_1",
+        "RETIRE_APPEAR_3",
+        "FAST_FORWARD_ON",
+        "FAST_FORWARD_OFF",
         "GOTO_MAIN",
         "BACK_ARROW",
         "MAP_PREPARATION",
@@ -553,10 +607,12 @@ PAGE_VIRTUAL_RESOURCES = frozenset(
         "RESEARCH_CHECK",
         "SHIPYARD_CHECK",
         "TACTICAL_CHECK",
+        "GUILD_CHECK",
         "WAR_ARCHIVES_CHECK",
         "DATA_KEY_COLLECTED",
         "DATA_KEY_COLLECT",
         "BATTLE_PASS_CHECK",
+        "PRIVATE_QUARTERS_CHECK",
         "SHOP_CHECK",
     }
 )
@@ -613,6 +669,7 @@ UI_PAGE_CHECK_RESOURCES = frozenset(
         "RESEARCH_CHECK",
         "SHIPYARD_CHECK",
         "META_CHECK",
+        "META_MENU_CHECK",
         "STORAGE_CHECK",
         "RESHMENU_CHECK",
         "DORMMENU_CHECK",
@@ -637,6 +694,7 @@ UI_PAGE_CHECK_RESOURCES = frozenset(
 
 RESEARCH_VIRTUAL_RESOURCES = frozenset(
     {
+        "RESET_AVAILABLE",
         "QUEUE_CHECK",
         "QUEUE_CLAIM_REWARD",
         "RESEARCH_COST_CHECKER",
@@ -679,6 +737,11 @@ DORM_VIRTUAL_RESOURCES = frozenset(
         "DORM_FEED_CHECK",
         "DORM_FEED_ENTER",
         "DORM_FEED_CANCEL",
+        "DORM_BUY_FOOD_CHECK",
+        "DORM_BUY_FOOD_ENTER",
+        "DORM_BUY_FOOD_CONFIRM",
+        "FOOD_PLUS",
+        "FOOD_MINUS",
         "POPUP_CANCEL",
     }
 )

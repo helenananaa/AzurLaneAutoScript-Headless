@@ -1,0 +1,26 @@
+--- a/module/minigame/new_year_challenge.py
++++ b/module/minigame/new_year_challenge.py
+@@ -68,11 +68,6 @@
+         if semantic_adapter is not None and not semantic_adapter.minigame_play_allowed():
+             logger.info('Minigame play budget is zero, skip spending game tickets')
+             return False
+-        if semantic_adapter is not None:
+-            coin_cost_after_add = semantic_adapter.minigame_prepare_default_ticket()
+-            self.device.screenshot()
+-            logger.info(f"coin cost after add : {coin_cost_after_add}")
+-            return coin_cost_after_add == 1
+         return self.use_coin_new_year_challenge(count=5)
+ 
+     def play_game(self, skip_first_screenshot=True):
+@@ -192,6 +187,11 @@
+                 # add coins
+                 if count > 1:
+                     for i in range(count - 1):
++                        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++                        if semantic_adapter is not None:
++                            selected, owned = semantic_adapter.minigame_ticket_selection()
++                            if selected == 0 or selected >= min(count, owned):
++                                break
+                         self.device.click(NEW_YEAR_CHALLENGE_ADD_COIN)
+                     self.device.screenshot()
+                 # spend no coins for test

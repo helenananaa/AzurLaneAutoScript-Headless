@@ -10,6 +10,7 @@ from alas_headless import (
 )
 from alas_headless.adapter import (
     ACTION_CAPABILITIES,
+    ActionLeaseError,
     ActionLedger,
     DEFAULT_CAPABILITY_INVENTORY,
     RecoveryPolicy,
@@ -143,11 +144,15 @@ class ActionLedgerWiringTests(unittest.TestCase):
         self.assertFalse(adapter.operation_siren_action_point_use_allowed())
         self.assertFalse(adapter.operation_siren_port_repair_allowed())
         self.assertFalse(adapter.operation_siren_daemon_move_allowed())
-        with self.assertRaisesRegex(SemanticGateClosed, "action point use"):
+        # Unlisted capabilities are rejected by the central ledger before
+        # dispatch; there is no task-specific budget guard to supply a label.
+        with self.assertRaises(ActionLeaseError):
             adapter.click_operation_siren_action_point_control(True)
-        with self.assertRaisesRegex(SemanticGateClosed, "port repair"):
+        self.assertEqual(oracle.calls, [])
+        with self.assertRaises(ActionLeaseError):
             adapter.click_operation_siren_port_repair(True)
-        with self.assertRaisesRegex(SemanticGateClosed, "daemon movement"):
+        self.assertEqual(oracle.calls, [])
+        with self.assertRaises(ActionLeaseError):
             adapter.click_operation_siren_daemon_target(target)
         self.assertEqual(oracle.calls, [])
 

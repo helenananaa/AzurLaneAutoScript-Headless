@@ -1,0 +1,70 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 12:22:31.949 │ [Server] cn                                 
+read: ./config\semantic_e2e.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 12:22:31.958 │ Bind task ['General', 'Alas']               
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 12:22:31.960 │ DEVICE                                      
+INFO     2026-09-12 12:22:31.962 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 12:22:31.964 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 12:22:31.967 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 12:22:31.969 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 12:22:31.970 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 12:22:31.973 │ emulator-5580                               
+INFO     2026-09-12 12:22:31.975 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 12:22:31.977 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 12:22:31.982 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 12:22:31.983 │ [Server] cn                                 
+WARNING  2026-09-12 12:22:31.985 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 12:22:31.987 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 12:22:32.035 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 12:22:32.037 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 12:22:32.039 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 12:22:32.040 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 12:22:32.042 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 12:22:32.043 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 12:22:34.257 │ UI get current page                         
+INFO     2026-09-12 12:22:35.836 │ [UI] page_main                              
+INFO     2026-09-12 12:22:35.838 │ Goto page_dormmenu                          
+INFO     2026-09-12 12:22:35.840 │ <<< UI GOTO PAGE_DORMMENU >>>               
+INFO     2026-09-12 12:22:38.648 │ Page switch: page_main -> page_dormmenu     
+INFO     2026-09-12 12:22:39.240 │ Semantic click main/live @                  
+         OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/bottom/fr
+         ame/live                                                              
+INFO     2026-09-12 12:22:47.250 │ Page switch: page_main_white ->             
+         page_dormmenu                                                         
+Traceback (most recent call last):
+  File "<stdin>", line 10, in <module>
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\artifacts\campaign-preparation\upstream\module\ui\ui.py", line 334, in ui_ensure
+    self.ui_goto(destination, skip_first_screenshot=True)
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\artifacts\campaign-preparation\upstream\module\ui\ui.py", line 297, in ui_goto
+    self.device.click(button)
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\artifacts\campaign-preparation\upstream\module\device\control.py", line 57, in click
+    receipt = semantic_adapter.click(button)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\python\alas_headless\adapter\semantic\session_dispatch.py", line 615, in click
+    return self.open().click(button)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\python\alas_headless\adapter\semantic\dispatch.py", line 219, in click
+    result = self._click_mapped(name, semantic_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\python\alas_headless\adapter\semantic\dispatch_actions.py", line 693, in _click_mapped
+    receipt = self.oracle.click(semantic_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\python\alas_headless\oracle\actions.py", line 598, in click
+    raise SemanticGateClosed("semantic target is not actionable")
+alas_headless.oracle.errors.SemanticGateClosed: semantic target is not actionable

@@ -1,0 +1,64 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 11:48:57.119 │ [Server] cn                                 
+read: ./config\_codex_meta_assist_fa1576925e13482abcec2e0e80a9e915.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 11:48:57.143 │ Bind task ['General', 'Alas']               
+read: ./config\_codex_meta_assist_fa1576925e13482abcec2e0e80a9e915.json
+INFO     2026-09-12 11:48:57.148 │ Bind task ['General', 'Alas', 'OpsiGeneral',
+         'OpsiAshAssist']                                                      
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 11:48:57.151 │ DEVICE                                      
+INFO     2026-09-12 11:48:57.152 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 11:48:57.154 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 11:48:57.156 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 11:48:57.157 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 11:48:57.159 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 11:48:57.162 │ emulator-5580                               
+INFO     2026-09-12 11:48:57.164 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 11:48:57.165 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 11:48:57.171 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 11:48:57.172 │ [Server] cn                                 
+WARNING  2026-09-12 11:48:57.174 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 11:48:57.176 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 11:48:57.219 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 11:48:57.221 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 11:48:57.222 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 11:48:57.224 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 11:48:58.024 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 11:48:58.524 │ <<< META BEACON ASSIST >>>                  
+INFO     2026-09-12 11:48:58.526 │ Ensure beacon assist page                   
+INFO     2026-09-12 11:48:58.895 │ In beacon assist page                       
+INFO     2026-09-12 11:49:19.277 │ No enough assist times, complete            
+INFO     2026-09-12 11:49:19.279 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 11:49:19.280 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 11:49:19.282 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 11:49:20.927 │ Already at page_meta                        
+WARNING  2026-09-12 11:49:48.124 │ meta_wait_reward_page timeout               
+INFO     2026-09-12 11:49:49.589 │ No meta sync red dot or sync tap            
+INFO     2026-09-12 11:49:50.289 │ No meta reward red dot                      
+INFO     2026-09-12 11:49:50.291 │ Delay task `OpsiAshAssist` to 2026-09-13    
+         00:00:00 (server_update='00:00')                                      
+read: ./config\_codex_meta_assist_fa1576925e13482abcec2e0e80a9e915.json
+INFO     2026-09-12 11:49:50.298 │ Bind task ['General', 'Alas', 'OpsiGeneral',
+         'OpsiAshAssist']                                                      
+INFO     2026-09-12 11:49:50.301 │ Save config                                 
+         ./config\_codex_meta_assist_fa1576925e13482abcec2e0e80a9e915.json,    
+         OpsiAshAssist.Scheduler.NextRun=datetime.datetime(2026, 9, 13, 0, 0)  
+write: ./config\_codex_meta_assist_fa1576925e13482abcec2e0e80a9e915.json
+passed False attacks 0

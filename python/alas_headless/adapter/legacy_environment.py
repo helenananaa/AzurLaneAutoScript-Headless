@@ -32,6 +32,7 @@ LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES = frozenset(
         "ALAS_SEMANTIC_OPSI_PORT_REPAIR_BUDGET",
         "ALAS_SEMANTIC_OBSERVER_MAX_AGE_MS",
         "ALAS_SEMANTIC_ALLOW_MISSION_CLAIM_ONCE",
+        "ALAS_SEMANTIC_MISSION_CLAIM_BUDGET",
         "ALAS_SEMANTIC_ALLOW_TACTICAL_REWARDS",
         "ALAS_SEMANTIC_AWAKEN_BUDGET",
         "ALAS_SEMANTIC_BUILD_SUBMIT_BUDGET",
@@ -72,6 +73,7 @@ LEGACY_BOOLEAN_GRANTS: Mapping[str, str] = MappingProxyType(
 
 LEGACY_BUDGET_GRANTS: Mapping[str, tuple[str, str]] = MappingProxyType(
     {
+        "ALAS_SEMANTIC_MISSION_CLAIM_BUDGET": ("mission.claim", "mission claim"),
         "ALAS_SEMANTIC_AWAKEN_BUDGET": (
             "awaken.execute",
             "awaken",

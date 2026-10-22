@@ -1,96 +1,96 @@
 {
-  "schema": "alas-headless.pixel-access-inventory/v1",
-  "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af",
-  "combined_patch_sha256": "2d281f8ea1fd76148f42da972b09c111dc38c637bd9d852627c816ec7868b928",
-  "patch_series_manifest_sha256": "8d097c67e2ed6186771a0d20cecfcfda42d9aa26f79aafd1121ff1efe8d0e966",
+  "android_input_injected": false,
+  "combined_patch_sha256": "9f87f0710ecebbc2b3f81c52b5656681530419b749c3fa9b28da98df3d226a5c",
+  "patch_series_manifest_sha256": "810f1452b9d95ae593a2407f60df849de4a27a4cb0b371e2adab2c9595720cbf",
+  "production_ready": false,
   "replay_surfaces": [
     {
-      "id": "login-handler-c04",
-      "evidence": "scripts/python/verify_alas_login_flow_replay.py",
       "classification": "supported-typed",
       "classified_pixel_accesses": 0,
+      "evidence": "scripts/python/verify_alas_login_flow_replay.py",
+      "id": "login-handler-c04",
       "unclassified_pixel_accesses": 0
     },
     {
-      "id": "screenshot-frame-clock-e04",
-      "evidence": "scripts/python/verify_alas_screenshot_frame_clock.py",
       "classification": "supported-typed-stop",
       "classified_pixel_accesses": 0,
+      "evidence": "scripts/python/verify_alas_screenshot_frame_clock.py",
+      "id": "screenshot-frame-clock-e04",
       "unclassified_pixel_accesses": 0
     },
     {
-      "id": "reward-commission-g8",
-      "evidence": "docs/g8-alas-reward-commission-validation-report.md",
       "classification": "supported-typed",
       "classified_pixel_accesses": 0,
+      "evidence": "docs/g8-alas-reward-commission-validation-report.md",
+      "id": "reward-commission-g8",
       "unclassified_pixel_accesses": 0
     },
     {
-      "id": "campaign-decision-g15-g18",
-      "evidence": "docs/g18-alas-goto-input-preview-validation-report.md",
       "classification": "device-free-or-input-intercepted",
       "classified_pixel_accesses": 0,
+      "evidence": "docs/g18-alas-goto-input-preview-validation-report.md",
+      "id": "campaign-decision-g15-g18",
       "unclassified_pixel_accesses": 0
     },
     {
-      "id": "combat-state-g19-g27",
-      "evidence": "docs/g19-alas-combat-state-replay-validation-report.md",
       "classification": "device-free-typed",
       "classified_pixel_accesses": 0,
+      "evidence": "docs/g19-alas-combat-state-replay-validation-report.md",
+      "id": "combat-state-g19-g27",
       "unclassified_pixel_accesses": 0
     },
     {
-      "id": "combat-defensive-g28",
-      "evidence": "integration/alas/combat-defensive-branch-replay-g28.json",
       "classification": "qualification-only-with-classified-stop",
       "classified_pixel_accesses": 1,
+      "evidence": "integration/alas/combat-defensive-branch-replay-g28.json",
+      "id": "combat-defensive-g28",
       "unclassified_pixel_accesses": 0
     },
     {
-      "id": "campaign-camera-g34-g35",
-      "evidence": "docs/g35-natural-goto-camera-validation-report.md",
       "classification": "typed-geometry",
       "classified_pixel_accesses": 0,
+      "evidence": "docs/g35-natural-goto-camera-validation-report.md",
+      "id": "campaign-camera-g34-g35",
       "unclassified_pixel_accesses": 0
     }
   ],
+  "schema": "alas-headless.pixel-access-inventory/v1",
+  "totals": {
+    "adapted_consumers": 0,
+    "classified_pixel_accesses": 1,
+    "excluded_consumers": 0,
+    "replay_surfaces": 7,
+    "triggered_consumers": 2,
+    "unclassified_pixel_accesses": 0,
+    "unsupported_consumers": 2
+  },
   "triggered_consumers": [
     {
+      "capability": "device.night-commission-template",
       "id": "device-night-commission-template",
-      "source": "module/device/device.py",
-      "symbol": "Device.handle_night_commission",
       "needle": "GET_MISSION.match(self.image, offset=True)",
       "operation": "template-access",
       "outcome": "unsupported-capability",
-      "capability": "device.night-commission-template",
+      "reason": "GET_MISSION is not a reviewed typed login observation and the time-gated source branch is reachable",
       "replays": [
         "screenshot-frame-clock-e04"
       ],
-      "reason": "GET_MISSION is not a reviewed typed login observation and the time-gated source branch is reachable"
+      "source": "module/device/device.py",
+      "symbol": "Device.handle_night_commission"
     },
     {
+      "capability": "combat.ambush-info-bar-pixels",
       "id": "combat-ambush-info-bar",
-      "source": "python/alas_headless/alas_combat_branch_replay.py",
-      "symbol": "AmbushHandler.handle_ambush",
       "needle": "image_crop:info_bar",
       "operation": "crop",
       "outcome": "unsupported-capability",
-      "capability": "combat.ambush-info-bar-pixels",
+      "reason": "G28 uses a qualification-only synthetic crop and explicitly does not promote a live mapping",
       "replays": [
         "combat-defensive-g28"
       ],
-      "reason": "G28 uses a qualification-only synthetic crop and explicitly does not promote a live mapping"
+      "source": "python/alas_headless/alas_combat_branch_replay.py",
+      "symbol": "AmbushHandler.handle_ambush"
     }
   ],
-  "totals": {
-    "replay_surfaces": 7,
-    "triggered_consumers": 2,
-    "classified_pixel_accesses": 1,
-    "unclassified_pixel_accesses": 0,
-    "adapted_consumers": 0,
-    "unsupported_consumers": 2,
-    "excluded_consumers": 0
-  },
-  "android_input_injected": false,
-  "production_ready": false
+  "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
 }

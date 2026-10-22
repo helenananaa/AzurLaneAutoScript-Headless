@@ -1,0 +1,14 @@
+diff --git a/module/private_quarters/interact.py b/module/private_quarters/interact.py
+--- a/module/private_quarters/interact.py
++++ b/module/private_quarters/interact.py
+@@ -156,6 +156,10 @@
+         """
+         Callable wrapper for whether is loading or blocked by download asset popup
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (semantic_adapter is not None
++                and semantic_adapter.private_quarters_entry_destination_visible()):
++            return True
+         if self.appear(PRIVATE_QUARTERS_LOADING_CHECK, offset=(20, 20)):
+             return True
+         if self.appear(POPUP_CANCEL, offset=(20, 20)):

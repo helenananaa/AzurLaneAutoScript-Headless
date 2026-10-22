@@ -1,0 +1,68 @@
+{
+  "schema": "alas-headless.main-shared-config-equivalence/v1",
+  "passed": true,
+  "tasks": [
+    "Main",
+    "Main2",
+    "Main3"
+  ],
+  "group_count": 9,
+  "field_count": 54,
+  "panel_field_instance_count": 162,
+  "intentional_template_differences": [
+    "Scheduler.Command"
+  ],
+  "scheduler": {
+    "Main": {
+      "command": "Main",
+      "server_updates": [
+        "00:00"
+      ]
+    },
+    "Main2": {
+      "command": "Main2",
+      "server_updates": [
+        "00:00"
+      ]
+    },
+    "Main3": {
+      "command": "Main3",
+      "server_updates": [
+        "00:00"
+      ]
+    }
+  },
+  "dispatches": {
+    "Main": {
+      "name": "Main-stage",
+      "folder": "campaign_main",
+      "mode": "normal",
+      "config_identity_preserved": true,
+      "device_identity_preserved": true
+    },
+    "Main2": {
+      "name": "Main2-stage",
+      "folder": "campaign_main",
+      "mode": "normal",
+      "config_identity_preserved": true,
+      "device_identity_preserved": true
+    },
+    "Main3": {
+      "name": "Main3-stage",
+      "folder": "campaign_main",
+      "mode": "normal",
+      "config_identity_preserved": true,
+      "device_identity_preserved": true
+    }
+  },
+  "stop_condition_accepted_rows": 60,
+  "stop_condition_rejected_rows": 45,
+  "source_sha256": {
+    "args": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+    "template": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
+    "alas": "f9fb25225d8ff322fc451d6eee52fe1fa1d693e983c0872097877c38d8900354",
+    "run": "b8db067f2ef56858b5c557f1cb0de358163771ae44d5da54c761a9f394d576b5"
+  },
+  "mutation_budget": 0,
+  "android_input_injected": false
+}

@@ -1,0 +1,14 @@
+--- a/module/os_handler/map_event.py
++++ b/module/os_handler/map_event.py
+@@ -135,9 +135,9 @@
+             # that reviewed overlay and keep the current exploration loop.
+             from module.handler.assets import POPUP_CONFIRM
+             if semantic_adapter.appear(POPUP_CONFIRM):
+-                logger.info('Operation Siren network reconnect')
++                logger.info('Operation Siren map confirmation')
+                 self.device.click(POPUP_CONFIRM)
+-                return 'network_reconnect'
++                return 'map_confirmation'
+         if self.handle_map_get_items(drop=drop):
+             return 'map_get_items'
+         if self.handle_os_game_tips():

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from ...semantic_oracle import SemanticGateClosed
+from ...semantic_oracle import SemanticGateClosed, SemanticTargetMissing
 from .contracts import (
     _BattlePassFlowContext,
     _DataKeyFlowContext,
@@ -187,8 +187,49 @@ class RewardsAdapterPorts:
                 )
         if self._supply_pack_context is not None:
             context = self._supply_pack_context
+            if name == "SUPPLY_PACK_CHECK":
+                # The original fallback probes this page check again after
+                # its first negative read. If the tab became selected in
+                # between, there is no navigation left to submit; its next
+                # screenshot owns the page check. Never click a legacy rect.
+                if self.oracle.gift_pack_page_visible():
+                    raise SemanticTargetMissing("gift pack page is already selected")
+                raise SemanticGateClosed("gift pack page check is not an input target")
             if name == "SHOP_GOTO_SUPPLY_PACK":
-                receipt = self.oracle.click_toggle("shop/gift-pack")
+                if self.oracle.gift_pack_page_visible():
+                    raise SemanticTargetMissing("gift pack tab is already selected")
+                try:
+                    receipt = self.oracle.click_toggle("shop/gift-pack")
+                except SemanticGateClosed as exc:
+                    # The tab can become selected between ALAS' presence read
+                    # and its click. The caller retries its page check without
+                    # inventing an input receipt or tapping a checked toggle.
+                    if self.oracle.gift_pack_page_visible():
+                        raise SemanticTargetMissing(
+                            "gift pack tab became selected before input"
+                        ) from None
+                    if str(exc) == "semantic toggle action is blocked":
+                        deadline = time.monotonic() + 3.0
+                        while time.monotonic() < deadline:
+                            state = self.oracle.read_state()
+                            blockers = self.oracle._blocking_rules(
+                                state, "shop/gift-pack")
+                            if not blockers or any(
+                                    rule.blocker_id != "loading" for rule in blockers):
+                                break
+                            time.sleep(0.2)
+                        if self.oracle.gift_pack_page_visible():
+                            raise SemanticTargetMissing(
+                                "gift pack tab became selected before input"
+                            ) from None
+                        if (self.oracle.recommendation_shop_visible()
+                                and not self.oracle._blocking_rules(
+                                    self.oracle.read_state(), "shop/gift-pack")):
+                            receipt = self.oracle.click_toggle("shop/gift-pack")
+                            context.gift_pack_selected = True
+                            context.passive_transition_until = time.monotonic() + 12.0
+                            return receipt
+                    raise
                 context.gift_pack_selected = True
                 context.passive_transition_until = time.monotonic() + 12.0
                 return receipt

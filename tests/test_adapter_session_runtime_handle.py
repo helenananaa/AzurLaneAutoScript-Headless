@@ -1,5 +1,7 @@
 import copy
+from contextlib import nullcontext
 import unittest
+import pytest
 from types import SimpleNamespace
 from unittest import mock
 
@@ -147,6 +149,102 @@ class FrameRuntimeHandle(FakeRuntimeHandle):
 
 
 class SessionRuntimeHandleTests(unittest.TestCase):
+    def test_shared_guild_back_path_does_not_enter_dock_exit_port(self):
+        from tests.semantic_support.observer_fixtures import make_button
+        handle = FrameRuntimeHandle()
+        original_request = handle.observer_request
+        def request(line):
+            value = original_request(line)
+            if line == 'GET /v1/state\n':
+                records = [make_button('back', 'OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back')]
+                value['buttons'].update(buttons=records, button_count=1)
+            return value
+        handle.observer_request = request
+        session = AlasSemanticSession(driver_revision=REVISION, runtime_handle=handle)
+        adapter = session.open()
+        receipt = SimpleNamespace(semantic_id='guild/page/back')
+        adapter.click = mock.Mock(return_value=receipt)
+        adapter.oracle.click_dock_page_back = mock.Mock(side_effect=AssertionError('not Dock'))
+        self.assertIs(session.click('GOTO_MAIN'), receipt)
+        adapter.oracle.click_dock_page_back.assert_not_called()
+        adapter.click.assert_called_once_with('GOTO_MAIN')
+
+    def test_dock_filter_anchor_retains_strict_dock_return_port(self):
+        from tests.semantic_support.observer_fixtures import make_button
+        handle = FrameRuntimeHandle()
+        original_request = handle.observer_request
+        def request(line):
+            value = original_request(line)
+            if line == 'GET /v1/state\n':
+                root = 'OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/'
+                records = [make_button('back', root+'back'), make_button('index_button', root+'index_button')]
+                value['buttons'].update(buttons=records, button_count=2)
+            return value
+        handle.observer_request = request
+        session = AlasSemanticSession(driver_revision=REVISION, runtime_handle=handle)
+        adapter = session.open()
+        receipt = SimpleNamespace(semantic_id='dock/page/back', generation=7)
+        def dock_back():
+            adapter.oracle.read_state = mock.Mock(return_value=SimpleNamespace(generation=8, buttons=()))
+            adapter.oracle.main_page_visible = mock.Mock(return_value=True)
+            return receipt
+        adapter.oracle.click_dock_page_back = mock.Mock(side_effect=dock_back)
+        self.assertIs(session.click('GOTO_MAIN'), receipt)
+        adapter.oracle.click_dock_page_back.assert_called_once_with()
+
+    def test_navigation_preparation_reuses_frame_and_keeps_input_guards(self):
+        from tests.semantic_support.observer_fixtures import make_button
+        for resource in ("CLICK_SAFE_AREA", "GOTO_MAIN"):
+            for condition in ("valid", "foreground", "expired", "duplicate"):
+                with self.subTest(resource=resource, condition=condition):
+                    handle = FrameRuntimeHandle()
+                    original_request = handle.observer_request
+                    # Exercise home now owns a full destination postcondition.
+                    # This case tests generic frame preparation on the exact
+                    # inherited commission return; exercise flow has its own tests.
+                    page = "root/UICamera/Canvas/UIMain/EventUI(Clone)/"
+                    records = ([make_button("close", "root/AwardInfoUI(Clone)/items/close")]
+                               if resource == "CLICK_SAFE_AREA" else [
+                                   make_button("back_btn", page + "blur_panel/adapt/top/back_btn")])
+                    if condition == "duplicate":
+                        records.append(copy.deepcopy(records[0]))
+                    def request(line):
+                        value = original_request(line)
+                        if line == "GET /v1/state\n":
+                            value["buttons"].update(buttons=records, button_count=len(records))
+                        return value
+                    handle.observer_request = request
+                    session = AlasSemanticSession(driver_revision=REVISION, runtime_handle=handle)
+                    adapter = session.open()
+                    original_provider = adapter._require_frame_observation_oracle
+                    def provider():
+                        oracle = original_provider()
+                        if condition == "foreground":
+                            adapter.oracle._foreground_component = lambda: "com.android.launcher/.Launcher"
+                        if condition == "expired":
+                            clock = session._frame_clock
+                            captured = clock.borrow().captured_monotonic_ns
+                            clock._monotonic_ns = lambda: captured + 60_000_000_000
+                        return oracle
+                    with mock.patch.object(adapter, "_require_frame_observation_oracle", side_effect=provider):
+                        if condition == "valid":
+                            session.click(resource)
+                            self.assertEqual(len(handle.taps), 1)
+                            self.assertIsNone(session._frame_clock.current_frame_id)
+                        else:
+                            with self.assertRaises(SemanticGateClosed, msg=(resource, condition)):
+                                session.click(resource)
+                            self.assertEqual(handle.taps, [])
+                    if condition == "valid":
+                        # One immutable state/UI frame is captured. Generic
+                        # navigation may additionally revalidate live Button
+                        # state at its final input boundary, without recapturing UI.
+                        self.assertEqual(handle.requests[:2], ["GET /v1/state\n", "GET /v1/ui\n"], (resource, condition))
+                        self.assertEqual(handle.requests.count("GET /v1/ui\n"), 1,
+                                         (resource, condition, handle.requests))
+                        self.assertTrue(all(line == "GET /v1/state\n"
+                                            for line in handle.requests[2:]))
+
     def test_combat_loading_keeps_exact_precombat_mount_transition_bounded(self):
         session = AlasSemanticSession(
             driver_revision=REVISION,
@@ -161,6 +259,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
             campaign_combat_committed=lambda: True,
             _campaign_context=context,
         )
+        session.adapter._frame_or_live_observation_oracle = lambda: session.adapter.oracle
         error = SemanticGateClosed(
             "combat action control is not exact top-raycast actionable: start"
         )
@@ -227,6 +326,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
             operation_siren_combat_committed=lambda: True,
             _campaign_context=None,
         )
+        session.adapter._frame_or_live_observation_oracle = lambda: session.adapter.oracle
         error = SemanticGateClosed(
             "combat fixture endpoint completeness changed"
         )
@@ -248,6 +348,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         context = SimpleNamespace(passive_transition_until=50.0)
         session.adapter = SimpleNamespace(
             campaign_combat_committed=lambda: True,
+            meta_beacon_active=lambda: False,
             _campaign_context=context,
         )
         receipt = object()
@@ -345,7 +446,13 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         )
         adapter = mock.Mock(spec=AlasSemanticAdapter)
         adapter._require_frame_observation_oracle.return_value = result_oracle
+        adapter._meta_assist_active = False
+        adapter.meta_beacon_active.return_value = False
         adapter._campaign_context = None
+
+        adapter._commission_context = None
+        # This fixture describes the combat result stack, not ItemInfoUI.
+        adapter.oracle.award_info_page_visible.return_value = False
 
         with mock.patch.object(session, "open", return_value=adapter), mock.patch(
             "alas_headless.alas_adapter.time.monotonic",
@@ -392,6 +499,8 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         )
         context = SimpleNamespace(passive_transition_until=0.0)
         session.adapter = SimpleNamespace(
+            _meta_assist_active=False,
+            meta_beacon_active=lambda: False,
             oracle=oracle,
             _frame_or_live_observation_oracle=lambda: oracle,
             campaign_combat_committed=lambda: True,
@@ -420,6 +529,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
             _mail_context=None,
             _minigame_context=None,
             _build_context=object(),
+            _frame_or_live_observation_oracle=lambda: SimpleNamespace(),
             appear=mock.Mock(return_value=True),
         )
         session.adapter = adapter
@@ -448,6 +558,8 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         adapter._require_frame_observation_oracle.return_value = result_oracle
         adapter.campaign_combat_committed.return_value = True
         adapter._campaign_context = SimpleNamespace(passive_transition_until=0.0)
+        adapter._meta_assist_active = False
+        adapter.meta_beacon_active.return_value = False
         session.adapter = adapter
 
         with mock.patch.object(session, "open", return_value=adapter), mock.patch(
@@ -479,9 +591,11 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         )
         session.adapter = SimpleNamespace(
             oracle=oracle,
+            _meta_assist_active=False,
+            meta_beacon_active=lambda: False,
             _frame_or_live_observation_oracle=lambda: oracle,
             campaign_combat_committed=lambda: True,
-            _campaign_context=SimpleNamespace(passive_transition_until=0.0),
+            _campaign_context=SimpleNamespace(passive_transition_until=0.0, submarine_move_confirm=None),
             _login_flow=SimpleNamespace(active=False),
             _mail_context=None,
             _minigame_context=None,
@@ -555,6 +669,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         context = SimpleNamespace(passive_transition_until=0.0)
         session.adapter = SimpleNamespace(
             oracle=oracle,
+            _frame_or_live_observation_oracle=lambda: oracle,
             campaign_combat_committed=lambda: True,
             _campaign_context=context,
             _login_flow=SimpleNamespace(active=False),
@@ -648,6 +763,30 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         self.assertEqual(session._frame_clock.acquire.call_count, 4)
         self.assertEqual(session._combat_result_transition_until, 112.0)
 
+    def test_private_room_wait_retries_only_freshness_during_actual_entry_window(self):
+        for deadline, message, success, calls in (
+            (112.0, 'observer snapshot is stale', True, 4),
+            (90.0, 'observer snapshot is stale', False, 3),
+            (112.0, 'observer PID differs from bound package', False, 1),
+        ):
+            with self.subTest(deadline=deadline, message=message):
+                session = AlasSemanticSession(driver_revision=REVISION, runtime_handle=FakeRuntimeHandle())
+                session.adapter = SimpleNamespace(
+                    _private_quarters_transition_until=deadline,
+                    _login_flow=SimpleNamespace(snapshot=lambda: SimpleNamespace(active=False, passive_transition_until=0.0)),
+                )
+                expected = mock.Mock(generation=82, frame_id='frame-82')
+                session._frame_clock = mock.Mock(current_frame_id='frame-81')
+                session._frame_clock.acquire.side_effect = [SemanticGateClosed(message)] * 3 + [expected]
+                with mock.patch('alas_headless.alas_adapter.time.monotonic', return_value=100.0), \
+                     mock.patch('alas_headless.alas_adapter.time.sleep'):
+                    if success:
+                        self.assertIs(session.refresh_frame(), expected)
+                    else:
+                        with self.assertRaises(SemanticGateClosed):
+                            session.refresh_frame()
+                self.assertEqual(session._frame_clock.acquire.call_count, calls)
+
     def test_combat_automation_switch_is_bound_to_last_exact_state_probe(self):
         session = AlasSemanticSession(
             driver_revision=REVISION,
@@ -736,6 +875,52 @@ class SessionRuntimeHandleTests(unittest.TestCase):
                 "template-access",
                 "Device.handle_night_commission",
             )
+
+    def test_nested_input_preparation_reuses_only_one_fresh_session_frame(self):
+        for condition in ("fresh", "expired", "invalidated"):
+            with self.subTest(condition=condition):
+                handle = FrameRuntimeHandle()
+                session = AlasSemanticSession(driver_revision=REVISION, runtime_handle=handle)
+                adapter = session.open()
+                generations = []
+
+                def nested_click(button):
+                    clock = session._frame_clock
+                    first = clock.borrow()
+                    if condition == "expired":
+                        clock._monotonic_ns = lambda: first.captured_monotonic_ns + 60_000_000_000
+                        handle.generation += 1
+                    elif condition == "invalidated":
+                        clock.invalidate()
+                        handle.generation += 1
+                    generations.append(adapter._fresh_input_oracle().read_state().generation)
+                    return "receipt"
+
+                with mock.patch.object(adapter, "click", side_effect=nested_click), mock.patch.object(
+                    session._frame_clock, "acquire", wraps=session._frame_clock.acquire
+                ) as acquire:
+                    self.assertEqual(session.click("MAIN_GOTO_FLEET"), "receipt")
+                    self.assertEqual(acquire.call_count, 1 if condition == "fresh" else 2)
+                    # No preparation can leak into the next independent action.
+                    adapter._fresh_input_oracle()
+                    self.assertEqual(acquire.call_count, 2 if condition == "fresh" else 3)
+                self.assertEqual(generations, [10 if condition == "fresh" else 11])
+                self.assertIsNone(adapter._prepared_input_oracle)
+                self.assertEqual(handle.taps, [])
+
+    def test_page_scan_common_probes_use_the_frozen_frame(self):
+        handle = FrameRuntimeHandle()
+        session = AlasSemanticSession(driver_revision=REVISION, runtime_handle=handle)
+        session.refresh_frame()
+        adapter = session.open()
+        requests = list(handle.requests)
+        foreground_calls = handle.foreground_calls
+        with mock.patch.object(adapter, "appear", return_value=False):
+            for _ in range(33):
+                self.assertFalse(session.appear("SHOP_CHECK"))
+        self.assertEqual(handle.requests, requests)
+        self.assertEqual(handle.foreground_calls, foreground_calls)
+        self.assertEqual(handle.taps, [])
 
     def test_login_reads_require_refresh_and_reuse_one_frame_acquisition(self):
         handle = FrameRuntimeHandle()
@@ -941,15 +1126,10 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         adapter.begin_login()
         frame = session.refresh_frame()
         frame_clock = session._frame_clock
-        clock_reads = iter(
-            (
-                frame.captured_monotonic_ns,
-                frame.captured_monotonic_ns,
-                frame.captured_monotonic_ns
-                + int((frame_clock._maximum_age_ms + 1) * 1_000_000),
-            )
+        frame_clock._monotonic_ns = lambda: (
+            frame.captured_monotonic_ns
+            + int((frame_clock._maximum_age_ms + 1) * 1_000_000)
         )
-        frame_clock._monotonic_ns = lambda: next(clock_reads)
 
         with self.assertRaises(StaleFrameError):
             adapter.click("LOGIN_CHECK")
@@ -1382,6 +1562,21 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         ):
             self.assertFalse(session.restart_game_after_update())
 
+    def test_login_reconnect_owner_probe_uses_boot_grace_but_expires_closed(self):
+        session = AlasSemanticSession(driver_revision=REVISION,
+                                      runtime_handle=FrameRuntimeHandle())
+        adapter = session.open()
+        adapter.begin_login()
+        failure = SemanticGateClosed('game activity is not top-resumed')
+        with mock.patch.object(adapter.oracle, 'enabled', side_effect=failure):
+            self.assertFalse(session.server_maintenance_visible())
+            self.assertFalse(session.restart_game_after_update())
+            adapter._login_flow._context.passive_transition_until = 0.0
+            with self.assertRaisesRegex(SemanticGateClosed, 'not top-resumed'):
+                session.server_maintenance_visible()
+            with self.assertRaisesRegex(SemanticGateClosed, 'not top-resumed'):
+                session.restart_game_after_update()
+
     def test_update_restart_preflight_uses_coherent_frame_and_process_latch(self):
         session = AlasSemanticSession(
             driver_revision=REVISION,
@@ -1415,6 +1610,66 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         refresh.assert_called_once_with()
         self.assertTrue(live_oracle._login_update_restart_consumed)
 
+    def test_login_retry_action_latches_across_screenshot_frames(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        live_oracle = SimpleNamespace(_login_update_retry_attempted=False)
+        frame_oracle = SimpleNamespace(_login_update_retry_attempted=False)
+        receipt = object()
+
+        def click(_button):
+            frame_oracle._login_update_retry_attempted = True
+            return receipt
+
+        adapter = SimpleNamespace(
+            oracle=live_oracle,
+            _exercise_pending=False,
+            _require_frame_observation_oracle=lambda: frame_oracle,
+            prepared_input_frame=lambda provider: nullcontext(),
+            click=click,
+        )
+        with mock.patch.object(session, "refresh_frame"), mock.patch.object(
+            session, "open", return_value=adapter
+        ):
+            self.assertIs(
+                session.click(SimpleNamespace(name="LOGIN_GAME_UPDATE")), receipt
+            )
+        self.assertTrue(live_oracle._login_update_retry_attempted)
+
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_maintenance_presence_uses_native_screenshot_frame_without_extra_live_reads():
+    handle = FrameRuntimeHandle()
+    session = AlasSemanticSession(driver_revision=REVISION, runtime_handle=handle)
+    try:
+        adapter = session.open()
+        session.refresh_frame()
+        request_count = len(handle.requests)
+        failure = SemanticGateClosed("observer snapshot is stale")
+        with mock.patch.object(adapter._live_oracle, "enabled", side_effect=failure), mock.patch.object(
+            adapter._live_oracle, "server_maintenance_visible", side_effect=failure
+        ):
+            assert session.server_maintenance_visible() is False
+        assert len(handle.requests) == request_count
+        assert handle.taps == []
+    finally:
+        session.close()
+
+
+def test_maintenance_presence_without_native_frame_keeps_live_failure_closed():
+    handle = FrameRuntimeHandle()
+    session = AlasSemanticSession(driver_revision=REVISION, runtime_handle=handle)
+    try:
+        adapter = session.open()
+        failure = SemanticGateClosed("observer snapshot is stale")
+        with mock.patch.object(adapter._live_oracle, "enabled", side_effect=failure):
+            with pytest.raises(SemanticGateClosed, match="snapshot is stale"):
+                session.server_maintenance_visible()
+        assert handle.taps == []
+    finally:
+        session.close()

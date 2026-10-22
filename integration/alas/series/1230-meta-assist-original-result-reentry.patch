@@ -1,0 +1,25 @@
+diff --git a/module/os_ash/meta.py b/module/os_ash/meta.py
+index 5bf9f4081c6d47b1655ba3e85f7b18bf8c6759ef..7dbbedfcb39b8da3cbc8e832bd0318861dfa9fc2 100644
+--- a/module/os_ash/meta.py
++++ b/module/os_ash/meta.py
+@@ -726,10 +726,19 @@
+         if semantic_adapter is not None:
+             semantic_adapter.begin_meta_assist()
+         try:
+-            if semantic_adapter is None or not self._in_meta_assist_page():
++            if semantic_adapter is None or not (
++                    self._in_meta_assist_page() or semantic_adapter.meta_page_visible()
++                    or semantic_adapter.meta_precombat_visible()):
+                 self.ui_ensure(page_reward)
+ 
++            if semantic_adapter is not None and semantic_adapter.meta_precombat_visible():
++                # Resume this task's selected assist using the original combat
++                # loop, as the own-beacon task already does after interruption.
++                self._make_an_attack()
++
+             if self._begin_meta_assist():
++                if semantic_adapter is not None:
++                    semantic_adapter.complete_meta_assist_combat()
+                 MetaReward(self.config, self.device).run()
+                 self.config.task_delay(server_update=True)
+             else:

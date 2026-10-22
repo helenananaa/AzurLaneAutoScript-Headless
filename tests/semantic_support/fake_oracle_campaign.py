@@ -16,6 +16,18 @@ from types import SimpleNamespace
 
 
 class FakeCampaignOracle:
+    def campaign_auto_search_reentry_available(self):
+        return False
+
+    def click_campaign_auto_search_reentry(self):
+        return self.click("reward/campaign-total/go")
+
+    def campaign_dock_full_visible(self, stage_code):
+        return getattr(self, 'dock_full_visible_value', False)
+
+    def campaign_2x_book_selected(self, mode=None):
+        return getattr(self, "campaign_2x_book_value", False)
+
     def campaign_auto_search_selected(self):
         return self.toggle_selected_values.get(
             "campaign/map-preparation/auto-search", False
@@ -30,6 +42,12 @@ class FakeCampaignOracle:
         if not self.event_campaign_page_visible_value:
             raise SemanticTargetMissing("event campaign page is absent")
         return self.campaign_state_value
+
+    def current_raid_event(self):
+        return "raid_20260827"
+
+    def supports_raid_layout(self, event):
+        return event == "raid_20260827"
 
     def raid_page_visible(self, event):
         if event != "raid_20260827":

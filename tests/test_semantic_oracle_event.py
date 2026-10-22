@@ -82,6 +82,9 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         )
         backend.buttons["buttons"].append(underlying)
         backend.buttons["button_count"] += 1
+        # An observer upgrade proving this exact control is the top hit adds
+        # confidence; the old optional-raycast boundary must accept it.
+        backend.buttons["buttons"][0]["raycast_top"] = True
         receipt = oracle.click_war_archives_campaign(
             "war_archives_20190321_en"
         )
@@ -92,8 +95,53 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         self.assertEqual(backend.taps, [(322, 236), (322, 236)])
 
         backend.taps.clear()
-        with self.assertRaisesRegex(SemanticGateClosed, "unavailable"):
+        backend.buttons["buttons"][0]["raycast_top"] = False
+        with self.assertRaisesRegex(SemanticGateClosed, "not actionable"):
+            oracle.click_war_archives_campaign("war_archives_20190321_en")
+        self.assertEqual(backend.taps, [])
+        with self.assertRaisesRegex(SemanticGateClosed, "identity mapping"):
             oracle.click_war_archives_campaign("war_archives_20240725_cn")
+        self.assertEqual(backend.taps, [])
+
+    def test_war_archives_card_edge_pivot_uses_proven_button_interior(self):
+        root = "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)"
+        card = root + "/list/content/item(Clone)/bg/icon"
+        bounds = dict(left=729.367, top=181.287, right=1184.367, bottom=351.287)
+        backend = FakeBackend([
+            make_button("icon", card, x=956.867, y=181.287,
+                        bounds=bounds, raycast_top=None),
+        ])
+        backend.ui = make_ui(
+            [make_text("300/300", root + "/nums/text")],
+            toggles=[
+                make_toggle(root + "/toggles/EX", checked=True, raycast_top=None),
+                make_toggle(root + "/toggles/SP", checked=False, raycast_top=None),
+            ],
+            images=[make_image(card, "temp_hongran", bounds)],
+        )
+        receipt = make_oracle(backend).click_war_archives_campaign(
+            "war_archives_20190321_en"
+        )
+        self.assertEqual(backend.taps, [(957, 266)])
+        self.assertEqual(receipt.point, Point(957, 266))
+        self.assertTrue(receipt.bounds.contains(receipt.point))
+        self.assertLess(round(181.287), bounds["top"])
+
+        # A newer publisher's raycast applies to its actual point, even when
+        # that point differs from the bounds center used for older publishers.
+        target = backend.buttons["buttons"][0]
+        target["raycast_top"] = True
+        target["adb_point"] = dict(x=973, y=264)
+        receipt = make_oracle(backend).click_war_archives_campaign(
+            "war_archives_20190321_en"
+        )
+        self.assertEqual(backend.taps[-1], (973, 264))
+        self.assertEqual(receipt.point, Point(973, 264))
+
+        backend.taps.clear()
+        target["adb_point"] = dict(x=956.867, y=181.287)
+        with self.assertRaisesRegex(SemanticGateClosed, "no interior input point"):
+            make_oracle(backend).click_war_archives_campaign("war_archives_20190321_en")
         self.assertEqual(backend.taps, [])
 
     def test_war_archives_campaign_page_parses_letter_stage_and_key_counter(self):
@@ -142,6 +190,70 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         receipt = oracle.click_campaign_stage("a1")
         self.assertEqual(receipt.semantic_id, "campaign/stage/a1")
         self.assertEqual(backend.taps, [(630, 355)])
+
+    def test_archive_campaign_reuses_known_event_nodes_without_stage_id_allowlist(self):
+        root = "UICamera/Canvas/UIMain/LevelMainScene(Clone)"
+        stage = root + "/LevelSelectSPFullUI(Clone)/Battle/Nodes/Chapter_2200171/main"
+        backend = FakeBackend([
+            make_button("back_button", root + "/top/top_chapter/back_button"),
+            make_button("main", stage, x=259, y=255.734, raycast_top=None),
+            make_button("Chapter_2200171", stage.removesuffix("/main"), raycast_top=None),
+        ])
+        backend.ui = make_ui([
+            make_text("幻梦间奏曲", root + "/top/top_chapter/title_chapter/name"),
+            make_text("300/300", root + "/main/right_chapter/event_btns/tickets/Text"),
+            make_text("T1  ", stage + "/info/bk/title_form/title_index"),
+            make_text("雄狮之章", stage + "/info/bk/title_form/title"),
+        ])
+        oracle = make_oracle(backend)
+        self.assertTrue(oracle.war_archives_campaign_page_visible())
+        self.assertEqual(oracle.war_archives_campaign_data_key_count(), (300, 300))
+        state = oracle.campaign_page_state()
+        self.assertEqual(state.chapter_name, "t")
+        self.assertEqual([(s.stage_id, s.stage_code) for s in state.stages], [(2200171, "t1")])
+        self.assertEqual(backend.taps, [])
+
+        parent = backend.buttons["buttons"].pop()
+        backend.buttons["button_count"] -= 1
+        with self.assertRaisesRegex(SemanticGateClosed, "stage action is absent or ambiguous"):
+            oracle.click_campaign_stage("t1")
+        backend.buttons["buttons"].append(parent)
+        backend.buttons["button_count"] += 1
+
+        # A second known stage container is ambiguous even with disjoint IDs.
+        backend.buttons["buttons"].append(make_button(
+            "main", root + "/float/levels/items/Chapter_2100001/main"
+        ))
+        backend.buttons["button_count"] += 1
+        with self.assertRaisesRegex(SemanticGateClosed, "stages are absent or ambiguous"):
+            oracle.click_campaign_stage("t1")
+        self.assertEqual(backend.taps, [])
+
+        backend.buttons["buttons"].pop()
+        backend.buttons["button_count"] -= 1
+        # Similar Chapter names under an unreviewed layout cannot authorize input.
+        backend.buttons["buttons"][1]["path"] = stage.replace("LevelSelectSPFullUI", "FutureSelector")
+        with self.assertRaisesRegex(SemanticGateClosed, "stages are absent or ambiguous"):
+            oracle.click_campaign_stage("t1")
+        self.assertEqual(backend.taps, [])
+
+        # The actual input frame must still reject a popup arriving after the
+        # page read, and must keep the final integer tap within its button.
+        backend.buttons["buttons"][1]["path"] = stage
+        observed = oracle.campaign_stage_state("t1")
+        oracle.campaign_stage_state = lambda _: observed
+        backend.buttons["buttons"].append(make_button(
+            "popup", "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/popup"
+        ))
+        backend.buttons["button_count"] += 1
+        with self.assertRaisesRegex(SemanticGateClosed, "stage input is blocked"):
+            oracle.click_campaign_stage("t1")
+        backend.buttons["buttons"].pop()
+        backend.buttons["button_count"] -= 1
+        backend.buttons["buttons"][1]["adb_point"] = dict(x=600, y=350)
+        with self.assertRaisesRegex(SemanticGateClosed, "point is outside its button"):
+            oracle.click_campaign_stage("t1")
+        self.assertEqual(backend.taps, [])
 
     def test_current_event_campaign_page_uses_typed_stage_labels(self):
         root = (

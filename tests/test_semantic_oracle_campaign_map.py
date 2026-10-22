@@ -60,7 +60,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
                     x=58,
                     y=54,
                     bounds={"left": 0, "top": 0, "right": 115, "bottom": 111},
-                    raycast_top=None,
+                    raycast_top=True,
                 )
             ]
         )
@@ -76,6 +76,10 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         receipt = make_oracle(backend).click_campaign_precombat_back()
 
         self.assertEqual(receipt.semantic_id, "campaign/precombat/back")
+        self.assertEqual(backend.taps, [(58, 54)])
+        backend.buttons["buttons"][0]["raycast_top"] = None
+        with self.assertRaises(SemanticGateClosed):
+            make_oracle(backend).click_campaign_precombat_back()
         self.assertEqual(backend.taps, [(58, 54)])
 
     def test_campaign_map_cell_viewport_target_allows_bounded_easing_only(self):

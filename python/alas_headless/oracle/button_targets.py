@@ -7,6 +7,16 @@ from .contracts import SemanticTarget
 
 
 DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
+    SemanticTarget('meta/current/reward', 'award_btn', 'WorldBossUI(Clone)/pages/CurrentWorldBossDetailUI(Clone)/btns/award_btn'),
+    SemanticTarget('private-quarters/level-up/close', 'bg', 'OverlayCamera/Overlay/UIMain/LevelUpWindow/bg'),
+    SemanticTarget('private-quarters/home', 'home', 'SelectDorm3DUI(Clone)/Main/option/home'),
+    SemanticTarget('private-quarters/page/left', 'left', 'SelectDorm3DUI(Clone)/Main/btn_switch/left'),
+    SemanticTarget('private-quarters/page/right', 'right', 'SelectDorm3DUI(Clone)/Main/btn_switch/right'),
+    SemanticTarget('private-quarters/interact', 'tpl', 'Dorm3dMainUI(Clone)/UI/watch/Role/Touch/tpl'),
+    SemanticTarget('private-quarters/room/back', 'btn_back', tuple(
+        f'Dorm3dMainUI(Clone)/UI/{mode}/btn_back' for mode in ('base', 'watch', 'ik'))),
+    SemanticTarget('private-quarters/dialogue/continue', 'NewStoryUI(Clone)', 'OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)'),
+    SemanticTarget('private-quarters/room/new-jersey', 'Xinzexi', 'SelectDorm3DUI(Clone)/Map/floor_2/Xinzexi'),
     SemanticTarget(
         "login/enter",
         "LoginUI2(Clone)",
@@ -48,6 +58,23 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     SemanticTarget("main/mail", "mail", "frame/top/btns/mail"),
     SemanticTarget("main/shop", "shop", "frame/bottom/frame/shop"),
     SemanticTarget("main/dock", "dock", "frame/bottom/frame/dock"),
+    SemanticTarget("meta/character/back", "back", "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back"),
+    SemanticTarget("meta/character/sync", "SynBtn", "UICamera/Canvas/UIMain/MetaCharacterUI(Clone)/HidePanel/MenuPanel/SynBtn"),
+    SemanticTarget("meta/reward-preview/open", "award_btn", "WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/main/award_btn"),
+    SemanticTarget("meta/dossier/list", "list_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossDetailUI(Clone)/list_btn"),
+    SemanticTarget("meta/dossier/current", "current_list_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/current_list_btn"),
+    SemanticTarget("meta/dossier/empty/list", "list_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossEmptyUI(Clone)/list_btn"),
+    SemanticTarget("meta/dossier/create", "tpl", "WorldBossUI(Clone)/pages/ArchivesWorldBossEmptyUI(Clone)/useItem/list/tpl"),
+    SemanticTarget("meta/dossier/sync/open", "archives_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossEmptyUI(Clone)/archives_btn"),
+    SemanticTarget("meta/dossier/sync/back", "back", "WorldBossUI(Clone)/pages/ArchivesWorldBossListUI(Clone)/blur_panel/adapt/top/back"),
+    SemanticTarget("meta/dossier/sync/rewards", "get_all", "WorldBossUI(Clone)/pages/ArchivesWorldBossListUI(Clone)/main/award/get_all"),
+    SemanticTarget("meta/dossier/auto/start", "auto_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossDetailUI(Clone)/btns/auto_btn"),
+    SemanticTarget("meta/dossier/auto/confirm", "start", "WorldBossUI(Clone)/ArchivesWorldBossAutoBattleTipUI(Clone)/window/btns/start"),
+    SemanticTarget("meta/dossier/auto/result/confirm", "start", "WorldBossUI(Clone)/ArchivesWorldBossAutoBattleResultUI(Clone)/window/btns/start"),
+    SemanticTarget("meta/dossier/reward", "award_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossDetailUI(Clone)/btns/award_btn"),
+    SemanticTarget("meta/dossier/start", "start_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossDetailUI(Clone)/btns/start_btn"),
+    SemanticTarget("meta/precombat/vanguard/add", "tip", "PreCombatUI(Clone)/adapt/middle/mask/GridFrame/vanguard_1/tip"),
+    SemanticTarget("meta/precombat/main/add", "tip", "PreCombatUI(Clone)/adapt/middle/mask/GridFrame/main_1/tip"),
     SemanticTarget("main/task", "task", "frame/bottom/frame/task"),
     SemanticTarget("main/build", "build", "frame/bottom/frame/build"),
     SemanticTarget("main/guild", "guild", "frame/bottom/frame/guild"),
@@ -153,9 +180,15 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     ),
     SemanticTarget("main/live", "live", "frame/bottom/frame/live"),
     SemanticTarget("main/tech", "tech", "frame/bottom/frame/tech"),
+    SemanticTarget("main/storage", "storage", "NewMainMellowTheme(Clone)/frame/bottom/frame/storage"),
     SemanticTarget("shop/home", "homeBtn", "buttonList/top/homeBtn"),
     SemanticTarget(
         "dorm-menu/page/root",
+        "MainLiveAreaUI(Clone)",
+        "Overlay/UIMain/MainLiveAreaUI(Clone)",
+    ),
+    SemanticTarget(
+        "dorm-menu/back",
         "MainLiveAreaUI(Clone)",
         "Overlay/UIMain/MainLiveAreaUI(Clone)",
     ),
@@ -180,6 +213,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "MainLiveAreaUI(Clone)/dorm_btn",
     ),
     SemanticTarget(
+        "academy/page/back",
+        "back",
+        "NavalAcademyUI/blur_container/adapt/top/title/back",
+    ),
+    SemanticTarget(
         "academy/munitions",
         "supplyShop",
         "NavalAcademyUI/academyMap/map/supplyShop",
@@ -197,7 +235,10 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     SemanticTarget(
         "game-room/play",
         "btnPlay",
-        "GameHallUI(Clone)/ad/btnPlay",
+        (
+            "GameHallUI(Clone)/ad/btnPlay",
+            "GameHallUI(Clone)/ad/adapt/btnPlay",
+        ),
     ),
     SemanticTarget(
         "game-room/back",
@@ -210,9 +251,24 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "GameHallUI(Clone)/ad/topPanel/btnHome",
     ),
     SemanticTarget(
+        "game-room/free-coins",
+        "free",
+        "GameHallUI(Clone)/ad/container/content/top/free",
+    ),
+    SemanticTarget(
         "minigame/shooting/back",
         "back",
         "GameRoomShootingUI(Clone)/noAdaptPanel/blur_panel/top/back",
+    ),
+    SemanticTarget(
+        "minigame/new-year/back",
+        "back",
+        "GameRoomFushun2UI(Clone)/back",
+    ),
+    SemanticTarget(
+        "minigame/poke/back",
+        "btnBack",
+        "GameRoomPokeUI(Clone)/pop/menuUI/btnBack",
     ),
     SemanticTarget(
         "minigame/tickets/cancel",
@@ -263,6 +319,26 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "dorm/feed/shop/cancel",
         "cancel_btn",
         "BackYardFeedUI(Clone)/BackYardFeedShopPanel(Clone)/frame/cancel_btn",
+    ),
+    SemanticTarget(
+        "dorm/feed/shop/confirm",
+        "ok_btn",
+        "BackYardFeedUI(Clone)/BackYardFeedShopPanel(Clone)/frame/ok_btn",
+    ),
+    SemanticTarget(
+        "dorm/feed/shop/open",
+        "add",
+        "BackYardFeedUI(Clone)/frame/food_50004/add",
+    ),
+    SemanticTarget(
+        "dorm/feed/shop/plus",
+        "add_btn",
+        "BackYardFeedUI(Clone)/BackYardFeedShopPanel(Clone)/frame/cal_panel/add_btn",
+    ),
+    SemanticTarget(
+        "dorm/feed/shop/minus",
+        "minus_btn",
+        "BackYardFeedUI(Clone)/BackYardFeedShopPanel(Clone)/frame/cal_panel/minus_btn",
     ),
     SemanticTarget(
         "dorm/empty-food/cancel",
@@ -322,12 +398,12 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     SemanticTarget(
         "meowfficer/buy/cancel",
         "cancel_btn",
-        "CommanderReserveUI(Clone)/CommanderMsgBoxUI(Clone)/frame/cancel_btn",
+        "CommanderMsgBoxUI(Clone)/frame/cancel_btn",
     ),
     SemanticTarget(
         "meowfficer/buy/confirm",
         "confirm_btn",
-        "CommanderReserveUI(Clone)/CommanderMsgBoxUI(Clone)/frame/confirm_btn",
+        "CommanderMsgBoxUI(Clone)/frame/confirm_btn",
     ),
     SemanticTarget(
         "meowfficer/train/enter",
@@ -515,7 +591,10 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     SemanticTarget(
         "build/queue/all-launch",
         "all_launch",
-        "BuildShipDetailUI1(Clone)/all_launch",
+        (
+            "BuildShipDetailUI1(Clone)/all_launch",
+            "BuildShipDetailUI1(Clone)/adapt/all_launch",
+        ),
     ),
     SemanticTarget(
         "build/queue/finish-cancel",
@@ -874,9 +953,19 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "Overlay/UIMain/LevelRemasterView(Clone)/bg",
     ),
     SemanticTarget(
+        "archive/activity-list/home",
+        "homeBtn",
+        "ActivityRemasterUI(Clone)/top/homeBtn",
+    ),
+    SemanticTarget(
         "exercise/page/back",
         "backBtn",
         "MilitaryExerciseUI(Clone)/blur_panel/adapt/top/backBtn",
+    ),
+    SemanticTarget(
+        "exercise/page/home",
+        "option",
+        "MilitaryExerciseUI(Clone)/blur_panel/adapt/top/option",
     ),
     SemanticTarget(
         "exercise/opponent/1",
@@ -930,6 +1019,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         ),
     ),
     SemanticTarget(
+        "campaign/map-preparation/proceed-clear",
+        "start_button_l",
+        "LevelStageInfoView(Clone)/panel/start_button_l",
+    ),
+    SemanticTarget(
         "campaign/fleet-preparation/cancel",
         "btnBack",
         "LevelFleetSelectView(Clone)/panel/Fixed/btnBack",
@@ -943,6 +1037,12 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "campaign/fleet-preparation/roles/open",
         "Click",
         "LevelFleetSelectView(Clone)/panel/Fixed/title/DropSide/Click",
+    ),
+    *tuple(
+        SemanticTarget('campaign/fleet-preparation/roles/submarine/' + mode,
+            'Item' + str(index),
+            'LevelFleetSelectView(Clone)/panel/ShipList/sub/1/DutySelect/Item' + str(index))
+        for index, mode in ((1, 'sub_auto_call'), (2, 'sub_standby'))
     ),
     *tuple(
         SemanticTarget(
@@ -1096,12 +1196,18 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     SemanticTarget(
         "tactical/dock/confirm",
         "confirm_button",
-        "Overlay/UIMain/blur_panel/select_panel/confirm_button",
+        (
+            "Overlay/UIMain/blur_panel/select_panel/confirm_button",
+            "Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/confirm_button",
+        ),
     ),
     SemanticTarget(
         "tactical/dock/cancel",
         "cancel_button",
-        "Overlay/UIMain/blur_panel/select_panel/cancel_button",
+        (
+            "Overlay/UIMain/blur_panel/select_panel/cancel_button",
+            "Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/cancel_button",
+        ),
     ),
     SemanticTarget(
         "tactical/skill/confirm",
@@ -1122,6 +1228,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "tactical/continue/cancel",
         "custom_button_2(Clone)",
         "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
+    ),
+    SemanticTarget(
+        "tactical/completion/ack",
+        "custom_button_1(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
     ),
     SemanticTarget(
         "tactical/course/cancel",
@@ -1159,7 +1270,27 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
     ),
     SemanticTarget(
+        "research/progress/confirm",
+        "custom_button_1(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+    ),
+    SemanticTarget(
+        "research/progress/cancel",
+        "custom_button_2(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
+    ),
+    SemanticTarget(
         "research/start/confirm",
+        "custom_button_1(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+    ),
+    SemanticTarget(
+        "research/stop/cancel",
+        "custom_button_2(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
+    ),
+    SemanticTarget(
+        "research/stop/confirm",
         "custom_button_1(Clone)",
         "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
     ),
@@ -1170,6 +1301,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     ),
     SemanticTarget(
         "research/queue/confirm",
+        "custom_button_1(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+    ),
+    SemanticTarget(
+        "campaign/urgent-notice/confirm",
         "custom_button_1(Clone)",
         "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
     ),
@@ -1267,6 +1403,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "meta/home",
         "option",
         "WorldBossUI(Clone)/option",
+    ),
+    SemanticTarget(
+        "meta/category/back",
+        "back_btn",
+        "WorldBossUI(Clone)/back_btn",
     ),
     SemanticTarget(
         "meta/current/open",
@@ -1384,6 +1525,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "NewSettingsUI(Clone)/blur_panel/adapt/top/back_btn",
     ),
     SemanticTarget(
+        "player/profile/back",
+        "back",
+        "PlayerVitaeUI(Clone)/top/frame/back",
+    ),
+    SemanticTarget(
         "task/page/back",
         "back_btn",
         "TaskScene(Clone)/blur_panel/adapt/top/back_btn",
@@ -1464,6 +1610,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
     ),
     SemanticTarget(
+        "reward/item-info/close",
+        "btnBack",
+        "Msgbox(Clone)/window/top/btnBack",
+    ),
+    SemanticTarget(
         "exercise/merit-shop/close",
         "closeBtn",
         "Overlay/UIMain/buttonList/top/closeBtn",
@@ -1502,5 +1653,9 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "reward/campaign-total/continue",
         "ButtonContinue",
         "LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonContinue",
+    ),
+    SemanticTarget(
+        'campaign/map-timeout/confirm', 'custom_button_1(Clone)',
+        'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)',
     ),
 )

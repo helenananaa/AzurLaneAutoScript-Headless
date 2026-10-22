@@ -519,13 +519,15 @@ def _invalid_cases() -> int:
             ("campaign-switch", "fleet"),
         ),
         (
-            "hp-nan",
-            lambda values: values["hp"].update(repair_use_multi_threshold=float("nan")),
+            "active-hp-nan",
+            lambda values: values["hp"].update(
+                use_emergency_repair=True, repair_use_multi_threshold=float("nan")
+            ),
             ("campaign-switch", "fleet", "hp-control"),
         ),
         (
-            "submarine-active-fleet",
-            lambda values: values["submarine"].update(fleet=1),
+            "submarine-invalid-fleet",
+            lambda values: values["submarine"].update(fleet=3),
             ("campaign-switch", "fleet", "hp-control", "submarine"),
         ),
     )
@@ -586,9 +588,12 @@ def _seeded_sequences() -> int:
         elif offset % 4 == 1:
             invalid["fleet"]["fleet1"] = True
         elif offset % 4 == 2:
+            # Disabled thresholds are intentionally not consumed. Exercise the
+            # unsafe active branch instead of reviving a global config gate.
+            invalid["hp"]["use_low_hp_retreat"] = True
             invalid["hp"]["low_hp_retreat_threshold"] = float("nan")
         else:
-            invalid["submarine"]["fleet"] = 1
+            invalid["submarine"]["fleet"] = 3
         before = copy.deepcopy(invalid)
         refused = _PreflightRecorder()
         try:

@@ -1,0 +1,97 @@
+diff --git a/module/handler/info_handler.py b/module/handler/info_handler.py
+--- a/module/handler/info_handler.py
++++ b/module/handler/info_handler.py
+@@ -105,6 +105,12 @@
+     _popup_offset = (3, 30)
+ 
+     def handle_popup_confirm(self, name='', offset=None, interval=2):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and name == 'WITHDRAW':
++            if semantic_adapter.appear('CAMPAIGN_WITHDRAW_CONFIRM'):
++                semantic_adapter.click('CAMPAIGN_WITHDRAW_CONFIRM')
++                return True
++            return False
+         if offset is None:
+             offset = self._popup_offset
+         if self.appear(POPUP_CANCEL, offset=offset) \
+diff --git a/module/combat/hp_balancer.py b/module/combat/hp_balancer.py
+--- a/module/combat/hp_balancer.py
++++ b/module/combat/hp_balancer.py
+@@ -94,15 +94,30 @@
+ 
+         from alas_headless import current_semantic_session
+         semantic_session = current_semantic_session()
++        typed_presence = None
+         if semantic_session is not None:
+-            hp = list(semantic_session.campaign_fleet_hp())
++            if (self.config.HpControl_UseLowHpRetreat or self.config.HpControl_UseEmergencyRepair
++                    or self.config.HpControl_UseHpBalance):
++                # combat_status may return after a live map probe while the last
++                # screenshot still belongs to settlement. Refresh before HP.
++                self.device.screenshot()
++                vitals = semantic_session.campaign_hp_control_snapshot(self.fleet_current_index)
++            else:
++                vitals = None
++            if vitals is not None:
++                hp, typed_presence = vitals
++                hp = list(hp)
++            else:
++                hp = list(semantic_session.campaign_fleet_hp())
+         else:
+             hp = [self._calculate_hp(button.area) for button in self._hp_grid().buttons]
+         weight = to_list(weight)
+         scout = np.array(hp[3:]) * np.array(weight) / np.max(weight)
+ 
+         self.hp = hp[:3] + scout.tolist()
+-        if self.fleet_current_index not in self._hp_has_ship:
++        if typed_presence is not None:
++            self.hp_has_ship = list(typed_presence)
++        elif self.fleet_current_index not in self._hp_has_ship:
+             self.hp_has_ship = [bool(hp > 0.3) for hp in self.hp]
+ 
+         logger.attr('HP', ' '.join(
+@@ -127,6 +142,9 @@
+             p1 (int): Origin position [0, 2].
+             p2 (int): Target position [0, 2].
+         """
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            from alas_headless import AlasSemanticUnmapped
++            raise AlasSemanticUnmapped('Campaign HP balance needs a typed scout-position drag')
+         logger.info('scout_position_change (%s, %s)' % (p1, p2))
+         self.device.drag(p1=SCOUT_POSITION[p1], p2=SCOUT_POSITION[p2], segments=3)
+ 
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -366,6 +366,13 @@
+     def handle_emergency_repair_use(self):
+         if not self.config.HpControl_UseEmergencyRepair:
+             return False
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            postcondition = semantic_adapter.campaign_repair_postcondition()
++            if postcondition == 'pending':
++                return True
++            if postcondition == 'complete':
++                self.hp_get()
+ 
+         if self.appear_then_click(EMERGENCY_REPAIR_CONFIRM, offset=True, interval=3):
+             return True
+@@ -375,10 +382,13 @@
+             # After a short animation, everything shows as usual.
+             # Using fleet power number as a stable checker.
+             # First wait for it to be non-zero, then wait for it to be stable.
+-            self.wait_until_disappear(MAIN_FLEET_POWER_ZERO, offset=(20, 20))
+-            stable_checker = Button(
+-                area=MAIN_FLEET_POWER_ZERO.area, color=(), button=MAIN_FLEET_POWER_ZERO.button, name='STABLE_CHECKER')
+-            self.wait_until_stable(stable_checker)
++            if semantic_adapter is not None:
++                semantic_adapter.wait_campaign_repair_ready()
++            else:
++                self.wait_until_disappear(MAIN_FLEET_POWER_ZERO, offset=(20, 20))
++                stable_checker = Button(
++                    area=MAIN_FLEET_POWER_ZERO.area, color=(), button=MAIN_FLEET_POWER_ZERO.button, name='STABLE_CHECKER')
++                self.wait_until_stable(stable_checker)
+             if not self.appear(EMERGENCY_REPAIR_AVAILABLE):
+                 return False
+ 

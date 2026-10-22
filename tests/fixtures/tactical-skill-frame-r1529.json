@@ -1,0 +1,4286 @@
+{
+  "scope": "Fresh read-only immutable retained skill page after failure, not original failing split reads; no input.",
+  "generation": 360579,
+  "projections": {
+    "buttons": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "semantic_schema": "alas-headless.buttons/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 1952,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "schema": 1,
+      "struct_size": 344104,
+      "generation": 360579,
+      "snapshot_monotonic_ns": 29487402858321,
+      "response_monotonic_ns": 29487505356962,
+      "age_ms": 102,
+      "button_count": 13,
+      "truncated": false,
+      "error_count": 0,
+      "buttons": [
+        {
+          "name": "confirm_btn",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/confirm_btn",
+          "canvas": "Overlay",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -3596730,
+          "click_listener_count": -1,
+          "runtime_click_listener_count": -1,
+          "world_position": {
+            "x": 0.0,
+            "y": -4.944,
+            "z": -390.0
+          },
+          "local_rect": {
+            "x": -136.5,
+            "y": -50.5,
+            "width": 273.0,
+            "height": 101.0
+          },
+          "screen_point": {
+            "x": 640.0,
+            "y": 137.528
+          },
+          "adb_point": {
+            "x": 640.0,
+            "y": 582.472
+          },
+          "screen_bounds": {
+            "left": 548.998,
+            "bottom": 103.86,
+            "right": 731.002,
+            "top": 171.195
+          },
+          "adb_bounds": {
+            "left": 548.998,
+            "top": 548.805,
+            "right": 731.002,
+            "bottom": 616.14
+          }
+        },
+        {
+          "name": "NewNavalTacticsSkillsPage(Clone)",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)",
+          "canvas": "Overlay",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -3596502,
+          "click_listener_count": -1,
+          "runtime_click_listener_count": -1,
+          "world_position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": -390.0
+          },
+          "local_rect": {
+            "x": -960.0,
+            "y": -540.0,
+            "width": 1920.0,
+            "height": 1080.0
+          },
+          "screen_point": {
+            "x": 640.0,
+            "y": 360.0
+          },
+          "adb_point": {
+            "x": 640.0,
+            "y": 360.0
+          },
+          "screen_bounds": {
+            "left": -0.016,
+            "bottom": -0.009,
+            "right": 1280.016,
+            "top": 720.009
+          },
+          "adb_bounds": {
+            "left": -0.016,
+            "top": -0.009,
+            "right": 1280.016,
+            "bottom": 720.009
+          }
+        },
+        {
+          "name": "frame",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame",
+          "canvas": "Overlay",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -3596518,
+          "click_listener_count": -1,
+          "runtime_click_listener_count": -1,
+          "world_position": {
+            "x": 0.0,
+            "y": 0.207,
+            "z": -390.0
+          },
+          "local_rect": {
+            "x": -530.0,
+            "y": -406.0,
+            "width": 1060.0,
+            "height": 812.0
+          },
+          "screen_point": {
+            "x": 640.0,
+            "y": 369.334
+          },
+          "adb_point": {
+            "x": 640.0,
+            "y": 350.666
+          },
+          "screen_bounds": {
+            "left": 286.658,
+            "bottom": 98.66,
+            "right": 993.342,
+            "top": 640.007
+          },
+          "adb_bounds": {
+            "left": 286.658,
+            "top": 79.993,
+            "right": 993.342,
+            "bottom": 621.34
+          }
+        },
+        {
+          "name": "add(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/add(Clone)",
+          "canvas": "Canvas",
+          "flags": 3583,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": false,
+          "canvas_render_mode": 1,
+          "instance_id": -3596300,
+          "click_listener_count": -1,
+          "runtime_click_listener_count": -1,
+          "world_position": {
+            "x": 11.551,
+            "y": -0.723,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -164.915,
+            "y": -467.5,
+            "width": 329.83,
+            "height": 935.0
+          },
+          "screen_point": {
+            "x": 1159.787,
+            "y": 327.473
+          },
+          "adb_point": {
+            "x": 1159.787,
+            "y": 392.527
+          },
+          "screen_bounds": {
+            "left": 1049.892,
+            "bottom": 15.945,
+            "right": 1269.681,
+            "top": 639.002
+          },
+          "adb_bounds": {
+            "left": 1049.892,
+            "top": 80.998,
+            "right": 1269.681,
+            "bottom": 704.055
+          }
+        },
+        {
+          "name": "add(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/add(Clone)",
+          "canvas": "Canvas",
+          "flags": 3583,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": false,
+          "canvas_render_mode": 1,
+          "instance_id": -3596230,
+          "click_listener_count": -1,
+          "runtime_click_listener_count": -1,
+          "world_position": {
+            "x": 6.664,
+            "y": -0.723,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -164.915,
+            "y": -467.5,
+            "width": 329.83,
+            "height": 935.0
+          },
+          "screen_point": {
+            "x": 939.9,
+            "y": 327.473
+          },
+          "adb_point": {
+            "x": 939.9,
+            "y": 392.527
+          },
+          "screen_bounds": {
+            "left": 830.005,
+            "bottom": 15.945,
+            "right": 1049.795,
+            "top": 639.002
+          },
+          "adb_bounds": {
+            "left": 830.005,
+            "top": 80.998,
+            "right": 1049.795,
+            "bottom": 704.055
+          }
+        },
+        {
+          "name": "1299012",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -3592808,
+          "click_listener_count": -1,
+          "runtime_click_listener_count": -1,
+          "world_position": {
+            "x": -3.108,
+            "y": 2.994,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -116.0,
+            "y": -162.5,
+            "width": 232.0,
+            "height": 325.0
+          },
+          "screen_point": {
+            "x": 500.127,
+            "y": 494.752
+          },
+          "adb_point": {
+            "x": 500.127,
+            "y": 225.248
+          },
+          "screen_bounds": {
+            "left": 401.172,
+            "bottom": 356.131,
+            "right": 599.081,
+            "top": 633.374
+          },
+          "adb_bounds": {
+            "left": 401.172,
+            "top": 86.626,
+            "right": 599.081,
+            "bottom": 363.869
+          }
+        },
+        {
+          "name": "add",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/add",
+          "canvas": "Canvas",
+          "flags": 3583,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": false,
+          "canvas_render_mode": 1,
+          "instance_id": -3592210,
+          "click_listener_count": -1,
+          "runtime_click_listener_count": -1,
+          "world_position": {
+            "x": 1.778,
+            "y": -0.723,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -164.915,
+            "y": -467.5,
+            "width": 329.83,
+            "height": 935.0
+          },
+          "screen_point": {
+            "x": 720.013,
+            "y": 327.473
+          },
+          "adb_point": {
+            "x": 720.013,
+            "y": 392.527
+          },
+          "screen_bounds": {
+            "left": 610.119,
+            "bottom": 15.945,
+            "right": 829.908,
+            "top": 639.002
+          },
+          "adb_bounds": {
+            "left": 610.119,
+            "top": 80.998,
+            "right": 829.908,
+            "bottom": 704.055
+          }
+        },
+        {
+          "name": "skill",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/skill",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -3592064,
+          "click_listener_count": -1,
+          "runtime_click_listener_count": -1,
+          "world_position": {
+            "x": -3.108,
+            "y": -2.267,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -148.45,
+            "y": -145.33,
+            "width": 296.9,
+            "height": 290.66
+          },
+          "screen_point": {
+            "x": 500.127,
+            "y": 258.003
+          },
+          "adb_point": {
+            "x": 500.127,
+            "y": 461.997
+          },
+          "screen_bounds": {
+            "left": 401.16,
+            "bottom": 161.116,
+            "right": 599.093,
+            "top": 354.889
+          },
+          "adb_bounds": {
+            "left": 401.16,
+            "top": 365.111,
+            "right": 599.093,
+            "bottom": 558.884
+          }
+        },
+        {
+          "name": "help_btn",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/help_btn",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -3592242,
+          "click_listener_count": -1,
+          "runtime_click_listener_count": -1,
+          "world_position": {
+            "x": -6.598,
+            "y": 5.613,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -19.493,
+            "y": -26.5,
+            "width": 53.0,
+            "height": 53.0
+          },
+          "screen_point": {
+            "x": 343.077,
+            "y": 612.567
+          },
+          "adb_point": {
+            "x": 343.077,
+            "y": 107.433
+          },
+          "screen_bounds": {
+            "left": 331.381,
+            "bottom": 596.667,
+            "right": 363.181,
+            "top": 628.467
+          },
+          "adb_bounds": {
+            "left": 331.381,
+            "top": 91.533,
+            "right": 363.181,
+            "bottom": 123.333
+          }
+        },
+        {
+          "name": "cancel_btn",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/cancel_btn",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -3592152,
+          "click_listener_count": -1,
+          "runtime_click_listener_count": -1,
+          "world_position": {
+            "x": -3.108,
+            "y": -6.601,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -154.0,
+            "y": -53.5,
+            "width": 308.0,
+            "height": 107.0
+          },
+          "screen_point": {
+            "x": 500.127,
+            "y": 62.959
+          },
+          "adb_point": {
+            "x": 500.127,
+            "y": 657.041
+          },
+          "screen_bounds": {
+            "left": 397.46,
+            "bottom": 27.293,
+            "right": 602.793,
+            "top": 98.626
+          },
+          "adb_bounds": {
+            "left": 397.46,
+            "top": 621.374,
+            "right": 602.793,
+            "bottom": 692.707
+          }
+        },
+        {
+          "name": "option",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/option",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -3591982,
+          "click_listener_count": -1,
+          "runtime_click_listener_count": -1,
+          "world_position": {
+            "x": 13.07,
+            "y": 7.125,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -46.0,
+            "y": -53.5,
+            "width": 92.0,
+            "height": 107.0
+          },
+          "screen_point": {
+            "x": 1228.134,
+            "y": 680.61
+          },
+          "adb_point": {
+            "x": 1228.134,
+            "y": 39.39
+          },
+          "screen_bounds": {
+            "left": 1197.467,
+            "bottom": 644.944,
+            "right": 1258.8,
+            "top": 716.277
+          },
+          "adb_bounds": {
+            "left": 1197.467,
+            "top": 3.723,
+            "right": 1258.8,
+            "bottom": 75.056
+          }
+        },
+        {
+          "name": "btnBack",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/btnBack",
+          "canvas": "Canvas",
+          "flags": 3583,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": false,
+          "canvas_render_mode": 1,
+          "instance_id": -3591956,
+          "click_listener_count": -1,
+          "runtime_click_listener_count": -1,
+          "world_position": {
+            "x": -12.948,
+            "y": 6.8,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -65.255,
+            "y": -55.7,
+            "width": 130.51,
+            "height": 111.4
+          },
+          "screen_point": {
+            "x": 57.333,
+            "y": 666.0
+          },
+          "adb_point": {
+            "x": 57.333,
+            "y": 54.0
+          },
+          "screen_bounds": {
+            "left": 0.315,
+            "bottom": 608.981,
+            "right": 114.352,
+            "top": 723.019
+          },
+          "adb_bounds": {
+            "left": 0.315,
+            "top": -3.019,
+            "right": 114.352,
+            "bottom": 111.019
+          }
+        },
+        {
+          "name": "NewNavalTacticsUI(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)",
+          "canvas": "Canvas",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -3591840,
+          "click_listener_count": -1,
+          "runtime_click_listener_count": -1,
+          "world_position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -960.0,
+            "y": -540.0,
+            "width": 1920.0,
+            "height": 1080.0
+          },
+          "screen_point": {
+            "x": 640.0,
+            "y": 360.0
+          },
+          "adb_point": {
+            "x": 640.0,
+            "y": 360.0
+          },
+          "screen_bounds": {
+            "left": -0.0,
+            "bottom": 0.0,
+            "right": 1280.0,
+            "top": 720.0
+          },
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 0.0,
+            "right": 1280.0,
+            "bottom": 720.0
+          }
+        }
+      ]
+    },
+    "snapshot": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 1952,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "abi": "x86_64",
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "snapshot_schema": 1,
+      "snapshot_struct_size": 104,
+      "generation": 360579,
+      "scene_generation": 10,
+      "semantic_generation": 2,
+      "snapshot_monotonic_ns": 29487402858321,
+      "response_monotonic_ns": 29487505341587,
+      "age_ms": 102,
+      "observer_tid": 1984,
+      "assembly_count": 129,
+      "semantic_code": 1,
+      "width": 1280,
+      "height": 720,
+      "flags": 15,
+      "observer_attached": false,
+      "main_thread": true,
+      "button_count": 487,
+      "active_button_count": 13,
+      "interactable_button_count": 487,
+      "scene_handle": -76,
+      "ui_stage": 100,
+      "ui_method_mask": 15
+    },
+    "ui": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "semantic_schema": "alas-headless.ui/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 1952,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "schema": 1,
+      "struct_size": 4472768,
+      "generation": 360579,
+      "snapshot_monotonic_ns": 29487402858321,
+      "response_monotonic_ns": 29487518702082,
+      "age_ms": 115,
+      "method_mask": 15,
+      "toggle_count": 8,
+      "text_count": 22,
+      "image_count": 83,
+      "toggle_truncated": false,
+      "text_truncated": false,
+      "image_truncated": false,
+      "error_count": 0,
+      "error_counts": {
+        "toggle": 0,
+        "text": 0,
+        "image": 0,
+        "shared": 0
+      },
+      "skipped_count": 0,
+      "image_source_count": 6566,
+      "image_source_capacity": 16384,
+      "toggles": [
+        {
+          "kind": "toggle",
+          "name": "skill(Clone)",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "checked": false,
+          "raycast_top": null,
+          "adb_point": {
+            "x": 625.333,
+            "y": 331.333
+          },
+          "adb_bounds": {
+            "left": 314.666,
+            "top": 271.999,
+            "right": 936.0,
+            "bottom": 390.666
+          }
+        },
+        {
+          "kind": "toggle",
+          "name": "skill",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "checked": true,
+          "raycast_top": null,
+          "adb_point": {
+            "x": 625.333,
+            "y": 199.329
+          },
+          "adb_bounds": {
+            "left": 314.666,
+            "top": 139.996,
+            "right": 936.0,
+            "bottom": 258.663
+          }
+        },
+        {
+          "kind": "toggle",
+          "name": "star_tpl(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/stars/star_tpl(Clone)",
+          "flags": 1531,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": false,
+          "checked": false,
+          "raycast_top": null,
+          "adb_point": {
+            "x": 542.779,
+            "y": 345.529
+          },
+          "adb_bounds": {
+            "left": 526.742,
+            "top": 330.856,
+            "right": 558.817,
+            "bottom": 360.201
+          }
+        },
+        {
+          "kind": "toggle",
+          "name": "star_tpl(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/stars/star_tpl(Clone)",
+          "flags": 1531,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": false,
+          "checked": false,
+          "raycast_top": null,
+          "adb_point": {
+            "x": 525.718,
+            "y": 345.529
+          },
+          "adb_bounds": {
+            "left": 509.681,
+            "top": 330.856,
+            "right": 541.756,
+            "bottom": 360.201
+          }
+        },
+        {
+          "kind": "toggle",
+          "name": "star_tpl(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/stars/star_tpl(Clone)",
+          "flags": 1531,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": false,
+          "checked": true,
+          "raycast_top": null,
+          "adb_point": {
+            "x": 508.657,
+            "y": 345.529
+          },
+          "adb_bounds": {
+            "left": 492.62,
+            "top": 330.856,
+            "right": 524.695,
+            "bottom": 360.201
+          }
+        },
+        {
+          "kind": "toggle",
+          "name": "star_tpl(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/stars/star_tpl(Clone)",
+          "flags": 1531,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": false,
+          "checked": true,
+          "raycast_top": null,
+          "adb_point": {
+            "x": 491.596,
+            "y": 345.529
+          },
+          "adb_bounds": {
+            "left": 475.559,
+            "top": 330.856,
+            "right": 507.634,
+            "bottom": 360.201
+          }
+        },
+        {
+          "kind": "toggle",
+          "name": "star_tpl(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/stars/star_tpl(Clone)",
+          "flags": 1531,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": false,
+          "checked": true,
+          "raycast_top": null,
+          "adb_point": {
+            "x": 474.535,
+            "y": 345.529
+          },
+          "adb_bounds": {
+            "left": 458.498,
+            "top": 330.856,
+            "right": 490.572,
+            "bottom": 360.201
+          }
+        },
+        {
+          "kind": "toggle",
+          "name": "star_tpl",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/stars/star_tpl",
+          "flags": 1531,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": false,
+          "checked": true,
+          "raycast_top": null,
+          "adb_point": {
+            "x": 457.474,
+            "y": 345.529
+          },
+          "adb_bounds": {
+            "left": 441.436,
+            "top": 330.856,
+            "right": 473.511,
+            "bottom": 360.201
+          }
+        }
+      ],
+      "texts": [
+        {
+          "kind": "ugui-text",
+          "name": "level",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill(Clone)/name/level",
+          "text": "Lv.1",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 891.078,
+            "top": 278.467,
+            "right": 920.078,
+            "bottom": 306.467
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "subText",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill(Clone)/name/Text/subText",
+          "text": "Vlogger`s time",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 434.664,
+            "top": 281.134,
+            "right": 853.331,
+            "bottom": 303.801
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "label",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill(Clone)/next/label",
+          "text": "NEXT:",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 846.2,
+            "top": 368.399,
+            "right": 890.2,
+            "bottom": 390.666
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "next",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill(Clone)/next",
+          "text": "<color=#A9F548FF>0</color>/100",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 891.533,
+            "top": 368.399,
+            "right": 930.533,
+            "bottom": 390.666
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "desc",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill(Clone)/descView/desc",
+          "text": "自身发动空袭时，额外触发一轮航空弹幕攻击<color=#FFDE38FF>Lv.1</color>（威力依据技能等级），若此时队伍中存在至少3个白鹰阵营角色，使在场的所有敌方单位2.5秒内缓慢减速至航速为0，1.5秒后恢复原航速；战斗开始时，若主力舰队存在其他白鹰阵营角色，自身受到航空伤害降低<color=#FFDE38FF>5.0%(+1.1%)</color>",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 434.704,
+            "top": 315.402,
+            "right": 920.038,
+            "bottom": 416.402
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "subText",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill/name/Text/subText",
+          "text": "自由之翼",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 434.664,
+            "top": 149.131,
+            "right": 853.331,
+            "bottom": 171.797
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "Image",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/confirm_btn/Image",
+          "text": "开始课程",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 548.998,
+            "top": 552.805,
+            "right": 731.002,
+            "bottom": 620.14
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "level",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill/name/level",
+          "text": "Lv.8",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 890.078,
+            "top": 146.464,
+            "right": 920.078,
+            "bottom": 174.464
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "label",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill/next/label",
+          "text": "NEXT:",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 824.2,
+            "top": 236.396,
+            "right": 868.2,
+            "bottom": 258.663
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "next",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill/next",
+          "text": "<color=#A9F548FF>100</color>/4400",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 869.533,
+            "top": 236.396,
+            "right": 930.533,
+            "bottom": 258.663
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "desc",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill/descView/desc",
+          "text": "战斗开始时，自身航空属性提高<color=#FFDE38FF>12.7%(+1.1%)</color>，命中属性提高<color=#FFDE38FF>8.6%(+0.6%)</color>；自身舰载机击落敌方飞机时，自身航空属性提高<color=#FFDE38FF>3.9%(+0.4%)</color>，最高叠加2层，叠加至满层时，使此时队伍中所有防空属性低于自身的角色防空提高<color=#FFDE38FF>12.7%(+1.1%)</color>（防空属性提升效果持续至战斗结束）",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 434.704,
+            "top": 183.399,
+            "right": 920.038,
+            "bottom": 284.399
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "title_en",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/bg/title_en",
+          "text": "SKILLS\r",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 427.428,
+            "top": 103.627,
+            "right": 516.564,
+            "bottom": 127.028
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "title",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/bg/title",
+          "text": "选择技能",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 290.991,
+            "top": 78.66,
+            "right": 451.662,
+            "bottom": 126.661
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/dockyard/lv/Text",
+          "text": "120",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 538.944,
+            "top": 96.439,
+            "right": 578.605,
+            "bottom": 134.821
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "lv_label",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/dockyard/lv/lv_label",
+          "text": "Lv.",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 512.069,
+            "top": 96.436,
+            "right": 538.941,
+            "bottom": 134.824
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "name",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/info/name_mask/name",
+          "text": "瓦尔帕莱索",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 407.997,
+            "top": 302.876,
+            "right": 592.257,
+            "bottom": 333.586
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "next",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/skill/next",
+          "text": "3700/4400",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 516.66,
+            "top": 500.389,
+            "right": 592.66,
+            "bottom": 522.656
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "label",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/skill/level/label",
+          "text": "Lv.",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 561.014,
+            "top": 438.779,
+            "right": 583.014,
+            "bottom": 469.779
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "level",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/skill/level",
+          "text": "8",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 583.193,
+            "top": 438.651,
+            "right": 594.193,
+            "bottom": 469.651
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "name_Text",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/skill/name_Text",
+          "text": "晶焰归航之诗",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 410.715,
+            "top": 374.184,
+            "right": 589.538,
+            "bottom": 409.811
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "timer_Text",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/timer_Text",
+          "text": "11:54:14",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 400.66,
+            "top": 591.589,
+            "right": 599.9,
+            "bottom": 626.923
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "FpsPanel",
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 573.333,
+            "top": 0.0,
+            "right": 706.667,
+            "bottom": 34.667
+          }
+        }
+      ],
+      "images": [
+        {
+          "kind": "image",
+          "name": "icon_frame",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill(Clone)/icon_frame",
+          "sprite": "skill_icon_bg",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 329.666,
+            "top": 284.333,
+            "right": 422.333,
+            "bottom": 376.999
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 376.0,
+            "y": 330.666
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "icon",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill(Clone)/icon",
+          "sprite": "152630",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 333.333,
+            "top": 287.999,
+            "right": 418.666,
+            "bottom": 373.333
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 376.0,
+            "y": 330.666
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "skill(Clone)",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill(Clone)",
+          "sprite": "white_dot",
+          "flags": 14319,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": true,
+          "color": {
+            "red": 0.415686,
+            "green": 0.458824,
+            "blue": 0.529412,
+            "alpha": 0.27451
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 314.666,
+            "top": 271.999,
+            "right": 936.0,
+            "bottom": 390.666
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 625.333,
+            "y": 331.333
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "confirm_btn",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/confirm_btn",
+          "sprite": "btn_big_blue",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 548.998,
+            "top": 548.805,
+            "right": 731.002,
+            "bottom": 616.14
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 640.0,
+            "y": 582.472
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "Image",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/scroll_bar/Image",
+          "sprite": "scroll_bar",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 956.541,
+            "top": 134.661,
+            "right": 970.541,
+            "bottom": 530.671
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 963.541,
+            "y": 332.666
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "scroll_bar",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/scroll_bar",
+          "sprite": "white_dot",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.180392,
+            "green": 0.211765,
+            "blue": 0.27451,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 961.875,
+            "top": 139.995,
+            "right": 965.208,
+            "bottom": 525.337
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 963.541,
+            "y": 332.666
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "empty",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/empty/empty",
+          "sprite": "empty",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 322.659,
+            "top": 408.668,
+            "right": 928.007,
+            "bottom": 518.004
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 625.333,
+            "y": 463.336
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "mark",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill/mark",
+          "sprite": "selected",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 306.658,
+            "top": 131.994,
+            "right": 944.008,
+            "bottom": 266.664
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 625.333,
+            "y": 199.329
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "icon_frame",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill/icon_frame",
+          "sprite": "skill_icon_bg",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 329.666,
+            "top": 152.329,
+            "right": 422.333,
+            "bottom": 244.996
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 376.0,
+            "y": 198.663
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "icon",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill/icon",
+          "sprite": "152620",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 333.333,
+            "top": 155.996,
+            "right": 418.666,
+            "bottom": 241.329
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 376.0,
+            "y": 198.663
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "skill",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/skill",
+          "sprite": "white_dot",
+          "flags": 14319,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": true,
+          "color": {
+            "red": 0.415686,
+            "green": 0.458824,
+            "blue": 0.529412,
+            "alpha": 0.27451
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 314.666,
+            "top": 139.996,
+            "right": 936.0,
+            "bottom": 258.663
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 625.333,
+            "y": 199.329
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "skill_container",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/skill_container",
+          "sprite": "white_dot",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.0,
+            "green": 0.0,
+            "blue": 0.0,
+            "alpha": 0.490196
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 289.325,
+            "top": 126.661,
+            "right": 990.675,
+            "bottom": 538.671
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 640.0,
+            "y": 332.666
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "title_bg",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/bg/title_bg",
+          "sprite": "title_print",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.0,
+            "green": 0.0,
+            "blue": 0.0,
+            "alpha": 0.313726
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 290.658,
+            "top": 95.327,
+            "right": 469.329,
+            "bottom": 120.661
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 379.994,
+            "y": 107.994
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "right",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/bg/right",
+          "sprite": "skill_title_print",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 913.34,
+            "top": 79.993,
+            "right": 993.342,
+            "bottom": 125.994
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 993.342,
+            "y": 79.993
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "print",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/bg/print",
+          "sprite": "white_dot",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.235294
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 286.658,
+            "top": 619.34,
+            "right": 993.342,
+            "bottom": 621.34
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 640.0,
+            "y": 621.34
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "bg",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame/bg",
+          "sprite": "skill_bg_up",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 286.658,
+            "top": 79.993,
+            "right": 993.342,
+            "bottom": 621.34
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 640.0,
+            "y": 79.993
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "frame",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/frame",
+          "sprite": "msg_bg",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 286.658,
+            "top": 79.993,
+            "right": 993.342,
+            "bottom": 621.34
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 640.0,
+            "y": 350.666
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "print",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)/print",
+          "sprite": "add",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.294118
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.138,
+            "top": -0.078,
+            "right": 1280.138,
+            "bottom": 720.078
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 640.0,
+            "y": 360.0
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "NewNavalTacticsSkillsPage(Clone)",
+          "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsSkillsPage(Clone)",
+          "sprite": "white_dot",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.0,
+            "green": 0.0,
+            "blue": 0.0,
+            "alpha": 0.705882
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.016,
+            "top": -0.009,
+            "right": 1280.016,
+            "bottom": 720.009
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 640.0,
+            "y": 360.0
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "decoration",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/add(Clone)/decoration",
+          "sprite": "print4",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1108.476,
+            "top": 614.962,
+            "right": 1254.411,
+            "bottom": 673.602
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 1181.444,
+            "y": 644.282
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "decoration",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/add(Clone)/decoration",
+          "sprite": "print2",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1066.583,
+            "top": 94.921,
+            "right": 1253.167,
+            "bottom": 353.473
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 1159.875,
+            "y": 224.197
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "add_btn",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/add(Clone)/add_btn",
+          "sprite": "text_add_student",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1060.919,
+            "top": 364.469,
+            "right": 1268.161,
+            "bottom": 414.446
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 1164.54,
+            "y": 389.457
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "add(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/add(Clone)",
+          "sprite": "lock_300",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1049.892,
+            "top": 80.998,
+            "right": 1269.681,
+            "bottom": 704.055
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 1159.787,
+            "y": 392.527
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "decoration",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/add(Clone)/decoration",
+          "sprite": "print4",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 888.589,
+            "top": 614.962,
+            "right": 1034.525,
+            "bottom": 673.602
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 961.557,
+            "y": 644.282
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "decoration",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/add(Clone)/decoration",
+          "sprite": "print2",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 846.696,
+            "top": 94.921,
+            "right": 1033.281,
+            "bottom": 353.473
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 939.988,
+            "y": 224.197
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "add_btn",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/add(Clone)/add_btn",
+          "sprite": "text_add_student",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 841.032,
+            "top": 364.469,
+            "right": 1048.274,
+            "bottom": 414.446
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 944.653,
+            "y": 389.457
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "add(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/add(Clone)",
+          "sprite": "lock_300",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 830.005,
+            "top": 80.998,
+            "right": 1049.795,
+            "bottom": 704.055
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 939.9,
+            "y": 392.527
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "Ring01",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/bg_other/duang_6(Clone)/Ring01",
+          "sprite": "duang_6_Line01",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 401.172,
+            "top": 86.626,
+            "right": 599.081,
+            "bottom": 363.869
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 500.127,
+            "y": 225.248
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "Line",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/bg_other/duang_6(Clone)/Line",
+          "sprite": "IconColorfulwave01_1",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 401.204,
+            "top": 82.28,
+            "right": 599.049,
+            "bottom": 370.434
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 500.127,
+            "y": 226.357
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "on",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/stars/star_tpl(Clone)/on",
+          "sprite": "star",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 526.742,
+            "top": 330.856,
+            "right": 558.817,
+            "bottom": 360.201
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 542.779,
+            "y": 345.529
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "star_tpl(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/stars/star_tpl(Clone)",
+          "sprite": "star_bg",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 526.742,
+            "top": 330.856,
+            "right": 558.817,
+            "bottom": 360.201
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 542.779,
+            "y": 345.529
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "on",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/stars/star_tpl(Clone)/on",
+          "sprite": "star",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 509.681,
+            "top": 330.856,
+            "right": 541.756,
+            "bottom": 360.201
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 525.718,
+            "y": 345.529
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "star_tpl(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/stars/star_tpl(Clone)",
+          "sprite": "star_bg",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 509.681,
+            "top": 330.856,
+            "right": 541.756,
+            "bottom": 360.201
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 525.718,
+            "y": 345.529
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "on",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/stars/star_tpl(Clone)/on",
+          "sprite": "star",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 492.62,
+            "top": 330.856,
+            "right": 524.695,
+            "bottom": 360.201
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 508.657,
+            "y": 345.529
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "star_tpl(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/stars/star_tpl(Clone)",
+          "sprite": "star_bg",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 492.62,
+            "top": 330.856,
+            "right": 524.695,
+            "bottom": 360.201
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 508.657,
+            "y": 345.529
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "on",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/stars/star_tpl(Clone)/on",
+          "sprite": "star",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 475.559,
+            "top": 330.856,
+            "right": 507.634,
+            "bottom": 360.201
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 491.596,
+            "y": 345.529
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "star_tpl(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/stars/star_tpl(Clone)",
+          "sprite": "star_bg",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 475.559,
+            "top": 330.856,
+            "right": 507.634,
+            "bottom": 360.201
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 491.596,
+            "y": 345.529
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "on",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/stars/star_tpl(Clone)/on",
+          "sprite": "star",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 458.498,
+            "top": 330.856,
+            "right": 490.572,
+            "bottom": 360.201
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 474.535,
+            "y": 345.529
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "star_tpl(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/stars/star_tpl(Clone)",
+          "sprite": "star_bg",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 458.498,
+            "top": 330.856,
+            "right": 490.572,
+            "bottom": 360.201
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 474.535,
+            "y": 345.529
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "on",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/stars/star_tpl/on",
+          "sprite": "star",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 441.436,
+            "top": 330.856,
+            "right": 473.511,
+            "bottom": 360.201
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 457.474,
+            "y": 345.529
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "star_tpl",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/stars/star_tpl",
+          "sprite": "star_bg",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 441.436,
+            "top": 330.856,
+            "right": 473.511,
+            "bottom": 360.201
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 457.474,
+            "y": 345.529
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "frame",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/front/frame",
+          "sprite": "5_0",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 401.172,
+            "top": 86.626,
+            "right": 599.081,
+            "bottom": 363.869
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 500.127,
+            "y": 225.248
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "lock",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/dockyard/container/lock",
+          "sprite": "suo01",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 553.357,
+            "top": 129.492,
+            "right": 588.674,
+            "bottom": 164.041
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 571.016,
+            "y": 146.767
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "name_mask",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/info/name_mask",
+          "sprite": "white_dot",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.0,
+            "green": 0.0,
+            "blue": 0.0,
+            "alpha": 0.705882
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 407.997,
+            "top": 303.302,
+            "right": 592.257,
+            "bottom": 333.159
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 500.127,
+            "y": 333.159
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "type",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/info/top/type",
+          "sprite": "zhanlie",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 407.997,
+            "top": 101.981,
+            "right": 452.356,
+            "bottom": 129.279
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 407.997,
+            "y": 115.63
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "top",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/info/top",
+          "sprite": "white_dot",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.0,
+            "green": 0.0,
+            "blue": 0.0,
+            "alpha": 0.54902
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 407.997,
+            "top": 101.981,
+            "right": 592.257,
+            "bottom": 129.279
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 500.127,
+            "y": 115.63
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "ship_icon",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/ship_icon",
+          "sprite": "waerpalaisuo",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 407.997,
+            "top": 101.981,
+            "right": 592.257,
+            "bottom": 348.514
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 500.127,
+            "y": 225.248
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "bg",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/1299012/content/bg",
+          "sprite": "star_level_card_5_0",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 412.262,
+            "top": 101.981,
+            "right": 587.991,
+            "bottom": 348.514
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 500.127,
+            "y": 225.248
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "help_btn",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/help_btn",
+          "sprite": "help_butten",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 331.381,
+            "top": 91.533,
+            "right": 363.181,
+            "bottom": 123.333
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 343.077,
+            "y": 107.433
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "decoration",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/add/decoration",
+          "sprite": "print4",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 668.703,
+            "top": 614.962,
+            "right": 814.638,
+            "bottom": 673.602
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 741.67,
+            "y": 644.282
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "decoration",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/add/decoration",
+          "sprite": "print2",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 626.81,
+            "top": 94.921,
+            "right": 813.394,
+            "bottom": 353.473
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 720.102,
+            "y": 224.197
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "add_btn",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/add/add_btn",
+          "sprite": "text_add_student",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 621.146,
+            "top": 364.469,
+            "right": 828.387,
+            "bottom": 414.446
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 724.766,
+            "y": 389.457
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "add",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/add",
+          "sprite": "lock_300",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 610.119,
+            "top": 80.998,
+            "right": 829.908,
+            "bottom": 704.055
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 720.013,
+            "y": 392.527
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "cancel_btn",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/cancel_btn",
+          "sprite": "btn_cancel",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 397.46,
+            "top": 621.374,
+            "right": 602.793,
+            "bottom": 692.707
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 500.127,
+            "y": 657.041
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "bar",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/skill/exp/bar",
+          "sprite": "bar",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 404.648,
+            "top": 544.616,
+            "right": 566.811,
+            "bottom": 561.453
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 485.73,
+            "y": 553.035
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "exp",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/skill/exp",
+          "sprite": "bar_bg_282",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 407.003,
+            "top": 546.95,
+            "right": 594.197,
+            "bottom": 558.89
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 500.6,
+            "y": 552.92
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "icon_bg",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/skill/icon_bg",
+          "sprite": "skill_icon_bg",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 407.06,
+            "top": 426.936,
+            "right": 502.667,
+            "bottom": 527.21
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 454.863,
+            "y": 477.073
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "icon",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/skill/icon",
+          "sprite": "190110",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 407.06,
+            "top": 426.936,
+            "right": 502.667,
+            "bottom": 527.21
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 454.863,
+            "y": 477.073
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "name",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/skill/name",
+          "sprite": "skill_name",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 405.793,
+            "top": 373.997,
+            "right": 594.46,
+            "bottom": 409.997
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 500.127,
+            "y": 391.997
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "timer_bg",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/timer_bg",
+          "sprite": "timer_298",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 400.66,
+            "top": 591.589,
+            "right": 599.9,
+            "bottom": 626.923
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 500.28,
+            "y": 609.256
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "decoration",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/decoration",
+          "sprite": "bg_print_726_286",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 404.792,
+            "top": 97.874,
+            "right": 595.461,
+            "bottom": 581.88
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 500.127,
+            "y": 339.877
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "decoration",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/decoration",
+          "sprite": "print1",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 409.5,
+            "top": 569.601,
+            "right": 504.835,
+            "bottom": 577.601
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 457.167,
+            "y": 573.601
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "decoration",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/decoration",
+          "sprite": "print5_114",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 518.841,
+            "top": 522.484,
+            "right": 594.203,
+            "bottom": 523.817
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 556.522,
+            "y": 523.151
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "decoration",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/decoration",
+          "sprite": "print5_114",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 518.841,
+            "top": 469.702,
+            "right": 594.203,
+            "bottom": 471.034
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 556.522,
+            "y": 470.368
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "decoration",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/decoration",
+          "sprite": "print6",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 566.878,
+            "top": 429.048,
+            "right": 594.203,
+            "bottom": 435.046
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 580.541,
+            "y": 432.047
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "info",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info",
+          "sprite": "bg_300",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 390.256,
+            "top": 81.401,
+            "right": 609.998,
+            "bottom": 703.652
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 500.127,
+            "y": 392.527
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "option",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/option",
+          "sprite": "viewall_1920",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1197.467,
+            "top": 3.723,
+            "right": 1258.8,
+            "bottom": 75.056
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 1228.134,
+            "y": 39.39
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "Image",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/btnBack/mask/Image",
+          "sprite": "back_btn",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 22.8,
+            "top": 18.667,
+            "right": 94.133,
+            "bottom": 88.667
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 58.467,
+            "y": 53.667
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "mask",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/btnBack/mask",
+          "sprite": "icon_bg_mask_1920",
+          "flags": 12719,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 0.140138,
+            "green": 0.125541,
+            "blue": 0.198529,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 11.333,
+            "top": 8.0,
+            "right": 103.333,
+            "bottom": 100.0
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 57.333,
+            "y": 54.0
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "btnBack",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/btnBack",
+          "sprite": "icon_bg_front_1920",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 0.315,
+            "top": -3.019,
+            "right": 114.352,
+            "bottom": 111.019
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 57.333,
+            "y": 54.0
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "title_EN",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/title_EN",
+          "sprite": "ACADEMY",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 226.429,
+            "top": 23.256,
+            "right": 297.096,
+            "bottom": 49.923
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 261.762,
+            "y": 36.59
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "title",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/title",
+          "sprite": "title",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 111.0,
+            "top": 3.256,
+            "right": 242.333,
+            "bottom": 49.923
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 111.0,
+            "y": 26.59
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "line",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/line",
+          "sprite": "top_line",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.588235
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -213.717,
+            "top": 53.316,
+            "right": 1493.716,
+            "bottom": 54.649
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 640.0,
+            "y": 54.649
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "print",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/print",
+          "sprite": "player_info_bg1_1920",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 98.831,
+            "top": 27.918,
+            "right": 363.948,
+            "bottom": 45.251
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 231.389,
+            "y": 36.584
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "print_bg",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/print_bg",
+          "sprite": "player_info_bg2_1920",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 94.216,
+            "top": 8.989,
+            "right": 412.823,
+            "bottom": 47.649
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 253.52,
+            "y": 28.319
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "print_top",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/print_top",
+          "sprite": "icon_bg_top_1920",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 56.144,
+            "top": -0.011,
+            "right": 114.141,
+            "bottom": 25.32
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 85.143,
+            "y": 12.654
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "top_bg",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/top_bg",
+          "sprite": "top_bg",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 0.0,
+            "right": 1280.0,
+            "bottom": 54.667
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 640.0,
+            "y": 0.0
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "painting",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/painting",
+          "sprite": "class_painting",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -3.257,
+            "top": 159.333,
+            "right": 388.743,
+            "bottom": 842.0
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 192.743,
+            "y": 500.667
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "NewNavalTacticsUI(Clone)",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)",
+          "sprite": "technology_bg",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 0.0,
+            "right": 1280.0,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 640.0,
+            "y": 360.0
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "top",
+          "path": "OverlayCamera/Adpter/top/top",
+          "sprite": "mask1",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": -140.667,
+            "right": 1280.0,
+            "bottom": 0.0
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 640.0,
+            "y": -70.333
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "left",
+          "path": "OverlayCamera/Adpter/left/left",
+          "sprite": "mask",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -140.667,
+            "top": 0.0,
+            "right": -0.0,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": -70.333,
+            "y": 360.0
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "bottom",
+          "path": "OverlayCamera/Adpter/bottom/bottom",
+          "sprite": "mask1",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 720.0,
+            "right": 1280.0,
+            "bottom": 860.667
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 640.0,
+            "y": 790.333
+          },
+          "inherited_alpha": 1.0
+        },
+        {
+          "kind": "image",
+          "name": "right",
+          "path": "OverlayCamera/Adpter/right/right",
+          "sprite": "mask",
+          "flags": 12783,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1280.0,
+            "top": 0.0,
+            "right": 1420.667,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null,
+          "adb_point": {
+            "x": 1350.333,
+            "y": 360.0
+          },
+          "inherited_alpha": 1.0
+        }
+      ],
+      "globe_geometry": {
+        "schema": "alas-headless.globe-geometry/v1",
+        "status": 0,
+        "truncated": false,
+        "error_count": 0,
+        "camera_path": "",
+        "objects": []
+      },
+      "lua_globe_diagnostic": {
+        "schema": "alas-headless.lua-globe-diagnostic/v1",
+        "status": 0,
+        "stage": 0,
+        "truncated": false,
+        "stack_balanced": false,
+        "registry_visited": 0,
+        "inspection_count": 0,
+        "world_candidates": 0,
+        "drag_candidates": 0,
+        "colors": [],
+        "dragging": [],
+        "drag_pointer_instance_ids": [],
+        "drag_trigger_instance_ids": [],
+        "active_pointer_instance_id": 0
+      },
+      "shipyard_strengthen": {
+        "status": 0,
+        "stage": 0,
+        "truncated": false,
+        "stack_balanced": false,
+        "blueprint_id": 0,
+        "ship_id": 0,
+        "ship_index": 0,
+        "series": 0,
+        "rarity": 0,
+        "pursuing": false,
+        "purchased": 0,
+        "coins": 0,
+        "gems_known": false,
+        "paid_gems": 0,
+        "free_gems": 0,
+        "level": 0,
+        "fate_level": -1,
+        "exp": 0
+      },
+      "activity_identity": {
+        "status": 1,
+        "stack_balanced": true,
+        "archives": {
+          "status": 1,
+          "expected_count": 52,
+          "truncated": false,
+          "records": [
+            {
+              "id": 1,
+              "activity_type": 1,
+              "name": "红染常驻复刻",
+              "bg": "temp_hongran"
+            },
+            {
+              "id": 2,
+              "activity_type": 2,
+              "name": "Z舰队常驻复刻",
+              "bg": "temp_zjiandui"
+            },
+            {
+              "id": 4,
+              "activity_type": 1,
+              "name": "凛冬常驻复刻",
+              "bg": "temp_lingdong"
+            },
+            {
+              "id": 5,
+              "activity_type": 2,
+              "name": "围剿斯佩伯爵』常驻复刻",
+              "bg": "temp_sipei"
+            },
+            {
+              "id": 6,
+              "activity_type": 1,
+              "name": "异色格常驻复刻",
+              "bg": "temp_yisege"
+            },
+            {
+              "id": 7,
+              "activity_type": 1,
+              "name": "坠落之翼常驻复刻",
+              "bg": "temp_zhuiluo"
+            },
+            {
+              "id": 8,
+              "activity_type": 1,
+              "name": "鸢尾之华常驻复刻",
+              "bg": "temp_yuanwei"
+            },
+            {
+              "id": 9,
+              "activity_type": 1,
+              "name": "墨染的钢铁之花常驻复刻",
+              "bg": "temp_moran"
+            },
+            {
+              "id": 10,
+              "activity_type": 2,
+              "name": "光荣的一战常驻复刻",
+              "bg": "temp_guangrong"
+            },
+            {
+              "id": 11,
+              "activity_type": 1,
+              "name": "苍红的回响常驻复刻",
+              "bg": "temp_tiancheng"
+            },
+            {
+              "id": 12,
+              "activity_type": 2,
+              "name": "月光下的序曲常驻复刻",
+              "bg": "temp_xinaoerliang"
+            },
+            {
+              "id": 13,
+              "activity_type": 1,
+              "name": "俾斯麦常驻复刻",
+              "bg": "temp_bisimai"
+            },
+            {
+              "id": 14,
+              "activity_type": 2,
+              "name": "偶像一期常驻复刻",
+              "bg": "temp_ouxiang"
+            },
+            {
+              "id": 15,
+              "activity_type": 1,
+              "name": "神圣的悲喜剧常驻复刻",
+              "bg": "temp_beixiju"
+            },
+            {
+              "id": 16,
+              "activity_type": 2,
+              "name": "斯图尔特的硝烟常驻复刻",
+              "bg": "temp_longxiang"
+            },
+            {
+              "id": 17,
+              "activity_type": 1,
+              "name": "箱庭疗法常驻复刻",
+              "bg": "temp_xiangting"
+            },
+            {
+              "id": 18,
+              "activity_type": 1,
+              "name": "浮樱影华常驻复刻",
+              "bg": "temp_fuying"
+            },
+            {
+              "id": 19,
+              "activity_type": 2,
+              "name": "最珍贵的宝物常驻复刻",
+              "bg": "temp_u110"
+            },
+            {
+              "id": 20,
+              "activity_type": 2,
+              "name": "偶像二期常驻复刻",
+              "bg": "temp_ouxiang2"
+            },
+            {
+              "id": 21,
+              "activity_type": 1,
+              "name": "微层混合常驻复刻",
+              "bg": "temp_weiceng"
+            },
+            {
+              "id": 22,
+              "activity_type": 2,
+              "name": "峡湾间的星辰常驻复刻",
+              "bg": "temp_yonggan"
+            },
+            {
+              "id": 23,
+              "activity_type": 1,
+              "name": "穹顶下的圣咏曲常驻复刻",
+              "bg": "temp_zhende"
+            },
+            {
+              "id": 24,
+              "activity_type": 2,
+              "name": "夜幕下的归途常驻复刻",
+              "bg": "temp_taertu"
+            },
+            {
+              "id": 25,
+              "activity_type": 1,
+              "name": "北境序曲常驻复刻",
+              "bg": "temp_qiaba"
+            },
+            {
+              "id": 26,
+              "activity_type": 1,
+              "name": "永夜幻光常驻复刻",
+              "bg": "temp_hemin"
+            },
+            {
+              "id": 27,
+              "activity_type": 2,
+              "name": "峡湾间的反击常驻复刻",
+              "bg": "temp_aisijimoren"
+            },
+            {
+              "id": 28,
+              "activity_type": 1,
+              "name": "负象限作战常驻复刻",
+              "bg": "temp_u37"
+            },
+            {
+              "id": 29,
+              "activity_type": 1,
+              "name": "蝶海梦花常驻复刻",
+              "bg": "temp_xinnong"
+            },
+            {
+              "id": 30,
+              "activity_type": 1,
+              "name": "镜位螺旋常驻复刻",
+              "bg": "temp_xinzexi"
+            },
+            {
+              "id": 31,
+              "activity_type": 1,
+              "name": "破晓冰华常驻复刻",
+              "bg": "temp_talin"
+            },
+            {
+              "id": 32,
+              "activity_type": 2,
+              "name": "划破海空之翼常驻复刻",
+              "bg": "temp_pulinsidun"
+            },
+            {
+              "id": 33,
+              "activity_type": 2,
+              "name": "杰诺瓦的焰火常驻复刻",
+              "bg": "temp_fuxv"
+            },
+            {
+              "id": 34,
+              "activity_type": 1,
+              "name": "碧海光粼常驻复刻",
+              "bg": "temp_daofeng"
+            },
+            {
+              "id": 35,
+              "activity_type": 1,
+              "name": "复兴的赞美诗常驻复刻",
+              "bg": "temp_weineituo"
+            },
+            {
+              "id": 36,
+              "activity_type": 1,
+              "name": "逆转彩虹之塔常驻复刻",
+              "bg": "temp_huteng"
+            },
+            {
+              "id": 37,
+              "activity_type": 1,
+              "name": "深度回音常驻复刻",
+              "bg": "temp_kalangshitade"
+            },
+            {
+              "id": 38,
+              "activity_type": 2,
+              "name": "虚像构筑之塔常驻复刻",
+              "bg": "temp_diguo"
+            },
+            {
+              "id": 39,
+              "activity_type": 1,
+              "name": "泠誓光庭常驻复刻",
+              "bg": "temp_qianwei"
+            },
+            {
+              "id": 40,
+              "activity_type": 1,
+              "name": "雄鹰的叙事歌常驻复刻",
+              "bg": "temp_luoma"
+            },
+            {
+              "id": 41,
+              "activity_type": 1,
+              "name": "虹彩的终幕曲常驻复刻",
+              "bg": "temp_aimudeng"
+            },
+            {
+              "id": 42,
+              "activity_type": 2,
+              "name": "飓风与青春之泉常驻复刻",
+              "bg": "temp_fengfanv1"
+            },
+            {
+              "id": 43,
+              "activity_type": 1,
+              "name": "紫绛槿岚常驻复刻",
+              "bg": "temp_wuzang"
+            },
+            {
+              "id": 44,
+              "activity_type": 1,
+              "name": "定向折叠常驻复刻",
+              "bg": "temp_yuekechengII"
+            },
+            {
+              "id": 45,
+              "activity_type": 1,
+              "name": "湮烬尘墟常驻复刻",
+              "bg": "temp_yuanchou"
+            },
+            {
+              "id": 46,
+              "activity_type": 2,
+              "name": "远汇点作战常驻复刻",
+              "bg": "temp_bulunxierde"
+            },
+            {
+              "id": 47,
+              "activity_type": 2,
+              "name": "奏响鸢尾之歌常驻复刻",
+              "bg": "temp_masaiqu"
+            },
+            {
+              "id": 48,
+              "activity_type": 1,
+              "name": "空相交汇点常驻复刻",
+              "bg": "temp_bisimaiz"
+            },
+            {
+              "id": 49,
+              "activity_type": 2,
+              "name": "幻梦间奏曲常驻复刻",
+              "bg": "temp_sitelasibao"
+            },
+            {
+              "id": 50,
+              "activity_type": 3,
+              "name": "极地风暴常驻复刻",
+              "bg": "temp_kuersike"
+            },
+            {
+              "id": 51,
+              "activity_type": 3,
+              "name": "童心学院常驻复刻",
+              "bg": "temp_yaerweite"
+            },
+            {
+              "id": 52,
+              "activity_type": 2,
+              "name": "飓风与沉眠之海常驻复刻",
+              "bg": "temp_fengfanv2"
+            },
+            {
+              "id": 53,
+              "activity_type": 2,
+              "name": "飓风与自由群岛常驻复刻",
+              "bg": "temp_fengfanv3"
+            }
+          ]
+        },
+        "raids": {
+          "status": 1,
+          "stage": 14,
+          "proxy_count": 34,
+          "matched_count": 34,
+          "failed_id": 0,
+          "expected_count": 0,
+          "truncated": false,
+          "records": []
+        }
+      },
+      "operation_siren_globe_drag": {
+        "status": 2,
+        "handler_instance_id": 762352,
+        "endpoints": [
+          629.0,
+          327.0,
+          472.0,
+          533.0
+        ],
+        "handler_path": "WorldMap3D/entity/Plane",
+        "samples": [
+          {
+            "x": 629.0,
+            "y": 327.0,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 624.094,
+            "y": 333.438,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 619.188,
+            "y": 339.875,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 614.281,
+            "y": 346.312,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 609.375,
+            "y": 352.75,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 604.469,
+            "y": 359.188,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 599.562,
+            "y": 365.625,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 594.656,
+            "y": 372.062,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 589.75,
+            "y": 378.5,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 584.844,
+            "y": 384.938,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 579.938,
+            "y": 391.375,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 575.031,
+            "y": 397.812,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 570.125,
+            "y": 404.25,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 565.219,
+            "y": 410.688,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 560.312,
+            "y": 417.125,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 555.406,
+            "y": 423.562,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 550.5,
+            "y": 430.0,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 545.594,
+            "y": 436.438,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 540.688,
+            "y": 442.875,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 535.781,
+            "y": 449.312,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 530.875,
+            "y": 455.75,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 525.969,
+            "y": 462.188,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 521.062,
+            "y": 468.625,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 516.156,
+            "y": 475.062,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 511.25,
+            "y": 481.5,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 506.344,
+            "y": 487.938,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 501.438,
+            "y": 494.375,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 496.531,
+            "y": 500.812,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 491.625,
+            "y": 507.25,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 486.719,
+            "y": 513.688,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 481.812,
+            "y": 520.125,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 476.906,
+            "y": 526.562,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          },
+          {
+            "x": 472.0,
+            "y": 533.0,
+            "owned": true,
+            "top_path": "WorldMap3D/entity/Plane"
+          }
+        ]
+      },
+      "storage_scroll": {
+        "schema": "alas-headless.storage-scroll/v1",
+        "status": 0,
+        "matches": 0,
+        "controls": [],
+        "scrollbar": {
+          "schema": "alas-headless.storage-scrollbar/v1",
+          "status": 0,
+          "matches": 0,
+          "class_found": false,
+          "source_count": 0,
+          "controls": [],
+          "input": {
+            "schema": "alas-headless.storage-scrollbar-input/v1",
+            "status": 0
+          }
+        }
+      },
+      "private_quarters_physics": {
+        "schema": "alas-headless.private-colliders/v1",
+        "status": 0,
+        "truncated": false,
+        "error_count": 0,
+        "camera_path": "",
+        "colliders": []
+      }
+    },
+    "ui_source_generation": 360579
+  }
+}

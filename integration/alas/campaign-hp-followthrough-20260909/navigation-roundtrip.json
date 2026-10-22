@@ -1,0 +1,4 @@
+{
+  "passed": false,
+  "error": "AlasSemanticUnmapped('ALAS mission resource used outside mission flow: GET_SHIP')"
+}

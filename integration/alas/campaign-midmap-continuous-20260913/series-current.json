@@ -1,0 +1,8 @@
+{
+  "byte_count": 754831,
+  "combined_sha256": "9f87f0710ecebbc2b3f81c52b5656681530419b749c3fa9b28da98df3d226a5c",
+  "generated_path": "integration/alas/0001-semantic-oracle-hooks.patch",
+  "member_count": 113,
+  "schema": "alas-headless.alas-patch-series-check/v1",
+  "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
+}

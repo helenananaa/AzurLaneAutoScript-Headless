@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 import socket
 import subprocess
@@ -10,8 +11,11 @@ import time
 from typing import Any, Callable, Mapping, Optional, Sequence, Tuple
 from ..runtime_trace import RuntimeTraceRecorder
 from .contracts import AndroidPackageFingerprint, OBSERVER_SCHEMA
-from .errors import ObserverResponseTimeout, ObserverTransportError, SemanticGateClosed
+from .errors import ObserverConnectionInterrupted, ObserverResponseTimeout, ObserverTransportError, SemanticGateClosed
 
+_PLAIN_OBSERVER_READ_REQUESTS = (
+    "GET /v1/snapshot\n", "GET /v1/buttons\n", "GET /v1/ui\n", "GET /v1/state\n",
+)
 
 def encode_adb_shell_string_extra(value: str) -> str:
     """Keep a leading dash as string data across adb's shell argv reparse."""
@@ -24,19 +28,27 @@ def encode_adb_shell_string_extra(value: str) -> str:
 def observer_snapshot_semantic_ready(snapshot: Mapping[str, Any]) -> bool:
     """Return whether the main-thread typed UI publisher is fully ready."""
 
-    def exact_integer(name: str, expected: int) -> bool:
+    def contains_required_bits(name: str, required: int) -> bool:
         value = snapshot.get(name)
         return (
             isinstance(value, int)
             and not isinstance(value, bool)
-            and value == expected
+            and 0 <= value <= 0xFFFFFFFF
+            and value & required == required
         )
 
+    # These are capability bitmasks, not version identifiers. Additive bits in
+    # the same protocol must not hide the existing ready publisher. The native
+    # probe reserves the high flags bit for failure, even if low bits are set.
+    stage = snapshot.get("ui_stage")
     return bool(
         snapshot.get("main_thread") is True
-        and exact_integer("flags", 15)
-        and exact_integer("ui_stage", 100)
-        and exact_integer("ui_method_mask", 15)
+        and contains_required_bits("flags", 0xF)
+        and snapshot["flags"] & 0x80000000 == 0
+        and isinstance(stage, int)
+        and not isinstance(stage, bool)
+        and stage == 100
+        and contains_required_bits("ui_method_mask", 0xF)
     )
 
 
@@ -47,15 +59,15 @@ def request_observer_state(
 
     combined = request("GET /v1/state\n")
     combined_response = (
-        isinstance(combined, dict)
+        isinstance(combined, Mapping)
         and combined.get("protocol_schema") == OBSERVER_SCHEMA
         and combined.get("status") == "ok"
-        and isinstance(combined.get("snapshot"), dict)
-        and isinstance(combined.get("buttons"), dict)
+        and isinstance(combined.get("snapshot"), Mapping)
+        and isinstance(combined.get("buttons"), Mapping)
     )
     if combined_response:
         return combined["snapshot"], combined["buttons"], True
-    if isinstance(combined, dict) and combined.get("status") == "bad-request":
+    if isinstance(combined, Mapping) and combined.get("status") == "bad-request":
         # Compatibility with pre-state observer builds. The atomic endpoint
         # reduces this pair to one socket round trip without changing cadence.
         return (
@@ -64,7 +76,7 @@ def request_observer_state(
             False,
         )
     if (
-        isinstance(combined, dict)
+        isinstance(combined, Mapping)
         and combined.get("protocol_schema") == OBSERVER_SCHEMA
         and combined.get("status") == "unavailable"
     ):
@@ -80,7 +92,7 @@ class TcpObserverTransport:
         host: str,
         port: int,
         timeout_seconds: float = 3.0,
-        maximum_response_bytes: int = 1024 * 1024,
+        maximum_response_bytes: int = 4 * 1024 * 1024,
         trace: Optional[RuntimeTraceRecorder] = None,
     ) -> None:
         self._host = host
@@ -90,12 +102,46 @@ class TcpObserverTransport:
         self._trace = trace
 
     def request(self, request_line: str) -> Mapping[str, Any]:
-        if request_line not in (
-            "GET /v1/snapshot\n",
-            "GET /v1/buttons\n",
-            "GET /v1/ui\n",
-            "GET /v1/state\n",
-        ):
+        retry_reason = None
+        try:
+            value = self._request_once(request_line)
+        except ObserverResponseTimeout:
+            if request_line not in _PLAIN_OBSERVER_READ_REQUESTS:
+                raise
+            # These four requests only observe state. Discard the incomplete
+            # response and reconnect once; no input or parameterized request
+            # is replayed, and the caller still validates the new frame.
+            retry_reason = 'response-timeout'
+        except ObserverConnectionInterrupted:
+            if request_line not in _PLAIN_OBSERVER_READ_REQUESTS:
+                raise
+            retry_reason = 'connection-interrupted'
+        else:
+            if (request_line in _PLAIN_OBSERVER_READ_REQUESTS
+                    and value.get('status') == 'bad-request'):
+                retry_reason = 'bad-request'
+        if retry_reason is not None:
+            # Legacy observers read the stream with one recv(). A valid plain
+            # read can be rejected when fragmented or delayed at the forward.
+            # Reconnect once; parameterized requests and uncertain failures
+            # retain their existing handling, and all response identity/
+            # freshness/coherence checks still belong to the caller.
+            if self._trace is not None:
+                self._trace.emit('observer.plain_read_retry', fields={
+                    'endpoint': request_line.split(' ', 1)[1].strip(),
+                    'reason': retry_reason, 'retry': 1})
+            value = self._request_once(request_line)
+        return value
+
+    def _request_once(self, request_line: str) -> Mapping[str, Any]:
+        number = r'[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?'
+        projection = re.fullmatch(r'GET /v1/(?:globe-projection|storage-scrollbar-input) (' + number + r') (' + number + r')\n', request_line)
+        projection_request = projection is not None and all(math.isfinite(float(v)) for v in projection.groups())
+        drag = re.fullmatch(r'GET /v1/(?:os-map-drag|globe-map-drag) ' + ' '.join(['(' + number + ')'] * 4) + r'\n', request_line)
+        drag_request = drag is not None and all(math.isfinite(float(v)) for v in drag.groups())
+        port_input_request = re.fullmatch(r'GET /v1/globe-port-input [1-8]\n', request_line) is not None
+        if (request_line not in _PLAIN_OBSERVER_READ_REQUESTS
+                and not projection_request and not drag_request and not port_input_request):
             raise ObserverTransportError(
                 "client refused an unsupported observer request"
             )
@@ -151,6 +197,8 @@ class TcpObserverTransport:
                     duration_ns=time.monotonic_ns() - started_ns,
                     fields={"endpoint": endpoint, "exception_type": type(exc).__name__},
                 )
+            if connected and isinstance(exc, (ConnectionAbortedError, ConnectionResetError, BrokenPipeError)):
+                raise ObserverConnectionInterrupted("observer socket request failed") from exc
             raise ObserverTransportError("observer socket request failed") from exc
 
         line = bytes(chunks).split(b"\n", 1)[0]
@@ -261,19 +309,38 @@ class AdbObserverBridge:
                 [*prefix, "-s", self.serial, *arguments],
                 check=True,
                 capture_output=True,
-                text=True,
+                text=False,
                 timeout=timeout,
             )
-        except (OSError, subprocess.SubprocessError) as exc:
+            # ADB emits UTF-8 independently of Windows' locale. Decode on the
+            # calling thread so malformed output is a classified failure.
+            output = completed.stdout.decode('utf-8')
+        except (OSError, subprocess.SubprocessError, UnicodeError) as exc:
             if self.trace is not None:
+                fields = {"operation": operation, "exception_type": type(exc).__name__}
+                if operation == "foreground-activity":
+                    # A slow failed read must remain distinguishable from a
+                    # daemon/connectivity error or an Android service timeout.
+                    # Keep stderr bounded and never record activity dump data.
+                    fields.update(adb_executable=self.adb, adb_server_port=self.adb_server_port,
+                                  timeout_seconds=timeout)
+                    if isinstance(exc, subprocess.CalledProcessError):
+                        fields["returncode"] = exc.returncode
+                    stderr = getattr(exc, "stderr", None) or ""
+                    if isinstance(stderr, bytes):
+                        stderr = stderr.decode("utf-8", errors="replace")
+                    if stderr:
+                        fields["stderr_tail"] = stderr[-512:]
+                    stdout = getattr(exc, "stdout", None) or getattr(exc, "output", None) or ""
+                    if isinstance(stdout, bytes):
+                        stdout = stdout.decode("utf-8", errors="replace")
+                    if "dump timeout" in stdout.lower():
+                        fields["activity_dump_timeout"] = True
                 self.trace.emit(
                     "adb.command",
                     outcome="error",
                     duration_ns=time.monotonic_ns() - started_ns,
-                    fields={
-                        "operation": operation,
-                        "exception_type": type(exc).__name__,
-                    },
+                    fields=fields,
                 )
             raise ObserverTransportError("ADB command failed") from exc
         if self.trace is not None:
@@ -282,7 +349,7 @@ class AdbObserverBridge:
                 duration_ns=time.monotonic_ns() - started_ns,
                 fields={"operation": operation},
             )
-        return completed.stdout.strip()
+        return output.strip()
 
     @staticmethod
     def _classify_adb_operation(arguments: Sequence[str]) -> str:
@@ -446,13 +513,75 @@ class AdbObserverBridge:
     def request(self, request_line: str) -> Mapping[str, Any]:
         if self.transport is None:
             raise ObserverTransportError("ADB observer bridge is not open")
-        return self.transport.request(request_line)
+        try:
+            return self.transport.request(request_line)
+        except ObserverTransportError as exc:
+            # Another ADB client can restart the shared daemon and discard
+            # our forward while Unity keeps running. Only recover a refused
+            # connection before a read was sent, never replay native input.
+            if (
+                request_line not in (
+                    "GET /v1/snapshot\n", "GET /v1/buttons\n",
+                    "GET /v1/ui\n", "GET /v1/state\n",
+                )
+                or not isinstance(exc.__cause__, ConnectionRefusedError)
+                or not self._restore_missing_observer_forward()
+            ):
+                raise
+            return self.transport.request(request_line)
+
+    def _restore_missing_observer_forward(self) -> bool:
+        if self.pid is None or self.port is None or self.transport is None:
+            return False
+        old_local = "tcp:{0}".format(self.port)
+        forwards = self._run(("forward", "--list"))
+        if any(
+            len(parts) == 3 and parts[1] == old_local
+            for parts in (line.split() for line in forwards.splitlines())
+        ):
+            # A still-listed or reassigned listener is a different failure.
+            return False
+        if self._run(("shell", "pidof", self.package)) != str(self.pid):
+            raise ObserverTransportError("game PID changed while restoring observer forward")
+        port_text = self._run((
+            "forward", "tcp:0", "localabstract:alas.g3.{0}".format(self.pid),
+        ))
+        if not port_text.isdigit():
+            raise ObserverTransportError("ADB did not return a forwarding port")
+        previous = self.transport
+        self.port = int(port_text)
+        self.transport = TcpObserverTransport(
+            "127.0.0.1", self.port,
+            timeout_seconds=previous._timeout_seconds,
+            maximum_response_bytes=previous._maximum_response_bytes,
+            trace=self.trace,
+        )
+        if self.trace is not None:
+            self.trace.emit("adb.observer-forward-restored", fields={"pid": self.pid})
+        return True
 
     def foreground_component(self) -> str:
-        output = self._run(
-            ("shell", "dumpsys", "activity", "activities"),
-            timeout_seconds=max(self.command_timeout_seconds, 30.0),
-        )
+        for attempt in range(2):
+            try:
+                output = self._run(
+                    ("shell", "dumpsys", "activity", "activities"),
+                    timeout_seconds=max(self.command_timeout_seconds, 30.0),
+                )
+                break
+            except ObserverTransportError as exc:
+                cause = exc.__cause__
+                stderr = getattr(cause, 'stderr', b'') or b''
+                if isinstance(stderr, bytes):
+                    stderr = stderr.decode('utf-8', errors='replace')
+                retryable = (isinstance(cause, subprocess.TimeoutExpired)
+                    or isinstance(cause, subprocess.CalledProcessError)
+                    and 'cannot connect to daemon' in stderr.lower())
+                if attempt or not retryable:
+                    raise
+                # This query has no input outcome to duplicate. Re-query the
+                # same device/server after transient daemon recovery, keeping
+                # the failed command trace and every final foreground gate.
+                time.sleep(0.25)
         match = self._FOREGROUND_PATTERN.search(output)
         return match.group(1) if match else ""
 
@@ -469,8 +598,13 @@ class AdbObserverBridge:
             raise ObserverTransportError("expected exactly one numeric game PID")
         return int(pid_text)
 
-    def tap(self, x: int, y: int) -> None:
-        self._run(("shell", "input", "tap", str(x), str(y)))
+    def tap(self, x: float, y: float) -> None:
+        if any(isinstance(value, bool) or not isinstance(value, (int, float))
+               or not math.isfinite(value) for value in (x, y)):
+            raise ValueError("typed tap point must contain finite numbers")
+        # Keep down and up separated for the Unity input loop. Both endpoints
+        # remain the caller's single reviewed point; this introduces no drag.
+        self._run(("shell", "input", "swipe", str(x), str(y), str(x), str(y), "100"))
 
     def swipe(
         self,

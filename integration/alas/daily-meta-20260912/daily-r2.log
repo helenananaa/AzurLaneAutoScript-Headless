@@ -1,0 +1,80 @@
+�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+                                     START                                     
+�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+                                     START                                     
+�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+INFO     2026-09-12 11:18:36.224 �� [Server] cn                                 
+read: ./config\_codex_daily_quick_ae5598d019a245fdaa7e590b3b6dc801.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 11:18:36.251 �� Bind task ['General', 'Alas']               
+read: ./config\_codex_daily_quick_ae5598d019a245fdaa7e590b3b6dc801.json
+INFO     2026-09-12 11:18:36.256 �� Bind task ['General', 'Alas', 'Daily']      
+----------------------------------- DEVICE ------------------------------------
+INFO     2026-09-12 11:18:36.258 �� DEVICE                                      
+INFO     2026-09-12 11:18:36.258 �� [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 11:18:36.259 �� [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 11:18:36.261 �� [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 11:18:36.262 �� <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 11:18:36.262 �� Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 11:18:36.265 �� emulator-5580                               
+INFO     2026-09-12 11:18:36.266 �� "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 11:18:36.267 �� [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 11:18:36.271 �� [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 11:18:36.272 �� [Server] cn                                 
+WARNING  2026-09-12 11:18:36.274 �� ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+--------------------------- FIND EMULATOR INSTANCE ----------------------------
+INFO     2026-09-12 11:18:36.275 �� FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 11:18:36.303 �� MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 11:18:36.304 �� MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 11:18:36.305 �� No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 11:18:36.305 �� Screenshot interval set to 0.3s             
+INFO     2026-09-12 11:18:36.824 �� Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+-------------------------------- DAILY RUN ONE --------------------------------
+INFO     2026-09-12 11:18:36.826 �� DAILY RUN ONE                               
+INFO     2026-09-12 11:18:37.023 �� <<< UI ENSURE >>>                           
+INFO     2026-09-12 11:18:37.775 �� UI get current page                         
+INFO     2026-09-12 11:18:38.626 �� [UI] page_main                              
+INFO     2026-09-12 11:18:38.627 �� Goto page_daily                             
+INFO     2026-09-12 11:18:38.628 �� <<< UI GOTO PAGE_DAILY >>>                  
+INFO     2026-09-12 11:18:40.327 �� Page switch: page_main -> page_campaign_menu
+INFO     2026-09-12 11:18:40.680 �� Semantic click main/battle @                
+         OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/right/1/b
+         attle                                                                 
+INFO     2026-09-12 11:18:44.719 �� Page switch: page_main_white ->             
+         page_campaign_menu                                                    
+INFO     2026-09-12 11:18:45.084 �� Semantic click main/battle @                
+         OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/right/1/b
+         attle                                                                 
+INFO     2026-09-12 11:18:47.072 �� Page switch: page_campaign_menu ->          
+         page_daily                                                            
+INFO     2026-09-12 11:18:47.547 �� Semantic click campaign-menu/daily @        
+         UICamera/Canvas/UIMain/LevelMainScene(Clone)/entrance/btns/btn_daily  
+INFO     2026-09-12 11:18:49.559 �� Page arrive: page_daily                     
+INFO     2026-09-12 11:18:51.136 �� [emergency_module_development] False        
+INFO     2026-09-12 11:18:51.137 �� Checked_list: [0]                           
+INFO     2026-09-12 11:18:51.533 �� [Daily_1] active                            
+----------------------------------- DAILY 1 -----------------------------------
+INFO     2026-09-12 11:18:51.952 �� DAILY 1                                     
+INFO     2026-09-12 11:18:51.953 �� remain=3, stage=2, fleet=1                  
+INFO     2026-09-12 11:18:51.954 �� <<< UI CLICK >>>                            
+INFO     2026-09-12 11:18:55.097 �� Semantic click daily/current @              
+         UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/601        
+INFO     2026-09-12 11:18:57.892 �� <<< COUNT 1 >>>                             
+INFO     2026-09-12 11:18:59.439 �� Semantic click daily/stage/2 @              
+         UICamera/Canvas/UIMain/DailyLevelUI(Clone)/desc_panel/main_mask/main/s
+         crollview/content/stagetpl(Clone)/info                                
+INFO     2026-09-12 11:19:16.806 �� Semantic click daily/stage/2 @              
+         UICamera/Canvas/UIMain/DailyLevelUI(Clone)/desc_panel/main_mask/main/s
+         crollview/content/stagetpl(Clone)/info                                
+INFO     2026-09-12 11:19:36.376 �� Semantic click daily/stage/2 @              
+         UICamera/Canvas/UIMain/DailyLevelUI(Clone)/desc_panel/main_mask/main/s
+         crollview/content/stagetpl(Clone)/info                                

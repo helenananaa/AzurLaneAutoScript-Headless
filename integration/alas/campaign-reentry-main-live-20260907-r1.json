@@ -1,0 +1,11 @@
+{
+  "schema": "alas-headless.main-task-live-validation/v1",
+  "passed": false,
+  "finished_at": "2026-09-07T10:55:49.840774Z",
+  "task": "Main",
+  "stage": "3-1",
+  "serial": "emulator-5580",
+  "run_count_requested": 2,
+  "error": "SystemExit: 1",
+  "execution_status": "incomplete"
+}

@@ -8,6 +8,7 @@ from ...semantic_oracle import (
     BuildPool,
     BuildSubmitState,
     SemanticGateClosed,
+    SemanticTargetMissing,
 )
 from .contracts import _BuildFlowContext
 from .dispatch_result import UNHANDLED
@@ -128,7 +129,24 @@ class BuildAdapterPorts:
         return self._build_context.coins_owned
 
     def _appear_build(self, name):
+        if self._build_context is not None and name in ("POPUP_CONFIRM", "POPUP_CANCEL"):
+            if (self.oracle.observation_prompt_kind() == "opsi-exit"
+                    and self.oracle.operation_siren_exit_prompt_visible()):
+                return UNHANDLED
         if name in BUILD_VIRTUAL_RESOURCES and self._build_context is not None:
+            if name in ("BUILD_QUEUE_EMPTY", "BUILD_FINISH_ORDERS", "POPUP_CONFIRM", "POPUP_CANCEL"):
+                # Native Gacha checks its queue before waiting for the launch
+                # animation/new-ship reward. The animation owns this frame;
+                # leave the queue probes absent for the next ALAS screenshot.
+                if self.oracle.build_animation_visible():
+                    return False
+                if self._queue_entry_loading():
+                    return False
+                # Original Gacha checks these before handle_retirement(). A
+                # proven dock modal owns the page; do not read its queue
+                # underlay or prevent the original recovery handler running.
+                if self.campaign_dock_full_visible():
+                    return False
             if name == "BUILD_SUBMIT_ORDERS":
                 return self.oracle.enabled("build/page/start")
             if name in ("BUILD_SUBMIT_WW_ORDERS", "BUILD_WW_CHECK", "SHOP_MEDAL_CHECK"):
@@ -152,6 +170,7 @@ class BuildAdapterPorts:
                             # immediately after the batch-finish tap.
                             time.monotonic()
                             <= self._build_context.queue_finish_transition_until
+                            or self._post_submit_transition()
                             or self.oracle.build_queue_finish_prompt_cost() is not None
                             or self.oracle.new_ship_reward_visible()
                             or self.oracle.new_ship_reward_page_visible()
@@ -174,6 +193,8 @@ class BuildAdapterPorts:
                     if (
                         str(exc) == "construction queue page identity is not proven"
                         and (
+                            self._queue_entry_loading()
+                            or
                             # A selected background queue tab can be observed
                             # before the foreground NewShip/AwardInfo page has
                             # finished publishing its own typed identity.
@@ -181,6 +202,7 @@ class BuildAdapterPorts:
                             # when the queue toggle itself is absent.
                             time.monotonic()
                             <= self._build_context.queue_finish_transition_until
+                            or self._post_submit_transition()
                             or self.oracle.new_ship_reward_visible()
                             or self.oracle.new_ship_reward_page_visible()
                             or self.oracle.award_info_page_visible()
@@ -193,10 +215,6 @@ class BuildAdapterPorts:
                         # through that page; let the result aliases close it.
                         return False
                     raise
-                if not empty and self._build_context.submit_receipt is None:
-                    raise SemanticGateClosed(
-                        "construction queue must be empty before a bounded submit"
-                    )
                 return empty
             if name == "BUILD_FINISH_ORDERS":
                 # Gacha polls the batch-finish sentinel after it returns from
@@ -213,6 +231,7 @@ class BuildAdapterPorts:
                             # post-tap grace before any slow typed state probe.
                             time.monotonic()
                             <= self._build_context.queue_finish_transition_until
+                            or self._post_submit_transition()
                             or self.oracle.build_queue_finish_prompt_cost() is not None
                             or self.oracle.new_ship_reward_visible()
                             or self.oracle.new_ship_reward_page_visible()
@@ -225,15 +244,22 @@ class BuildAdapterPorts:
                 if not queue_selected:
                     return False
                 try:
-                    return self.oracle.build_queue_all_launch_available()
+                    # The original load sentinel matches the visible button
+                    # on an empty queue too; the click port independently
+                    # requires a nonempty queue and an actionable control.
+                    return getattr(self.oracle, 'build_queue_all_launch_visible',
+                                   self.oracle.build_queue_all_launch_available)()
                 except SemanticGateClosed as exc:
                     if str(exc) == "construction queue tab is not selected":
                         return False
                     if (
                         str(exc) == "construction queue page identity is not proven"
                         and (
+                            self._queue_entry_loading()
+                            or
                             time.monotonic()
                             <= self._build_context.queue_finish_transition_until
+                            or self._post_submit_transition()
                             or self.oracle.new_ship_reward_visible()
                             or self.oracle.new_ship_reward_page_visible()
                             or self.oracle.award_info_page_visible()
@@ -291,7 +317,11 @@ class BuildAdapterPorts:
             deadline = time.monotonic() + 8.0
             while True:
                 try:
-                    return self.oracle.click_toggle(target)
+                    receipt = self.oracle.click_toggle(target)
+                    if target == "build/nav/queue":
+                        self._build_context.queue_entry_receipt = receipt
+                        self._build_context.passive_transition_until = time.monotonic() + 8.0
+                    return receipt
                 except SemanticGateClosed as exc:
                     if (
                         str(exc) != "semantic toggle action is blocked"
@@ -307,9 +337,56 @@ class BuildAdapterPorts:
             return self.oracle.click_toggle(target)
         return UNHANDLED
 
+    def _queue_entry_loading(self) -> bool:
+        if self._build_context is None:
+            return False
+        state = self.oracle.read_state()
+        # The queue can already be selected when ALAS enters Gacha. Its
+        # inherited loading overlay has no opening receipt in this task.
+        # Exact loading proves the underlay is unavailable; ALAS owns the
+        # next screenshot and its existing stuck timeout. No input is granted.
+        return any(
+            rule.blocker_id == "loading"
+            for rule in self.oracle._blocking_rules(state, "ui/absence-probe")
+        )
+
+    def _post_submit_transition(self) -> bool:
+        context = self._build_context
+        return bool(
+            context is not None
+            and context.submit_receipt is not None
+            and time.monotonic() <= context.submit_transition_until
+        )
+
+    def _close_build_award(self, target):
+        oracle = self.oracle
+        receipt = oracle.click(target)
+        for attempt in range(20):
+            state = oracle.read_state()
+            if state.generation > receipt.generation and not any(
+                button.active_in_hierarchy and any(root in button.path for root in (
+                    '/AwardInfoUI(Clone)/', '/AwardInfoUI1(Clone)/'))
+                for button in state.buttons
+            ):
+                return receipt
+            if attempt < 19:
+                time.sleep(0.1)
+        raise SemanticGateClosed('construction reward did not close after one input')
+
     def _click_build(self, name):
         if self._build_context is not None and name in BUILD_VIRTUAL_RESOURCES:
             context = self._build_context
+            if name in ("POPUP_CONFIRM", "POPUP_CANCEL"):
+                prompt_kind = self.oracle.observation_prompt_kind()
+                if ((prompt_kind == "opsi-exit"
+                        and self.oracle.operation_siren_exit_prompt_visible())
+                        or (name == "POPUP_CONFIRM" and prompt_kind is None
+                            and self._operation_siren_exit_receipt is not None
+                            and time.monotonic() <= self._operation_siren_entry_transition_until)):
+                    # Original UI navigation can leave OS while the build
+                    # context is active. Its existing exit port owns this
+                    # prompt and the proven return after confirmation.
+                    return UNHANDLED
             if name == "BUILD_SUBMIT_ORDERS":
                 receipt = self.oracle.click("build/page/start")
                 context.prep_opened = True
@@ -337,13 +414,19 @@ class BuildAdapterPorts:
                 target = self._award_close_target()
                 if target is None:
                     raise SemanticGateClosed("construction reward popup is absent")
-                return self.oracle.click(target)
+                return self._close_build_award(target)
             if name == "BUILD_FINISH_ORDERS":
                 if self.oracle.new_ship_reward_visible():
                     return self.oracle.click("reward/new-ship/continue")
                 target = self._award_close_target()
                 if target is not None:
-                    return self.oracle.click(target)
+                    return self._close_build_award(target)
+                if self.oracle.build_queue_empty():
+                    return self.oracle.click_build_empty_queue_return()
+                if not self.oracle.build_queue_all_launch_available():
+                    # Native appear_then_click is a negative probe when the
+                    # exact batch control is covered.
+                    raise SemanticTargetMissing("construction batch-finish target is unavailable")
                 return self._dispatch_mutation(
                     "build.submit",
                     self.oracle.click_build_queue_all_launch,
@@ -389,21 +472,21 @@ class BuildAdapterPorts:
                     )
                 submit = self.oracle.build_submit_state()
                 if (
-                    not self._action_ledger.allowed("build.submit")
-                    or not 1 <= submit.count <= 10
+                    not 1 <= submit.count <= 10
                     or submit.cubes_owned < submit.cubes_required
                     or context.coins_owned is None
                     or context.coins_owned < submit.coins_required
                     or not context.prep_opened
                 ):
                     raise SemanticGateClosed(
-                        "construction submit requires 1..10 builds, sufficient resources, and a positive budget"
+                        "construction submit requires 1..10 builds, sufficient resources, and an open preparation"
                     )
                 receipt = self._dispatch_mutation(
                     "build.submit",
                     lambda: self.oracle.click("build/prep/confirm"),
                 )
                 context.submit_receipt = receipt
+                context.submit_transition_until = time.monotonic() + 15.0
                 context.prep_opened = False
                 context.prep_validated = False
                 return receipt

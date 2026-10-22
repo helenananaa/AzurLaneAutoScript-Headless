@@ -1,0 +1,20 @@
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -279,7 +279,15 @@
+                     semantic_adapter.click_meta_beacon_sortie_confirm()
+                     continue
+                 if oracle.daily_precombat_visible():
+-                    semantic_adapter.click_daily_precombat_start()
++                    from alas_headless.oracle.errors import SemanticInputBlocked
++                    try:
++                        semantic_adapter.click_daily_precombat_start()
++                    except SemanticInputBlocked as exc:
++                        if exc.semantic_id != 'daily/precombat/start' or exc.blockers != ('loading',):
++                            raise
++                        # No start input was sent. The original screenshot
++                        # loop owns waiting for the temporary loading cover.
++                        continue
+                     semantic_daily_start_at = time.time()
+                     continue
+                 if oracle.daily_combat_visible():

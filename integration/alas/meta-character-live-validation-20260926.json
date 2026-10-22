@@ -1,0 +1,107 @@
+{
+  "schema": "alas-headless.meta-character-live/v1",
+  "date": "2026-09-26",
+  "support_status": "B",
+  "native_reward_navigation_passed": true,
+  "scope": "native MetaReward under the owning META assist context; zero combat grants",
+  "runtime": {
+    "package": "com.bilibili.azurlane",
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "width": 1280,
+    "height": 720,
+    "max_age_ms": 10000,
+    "peer_uid": 2000,
+    "expected_pid": 23090
+  },
+  "modern_sync": {
+    "points": 9926,
+    "eligible_milestones": 22,
+    "claimed_milestones": 22,
+    "new_rewards_claimed": 0
+  },
+  "combat_attempts": 0,
+  "final_home": true,
+  "actual_claim_qualified": false,
+  "full_assist_task_qualified": false,
+  "observer_build": {
+    "incremental": true,
+    "abi": "x86_64",
+    "steps": 12,
+    "elapsed_seconds": 7.45,
+    "user": "helenanana",
+    "base_commit": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+    "cold_start_extra": "-force-gfx-st",
+    "candidate_sha256": "67a17b5ebd4739c8f1a7654f0bc23bf660a283fae7debdde9567625d4ae4dc90",
+    "installed_sha256": "67a17b5ebd4739c8f1a7654f0bc23bf660a283fae7debdde9567625d4ae4dc90",
+    "rollback_sha256": "f5d3d11f9f5ac529b8c9f7ca931440d924f869355b8beea197b914439660c1dd",
+    "rollback_tested": false
+  },
+  "patch_series": {
+    "byte_count": 760696,
+    "combined_sha256": "f8a0a3e97ec5cb2b6cf1e395e81dd808753ada4a949e60aa0c004e44f42e2573",
+    "generated_path": "integration/alas/0001-semantic-oracle-hooks.patch",
+    "member_count": 120,
+    "schema": "alas-headless.alas-patch-series-check/v1",
+    "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
+  },
+  "validation": {
+    "focused_tests_passed": 139,
+    "patch_tree_applied_and_compiled": true,
+    "opsi_configuration_passed": true
+  },
+  "source_sha256": {
+    "overlays/angle-g3/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp": "c905863c3e1ce28f9d939bdd9f96f3a9246c90ebd17c9375766f90bd34300346",
+    "python/alas_headless/oracle/meta.py": "e4c47eb5f3c3c4b100b8d0ffaef1a444ed98e5c15ec05f9aa8fe2b1f4b00da32",
+    "python/alas_headless/adapter/semantic/meta.py": "e6c37e666b33be33e73cfcb7b5e4b648f69fb3da7084fb8320bbc1a68396ed91",
+    "python/alas_headless/adapter/semantic/dispatch_observation.py": "8c008bbc085d1264ae492ad5327436e9a48666b487da216ec1feb5a711ee08ca",
+    "integration/alas/series/0730-meta-menu-navigation.patch": "2470720d0569ac8b1fe25edeb6653b34d806f039849e46db94a766eb85fdf406"
+  },
+  "evidence": [
+    {
+      "path": "artifacts/meta-character-20260926/initial.json",
+      "sha256": "cda4e2ca489b3eac156729d9afe7d9bc608b135e48a8579051b5a9a21769b43b"
+    },
+    {
+      "path": "artifacts/meta-character-20260926/login.json",
+      "sha256": "e5f2ba5f9458e8c340b2b002db47f7cf0f9a0889d80c274a9e255445b5218090"
+    },
+    {
+      "path": "artifacts/meta-character-20260926/sync-entry.json",
+      "sha256": "fd41562345f78fbcec85eb967f424a78f9d8ac3340cf0bfbc86d8e33a3148883"
+    },
+    {
+      "path": "artifacts/meta-character-20260926/native-r1.json",
+      "sha256": "3db6152a0764bc3f8eef029d79ff1bab00c45d0e484809840637e4fa24805f5c"
+    },
+    {
+      "path": "artifacts/meta-character-20260926/native-r2.json",
+      "sha256": "c9abdd2e364fc8e2c028be0c5607e68a9516ccfe2e850e3e250e8987b210186a"
+    },
+    {
+      "path": "artifacts/meta-character-20260926/native-r3.json",
+      "sha256": "64052c822bf3d55c6faee479f3f2c7e6f3b5cd59baecc10260686d6d863893c9"
+    },
+    {
+      "path": "artifacts/meta-character-20260926/build.log",
+      "sha256": "f38fd92852a00e9fda40ff3c3ebf2c52857a821f3b50cdb09fa638135903d497"
+    },
+    {
+      "path": "artifacts/meta-character-20260926/tests-final.log",
+      "sha256": "671a54e47b3512580484c9232d2371148a91dedc605a0c2ad7c973e7879bb4c3"
+    },
+    {
+      "path": "artifacts/meta-character-20260926/patch-series-r2.json",
+      "sha256": "0fe410cda49aa45101c17d78babb358c051df9c2435bdb4e50652084189b04bb"
+    },
+    {
+      "path": "artifacts/meta-character-20260926/patch-tree-r2.log",
+      "sha256": "addf6aa8ddaaa297f209a7ed4d7d983b877456fb68de8e56f9568e7b79008740"
+    },
+    {
+      "path": "artifacts/meta-character-20260926/config.json",
+      "sha256": "c406b249c59974de1b1d3955cc1083d0a798bac0ffbb5df1aecb33556a9f7242"
+    }
+  ],
+  "live_page_sha256": "0b09f7f71e63e48744f74f8b280f3c02fd13658d0299a0f6629a1e4d20e23d38"
+}

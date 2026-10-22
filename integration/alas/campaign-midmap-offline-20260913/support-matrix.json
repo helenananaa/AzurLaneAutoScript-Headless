@@ -1,0 +1,22 @@
+{
+  "configuration_source": null,
+  "configuration_source_verified": false,
+  "counts": {
+    "field_count": 278,
+    "panel_count": 60,
+    "panel_field_instance_count": 1217
+  },
+  "field_classes": {
+    "complete": 55,
+    "declared_only": 0,
+    "live_partial": 147,
+    "offline_only": 61,
+    "unsupported": 15
+  },
+  "patch_series": {
+    "combined_sha256": "ec60d0ceca003b4ad32c80ae4325630227305b6754258b05a0555b7cbe439908",
+    "manifest_sha256": "e1d2db57cc7fb349f3770385c5caeabdd4444ad268491266475119216ca8ced9",
+    "member_count": 114
+  },
+  "schema": "alas-headless.support-matrix-verification/v1"
+}

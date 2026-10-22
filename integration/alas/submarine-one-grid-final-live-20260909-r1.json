@@ -1,0 +1,391 @@
+{
+  "schema": "alas-headless.main-task-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-09-09T05:32:28.843345Z",
+  "finished_at": "2026-09-09T05:45:12.844772Z",
+  "task": "Main",
+  "stage": "10-2",
+  "serial": "emulator-5580",
+  "run_count_requested": 1,
+  "execution_status": "incomplete",
+  "error": "SystemExit: 1",
+  "preparations": [
+    {
+      "generation": 197103,
+      "mode": "prep",
+      "use_2x_book": false,
+      "book_selected": false,
+      "book_count": 564
+    }
+  ],
+  "completed_sorties": [],
+  "auto_menu_observations": [],
+  "continuation_receipts": [],
+  "submarine_observations": [],
+  "submarine_calls": [
+    {
+      "semantic_id": "campaign/combat/submarine/call",
+      "generation": 206234,
+      "point": {
+        "x": 742.4,
+        "y": 622.8
+      },
+      "bounds": {
+        "left": 709.067,
+        "top": 589.467,
+        "right": 775.733,
+        "bottom": 656.133
+      },
+      "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Weapon_button(Clone)/ActCtl",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "combat_admissions": [
+    {
+      "generation": 198209,
+      "battle_count": 0,
+      "target": "B6",
+      "expected": "combat",
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "E3",
+        "ammo": 6,
+        "ammo_capacity": 6
+      },
+      "hunting_nodes": [
+        "B3",
+        "B4",
+        "D2",
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "F3",
+        "F4",
+        "G2",
+        "G3",
+        "G4",
+        "H5"
+      ],
+      "submarine_destination": null
+    },
+    {
+      "generation": 199311,
+      "battle_count": 1,
+      "target": "G4",
+      "expected": "combat",
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "E3",
+        "ammo": 6,
+        "ammo_capacity": 6
+      },
+      "hunting_nodes": [
+        "B3",
+        "B4",
+        "D2",
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "F3",
+        "F4",
+        "G2",
+        "G3",
+        "G4",
+        "H5"
+      ],
+      "submarine_destination": null
+    },
+    {
+      "generation": 200113,
+      "battle_count": 2,
+      "target": "G3",
+      "expected": "combat",
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "E3",
+        "ammo": 6,
+        "ammo_capacity": 6
+      },
+      "hunting_nodes": [
+        "B3",
+        "B4",
+        "D2",
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "F3",
+        "F4",
+        "G2",
+        "G3",
+        "G4",
+        "H5"
+      ],
+      "submarine_destination": null
+    },
+    {
+      "generation": 201139,
+      "battle_count": 3,
+      "target": "G2",
+      "expected": "combat",
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "E3",
+        "ammo": 6,
+        "ammo_capacity": 6
+      },
+      "hunting_nodes": [
+        "B3",
+        "B4",
+        "D2",
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "F3",
+        "F4",
+        "G2",
+        "G3",
+        "G4",
+        "H5"
+      ],
+      "submarine_destination": null
+    },
+    {
+      "generation": 202249,
+      "battle_count": 4,
+      "target": "G5",
+      "expected": "combat",
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "E3",
+        "ammo": 6,
+        "ammo_capacity": 6
+      },
+      "hunting_nodes": [
+        "B3",
+        "B4",
+        "D2",
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "F3",
+        "F4",
+        "G2",
+        "G3",
+        "G4",
+        "H5"
+      ],
+      "submarine_destination": null
+    },
+    {
+      "generation": 203371,
+      "battle_count": 5,
+      "target": "H5",
+      "expected": "combat",
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "E3",
+        "ammo": 6,
+        "ammo_capacity": 6
+      },
+      "hunting_nodes": [
+        "B3",
+        "B4",
+        "D2",
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "F3",
+        "F4",
+        "G2",
+        "G3",
+        "G4",
+        "H5"
+      ],
+      "submarine_destination": null
+    },
+    {
+      "generation": 204392,
+      "battle_count": 6,
+      "target": "H1",
+      "expected": "combat_boss",
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "E3",
+        "ammo": 6,
+        "ammo_capacity": 6
+      },
+      "hunting_nodes": [
+        "B3",
+        "B4",
+        "D2",
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "F3",
+        "F4",
+        "G2",
+        "G3",
+        "G4",
+        "H5"
+      ],
+      "submarine_destination": "G1"
+    }
+  ],
+  "submarine_moves": [
+    {
+      "entry": {
+        "semantic_id": "campaign/map/strategy/submarine/move",
+        "generation": 205241,
+        "point": {
+          "x": 1138.667,
+          "y": 492.667
+        },
+        "bounds": {
+          "left": 1096.0,
+          "top": 450.0,
+          "right": 1181.333,
+          "bottom": 535.333
+        },
+        "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/detail/items/item(Clone)/icon",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      "destination": {
+        "semantic_id": "campaign/map/submarine/destination/G1",
+        "generation": 205361,
+        "point": {
+          "x": 1014.674,
+          "y": 382.466
+        },
+        "bounds": {
+          "left": 945.435,
+          "top": 338.653,
+          "right": 1086.981,
+          "bottom": 428.22
+        },
+        "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_2_7",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      "confirm": {
+        "semantic_id": "campaign/map/submarine/deployment/confirm",
+        "generation": 205409,
+        "point": {
+          "x": 1161.233,
+          "y": 662.667
+        },
+        "bounds": {
+          "left": 1070.233,
+          "top": 629.0,
+          "right": 1252.233,
+          "bottom": 696.333
+        },
+        "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/bottom_stage/Action/MissileStrike/confirm_button",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      "post_generation": 205552,
+      "oil_confirmation": {
+        "semantic_id": "campaign/map/submarine/oil/confirm",
+        "generation": 205508,
+        "point": {
+          "x": 790.0,
+          "y": 515.0
+        },
+        "bounds": {
+          "left": 699.0,
+          "top": 481.333,
+          "right": 881.0,
+          "bottom": 548.667
+        },
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "G1",
+        "ammo": 6,
+        "ammo_capacity": 6
+      }
+    }
+  ],
+  "submarine_strategy": [
+    {
+      "semantic_id": "campaign/map/strategy/submarine/view",
+      "generation": 198029,
+      "point": {
+        "x": 1230.667,
+        "y": 398.0
+      },
+      "bounds": {
+        "left": 1188.0,
+        "top": 355.333,
+        "right": 1273.333,
+        "bottom": 440.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/detail/items/item(Clone)/icon",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "campaign/map/strategy/submarine/view",
+      "generation": 204809,
+      "point": {
+        "x": 1230.667,
+        "y": 398.0
+      },
+      "bounds": {
+        "left": 1188.0,
+        "top": 355.333,
+        "right": 1273.333,
+        "bottom": 440.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/detail/items/item(Clone)/icon",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "campaign/map/strategy/submarine/view",
+      "generation": 205077,
+      "point": {
+        "x": 1230.667,
+        "y": 398.0
+      },
+      "bounds": {
+        "left": 1188.0,
+        "top": 355.333,
+        "right": 1273.333,
+        "bottom": 440.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/detail/items/item(Clone)/icon",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "campaign/map/strategy/submarine/view",
+      "generation": 205611,
+      "point": {
+        "x": 1230.667,
+        "y": 398.0
+      },
+      "bounds": {
+        "left": 1188.0,
+        "top": 355.333,
+        "right": 1273.333,
+        "bottom": 440.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/detail/items/item(Clone)/icon",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ]
+}

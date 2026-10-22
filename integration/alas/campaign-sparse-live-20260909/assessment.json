@@ -1,0 +1,562 @@
+{
+  "schema": "alas-headless.sparse-vitals-assessment/v1",
+  "passed": true,
+  "scope": "fleet 6, two main and two vanguard, 10-2 map/precombat vitals and withdrawal; no sparse combat or repair qualification",
+  "presence": [
+    true,
+    true,
+    false,
+    true,
+    true,
+    false
+  ],
+  "map_vitals": {
+    "fleet_index": 1,
+    "vitals": [
+      [
+        1.0,
+        1.0,
+        0.0,
+        1.0,
+        1.0,
+        0.0
+      ],
+      [
+        true,
+        true,
+        false,
+        true,
+        true,
+        false
+      ]
+    ],
+    "precombat": false,
+    "levels": [
+      120,
+      119,
+      0,
+      123,
+      118,
+      0
+    ]
+  },
+  "precombat_vitals": [
+    [
+      1.0,
+      1.0,
+      0.0,
+      1.0,
+      1.0,
+      0.0
+    ],
+    [
+      true,
+      true,
+      false,
+      true,
+      true,
+      false
+    ]
+  ],
+  "prepared_fleets": {
+    "generation": 106059,
+    "stage_code": "10-2",
+    "title": "先发制人",
+    "surface_fleets": [
+      2,
+      2
+    ],
+    "submarine_fleets": [
+      0,
+      1
+    ],
+    "mob_oil_cost": 32,
+    "boss_oil_cost": 43,
+    "submarine_oil_cost": 16,
+    "rows": [
+      {
+        "row_key": "fleet1",
+        "selected_fleet": 6,
+        "ship_levels": [
+          118,
+          119,
+          120,
+          123
+        ],
+        "select_button": {
+          "name": "btn_select",
+          "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/btn_select",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "point": {
+            "x": 1054.703,
+            "y": 224.933
+          },
+          "bounds": {
+            "left": 1017.37,
+            "top": 189.6,
+            "right": 1092.037,
+            "bottom": 260.267
+          },
+          "raw": {
+            "name": "btn_select",
+            "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/btn_select",
+            "canvas": "Overlay",
+            "flags": 7679,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "canvas_render_mode": 1,
+            "instance_id": -23036,
+            "world_position": {
+              "x": 9.216,
+              "y": 3.001,
+              "z": -390.0
+            },
+            "local_rect": {
+              "x": -56.0,
+              "y": -53.0,
+              "width": 112.0,
+              "height": 106.0
+            },
+            "screen_point": {
+              "x": 1054.703,
+              "y": 495.067
+            },
+            "adb_point": {
+              "x": 1054.703,
+              "y": 224.933
+            },
+            "screen_bounds": {
+              "left": 1017.37,
+              "bottom": 459.733,
+              "right": 1092.037,
+              "top": 530.4
+            },
+            "adb_bounds": {
+              "left": 1017.37,
+              "top": 189.6,
+              "right": 1092.037,
+              "bottom": 260.267
+            }
+          }
+        },
+        "clear_button": {
+          "name": "btn_clear",
+          "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/btn_clear",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "point": {
+            "x": 1142.237,
+            "y": 224.933
+          },
+          "bounds": {
+            "left": 1104.903,
+            "top": 189.6,
+            "right": 1179.57,
+            "bottom": 260.267
+          },
+          "raw": {
+            "name": "btn_clear",
+            "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/btn_clear",
+            "canvas": "Overlay",
+            "flags": 7679,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "canvas_render_mode": 1,
+            "instance_id": -23056,
+            "world_position": {
+              "x": 11.161,
+              "y": 3.001,
+              "z": -390.0
+            },
+            "local_rect": {
+              "x": -56.0,
+              "y": -53.0,
+              "width": 112.0,
+              "height": 106.0
+            },
+            "screen_point": {
+              "x": 1142.237,
+              "y": 495.067
+            },
+            "adb_point": {
+              "x": 1142.237,
+              "y": 224.933
+            },
+            "screen_bounds": {
+              "left": 1104.903,
+              "bottom": 459.733,
+              "right": 1179.57,
+              "top": 530.4
+            },
+            "adb_bounds": {
+              "left": 1104.903,
+              "top": 189.6,
+              "right": 1179.57,
+              "bottom": 260.267
+            }
+          }
+        },
+        "required_slots": 0,
+        "empty_required_slots": 0
+      },
+      {
+        "row_key": "fleet2",
+        "selected_fleet": 1,
+        "ship_levels": [
+          100,
+          101,
+          101,
+          101,
+          115,
+          118
+        ],
+        "select_button": {
+          "name": "btn_select",
+          "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/btn_select",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "point": {
+            "x": 1054.703,
+            "y": 338.8
+          },
+          "bounds": {
+            "left": 1017.37,
+            "top": 303.467,
+            "right": 1092.037,
+            "bottom": 374.133
+          },
+          "raw": {
+            "name": "btn_select",
+            "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/btn_select",
+            "canvas": "Overlay",
+            "flags": 7679,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "canvas_render_mode": 1,
+            "instance_id": -23408,
+            "world_position": {
+              "x": 9.216,
+              "y": 0.471,
+              "z": -390.0
+            },
+            "local_rect": {
+              "x": -56.0,
+              "y": -53.0,
+              "width": 112.0,
+              "height": 106.0
+            },
+            "screen_point": {
+              "x": 1054.703,
+              "y": 381.2
+            },
+            "adb_point": {
+              "x": 1054.703,
+              "y": 338.8
+            },
+            "screen_bounds": {
+              "left": 1017.37,
+              "bottom": 345.867,
+              "right": 1092.037,
+              "top": 416.533
+            },
+            "adb_bounds": {
+              "left": 1017.37,
+              "top": 303.467,
+              "right": 1092.037,
+              "bottom": 374.133
+            }
+          }
+        },
+        "clear_button": {
+          "name": "btn_clear",
+          "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/btn_clear",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "point": {
+            "x": 1142.237,
+            "y": 338.8
+          },
+          "bounds": {
+            "left": 1104.903,
+            "top": 303.467,
+            "right": 1179.57,
+            "bottom": 374.133
+          },
+          "raw": {
+            "name": "btn_clear",
+            "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/btn_clear",
+            "canvas": "Overlay",
+            "flags": 7679,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "canvas_render_mode": 1,
+            "instance_id": -23428,
+            "world_position": {
+              "x": 11.161,
+              "y": 0.471,
+              "z": -390.0
+            },
+            "local_rect": {
+              "x": -56.0,
+              "y": -53.0,
+              "width": 112.0,
+              "height": 106.0
+            },
+            "screen_point": {
+              "x": 1142.237,
+              "y": 381.2
+            },
+            "adb_point": {
+              "x": 1142.237,
+              "y": 338.8
+            },
+            "screen_bounds": {
+              "left": 1104.903,
+              "bottom": 345.867,
+              "right": 1179.57,
+              "top": 416.533
+            },
+            "adb_bounds": {
+              "left": 1104.903,
+              "top": 303.467,
+              "right": 1179.57,
+              "bottom": 374.133
+            }
+          }
+        },
+        "required_slots": 0,
+        "empty_required_slots": 0
+      },
+      {
+        "row_key": "submarine",
+        "selected_fleet": null,
+        "ship_levels": [],
+        "select_button": {
+          "name": "btn_select",
+          "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/sub/1/btn_select",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "point": {
+            "x": 1054.703,
+            "y": 475.0
+          },
+          "bounds": {
+            "left": 1017.37,
+            "top": 439.667,
+            "right": 1092.037,
+            "bottom": 510.333
+          },
+          "raw": {
+            "name": "btn_select",
+            "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/sub/1/btn_select",
+            "canvas": "Overlay",
+            "flags": 7679,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "canvas_render_mode": 1,
+            "instance_id": -23806,
+            "world_position": {
+              "x": 9.216,
+              "y": -2.556,
+              "z": -390.0
+            },
+            "local_rect": {
+              "x": -56.0,
+              "y": -53.0,
+              "width": 112.0,
+              "height": 106.0
+            },
+            "screen_point": {
+              "x": 1054.703,
+              "y": 245.0
+            },
+            "adb_point": {
+              "x": 1054.703,
+              "y": 475.0
+            },
+            "screen_bounds": {
+              "left": 1017.37,
+              "bottom": 209.667,
+              "right": 1092.037,
+              "top": 280.333
+            },
+            "adb_bounds": {
+              "left": 1017.37,
+              "top": 439.667,
+              "right": 1092.037,
+              "bottom": 510.333
+            }
+          }
+        },
+        "clear_button": {
+          "name": "btn_clear",
+          "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/sub/1/btn_clear",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "point": {
+            "x": 1142.237,
+            "y": 475.0
+          },
+          "bounds": {
+            "left": 1104.903,
+            "top": 439.667,
+            "right": 1179.57,
+            "bottom": 510.333
+          },
+          "raw": {
+            "name": "btn_clear",
+            "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/sub/1/btn_clear",
+            "canvas": "Overlay",
+            "flags": 7679,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "canvas_render_mode": 1,
+            "instance_id": -23826,
+            "world_position": {
+              "x": 11.161,
+              "y": -2.556,
+              "z": -390.0
+            },
+            "local_rect": {
+              "x": -56.0,
+              "y": -53.0,
+              "width": 112.0,
+              "height": 106.0
+            },
+            "screen_point": {
+              "x": 1142.237,
+              "y": 245.0
+            },
+            "adb_point": {
+              "x": 1142.237,
+              "y": 475.0
+            },
+            "screen_bounds": {
+              "left": 1104.903,
+              "bottom": 209.667,
+              "right": 1179.57,
+              "top": 280.333
+            },
+            "adb_bounds": {
+              "left": 1104.903,
+              "top": 439.667,
+              "right": 1179.57,
+              "bottom": 510.333
+            }
+          }
+        },
+        "required_slots": 0,
+        "empty_required_slots": 0
+      }
+    ],
+    "sortie_button": {
+      "name": "start_button",
+      "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/start_button",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "interactable": true,
+      "raycast_top": true,
+      "point": {
+        "x": 1078.17,
+        "y": 584.8
+      },
+      "bounds": {
+        "left": 972.837,
+        "top": 548.467,
+        "right": 1183.503,
+        "bottom": 621.133
+      },
+      "raw": {
+        "name": "start_button",
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/start_button",
+        "canvas": "Overlay",
+        "flags": 7679,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "canvas_render_mode": 1,
+        "instance_id": -22590,
+        "world_position": {
+          "x": 9.737,
+          "y": -4.996,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -158.0,
+          "y": -54.5,
+          "width": 316.0,
+          "height": 109.0
+        },
+        "screen_point": {
+          "x": 1078.17,
+          "y": 135.2
+        },
+        "adb_point": {
+          "x": 1078.17,
+          "y": 584.8
+        },
+        "screen_bounds": {
+          "left": 972.837,
+          "bottom": 98.867,
+          "right": 1183.503,
+          "top": 171.533
+        },
+        "adb_bounds": {
+          "left": 972.837,
+          "top": 548.467,
+          "right": 1183.503,
+          "bottom": 621.133
+        }
+      }
+    },
+    "hard_mode": false,
+    "hard_requirements": [],
+    "sortie_oil_requirement": 75,
+    "oil_cost_source": "observed-fleet-summary"
+  },
+  "oil_before": 13528,
+  "oil_after": 13498,
+  "oil_consumed": 30,
+  "battles": 0,
+  "repair_items_used": 0,
+  "tests_passed": 180,
+  "remaining": [
+    "other sparse configurations",
+    "sparse resume without retained preparation proof",
+    "natural low-HP thresholds",
+    "natural dock-full retirement continuation"
+  ],
+  "source_sha256": {
+    "python/alas_headless/adapter/semantic/campaign_preparation.py": "0c7424ebbf10e3c2033c072d3575f3d34b81331af5b7205bfe139734ac9f95bf",
+    "python/alas_headless/oracle/campaign_state.py": "e502fcb0f017c6a6f1a589d9514bb5dd4650afea2dda6bd8df8fca1bada2b30c",
+    "python/alas_headless/adapter/semantic/dispatch_observation.py": "23d4f8deeb9286562e2fc42b3ed37482ca55bee5cefa792c4d1c3f90e999047a",
+    "scripts/python/run_alas_main_task_live_validation.py": "75f326e89dcd6044927d440f32cc34e31bc317e5195591c03c1ea8136e51656b",
+    "tests/test_campaign_sparse_vitals.py": "66162857df4a15a878e73beef49f72891c457ce3b57b69fe32ecfcb28fb6a9fc"
+  }
+}

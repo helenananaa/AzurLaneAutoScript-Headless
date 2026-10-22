@@ -1275,7 +1275,7 @@ index d5528710..61c2bd1a 100644
                  self.campaign_set_chapter(name, mode)
                  self.ENTRANCE = self.campaign_get_entrance(name=name)
 diff --git a/module/daily/daily.py b/module/daily/daily.py
-index f9b86c33..a9434987 100644
+index f9b86c336a6d97570b43419ef4a0abd32f37f48a..19f8170d5bf7617993b41cbfac3296518a52ce1f 100644
 --- a/module/daily/daily.py
 +++ b/module/daily/daily.py
 @@ -1,5 +1,7 @@
@@ -1317,7 +1317,7 @@ index f9b86c33..a9434987 100644
          color = get_color(image=self.device.image, area=DAILY_ACTIVE.area)
          color = np.array(color).astype(float)
          color = (np.max(color) + np.min(color)) / 2
-@@ -49,6 +74,37 @@ class Daily(Combat):
+@@ -49,6 +74,39 @@ class Daily(Combat):
              int: Stage index, 0 to 3
              int: Fleet index, 1 to 6
          """
@@ -1351,10 +1351,21 @@ index f9b86c33..a9434987 100644
 +                ),
 +            }
 +            stage, fleet = mapping[kind]
-+            return {'skip': 0, 'first': 1, 'second': 2, 'third': 3}[stage], int(fleet)
++            if stage == 'skip':
++                return 0, 0
++            return {'first': 1, 'second': 2, 'third': 3}[stage], int(fleet)
          if self.emergency_module_development:
              # Meaning of daily_current
              # 1 Emergency Module Development 限时兵装训练
+@@ -136,6 +194,8 @@ class Daily(Combat):
+         if stage not in dic:
+             logger.warning(f'Unknown daily stage `{stage}` from daily_current={self.daily_current}')
+         stage = dic.get(stage, 0)
++        if stage == 0:
++            return 0, 0
+         return int(stage), int(fleet)
+ 
+     @property
 @@ -192,17 +247,35 @@ class Daily(Combat):
  
          button = DAILY_MISSION_LIST[stage - 1]

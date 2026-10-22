@@ -1,0 +1,18 @@
+diff --git a/module/ui/navbar.py b/module/ui/navbar.py
+--- a/module/ui/navbar.py
++++ b/module/ui/navbar.py
+@@ -122,6 +122,14 @@
+         Returns:
+             bool:
+         """
++        # Gacha acquisition rewards can mount after queue-empty was read.
++        # Keep their handling in ALAS' existing navigation loop and reuse its
++        # original ship-item handler before inspecting or clicking the tab.
++        if self.name == 'GACHA_SIDE_NAVBAR':
++            from alas_headless import current_semantic_session
++            if current_semantic_session() is not None:
++                return main.handle_get_items_ship()
++
+         # Check name, identifies if NavBar
+         # instance belongs to shop module
+         if self.name not in ['SHOP_BOTTOM_NAVBAR', 'GUILD_SIDE_NAVBAR']:

@@ -1,0 +1,3 @@
+detail True
+ActionReceipt(semantic_id='daily/page/back', generation=13138, point=Point(x=57.667, y=53.92), bounds=Bounds(left=0.644, top=-3.103, right=114.69, bottom=110.943), path='UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_button', policy_sha256=None, capability_id=None)
+daily True detail False

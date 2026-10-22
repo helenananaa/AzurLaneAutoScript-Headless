@@ -1,0 +1,417 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 11:38:09.315 │ [Server] cn                                 
+read: ./config\_codex_meta_assist_be9f911b6bd245dc8c375956348b4a39.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 11:38:09.346 │ Bind task ['General', 'Alas']               
+read: ./config\_codex_meta_assist_be9f911b6bd245dc8c375956348b4a39.json
+INFO     2026-09-12 11:38:09.352 │ Bind task ['General', 'Alas', 'OpsiGeneral',
+         'OpsiAshAssist']                                                      
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 11:38:09.354 │ DEVICE                                      
+INFO     2026-09-12 11:38:09.356 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 11:38:09.357 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 11:38:09.359 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 11:38:09.360 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 11:38:09.362 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 11:38:09.365 │ emulator-5580                               
+INFO     2026-09-12 11:38:09.366 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 11:38:09.368 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 11:38:09.374 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 11:38:09.375 │ [Server] cn                                 
+WARNING  2026-09-12 11:38:09.376 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 11:38:09.378 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 11:38:09.417 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 11:38:09.419 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 11:38:09.421 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 11:38:09.422 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 11:38:10.241 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 11:38:10.777 │ <<< META BEACON ASSIST >>>                  
+INFO     2026-09-12 11:38:10.780 │ Ensure beacon assist page                   
+INFO     2026-09-12 11:38:11.211 │ In beacon assist page                       
+INFO     2026-09-12 11:38:33.353 │ Begin find a level 15 meta                  
+INFO     2026-09-12 11:38:33.538 │ Find a beacon in level:15                   
+────────────────────────── BEGIN META ASSIST COMBAT ───────────────────────────
+INFO     2026-09-12 11:38:33.738 │ BEGIN META ASSIST COMBAT                    
+INFO     2026-09-12 11:38:33.739 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 11:38:33.740 │ Combat preparation.                         
+ERROR    2026-09-12 11:38:43.280 │ SemanticGateClosed: daily precombat page is 
+         absent                                                                
+         ┌──────────────── Traceback (most recent call last) ─────────────────┐
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\artifacts\campaign-preparation\upstream\alas.py:74 in run       │
+         │                                                                    │
+         │    71 │   │   │   with semantic_task_scope(session, command):      │
+         │    72 │   │   │   │   if not skip_first_screenshot:                │
+         │    73 │   │   │   │   │   self.device.screenshot()                 │
+         │ >  74 │   │   │   │   self.__getattribute__(command)()             │
+         │    75 │   │   │   return True                                      │
+         │    76 │   │   except TaskEnd:                                      │
+         │    77 │   │   │   return True                                      │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │               command = 'opsi_ash_assist'                      │ │
+         │ │                     e = SemanticGateClosed('daily precombat    │ │
+         │ │                         page is absent')                       │ │
+         │ │                  self = <alas.AzurLaneAutoScript object at     │ │
+         │ │                         0x0000017558E1DA90>                    │ │
+         │ │               session = <alas_headless.adapter.semantic.sessi… │ │
+         │ │                         object at 0x000001753FF27110>          │ │
+         │ │ skip_first_screenshot = False                                  │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\artifacts\campaign-preparation\upstream\alas.py:306 in          │
+         │ opsi_ash_assist                                                    │
+         │                                                                    │
+         │   303 │                                                            │
+         │   304 │   def opsi_ash_assist(self):                               │
+         │   305 │   │   from module.os_ash.meta import AshBeaconAssist       │
+         │ > 306 │   │   AshBeaconAssist(config=self.config, device=self.devi │
+         │   307 │                                                            │
+         │   308 │   def opsi_ash_beacon(self):                               │
+         │   309 │   │   from module.os_ash.meta import OpsiAshBeacon         │
+         │                                                                    │
+         │ ┌─────────────────────────── locals ────────────────────────────┐  │
+         │ │ self = <alas.AzurLaneAutoScript object at 0x0000017558E1DA90> │  │
+         │ └───────────────────────────────────────────────────────────────┘  │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\artifacts\campaign-preparation\upstream\module\os_ash\meta.py:7 │
+         │ 29 in run                                                          │
+         │                                                                    │
+         │   726 │   │   │   if semantic_adapter is None or not self._in_meta │
+         │   727 │   │   │   │   self.ui_ensure(page_reward)                  │
+         │   728 │   │   │                                                    │
+         │ > 729 │   │   │   if self._begin_meta_assist():                    │
+         │   730 │   │   │   │   MetaReward(self.config, self.device).run()   │
+         │   731 │   │   │   │   self.config.task_delay(server_update=True)   │
+         │   732 │   │   │   else:                                            │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │             self = <module.os_ash.meta.AshBeaconAssist object  │ │
+         │ │                    at 0x000001753FF6C5F0>                      │ │
+         │ │ semantic_adapter = <alas_headless.adapter.semantic.session.Al… │ │
+         │ │                    object at 0x000001753FF27110>               │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\artifacts\campaign-preparation\upstream\module\os_ash\meta.py:7 │
+         │ 19 in _begin_meta_assist                                           │
+         │                                                                    │
+         │   716 │   def _begin_meta_assist(self):                            │
+         │   717 │   │   logger.hr('Meta Beacon Assist')                      │
+         │   718 │   │   self._ensure_meta_assist_page()                      │
+         │ > 719 │   │   return self._attack_meta(skip_first_screenshot=False │
+         │   720 │                                                            │
+         │   721 │   def run(self):                                           │
+         │   722 │   │   semantic_adapter = getattr(self.device, 'semantic_ad │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │ self = <module.os_ash.meta.AshBeaconAssist object at           │ │
+         │ │        0x000001753FF6C5F0>                                     │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\artifacts\campaign-preparation\upstream\module\os_ash\meta.py:5 │
+         │ 89 in _attack_meta                                                 │
+         │                                                                    │
+         │   586 │   │   │   │   remain_times = self.digit_ocr_point_and_chec │
+         │   587 │   │   │   │   if remain_times:                             │
+         │   588 │   │   │   │   │   self._ensure_meta_level()                │
+         │ > 589 │   │   │   │   │   self._make_an_attack()                   │
+         │   590 │   │   │   │   else:                                        │
+         │   591 │   │   │   │   │   logger.info('No enough assist times, com │
+         │   592 │   │   │   │   │   break                                    │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │              appeared = True                                   │ │
+         │ │          remain_times = True                                   │ │
+         │ │                  self = <module.os_ash.meta.AshBeaconAssist    │ │
+         │ │                         object at 0x000001753FF6C5F0>          │ │
+         │ │ skip_first_screenshot = False                                  │ │
+         │ │               timeout = Timer(limit=32.071/3, count=1/9)       │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\scripts\python\run_alas_meta_assist_live_validation.py:69 in    │
+         │ observed_attack                                                    │
+         │                                                                    │
+         │   66 │   │   item = {'before':read_assist()}                       │
+         │   67 │   │   result['attacks'].append(item)                        │
+         │   68 │   │   save()                                                │
+         │ > 69 │   │   value = original(host)                                │
+         │   70 │   │   host.device.screenshot()                              │
+         │   71 │   │   item['after'] = read_assist()                         │
+         │   72 │   │   save()                                                │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │   host = <module.os_ash.meta.AshBeaconAssist object at         │ │
+         │ │          0x000001753FF6C5F0>                                   │ │
+         │ │   item = {                                                     │ │
+         │ │          │   'before': {                                       │ │
+         │ │          │   │   'remaining_attempts': 3,                      │ │
+         │ │          │   │   'attempt_capacity': 3,                        │ │
+         │ │          │   │   'selected_level': 15,                         │ │
+         │ │          │   │   'selected_hp': 1820000,                       │ │
+         │ │          │   │   'candidate_count': 8,                         │ │
+         │ │          │   │   'selected_candidate_index': 1                 │ │
+         │ │          │   }                                                 │ │
+         │ │          }                                                     │ │
+         │ │ result = {                                                     │ │
+         │ │          │   'schema': 'alas-headless.meta-assist-live/v1',    │ │
+         │ │          │   'passed': False,                                  │ │
+         │ │          │   'source_sha256': {                                │ │
+         │ │          │   │                                                 │ │
+         │ │          'python/alas_headless/adapter/semantic/__init__.py':  │ │
+         │ │          '649733a0379b5a6bf1f48f2f8605524168ef8cc8f6cf35242e3… │ │
+         │ │          │   │                                                 │ │
+         │ │          'python/alas_headless/adapter/semantic/adapter.py':   │ │
+         │ │          '2a8f3859db58088395b71f8b5153294937e18321c0e620a6b81… │ │
+         │ │          │   │                                                 │ │
+         │ │          'python/alas_headless/adapter/semantic/archives.py':  │ │
+         │ │          '74f453051ad4f85a0065a19362889ec5a12804f987dedd52ea4… │ │
+         │ │          │   │                                                 │ │
+         │ │          'python/alas_headless/adapter/semantic/build.py':     │ │
+         │ │          'e06943310a0f11c002efc457f0df4d0bfc532b603f6d33f11e8… │ │
+         │ │          │   │                                                 │ │
+         │ │          'python/alas_headless/adapter/semantic/campaign.py':  │ │
+         │ │          'ba372cc4a2c351e2a00ee9cf6d069969462673eb46538d73087… │ │
+         │ │          │   │                                                 │ │
+         │ │          'python/alas_headless/adapter/semantic/campaign_heal… │ │
+         │ │          'a148a0b346989b625efd7b0a1e7d1aa6c2af85c928ab2a07c99… │ │
+         │ │          │   │                                                 │ │
+         │ │          'python/alas_headless/adapter/semantic/campaign_map.… │ │
+         │ │          'c8c99cbf889e03bac5d930705fec79e7ad40db3e83e200edc3d… │ │
+         │ │          │   │                                                 │ │
+         │ │          'python/alas_headless/adapter/semantic/campaign_prep… │ │
+         │ │          '904633d6bbbb12d8eb61b4694a0257288e1ec63524b59329ee3… │ │
+         │ │          │   │                                                 │ │
+         │ │          'python/alas_headless/adapter/semantic/commission.py… │ │
+         │ │          '91fe54d2b37e4b2e85eba2868be6f4ac8f248beaf8501dd46b4… │ │
+         │ │          │   │                                                 │ │
+         │ │          'python/alas_headless/adapter/semantic/contracts.py': │ │
+         │ │          'a07fa9b7b131442554a4011cb3c3ccf5afcef244d0c5697d22e… │ │
+         │ │          │   │   ... +85                                       │ │
+         │ │          │   },                                                │ │
+         │ │          │   'budget': 3,                                      │ │
+         │ │          │   'serial': 'emulator-5580',                        │ │
+         │ │          │   'attacks': [                                      │ │
+         │ │          │   │   {                                             │ │
+         │ │          │   │   │   'before': {                               │ │
+         │ │          │   │   │   │   'remaining_attempts': 3,              │ │
+         │ │          │   │   │   │   'attempt_capacity': 3,                │ │
+         │ │          │   │   │   │   'selected_level': 15,                 │ │
+         │ │          │   │   │   │   'selected_hp': 1820000,               │ │
+         │ │          │   │   │   │   'candidate_count': 8,                 │ │
+         │ │          │   │   │   │   'selected_candidate_index': 1         │ │
+         │ │          │   │   │   }                                         │ │
+         │ │          │   │   }                                             │ │
+         │ │          │   ],                                                │ │
+         │ │          │   'profile':                                        │ │
+         │ │          'E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Hea… │ │
+         │ │          }                                                     │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\artifacts\campaign-preparation\upstream\module\os_ash\meta.py:6 │
+         │ 25 in _make_an_attack                                              │
+         │                                                                    │
+         │   622 │   │                                                        │
+         │   623 │   │   # Attack                                             │
+         │   624 │   │   combat = AshCombat(config=self.config, device=self.d │
+         │ > 625 │   │   combat.combat(expected_end=expected_end, save_get_it │
+         │       emotion_reduce=False)                                        │
+         │   626 │                                                            │
+         │   627 │   def _ensure_meta_level(self):                            │
+         │   628 │   │   """                                                  │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │ combat = <module.os_ash.ash.AshCombat object at                │ │
+         │ │          0x000001754008E600>                                   │ │
+         │ │   self = <module.os_ash.meta.AshBeaconAssist object at         │ │
+         │ │          0x000001753FF6C5F0>                                   │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\artifacts\campaign-preparation\upstream\module\os_ash\ash.py:80 │
+         │  in combat                                                         │
+         │                                                                    │
+         │    77 │                                                            │
+         │    78 │   def combat(self, *args, expected_end=None, **kwargs):    │
+         │    79 │   │   try:                                                 │
+         │ >  80 │   │   │   super().combat(*args, expected_end=expected_end, │
+         │    81 │   │   except AshBeaconFinished:                            │
+         │    82 │   │   │   pass                                             │
+         │    83                                                              │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │   args = ()                                                    │ │
+         │ │ kwargs = {'save_get_items': False, 'emotion_reduce': False}    │ │
+         │ │   self = <module.os_ash.ash.AshCombat object at                │ │
+         │ │          0x000001754008E600>                                   │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\artifacts\campaign-preparation\upstream\module\combat\combat.py │
+         │ :829 in combat                                                     │
+         │                                                                    │
+         │   826 │   │   │   │   and semantic_adapter.campaign_result_ready() │
+         │   827 │   │   │   )                                                │
+         │   828 │   │   │   if not semantic_campaign_result_ready:           │
+         │ > 829 │   │   │   │   semantic_campaign_result_ready = self.combat │
+         │   830 │   │   │   │   │   balance_hp=balance_hp, emotion_reduce=em │
+         │   831 │   │   │   │   │   auto=auto_mode, fleet_index=fleet_index) │
+         │   832 │   │   │   │   if not semantic_campaign_result_ready:       │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │                    auto_mode = 'combat_auto'                   │ │
+         │ │                   balance_hp = False                           │ │
+         │ │                         drop = None                            │ │
+         │ │               emotion_reduce = False                           │ │
+         │ │                  fleet_index = 1                               │ │
+         │ │               save_get_items = False                           │ │
+         │ │                         self = <module.os_ash.ash.AshCombat    │ │
+         │ │                                object at 0x000001754008E600>   │ │
+         │ │             semantic_adapter = <alas_headless.adapter.semanti… │ │
+         │ │                                object at 0x000001753FF27110>   │ │
+         │ │ semantic_campaign_result_ready False                           │ │
+         │ │                              =                                 │ │
+         │ │               submarine_mode = 'do_not_use'                    │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\artifacts\campaign-preparation\upstream\module\combat\combat.py │
+         │ :277 in combat_preparation                                         │
+         │                                                                    │
+         │   274 │   │   │   │   │   semantic_adapter.click_meta_beacon_sorti │
+         │   275 │   │   │   │   │   continue                                 │
+         │   276 │   │   │   │   if oracle.daily_precombat_visible():         │
+         │ > 277 │   │   │   │   │   semantic_adapter.click_daily_precombat_s │
+         │   278 │   │   │   │   │   semantic_daily_start_at = time.time()    │
+         │   279 │   │   │   │   │   continue                                 │
+         │   280 │   │   │   │   if oracle.daily_combat_visible():            │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │                       _ = SemanticPixelGuard(frame_id='frame-… │ │
+         │ │                           generation=19044)                    │ │
+         │ │                    auto = 'combat_auto'                        │ │
+         │ │              balance_hp = False                                │ │
+         │ │          emotion_reduce = False                                │ │
+         │ │             fleet_index = 1                                    │ │
+         │ │            interval_set = False                                │ │
+         │ │                  oracle = <alas_headless.semantic_oracle.Sema… │ │
+         │ │                           object at 0x000001750D8E7440>        │ │
+         │ │                    self = <module.os_ash.ash.AshCombat object  │ │
+         │ │                           at 0x000001754008E600>               │ │
+         │ │        semantic_adapter = <alas_headless.adapter.semantic.ses… │ │
+         │ │                           object at 0x000001753FF27110>        │ │
+         │ │ semantic_daily_start_at = 1789184322.4849029                   │ │
+         │ │   skip_first_screenshot = True                                 │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\python\alas_headless\adapter\semantic\session_combat.py:439 in  │
+         │ click_daily_precombat_start                                        │
+         │                                                                    │
+         │   436 │   │   if getattr(self, '_meta_assist_active', False):      │
+         │   437 │   │   │   if not adapter._meta_assist_active:              │
+         │   438 │   │   │   │   adapter.begin_meta_assist()                  │
+         │ > 439 │   │   │   return adapter.click_meta_precombat_start()      │
+         │   440 │   │   if self._meta_beacon_active:                         │
+         │   441 │   │   │   if not adapter.meta_beacon_active():             │
+         │   442 │   │   │   │   adapter.begin_meta_beacon()                  │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │ adapter = <alas_headless.adapter.semantic.adapter.AlasSemanti… │ │
+         │ │           object at 0x000001753FCDCC80>                        │ │
+         │ │    self = <alas_headless.adapter.semantic.session.AlasSemanti… │ │
+         │ │           object at 0x000001753FF27110>                        │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\python\alas_headless\adapter\semantic\meta.py:89 in             │
+         │ click_meta_precombat_start                                         │
+         │                                                                    │
+         │    86 │   │   │   raise SemanticGateClosed(                        │
+         │    87 │   │   │   │   "META precombat requires non-empty main and  │
+         │    88 │   │   │   )                                                │
+         │ >  89 │   │   receipt = self.oracle.click_daily_precombat_start()  │
+         │    90 │   │   self._operation_siren_combat_active = True           │
+         │    91 │   │   return receipt                                       │
+         │    92                                                              │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │ self = <alas_headless.adapter.semantic.adapter.AlasSemanticAd… │ │
+         │ │        object at 0x000001753FCDCC80>                           │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\python\alas_headless\oracle\combat.py:402 in                    │
+         │ click_daily_precombat_start                                        │
+         │                                                                    │
+         │   399 │   def click_daily_precombat_start(self) -> ActionReceipt:  │
+         │   400 │   │   state = self.read_state()                            │
+         │   401 │   │   if not self._daily_precombat_visible(state):         │
+         │ > 402 │   │   │   raise SemanticGateClosed("daily precombat page i │
+         │   403 │   │   target = self._unique(state, "daily/precombat/start" │
+         │   404 │   │   if (                                                 │
+         │   405 │   │   │   not target.active_in_hierarchy                   │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │  self = <alas_headless.semantic_oracle.SemanticOracle object   │ │
+         │ │         at 0x000001750D8E7440>                                 │ │
+         │ │ state = OracleState(                                           │ │
+         │ │         │   generation=19046,                                  │ │
+         │ │         │   scene_handle=-76,                                  │ │
+         │ │         │   snapshot={                                         │ │
+         │ │         │   │   'protocol_schema':                             │ │
+         │ │         'alas-headless.observer/v1',                           │ │
+         │ │         │   │   'status': 'ok',                                │ │
+         │ │         │   │   'package': 'com.bilibili.azurlane',            │ │
+         │ │         │   │   'pid': 10683,                                  │ │
+         │ │         │   │   'uid': 10105,                                  │ │
+         │ │         │   │   'peer_uid': 2000,                              │ │
+         │ │         │   │   'abi': 'x86_64',                               │ │
+         │ │         │   │   'driver_revision':                             │ │
+         │ │         '506b76f698b5089aaa29c4e7908b48edb8532a44',            │ │
+         │ │         │   │   'snapshot_schema': 1,                          │ │
+         │ │         │   │   'snapshot_struct_size': 104,                   │ │
+         │ │         │   │   ... +20                                        │ │
+         │ │         │   },                                                 │ │
+         │ │         │   buttons_snapshot={                                 │ │
+         │ │         │   │   'protocol_schema':                             │ │
+         │ │         'alas-headless.observer/v1',                           │ │
+         │ │         │   │   'semantic_schema': 'alas-headless.buttons/v1', │ │
+         │ │         │   │   'status': 'ok',                                │ │
+         │ │         │   │   'package': 'com.bilibili.azurlane',            │ │
+         │ │         │   │   'pid': 10683,                                  │ │
+         │ │         │   │   'uid': 10105,                                  │ │
+         │ │         │   │   'peer_uid': 2000,                              │ │
+         │ │         │   │   'driver_revision':                             │ │
+         │ │         '506b76f698b5089aaa29c4e7908b48edb8532a44',            │ │
+         │ │         │   │   'schema': 1,                                   │ │
+         │ │         │   │   'struct_size': 340008,                         │ │
+         │ │         │   │   ... +8                                         │ │
+         │ │         │   },                                                 │ │
+         │ │         │   buttons=()                                         │ │
+         │ │         )                                                      │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         └────────────────────────────────────────────────────────────────────┘
+         SemanticGateClosed: daily precombat page is absent                    
+INFO     2026-09-12 11:38:44.411 │ No provider specified, skip sending         
+passed False attacks 1

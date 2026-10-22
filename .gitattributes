@@ -13,3 +13,19 @@
 *.ps1 text eol=crlf
 *.bat text eol=crlf
 *.cmd text eol=crlf
+
+# Preserve original bytes of the 2026-09-26 qualification receipts.
+/integration/alas/daily-native-continuity-20260926-fierce.json -text whitespace=cr-at-eol
+/integration/alas/daily-native-continuity-20260926-tactical.json -text whitespace=cr-at-eol
+/integration/alas/daily-native-continuity-assessment-20260926.json -text whitespace=cr-at-eol
+/integration/alas/hard-native-continuity-live-validation-receipt-20260926.json -text whitespace=cr-at-eol
+/integration/alas/meta-assist-continuity-20260926.json -text whitespace=cr-at-eol
+/integration/alas/meta-character-live-validation-20260926.json -text whitespace=cr-at-eol
+/integration/alas/private-quarters-continuity-20260926/private-quarters-levelup-observation-20260926.json -text whitespace=cr-at-eol
+/integration/alas/private-quarters-continuity-20260926/private-quarters-native-continuity-20260926-r5.json -text whitespace=cr-at-eol
+/integration/alas/private-quarters-continuity-20260926/private-quarters-zero-recovery-20260926-r3.json -text whitespace=cr-at-eol
+/integration/alas/private-quarters-continuity-20260926/runs.json -text whitespace=cr-at-eol
+/integration/alas/private-quarters-observer-deployment-20260926.json -text whitespace=cr-at-eol
+/integration/alas/research-native-continuity-live-validation-receipt-20260926.json -text whitespace=cr-at-eol
+/integration/alas/research-navigation-continuity-receipt-20260926.json -text whitespace=cr-at-eol
+/integration/alas/shipyard-series3-live-validation-20260926.json -text whitespace=cr-at-eol

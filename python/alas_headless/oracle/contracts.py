@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Mapping, Optional, Tuple, Union
+from typing import Any, Callable, Mapping, Optional, Tuple, Union
 
 
 OBSERVER_SCHEMA = "alas-headless.observer/v1"
@@ -17,12 +17,9 @@ BUTTON_SCHEMA = "alas-headless.buttons/v1"
 UI_SCHEMA = "alas-headless.ui/v1"
 
 
-# Reviewed from the game's ``re_map_template`` identity table.  The folder is
-# ALAS's stable campaign module key; the pair is the Unity archive category
-# and the exact activity-banner sprite mounted on that card.  Three newer ALAS
-# folders (20230525, 20230803 and 20240725) are intentionally absent because
-# the pinned CN game exposes no corresponding re-map record.  They therefore
-# fail only the requested archive instead of being guessed by list position.
+# Reviewed legacy identities for older observers without an activity catalog.
+# New observers join installed ALAS titles to current game re_map_template
+# records; absence from this fallback table does not disable a newer archive.
 WAR_ARCHIVES_CAMPAIGN_CARDS: Mapping[str, Tuple[str, str]] = {
     "war_archives_20190321_en": ("ex", "temp_hongran"),
     "war_archives_20181020_en": ("sp", "temp_zjiandui"),
@@ -280,15 +277,97 @@ class ShipyardState:
     ship_name: str
     blueprint_count: int
     phase: str
-    level: int
-    level_max: int
+    level: Optional[int]
+    level_max: Optional[int]
     research_status: str
+    fate_stage: Optional[int] = None
 
     @property
     def cannot_strengthen(self) -> bool:
-        return self.research_status in ("incomplete", "in-progress") or (
-            self.level >= self.level_max
-        )
+        if self.research_status in ("incomplete", "in-progress"):
+            return True
+        if self.level is None or self.level_max is None:
+            raise ValueError("shipyard development level is unavailable")
+        return self.level >= self.level_max
+
+
+@dataclass(frozen=True)
+class ShipyardStrengthenPanel:
+    """One selected ship's visible native DEV/FATE quantity panel."""
+
+    generation: int
+    series: int
+    ship_index: int
+    ship_name: str
+    phase: str
+    quantity: int
+    blueprint_count: int
+    currency: str
+    resource_count: int
+    total_price: Optional[int]
+    panel_path: str
+
+
+@dataclass(frozen=True)
+class ShipyardPurchaseState:
+    """UI quote paired with the game's selected blueprint and purchase counter."""
+
+    panel: ShipyardStrengthenPanel
+    blueprint_id: int
+    rarity: str
+    purchased: int
+    coins: int
+    level: int
+    fate_level: int
+    exp: int
+
+    @property
+    def identity(self) -> tuple:
+        return (self.panel.series, self.panel.ship_index, self.panel.ship_name,
+                self.blueprint_id, self.rarity)
+
+
+@dataclass(frozen=True)
+class ShipyardPurchaseResult:
+    """Authoritative completion remains readable during the native UI animation."""
+
+    generation: int
+    blueprint_id: int
+    series: int
+    ship_index: int
+    rarity: str
+    purchased: int
+    coins: int
+    level: int
+    fate_level: int
+    exp: int
+
+
+@dataclass(frozen=True)
+class ShipyardBlueprintUseState:
+    """Stored-item request; no gold or premium-currency debit is authorized."""
+
+    panel: ShipyardStrengthenPanel
+    native: ShipyardPurchaseResult
+    paid_gems: int
+    free_gems: int
+
+
+@dataclass(frozen=True)
+class ShipyardBlueprintUseResult:
+    """Selected blueprint inventory and native progress after an item input."""
+
+    native: ShipyardPurchaseResult
+    blueprint_count: int
+    paid_gems: int
+    free_gems: int
+
+
+@dataclass(frozen=True)
+class _DeferredUiValue:
+    """An internal field parser over one already captured UI snapshot."""
+
+    read: Callable[[], Any]
 
 
 @dataclass(frozen=True)
@@ -303,6 +382,15 @@ class UiState:
     images: Tuple[ImageState, ...]
     image_source_count: Optional[int] = None
     image_source_capacity: Optional[int] = None
+
+    def __getattribute__(self, name: str) -> Any:
+        value = object.__getattribute__(self, name)
+        if isinstance(value, _DeferredUiValue):
+            # Resolve only the field family actually consumed. Cache successful
+            # immutable values, never an empty substitute for a failed parse.
+            value = value.read()
+            object.__setattr__(self, name, value)
+        return value
 
 
 @dataclass(frozen=True)
@@ -325,8 +413,8 @@ class GuildLogisticsState:
     supply_remaining: int
     supply_total: int
     supply_claimable: bool
-    mission_current: int
-    mission_total: int
+    mission_current: Optional[int]
+    mission_total: Optional[int]
     mission_claimable: bool
     mission_finished: bool
     exchange_remaining: int
@@ -340,6 +428,7 @@ class GuildOperationsState:
     active_node: Optional[str]
     active_node_path: Optional[str]
     report_available: bool
+    active_nodes: Tuple[ButtonState, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -349,6 +438,7 @@ class GuildFormationState:
     score_addition: int
     effect_addition: int
     empty_slots: int
+    in_progress: bool = False
 
 
 @dataclass(frozen=True)
@@ -531,7 +621,7 @@ class RetirementExecutionReceipt:
             raise ValueError("retirement receipt count must be positive")
         if self.capacity_before - self.capacity_after != self.retired_count:
             raise ValueError("retirement receipt capacity delta is inconsistent")
-        if not (0 <= self.capacity_after < self.capacity_before <= self.capacity_total):
+        if not (0 <= self.capacity_after < self.capacity_before and self.capacity_total > 0):
             raise ValueError("retirement receipt capacity values are invalid")
         if (self.policy_sha256 is None) != (self.capability_id is None):
             raise ValueError("retirement receipt authority metadata is incomplete")
@@ -555,7 +645,7 @@ class RetirementNoCandidateReceipt:
     capability_id: Optional[str] = None
 
     def __post_init__(self) -> None:
-        if not (0 <= self.capacity_used <= self.capacity_total):
+        if not (self.capacity_used >= 0 and self.capacity_total > 0):
             raise ValueError("no-candidate receipt capacity values are invalid")
         if self.official_message != "<color=white>没找到符合条件的舰船</color>":
             raise ValueError("no-candidate receipt message is not official")
@@ -775,7 +865,7 @@ def enhancement_config_policy(
 
 
 class MissionDisposition(str, Enum):
-    """Observed task-page state proven only from reviewed Unity Buttons."""
+    """Observed task-page state from reviewed Unity controls and status markers."""
 
     CLAIMABLE_ALL = "claimable-all"
     CLAIMABLE_ROW = "claimable-row"
@@ -818,11 +908,11 @@ class CommissionRowState:
     level: int
     duration_seconds: int
     status: CommissionStatus
-    type_sprite: str
+    type_sprite: Optional[str]
     button: ButtonState
 
     @property
-    def signature(self) -> Tuple[Union[int, str], ...]:
+    def signature(self) -> Tuple[Union[int, str, None], ...]:
         return (
             self.index,
             self.name,
@@ -899,8 +989,8 @@ class CommissionScrollProof:
     after_position: float
     before_generation: int
     after_generation: int
-    before_row_signatures: Tuple[Tuple[Union[int, str], ...], ...]
-    after_row_signatures: Tuple[Tuple[Union[int, str], ...], ...]
+    before_row_signatures: Tuple[Tuple[Union[int, str, None], ...], ...]
+    after_row_signatures: Tuple[Tuple[Union[int, str, None], ...], ...]
 
 
 class BuildPool(str, Enum):
@@ -1126,6 +1216,16 @@ class MetaCurrentDetailState:
 
 
 @dataclass(frozen=True)
+class MetaDossierDetailState:
+    current_points: int
+    point_capacity: int
+    level: int
+    current_hp: int
+    max_hp: int
+    auto_sprite: Optional[str]
+
+
+@dataclass(frozen=True)
 class CampaignStageState:
     stage_id: int
     stage_code: str
@@ -1250,6 +1350,12 @@ class CampaignFleetSelectionState:
             for item in (self.mob_oil_cost, self.boss_oil_cost)
         ):
             value = self.mob_oil_cost + self.boss_oil_cost
+            if self.submarine_fleets[0]:
+                if (isinstance(self.submarine_oil_cost, bool)
+                        or not isinstance(self.submarine_oil_cost, int)
+                        or self.submarine_oil_cost < 0):
+                    raise ValueError("campaign submarine oil requirement is not proven")
+                value += self.submarine_oil_cost
         if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
             raise ValueError("campaign sortie oil requirement is not proven")
         return value
@@ -1331,6 +1437,15 @@ class CampaignMapFleetState:
 
 
 @dataclass(frozen=True)
+class CampaignMapSubmarineState:
+    marker: str
+    node: str
+    # Both ammo widgets can be hidden (e.g. hunting); unknown is not zero.
+    ammo: Optional[int]
+    ammo_capacity: Optional[int]
+
+
+@dataclass(frozen=True)
 class CampaignMapState:
     generation: int
     stage_code: str
@@ -1344,10 +1459,13 @@ class CampaignMapState:
     displayed_fleet_index: int
     current_fleet_marker: str
     current_fleet_roster_sprites: Tuple[str, ...]
+    submarine: Optional[CampaignMapSubmarineState] = None
+    submarine_hunting_nodes: Optional[Tuple[str, ...]] = None
+    submarine_destination_node: Optional[str] = None
 
     @property
     def signature(self) -> Tuple[Any, ...]:
-        return (
+        base = (
             self.stage_code,
             self.rows,
             self.columns,
@@ -1375,6 +1493,11 @@ class CampaignMapState:
             self.current_fleet_marker,
             self.current_fleet_roster_sprites,
         )
+        if self.submarine is None:
+            return base
+        return (*base, ('submarine', self.submarine.marker, self.submarine.node,
+                       self.submarine.ammo, self.submarine.ammo_capacity),
+                self.submarine_hunting_nodes, self.submarine_destination_node)
 
 
 @dataclass(frozen=True)
@@ -1442,6 +1565,7 @@ class OperationSirenStorageScrollReceipt:
 
 class ResearchProjectStatus(str, Enum):
     DETAIL = "detail"
+    REQUIREMENTS_UNMET = "requirements_unmet"
     RUNNING = "running"
     WAITING = "waiting"
     FINISHED = "finished"
@@ -1483,6 +1607,7 @@ class ResearchDetailState:
     is_running: bool
     is_finished: bool
     resource_costs: Tuple[ResearchResourceCostState, ...] = ()
+    series: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -1530,6 +1655,17 @@ class DormFeedState:
     food: int
     capacity: int
     items: Tuple[DormFoodState, ...]
+
+
+@dataclass(frozen=True)
+class DormFoodShopState:
+    """Current food purchase proposal; reading it does not submit a purchase."""
+    generation: int
+    food_name: str
+    quantity: int
+    total_cost: int
+    currency_sprite: str
+    item_sprite: str
 
 
 @dataclass(frozen=True)

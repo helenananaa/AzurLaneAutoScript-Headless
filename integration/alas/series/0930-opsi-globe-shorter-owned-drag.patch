@@ -1,0 +1,41 @@
+diff --git a/module/device/control.py b/module/device/control.py
+--- a/module/device/control.py
++++ b/module/device/control.py
+@@ -221,8 +221,8 @@
+                     break
+                 logger.info('Original ALAS swipe candidate is outside native globe Plane; resample before input')
+             else:
+-                from alas_headless import SemanticGateClosed
+-                raise SemanticGateClosed('original ALAS sampler found no owned globe drag path')
++                from alas_headless.oracle.errors import SemanticGlobeDragPathUnavailable
++                raise SemanticGlobeDragPathUnavailable('original ALAS sampler found no owned globe drag path')
+             return self.swipe(
+                 p1, p2, duration=duration, name=name,
+                 distance_check=distance_check)
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -10,7 +10,7 @@
+ from module.os_handler.assets import ACTION_POINT_CANCEL, ACTION_POINT_USE, AUTO_SEARCH_REWARD
+ 
+ from alas_headless import SemanticGateClosed
+-from alas_headless.oracle.errors import SemanticViewportReanchorRequired
++from alas_headless.oracle.errors import SemanticViewportReanchorRequired, SemanticGlobeDragPathUnavailable
+ 
+ 
+ class GlobeCamera(GlobeOperation, ZoneManager):
+@@ -217,7 +217,13 @@
+                         return
+                     continue
+                 vector = np.clip(np.array((500.0 - point.x, 420.0 - point.y)), -300, 300)
+-                self.device.swipe_vector(tuple(vector), name=f'GLOBE_SWIPE_{int(vector[0])}_{int(vector[1])}', box=sight)
++                try:
++                    self.device.swipe_vector(tuple(vector), name=f'GLOBE_SWIPE_{int(vector[0])}_{int(vector[1])}', box=sight)
++                except SemanticGlobeDragPathUnavailable:
++                    # Native proofs rejected all candidates before any input.
++                    # ALAS samples one shorter leg, retaining the same target.
++                    vector = vector * 0.5
++                    self.device.swipe_vector(tuple(vector), name=f'GLOBE_SWIPE_{int(vector[0])}_{int(vector[1])}', box=sight)
+                 self.device.sleep(1)
+                 after = project()
+                 if np.linalg.norm(np.array((after.x-point.x, after.y-point.y))) < 10:

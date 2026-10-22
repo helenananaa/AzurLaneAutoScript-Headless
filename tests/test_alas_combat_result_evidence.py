@@ -114,7 +114,7 @@ def records_for_profile(item, *, raycast_top=True, geometry_offset=0.0):
                         "alpha": 1.0,
                     },
                     "fill_amount": 1.0,
-                    "flags": 0,
+                    "flags": 0x8,  # The observer marks a present sprite.
                     "adb_point": None,
                     "adb_bounds": {
                         "left": 300.0,

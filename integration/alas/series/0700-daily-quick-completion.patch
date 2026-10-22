@@ -1,0 +1,14 @@
+diff --git a/module/daily/daily.py b/module/daily/daily.py
+--- a/module/daily/daily.py
++++ b/module/daily/daily.py
+@@ -299,6 +299,10 @@
+             else:
+                 self.device.screenshot()
+ 
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if semantic_adapter is not None and semantic_adapter.daily_quick_complete():
++                return False
++
+             if self.appear(DAILY_ENTER_CHECK, threshold=30, interval=5):
+                 self.device.click(button)
+                 continue

@@ -1,0 +1,56 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 12:11:13.355 │ [Server] cn                                 
+read: ./config\semantic_e2e.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 12:11:13.363 │ Bind task ['General', 'Alas']               
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 12:11:13.367 │ DEVICE                                      
+INFO     2026-09-12 12:11:13.369 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 12:11:13.370 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 12:11:13.372 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 12:11:13.376 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 12:11:13.377 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 12:11:13.381 │ emulator-5580                               
+INFO     2026-09-12 12:11:13.383 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 12:11:13.385 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 12:11:13.391 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 12:11:13.392 │ [Server] cn                                 
+WARNING  2026-09-12 12:11:13.394 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 12:11:13.397 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 12:11:13.450 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 12:11:13.453 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 12:11:13.455 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 12:11:13.457 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 12:11:13.458 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 12:11:13.460 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 12:11:15.954 │ UI get current page                         
+INFO     2026-09-12 12:11:41.299 │ [UI] page_meta                              
+INFO     2026-09-12 12:11:41.300 │ Goto page_main                              
+INFO     2026-09-12 12:11:41.302 │ <<< UI GOTO PAGE_MAIN >>>                   
+INFO     2026-09-12 12:12:17.109 │ Page switch: page_meta -> page_main         
+INFO     2026-09-12 12:12:19.656 │ Semantic click meta/character/back @        
+         OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back                
+INFO     2026-09-12 12:12:49.412 │ Page switch: page_reshmenu -> page_main     
+INFO     2026-09-12 12:12:51.589 │ Semantic click research-menu/page/back @    
+         OverlayCamera/Overlay/UIMain/SelectTechnologyUI(Clone)/blur_panel/adap
+         t/top/back                                                            
+INFO     2026-09-12 12:13:24.956 │ Page switch: page_reshmenu -> page_main     
+INFO     2026-09-12 12:13:27.061 │ Semantic click main/already @               
+         OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/right/1/b
+         attle                                                                 
+INFO     2026-09-12 12:13:28.924 │ Page arrive: page_main                      
+True

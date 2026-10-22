@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from collections.abc import Mapping
 
 from .semantic_oracle import SemanticGateClosed
 
@@ -46,7 +47,7 @@ RESEARCH_RESOURCE_STRATEGIES = (
 @dataclass(frozen=True)
 class AlasResearchConfigSnapshot:
     preset_filter: str
-    custom_filter: str
+    custom_filter: str | None
     allow_delay: bool
     use_coin: str
     use_cube: str
@@ -59,10 +60,19 @@ def _nonempty_text(name: str, value: object) -> str:
     return value
 
 
-def _resource_strategy(name: str, value: object) -> str:
-    if not isinstance(value, str) or value not in RESEARCH_RESOURCE_STRATEGIES:
+def _resource_strategy(name: str, value: object, options: object) -> str:
+    declaration = options.get(name, {}) if isinstance(options, Mapping) else {}
+    declared = declaration.get("option", ()) if isinstance(declaration, Mapping) else ()
+    installed_option = (
+        isinstance(declared, (list, tuple))
+        and isinstance(value, str)
+        and value in declared
+    )
+    if not isinstance(value, str) or not value.strip() or (
+        value not in RESEARCH_RESOURCE_STRATEGIES and not installed_option
+    ):
         raise SemanticGateClosed(
-            f"Research.{name} is outside the pinned ALAS strategy surface"
+            f"Research.{name} is not declared by the installed ALAS strategy surface"
         )
     return value
 
@@ -83,20 +93,23 @@ def validate_alas_research_selector_config(
     use_coin: object,
     use_cube: object,
     use_part: object,
+    resource_options: object = None,
 ) -> AlasResearchConfigSnapshot:
     """Validate all six public fields before Research selection can branch."""
 
     # Unknown non-empty preset names intentionally remain valid here.  The
     # pinned ALAS selector logs them and falls back to its generated default.
     preset = _nonempty_text("PresetFilter", preset_filter)
-    custom = _nonempty_text("CustomFilter", custom_filter)
+    # Only the custom branch reads CustomFilter.  Preset users can retain an
+    # obsolete or empty custom expression without blocking project selection.
+    custom = _nonempty_text("CustomFilter", custom_filter) if preset == "custom" else None
     return AlasResearchConfigSnapshot(
         preset_filter=preset,
         custom_filter=custom,
         allow_delay=validate_alas_research_allow_delay(allow_delay),
-        use_coin=_resource_strategy("UseCoin", use_coin),
-        use_cube=_resource_strategy("UseCube", use_cube),
-        use_part=_resource_strategy("UsePart", use_part),
+        use_coin=_resource_strategy("UseCoin", use_coin, resource_options),
+        use_cube=_resource_strategy("UseCube", use_cube, resource_options),
+        use_part=_resource_strategy("UsePart", use_part, resource_options),
     )
 
 

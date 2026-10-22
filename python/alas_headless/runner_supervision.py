@@ -1,24 +1,20 @@
-"""Host-only authority and lifecycle for bounded live-validation workers.
+"""Host lifecycle and run correlation for bounded live-validation workers.
 
-The security boundary is deliberately narrow: a directly invoked runner or a
-self-consistent environment/control file is not a worker.  A worker activates
-only after reading a one-time message from an anonymous OS pipe inherited from
-its real parent, and the parent sends that message only after assigning the
-worker to a kill-on-close Windows Job Object.  Same-user arbitrary native code
-can still duplicate handles or modify Python and is outside this boundary.
+The anonymous inherited pipe is an ordering barrier: the parent releases a
+worker only after assigning it to a kill-on-close Windows Job Object. Its
+public run ID prevents accidental cross-run control mixups; it is not a secret
+or a security boundary against code running with the same user authority.
+Owned file identities and handle-based cleanup protect unrelated user files.
 
-Nothing in this module understands game pages, navigation, or task flow.  The
-Job Object contains the worker host process and children it starts while
-active.  It never acquires handles to, or operates on, the game, emulator, or
-pre-existing ADB server processes.
+Nothing here owns game navigation or task flow. The Job Object contains only
+the worker and children it starts, never the game, emulator or existing ADB
+server processes.
 """
 
 from __future__ import annotations
 
 import ctypes
-import base64
 import hashlib
-import hmac
 import json
 import math
 import os
@@ -37,11 +33,11 @@ MIN_TOTAL_DEADLINE_SECONDS = 120
 MAX_TOTAL_DEADLINE_SECONDS = 1800
 WORKER_CLEANUP_GRACE_SECONDS = 45.0
 WORKER_FORCE_STOP_GRACE_SECONDS = 5.0
-WORKER_CONTROL_SCHEMA = "alas-headless.runner-worker-control/v5"
-WORKER_BINDING_SCHEMA = "alas-headless.runner-worker-binding/v2"
-WORKER_ACTIVATION_SCHEMA = "ALASACT2"
-WORKER_RESULT_SCHEMA = "alas-headless.runner-worker-result/v2"
-WORKER_CLEANUP_SCHEMA = "alas-headless.runner-worker-cleanup/v2"
+WORKER_CONTROL_SCHEMA = "alas-headless.runner-worker-control/v6"
+WORKER_BINDING_SCHEMA = "alas-headless.runner-worker-binding/v3"
+WORKER_ACTIVATION_SCHEMA = "ALASRUN3"
+WORKER_RESULT_SCHEMA = "alas-headless.runner-worker-result/v3"
+WORKER_CLEANUP_SCHEMA = "alas-headless.runner-worker-cleanup/v3"
 FORWARD_LEASE_SCHEMA = "alas-headless.runner-forward-lease/v2"
 CONFIG_OWNERSHIP_SCHEMA = "alas-headless.runner-config-ownership/v1"
 CONFIG_MARKER_SCHEMA = "alas-headless.eventsp-config-provenance/v2"
@@ -79,13 +75,7 @@ PUBLIC_EXCEPTION_TYPES = frozenset(
     }
 )
 _ACTIVATION_MAGIC = WORKER_ACTIVATION_SCHEMA.encode("ascii")
-_ACTIVATION_TOKEN_BYTES = 32
-_ACTIVATION_DIGEST_BYTES = 32
-ACTIVATION_RECORD_BYTES = (
-    len(_ACTIVATION_MAGIC) + _ACTIVATION_TOKEN_BYTES + _ACTIVATION_DIGEST_BYTES
-)
-if ACTIVATION_RECORD_BYTES > 512:
-    raise RuntimeError("runner activation capability exceeds its hard bound")
+ACTIVATION_RECORD_BYTES = len(_ACTIVATION_MAGIC) + 32  # public UUID hex
 _MAX_CONTROL_BYTES = 512 * 1024
 MAX_CONFIG_BYTES = 2 * 1024 * 1024
 MAX_WORKER_RESULT_BYTES = 2 * 1024 * 1024
@@ -103,7 +93,7 @@ WORKER_PHASES = (
     "result_serialize",
 )
 WORKER_EXECUTION_STATES = ("not_started", "started", "unknown", "finished")
-BOUND_RECORD_SCHEMA = "alas-headless.runner-bound-record/v1"
+BOUND_RECORD_SCHEMA = "alas-headless.runner-bound-record/v2"
 RECORD_RESULT = "worker-result/v1"
 RECORD_CLEANUP = "worker-cleanup/v1"
 RECORD_TERMINAL = "worker-terminal/v1"
@@ -182,7 +172,7 @@ def _bind_record_to_binding(
     return {
         "schema": BOUND_RECORD_SCHEMA,
         "purpose": purpose,
-        "binding_digest": binding_digest(binding),
+        "run_id": binding.run_id,
         "payload": dict(payload),
     }
 
@@ -196,14 +186,14 @@ def verify_bound_record(
 def _verify_bound_record_for_binding(
     binding: "RunBinding", purpose: str, value: Mapping[str, Any]
 ) -> Mapping[str, Any]:
-    expected = {"schema", "purpose", "binding_digest", "payload"}
+    expected = {"schema", "purpose", "run_id", "payload"}
     if (
         purpose not in _RECORD_PURPOSES
         or not isinstance(value, Mapping)
         or set(value) != expected
         or value.get("schema") != BOUND_RECORD_SCHEMA
         or value.get("purpose") != purpose
-        or value.get("binding_digest") != binding_digest(binding)
+        or value.get("run_id") != binding.run_id
         or not isinstance(value.get("payload"), Mapping)
     ):
         raise ValueError("runner bound record is malformed or belongs to another run")
@@ -390,7 +380,6 @@ class ForwardRecord:
 @dataclass(frozen=True)
 class RunBinding:
     run_id: str
-    token_digest: str
     task: str
     stage: str
     event: str
@@ -407,11 +396,6 @@ class RunBinding:
     def __post_init__(self) -> None:
         if not isinstance(self.run_id, str) or _RUN_ID.fullmatch(self.run_id) is None:
             raise ValueError("worker run id is malformed")
-        if (
-            not isinstance(self.token_digest, str)
-            or _SHA256_HEX.fullmatch(self.token_digest) is None
-        ):
-            raise ValueError("worker token digest is malformed")
         if (
             self.task != "EventSp"
             or not isinstance(self.stage, str)
@@ -453,7 +437,6 @@ class RunBinding:
         return {
             "schema": WORKER_BINDING_SCHEMA,
             "run_id": self.run_id,
-            "token_digest": self.token_digest,
             "task": self.task,
             "stage": self.stage,
             "event": self.event,
@@ -473,7 +456,6 @@ class RunBinding:
         expected = {
             "schema",
             "run_id",
-            "token_digest",
             "task",
             "stage",
             "event",
@@ -504,7 +486,6 @@ class RunBinding:
                 raise ValueError("worker binding path is malformed")
         return cls(
             run_id=value.get("run_id"),
-            token_digest=value.get("token_digest"),
             task=value.get("task"),
             stage=value.get("stage"),
             event=value.get("event"),
@@ -521,6 +502,7 @@ class RunBinding:
 
 
 def binding_digest(binding: RunBinding) -> str:
+    """Content checksum for the owned-config marker, not authentication."""
     if not isinstance(binding, RunBinding):
         raise ValueError("worker binding is malformed")
     return _sha256_hex(_canonical_bytes(binding.to_mapping()))
@@ -549,12 +531,6 @@ def _config_control_core(
         "control_identity": control_identity.to_mapping(),
         "marker_schema": CONFIG_MARKER_SCHEMA,
     }
-
-
-def _validate_activation_token(token: bytes) -> bytes:
-    if not isinstance(token, bytes) or len(token) != _ACTIVATION_TOKEN_BYTES:
-        raise ValueError("worker activation token is malformed")
-    return token
 
 
 def expected_config_marker(
@@ -909,9 +885,6 @@ class WorkerControl:
     _activation_verified: bool = field(
         default=False, init=False, compare=False, repr=False
     )
-    _activation_token: bytes | None = field(
-        default=None, init=False, compare=False, repr=False
-    )
 
     def __post_init__(self) -> None:
         if not isinstance(self.config_ownership, ConfigOwnership):
@@ -1003,41 +976,19 @@ class WorkerControl:
     def activation_verified(self) -> bool:
         return self._activation_verified
 
-    @property
-    def activation_token(self) -> bytes:
-        if self._activation_token is None:
-            raise RuntimeError("worker control has no activation secret")
-        return self._activation_token
-
-    def bind_activation_token(self, token: bytes, *, verified: bool) -> None:
-        token = _validate_activation_token(token)
-        token_digest = hashlib.sha256(token).hexdigest()
-        if not hmac.compare_digest(token_digest, self.binding.token_digest):
-            raise RuntimeError("worker activation token digest changed")
-        validate_config_ownership(self.binding, self.config_ownership)
-        object.__setattr__(self, "_activation_token", token)
-        if verified:
-            object.__setattr__(self, "_activation_verified", True)
+    def mark_activated(self) -> None:
+        """Record that this worker consumed its parent's start barrier."""
+        object.__setattr__(self, "_activation_verified", True)
 
     @classmethod
-    def from_mapping(
-        cls, value: Mapping[str, Any], *, activation_token: bytes | None = None
-    ) -> "WorkerControl":
-        """Verify public run binding before constructing the control object."""
-
-        if activation_token is None:
-            raise ValueError("worker activation token is required")
+    def from_mapping(cls, value: Mapping[str, Any]) -> "WorkerControl":
+        """Validate structure and public run correlation, without authentication."""
         if not isinstance(value, Mapping) or not isinstance(value.get("payload"), Mapping):
             raise ValueError("worker control record is malformed")
         candidate_binding = RunBinding.from_mapping(value["payload"].get("binding"))
         body = _verify_bound_record_for_binding(
             candidate_binding, RECORD_WORKER_CONTROL, value
         )
-        if not hmac.compare_digest(
-            hashlib.sha256(_validate_activation_token(activation_token)).hexdigest(),
-            candidate_binding.token_digest,
-        ):
-            raise ValueError("worker activation token does not match this run")
         return cls._from_body_mapping(body)
 
     @classmethod
@@ -1146,61 +1097,6 @@ def secret_free_exception_label(exc: BaseException, purpose: str) -> str:
     return "{0}:{1}:sha256:{2}".format(
         purpose, descriptor["type"], descriptor["traceback_digest"]
     )
-
-
-def _secret_representations(token: bytes) -> tuple[str, ...]:
-    token = _validate_activation_token(token)
-    values = {token.hex(), token.hex().upper()}
-    for encoder in (base64.b64encode, base64.urlsafe_b64encode):
-        encoded = encoder(token).decode("ascii")
-        values.add(encoded)
-        values.add(encoded.rstrip("="))
-    try:
-        decoded = token.decode("utf-8", errors="strict")
-    except UnicodeDecodeError:
-        decoded = ""
-    if decoded:
-        values.add(decoded)
-    return tuple(sorted(values, key=len, reverse=True))
-
-
-def redact_secret_representations(value: Any, token: bytes) -> Any:
-    """Recursively redact every direct public representation of a run token."""
-
-    representations = _secret_representations(token)
-
-    def redact(item: Any) -> Any:
-        if isinstance(item, str):
-            result = item
-            for representation in representations:
-                result = result.replace(representation, "[redacted-secret]")
-            return result
-        if isinstance(item, bytes):
-            if any(rep.encode("utf-8") in item for rep in representations):
-                return "[redacted-secret]"
-            return item
-        if isinstance(item, Mapping):
-            result: dict[Any, Any] = {}
-            for key, nested in item.items():
-                redacted_key = redact(key)
-                if redacted_key in result:
-                    raise ValueError("secret redaction produced a duplicate key")
-                result[redacted_key] = redact(nested)
-            return result
-        if isinstance(item, list):
-            return [redact(nested) for nested in item]
-        if isinstance(item, tuple):
-            return tuple(redact(nested) for nested in item)
-        return item
-
-    return redact(value)
-
-
-def ensure_secret_free_payload(value: Any, token: bytes) -> Any:
-    redacted = redact_secret_representations(value, token)
-    if redacted != value:
-        raise RuntimeError("public payload contained a private runner capability")
-    return value
 
 
 def normalize_exit_code(value: Any) -> Optional[int]:
@@ -3057,7 +2953,7 @@ def activation_pipe_write_is_blocking(pipe: ActivationPipe) -> bool:
 def create_activation_pipe() -> ActivationPipe:
     read_fd, write_fd = os.pipe()
     try:
-        # The parent performs exactly one small capability write before it
+        # The parent performs exactly one small start-message write before it
         # enters the supervisor.  Nonblocking mode makes an unexpected kernel
         # capacity failure fail closed instead of consuming the total deadline.
         _set_activation_write_nonblocking(write_fd)
@@ -3081,23 +2977,6 @@ def create_activation_pipe() -> ActivationPipe:
         raise
 
 
-def _activation_control_digest(control_path: Path, control_bytes: bytes) -> bytes:
-    if not isinstance(control_path, Path) or not control_path.is_absolute():
-        raise ValueError("worker control path must be absolute")
-    if not isinstance(control_bytes, bytes):
-        raise ValueError("worker control payload must be bytes")
-    path_bytes = str(control_path).encode("utf-8")
-    if len(path_bytes) > 0xFFFFFFFF:
-        raise ValueError("worker control path is too long")
-    framed = (
-        b"alas-headless.runner-worker-control-digest/v2\0"
-        + len(path_bytes).to_bytes(4, "big")
-        + path_bytes
-        + control_bytes
-    )
-    return hashlib.sha256(framed).digest()
-
-
 def send_activation(
     pipe: ActivationPipe,
     control: WorkerControl,
@@ -3106,36 +2985,28 @@ def send_activation(
     absolute_deadline: float,
     monotonic: Callable[[], float] = time.monotonic,
 ) -> None:
-    """Deliver one fixed-size capability without a blocking write loop."""
+    """Release one run after containment, without a blocking write loop."""
 
     remaining_seconds(absolute_deadline, monotonic)
     if control_path != control.binding.control_path:
         raise RuntimeError("worker activation control path changed")
-    control_bytes = canonical_json_bytes(control.to_mapping())
-    if not control_bytes or len(control_bytes) > _MAX_CONTROL_BYTES:
-        raise RuntimeError("worker control is empty or oversized")
-    token = control.activation_token
-    payload = (
-        _ACTIVATION_MAGIC
-        + token
-        + _activation_control_digest(control_path, control_bytes)
-    )
+    payload = _ACTIVATION_MAGIC + control.binding.run_id.encode("ascii")
     if len(payload) != ACTIVATION_RECORD_BYTES:
-        raise RuntimeError("worker activation capability size changed")
+        raise RuntimeError("worker activation message size changed")
     # Re-check immediately before the only kernel write.  The fresh pipe is
-    # empty, its write end is nonblocking, and this record is only 72 bytes.
+    # empty, its write end is nonblocking, and the record fits in one write.
     remaining_seconds(absolute_deadline, monotonic)
     written = os.write(pipe.write_fd, payload)
     if written != ACTIVATION_RECORD_BYTES:
         raise OSError(
-            "activation capability short write: {0}/{1}".format(
+            "activation message short write: {0}/{1}".format(
                 written, ACTIVATION_RECORD_BYTES
             )
         )
     pipe.close_parent_write()
 
 
-def _read_activation_handle(handle: int) -> tuple[bytes, bytes]:
+def _read_activation_handle(handle: int) -> str:
     if os.name == "nt":
         import msvcrt
 
@@ -3145,20 +3016,16 @@ def _read_activation_handle(handle: int) -> tuple[bytes, bytes]:
     with os.fdopen(fd, "rb", closefd=True) as stream:
         payload = stream.read(ACTIVATION_RECORD_BYTES + 1)
     if len(payload) != ACTIVATION_RECORD_BYTES:
-        raise RuntimeError("worker activation capability is partial or oversized")
-    if not hmac.compare_digest(payload[: len(_ACTIVATION_MAGIC)], _ACTIVATION_MAGIC):
+        raise RuntimeError("worker activation message is partial or oversized")
+    if not payload.startswith(_ACTIVATION_MAGIC):
         raise RuntimeError("worker activation schema is invalid")
-    token_start = len(_ACTIVATION_MAGIC)
-    token_end = token_start + _ACTIVATION_TOKEN_BYTES
-    return payload[token_start:token_end], payload[token_end:]
-
-
-def _read_bounded_file(path: Path, maximum: int, label: str) -> bytes:
-    with path.open("rb") as stream:
-        payload = stream.read(maximum + 1)
-    if not payload or len(payload) > maximum:
-        raise RuntimeError(label + " is empty or oversized")
-    return payload
+    try:
+        run_id = payload[len(_ACTIVATION_MAGIC):].decode("ascii", errors="strict")
+    except UnicodeError as exc:
+        raise RuntimeError("worker activation run ID is malformed") from exc
+    if _RUN_ID.fullmatch(run_id) is None:
+        raise RuntimeError("worker activation run ID is malformed")
+    return run_id
 
 
 def worker_control_from_activation(
@@ -3185,36 +3052,23 @@ def worker_control_from_activation(
         control_path = Path(environment[WORKER_CONTROL_ENV])
     except (KeyError, TypeError, ValueError) as exc:
         raise RuntimeError(
-            "runner worker has no inherited activation authority"
+            "runner worker has no inherited start barrier"
         ) from exc
-    activation_token, activation_digest = _read_activation_handle(activation_handle)
+    activation_run_id = _read_activation_handle(activation_handle)
     control_bytes, control_identity = read_bytes_handle(
         environment_handles.control, _MAX_CONTROL_BYTES
     )
-    if not hmac.compare_digest(
-        activation_digest,
-        _activation_control_digest(control_path, control_bytes),
-    ):
-        raise RuntimeError("worker activation control digest changed")
     control_mapping = strict_json_mapping_bytes(
         control_bytes, maximum=_MAX_CONTROL_BYTES, label="worker control"
     )
-    if control_bytes != canonical_json_bytes(control_mapping):
-        raise RuntimeError("worker control serialization is not canonical")
     try:
-        control = WorkerControl.from_mapping(
-            control_mapping, activation_token=activation_token
-        )
+        control = WorkerControl.from_mapping(control_mapping)
     except ValueError as exc:
-        raise RuntimeError(
-            "worker activation token or control binding changed"
-        ) from exc
+        raise RuntimeError("worker control structure or run binding changed") from exc
     if control_path != control.binding.control_path:
         raise RuntimeError("worker activation control path changed")
-    if not hmac.compare_digest(
-        hashlib.sha256(activation_token).hexdigest(), control.binding.token_digest
-    ):
-        raise RuntimeError("worker activation token digest changed")
+    if activation_run_id != control.binding.run_id:
+        raise RuntimeError("worker activation belongs to another run")
     if environment_handles != control.handles:
         raise RuntimeError("worker inherited output handles changed")
     if control_identity != control.config_ownership.control_identity:
@@ -3236,7 +3090,7 @@ def worker_control_from_activation(
     # This marker is deliberately absent from the serialized control and is not
     # accepted by WorkerControl.__init__.  It records that this specific object
     # was produced by consuming the live activation channel.
-    control.bind_activation_token(activation_token, verified=True)
+    control.mark_activated()
     return control
 
 

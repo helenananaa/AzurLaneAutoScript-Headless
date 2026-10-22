@@ -1,0 +1,43 @@
+{
+  "android_input_injected": false,
+  "classified_pixel_accesses": 0,
+  "classified_pixel_operations": [],
+  "failed_refresh_call_order": [
+    "stuck_record_check",
+    "interval.wait",
+    "interval.reset",
+    "session.refresh_frame"
+  ],
+  "frame_generations": [
+    10,
+    10,
+    11
+  ],
+  "frame_ids": [
+    "frame-10-1",
+    "frame-10-2",
+    "frame-11-3"
+  ],
+  "normal_device_source_preserved": true,
+  "normal_screenshot_source_preserved": true,
+  "observation_hidden_refreshes": 0,
+  "observer_requests": 48,
+  "passed": true,
+  "patch_series_manifest_sha256": "bfa97e100c654b20bbee16dd63a927a7baa90a46dc2e4615cb476ce2cee85e9c",
+  "patch_sha256": "cfbbf07cfa53cb26d418916869c2e418d2b42f5911828237dc0edbcc31009efc",
+  "patched_screenshot_sha256": "fe035cae51df84188abfe20a9c84f446b8ce1ee4c30d2fcc8800f6584edb4342",
+  "post_action_newer_generation_required": true,
+  "runtime_handle_taps": 1,
+  "schema": "alas-headless.screenshot-frame-clock-verification/v1",
+  "session_close_clears_frame": true,
+  "successful_screenshot_call_order": [
+    "stuck_record_check",
+    "interval.wait",
+    "interval.reset",
+    "session.refresh_frame",
+    "session.pixel_guard",
+    "handle_night_commission"
+  ],
+  "unclassified_pixel_accesses": 0,
+  "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
+}

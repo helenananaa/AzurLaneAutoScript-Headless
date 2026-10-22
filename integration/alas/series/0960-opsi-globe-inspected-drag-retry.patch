@@ -1,0 +1,33 @@
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -206,7 +206,9 @@
+                 if 0 <= zone.zone_id <= 7:
+                     return semantic_adapter.operation_siren_globe_port_projection(zone.zone_id)
+                 return semantic_adapter.operation_siren_globe_map_projection(zone.area_pos)
+-            # Keep ALAS centering until sight entry; each swipe must move the target.
++            # Keep ALAS centering until sight entry, inspecting a missed drag
++            # before one bounded retry through the original path sampler.
++            missed_swipes = 0
+             while True:
+                 point = project()
+                 if point_in_area((point.x, point.y), area=sight, threshold=0):
+@@ -227,7 +229,17 @@
+                 self.device.sleep(1)
+                 after = project()
+                 if np.linalg.norm(np.array((after.x-point.x, after.y-point.y))) < 10:
+-                    raise GameStuckError('Semantic globe port did not move after camera swipe')
++                    if missed_swipes:
++                        raise GameStuckError('Semantic globe target did not move after inspected camera retry')
++                    self.device.screenshot()
++                    if not semantic_adapter.operation_siren_globe_visible():
++                        raise SemanticGateClosed('Semantic globe disappeared while inspecting missed camera drag')
++                    inspected = project()
++                    if np.linalg.norm(np.array((inspected.x-point.x, inspected.y-point.y))) < 10:
++                        missed_swipes = 1
++                        logger.info('Fresh globe projection confirms missed drag; resample original path once')
++                else:
++                    missed_swipes = 0
+ 
+         while 1:
+             if point_in_area(self.globe2screen([zone.location])[0], area=sight):

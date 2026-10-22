@@ -11,3 +11,9 @@ from .fake_oracle_rewards import FakeRewardsOracle
 
 class FakeOracle(FakeCoreOracle, FakeRewardsOracle, FakeCampaignOracle, FakeOpsiOracle, FakeDockOracle):
     """Scriptable oracle with domain-specific fake ports and one call ledger."""
+
+    def new_year_challenge_result(self):
+        return None
+
+    def new_year_challenge_home_visible(self):
+        return False

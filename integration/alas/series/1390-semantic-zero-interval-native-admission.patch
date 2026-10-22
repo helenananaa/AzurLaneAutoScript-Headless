@@ -1,0 +1,93 @@
+diff --git a/alas.py b/alas.py
+--- a/alas.py
++++ b/alas.py
+@@ -29,11 +29,15 @@
+         # Failure count of tasks
+         # Key: str, task name, value: int, failure count
+         self.failure_record = {}
++        # Only unavailable tasks with no effective native delay are skipped
++        # for this queue pass. ALAS still owns priority, clocks and re-entry.
++        self._semantic_unavailable_tasks = set()
+ 
+     @cached_property
+     def config(self):
+         try:
+             config = AzurLaneConfig(config_name=self.config_name)
++            config._semantic_unavailable_tasks = self._semantic_unavailable_tasks
+             return config
+         except RequestHumanTakeover:
+             logger.critical('Request human takeover')
+@@ -87,6 +91,13 @@
+                 self.config.task_delay(target=next_run)
+             else:
+                 self.config.task_delay(success=False)
++            next_run = getattr(self.config, 'Scheduler_NextRun', None)
++            if isinstance(next_run, datetime) and next_run <= datetime.now():
++                unavailable = getattr(self, '_semantic_unavailable_tasks', None)
++                if unavailable is None:
++                    unavailable = self._semantic_unavailable_tasks = set()
++                self.config._semantic_unavailable_tasks = unavailable
++                unavailable.add(self.config.task.command)
+             return None
+         except GameNotRunningError as e:
+             logger.warning(e)
+@@ -473,6 +484,7 @@
+             time.sleep(5)
+ 
+             if self.config.should_reload():
++                self._semantic_unavailable_tasks.clear()
+                 return False
+ 
+     def get_next_task(self):
+@@ -485,6 +497,13 @@
+                 self.config.Optimization_WhenTaskQueueEmpty
+             )
+             task = self.config.get_next()
++            if task is None:
++                # All enabled tasks are temporarily unavailable. Reuse the
++                # existing config-watching wait, then retry their admission.
++                self.wait_until(datetime.now())
++                self._semantic_unavailable_tasks.clear()
++                del_cached_property(self, 'config')
++                continue
+             self.config.task = task
+             self.config.bind(task)
+ 
+@@ -584,9 +603,14 @@
+             if success is None:
+                 # An optional semantic port is unavailable. Keep other tasks
+                 # schedulable without counting this as a client crash.
++                next_run = getattr(self.config, 'Scheduler_NextRun', None)
++                if isinstance(next_run, datetime) and next_run > datetime.now():
++                    self._semantic_unavailable_tasks.clear()
+                 del_cached_property(self, 'config')
+                 continue
+ 
++            # A real native task outcome permits a fresh availability check.
++            self._semantic_unavailable_tasks.clear()
+             # Check failures
+             failed = deep_get(self.failure_record, keys=task, default=0)
+             failed = 0 if success else failed + 1
+diff --git a/module/config/config.py b/module/config/config.py
+--- a/module/config/config.py
++++ b/module/config/config.py
+@@ -213,6 +213,8 @@
+             func = Function(func)
+             if not func.enable:
+                 continue
++            if func.command in getattr(self, '_semantic_unavailable_tasks', ()):
++                continue
+             if not isinstance(func.next_run, datetime):
+                 error.append(func)
+             elif func.next_run < now:
+@@ -256,6 +258,10 @@
+             logger.attr("Task", task)
+             return task
+         else:
++            unavailable = getattr(self, '_semantic_unavailable_tasks', ())
++            if any(Function(data).enable and Function(data).command in unavailable
++                   for data in self.data.values()):
++                return None
+             logger.critical("No task waiting or pending")
+             logger.critical("Please enable at least one task")
+             raise RequestHumanTakeover

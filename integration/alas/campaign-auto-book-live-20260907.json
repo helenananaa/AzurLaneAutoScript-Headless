@@ -1,0 +1,30 @@
+{
+  "schema": "alas-headless.campaign-auto-book-live/v1",
+  "passed": true,
+  "serial": "emulator-5580",
+  "stage_context": "3-1",
+  "cases": [
+    {
+      "desired": true,
+      "observed": true,
+      "handled": true,
+      "generation": 18815,
+      "path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/SpList/Item",
+      "raycast_top": true
+    },
+    {
+      "desired": false,
+      "observed": false,
+      "handled": true,
+      "generation": 18908,
+      "path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/SpList/Item",
+      "raycast_top": true
+    }
+  ],
+  "sortie_inputs": 0,
+  "pid": 6454,
+  "generation_before": 18719,
+  "before": false,
+  "book_count_before": 568,
+  "book_count_after": 568
+}

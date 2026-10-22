@@ -1,6 +1,7 @@
 """Login regression cases for the oracle."""
 
 import unittest
+from unittest.mock import Mock
 from alas_headless.semantic_oracle import SemanticGateClosed
 from tests.semantic_support.observer_fixtures import (
     FakeBackend,
@@ -14,6 +15,23 @@ from tests.semantic_support.oracle_cases import SemanticOracleTestsSupport
 
 
 class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
+    def test_maintenance_probe_does_not_bind_absent_modal_to_previous_scene(self):
+        backend = FakeBackend([])
+        oracle = make_oracle(backend)
+        oracle._stable_msgbox_ui_state = Mock(side_effect=SemanticGateClosed('Msgbox snapshots are not coherent'))
+        self.assertFalse(oracle.server_maintenance_visible())
+        oracle._stable_msgbox_ui_state.assert_not_called()
+        self.assertEqual(backend.taps, [])
+
+    def test_present_maintenance_control_still_requires_coherent_modal(self):
+        backend = FakeBackend([make_button('custom_button_1(Clone)',
+            'root/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)')])
+        oracle = make_oracle(backend)
+        oracle._stable_msgbox_ui_state = Mock(side_effect=SemanticGateClosed('Msgbox snapshots are not coherent'))
+        with self.assertRaises(SemanticGateClosed):
+            oracle.server_maintenance_visible()
+        self.assertEqual(backend.taps, [])
+
     def test_login_data_expired_confirm_requires_exact_single_button_prompt(self):
         popup = "root/Overlay/UIMain/Msgbox(Clone)/window/"
         backend = FakeBackend(
@@ -45,7 +63,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         backend.ui["texts"][0]["text"] = "是否购买资源？"
         self.assertFalse(oracle.enabled("overlay/login-data-expired/confirm"))
 
-    def test_server_maintenance_requires_exact_single_button_prompt(self):
+    def test_server_maintenance_accepts_exact_prompt_with_optional_cancel(self):
         popup = "root/Overlay/UIMain/Msgbox(Clone)/window/"
         backend = FakeBackend(
             [
@@ -66,6 +84,13 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         )
         oracle = make_oracle(backend)
 
+        self.assertTrue(oracle.server_maintenance_visible())
+        self.assertEqual(backend.taps, [])
+
+        backend.buttons['buttons'].append(make_button('custom_button_2(Clone)', popup+'button_container/custom_button_2(Clone)'))
+        backend.buttons['button_count'] += 1
+        backend.ui['texts'].append(make_text('取 消', popup+'button_container/custom_button_2(Clone)/pic'))
+        backend.ui['text_count'] += 1
         self.assertTrue(oracle.server_maintenance_visible())
         self.assertEqual(backend.taps, [])
 
@@ -100,6 +125,65 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
 
         backend.ui["texts"][0]["text"] = "是否购买资源？"
         self.assertFalse(oracle.enabled("login/update/download"))
+
+    def test_login_update_download_accepts_top_raycast_and_rejects_obscured(self):
+        dialog = "root/Overlay/UIMain/DialogPanel/dialog/"
+        backend = FakeBackend(
+            [
+                make_button("exit_button", dialog + "exit_button", raycast_top=None),
+                make_button(
+                    "action_button", dialog + "action_button", raycast_top=True
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "本次更新需要下载215.6MB的文件，是否继续更新？",
+                    dialog + "content/Text",
+                )
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.login_update_download_available())
+        self.assertEqual(
+            oracle.click("login/update/download").semantic_id,
+            "login/update/download",
+        )
+
+        backend.buttons["buttons"][1]["raycast_top"] = False
+        self.assertFalse(oracle.login_update_download_available())
+        backend.buttons["buttons"][1]["raycast_top"] = True
+        backend.buttons["buttons"][0]["raycast_top"] = False
+        self.assertFalse(oracle.login_update_download_available())
+
+    def test_login_update_failed_files_allows_one_exact_typed_retry(self):
+        dialog = "root/Overlay/UIMain/DialogPanel/dialog/"
+        backend = FakeBackend(
+            [
+                make_button("exit_button", dialog + "exit_button", raycast_top=None),
+                make_button("action_button", dialog + "action_button", raycast_top=True),
+            ]
+        )
+        backend.ui = make_ui(
+            [make_text("部分文件下载失败，是否重试？", dialog + "content/Text")]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.login_update_download_available())
+        self.assertTrue(oracle.enabled("login/update/download"))
+        self.assertEqual(oracle.click("login/update/download").path, dialog + "action_button")
+        self.assertEqual(backend.taps, [(640, 360)])
+        self.assertFalse(oracle.login_update_download_available())
+        self.assertFalse(oracle.enabled("login/update/download"))
+
+        fresh = make_oracle(backend)
+        backend.ui["texts"][0]["text"] = "是否购买资源？"
+        self.assertFalse(fresh.login_update_download_available())
+        backend.ui["texts"][0]["text"] = "部分文件下载失败，是否重试？"
+        backend.buttons["buttons"][1]["raycast_top"] = False
+        self.assertFalse(fresh.login_update_download_available())
 
     def test_login_update_download_accepts_reviewed_maintenance_variants(self):
         dialog = "root/Overlay/UIMain/DialogPanel/dialog/"
@@ -177,7 +261,11 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         self.assertFalse(oracle.stale_login_update_in_progress())
         backend.ui["texts"][0]["text"] = "正在检查更新..."
         backend.ui["age_ms"] = 20
-        self.assertFalse(oracle.stale_login_update_in_progress())
+        # A fresh UpdatePanel cannot make passive waiting unsafe when the
+        # separately published state frame is stale. It admits no input.
+        self.assertTrue(oracle.stale_login_update_in_progress())
+        self.assertFalse(oracle._login_update_seen)
+        self.assertEqual(backend.taps, [])
 
     def test_login_update_download_prompt_wins_over_background_check_status(self):
         dialog = "root/Overlay/UIMain/DialogPanel/dialog/"

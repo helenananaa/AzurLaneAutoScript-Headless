@@ -1,0 +1,52 @@
+offline mode
+ninja: Entering directory `out/AndroidNullObserverX64'
+
+
+disable fast local for non-interactive: fastlocal=1->0
+ use `--fast_local` to enable fast local with non-interactive mode
+schedule pending:1+ready:0 (node:5637 edge:2)
+build start: Ready 1 Pending 1
+rebuild manifest finished
+
+loading build.ninja... done 256.051005ms
+load siso config done 81.005926ms
+schedule pending:1+ready:0 (node:23134 edge:2)
+build start: Ready 1 Pending 1
+rebuild manifest finished
+schedule pending:1+ready:0 (node:23134 edge:8)
+build start: Ready 252 Pending 1877
+[0/726] 0.61s S ACTION //:angle_program_version_id(//build/toolchain/android:android_clang_x64)
+[0/254] 0.62s S CXX obj/src/libANGLE/renderer/null/angle_null_backend/Il2CppNamespaceProbe.o obj/src/libANGLE/renderer/null/angle_null_backend/Il2CppNamespaceProbe.dwo
+[0/243] 1.29s F ACTION //:angle_program_version_id(//build/toolchain/android:android_clang_x64)
+[1/40] 1.29s S CXX obj/angle_version_info/angle_version_info.o obj/angle_version_info/angle_version_info.dwo
+[1/40] 1.98s F CXX obj/angle_version_info/angle_version_info.o obj/angle_version_info/angle_version_info.dwo
+[2/38] 3.48s F CXX obj/src/libANGLE/renderer/null/angle_null_backend/Il2CppNamespaceProbe.o obj/src/libANGLE/renderer/null/angle_null_backend/Il2CppNamespaceProbe.dwo
+[3/35] 3.48s S SOLINK ./libGLESv2_angle.so
+[3/35] 4.20s F SOLINK ./libGLESv2_angle.so
+[4/29] 4.20s S ACTION //:compressed_symbols(//build/toolchain/android:android_clang_x64)
+[4/29] 4.77s F ACTION //:compressed_symbols(//build/toolchain/android:android_clang_x64)
+[5/28] 4.77s S ACTION //:angle_chromium_apk__compile_resources(//build/toolchain/android:android_clang_x64)
+[5/28] 6.95s F ACTION //:angle_chromium_apk__compile_resources(//build/toolchain/android:android_clang_x64)
+[6/23] 6.95s S ACTION //:angle_chromium_apk__java__header(//build/toolchain/android:android_clang_x64)
+[6/23] 7.80s F ACTION //:angle_chromium_apk__java__header(//build/toolchain/android:android_clang_x64)
+[7/22] 7.81s S ACTION //:angle_chromium_apk__errorprone(//build/toolchain/android:android_clang_x64)
+[7/22] 7.81s S ACTION //:angle_chromium_apk__compile_java(//build/toolchain/android:android_clang_x64)
+[7/22] 8.00s F ACTION //:angle_chromium_apk__compile_java(//build/toolchain/android:android_clang_x64)
+[8/18] 8.00s S ACTION //:angle_chromium_apk__java__validate_deps(//build/toolchain/android:android_clang_x64)
+[8/18] 8.00s S ACTION //:angle_chromium_apk__final_dex(//build/toolchain/android:android_clang_x64)
+[8/18] 8.14s F ACTION //:angle_chromium_apk__final_dex(//build/toolchain/android:android_clang_x64)
+[9/17] 8.14s S ACTION //:angle_chromium_apk__create(//build/toolchain/android:android_clang_x64)
+[9/17] 8.81s F ACTION //:angle_chromium_apk__java__validate_deps(//build/toolchain/android:android_clang_x64)
+[10/16] 8.99s F ACTION //:angle_chromium_apk__create(//build/toolchain/android:android_clang_x64)
+[11/13] 10.83s F ACTION //:angle_chromium_apk__errorprone(//build/toolchain/android:android_clang_x64)
+build finished
+
+	
+noexec:0 local:12 remote:0 cache:0 skip:2117
+  cache-write:0(err:0) fallback:0 retry:0
+fs: ops: 195(err:9) / r:71(err:0) 122.41MiB / w:2(err:0) 80.13KiB
+
+
+
+10.88s Build Succeeded: 12 steps - 1.10/s
+shutdown cloud logging/monitoring done 85.223µs

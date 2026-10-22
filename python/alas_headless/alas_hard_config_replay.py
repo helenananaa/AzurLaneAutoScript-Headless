@@ -118,7 +118,7 @@ def _verify_contract() -> tuple[int, int]:
         "",
         "0-1",
         "1-0",
-        "17-1",
+        "-1-1",
         "1-5",
         "1",
         "campaign_1_1junk",
@@ -263,7 +263,7 @@ def _verify_original(module: Any, hard_type: type[Any]) -> dict[str, Any]:
     return {
         "fleet_one": fleet_one,
         "fleet_two": fleet_two,
-        "invalid_stage_events": _invalid_case(hard_type, stage="17-1"),
+        "invalid_stage_events": _invalid_case(hard_type, stage="-1-1"),
         "invalid_fleet_events": _invalid_case(hard_type, fleet=True),
     }
 

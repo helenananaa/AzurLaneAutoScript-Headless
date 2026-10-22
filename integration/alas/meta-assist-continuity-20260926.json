@@ -1,0 +1,90 @@
+{
+  "schema": "alas-headless.meta-assist-continuity-assessment/v1",
+  "date": "2026-09-26",
+  "status": "B",
+  "full_task_passed": false,
+  "runtime": {
+    "package": "com.bilibili.azurlane",
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "width": 1280,
+    "height": 720,
+    "max_age_ms": 10000,
+    "peer_uid": 2000,
+    "expected_pid": 27842
+  },
+  "ordinary_assist_attempts_consumed": 3,
+  "attempts_before": 3,
+  "attempts_after": 0,
+  "segmented_first_two": true,
+  "final_native_attack": {
+    "before": {
+      "remaining_attempts": 1,
+      "attempt_capacity": 3,
+      "selected_level": 15,
+      "selected_hp": 1820000,
+      "candidate_count": 8,
+      "selected_candidate_index": 5
+    },
+    "after": {
+      "remaining_attempts": 0,
+      "attempt_capacity": 3,
+      "selected_level": 15,
+      "selected_hp": 1820000,
+      "candidate_count": 8,
+      "selected_candidate_index": 2
+    }
+  },
+  "reward_started": true,
+  "reward_returned": false,
+  "blocker": "MetaCharacterUI opened into ScrollPanel/ListPanel/Container/BannerTpl list; PTPanel absent. Repeated research-menu/meta input rejected after menu disappeared. Selection/synchronization reward phase unqualified.",
+  "reentry": "Qualify current META list/card selection and native reward navigation using fresh typed identity; next quota refresh required for continuous three-sortie task evidence.",
+  "validation": {
+    "focused_tests": 134,
+    "patch_members": 119,
+    "patch_tree_passed": true,
+    "opsi_config_passed": true
+  },
+  "evidence": [
+    {
+      "path": "artifacts/meta-assist-20260926/live-r9.json",
+      "sha256": "da7083e771ca55a7c6979c055c53d2bde2455d4c4a38e726fe93e4edef3f63fe"
+    },
+    {
+      "path": "artifacts/meta-assist-20260926/after-r9.json",
+      "sha256": "91debf3db08f481fbf3e67f6161f94f00a8c8b4175de137e208d385f5852fe98"
+    },
+    {
+      "path": "artifacts/meta-assist-20260926/live-r10.json",
+      "sha256": "87d4a1ffb5fe6c0f320bebe9412783becc5edf4584707d77438c6b1680bc5276"
+    },
+    {
+      "path": "artifacts/meta-assist-20260926/after-r10.json",
+      "sha256": "fa171510f4660549078f313761b4566af5b16eb4cc28f986302fbfa564f153b2"
+    },
+    {
+      "path": "artifacts/meta-assist-20260926/live-r11.json",
+      "sha256": "e31050776324f734db8e88803b30ac091a4aa6ad371f93959d91e5abaad87343"
+    },
+    {
+      "path": "artifacts/meta-assist-20260926/meta-source-sync.json",
+      "sha256": "f10e82f4fb91ce061363391f4bdb4d8b5ea9e2c22b1d19d22bc764da4be700e7"
+    },
+    {
+      "path": "artifacts/meta-assist-20260926/tests-final.log",
+      "sha256": "6105c8e04c9758b66b67bf465098451b613a4d9cd4049966d8a22e8e779a2e1e"
+    },
+    {
+      "path": "artifacts/meta-assist-20260926/config.json",
+      "sha256": "c406b249c59974de1b1d3955cc1083d0a798bac0ffbb5df1aecb33556a9f7242"
+    },
+    {
+      "path": "artifacts/meta-assist-20260926/patch-series.json",
+      "sha256": "2db889a2f26671a7beed55b5b56bfca0437d8113e66c8d92a81d71e7041d03d0"
+    },
+    {
+      "path": "artifacts/meta-assist-20260926/patch-tree.log",
+      "sha256": "b53c60f75a427e4201eca2f42e4fedc86b100ed26d3e594727670c024a056f15"
+    }
+  ]
+}

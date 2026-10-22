@@ -1,0 +1,485 @@
+from types import SimpleNamespace
+import copy
+import pytest
+from alas_headless import AlasSemanticAdapter, SemanticGateClosed
+from tests.semantic_support.observer_fixtures import FakeBackend, make_button, make_toggle, make_text, make_image, make_ui, make_oracle
+
+ROOT = 'UICamera/Canvas/UIMain/ShipBluePrintUI(Clone)/main'
+CARD = 'OverlayCamera/Overlay/UIMain/blur_panel/adapt/bottom_panel/ships/bg/content/ship_tpl(Clone)'
+
+
+@pytest.mark.parametrize('observations,expected,refreshes', [
+    ([False], False, 0), ([True, False], False, 1), ([True, True], True, 1),
+])
+def test_update_restart_probe_preserves_frame_and_revalidates_positive(
+        observations, expected, refreshes):
+    from alas_headless import AlasSemanticSession
+    from unittest.mock import Mock
+    live = SimpleNamespace(_login_update_seen=True, _login_update_restart_consumed=False)
+    frame = SimpleNamespace(login_update_restart_required=Mock(side_effect=observations))
+    adapter = SimpleNamespace(oracle=live, _require_frame_observation_oracle=lambda: frame)
+    session = AlasSemanticSession.__new__(AlasSemanticSession)
+    session.refresh_frame = Mock()
+    assert session._login_update_restart_required_on_frame(adapter) is expected
+    assert session.refresh_frame.call_count == refreshes
+
+
+def test_update_restart_probe_acquires_missing_frame():
+    from alas_headless import AlasSemanticSession
+    from alas_headless.adapter.errors import StaleFrameError
+    from unittest.mock import Mock
+    live = SimpleNamespace(_login_update_seen=True, _login_update_restart_consumed=False)
+    frame = SimpleNamespace(login_update_restart_required=lambda: False)
+    adapter = SimpleNamespace(oracle=live,
+        _require_frame_observation_oracle=Mock(side_effect=[StaleFrameError(), frame]))
+    session = AlasSemanticSession.__new__(AlasSemanticSession)
+    session.refresh_frame = Mock()
+    assert session._login_update_restart_required_on_frame(adapter) is False
+    session.refresh_frame.assert_called_once_with()
+
+
+def test_shipyard_helpers_keep_screenshot_frame_until_refresh():
+    from unittest.mock import Mock
+    live = make_oracle(backend())
+    live.shipyard_state = Mock(side_effect=AssertionError('unexpected live read'))
+    frame = make_oracle(backend(research=False))
+    adapter = AlasSemanticAdapter(live, package_gate=lambda: None,
+                                 frame_observation_oracle=lambda: frame)
+    before = adapter.shipyard_state(3)
+    assert adapter.shipyard_state(3) == before
+    frame = make_oracle(backend(research=True))
+    assert adapter.shipyard_state(3).phase == 'research'
+    assert before.phase == 'dev'
+    live.shipyard_state.assert_not_called()
+
+
+def test_shipyard_frame_still_rejects_incoherent_state():
+    frame_backend = backend()
+    frame_backend.ui['generation'] = 13
+    adapter = AlasSemanticAdapter(make_oracle(backend()), package_gate=lambda: None,
+        frame_observation_oracle=lambda: make_oracle(frame_backend))
+    with pytest.raises(SemanticGateClosed, match='incoherent'):
+        adapter.shipyard_state(3)
+
+
+@pytest.mark.parametrize('error,retry', [
+    ('shipyard input snapshots are not coherent', True),
+    ('foreground changed immediately after shipyard input', False),
+])
+def test_shipyard_selection_retries_only_preinput_coherence(monkeypatch, error, retry):
+    from unittest.mock import Mock
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    import alas_headless.adapter.semantic.research as ports
+    monkeypatch.setattr(ports.time, 'sleep', lambda _: None)
+    oracle = FakeOracle()
+    oracle.click_shipyard_ship = Mock(side_effect=[SemanticGateClosed(error),
+        SimpleNamespace(semantic_id='shipyard/ship/3')])
+    oracle.shipyard_state = Mock(return_value='selected')
+    adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    if retry:
+        assert adapter.shipyard_select_ship(3) == 'selected'
+        assert oracle.click_shipyard_ship.call_count == 2
+    else:
+        with pytest.raises(SemanticGateClosed):
+            adapter.shipyard_select_ship(3)
+        assert oracle.click_shipyard_ship.call_count == 1
+
+
+@pytest.mark.parametrize('already', [False, True])
+def test_shipyard_selection_preserves_native_detail_settle(monkeypatch, already):
+    from unittest.mock import Mock
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    import alas_headless.adapter.semantic.research as ports
+    sleep = Mock()
+    monkeypatch.setattr(ports.time, 'sleep', sleep)
+    oracle = FakeOracle()
+    oracle.click_shipyard_ship = Mock(return_value=SimpleNamespace(
+        semantic_id='shipyard/ship/3' + ('/already' if already else '')))
+    oracle.shipyard_state = Mock(return_value='settled')
+    adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    assert adapter.shipyard_select_ship(3) == 'settled'
+    if already:
+        sleep.assert_not_called()
+    else:
+        sleep.assert_called_once_with(1.5)
+
+
+@pytest.mark.parametrize('name', ['MAP_PREPARATION', 'FLEET_PREPARATION',
+                                  'RAID_FLEET_PREPARATION', 'WITHDRAW'])
+def test_shipyard_return_home_allows_only_passive_campaign_probe(name):
+    from alas_headless import AlasSemanticUnmapped
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    oracle = FakeOracle()
+    oracle.main_page_visible = lambda: True
+    oracle.inherited_campaign_withdraw_control = lambda *, confirm: None
+    adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    button = SimpleNamespace(name=name)
+    assert adapter.appear(button) is False
+    with pytest.raises((AlasSemanticUnmapped, SemanticGateClosed)):
+        adapter.click(button)
+    assert oracle.click_calls == []
+    oracle.main_page_visible = lambda: False
+    with pytest.raises(AlasSemanticUnmapped):
+        adapter.appear(button)
+
+
+def test_shipyard_series_reads_exact_current_sprite():
+    b = backend()
+    b.ui['images'].append(make_image(
+        'OverlayCamera/Overlay/UIMain/blur_panel/adapt/bottom_panel/ships/bg/version/version_btn',
+        'version_9'))
+    b.ui['image_count'] += 1
+    oracle = make_oracle(b)
+    assert oracle.shipyard_series() == 9
+    b.ui['images'][-1]['sprite'] = 'version_1'
+    assert oracle.shipyard_series() == 1
+    b.ui['images'][-1]['sprite'] = 'unknown'
+    with pytest.raises(SemanticGateClosed):
+        oracle.shipyard_series()
+
+
+def test_series_observation_survives_covered_back_without_input_authority():
+    b = backend()
+    b.buttons['buttons'][1]['raycast_top'] = False
+    b.ui['images'].append(make_image(
+        'OverlayCamera/Overlay/UIMain/blur_panel/adapt/bottom_panel/ships/bg/version/version_btn',
+        'version_1'))
+    b.ui['image_count'] += 1
+    oracle = make_oracle(b)
+    assert not oracle.shipyard_page_visible()
+    assert oracle.shipyard_series() == 1
+    with pytest.raises(SemanticGateClosed):
+        oracle.click('shipyard/page/back')
+    assert b.taps == []
+    b.buttons['buttons'] = b.buttons['buttons'][1:]
+    b.buttons['button_count'] = 1
+    with pytest.raises(SemanticGateClosed):
+        oracle.shipyard_series()
+
+
+@pytest.mark.parametrize('phase', ['dev', 'fate'])
+def test_original_shipyard_phase_probes_follow_visible_panel_not_navbar(phase):
+    b = backend(research=False)
+    for image in b.ui['images']:
+        if image['path'].endswith('/state/dev'):
+            image['path'] = image['path'].rsplit('/', 1)[0] + '/' + phase
+            image['name'] = phase
+    oracle = make_oracle(b)
+    adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    assert oracle.shipyard_selected_state().phase == 'dev'
+    assert adapter.appear(SimpleNamespace(name='SHIPYARD_IN_DEV'))
+    assert not adapter.appear(SimpleNamespace(name='SHIPYARD_IN_FATE'))
+
+
+def test_fate_stage_is_separate_from_development_level():
+    b = backend(research=False)
+    b.ui['texts'][-1]['text'] = '<size=45>30</size>/<size=27>30</size>'
+    marker = next(i for i in b.ui['images'] if i['adb_bounds']['left'] == 460)
+    marker['path'] = CARD + '/state/fate'
+    marker['name'] = 'fate'
+    b.ui['images'].append(make_image(CARD + '/state/fate/Image', 'icon_phase_5',
+        bounds=dict(left=460, right=620, top=600, bottom=720)))
+    b.ui['image_count'] += 1
+    state = make_oracle(b).shipyard_state(3)
+    assert state.phase == 'dev'
+    assert state.level == 30
+    assert state.fate_stage == 5
+
+
+def fate_backend():
+    b = backend(False)
+    b.ui['texts'][-1] = make_text('MAX',
+        'OverlayCamera/Overlay/UIMain/blur_panel/adapt/right_panel/fitting_panel/desc/top/precent')
+    marker = next(i for i in b.ui['images'] if i['adb_bounds']['left'] == 460)
+    marker['path'], marker['name'] = CARD + '/state/fate', 'fate'
+    b.ui['images'].extend([
+        make_image(CARD + '/state/fate/Image', 'icon_phase_5',
+            bounds=dict(left=460, right=620, top=600, bottom=720)),
+        make_image('OverlayCamera/Overlay/UIMain/blur_panel/adapt/bottom_panel/ships/bg/version/version_btn',
+            'version_1')])
+    b.ui['image_count'] += 2
+    b.ui['shipyard_strengthen'] = dict(status=1, truncated=False, stack_balanced=True,
+        ship_id=4418, ship_index=3, series=1, level=30, fate_level=5)
+    return b
+
+
+def test_selected_ship_state_reads_active_fate_without_inventing_dev_maximum():
+    b = fate_backend()
+    oracle = make_oracle(b)
+    state = oracle.shipyard_state(3)
+    assert (state.phase, state.level, state.level_max, state.fate_stage) == ('fate', 30, None, 5)
+    assert oracle.shipyard_cannot_strengthen(3)
+    assert b.taps == []
+
+
+@pytest.mark.parametrize('change', ['missing', 'ship', 'index', 'series', 'stage', 'ambiguous', 'malformed'])
+def test_fate_state_rejects_missing_or_mismatched_selected_model(change):
+    b = fate_backend()
+    if change == 'missing':
+        del b.ui['shipyard_strengthen']
+    elif change == 'ambiguous':
+        b.ui['texts'].append(make_text('30/30',
+            'OverlayCamera/Overlay/UIMain/blur_panel/adapt/right_panel/mod_panel/title/level_bg/Text'))
+        b.ui['text_count'] += 1
+    elif change == 'malformed':
+        b.ui['texts'][-1]['text'] = 'unknown'
+    else:
+        key, value = {'ship': ('ship_id', 0), 'index': ('ship_index', 2),
+                      'series': ('series', 2), 'stage': ('fate_level', 4)}[change]
+        b.ui['shipyard_strengthen'][key] = value
+    with pytest.raises(SemanticGateClosed):
+        make_oracle(b).shipyard_state(3)
+    assert b.taps == []
+
+
+def test_dev_observation_does_not_require_optional_native_fate_model():
+    b = backend(False)
+    b.ui['shipyard_strengthen'] = dict(status=0)
+    assert make_oracle(b).shipyard_state(3).phase == 'dev'
+
+
+def test_initial_fate_with_dev_navbar_uses_matched_native_stage():
+    b = fate_backend()
+    b.ui['texts'][-1]['text'] = '12%'
+    b.ui['shipyard_strengthen']['fate_level'] = 0
+    b.ui['images'] = [i for i in b.ui['images'] if not i['path'].endswith('/state/fate/Image')]
+    marker = next(i for i in b.ui['images'] if i['adb_bounds']['left'] == 460)
+    marker['name'], marker['path'] = 'dev', CARD + '/state/dev'
+    b.ui['image_count'] -= 1
+    oracle = make_oracle(b)
+    state = oracle.shipyard_state(3)
+    assert (state.phase, state.fate_stage, state.level_max) == ('fate', 0, None)
+    assert not oracle.shipyard_cannot_strengthen(3)
+    assert not b.taps
+
+
+@pytest.mark.parametrize('name,menu,expected', [
+    ('FLEET_CHECK', True, False), ('RESHMENU_CHECK', True, True),
+    ('FLEET_CHECK', False, None), ('UNREVIEWED_RESOURCE', True, None),
+])
+def test_shipyard_return_reclassifies_only_known_page_probes(name, menu, expected):
+    from alas_headless import AlasSemanticSession, AlasSemanticUnmapped
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    from unittest.mock import Mock
+    oracle = FakeOracle()
+    oracle.enabled = Mock(return_value=False)
+    adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    adapter.appear = Mock(side_effect=[AlasSemanticUnmapped('old transition'), expected])
+    session = AlasSemanticSession.__new__(AlasSemanticSession)
+    session.open = lambda: adapter
+    def refresh():
+        oracle.exists_values['research-menu/page/back'] = menu
+    session.refresh_frame = Mock(side_effect=refresh)
+    if expected is None:
+        with pytest.raises(AlasSemanticUnmapped):
+            session.appear(SimpleNamespace(name=name))
+        assert adapter.appear.call_count == 1
+    else:
+        assert session.appear(SimpleNamespace(name=name)) is expected
+        assert adapter.appear.call_count == 2
+    session.refresh_frame.assert_called_once()
+
+
+@pytest.mark.parametrize('raycast', [True, False, None])
+def test_shipyard_series_input_requires_top_hit(raycast):
+    b = FakeBackend([make_button('version_1',
+        'OverlayCamera/Overlay/UIMain/version_panel/window/content/version_1',
+        raycast_top=raycast)])
+    oracle = make_oracle(b)
+    if raycast is True:
+        assert oracle.click('shipyard/series/1').semantic_id == 'shipyard/series/1'
+        assert len(b.taps) == 1
+    else:
+        with pytest.raises(SemanticGateClosed):
+            oracle.click('shipyard/series/1')
+        assert not b.taps
+
+
+@pytest.mark.parametrize('series_result', [1, 9])
+def test_shipyard_series_waits_for_choice_and_verifies_selected_value(monkeypatch, series_result):
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    from unittest.mock import Mock
+    import alas_headless.adapter.semantic.research as ports
+    clock = iter(range(100))
+    monkeypatch.setattr(ports.time, 'monotonic', lambda: next(clock))
+    monkeypatch.setattr(ports.time, 'sleep', lambda _: None)
+    oracle = FakeOracle()
+    oracle.shipyard_series_choice_available = Mock(side_effect=[False, True])
+    oracle.click_shipyard_series = lambda series: oracle.click('shipyard/series/' + str(series))
+    oracle.shipyard_series_choices_visible = lambda: False
+    oracle.shipyard_page_visible = lambda: True
+    oracle.shipyard_series = lambda: series_result
+    adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    if series_result == 1:
+        assert adapter.shipyard_select_series(1).semantic_id == 'shipyard/series/1'
+    else:
+        with pytest.raises(SemanticGateClosed, match='transition timed out'):
+            adapter.shipyard_select_series(1)
+    assert oracle.click_calls == ['shipyard/series/open', 'shipyard/series/1']
+
+
+@pytest.mark.parametrize('raycast', [True, False, None])
+def test_shipyard_selection_requires_observed_top_hit(raycast):
+    b = backend()
+    b.ui['toggles'][0] = make_toggle(CARD, raycast_top=raycast, x=180, y=660,
+        bounds=dict(left=100, right=260, top=600, bottom=720))
+    oracle = make_oracle(b)
+    if raycast is True:
+        assert oracle.click_shipyard_ship(1).semantic_id == 'shipyard/ship/1'
+        assert b.taps == [(180, 660)]
+    else:
+        with pytest.raises(SemanticGateClosed, match='not actionable'):
+            oracle.click_shipyard_ship(1)
+        assert b.taps == []
+
+
+@pytest.mark.parametrize('change', ['incoherent', 'outside', 'blocked'])
+def test_shipyard_selection_rejects_unproven_input(change):
+    b = backend()
+    b.ui['toggles'][0] = make_toggle(CARD, x=180, y=660,
+        bounds=dict(left=100, right=260, top=600, bottom=720))
+    if change == 'incoherent':
+        b.ui['generation'] = 13
+    elif change == 'outside':
+        b.ui['toggles'][0]['adb_point']['x'] = 400
+    else:
+        b.buttons['buttons'].append(make_button('custom_button_1(Clone)',
+            'root/Msgbox(Clone)/window/button_container/custom_button_1(Clone)'))
+        b.buttons['button_count'] += 1
+    with pytest.raises(SemanticGateClosed):
+        make_oracle(b).click_shipyard_ship(1)
+    assert b.taps == []
+
+
+def test_shipyard_selection_checks_foreground_after_input():
+    b = backend()
+    b.ui['toggles'][0] = make_toggle(CARD, x=180, y=660,
+        bounds=dict(left=100, right=260, top=600, bottom=720))
+    oracle = make_oracle(b)
+    oracle._foreground_component = lambda: 'other/activity' if b.taps else oracle.fingerprint.component
+    with pytest.raises(SemanticGateClosed, match='after shipyard input'):
+        oracle.click_shipyard_ship(1)
+    assert b.taps == [(180, 660)]
+
+
+def backend(research=True):
+    b = FakeBackend([make_button('main', ROOT), make_button('back','OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back')])
+    toggles, texts, images = [], [make_text('selected ship',ROOT+'/center_panel/name/name_mask/Text')], []
+    for index in range(5):
+        bounds = dict(left=100+index*180, right=260+index*180, top=600,bottom=720)
+        toggles.append(make_toggle(CARD,checked=index==2,bounds=bounds))
+        texts.append(make_text(str(48+index),CARD+'/count',bounds=bounds))
+        # Development levels are not blueprint inventory.
+        texts.append(make_text('15',CARD+'/state/dev/Text',bounds=bounds))
+        if research and index==2:
+            images.append(make_image(CARD+'/state/research/1','sel_dev',bounds=bounds))
+        else:
+            images.append(make_image(CARD+'/state/dev','dev_lv',bounds=bounds))
+    if research:
+        texts.append(make_text('研究进行中...',ROOT+'/center_panel/state_info/progress/label'))
+    else:
+        texts.append(make_text('<size=45>15</size>/<size=27>30</size>',
+            'OverlayCamera/Overlay/UIMain/blur_panel/adapt/right_panel/mod_panel/title/level_bg/Text'))
+    b.ui = make_ui(texts,toggles=toggles,images=images)
+    return b
+
+
+@pytest.mark.parametrize('research', [False,True])
+def test_selected_card_inventory_and_phase_survive_clone_order(research):
+    b = backend(research)
+    b.ui['texts'].reverse();b.ui['toggles'].reverse();b.ui['images'].reverse()
+    state = make_oracle(b).shipyard_state(3)
+    assert state.blueprint_count==50
+    assert state.cannot_strengthen is research
+    assert state.level == (None if research else 15)
+    assert state.phase == ('research' if research else 'dev')
+    assert b.taps==[]
+
+
+@pytest.mark.parametrize('change', ['missing_marker','wrong_marker','duplicate_count','wrong_selection','incoherent'])
+def test_ambiguous_or_incomplete_selected_state_is_not_guessed(change):
+    b = backend()
+    if change=='missing_marker':
+        b.ui['images']=[i for i in b.ui['images'] if not i['path'].endswith('/research/1')]
+        b.ui['image_count']-=1
+    elif change=='wrong_marker':
+        next(i for i in b.ui['images'] if i['path'].endswith('/research/1'))['sprite']='unknown'
+    elif change=='duplicate_count':
+        b.ui['texts'].append(copy.deepcopy(next(t for t in b.ui['texts'] if t['text']=='50')))
+        b.ui['text_count']+=1
+    elif change=='wrong_selection':
+        b.ui['toggles'][1]['checked']=True
+    else:
+        b.ui['generation']=13
+    with pytest.raises(SemanticGateClosed):make_oracle(b).shipyard_state(3)
+    assert make_oracle(b).shipyard_page_visible()
+    assert b.taps==[]
+
+
+def test_shipyard_page_does_not_require_a_dock_flow():
+    a=AlasSemanticAdapter(make_oracle(backend()),package_gate=lambda:None)
+    assert a.appear(SimpleNamespace(name='SHIPYARD_CHECK'))
+    assert not a.appear(SimpleNamespace(name='DOCK_CHECK'))
+
+
+@pytest.mark.parametrize('visible,generation,reuse', [(True,11,True),(False,11,False),(True,10,False)])
+def test_repeated_entry_reuses_real_receipt_only_at_destination(visible,generation,reuse):
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    o=FakeOracle();o.shipyard_page_visible=lambda:visible;o.read_state=lambda:SimpleNamespace(generation=generation)
+    a=AlasSemanticAdapter(o,package_gate=lambda:None);prior=SimpleNamespace(generation=10);a._shipyard_entry_receipt=prior
+    receipt=a._click_mapped('RESHMENU_GOTO_SHIPYARD','research-menu/shipyard')
+    assert (receipt is prior) is reuse
+    assert o.click_calls==([] if reuse else ['research-menu/shipyard'])
+    a.reset_task_state();assert a._shipyard_entry_receipt is None
+
+
+def test_missing_development_level_never_means_strengthening_is_allowed():
+    from alas_headless.oracle.contracts import ShipyardState
+    state=ShipyardState(10,3,'ship',50,'dev',None,None,'complete')
+    with pytest.raises(ValueError,match='unavailable'):
+        _=state.cannot_strengthen
+
+
+@pytest.mark.parametrize('raycast', [True, False, None])
+def test_login_shipyard_recovery_uses_real_typed_back_and_ignores_optional_cards(raycast):
+    from alas_headless.adapter.flows.login import LoginFlow
+    b = backend()
+    # A newer/unsupported selected-ship surface must not block navigation.
+    b.ui = make_ui([make_text('new optional field', ROOT+'/future/label')])
+    b.buttons['buttons'][1]['raycast_top'] = raycast
+    oracle = make_oracle(b)
+    flow = LoginFlow(lambda: None, observation_oracle=lambda: oracle)
+    if raycast is True:
+        assert flow.observe_goto_main()
+        assert flow.click('GOTO_MAIN').semantic_id == 'shipyard/page/back'
+        assert len(b.taps) == 1
+    else:
+        with pytest.raises(SemanticGateClosed):
+            flow.click('GOTO_MAIN')
+        assert b.taps == []
+
+
+@pytest.mark.parametrize('text', ['<size=45>15</size>/<size=27>30</size>',
+                                  '<size=48>15</size> / <size=24>30</size>',
+                                  ' 15 / 30 ', '<size=42>15/30</size>'])
+def test_development_level_accepts_font_metadata_drift(text):
+    b = backend(False)
+    for t in b.ui['texts']:
+        if t['path'].endswith('/mod_panel/title/level_bg/Text'):
+            t['text'] = text
+    state = make_oracle(b).shipyard_state(3)
+    assert (state.phase, state.level, state.level_max) == ('dev', 15, 30)
+    assert not state.cannot_strengthen
+    assert b.taps == []
+
+
+@pytest.mark.parametrize('text', ['<size=48>15/30', '<size=bad>15</size>/30',
+                                  '15/30/40', '15/unknown', '<unknown>15</unknown>/30'])
+def test_development_level_rejects_malformed_or_unknown_content(text):
+    b = backend(False)
+    for t in b.ui['texts']:
+        if t['path'].endswith('/mod_panel/title/level_bg/Text'):
+            t['text'] = text
+    with pytest.raises(SemanticGateClosed, match='development level'):
+        make_oracle(b).shipyard_state(3)
+    assert b.taps == []

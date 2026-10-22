@@ -1,0 +1,72 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 11:41:29.499 │ [Server] cn                                 
+read: ./config\semantic_e2e.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 11:41:29.514 │ Bind task ['General', 'Alas']               
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 11:41:29.519 │ DEVICE                                      
+INFO     2026-09-12 11:41:29.522 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 11:41:29.526 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 11:41:29.529 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 11:41:29.532 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 11:41:29.535 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 11:41:29.540 │ emulator-5580                               
+INFO     2026-09-12 11:41:29.543 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 11:41:29.545 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 11:41:29.555 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 11:41:29.558 │ [Server] cn                                 
+WARNING  2026-09-12 11:41:29.561 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 11:41:29.565 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 11:41:29.639 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 11:41:29.642 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 11:41:29.646 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 11:41:29.648 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 11:41:30.209 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 11:41:31.921 │ Semantic click combat/resource/GET_ITEMS_1 @
+         OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close           
+INFO     2026-09-12 11:41:36.742 │ Semantic click daily/battle/result @        
+         OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleRe
+         sultStatisticsPage(Clone)/bottom/confirmBtn                           
+Traceback (most recent call last):
+  File "<stdin>", line 11, in <module>
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\artifacts\campaign-preparation\upstream\module\combat\combat.py", line 553, in handle_get_items
+    if self.appear(GET_ITEMS_1, offset=5, interval=self.battle_status_click_interval):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\artifacts\campaign-preparation\upstream\module\base\base.py", line 255, in appear
+    appear = semantic_adapter.appear(button)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\python\alas_headless\adapter\semantic\session_dispatch.py", line 205, in appear
+    visible = name in self._live_combat_visible()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\python\alas_headless\adapter\semantic\session_combat.py", line 94, in _live_combat_visible
+    return alas_combat_visible_resource_names(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\python\alas_headless\alas_combat_observer.py", line 1226, in alas_combat_visible_resource_names
+    return _visible_resource_names(snapshot, mappings)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\python\alas_headless\alas_combat_observer.py", line 1189, in _visible_resource_names
+    if name in mappings and _resource_visible(snapshot, mappings[name])
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\python\alas_headless\alas_combat_observer.py", line 1177, in _resource_visible
+    return all(_selector_present(snapshot, item) for item in mapping.selectors)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\python\alas_headless\alas_combat_observer.py", line 1177, in <genexpr>
+    return all(_selector_present(snapshot, item) for item in mapping.selectors)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\python\alas_headless\alas_combat_observer.py", line 967, in _selector_present
+    raise SemanticGateClosed(
+alas_headless.oracle.errors.SemanticGateClosed: combat action control is not exact top-raycast actionable: OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleResultStatisticsPage(Clone)/bottom/confirmBtn, raycast_top=False

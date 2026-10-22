@@ -1,0 +1,93 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 18:59:34.529 │ [Server] cn                                 
+read: ./config\semantic_e2e.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 18:59:34.539 │ Bind task ['General', 'Alas']               
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 18:59:34.544 │ DEVICE                                      
+INFO     2026-09-12 18:59:34.545 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 18:59:34.548 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 18:59:34.550 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 18:59:34.552 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 18:59:34.553 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 18:59:34.556 │ emulator-5580                               
+INFO     2026-09-12 18:59:34.558 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 18:59:34.560 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 18:59:34.568 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 18:59:34.571 │ [Server] cn                                 
+WARNING  2026-09-12 18:59:34.573 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 18:59:34.577 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 18:59:34.644 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 18:59:34.647 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 18:59:34.650 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 18:59:34.653 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 18:59:35.527 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 18:59:35.529 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 18:59:36.430 │ Already at page_shipyard                    
+INFO     2026-09-12 18:59:37.655 │ Ship at full strength for current level, no 
+         more BPs can be consumed                                              
+INFO     2026-09-12 18:59:37.658 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 18:59:39.501 │ UI get current page                         
+INFO     2026-09-12 19:00:01.189 │ [UI] page_shipyard                          
+INFO     2026-09-12 19:00:01.192 │ Goto page_main                              
+INFO     2026-09-12 19:00:01.194 │ <<< UI GOTO PAGE_MAIN >>>                   
+INFO     2026-09-12 19:00:19.166 │ Page switch: page_shipyard -> page_main     
+INFO     2026-09-12 19:00:21.193 │ Semantic click shipyard/page/back @         
+         OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back                
+INFO     2026-09-12 19:00:58.364 │ Page switch: page_reshmenu -> page_main     
+INFO     2026-09-12 19:01:00.311 │ Semantic click research-menu/page/back @    
+         OverlayCamera/Overlay/UIMain/SelectTechnologyUI(Clone)/blur_panel/adap
+         t/top/back                                                            
+INFO     2026-09-12 19:01:38.604 │ Page switch: page_reshmenu -> page_main     
+INFO     2026-09-12 19:01:40.812 │ Semantic click main/already @               
+         OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/right/1/b
+         attle                                                                 
+INFO     2026-09-12 19:01:42.801 │ Page arrive: page_main                      
+INFO     2026-09-12 19:01:42.913 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 19:01:44.819 │ UI get current page                         
+INFO     2026-09-12 19:01:46.576 │ [UI] page_main                              
+INFO     2026-09-12 19:01:46.577 │ Goto page_shipyard                          
+INFO     2026-09-12 19:01:46.579 │ <<< UI GOTO PAGE_SHIPYARD >>>               
+INFO     2026-09-12 19:01:50.001 │ Page switch: page_main -> page_reshmenu     
+INFO     2026-09-12 19:01:50.540 │ Semantic click main/tech @                  
+         OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/bottom/fr
+         ame/tech                                                              
+INFO     2026-09-12 19:02:24.898 │ Page switch: page_reshmenu -> page_shipyard 
+INFO     2026-09-12 19:02:25.451 │ Semantic click research-menu/shipyard @     
+         OverlayCamera/Overlay/UIMain/SelectTechnologyUI(Clone)/frame/bg/bluepr
+         int_btn                                                               
+INFO     2026-09-12 19:03:07.152 │ Page switch: page_reshmenu -> page_shipyard 
+INFO     2026-09-12 19:03:07.682 │ Semantic click research-menu/shipyard @     
+         OverlayCamera/Overlay/UIMain/SelectTechnologyUI(Clone)/frame/bg/bluepr
+         int_btn                                                               
+INFO     2026-09-12 19:03:08.868 │ Page arrive: page_shipyard                  
+INFO     2026-09-12 19:03:09.911 │ Ship at full strength for current level, no 
+         more BPs can be consumed                                              
+INFO     2026-09-12 19:03:10.126 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 19:03:11.968 │ UI get current page                         
+INFO     2026-09-12 19:03:31.902 │ [UI] page_shipyard                          
+INFO     2026-09-12 19:03:31.905 │ Goto page_main                              
+INFO     2026-09-12 19:03:31.907 │ <<< UI GOTO PAGE_MAIN >>>                   
+INFO     2026-09-12 19:03:51.308 │ Page switch: page_shipyard -> page_main     
+INFO     2026-09-12 19:03:54.066 │ Semantic click shipyard/page/back @         
+         OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back                
+INFO     2026-09-12 19:04:31.273 │ Page switch: page_reshmenu -> page_main     
+INFO     2026-09-12 19:04:33.238 │ Semantic click research-menu/page/back @    
+         OverlayCamera/Overlay/UIMain/SelectTechnologyUI(Clone)/blur_panel/adap
+         t/top/back                                                            
+INFO     2026-09-12 19:04:35.425 │ Page arrive: page_main                      
+PASSED True

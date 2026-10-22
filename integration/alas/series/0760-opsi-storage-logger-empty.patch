@@ -1,0 +1,16 @@
+diff --git a/module/os_handler/storage.py b/module/os_handler/storage.py
+--- a/module/os_handler/storage.py
++++ b/module/os_handler/storage.py
+@@ -134,6 +134,12 @@ class StorageHandler(GlobeOperation, ZoneManager):
+             out: STORAGE_CHECK, scroll to bottom
+         """
+         logger.hr('Storage logger use all')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            oracle = semantic_adapter.open().oracle
++            oracle.operation_siren_storage_loggers_absent()
++            logger.info('All loggers in storage have been used')
++            return
+         for _ in self.loop():
+             if SCROLL_STORAGE.appear(main=self):
+                 SCROLL_STORAGE.set_bottom(main=self, skip_first_screenshot=True)

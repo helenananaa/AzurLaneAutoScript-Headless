@@ -1,4 +1,5 @@
 import copy
+import hashlib
 import json
 import tempfile
 import unittest
@@ -35,7 +36,11 @@ class AlasAdapterBaselineTests(unittest.TestCase):
             document["upstream_alas_commit"],
             "81ccf63b4540f00241628c82a58c02c7a2bb11af",
         )
-        self.assertEqual(document["integration_patch"]["changed_file_count"], 149)
+        # Inventory follows the current canonical patch; historical release
+        # hashes and membership are enforced by the patch-series verifier.
+        patch = (ROOT / "integration/alas/0001-semantic-oracle-hooks.patch").read_text(encoding="utf-8")
+        paths = {line.split()[3] for line in patch.splitlines() if line.startswith("diff --git ")}
+        self.assertEqual(document["integration_patch"]["changed_file_count"], len(paths))
         self.assertGreater(document["integration_patch"]["line_count"], 1_000)
         self.assertGreater(
             document["source_metrics"]["alas_adapter"]["line_count"],
@@ -47,7 +52,7 @@ class AlasAdapterBaselineTests(unittest.TestCase):
         )
         self.assertEqual(
             document["artifact_sha256"]["patch_series_manifest"],
-            "8d097c67e2ed6186771a0d20cecfcfda42d9aa26f79aafd1121ff1efe8d0e966",
+            hashlib.sha256((ROOT / "integration/alas/series/series.json").read_bytes()).hexdigest(),
         )
         self.assertIn(
             "appear",

@@ -1,0 +1,11 @@
+--- a/module/daily/daily.py
++++ b/module/daily/daily.py
+@@ -376,7 +376,7 @@
+         while 1:
+             if self.daily_current > 7:
+                 break
+-            if self.daily_current == self.empty_index:
++            if semantic_adapter is None and self.daily_current == self.empty_index:
+                 logger.info('This daily is not open now')
+                 self.daily_check()
+                 self.next()

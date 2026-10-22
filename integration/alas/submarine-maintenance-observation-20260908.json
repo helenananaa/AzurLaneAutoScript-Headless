@@ -1,0 +1,135 @@
+{
+  "schema": "alas-headless.submarine-ammo-observation/v1",
+  "serial": "emulator-5580",
+  "observed_at": "2026-09-08T02:17:40.221938+00:00",
+  "fingerprint": {
+    "package": "com.bilibili.azurlane",
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "width": 1280,
+    "height": 720,
+    "max_age_ms": 2500,
+    "peer_uid": 2000,
+    "expected_pid": 14353
+  },
+  "input_count": 0,
+  "records": [
+    {
+      "generation": 6879,
+      "ui_generation": 6880,
+      "runtime_messages": [
+        {
+          "kind": "ugui-text",
+          "name": "content",
+          "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/msg_panel/content",
+          "text": "服务器维护",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "truncated": false,
+          "bounds": {
+            "left": 350.0,
+            "top": 226.667,
+            "right": 930.0,
+            "bottom": 463.333
+          },
+          "raw": {
+            "kind": "ugui-text",
+            "name": "content",
+            "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/msg_panel/content",
+            "text": "服务器维护",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 350.0,
+              "top": 226.667,
+              "right": 930.0,
+              "bottom": 463.333
+            }
+          }
+        }
+      ],
+      "submarine_markers": [],
+      "ammo": [],
+      "controls": []
+    },
+    {
+      "generation": 6897,
+      "ui_generation": 6898,
+      "runtime_messages": [
+        {
+          "kind": "ugui-text",
+          "name": "content",
+          "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/msg_panel/content",
+          "text": "服务器维护",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "truncated": false,
+          "bounds": {
+            "left": 350.0,
+            "top": 226.667,
+            "right": 930.0,
+            "bottom": 463.333
+          },
+          "raw": {
+            "kind": "ugui-text",
+            "name": "content",
+            "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/msg_panel/content",
+            "text": "服务器维护",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 350.0,
+              "top": 226.667,
+              "right": 930.0,
+              "bottom": 463.333
+            }
+          }
+        }
+      ],
+      "submarine_markers": [],
+      "ammo": [],
+      "controls": []
+    },
+    {
+      "generation": 6915,
+      "ui_generation": 6916,
+      "runtime_messages": [
+        {
+          "kind": "ugui-text",
+          "name": "content",
+          "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/msg_panel/content",
+          "text": "服务器维护",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "truncated": false,
+          "bounds": {
+            "left": 350.0,
+            "top": 226.667,
+            "right": 930.0,
+            "bottom": 463.333
+          },
+          "raw": {
+            "kind": "ugui-text",
+            "name": "content",
+            "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/msg_panel/content",
+            "text": "服务器维护",
+            "flags": 271,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "adb_bounds": {
+              "left": 350.0,
+              "top": 226.667,
+              "right": 930.0,
+              "bottom": 463.333
+            }
+          }
+        }
+      ],
+      "submarine_markers": [],
+      "ammo": [],
+      "controls": []
+    }
+  ]
+}

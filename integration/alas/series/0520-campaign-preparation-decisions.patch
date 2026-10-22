@@ -1,0 +1,67 @@
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -185,1 +185,4 @@
++                    if self.handle_2x_book_popup():
++                        campaign_timer.reset()
++                        continue
+                     if semantic_adapter.campaign_sortie_committed():
+@@ -345,21 +348,11 @@
+-                        if self.config.Campaign_UseAutoSearch:
+-                            self.map_clear_percentage = (
+-                                semantic_adapter.campaign_map_clear_percentage()
+-                            )
+-                            self.map_is_100_percent_clear = (
+-                                self.map_clear_percentage > 0.95)
+-                            self.map_has_clear_mode = self.map_is_100_percent_clear
+-                            self.map_is_clear_mode = self.map_has_clear_mode
+-                            self.map_is_auto_search = self.map_has_clear_mode
+-                            self.map_is_2x_book = False
+-                            logger.attr(
+-                                'SemanticMapClear',
+-                                f'{self.map_clear_percentage:.2%}')
+-                            if not self.map_has_clear_mode:
+-                                raise RuntimeError(
+-                                    'Official auto-search is locked until the '
+-                                    'stage is fully cleared: '
+-                                    f'{self.map_clear_percentage:.2%}')
++                        self.map_clear_percentage = (
++                            semantic_adapter.campaign_map_clear_percentage()
++                        )
++                        self.map_is_100_percent_clear = self.map_clear_percentage > 0.95
++                        self.map_has_clear_mode = (
++                            self.map_is_100_percent_clear
++                            and semantic_adapter.campaign_clear_mode_available())
++                        self.handle_fast_forward()
+                         auto_search_selected = (
+                             semantic_adapter.campaign_auto_search_selected()
+                         )
+diff --git a/module/handler/fast_forward.py b/module/handler/fast_forward.py
+--- a/module/handler/fast_forward.py
++++ b/module/handler/fast_forward.py
+@@ -500,4 +500,8 @@
+                 box_button.load_offset(check_button)
+-                enabled = self.image_color_count(box_button.button, color=(156, 255, 82), threshold=221, count=20)
++                semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++                if semantic_adapter is not None:
++                    enabled = semantic_adapter.campaign_2x_book_selected()
++                else:
++                    enabled = self.image_color_count(box_button.button, color=(156, 255, 82), threshold=221, count=20)
+                 if (status == 'on' and enabled) or (status == 'off' and not enabled):
+                     return True
+@@ -581,2 +585,5 @@
+     def handle_2x_book_popup(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.handle_campaign_2x_book_popup()
+         if self.appear(BOOK_POPUP_CHECK, offset=(20, 20)):
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -270,2 +270,1 @@
+-                                self.handle_2x_book_setting(mode='prep')
+                                 if semantic_adapter.campaign_fleet_preparation_required():
+@@ -276,2 +275,3 @@
+                                 self.handle_auto_search_setting()
++                                self.handle_2x_book_setting(mode='prep')
+                                 self.map_fleet_checked = True

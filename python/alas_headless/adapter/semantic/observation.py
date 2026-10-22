@@ -17,6 +17,8 @@ from ...semantic_oracle import (
 )
 from .contracts import AlasSemanticUnmapped
 from ...oracle.surfaces import ObservationSurface
+from ...oracle.errors import SemanticViewportReanchorRequired, SemanticTargetNotActionable
+from ..errors import ExpiredFrameError
 from .resources import (
     BUILD_POOL_NAVBAR_ACTIVE_COLOR,
     BUILD_POOL_NAVBAR_INACTIVE_COLOR,
@@ -37,6 +39,33 @@ from .resources import (
 class ObservationAdapterPorts:
     """Observation ports on the shared adapter context."""
 
+    def _inherited_login_allows_passive_probe(self) -> bool:
+        oracle = self._frame_or_live_observation_oracle()
+        if not oracle.observation_target_present('login/enter'):
+            return False
+        blockers = oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe')
+        if any(rule.blocker_id != 'loading' for rule in blockers):
+            return False
+        # Generic ALAS navigation can inherit LoginUI2 after a cold start or
+        # an accepted SDK login, without an explicit LoginHandler context.
+        # Only unrelated presence probes become absent. The existing login
+        # input port still owns actionable targets and loading rejection.
+        return bool(blockers) or oracle.enabled('login/enter')
+
+    def _meta_dossier_allows_passive_page_probe(self):
+        oracle = self._frame_or_live_observation_oracle()
+        if oracle.observation_target_present('meta/dossier/sync/back'):
+            return oracle.meta_dossier_sync_page_visible()
+        if oracle.observation_target_present('meta/dossier/empty/list'):
+            # A completed beacon can leave the empty archive page for the next
+            # task. Its existing full counter/control parser identifies that
+            # page without borrowing the ended META task's ownership flags.
+            oracle.meta_dossier_empty_points()
+            return not oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe')
+        return (oracle.observation_target_present('meta/dossier/list')
+                and oracle.meta_dossier_detail_visible()
+                and not oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe'))
+
     def _new_year_challenge_surface_visible(self) -> bool:
         try:
             self.oracle.new_year_challenge_ticket_count()
@@ -51,9 +80,25 @@ class ObservationAdapterPorts:
 
     def _active_flow_allows_passive_probe(self) -> bool:
         now = time.monotonic()
+        if (self._inherited_dorm_overlay_return() == 'dorm/feed/shop/cancel'
+                or self._inherited_dorm_page_visible()):
+            # The original UI graph can inherit CourtYard after another task.
+            # Its exact unobscured identity owns unrelated passive probes,
+            # while optional task inputs retain their own context and grants.
+            return True
+        if now <= self._research_menu_return_transition_until:
+            self._package_gate()
+            blockers = self.oracle._blocking_rules(
+                self.oracle.read_state(), 'ui/absence-probe'
+            )
+            if not any(rule.blocker_id not in ('research-page', 'research-menu')
+                       for rule in blockers):
+                return True
         if self._operation_siren_allows_passive_probe():
             return True
         if self._login_flow.allows_passive_probe():
+            return True
+        if self._inherited_login_allows_passive_probe():
             return True
         if (
             self._mission_context is not None
@@ -147,17 +192,57 @@ class ObservationAdapterPorts:
             raise SemanticGateClosed("reward popup close target is ambiguous")
         return targets[0] if targets else None
 
+    def _retained_commission_detail_visible(self, oracle) -> bool:
+        context = self._commission_context
+        if context is not None and context.selected_signature is not None:
+            # A current native selection owns this detail. Generic recovery
+            # must not discard it or repeat a submitted start.
+            return False
+        if not oracle.observation_target_present('commission/detail/back'):
+            return False
+        # Several unrelated pages share this generic blur-panel back path.
+        # Dispatch the Commission parser only for its distinctive detail controls.
+        if not any(oracle.observation_target_present(target) for target in (
+                'commission/detail/recommend', 'commission/detail/start')):
+            return False
+        oracle.commission_detail_state()
+        return oracle.enabled('commission/detail/back')
+
     def _goto_main_target(self) -> Optional[str]:
         oracle = self._frame_or_live_observation_oracle()
+        if self._retained_commission_detail_visible(oracle):
+            # Use ALAS' unknown-page recovery edge to dismiss one inherited
+            # detail, then let its page graph rediscover the Commission list.
+            return 'commission/detail/back'
+        if (oracle.observation_target_present('tactical/book/cancel')
+                and oracle.enabled('tactical/book/cancel')):
+            # A retained lesson dialog covers its classroom back button.
+            # Original unknown-page recovery closes this reviewed cancel
+            # target first, then ALAS rediscovers the underlying page.
+            return 'tactical/book/cancel'
+        if (oracle.observation_target_present('mail/manage/back')
+                and oracle.enabled('mail/manage/back')):
+            return 'mail/manage/back'
+        if (oracle.observation_target_present('guild/report/close')
+                and oracle.enabled('guild/report/close')):
+            return 'guild/report/close'
         targets = []
         # Discover only atomic mapped anchors first. A failure in an absent
         # shop, guild or combat parser must not break another page's exit.
         readers = (
-            ("raid/page/home", lambda: oracle.raid_page_visible(event="raid_20260827")),
+            ("academy/page/back", lambda: oracle.academy_page_visible()),
+            ("daily/page/back", lambda: oracle.daily_page_visible()),
+            ("raid/page/home", lambda: oracle.raid_page_visible(event=oracle.current_raid_event())),
             ("guild/page/back", lambda: oracle.guild_page_visible()),
             ("os/page/back", lambda: oracle.operation_siren_page_visible()),
+            ("os/globe/map", lambda: oracle.operation_siren_globe_visible()),
             ("meta/home", lambda: oracle.meta_page_visible()),
+            ("meta/character/back", lambda: oracle.meta_character_page_visible() or oracle.meta_character_menu_visible()),
+            ("private-quarters/home", lambda: oracle.private_quarters_page_visible()),
             ("game-room/home", lambda: oracle.game_room_page_visible()),
+            ("minigame/new-year/back", lambda: oracle.new_year_challenge_prepare_visible()),
+            ("minigame/poke/back", lambda: oracle.poke_minigame_prepare_visible()),
+            ("minigame/shooting/back", lambda: oracle.shooting_minigame_prepare_visible()),
             ("battle-pass/home", lambda: oracle.battle_pass_page_visible()),
             ("shop/home", lambda: oracle.recommendation_shop_visible()),
         )
@@ -172,9 +257,14 @@ class ObservationAdapterPorts:
             if reader():
                 targets.append(target)
         for identity, target in (
+            ("settings/back", "settings/back"),
+            ("player/profile/back", "player/profile/back"),
+            ("archive/activity-list/home", "archive/activity-list/home"),
             ("event-list/page/back", "event-list/page/back"),
             ("campaign-menu/page/back", "campaign-menu/page/back"),
             ("task/page/back", "task/page/back"),
+            ("commission/page/back", "commission/page/back"),
+            ("tactical/page/back", "tactical/page/back"),
             ("build/page/back", "build/page/back"),
             ("research-menu/page/back", "research-menu/page/back"),
             ("research/page/back", "research/page/back"),
@@ -215,6 +305,9 @@ class ObservationAdapterPorts:
                 "observer endpoints are not generation-coherent",
                 "Msgbox snapshots are not coherent",
                 "current Raid button and UI snapshots are incoherent",
+                "guild page snapshots are not coherent",
+                "reward resource page close is temporarily covered",
+                "reward resource page identity is not proven: blockers=loading",
             )
             if not transient:
                 raise
@@ -275,6 +368,13 @@ class ObservationAdapterPorts:
 
         self._package_gate()
         bounds = self._ocr_bounds(areas)
+        if (self._dorm_context is not None and len(bounds) == 1
+                and bounds[0] == Bounds(653.0, 374.0, 706.0, 395.0)
+                and self._frame_or_live_observation_oracle().dorm_food_shop_visible()):
+            value = str(self._frame_or_live_observation_oracle().dorm_food_shop_state().quantity)
+            if alphabet is not None and any(character not in alphabet for character in value):
+                raise SemanticGateClosed('typed text violates the ALAS OCR alphabet contract')
+            return value
         if (
             len(bounds) == 1
             and bounds[0] == Bounds(1153.0, 140.0, 1178.0, 165.0)
@@ -359,7 +459,7 @@ class ObservationAdapterPorts:
             and len(bounds) == 1
             and bounds[0] == Bounds(377.0, 636.0, 408.0, 669.0)
         ):
-            return str(self.minigame_prepare_default_ticket())
+            return str(self.minigame_prepare_selected_tickets())
         groups = self.oracle.text_groups_in_bounds(bounds)
         values: List[str] = []
         for group in groups:
@@ -426,6 +526,8 @@ class ObservationAdapterPorts:
         """Replace only the final dispatch of one armed ALAS map swipe."""
 
         self._package_gate()
+        if self._operation_siren_map_swipe_intent is not None:
+            return self._dispatch_operation_siren_map_swipe(p1,p2,duration=duration,name=name,distance_check=distance_check)
         globe_intent = self._operation_siren_globe_swipe_intent
         if globe_intent is not None:
             if name != globe_intent.name or distance_check is not True:
@@ -468,11 +570,25 @@ class ObservationAdapterPorts:
                 or not (raw_duration or adb_duration)
             ):
                 raise SemanticGateClosed("operation siren globe final duration changed")
-            return self.oracle.operation_siren_globe_swipe(
-                start,
-                end,
-                int(round(float(duration) * 1000.0)),
-            )
+            # Native Control.swipe already refreshes the real input frame.
+            # A slow path proof can still outlive that lease; retain its final
+            # age check and classify only a proven pre-dispatch expiry below.
+            input_count = getattr(self.oracle, 'input_dispatch_count', None)
+            try:
+                return self.oracle.operation_siren_globe_swipe(
+                    start,
+                    end,
+                    int(round(float(duration) * 1000.0)),
+                )
+            except ExpiredFrameError as exc:
+                # The final guard still rejects expiry during a slow proof.
+                # Only a proven pre-dispatch refusal belongs to ALAS' task
+                # failure interval. Identity/invalidated-frame errors and any
+                # uncertain accepted input retain their original failure.
+                if (type(input_count) is not int
+                        or self.oracle.input_dispatch_count != input_count):
+                    raise
+                raise SemanticTargetNotActionable('os/globe/swipe', exc.generation) from exc
         context = self._require_campaign_context()
         intent = context.viewport_swipe_intent
         if intent is None:
@@ -548,7 +664,7 @@ class ObservationAdapterPorts:
                 ):
                     break
                 if attempt == 2:
-                    raise SemanticGateClosed(
+                    raise SemanticViewportReanchorRequired(
                         "campaign map viewport easing is not a uniform shift"
                     )
             else:  # pragma: no cover - the bounded loop always breaks or raises
@@ -575,7 +691,7 @@ class ObservationAdapterPorts:
                 self._campaign_point_in_area(point, area)
                 for area in blacklist_areas
             ):
-                raise SemanticGateClosed("campaign map viewport path entered its blacklist")
+                raise SemanticViewportReanchorRequired("campaign map viewport path entered its blacklist")
         duration_value = (
             float(duration)
             if isinstance(duration, (int, float)) and not isinstance(duration, bool)
@@ -618,26 +734,18 @@ class ObservationAdapterPorts:
             raise SemanticGateClosed("campaign map viewport lease is incomplete")
 
         if positioning is not None:
-            if (
-                not self._action_ledger.allowed("campaign.camera_positioning")
-                or not 1
-                <= self._action_ledger.remaining("campaign.camera_positioning")
-                <= 2
-            ):
-                raise SemanticGateClosed(
-                    "campaign camera positioning lease is incomplete"
-                )
+            self._require_action_grant("campaign.camera_positioning")
             capability = "campaign.camera_positioning"
             target_node = positioning.target_node
         else:
-            if (
-                not self._action_ledger.allowed("campaign.viewport_swipe")
-                or self._action_ledger.remaining("campaign.viewport_swipe") < 1
-            ):
-                raise SemanticGateClosed("campaign map viewport lease is incomplete")
+            self._require_action_grant("campaign.viewport_swipe")
             assert combat is not None
             capability = "campaign.viewport_swipe"
-            if post_combat:
+            if context.submarine_move_entry is not None:
+                target_node = context.submarine_planned_destination
+                if target_node is None:
+                    raise SemanticGateClosed('submarine viewport requires original planned destination')
+            elif post_combat:
                 fleets = tuple(
                     fleet
                     for fleet in context.map_state.fleets
@@ -672,10 +780,13 @@ class ObservationAdapterPorts:
                 land_cells=context.map_land_cells,
                 expected_fleet_count=context.map_expected_fleet_count,
                 allow_enemy_additions=post_combat,
+                **({'allow_deployment': True} if context.submarine_move_entry is not None else {}),
             ),
         )
         context.map_state = proof.post_state
-        if positioning is not None:
+        if context.submarine_move_entry is not None:
+            context.submarine_viewport_proofs.append(proof)
+        elif positioning is not None:
             context.camera_positioning_proofs.append(proof)
         else:
             assert combat is not None
@@ -758,16 +869,18 @@ class ObservationAdapterPorts:
             target = BUILD_POOL_NAVBAR_TARGETS.get(index)
             if target is None:
                 return False
-            selected = self.oracle.toggle_selected(target)
             normalized_color = tuple(color)
+            if index == 0 and not self.oracle.toggle_present(target):
+                # Check optional seasonal presence before requesting a unique
+                # selection state. Missing seasonal tabs have no selection.
+                if normalized_color not in (BUILD_POOL_NAVBAR_ACTIVE_COLOR,
+                                             BUILD_POOL_NAVBAR_INACTIVE_COLOR):
+                    raise SemanticGateClosed("unexpected construction pool-navbar color contract")
+                return False
+            selected = self.oracle.toggle_selected(target)
             if normalized_color == BUILD_POOL_NAVBAR_ACTIVE_COLOR:
                 return selected
             if normalized_color == BUILD_POOL_NAVBAR_INACTIVE_COLOR:
-                if index == 0 and not self.oracle.toggle_present(target):
-                    # The event construction pool is optional.  An unselected
-                    # toggle alone cannot distinguish an absent seasonal pool
-                    # from a present inactive tab.
-                    return False
                 return not selected
             raise SemanticGateClosed(
                 "unexpected construction pool-navbar color contract"
@@ -779,11 +892,27 @@ class ObservationAdapterPorts:
                 "ALAS color resource is not semantically mapped: {0}".format(name)
             )
         context = self._require_mission_context()
-        if not context.entry_clicked or not self.oracle.enabled("task/page/back"):
+        normalized_color = tuple(color)
+        if normalized_color not in (MISSION_NAVBAR_ACTIVE_COLOR, MISSION_NAVBAR_INACTIVE_COLOR):
+            raise SemanticGateClosed("unexpected mission navbar color contract")
+        if not context.entry_clicked:
+            raise SemanticGateClosed("default mission tab identity is not proven")
+        observation = self._frame_or_live_observation_oracle()
+        if not observation.enabled("task/page/back"):
+            state = observation.read_state()
+            back = observation._unique(state, "task/page/back")
+            blockers = observation._blocking_rules(state, "task/page/back")
+            if (back.active_in_hierarchy and back.active_and_enabled
+                    and back.interactable and back.point is not None
+                    and back.bounds is not None and back.bounds.contains(back.point)
+                    and blockers and all(rule.blocker_id == 'loading' for rule in blockers)):
+                # Both color probes are absent while the exact task shell is
+                # loading. ALAS Navbar.get_info then returns no active item;
+                # its original loop waits and acquires the next screenshot.
+                return False
             raise SemanticGateClosed("default mission tab identity is not proven")
         index = int(match.group(1))
-        selected = self.oracle.image_selected(MISSION_NAVBAR_TARGETS[index])
-        normalized_color = tuple(color)
+        selected = observation.image_selected(MISSION_NAVBAR_TARGETS[index])
         if normalized_color == MISSION_NAVBAR_ACTIVE_COLOR:
             return selected
         if normalized_color == MISSION_NAVBAR_INACTIVE_COLOR:

@@ -1,0 +1,15 @@
+diff --git a/module/os_handler/map_event.py b/module/os_handler/map_event.py
+--- a/module/os_handler/map_event.py
++++ b/module/os_handler/map_event.py
+@@ -267,7 +267,10 @@
+             self.os_auto_search_quit(drop=drop)
+             raise CampaignEnd
+ 
+-        if semantic_adapter is not None:
++        if (semantic_adapter is not None
++                and not self.appear(AUTO_SEARCH_REWARD, offset=(50, 50))):
++            # The existing reward branch below owns the foreground result.
++            # Do not require its covered map switch before that branch runs.
+             # During an active battle the local-map shell and its back button
+             # are intentionally unmounted.  The exact combat UI owns this
+             # frame; leave the map-option switch untouched until map return.

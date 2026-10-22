@@ -7,14 +7,10 @@ import argparse
 import ast
 import copy
 import hashlib
-import hmac
 import importlib
-import importlib.abc
-import importlib.util
 import json
 import os
 import re
-import stat
 import subprocess
 import sys
 import tempfile
@@ -24,7 +20,6 @@ import uuid
 from dataclasses import asdict, dataclass, is_dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from types import ModuleType
 from typing import Any, Mapping
 
 
@@ -66,13 +61,11 @@ from alas_headless.runner_supervision import (  # noqa: E402
     adb_remove_forward,
     adb_verified_game_pid,
     bind_record,
-    binding_digest,
     build_config_ownership,
     canonical_json_bytes,
     close_inherited_handle,
     create_activation_pipe,
     delete_owned_config_windows,
-    ensure_secret_free_payload,
     exclusive_create,
     file_identity_from_fd,
     file_identity_from_path,
@@ -85,7 +78,6 @@ from alas_headless.runner_supervision import (  # noqa: E402
     public_exception_descriptor,
     read_bytes_handle,
     read_owned_file,
-    redact_secret_representations,
     remaining_seconds,
     safe_exception_type,
     send_activation,
@@ -172,19 +164,17 @@ EVENT_SP_TEMPLATE_CHANGED = "event_sp.template_seed_changed"
 MATERIALIZED_ALAS_CAPABILITY_ID = "alas.eventsp.materialized-fleet-rollback-guard/v4"
 MATERIALIZED_ALAS_PROOF_SCHEMA = "alas-headless.materialized-alas-proof/v3"
 MATERIALIZED_ALAS_CONTROL_SCHEMA = "alas-headless.materialized-alas-control/v4"
-MATERIALIZED_ALAS_LOADED_SCHEMA = "alas-headless.materialized-alas-loaded/v3"
-MATERIALIZED_ALAS_CONTROL_ENV = "ALAS_EVENT_RUNNER_INTERNAL_MATERIALIZATION"
+MATERIALIZED_ALAS_LOADED_SCHEMA = "alas-headless.materialized-alas-loaded/v4"
 MATERIALIZED_ALAS_RELATIVE_PATH = Path("module/map/map_operation.py")
 MATERIALIZED_ALAS_MODULE_NAME = "module.map.map_operation"
-MATERIALIZED_ALAS_LOADER_ID = "verified-canonical-source-bytes/v3"
+MATERIALIZED_ALAS_LOADER_ID = "python-import-source-audit/v1"
 MATERIALIZED_ALAS_CANONICAL_SOURCE_SHA256 = (
-    "0ddeec74cde1a94e686830d0504f07fc789aab85b7552073f4226779992e57f8"
+    "695d50bdacfdf860e098005e7ad53997df80a4a88b322d02ad3e803e03a4201f"
 )
 MATERIALIZED_ALAS_SEMANTIC_BRANCH_SHA256 = (
-    "a0ac35cb40e6ad29711c0200598a77a18c88ec0060666adace3d46f30301f4d6"
+    "e6868451eff9daad2f81abee2b6c86d44c9bd0d27799946ef30680c0f19333b7"
 )
 MATERIALIZED_ALAS_MAX_SOURCE_BYTES = 2 * 1024 * 1024
-MATERIALIZED_ALAS_MAX_CONTROL_BYTES = 8 * 1024
 MATERIALIZED_ALAS_UNPROVEN = "event_sp.materialized_fleet_noop_guard_unproven"
 MATERIALIZED_ALAS_CHANGED = "event_sp.materialized_fleet_noop_guard_changed"
 MATERIALIZED_ALAS_BASELINE = "fully_qualified_baseline"
@@ -193,7 +183,7 @@ _SHA256_HEX = re.compile(r"[0-9a-f]{64}")
 
 
 class MaterializedAlasAdmissionError(RuntimeError):
-    """Stable, secret-free admission failure for the materialized ALAS tree."""
+    """Classified local compatibility failure for the materialized ALAS tree."""
 
     def __init__(self, classification: str) -> None:
         if classification not in (
@@ -231,17 +221,6 @@ def _attribute_chain(node: ast.AST) -> tuple[str, ...] | None:
 
 def _call_matches(node: ast.AST, chain: tuple[str, ...]) -> bool:
     return isinstance(node, ast.Call) and _attribute_chain(node.func) == chain
-
-
-def _static_string(node: ast.AST) -> str | None:
-    if isinstance(node, ast.Constant) and isinstance(node.value, str):
-        return node.value
-    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
-        left = _static_string(node.left)
-        right = _static_string(node.right)
-        if left is not None and right is not None:
-            return left + right
-    return None
 
 
 def _calls_in(node: ast.AST, chain: tuple[str, ...]) -> tuple[ast.Call, ...]:
@@ -316,502 +295,121 @@ def _normalized_ast_sha256(node: ast.AST) -> str:
 
 
 def _validate_materialized_enter_map(tree: ast.Module) -> str:
+    """Diagnose the local fleet no-op contract, not same-authority source safety.
+
+    Original ALAS fleet preparation can clear/reselect an already correct fleet.
+    The semantic hook must keep that call behind the positive "required" check,
+    after authorization and before selection confirmation. Check only this
+    integration seam; local names, logging, timers, native recovery calls and
+    unrelated wrappers are not a compatibility allowlist. This is not a proof
+    about arbitrary Python call targets. Actual inputs still require the typed
+    adapter's identity, freshness, budget and postcondition checks.
+
+    The returned digest correlates the loaded branch and retained qualification;
+    equality with a historical branch is not runtime admission policy.
+    """
     classes = [
-        node
-        for node in tree.body
+        node for node in tree.body
         if isinstance(node, ast.ClassDef) and node.name == "MapOperation"
     ]
     if len(classes) != 1:
         raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
     methods = [
-        node
-        for node in classes[0].body
+        node for node in classes[0].body
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
         and node.name == "enter_map"
     ]
-    if (
-        len(methods) != 1
-        or not isinstance(methods[0], ast.FunctionDef)
-        or methods[0].decorator_list
-    ):
+    if len(methods) != 1 or not isinstance(methods[0], ast.FunctionDef):
         raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
     method = methods[0]
+    arguments = method.args.posonlyargs + method.args.args
+    if not arguments:
+        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
+    owner = arguments[0].arg
 
-    adapter_stores = [
-        node
-        for node in ast.walk(method)
-        if isinstance(node, ast.Name)
-        and isinstance(node.ctx, ast.Store)
-        and node.id == "semantic_adapter"
-    ]
-    adapter_assignments = [
-        node
-        for node in method.body
-        if isinstance(node, ast.Assign)
-        and len(node.targets) == 1
-        and isinstance(node.targets[0], ast.Name)
-        and node.targets[0].id == "semantic_adapter"
-    ]
-    if len(adapter_stores) != 1 or len(adapter_assignments) != 1:
+    # Infer the hook receiver from the active semantic branch, rather than
+    # requiring a particular adapter-local name or outer loop/with layout.
+    branches = []
+    for node in ast.walk(method):
+        if not isinstance(node, ast.If):
+            continue
+        active = [
+            call for call in ast.walk(node.test)
+            if isinstance(call, ast.Call)
+            and isinstance(call.func, ast.Attribute)
+            and call.func.attr == "campaign_pre_sortie_active"
+        ]
+        if active:
+            branches.append((node, active))
+    if len(branches) != 1 or len(branches[0][1]) != 1:
         raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    adapter_assignment = adapter_assignments[0]
-    adapter_value = adapter_assignment.value
-    if (
-        not isinstance(adapter_value, ast.Call)
-        or not isinstance(adapter_value.func, ast.Name)
-        or adapter_value.func.id != "getattr"
-        or adapter_value.keywords
-        or len(adapter_value.args) != 3
-        or _attribute_chain(adapter_value.args[0]) != ("self", "device")
-        or not isinstance(adapter_value.args[1], ast.Constant)
-        or adapter_value.args[1].value != "semantic_adapter"
-        or not isinstance(adapter_value.args[2], ast.Constant)
-        or adapter_value.args[2].value is not None
-    ):
+    semantic_branch, active = branches[0]
+    receiver = _attribute_chain(active[0].func.value)
+    if receiver is None:
         raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-
-    adapter_index = method.body.index(adapter_assignment)
-    top_level_with = [
-        (index, statement)
-        for index, statement in enumerate(method.body)
-        if isinstance(statement, ast.With)
-    ]
-    if len(top_level_with) != 1 or adapter_index >= top_level_with[0][0]:
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    campaign_with = top_level_with[0][1]
-    while_loops = [
-        statement
-        for statement in campaign_with.body
-        if isinstance(statement, ast.While)
-    ]
-    if len(while_loops) != 1:
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    campaign_loop = while_loops[0]
-
-    active_chain = ("semantic_adapter", "campaign_pre_sortie_active")
-    semantic_branches = [
-        statement
-        for statement in campaign_loop.body
-        if isinstance(statement, ast.If)
-        and len(_calls_in(statement.test, active_chain)) == 1
-    ]
-    if len(semantic_branches) != 1 or len(_calls_in(method, active_chain)) != 1:
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    semantic_branch = semantic_branches[0]
-    semantic_test = semantic_branch.test
-    if (
-        not isinstance(semantic_test, ast.BoolOp)
-        or not isinstance(semantic_test.op, ast.And)
-        or len(semantic_test.values) != 2
-        or not isinstance(semantic_test.values[0], ast.Compare)
-        or not isinstance(semantic_test.values[0].left, ast.Name)
-        or semantic_test.values[0].left.id != "semantic_adapter"
-        or len(semantic_test.values[0].ops) != 1
-        or not isinstance(semantic_test.values[0].ops[0], ast.IsNot)
-        or len(semantic_test.values[0].comparators) != 1
-        or not isinstance(semantic_test.values[0].comparators[0], ast.Constant)
-        or semantic_test.values[0].comparators[0].value is not None
-        or not _call_matches(semantic_test.values[1], active_chain)
-        or semantic_test.values[1].args
-        or semantic_test.values[1].keywords
-        or semantic_branch.orelse
-    ):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-
-    authorize_chain = (
-        "semantic_adapter",
-        "authorize_campaign_fleet_preparation",
-    )
-    required_chain = (
-        "semantic_adapter",
-        "campaign_fleet_preparation_required",
-    )
-    legacy_chain = ("self", "fleet_preparation")
-    confirm_chain = ("semantic_adapter", "confirm_campaign_fleet_selection")
-    if (
-        any(
-            len(_calls_in(semantic_branch, chain)) != 1
-            for chain in (authorize_chain, required_chain, legacy_chain, confirm_chain)
-        )
-        or len(_calls_in(method, authorize_chain)) != 1
-    ):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-
-    fleet_branches = [
-        statement
-        for statement in semantic_branch.body
-        if isinstance(statement, ast.If)
-        and len(_calls_in(statement, authorize_chain)) == 1
-    ]
-    if len(fleet_branches) != 1:
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    fleet_branch = fleet_branches[0]
-    fleet_test = fleet_branch.test
-    if (
-        not isinstance(fleet_test, ast.Call)
-        or _attribute_chain(fleet_test.func) != ("self", "appear")
-        or len(fleet_test.args) != 1
-        or not isinstance(fleet_test.args[0], ast.Name)
-        or fleet_test.args[0].id != "FLEET_PREPARATION"
-        or fleet_branch.orelse
-    ):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    fleet_tries = [
-        statement for statement in fleet_branch.body if isinstance(statement, ast.Try)
-    ]
-    if len(fleet_tries) != 1:
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    try_node = fleet_tries[0]
-    if (
-        try_node.orelse
-        or len(try_node.finalbody) != 1
-        or not isinstance(try_node.finalbody[0], ast.If)
-    ):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    rollback_if = try_node.finalbody[0]
-    if (
-        not isinstance(rollback_if.test, ast.UnaryOp)
-        or not isinstance(rollback_if.test.op, ast.Not)
-        or not isinstance(rollback_if.test.operand, ast.Name)
-        or rollback_if.test.operand.id != "sortie_clicked"
-        or rollback_if.orelse
-        or len(rollback_if.body) != 1
-        or not isinstance(rollback_if.body[0], ast.Try)
-    ):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    rollback_try = rollback_if.body[0]
-    close_chain = (
-        "semantic_adapter",
-        "close_campaign_fleet_dropdown_for_rollback",
-    )
-    cancel_chain = ("self", "enter_map_cancel")
-    if (
-        rollback_try.handlers
-        or rollback_try.orelse
-        or len(rollback_try.body) != 1
-        or not _direct_call_statement(rollback_try.body[0], close_chain)
-        or len(rollback_try.finalbody) != 1
-        or not isinstance(rollback_try.finalbody[0], ast.Expr)
-        or not _call_matches(rollback_try.finalbody[0].value, cancel_chain)
-    ):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    close_call = rollback_try.body[0].value
-    cancel_call = rollback_try.finalbody[0].value
-    assert isinstance(close_call, ast.Call) and isinstance(cancel_call, ast.Call)
-    if (
-        close_call.args
-        or close_call.keywords
-        or cancel_call.args
-        or len(cancel_call.keywords) != 1
-        or cancel_call.keywords[0].arg != "skip_first_screenshot"
-        or not isinstance(cancel_call.keywords[0].value, ast.Constant)
-        or cancel_call.keywords[0].value.value is not False
-    ):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    authorize_locations = [
-        (index, statement)
-        for index, statement in enumerate(try_node.body)
-        if isinstance(statement, ast.Assign)
-        and len(statement.targets) == 1
-        and isinstance(statement.targets[0], ast.Name)
-        and statement.targets[0].id == "fleet_authorized"
-        and _call_matches(statement.value, authorize_chain)
-    ]
-    if len(authorize_locations) != 1:
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    authorize_index, authorize = authorize_locations[0]
-    if adapter_assignment.lineno >= authorize.lineno:
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    call = authorize.value
-    assert isinstance(call, ast.Call)
-    expected_arguments = (
-        ("self", "config", "Fleet_Fleet1"),
-        ("self", "config", "Fleet_Fleet2"),
-        ("self", "config", "Submarine_Fleet"),
-    )
-    if (
-        call.keywords
-        or tuple(_attribute_chain(argument) for argument in call.args)
-        != expected_arguments
-        or authorize_index + 1 >= len(try_node.body)
-    ):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-
-    authorized = try_node.body[authorize_index + 1]
-    authorized_branches = [
-        node
-        for node in try_node.body
-        if isinstance(node, ast.If)
-        and isinstance(node.test, ast.Name)
-        and node.test.id == "fleet_authorized"
-    ]
-    if (
-        len(authorized_branches) != 1
-        or authorized is not authorized_branches[0]
-        or not isinstance(authorized, ast.If)
-        or authorized.orelse
-    ):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-
-    guard_candidates = [
-        (index, statement)
-        for index, statement in enumerate(authorized.body)
-        if isinstance(statement, ast.If)
-        and _call_matches(statement.test, required_chain)
-    ]
-    if len(guard_candidates) != 1:
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    guard_index, guard = guard_candidates[0]
-    guard_call = guard.test
-    assert isinstance(guard_call, ast.Call)
-    if (
-        guard_call.args
-        or guard_call.keywords
-        or guard.orelse
-        or len(guard.body) != 1
-        or not _direct_call_statement(guard.body[0], legacy_chain)
-    ):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    if len(_calls_in(authorized, legacy_chain)) != 1:
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-
-    permitted_legacy_attribute = guard.body[0].value.func
-    legacy_attributes = [
-        node
-        for node in ast.walk(semantic_branch)
-        if isinstance(node, ast.Attribute) and node.attr == "fleet_preparation"
-    ]
-    forbidden_dynamic_references = [
-        node
-        for node in ast.walk(semantic_branch)
-        if (isinstance(node, ast.Constant) and node.value == "fleet_preparation")
-        or (
-            isinstance(node, ast.Name)
-            and isinstance(node.ctx, ast.Load)
-            and node.id == "fleet_preparation"
-        )
-        or isinstance(
-            node,
-            (
-                ast.Lambda,
-                ast.FunctionDef,
-                ast.AsyncFunctionDef,
-                ast.ClassDef,
-                ast.ListComp,
-                ast.SetComp,
-                ast.DictComp,
-                ast.GeneratorExp,
-            ),
-        )
-    ]
-    if (
-        legacy_attributes != [permitted_legacy_attribute]
-        or forbidden_dynamic_references
-    ):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-
-    # The compatibility path may tolerate unrelated source drift, but it must
-    # still prove that no second call path can bypass the reviewed guard.  This
-    # deliberately checks semantic references rather than the entire file hash.
-    permitted_fleet_calls = _calls_in(method, legacy_chain)
-    permitted_fleet_attributes = {
-        id(call.func) for call in permitted_fleet_calls if isinstance(call.func, ast.Attribute)
-    }
-    all_fleet_attributes = [
-        node
-        for node in ast.walk(tree)
-        if isinstance(node, ast.Attribute) and node.attr == "fleet_preparation"
-    ]
-    global_dynamic_fleet_references = [
-        node
-        for node in ast.walk(tree)
-        if (isinstance(node, ast.Constant) and node.value == "fleet_preparation")
-        or (
-            isinstance(node, ast.Name)
-            and isinstance(node.ctx, ast.Load)
-            and node.id == "fleet_preparation"
-        )
-        or (
-            isinstance(node, ast.Call)
-            and isinstance(node.func, ast.Name)
-            and node.func.id == "getattr"
-            and len(node.args) >= 2
-            and _static_string(node.args[1]) == "fleet_preparation"
-        )
-    ]
-    if (
-        len(permitted_fleet_calls) != 2
-        or len(all_fleet_attributes) != 2
-        or {id(node) for node in all_fleet_attributes} != permitted_fleet_attributes
-        or global_dynamic_fleet_references
-    ):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-
-    reviewed_self_calls = {
-        ("self", "appear"),
-        ("self", "device", "click"),
-        ("self", "enter_map_cancel"),
-        legacy_chain,
-        ("self", "handle_2x_book_setting"),
-        ("self", "handle_auto_search"),
-        ("self", "handle_auto_search_setting"),
-        ("self", "handle_auto_submarine_call_disable"),
-        ("self", "handle_retirement"),
-        ("self", "is_in_auto_search_menu"),
-        ("self", "is_in_map"),
-    }
+    authorize_chain = receiver + ("authorize_campaign_fleet_preparation",)
+    required_chain = receiver + ("campaign_fleet_preparation_required",)
+    confirm_chain = receiver + ("confirm_campaign_fleet_selection",)
+    legacy_chain = (owner, "fleet_preparation")
     if any(
-        chain is not None
-        and chain[:1] == ("self",)
-        and chain not in reviewed_self_calls
-        for chain in (
-            _attribute_chain(node.func)
-            for node in ast.walk(semantic_branch)
-            if isinstance(node, ast.Call)
-        )
+        len(_calls_in(semantic_branch, chain)) != 1
+        for chain in (authorize_chain, required_chain, legacy_chain, confirm_chain)
     ):
         raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
 
-    allowed_authorized_calls = {
-        ("semantic_adapter", "prepare_campaign_hard_fleets"),
-        ("semantic_adapter", "campaign_dock_full_visible"),
-        ("self", "handle_retirement"),
-        ("self", "handle_2x_book_setting"),
-        required_chain,
-        legacy_chain,
-        confirm_chain,
-        ("self", "handle_auto_submarine_call_disable"),
-        ("self", "handle_auto_search_setting"),
-        ("semantic_adapter", "authorize_campaign_sortie"),
-        ("self", "device", "click"),
-        ("fleet_timer", "reset"),
-        ("campaign_timer", "reset"),
-    }
-    authorized_call_chains = [
-        _attribute_chain(node.func)
-        for node in ast.walk(authorized)
-        if isinstance(node, ast.Call)
+    authorizations = [
+        node for node in ast.walk(semantic_branch)
+        if isinstance(node, ast.Assign) and len(node.targets) == 1
+        and isinstance(node.targets[0], ast.Name)
+        and _call_matches(node.value, authorize_chain)
     ]
-    if any(chain not in allowed_authorized_calls for chain in authorized_call_chains):
+    if len(authorizations) != 1:
+        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
+    authorization = authorizations[0]
+    authorized_name = authorization.targets[0].id
+    guards = [
+        node for node in ast.walk(semantic_branch)
+        if isinstance(node, ast.If) and _call_matches(node.test, required_chain)
+    ]
+    if len(guards) != 1:
+        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
+    guard = guards[0]
+    # Only the positive arm may invoke ALAS fleet preparation. Other statements
+    # inside it are permitted; confirmation independently verifies the outcome.
+    if (
+        guard.test.args or guard.test.keywords
+        or sum(len(_calls_in(statement, legacy_chain)) for statement in guard.body) != 1
+    ):
+        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
+    authorized_branches = [
+        node for node in ast.walk(semantic_branch)
+        if isinstance(node, ast.If) and isinstance(node.test, ast.Name)
+        and node.test.id == authorized_name and guard in node.body
+    ]
+    if len(authorized_branches) != 1:
+        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
+    authorized = authorized_branches[0]
+    if authorized.body.index(guard) >= _direct_statement_index(
+        authorized.body, confirm_chain
+    ):
         raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
 
-    two_x_indices = [
-        index
-        for index, statement in enumerate(authorized.body)
-        if isinstance(statement, ast.Expr)
-        and _call_matches(statement.value, ("self", "handle_2x_book_setting"))
-    ]
-    if len(two_x_indices) != 1:
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    two_x_index = two_x_indices[0]
-    two_x_statement = authorized.body[two_x_index]
-    assert isinstance(two_x_statement, ast.Expr)
-    two_x_call = two_x_statement.value
-    assert isinstance(two_x_call, ast.Call)
-    if (
-        two_x_call.args
-        or len(two_x_call.keywords) != 1
-        or two_x_call.keywords[0].arg != "mode"
-        or not isinstance(two_x_call.keywords[0].value, ast.Constant)
-        or two_x_call.keywords[0].value.value != "prep"
-    ):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    confirm_index = _direct_statement_index(authorized.body, confirm_chain)
-    auto_submarine_index = _direct_statement_index(
-        authorized.body, ("self", "handle_auto_submarine_call_disable")
+    # Authorization must precede its successful arm in the same local suite;
+    # no adjacency, temporary-name or unrelated statement constraints apply.
+    ordered_authorization = any(
+        isinstance(value, list)
+        and authorization in value and authorized in value
+        and value.index(authorization) < value.index(authorized)
+        for node in ast.walk(semantic_branch)
+        for _, value in ast.iter_fields(node)
     )
-    auto_search_index = _direct_statement_index(
-        authorized.body, ("self", "handle_auto_search_setting")
-    )
-    checked_indices = [
-        index
-        for index, statement in enumerate(authorized.body)
-        if isinstance(statement, ast.Assign)
-        and len(statement.targets) == 1
-        and _attribute_chain(statement.targets[0]) == ("self", "map_fleet_checked")
-        and isinstance(statement.value, ast.Constant)
-        and statement.value.value is True
-    ]
-    sortie_indices = [
-        index
-        for index, statement in enumerate(authorized.body)
-        if isinstance(statement, ast.If)
-        and _call_matches(
-            statement.test, ("semantic_adapter", "authorize_campaign_sortie")
-        )
-    ]
-    if len(checked_indices) != 1 or len(sortie_indices) != 1:
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    sortie = authorized.body[sortie_indices[0]]
-    assert isinstance(sortie, ast.If)
-    sortie_clicks = _calls_in(sortie, ("self", "device", "click"))
-    if (
-        sortie.orelse
-        or len(sortie_clicks) != 1
-        or len(sortie_clicks[0].args) != 1
-        or sortie_clicks[0].keywords
-        or not isinstance(sortie_clicks[0].args[0], ast.Name)
-        or sortie_clicks[0].args[0].id != "FLEET_PREPARATION"
-    ):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    sortie_call = sortie.test
-    assert isinstance(sortie_call, ast.Call)
-    expected_sortie_keywords = {
-        "use_auto_search": ("self", "map_is_auto_search"),
-        "use_2x_book": ("self", "map_is_2x_book"),
-        "submarine_mode": ("self", "config", "Submarine_Mode"),
-        "fleet_order": ("self", "config", "Fleet_FleetOrder"),
-    }
-    if (
-        sortie_call.args
-        or len(sortie_call.keywords) != len(expected_sortie_keywords)
-        or {
-            keyword.arg: _attribute_chain(keyword.value)
-            for keyword in sortie_call.keywords
-        }
-        != expected_sortie_keywords
-    ):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    if not (
-        two_x_index
-        < guard_index
-        < confirm_index
-        < auto_submarine_index
-        < auto_search_index
-        < checked_indices[0]
-        < sortie_indices[0]
-    ):
+    if not ordered_authorization:
         raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
     return _normalized_ast_sha256(semantic_branch)
 
 
-def _is_reparse(metadata: os.stat_result) -> bool:
-    attributes = getattr(metadata, "st_file_attributes", 0)
-    reparse_flag = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
-    return bool(attributes & reparse_flag)
-
-
-def _same_file(metadata: os.stat_result, other: os.stat_result) -> bool:
-    try:
-        return os.path.samestat(metadata, other)
-    except (AttributeError, OSError, ValueError):
-        return (metadata.st_dev, metadata.st_ino) == (other.st_dev, other.st_ino)
-
-
-def _same_open_snapshot(metadata: os.stat_result, other: os.stat_result) -> bool:
-    return _same_file(metadata, other) and (
-        metadata.st_size,
-        metadata.st_mtime_ns,
-        metadata.st_ctime_ns,
-    ) == (other.st_size, other.st_mtime_ns, other.st_ctime_ns)
-
-
-def _same_file_size(metadata: os.stat_result, other: os.stat_result) -> bool:
-    return _same_file(metadata, other) and metadata.st_size == other.st_size
-
-
 @dataclass(frozen=True)
-class _VerifiedMaterializedAlasSource:
+class _MaterializedAlasSourceAudit:
     root: Path
     origin: Path
     source: bytes
@@ -825,52 +423,16 @@ def _canonical_materialized_source(payload: bytes) -> bytes:
     return source.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
 
 
-def _read_verified_materialized_alas_source(
+def _read_materialized_source_audit(
     alas_root: Path, *, classification: str
-) -> _VerifiedMaterializedAlasSource:
+) -> _MaterializedAlasSourceAudit:
     try:
         root = alas_root.resolve(strict=True)
-        root_before = os.stat(root, follow_symlinks=False)
-        if not stat.S_ISDIR(root_before.st_mode) or _is_reparse(root_before):
-            raise MaterializedAlasAdmissionError(classification)
-        candidate = root / MATERIALIZED_ALAS_RELATIVE_PATH
-        resolved = candidate.resolve(strict=True)
-        if resolved != candidate or not resolved.is_file():
-            raise MaterializedAlasAdmissionError(classification)
-        path_before = os.stat(resolved, follow_symlinks=False)
-        if (
-            not stat.S_ISREG(path_before.st_mode)
-            or _is_reparse(path_before)
-            or path_before.st_size <= 0
-            or path_before.st_size > MATERIALIZED_ALAS_MAX_SOURCE_BYTES
-        ):
-            raise MaterializedAlasAdmissionError(classification)
-        flags = os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOINHERIT", 0)
-        flags |= getattr(os, "O_NOFOLLOW", 0)
-        descriptor = os.open(resolved, flags)
-        with os.fdopen(descriptor, "rb", closefd=True) as stream:
-            opened_before = os.fstat(stream.fileno())
-            if (
-                not stat.S_ISREG(opened_before.st_mode)
-                or _is_reparse(opened_before)
-                or not _same_file_size(opened_before, path_before)
-            ):
-                raise MaterializedAlasAdmissionError(classification)
+        resolved = (root / MATERIALIZED_ALAS_RELATIVE_PATH).resolve(strict=True)
+        with resolved.open("rb") as stream:
             payload = stream.read(MATERIALIZED_ALAS_MAX_SOURCE_BYTES + 1)
-            opened_after = os.fstat(stream.fileno())
-            path_after = os.stat(resolved, follow_symlinks=False)
-            root_after = os.stat(root, follow_symlinks=False)
-            if (
-                len(payload) != opened_before.st_size
-                or len(payload) > MATERIALIZED_ALAS_MAX_SOURCE_BYTES
-                or not _same_open_snapshot(opened_before, opened_after)
-                or not _same_file_size(opened_after, path_after)
-                or not _same_file(root_before, root_after)
-                or not stat.S_ISDIR(root_after.st_mode)
-                or _is_reparse(path_after)
-                or _is_reparse(root_after)
-            ):
-                raise MaterializedAlasAdmissionError(classification)
+        if not payload or len(payload) > MATERIALIZED_ALAS_MAX_SOURCE_BYTES:
+            raise MaterializedAlasAdmissionError(classification)
         canonical_payload = _canonical_materialized_source(payload)
         canonical_sha256 = hashlib.sha256(canonical_payload).hexdigest()
         tree = ast.parse(
@@ -891,12 +453,12 @@ def _read_verified_materialized_alas_source(
         "canonical_source_sha256": canonical_sha256,
         "semantic_branch_sha256": semantic_branch_sha256,
     }
-    return _VerifiedMaterializedAlasSource(root, resolved, canonical_payload, proof)
+    return _MaterializedAlasSourceAudit(root, resolved, canonical_payload, proof)
 
 
 def _materialized_alas_proof(alas_root: Path) -> dict[str, str]:
     return dict(
-        _read_verified_materialized_alas_source(
+        _read_materialized_source_audit(
             alas_root, classification=MATERIALIZED_ALAS_UNPROVEN
         ).proof
     )
@@ -948,13 +510,17 @@ def _validate_loaded_materialized_alas(
         "canonical_source_sha256",
         "semantic_branch_sha256",
         "support_classification",
-        "load_count",
         "proof",
     }
-    proof = _validate_materialized_alas_proof(expected_proof)
+    _validate_materialized_alas_proof(expected_proof)
+    if not isinstance(value, Mapping):
+        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_CHANGED)
+    # Parent admission and current imported-source audits may differ after a
+    # compatible edit. Validate this receipt's own proof; do not turn byte drift
+    # between same-user processes into a runtime compatibility gate.
+    proof = _validate_materialized_alas_proof(value.get("proof"))
     if (
-        not isinstance(value, Mapping)
-        or set(value) != expected
+        set(value) != expected
         or value.get("schema") != MATERIALIZED_ALAS_LOADED_SCHEMA
         or value.get("capability_id") != MATERIALIZED_ALAS_CAPABILITY_ID
         or value.get("loader_id") != MATERIALIZED_ALAS_LOADER_ID
@@ -964,111 +530,32 @@ def _validate_loaded_materialized_alas(
         or value.get("semantic_branch_sha256") != proof["semantic_branch_sha256"]
         or value.get("support_classification")
         != _materialized_alas_support_classification(proof)
-        or not isinstance(value.get("load_count"), int)
-        or isinstance(value.get("load_count"), bool)
-        or value["load_count"] < 1
-        or _validate_materialized_alas_proof(value.get("proof")) != proof
     ):
         raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_CHANGED)
     return dict(value)
 
 
-class _VerifiedMapOperationImporter(importlib.abc.MetaPathFinder, importlib.abc.Loader):
-    """Import only map_operation from the already verified immutable bytes."""
-
-    def __init__(self, verified: _VerifiedMaterializedAlasSource) -> None:
-        self.verified = verified
-        self.loaded_digest: str | None = None
-        self.load_count = 0
-
-    def find_spec(
-        self,
-        fullname: str,
-        path: Any = None,
-        target: ModuleType | None = None,
-    ) -> Any:
-        if fullname != MATERIALIZED_ALAS_MODULE_NAME:
-            return None
-        if target is not None and target.__name__ != MATERIALIZED_ALAS_MODULE_NAME:
-            raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_CHANGED)
-        if path is None:
-            raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_CHANGED)
-        try:
-            parents = {Path(item).resolve(strict=True) for item in path}
-        except (OSError, TypeError, ValueError) as exc:
-            raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_CHANGED) from exc
-        if self.verified.origin.parent not in parents:
-            raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_CHANGED)
-        spec = importlib.util.spec_from_loader(
-            fullname, self, origin=str(self.verified.origin)
-        )
-        if spec is None:
-            raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_CHANGED)
-        return spec
-
-    def create_module(self, spec: Any) -> ModuleType | None:
-        if (
-            spec.name != MATERIALIZED_ALAS_MODULE_NAME
-            or spec.origin != str(self.verified.origin)
-            or spec.loader is not self
-        ):
-            raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_CHANGED)
-        return None
-
-    def exec_module(self, module: ModuleType) -> None:
-        spec = module.__spec__
-        if (
-            module.__name__ != MATERIALIZED_ALAS_MODULE_NAME
-            or spec is None
-            or spec.name != MATERIALIZED_ALAS_MODULE_NAME
-            or spec.origin != str(self.verified.origin)
-            or spec.loader is not self
-        ):
-            raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_CHANGED)
-        digest = hashlib.sha256(self.verified.source).hexdigest()
-        if digest != self.verified.proof["canonical_source_sha256"]:
-            raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_CHANGED)
-        module.__file__ = str(self.verified.origin)
-        code = compile(
-            self.verified.source,
-            str(self.verified.origin),
-            "exec",
-            dont_inherit=True,
-        )
-        exec(code, module.__dict__)
-        self.loaded_digest = digest
-        self.load_count += 1
-
-
-def _install_verified_map_operation_importer(
-    verified: _VerifiedMaterializedAlasSource,
-) -> _VerifiedMapOperationImporter:
-    if MATERIALIZED_ALAS_MODULE_NAME in sys.modules or any(
-        isinstance(finder, _VerifiedMapOperationImporter) for finder in sys.meta_path
-    ):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_CHANGED)
-    importer = _VerifiedMapOperationImporter(verified)
-    sys.meta_path.insert(0, importer)
-    return importer
-
-
-def _confirm_verified_map_operation_loaded(
-    importer: _VerifiedMapOperationImporter,
+def _inspect_loaded_map_operation(
+    admitted: _MaterializedAlasSourceAudit,
 ) -> dict[str, Any]:
+    """Inspect the normal import's origin and current local compatibility seam.
+
+    This receipt audits source at inspection time, not immutable executed bytes.
+    Same-user source/bytecode replacement is outside the runner's threat model;
+    typed input validation remains the boundary for game actions.
+    """
     module = sys.modules.get(MATERIALIZED_ALAS_MODULE_NAME)
-    spec = getattr(module, "__spec__", None)
-    proof = _validate_materialized_alas_proof(importer.verified.proof)
-    if (
-        module is None
-        or module.__loader__ is not importer
-        or spec is None
-        or spec.loader is not importer
-        or spec.name != MATERIALIZED_ALAS_MODULE_NAME
-        or spec.origin != str(importer.verified.origin)
-        or importer.loaded_digest != proof["canonical_source_sha256"]
-        or importer.load_count < 1
-    ):
+    try:
+        origin = Path(module.__file__).resolve(strict=True)
+        entry = module.MapOperation.enter_map
+    except (AttributeError, OSError, TypeError, ValueError) as exc:
+        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_CHANGED) from exc
+    if origin != admitted.origin or not callable(entry):
         raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_CHANGED)
+    observed = _read_materialized_source_audit(
+        admitted.root, classification=MATERIALIZED_ALAS_CHANGED
+    )
+    proof = observed.proof
     return {
         "schema": MATERIALIZED_ALAS_LOADED_SCHEMA,
         "capability_id": MATERIALIZED_ALAS_CAPABILITY_ID,
@@ -1078,7 +565,6 @@ def _confirm_verified_map_operation_loaded(
         "canonical_source_sha256": proof["canonical_source_sha256"],
         "semantic_branch_sha256": proof["semantic_branch_sha256"],
         "support_classification": _materialized_alas_support_classification(proof),
-        "load_count": importer.load_count,
         "proof": proof,
     }
 
@@ -1115,43 +601,17 @@ def _validate_materialization_control_record(
     control: WorkerControl,
     args: argparse.Namespace,
 ) -> dict[str, str]:
-    if not isinstance(value, Mapping):
+    # WorkerControl already validates this record against its run binding.
+    # Here only the consumer-specific schema and requested import root remain.
+    if not isinstance(value, Mapping) or value.get("schema") != MATERIALIZED_ALAS_CONTROL_SCHEMA:
         raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    body = dict(value)
-    expected_fields = {
-        "schema",
-        "run_id",
-        "task",
-        "stage",
-        "event",
-        "deadline_seconds",
-        "parent_pid",
-        "alas_root",
-        "proof",
-    }
-    if (
-        set(body) != expected_fields
-        or body.get("schema") != MATERIALIZED_ALAS_CONTROL_SCHEMA
-    ):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    if dict(value) != dict(control.materialization_control):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    binding = control.binding
     try:
         args_root = args.alas_root.resolve(strict=True)
     except OSError as exc:
         raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_CHANGED) from exc
-    if (
-        body.get("run_id") != binding.run_id
-        or body.get("task") != binding.task
-        or body.get("stage") != binding.stage
-        or body.get("event") != binding.event
-        or body.get("deadline_seconds") != binding.deadline_seconds
-        or body.get("parent_pid") != binding.parent_pid
-        or body.get("alas_root") != str(args_root)
-    ):
+    if args_root != control.binding.config_path.parent.parent:
         raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    return _validate_materialized_alas_proof(body.get("proof"))
+    return _validate_materialized_alas_proof(value.get("proof"))
 
 
 def _worker_materialization_admission(
@@ -1159,25 +619,13 @@ def _worker_materialization_admission(
     *,
     control: WorkerControl,
     args: argparse.Namespace,
-) -> _VerifiedMaterializedAlasSource:
-    raw = environment.get(MATERIALIZED_ALAS_CONTROL_ENV)
-    if not isinstance(raw, str):
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
-    try:
-        encoded = raw.encode("utf-8", errors="strict")
-        value = strict_json_mapping_bytes(
-            encoded,
-            maximum=MATERIALIZED_ALAS_MAX_CONTROL_BYTES,
-            label="materialized ALAS control",
-        )
-    except (UnicodeError, ValueError) as exc:
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN) from exc
-    proof = _validate_materialization_control_record(value, control=control, args=args)
-    observed = _read_verified_materialized_alas_source(
+) -> _MaterializedAlasSourceAudit:
+    _validate_materialization_control_record(
+        control.materialization_control, control=control, args=args
+    )
+    observed = _read_materialized_source_audit(
         args.alas_root, classification=MATERIALIZED_ALAS_CHANGED
     )
-    if observed.proof != proof:
-        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_CHANGED)
     return observed
 
 
@@ -1301,7 +749,7 @@ def _validate_event_sp_template_payload(payload: bytes) -> Mapping[str, Any]:
 
 
 def _event_sp_template_support_classification(sha256: str) -> str:
-    if hmac.compare_digest(sha256, EVENT_SP_TEMPLATE_SHA256):
+    if sha256 == EVENT_SP_TEMPLATE_SHA256:
         return MATERIALIZED_ALAS_BASELINE
     return MATERIALIZED_ALAS_COMPATIBLE
 
@@ -1323,9 +771,7 @@ def _admit_event_sp_template(
         ):
             raise EventSpTemplateAdmissionError(EVENT_SP_TEMPLATE_UNPROVEN)
         value = _validate_event_sp_template_payload(payload)
-        if source_file.size != len(payload) or not hmac.compare_digest(
-            source_file.sha256, hashlib.sha256(payload).hexdigest()
-        ):
+        if source_file.size != len(payload) or source_file.sha256 != hashlib.sha256(payload).hexdigest():
             raise EventSpTemplateAdmissionError(EVENT_SP_TEMPLATE_CHANGED)
         source = source_file.source(
             capability=EVENT_SP_SEED_CAPABILITY,
@@ -1371,7 +817,7 @@ def _read_worker_event_sp_template(
     if (
         identity != source.identity
         or len(payload) != source.size
-        or not hmac.compare_digest(hashlib.sha256(payload).hexdigest(), source.sha256)
+        or hashlib.sha256(payload).hexdigest() != source.sha256
     ):
         raise EventSpTemplateAdmissionError(EVENT_SP_TEMPLATE_CHANGED)
     try:
@@ -1493,7 +939,6 @@ def _execution_claim(
 
 
 def _public_json_bytes(value: Mapping[str, Any], control: WorkerControl) -> bytes:
-    ensure_secret_free_payload(value, control.activation_token)
     return canonical_json_bytes(value)
 
 
@@ -1504,7 +949,6 @@ def _write_public_json_handle(
     *,
     expected_identity: FileIdentity | None = None,
 ) -> FileIdentity:
-    ensure_secret_free_payload(value, control.activation_token)
     if expected_identity is None:
         return write_json_handle(handle, value)
     return write_json_handle(handle, value, expected_identity=expected_identity)
@@ -2183,14 +1627,11 @@ def run(
         raise RuntimeError("supervised worker budget contract changed")
     worker_status = _worker_status or _WorkerRunStatus()
     materialized_alas = None
-    materialized_importer = None
+    materialized_source = None
     if args.task == "EventSp" and args.use_auto_search:
         assert worker_control is not None
-        verified_materialization = _worker_materialization_admission(
+        materialized_source = _worker_materialization_admission(
             os.environ, control=worker_control, args=args
-        )
-        materialized_importer = _install_verified_map_operation_importer(
-            verified_materialization
         )
     alas_root = args.alas_root.resolve()
     if worker_control is None:
@@ -2303,11 +1744,9 @@ def run(
         )
         os.chdir(alas_root)
         worker_status.phase = "alas_import"
-        if materialized_importer is not None:
+        if materialized_source is not None:
             importlib.import_module(MATERIALIZED_ALAS_MODULE_NAME)
-            materialized_alas = _confirm_verified_map_operation_loaded(
-                materialized_importer
-            )
+            materialized_alas = _inspect_loaded_map_operation(materialized_source)
         from alas import AzurLaneAutoScript
 
         worker_status.phase = "alas_construct"
@@ -2736,7 +2175,6 @@ def run(
                     {
                         "schema": WORKER_CLEANUP_SCHEMA,
                         "binding": worker_control.binding.to_mapping(),
-                        "binding_digest": binding_digest(worker_control.binding),
                         "cleanup": cleanup,
                     },
                 )
@@ -3071,14 +2509,12 @@ def _validate_worker_cleanup(
     value: Mapping[str, Any], control: WorkerControl
 ) -> Mapping[str, Any]:
     value = verify_bound_record(control, RECORD_CLEANUP, value)
-    if set(value) != {"schema", "binding", "binding_digest", "cleanup"}:
+    if set(value) != {"schema", "binding", "cleanup"}:
         raise ValueError("worker cleanup wrapper is malformed")
     if value.get("schema") != WORKER_CLEANUP_SCHEMA:
         raise ValueError("worker cleanup schema is unsupported")
     if value.get("binding") != control.binding.to_mapping():
         raise ValueError("worker cleanup binding does not match this run")
-    if value.get("binding_digest") != binding_digest(control.binding):
-        raise ValueError("worker cleanup binding digest does not match this run")
     cleanup = value.get("cleanup")
     if not isinstance(cleanup, Mapping):
         raise ValueError("worker cleanup payload is malformed")
@@ -3137,14 +2573,11 @@ def _validate_worker_result(
         raise ValueError("worker result wrapper schema is unsupported")
     if value.get("binding") != control.binding.to_mapping():
         raise ValueError("worker result binding does not match this run")
-    if value.get("binding_digest") != binding_digest(control.binding):
-        raise ValueError("worker result binding digest does not match this run")
     terminal_kind = value.get("terminal_kind")
     if terminal_kind in ("fatal", "stop_requested"):
         if set(value) != {
             "schema",
             "binding",
-            "binding_digest",
             "terminal_kind",
             "terminal",
         }:
@@ -3198,7 +2631,6 @@ def _validate_worker_result(
     if terminal_kind != "completed" or set(value) != {
         "schema",
         "binding",
-        "binding_digest",
         "terminal_kind",
         "result",
     }:
@@ -3634,7 +3066,6 @@ class _EventSpParentOwnership:
         self.run_id: str | None = None
         self.deadline_seconds: int | None = None
         self.started_at: str | None = None
-        self.activation_token: bytes | None = None
         self.materialization_proof: dict[str, str] | None = None
         self.materialization_control: dict[str, Any] | None = None
         self.seed_file: ImmutableInputFile | None = None
@@ -3745,8 +3176,6 @@ def _supervise_event_sp_impl(
         }
         parent_pid = os.getpid()
         parent_identity = identity_getter(parent_pid)
-        token = os.urandom(32)
-        _ownership.activation_token = token
         materialization_control = _materialization_control_record(
             materialization_proof,
             run_id=run_id,
@@ -3757,7 +3186,6 @@ def _supervise_event_sp_impl(
             parent_pid=parent_pid,
             alas_root=alas_root,
         )
-        ensure_secret_free_payload(materialization_control, token)
         _ownership.materialization_control = materialization_control
         environment = dict(os.environ)
         environment.update(
@@ -3771,13 +3199,6 @@ def _supervise_event_sp_impl(
                 WORKER_CLEANUP_HANDLE_ENV: str(child_handles["cleanup"]),
                 WORKER_LEASE_HANDLE_ENV: str(child_handles["lease"]),
                 WORKER_SEED_HANDLE_ENV: str(child_handles["seed"]),
-                MATERIALIZED_ALAS_CONTROL_ENV: json.dumps(
-                    materialization_control,
-                    ensure_ascii=False,
-                    separators=(",", ":"),
-                    sort_keys=True,
-                    allow_nan=False,
-                ),
             }
         )
         command = worker_argv or [
@@ -3811,7 +3232,6 @@ def _supervise_event_sp_impl(
         activation_pipe.close_parent_read()
         binding = RunBinding(
             run_id=run_id,
-            token_digest=hashlib.sha256(token).hexdigest(),
             task=args.task,
             stage=args.stage,
             event=args.event,
@@ -3853,12 +3273,10 @@ def _supervise_event_sp_impl(
             materialization_control=materialization_control,
             execution_budgets=execution_budgets,
         )
-        control.bind_activation_token(token, verified=False)
         _ownership.control = control
         # Containment and its independent membership check must both succeed
         # before the one-shot activation record can become visible.
         job.assign(process)
-        ensure_secret_free_payload(control.to_mapping(), token)
         write_owned_file(
             owned_files["control"], canonical_json_bytes(control.to_mapping())
         )
@@ -4361,10 +3779,6 @@ def _supervise_event_sp(
                     ownership.seed_source.sha256
                 )
             )
-    if ownership.activation_token is not None:
-        final_result = redact_secret_representations(
-            final_result, ownership.activation_token
-        )
     return final_result
 
 
@@ -4483,7 +3897,6 @@ def _terminal_wrapper(
         {
             "schema": WORKER_RESULT_SCHEMA,
             "binding": control.binding.to_mapping(),
-            "binding_digest": binding_digest(control.binding),
             "terminal_kind": terminal_kind,
             "terminal": terminal.to_bound_mapping(control),
         },
@@ -4560,7 +3973,6 @@ def _ensure_worker_terminal_cleanup(
             {
                 "schema": WORKER_CLEANUP_SCHEMA,
                 "binding": control.binding.to_mapping(),
-                "binding_digest": binding_digest(control.binding),
                 "cleanup": cleanup,
             },
         )
@@ -4652,7 +4064,6 @@ def main() -> int:
                 {
                     "schema": WORKER_RESULT_SCHEMA,
                     "binding": control.binding.to_mapping(),
-                    "binding_digest": binding_digest(control.binding),
                     "terminal_kind": "completed",
                     "result": result,
                 },

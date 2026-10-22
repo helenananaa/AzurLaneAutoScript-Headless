@@ -1,0 +1,27 @@
+{
+  "schema": "alas-headless.campaign-hp-runtime-build/v1",
+  "backend": "local-windows-avd",
+  "abi": "x86_64",
+  "cold_start_unity_extra": "-force-gfx-st",
+  "files": {
+    "observer-before.apk": {
+      "sha256": "8c5c1974b38cdadf190808a52064343f13585943a98ed1dafbb8ab4e0cefe9b0",
+      "bytes": 14260835
+    },
+    "observer-repair.apk": {
+      "sha256": "3cebb2fbd5564c22fabf97c9b3e20061bdf6b04b03c606753b116e46d1fffcd7",
+      "bytes": 14260363
+    },
+    "observer-repair-panel.apk": {
+      "sha256": "1fb2ee0d3071c8dc61858ff4a70f4985e51e1ae3a3b0cc9be640d34a03d344c3",
+      "bytes": 14260283
+    },
+    "observer-hp-final.apk": {
+      "sha256": "3ce02f98f7ca57507d5a55fc479cfd5f729ce32f6c0e5008b2ee4a39463d6ce7",
+      "bytes": 14260179
+    }
+  },
+  "native_source_sha256": "c6c3b7d17d10bd0b57590e3f4df921c5be2ce0bc0d8b9a38eb9084a05d4f89ab",
+  "final_apk": "artifacts/campaign-hp-control/observer-hp-final.apk",
+  "rollback_apk": "artifacts/campaign-hp-control/observer-before.apk"
+}

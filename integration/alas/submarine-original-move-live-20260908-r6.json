@@ -1,0 +1,21 @@
+{
+  "schema": "alas-headless.submarine-map-probe/v1",
+  "passed": false,
+  "stage": "10-2",
+  "serial": "emulator-5580",
+  "combat_budget": 0,
+  "oil_before": 8666,
+  "traceback": "Traceback (most recent call last):\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\scripts\\python\\probe_campaign_submarine_map.py\", line 51, in main\n    h.enter_map(h.ENTRANCE, mode='normal', skip_first_screenshot=False)\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\map\\map_operation.py\", line 383, in enter_map\n    self.device.click(MAP_PREPARATION)\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\artifacts\\campaign-preparation\\upstream\\module\\device\\control.py\", line 57, in click\n    receipt = semantic_adapter.click(button)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\python\\alas_headless\\adapter\\semantic\\session_dispatch.py\", line 571, in click\n    return self.open().click(button)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\python\\alas_headless\\adapter\\semantic\\dispatch.py\", line 192, in click\n    result = self._click_campaign_preparation(name, semantic_id)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\python\\alas_headless\\adapter\\semantic\\campaign.py\", line 1939, in _click_campaign_preparation\n    self._campaign_preparation_state_with_stage()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\python\\alas_headless\\adapter\\semantic\\campaign_preparation.py\", line 1273, in _campaign_preparation_state_with_stage\n    return self.oracle.campaign_preparation_state(stage_code), stage_code\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\python\\alas_headless\\oracle\\campaign_preparation.py\", line 316, in campaign_preparation_state\n    return self._campaign_map_preparation_state_once(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation\\python\\alas_headless\\oracle\\campaign_preparation.py\", line 1514, in _campaign_map_preparation_state_once\n    raise SemanticGateClosed(\nalas_headless.oracle.errors.SemanticGateClosed: campaign map-preparation controls are not proven\n",
+  "error": "SemanticGateClosed: campaign map-preparation controls are not proven",
+  "fingerprint": {
+    "package": "com.bilibili.azurlane",
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "width": 1280,
+    "height": 720,
+    "max_age_ms": 10000,
+    "peer_uid": 2000,
+    "expected_pid": 19236
+  },
+  "cleanup_error": "SemanticGateClosed: campaign page identity is not proven"
+}

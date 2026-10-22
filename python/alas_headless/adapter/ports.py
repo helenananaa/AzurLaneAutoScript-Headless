@@ -340,7 +340,7 @@ class RuntimeHandlePort(Protocol):
     def foreground_component(self) -> str:
         """Return the exact top-resumed Android component."""
 
-    def tap(self, x: int, y: int) -> None:
+    def tap(self, x: float, y: float) -> None:
         """Dispatch one already-authorized point input."""
 
     def swipe(self, x1: int, y1: int, x2: int, y2: int, duration_ms: int) -> None:

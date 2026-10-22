@@ -60,6 +60,7 @@ FLOW_PATHS = {
         "module/campaign/campaign_base.py",
         "module/campaign/run.py",
         "module/combat/combat.py",
+        "module/combat/combat_auto.py",
         "module/combat/hp_balancer.py",
         "module/exercise/combat.py",
         "module/exercise/exercise.py",
@@ -278,6 +279,16 @@ FLOW_PATHS = {
         "module/map/map_operation.py",
         "module/war_archives/war_archives.py",
     },
+    "0750-meta-reward-menu-entry.patch": {
+        "module/meta_reward/meta_reward.py",
+    },
+    "1533-native-campaign-auto-search-loop.patch": {
+        "module/campaign/campaign_base.py",
+        "module/handler/auto_search.py",
+        "module/campaign/campaign_status.py",
+        "module/map/map_operation.py",
+        "module/combat/auto_search_combat.py",
+    },
 }
 
 OVERRIDE_PATHS = {
@@ -302,6 +313,9 @@ OVERRIDE_PATHS = {
     },
     "0270-dorm-current-furniture-flow-port.patch": {
         "module/dorm/buy_furniture.py",
+    },
+    "1534-main-native-stage-aliases.patch": {
+        "module/campaign/run.py",
     },
 }
 
@@ -363,6 +377,8 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
         self.assertEqual(set(core), CORE_PATHS)
         self.assertEqual(set(lifecycle), LIFECYCLE_PATHS)
         expected_tasks = set().union(*FLOW_PATHS.values(), *OVERRIDE_PATHS.values())
+        # The later 0570 Campaign extension adds the original submarine port.
+        expected_tasks.add("module/combat/submarine.py")
         self.assertEqual(set(tasks), expected_tasks)
         self.assertFalse(set(core) & set(lifecycle))
         self.assertFalse(set(core) & set(tasks))
@@ -492,6 +508,12 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
                         "module/freebies/supply_pack.py",
                     },
                     "0470-war-archives-runtime.patch": {
+                        "module/map/map_operation.py",
+                    },
+                    "1533-native-campaign-auto-search-loop.patch": {
+                        "module/campaign/campaign_base.py",
+                        "module/handler/auto_search.py",
+                        "module/campaign/campaign_status.py",
                         "module/map/map_operation.py",
                     },
                 }.get(name, set())

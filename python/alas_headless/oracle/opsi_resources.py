@@ -18,6 +18,69 @@ from .errors import SemanticGateClosed, SemanticTargetMissing
 class OpsiResourcesOracle:
     """Opsi resources operations sharing the oracle frame and input boundary."""
 
+    def _operation_siren_adaptability_info_state(self):
+        state = self.read_state()
+        root = 'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/'
+        if not any(b.path.startswith(root) for b in state.buttons):
+            return None
+        ui = self.read_ui_state(check_foreground=False)
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('adaptability information snapshots are not coherent')
+        def text(suffix):
+            values = tuple(t.text for t in ui.texts if t.path == root + suffix
+                           and t.active_in_hierarchy and t.active_and_enabled and not t.truncated)
+            return ''.join(values[0].split()) if len(values) == 1 else None
+        if (text('single_item_panel/display_panel/name_container/name/Text') != '适应性调整-攻击'
+                or text('single_item_panel/display_panel/desc/Text') != '攻击适应性影响塞壬单位的攻击力倍率。'):
+            return None
+        buttons = tuple(b for b in state.buttons if b.path.startswith(root + 'button_container/')
+                        and b.active_in_hierarchy and b.active_and_enabled)
+        if (len(buttons) != 1 or buttons[0].path != root + 'button_container/custom_button_1(Clone)'
+                or text('button_container/custom_button_1(Clone)/pic') != '确定'):
+            raise SemanticGateClosed('adaptability information confirmation is ambiguous')
+        return state, buttons[0]
+
+    def operation_siren_adaptability_info_visible(self):
+        return self._operation_siren_adaptability_info_state() is not None
+
+    def operation_siren_adaptability_info_actionable(self):
+        observed = self._operation_siren_adaptability_info_state()
+        return bool(observed is not None and observed[1].actionable
+                    and not self._blocking_rules(observed[0], 'os/adaptability/info/confirm'))
+
+    def click_operation_siren_adaptability_info(self):
+        observed = self._operation_siren_adaptability_info_state()
+        if observed is None:
+            raise SemanticTargetMissing('reviewed adaptability information is absent')
+        state, target = observed
+        if (not target.actionable or self._blocking_rules(state, 'os/adaptability/info/confirm')
+                or self._foreground_component() != self.fingerprint.component):
+            raise SemanticGateClosed('adaptability information confirmation is not actionable')
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt('os/adaptability/info/confirm', state.generation,
+                             target.point, target.bounds, target.path)
+
+    def operation_siren_order_panel_visible(self) -> bool:
+        state = self.read_state()
+        backs = tuple(b for b in self._matches(state, 'os/order/back')
+                      if b.active_in_hierarchy and b.active_and_enabled and b.interactable)
+        if not backs:
+            return False
+        if len(backs) != 1:
+            raise SemanticGateClosed('operation siren order panel is ambiguous')
+        ui = self.read_ui_state(check_foreground=False)
+        # Button publication is complete and uniquely owns this control.
+        # Truncation among unrelated map images does not erase its exported,
+        # individually complete back image or the input raycast proof.
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('operation siren order panel snapshots are incomplete')
+        images = tuple(i for i in ui.images if i.path == backs[0].path and i.name == 'back'
+                       and i.sprite == 'btn_back' and i.active_in_hierarchy and i.active_and_enabled
+                       and not i.truncated and i.bounds is not None)
+        if len(images) != 1:
+            raise SemanticGateClosed('operation siren order panel back image is incomplete')
+        return True
+
     def _operation_siren_order_prompt_mounted(self, state: OracleState) -> bool:
         # This client uses Msgbox/window, without the generic Msgbox(Clone)
         # owner. Bind its blocking effect to the retained SVOrderPanel only.
@@ -140,12 +203,10 @@ class OpsiResourcesOracle:
             )
         bounds = images[0].bounds
         assert bounds is not None
-        point = Point(
-            (bounds.left + bounds.right) / 2.0,
-            (bounds.top + bounds.bottom) / 2.0,
-        )
-        if target.bounds is None or not target.bounds.contains(point):
-            raise SemanticGateClosed("operation siren order-back point changed")
+        if (not target.actionable or not bounds.contains(target.point)
+                or self._blocking_rules(state, 'os/order/back')):
+            raise SemanticGateClosed('operation siren order back is not exact top-raycast actionable')
+        point = target.point
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed(
                 "foreground changed before operation siren order back"
@@ -328,6 +389,11 @@ class OpsiResourcesOracle:
         OperationSirenActionPointState,
         Tuple[ImageState, ...],
     ]:
+        return self._retry_transition_read(self._operation_siren_action_point_read_once)
+
+    def _operation_siren_action_point_read_once(
+        self,
+    ) -> Tuple[OracleState, OperationSirenActionPointState, Tuple[ImageState, ...]]:
         button_state = self.read_state()
         use = self._unique(button_state, "os/action-point/use")
         cancel = self._unique(button_state, "os/action-point/cancel")
@@ -531,9 +597,7 @@ class OpsiResourcesOracle:
     def operation_siren_action_point_state(
         self,
     ) -> OperationSirenActionPointState:
-        return self._retry_transition_read(
-            lambda: self._operation_siren_action_point_read()[1]
-        )
+        return self._operation_siren_action_point_read()[1]
 
     def operation_siren_action_point_visible(self) -> bool:
         state = self.read_state()
@@ -814,6 +878,7 @@ class OpsiResourcesOracle:
                     "需要暂时离开大型作战么？",
                     "当前海域无法通过边界区域离开。是否继续？",
                     "离开当前海域后，潜艇舰队会自动返回我方港口待命，是否离开？",
+                    "正在进行搜寻作业的指挥喵将被强制召回！\n是否结束搜寻并离开当前海域？",
                     "是否确定从该处隐秘海域离开？\n"
                     "（离开后将无法再次返回）",
                     "是否确定从深渊海域离开？\n"
@@ -825,6 +890,7 @@ class OpsiResourcesOracle:
         )
         return state if (
             len(prompt) == 1
+            and state.generation <= ui_state.generation <= state.generation + 2
             and len(self._matches(state, "os/exit/confirm")) == 1
             and len(self._matches(state, "os/exit/cancel")) == 1
         ) else None
@@ -959,6 +1025,42 @@ class OpsiResourcesOracle:
             bounds=target.bounds,
             path=target.path,
         )
+
+    def _operation_siren_auto_search_reward_control_proven(self, state) -> bool:
+        targets = self._matches(state, 'os/auto-search/reward/close')
+        if len(targets) != 1:
+            return False
+        target = targets[0]
+        root = target.path.removesuffix('/Window/Fixed/ButtonExit')
+        if root not in ('WorldAutoFightRewardUI(Clone)',
+                        'OverlayCamera/Overlay/UIMain/WorldAutoFightRewardUI(Clone)'):
+            return False
+        if not (target.active_in_hierarchy and target.active_and_enabled
+                and target.interactable and target.raycast_top is not False
+                and target.point is not None and target.bounds is not None
+                and target.bounds.contains(target.point)):
+            return False
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation+2:
+            raise SemanticGateClosed('auto-search reward frames are incoherent')
+        def label(path, expected):
+            texts = [text for text in ui.texts if text.path == path
+                     and text.active_in_hierarchy and text.active_and_enabled]
+            return len(texts) == 1 and not texts[0].truncated and texts[0].text.strip() == expected
+        graphics = [image for image in ui.images if image.path == target.path
+                    and image.active_in_hierarchy and image.active_and_enabled]
+        if not (label(target.path+'/pic', '离开')
+                and label(root+'/Window/Fixed/top/bg/obtain/title/title_en', 'TOTAL REWARDS')
+                and len(graphics) == 1):
+            return False
+        graphic = graphics[0]
+        if (graphic.truncated or graphic.sprite != 'btn_big_grey'
+                or graphic.raycast_target is not True or graphic.raycast_top is False
+                or graphic.bounds is None
+                or any(abs(getattr(graphic.bounds,k)-getattr(target.bounds,k)) > .05
+                       for k in ('left','top','right','bottom'))):
+            return False
+        return not self._blocking_rules(state, 'os/auto-search/reward/close')
 
     def operation_siren_world_overview_visible(self) -> bool:
         """Recognize the post-special-zone overview dismissal exactly."""

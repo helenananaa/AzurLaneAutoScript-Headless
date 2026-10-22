@@ -1,0 +1,12 @@
+........................................................                 [100%]
+============================== warnings summary ===============================
+tests/test_alas_shipyard_config.py::AlasShipyardConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\module\device\method\minitouch.py:467: DeprecationWarning: websockets.WebSocketClientProtocol is deprecated
+    _minitouch_ws: websockets.WebSocketClientProtocol
+
+tests/test_alas_shipyard_config.py::AlasShipyardConfigTests::test_exact_live_tree_replay_when_available
+  D:\anaconda\Lib\site-packages\websockets\legacy\__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+    warnings.warn(  # deprecated in 14.0 - 2024-11-09
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+56 passed, 2 warnings in 8.67s

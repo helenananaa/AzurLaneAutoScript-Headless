@@ -18,8 +18,30 @@ from unittest.mock import Mock
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_event_entrance_notice_wait_is_owned_bounded_and_blocker_scoped(self):
+        adapter, oracle, _ = self.make_adapter()
+        receipt = SimpleNamespace(generation=10)
+        oracle.click_campaign_event_entrance = Mock(return_value=receipt)
+        oracle.campaign_page_error = SemanticGateClosed('campaign page identity is not proven')
+        with self.assertRaises(SemanticGateClosed):
+            adapter._campaign_notice_navigation_surface()
+        self.assertIs(adapter.click(NamedButton('CAMPAIGN_MENU_GOTO_EVENT')), receipt)
+        self.assertTrue(adapter._campaign_notice_navigation_surface())
+        self.assertFalse(adapter._appear_priority('FLEET_CHECK'))
+        oracle._blocking_rules = lambda *_: [SimpleNamespace(blocker_id='msgbox')]
+        from alas_headless.adapter.semantic.dispatch_result import UNHANDLED
+        self.assertIs(adapter._appear_priority('FLEET_CHECK'), UNHANDLED)
+        with self.assertRaises(SemanticGateClosed):
+            adapter._campaign_notice_navigation_surface()
+        oracle._blocking_rules = lambda *_: ()
+        adapter._campaign_event_entry_transition_until = time.monotonic() - 1
+        with self.assertRaises(SemanticGateClosed):
+            adapter._campaign_notice_navigation_surface()
+        oracle.click_campaign_event_entrance.assert_called_once()
+
     def test_event_story_input_owns_only_a_bounded_passive_transition(self):
         adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values['meowfficer/page/back'] = False
         oracle.event_story_dialogue_visible_value = True
 
         receipt = adapter.click_event_story_option(0)

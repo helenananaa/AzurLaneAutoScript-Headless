@@ -1,0 +1,83 @@
+diff --git a/module/map/fleet.py b/module/map/fleet.py
+--- a/module/map/fleet.py
++++ b/module/map/fleet.py
+@@ -94,6 +94,9 @@
+                 return self.config.Fleet_Fleet1Step
+ 
+     def fleet_ensure(self, index):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and semantic_adapter.campaign_movement_completed():
++            self.semantic_prepare_a_battle(initial_fleet_index=index)
+         if self.fleet_set(index=index):
+             self.camera = self.fleet_current
+             self.update()
+@@ -332,6 +335,10 @@
+                         fleet_index=self.fleet_show_index,
+                         submarine_mode=self._submarine_mode(expected)
+                     )
++                    if semantic_adapter is not None:
++                        # Combat's typed result reader may advance beyond the last
++                        # screenshot frame. Materialize the map before HP reads.
++                        self.device.screenshot()
+                     if (
+                         semantic_adapter is not None
+                         and expected == 'combat_boss'
+@@ -507,6 +514,9 @@
+             step_optimize (bool): True to walk in fleet step
+             turning_optimize (bool): True to optimize route to reduce ambushes
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and semantic_adapter.campaign_movement_completed():
++            self.semantic_prepare_a_battle()
+         location = location_ensure(location)
+         if step_optimize is None:
+             step_optimize = self.config.MAP_HAS_FLEET_STEP
+@@ -539,6 +549,9 @@
+                         self._goto(node_, expected=expected if node == nodes[-1] else '')
+         else:
+             self._goto(location, expected=expected)
++
++        if semantic_adapter is not None:
++            semantic_adapter.finish_campaign_movement(self.battle_count)
+ 
+     def find_path_initial(self):
+         """
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -515,9 +515,13 @@
+                     raise ScriptEnd('Inherited precombat recovery did not reach map')
+                 logger.info('Recovered inherited precombat to campaign map')
+ 
++            if semantic_adapter is not None:
++                self.campaign.semantic_resume_fleet_index = None
+             if self.campaign.is_in_map():
+                 if semantic_adapter is not None:
+                     semantic_map_resume = True
++                    resume_state = self.campaign.semantic_campaign_map_state()
++                    self.campaign.semantic_resume_fleet_index = resume_state.displayed_fleet_index
+                     logger.info('Already in semantic campaign map, resuming ALAS.')
+                 if not semantic_map_resume:
+                     logger.info('Already in map, retreating.')
+diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
+--- a/module/campaign/campaign_base.py
++++ b/module/campaign/campaign_base.py
+@@ -29,7 +29,7 @@
+             )),
+         )
+ 
+-    def semantic_prepare_a_battle(self):
++    def semantic_prepare_a_battle(self, initial_fleet_index=None):
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is None:
+             return
+@@ -72,7 +72,8 @@
+                 f'battle={self.battle_count}, target={boss_enemies[0].node}'
+             )
+         projection_map = self.map
+-        decision = preview_alas_campaign_decision(self, projection)
++        decision = preview_alas_campaign_decision(
++            self, projection, initial_fleet_index=initial_fleet_index)
+         admission = semantic_adapter.authorize_campaign_combat(
+             decision, state
+         )

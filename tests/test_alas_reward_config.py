@@ -74,7 +74,8 @@ class AlasRewardConfigTests(unittest.TestCase):
         self.assertFalse(result["android_input_injected"])
         self.assertEqual(
             result["semantic_claim_budget"],
-            {"claimed": True, "input_count": 1, "budget_checks": 2},
+            {"claimed": True, "input_count": 1, "budget_checks": 3,
+             "popup_transition_observed": True},
         )
 
     def test_all_boolean_combinations_are_accepted(self):

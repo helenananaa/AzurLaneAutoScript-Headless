@@ -1,0 +1,11 @@
+{
+  "schema": "alas-headless.main-task-live-validation/v1",
+  "passed": false,
+  "finished_at": "2026-09-13T10:57:51.276943Z",
+  "task": "Main",
+  "stage": "10-2",
+  "serial": "emulator-5554",
+  "run_count_requested": 1,
+  "error": "SemanticGateClosed: toggle snapshot is truncated",
+  "execution_status": "incomplete"
+}

@@ -1,0 +1,19 @@
+{
+  "kind": "retained-live-scene-inputs-for-offline-replay",
+  "fixtures": [
+    {
+      "fixture": "precombat.json",
+      "source": "artifacts/campaign-midmap-dock-20260911/after-retirement.json",
+      "source_sha256": "ef4cbc29145ba8019ecd4e614cead185a5b931447c5ba109d626eb24a3a37980",
+      "sha256": "805ac7110be3dd48492e89fb45228b45ed5d2d6ec7b902481298bb7c34666f80",
+      "conversion": "extract raw observer snapshots; no scene edits"
+    },
+    {
+      "fixture": "map.json",
+      "source": "artifacts/campaign-midmap-dock-20260911/back-to-same-map.json",
+      "source_sha256": "e035a6f9fd5209b98603b47ec85f0be32acf4d8d57f068e7f2c4ee35f5feca4c",
+      "sha256": "7d684e9b204404f7a509ee22947f93254d62a9e30ac38ba62a54886d3434f6ed",
+      "conversion": "extract raw observer snapshots; no scene edits"
+    }
+  ]
+}

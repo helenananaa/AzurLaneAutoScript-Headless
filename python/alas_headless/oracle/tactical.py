@@ -17,11 +17,50 @@ from .contracts import (
     TacticalSlotStatus,
     UiState,
 )
-from .errors import SemanticGateClosed
+from .errors import SemanticGateClosed, SemanticInputBlocked, SemanticTargetNotActionable
 
 
 class TacticalOracle:
     """Tactical operations sharing the oracle frame and input boundary."""
+
+    def _tactical_completion_prompt_matches(self, state: OracleState) -> bool:
+        choices = tuple(b for b in state.buttons
+                        if b.active_in_hierarchy and b.active_and_enabled
+                        and '/Msgbox(Clone)/window/button_container/' in b.path)
+        suffix = 'Msgbox(Clone)/window/button_container/custom_button_1(Clone)'
+        if len(choices) != 1 or not choices[0].path.endswith(suffix):
+            return False
+        ui = self._stable_msgbox_ui_state(state)
+        def texts(suffix):
+            return tuple(t for t in ui.texts if t.path.endswith(suffix)
+                         and t.active_in_hierarchy and t.active_and_enabled)
+        content = texts('Msgbox(Clone)/window/msg_panel/content')
+        label = texts(suffix + '/pic')
+        if len(content) != 1 or len(label) != 1:
+            return False
+        if any(t.truncated or t.bounds is None for t in (*content, *label)):
+            return False
+        # The original Tactical handler owns this one-button max-level notice.
+        # Its underlying student page distinguishes it from unrelated notices.
+        students = any(t.active_in_hierarchy and t.active_and_enabled
+                       and '/NewNavalTacticsStudentsPage(Clone)/' in t.path
+                       for t in ui.texts)
+        plain = re.sub(r'<[^>]*>', '', content[0].text).strip()
+        return bool(students and ''.join(label[0].text.split()) == '确定'
+                    and re.fullmatch(
+                        r'「[^」\n]+」学习完成，「[^」\n]+」技能获得[1-9][0-9]*点经验'
+                        r'[(（]技能等级提升:[1-9]→10[)）]！', plain))
+
+    def click_tactical_completion_ack(self) -> ActionReceipt:
+        receipt = self.click('tactical/completion/ack')
+        for _ in range(16):
+            self._sleep(.25)
+            after = self.read_state()
+            if (after.generation > receipt.generation
+                    and not any(b.active_in_hierarchy and '/Msgbox(Clone)/' in b.path
+                                for b in after.buttons)):
+                return receipt
+        raise SemanticGateClosed('tactical completion prompt did not close after input')
 
     def click_tactical_empty_slot(self, slot: int) -> ActionReceipt:
         """Click one visually ordered empty tactical slot after exact revalidation."""
@@ -51,25 +90,56 @@ class TacticalOracle:
     def click_tactical_first_empty_slot(self) -> ActionReceipt:
         """Click the leftmost current tactical empty slot."""
 
-        state = self.read_state()
-        targets = self._tactical_empty_slot_targets(state)
-        if not targets:
-            raise SemanticGateClosed("tactical class has no empty slot")
-        slot = min(targets)
-        target = targets[slot]
-        if self._blocking_rules(state, "tactical/slot/{0}".format(slot)):
-            raise SemanticGateClosed("tactical slot input is blocked")
+        semantic_id = 'tactical/slot/first-empty'
+        def read_target():
+            state = self.read_state()
+            blockers = self._blocking_rules(state, semantic_id)
+            if blockers:
+                raise SemanticInputBlocked(semantic_id, state.generation,
+                                           (rule.blocker_id for rule in blockers))
+            target = self._tactical_first_empty_slot_target(state)
+            if target is None:
+                raise SemanticGateClosed("tactical class has no empty slot")
+            if (not target.actionable
+                    or not (0 <= target.point.x < self.fingerprint.width
+                            and 0 <= target.point.y < self.fingerprint.height)):
+                raise SemanticTargetNotActionable(semantic_id, state.generation)
+            return state, target
+        # A positive empty control may still be mounting in ALAS's frozen
+        # screenshot. Re-observe only before input using the existing bounded
+        # transition helper; never retry the tap or its accepted result.
+        state, target = self._retry_transition_read(read_target)
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed immediately before input")
         assert target.point is not None and target.bounds is not None
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        # Return the accepted input immediately. The adapter retains it while
+        # ALAS' screenshot loop observes the select-Dock destination.
         return ActionReceipt(
-            semantic_id="tactical/slot/{0}".format(slot),
+            semantic_id=semantic_id,
             generation=state.generation,
             point=target.point,
             bounds=target.bounds,
             path=target.path,
         )
+
+    @staticmethod
+    def _tactical_first_empty_slot_target(state: OracleState) -> Optional[ButtonState]:
+        """Select a positive empty control without inventing a numbered slot."""
+        prefix = 'NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/'
+        targets = tuple(button for button in state.buttons
+                        if button.name in ('add', 'add(Clone)')
+                        and button.path.endswith(prefix + button.name)
+                        and button.active_in_hierarchy and button.active_and_enabled
+                        and button.interactable and button.point is not None
+                        and button.bounds is not None and button.bounds.contains(button.point))
+        if not targets:
+            return None
+        left = min(button.point.x for button in targets)
+        first = tuple(button for button in targets if button.point.x == left)
+        if len(first) != 1:
+            raise SemanticGateClosed('tactical first empty slot is ambiguous')
+        return first[0]
 
     def _tactical_empty_slot_targets(
         self, state: UiState
@@ -88,7 +158,7 @@ class TacticalOracle:
         occupied = tuple(
             button
             for button in state.buttons
-            if re.fullmatch(r"[1-9][0-9]{5}", button.name) is not None
+            if re.fullmatch(r"[1-9][0-9]{5,7}", button.name) is not None
             and prefix in button.path
             and button.path.endswith("/" + button.name)
             and button.active_in_hierarchy
@@ -105,11 +175,13 @@ class TacticalOracle:
         }
 
     def tactical_empty_slots_ready(self) -> bool:
-        """Report whether at least one complete current tactical empty slot exists."""
+        """Observe a positive empty control; actual input proves actionability."""
 
         state = self.read_state()
         try:
-            return bool(self._tactical_empty_slot_targets(state))
+            if self._blocking_rules(state, 'tactical/slot/first-empty'):
+                return False
+            return self._tactical_first_empty_slot_target(state) is not None
         except SemanticGateClosed:
             return False
 
@@ -247,7 +319,10 @@ class TacticalOracle:
             and image.bounds.top < self.fingerprint.height
         )
         rows = tuple(sorted(rows, key=lambda image: image.bounds.top))
-        if not rows or len(rows) > 4:
+        # Unity clones legitimately share a hierarchy path. Their disjoint
+        # row bounds own the text association and distinguish the targets.
+        if (not rows or len(rows) > 4
+                or len({(row.path, row.bounds) for row in rows}) != len(rows)):
             raise SemanticGateClosed("tactical skill rows are absent or ambiguous")
 
         result = []
@@ -330,6 +405,15 @@ class TacticalOracle:
 
     def tactical_books(self) -> Tuple[TacticalBookState, ...]:
         """Read visible tactical books in the same order as ALAS BOOKS_GRID."""
+
+        # Native book selection uses a live read outside an ALAS screenshot
+        # lease. Sequential Button/Image projections can straddle publication;
+        # re-read the complete view with the existing bounded read-only helper.
+        # Leased frames still get one immutable attempt and every check below
+        # must pass before a book can be clicked.
+        return self._retry_transition_read(self._tactical_books_once)
+
+    def _tactical_books_once(self) -> Tuple[TacticalBookState, ...]:
 
         button_state = self.read_state()
         start = self._unique(button_state, "tactical/book/start")
@@ -543,7 +627,7 @@ class TacticalOracle:
         raw_ship_buttons = tuple(
             button
             for button in button_state.buttons
-            if re.fullmatch(r"[1-9][0-9]{5}", button.name) is not None
+            if re.fullmatch(r"[1-9][0-9]{5,7}", button.name) is not None
             and prefix in button.path
             and button.path.endswith("/" + button.name)
             and button.active_in_hierarchy
@@ -688,12 +772,52 @@ class TacticalOracle:
         return tuple(slots)
 
     def tactical_remaining_seconds(self) -> Tuple[int, ...]:
-        return tuple(
-            slot.remaining_seconds
-            for slot in self.tactical_slots()
-            if slot.status == TacticalSlotStatus.RUNNING
-            and slot.remaining_seconds is not None
-        )
+        """Read native scheduling timers without resolving ship-card identities.
+
+        Pooled portrait children may coexist on one physical student card.
+        They are irrelevant to a countdown and cannot authorize any input.
+        """
+        state = self.read_state()
+        page = self._unique(state, "tactical/page/back")
+        if not page.active_in_hierarchy or not page.active_and_enabled:
+            raise SemanticGateClosed("tactical page identity is not proven")
+        prefix = "NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/"
+        slots = tuple(button for button in state.buttons
+            if button.name == "cancel_btn" and prefix in button.path
+            and button.path.endswith("/cancel_btn")
+            and button.active_in_hierarchy and button.active_and_enabled
+            and button.bounds is not None)
+        if len(slots) > 4:
+            raise SemanticGateClosed("tactical countdown slots are ambiguous")
+        if not slots and any(prefix in button.path
+                and re.fullmatch(r"[1-9][0-9]{5,7}", button.name)
+                and button.active_in_hierarchy and button.active_and_enabled
+                for button in state.buttons):
+            raise SemanticGateClosed("tactical countdown slots are absent")
+        ui = self.read_text_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed("tactical snapshots are not coherent")
+        timers = tuple(text for text in ui.texts
+            if prefix in text.path and text.path.endswith("/timer_Text")
+            and text.active_in_hierarchy and text.active_and_enabled)
+        remaining = []
+        matched = set()
+        for slot in sorted(slots, key=lambda button: button.bounds.left):
+            path = slot.path.rsplit("/", 1)[0] + "/timer_Text"
+            candidates = tuple((index, text) for index, text in enumerate(timers)
+                if text.path == path and text.bounds is not None
+                and slot.bounds.left <= (text.bounds.left + text.bounds.right) / 2.0 <= slot.bounds.right)
+            if len(candidates) != 1 or candidates[0][0] in matched:
+                raise SemanticGateClosed("tactical countdown is absent or ambiguous")
+            index, text = candidates[0]
+            if text.truncated:
+                raise SemanticGateClosed("tactical countdown is truncated")
+            matched.add(index)
+            if text.text.strip():
+                remaining.append(self.parse_countdown_seconds(text.text.strip()))
+        if len(matched) != len(timers):
+            raise SemanticGateClosed("tactical countdown slot identity is incomplete")
+        return tuple(remaining)
 
     def _tactical_continue_prompt_text(self, state: OracleState) -> Optional[str]:
         parts = self._msgbox_prompt_parts(state)

@@ -1,0 +1,16 @@
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -208,10 +208,10 @@
+                 return semantic_adapter.operation_siren_globe_map_projection(zone.area_pos)
+             for _ in range(6):
+                 point = project()
+-                if point_in_area((point.x, point.y), area=sight):
++                if point_in_area((point.x, point.y), area=sight, threshold=0):
+                     self.device.sleep(0.5)
+                     settled = project()
+-                    if (point_in_area((settled.x, settled.y), area=sight)
++                    if (point_in_area((settled.x, settled.y), area=sight, threshold=0)
+                             and np.linalg.norm((settled.x-point.x, settled.y-point.y)) < 3):
+                         return
+                     continue

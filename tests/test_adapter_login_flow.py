@@ -43,6 +43,16 @@ class Clock:
 
 
 class LoginOracle:
+    def read_state(self):
+        from types import SimpleNamespace
+        return SimpleNamespace(generation=7, buttons=())
+
+    def observation_target_present(self, semantic_id):
+        return self.frame.exists.get(semantic_id, False)
+
+    def main_page_visible(self):
+        return bool(self.frame.enabled.get('main/battle') or self.frame.enabled.get('main/formation'))
+
     def __init__(self, frame):
         self.frame = frame
         self.events = []
@@ -50,6 +60,27 @@ class LoginOracle:
     def observation_surface_present(self, surface):
         # Login parity frames contain only the declared login resources.
         return False
+
+    def award_info_page_visible(self):
+        return False
+
+    def enhancement_dock_back_control(self):
+        return None
+
+    def new_ship_reward_visible(self):
+        return False
+
+    def event_campaign_page_visible(self):
+        return False
+
+    def campaign_page_is_normal(self):
+        return False
+
+    def observation_prompt_kind(self):
+        return None
+
+    def _blocking_rules(self, state, target):
+        return ()
 
     def enabled(self, semantic_id):
         self.events.append(("enabled", semantic_id))
@@ -388,7 +419,8 @@ class LoginFlowFacadeParityTests(unittest.TestCase):
             "MAINTENANCE_ANNOUNCE",
             "BATTLE_PASS_NEW_SEASON",
             "BATTLE_PASS_NOTICE",
-            "GET_SHIP",
+            # GET_SHIP now has its own typed reward observation in the facade;
+            # it is no longer part of unsupported-presence delegation parity.
             "MONTHLY_PASS_NOTICE",
             "PLAYER_CHECK",
             "SHIPYARD_CHECK",

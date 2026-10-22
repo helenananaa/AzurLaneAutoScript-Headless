@@ -1,0 +1,48 @@
+diff --git a/module/combat/hp_balancer.py b/module/combat/hp_balancer.py
+--- a/module/combat/hp_balancer.py
++++ b/module/combat/hp_balancer.py
+@@ -142,9 +142,9 @@
+             p1 (int): Origin position [0, 2].
+             p2 (int): Target position [0, 2].
+         """
+-        if getattr(self.device, 'semantic_adapter', None) is not None:
+-            from alas_headless import AlasSemanticUnmapped
+-            raise AlasSemanticUnmapped('Campaign HP balance needs a typed scout-position drag')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.change_campaign_scout_position(p1, p2)
+         logger.info('scout_position_change (%s, %s)' % (p1, p2))
+         self.device.drag(p1=SCOUT_POSITION[p1], p2=SCOUT_POSITION[p2], segments=3)
+ 
+@@ -185,8 +185,7 @@
+ 
+         return order
+ 
+-    @Config.when(DEVICE_CONTROL_METHOD='minitouch')
+-    def _gen_exchange_step(self, target):
++    def _gen_exchange_step_drag(self, target):
+         """
+         Minitouch swiping is more like human, when it drag the first ship to the third ship,
+         [0, 1, 2] becomes [1, 2, 0], while in adb/uiautomator2, it becomes [2, 1, 0].
+@@ -217,12 +216,21 @@
+             # Target is the same as origin. Do nothing
+             pass
+ 
++    @Config.when(DEVICE_CONTROL_METHOD='minitouch')
++    def _gen_exchange_step(self, target):
++        yield from self._gen_exchange_step_drag(target)
++
+     @Config.when(DEVICE_CONTROL_METHOD=None)
+     def _gen_exchange_step(self, target):
+         """
+         Args:
+             target (list[int]): Such as [2, 0, 1].
+         """
++        from alas_headless import current_semantic_session
++        if current_semantic_session() is not None:
++            yield from self._gen_exchange_step_drag(target)
++            return
++
+         diff = np.array(target) - np.array((0, 1, 2))
+         count = np.count_nonzero(diff)
+         if count == 3:

@@ -1,0 +1,1634 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 11:46:02.802 │ [Server] cn                                 
+read: ./config\_codex_meta_assist_5546c6652bda43bcb18ae9e199349b50.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 11:46:02.826 │ Bind task ['General', 'Alas']               
+read: ./config\_codex_meta_assist_5546c6652bda43bcb18ae9e199349b50.json
+INFO     2026-09-12 11:46:02.832 │ Bind task ['General', 'Alas', 'OpsiGeneral',
+         'OpsiAshAssist']                                                      
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 11:46:02.834 │ DEVICE                                      
+INFO     2026-09-12 11:46:02.835 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 11:46:02.837 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 11:46:02.839 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 11:46:02.840 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 11:46:02.842 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 11:46:02.845 │ emulator-5580                               
+INFO     2026-09-12 11:46:02.847 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 11:46:02.848 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 11:46:02.853 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 11:46:02.855 │ [Server] cn                                 
+WARNING  2026-09-12 11:46:02.857 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 11:46:02.858 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 11:46:02.903 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 11:46:02.905 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 11:46:02.908 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 11:46:02.910 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 11:46:03.703 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 11:46:04.227 │ <<< META BEACON ASSIST >>>                  
+INFO     2026-09-12 11:46:04.229 │ Ensure beacon assist page                   
+INFO     2026-09-12 11:46:04.662 │ In beacon assist page                       
+INFO     2026-09-12 11:46:24.698 │ Begin find a level 15 meta                  
+INFO     2026-09-12 11:46:25.938 │ Find a beacon in level:15                   
+────────────────────────── BEGIN META ASSIST COMBAT ───────────────────────────
+INFO     2026-09-12 11:46:26.092 │ BEGIN META ASSIST COMBAT                    
+INFO     2026-09-12 11:46:26.094 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 11:46:26.095 │ Combat preparation.                         
+INFO     2026-09-12 11:46:44.365 │ [BattleUI] PAUSE                            
+INFO     2026-09-12 11:46:44.366 │ Screenshot interval set to 1.0s             
+INFO     2026-09-12 11:46:44.368 │ Combat execute                              
+INFO     2026-09-12 11:46:52.588 │ Combat auto check timer reached             
+INFO     2026-09-12 11:47:22.225 │ Semantic click combat/resource/GET_ITEMS_1 @
+         OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close           
+INFO     2026-09-12 11:47:22.227 │ Combat status                               
+INFO     2026-09-12 11:47:22.228 │ [expected_end] expected_end                 
+INFO     2026-09-12 11:47:22.229 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 11:47:28.023 │ Semantic click daily/battle/result @        
+         OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleRe
+         sultStatisticsPage(Clone)/bottom/confirmBtn                           
+INFO     2026-09-12 11:47:32.010 │ Meta combat finished and in correct page.   
+INFO     2026-09-12 11:47:32.013 │ Combat end.                                 
+ERROR    2026-09-12 11:47:54.649 │ SemanticGateClosed: META assist snapshots   
+         are not coherent                                                      
+         ┌──────────────── Traceback (most recent call last) ─────────────────┐
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\artifacts\campaign-preparation\upstream\alas.py:74 in run       │
+         │                                                                    │
+         │    71 │   │   │   with semantic_task_scope(session, command):      │
+         │    72 │   │   │   │   if not skip_first_screenshot:                │
+         │    73 │   │   │   │   │   self.device.screenshot()                 │
+         │ >  74 │   │   │   │   self.__getattribute__(command)()             │
+         │    75 │   │   │   return True                                      │
+         │    76 │   │   except TaskEnd:                                      │
+         │    77 │   │   │   return True                                      │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │               command = 'opsi_ash_assist'                      │ │
+         │ │                     e = SemanticGateClosed('META assist        │ │
+         │ │                         snapshots are not coherent')           │ │
+         │ │                  self = <alas.AzurLaneAutoScript object at     │ │
+         │ │                         0x000002665261CBC0>                    │ │
+         │ │               session = <alas_headless.adapter.semantic.sessi… │ │
+         │ │                         object at 0x0000026639373890>          │ │
+         │ │ skip_first_screenshot = False                                  │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\artifacts\campaign-preparation\upstream\alas.py:306 in          │
+         │ opsi_ash_assist                                                    │
+         │                                                                    │
+         │   303 │                                                            │
+         │   304 │   def opsi_ash_assist(self):                               │
+         │   305 │   │   from module.os_ash.meta import AshBeaconAssist       │
+         │ > 306 │   │   AshBeaconAssist(config=self.config, device=self.devi │
+         │   307 │                                                            │
+         │   308 │   def opsi_ash_beacon(self):                               │
+         │   309 │   │   from module.os_ash.meta import OpsiAshBeacon         │
+         │                                                                    │
+         │ ┌─────────────────────────── locals ────────────────────────────┐  │
+         │ │ self = <alas.AzurLaneAutoScript object at 0x000002665261CBC0> │  │
+         │ └───────────────────────────────────────────────────────────────┘  │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\artifacts\campaign-preparation\upstream\module\os_ash\meta.py:7 │
+         │ 29 in run                                                          │
+         │                                                                    │
+         │   726 │   │   │   if semantic_adapter is None or not self._in_meta │
+         │   727 │   │   │   │   self.ui_ensure(page_reward)                  │
+         │   728 │   │   │                                                    │
+         │ > 729 │   │   │   if self._begin_meta_assist():                    │
+         │   730 │   │   │   │   MetaReward(self.config, self.device).run()   │
+         │   731 │   │   │   │   self.config.task_delay(server_update=True)   │
+         │   732 │   │   │   else:                                            │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │             self = <module.os_ash.meta.AshBeaconAssist object  │ │
+         │ │                    at 0x00000266390CEAE0>                      │ │
+         │ │ semantic_adapter = <alas_headless.adapter.semantic.session.Al… │ │
+         │ │                    object at 0x0000026639373890>               │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\artifacts\campaign-preparation\upstream\module\os_ash\meta.py:7 │
+         │ 19 in _begin_meta_assist                                           │
+         │                                                                    │
+         │   716 │   def _begin_meta_assist(self):                            │
+         │   717 │   │   logger.hr('Meta Beacon Assist')                      │
+         │   718 │   │   self._ensure_meta_assist_page()                      │
+         │ > 719 │   │   return self._attack_meta(skip_first_screenshot=False │
+         │   720 │                                                            │
+         │   721 │   def run(self):                                           │
+         │   722 │   │   semantic_adapter = getattr(self.device, 'semantic_ad │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │ self = <module.os_ash.meta.AshBeaconAssist object at           │ │
+         │ │        0x00000266390CEAE0>                                     │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\artifacts\campaign-preparation\upstream\module\os_ash\meta.py:5 │
+         │ 86 in _attack_meta                                                 │
+         │                                                                    │
+         │   583 │   │   │   │   continue                                     │
+         │   584 │   │   │   if self.appear(ASH_START, offset=(20, 20)):      │
+         │   585 │   │   │   │   appeared = True                              │
+         │ > 586 │   │   │   │   remain_times = self.digit_ocr_point_and_chec │
+         │   587 │   │   │   │   if remain_times:                             │
+         │   588 │   │   │   │   │   self._ensure_meta_level()                │
+         │   589 │   │   │   │   │   self._make_an_attack()                   │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │              appeared = True                                   │ │
+         │ │          remain_times = True                                   │ │
+         │ │                  self = <module.os_ash.meta.AshBeaconAssist    │ │
+         │ │                         object at 0x00000266390CEAE0>          │ │
+         │ │ skip_first_screenshot = False                                  │ │
+         │ │               timeout = Timer(limit=109.99/3, count=1/9)       │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\artifacts\campaign-preparation\upstream\module\os_ash\meta.py:5 │
+         │ 9 in digit_ocr_point_and_check                                     │
+         │                                                                    │
+         │    56 │   def digit_ocr_point_and_check(self, button: Button, chec │
+         │    57 │   │   semantic_adapter = getattr(self.device, 'semantic_ad │
+         │    58 │   │   if semantic_adapter is not None and getattr(button,  │
+         │       'BEACON_REMAIN':                                             │
+         │ >  59 │   │   │   point = semantic_adapter.meta_assist_state().rem │
+         │    60 │   │   else:                                                │
+         │    61 │   │   │   point_ocr = MetaDigitCounter(button, letter=(235 │
+         │       name='POINT_OCR')                                            │
+         │    62 │   │   │   point, _, _ = point_ocr.ocr(self.device.image)   │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │           button = BEACON_REMAIN                               │ │
+         │ │     check_number = 1                                           │ │
+         │ │             self = <module.os_ash.meta.AshBeaconAssist object  │ │
+         │ │                    at 0x00000266390CEAE0>                      │ │
+         │ │ semantic_adapter = <alas_headless.adapter.semantic.session.Al… │ │
+         │ │                    object at 0x0000026639373890>               │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\python\alas_headless\adapter\semantic\session_tasks.py:539 in   │
+         │ meta_assist_state                                                  │
+         │                                                                    │
+         │    536 │   │   return self.open().meta_page_visible()              │
+         │    537 │                                                           │
+         │    538 │   def meta_assist_state(self) -> MetaAssistState:         │
+         │ >  539 │   │   return self.open().meta_assist_state()              │
+         │    540 │                                                           │
+         │    541 │   def click_meta_assist_next_candidate(                   │
+         │    542 │   │   self, *, expected_index: int, expected_level: int   │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │ self = <alas_headless.adapter.semantic.session.AlasSemanticSe… │ │
+         │ │        object at 0x0000026639373890>                           │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\python\alas_headless\adapter\semantic\meta.py:61 in             │
+         │ meta_assist_state                                                  │
+         │                                                                    │
+         │    58 │                                                            │
+         │    59 │   def meta_assist_state(self) -> MetaAssistState:          │
+         │    60 │   │   self._package_gate()                                 │
+         │ >  61 │   │   return self.oracle.meta_assist_state()               │
+         │    62 │                                                            │
+         │    63 │   def click_meta_assist_next_candidate(                    │
+         │    64 │   │   self, *, expected_index: int, expected_level: int    │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │ self = <alas_headless.adapter.semantic.adapter.AlasSemanticAd… │ │
+         │ │        object at 0x00000266073AB6B0>                           │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         │                                                                    │
+         │ E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptati │
+         │ on\python\alas_headless\oracle\meta.py:519 in meta_assist_state    │
+         │                                                                    │
+         │   516 │   │   │   <= ui_state.generation                           │
+         │   517 │   │   │   <= button_state.generation + 2                   │
+         │   518 │   │   ):                                                   │
+         │ > 519 │   │   │   raise SemanticGateClosed("META assist snapshots  │
+         │   520 │   │   selected_pattern = re.compile(                       │
+         │   521 │   │   │   r".*/"                                           │
+         │   522 │   │   │   + re.escape(root)                                │
+         │                                                                    │
+         │ ┌──────────────────────────── locals ────────────────────────────┐ │
+         │ │      button_state = OracleState(                               │ │
+         │ │                     │   generation=28481,                      │ │
+         │ │                     │   scene_handle=-76,                      │ │
+         │ │                     │   snapshot={                             │ │
+         │ │                     │   │   'protocol_schema':                 │ │
+         │ │                     'alas-headless.observer/v1',               │ │
+         │ │                     │   │   'status': 'ok',                    │ │
+         │ │                     │   │   'package':                         │ │
+         │ │                     'com.bilibili.azurlane',                   │ │
+         │ │                     │   │   'pid': 10683,                      │ │
+         │ │                     │   │   'uid': 10105,                      │ │
+         │ │                     │   │   'peer_uid': 2000,                  │ │
+         │ │                     │   │   'abi': 'x86_64',                   │ │
+         │ │                     │   │   'driver_revision':                 │ │
+         │ │                     '506b76f698b5089aaa29c4e7908b48edb8532a44… │ │
+         │ │                     │   │   'snapshot_schema': 1,              │ │
+         │ │                     │   │   'snapshot_struct_size': 104,       │ │
+         │ │                     │   │   ... +20                            │ │
+         │ │                     │   },                                     │ │
+         │ │                     │   buttons_snapshot={                     │ │
+         │ │                     │   │   'protocol_schema':                 │ │
+         │ │                     'alas-headless.observer/v1',               │ │
+         │ │                     │   │   'semantic_schema':                 │ │
+         │ │                     'alas-headless.buttons/v1',                │ │
+         │ │                     │   │   'status': 'ok',                    │ │
+         │ │                     │   │   'package':                         │ │
+         │ │                     'com.bilibili.azurlane',                   │ │
+         │ │                     │   │   'pid': 10683,                      │ │
+         │ │                     │   │   'uid': 10105,                      │ │
+         │ │                     │   │   'peer_uid': 2000,                  │ │
+         │ │                     │   │   'driver_revision':                 │ │
+         │ │                     '506b76f698b5089aaa29c4e7908b48edb8532a44… │ │
+         │ │                     │   │   'schema': 1,                       │ │
+         │ │                     │   │   'struct_size': 340008,             │ │
+         │ │                     │   │   ... +8                             │ │
+         │ │                     │   },                                     │ │
+         │ │                     │   buttons=(                              │ │
+         │ │                     │   │   ButtonState(                       │ │
+         │ │                     │   │   │   name='award_btn',              │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   interactable=True,             │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   point=Point(                   │ │
+         │ │                     │   │   │   │   x=1127.04,                 │ │
+         │ │                     │   │   │   │   y=540.2                    │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=1080.04,              │ │
+         │ │                     │   │   │   │   top=519.2,                 │ │
+         │ │                     │   │   │   │   right=1174.041,            │ │
+         │ │                     │   │   │   │   bottom=561.2               │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'name': 'award_btn',       │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'canvas': 'Canvas',        │ │
+         │ │                     │   │   │   │   'flags': 1535,             │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'interactable': True,      │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'canvas_render_mode': 1,   │ │
+         │ │                     │   │   │   │   'instance_id': -362866,    │ │
+         │ │                     │   │   │   │   ... +6                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ButtonState(                       │ │
+         │ │                     │   │   │   name='start_btn',              │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   interactable=True,             │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   point=Point(                   │ │
+         │ │                     │   │   │   │   x=1159.022,                │ │
+         │ │                     │   │   │   │   y=670.733                  │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=1043.669,             │ │
+         │ │                     │   │   │   │   top=623.725,               │ │
+         │ │                     │   │   │   │   right=1274.375,            │ │
+         │ │                     │   │   │   │   bottom=717.741             │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'name': 'start_btn',       │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'canvas': 'Canvas',        │ │
+         │ │                     │   │   │   │   'flags': 1535,             │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'interactable': True,      │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'canvas_render_mode': 1,   │ │
+         │ │                     │   │   │   │   'instance_id': -362882,    │ │
+         │ │                     │   │   │   │   ... +6                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ButtonState(                       │ │
+         │ │                     │   │   │   name='rank_btn',               │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   interactable=True,             │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   point=Point(                   │ │
+         │ │                     │   │   │   │   x=1233.13,                 │ │
+         │ │                     │   │   │   │   y=540.2                    │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=1186.139,             │ │
+         │ │                     │   │   │   │   top=519.204,               │ │
+         │ │                     │   │   │   │   right=1280.122,            │ │
+         │ │                     │   │   │   │   bottom=561.196             │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'name': 'rank_btn',        │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'canvas': 'Canvas',        │ │
+         │ │                     │   │   │   │   'flags': 1535,             │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'interactable': True,      │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'canvas_render_mode': 1,   │ │
+         │ │                     │   │   │   │   'instance_id': -362874,    │ │
+         │ │                     │   │   │   │   ... +6                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ButtonState(                       │ │
+         │ │                     │   │   │   name='8',                      │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   interactable=True,             │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   point=Point(                   │ │
+         │ │                     │   │   │   │   x=258.97,                  │ │
+         │ │                     │   │   │   │   y=449.065                  │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=61.765,               │ │
+         │ │                     │   │   │   │   top=438.354,               │ │
+         │ │                     │   │   │   │   right=456.175,             │ │
+         │ │                     │   │   │   │   bottom=528.628             │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'name': '8',               │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'canvas': 'Canvas',        │ │
+         │ │                     │   │   │   │   'flags': 1535,             │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'interactable': True,      │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'canvas_render_mode': 1,   │ │
+         │ │                     │   │   │   │   'instance_id': -363814,    │ │
+         │ │                     │   │   │   │   ... +6                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ButtonState(                       │ │
+         │ │                     │   │   │   name='7',                      │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   interactable=True,             │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   point=Point(                   │ │
+         │ │                     │   │   │   │   x=285.055,                 │ │
+         │ │                     │   │   │   │   y=368.785                  │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=87.85,                │ │
+         │ │                     │   │   │   │   top=358.073,               │ │
+         │ │                     │   │   │   │   right=482.259,             │ │
+         │ │                     │   │   │   │   bottom=448.347             │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'name': '7',               │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'canvas': 'Canvas',        │ │
+         │ │                     │   │   │   │   'flags': 1535,             │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'interactable': True,      │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'canvas_render_mode': 1,   │ │
+         │ │                     │   │   │   │   'instance_id': -363702,    │ │
+         │ │                     │   │   │   │   ... +6                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ButtonState(                       │ │
+         │ │                     │   │   │   name='6',                      │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   interactable=True,             │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   point=Point(                   │ │
+         │ │                     │   │   │   │   x=317.634,                 │ │
+         │ │                     │   │   │   │   y=268.517                  │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=120.429,              │ │
+         │ │                     │   │   │   │   top=257.805,               │ │
+         │ │                     │   │   │   │   right=514.838,             │ │
+         │ │                     │   │   │   │   bottom=348.079             │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'name': '6',               │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'canvas': 'Canvas',        │ │
+         │ │                     │   │   │   │   'flags': 1535,             │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'interactable': True,      │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'canvas_render_mode': 1,   │ │
+         │ │                     │   │   │   │   'instance_id': -363590,    │ │
+         │ │                     │   │   │   │   ... +6                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ButtonState(                       │ │
+         │ │                     │   │   │   name='5',                      │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   interactable=True,             │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   point=Point(                   │ │
+         │ │                     │   │   │   │   x=350.212,                 │ │
+         │ │                     │   │   │   │   y=168.249                  │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=153.008,              │ │
+         │ │                     │   │   │   │   top=157.537,               │ │
+         │ │                     │   │   │   │   right=547.417,             │ │
+         │ │                     │   │   │   │   bottom=247.812             │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'name': '5',               │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'canvas': 'Canvas',        │ │
+         │ │                     │   │   │   │   'flags': 1535,             │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'interactable': True,      │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'canvas_render_mode': 1,   │ │
+         │ │                     │   │   │   │   'instance_id': -363478,    │ │
+         │ │                     │   │   │   │   ... +6                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ButtonState(                       │ │
+         │ │                     │   │   │   name='4',                      │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   interactable=True,             │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   point=Point(                   │ │
+         │ │                     │   │   │   │   x=376.297,                 │ │
+         │ │                     │   │   │   │   y=87.968                   │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=179.092,              │ │
+         │ │                     │   │   │   │   top=77.257,                │ │
+         │ │                     │   │   │   │   right=573.502,             │ │
+         │ │                     │   │   │   │   bottom=167.531             │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'name': '4',               │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'canvas': 'Canvas',        │ │
+         │ │                     │   │   │   │   'flags': 1535,             │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'interactable': True,      │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'canvas_render_mode': 1,   │ │
+         │ │                     │   │   │   │   'instance_id': -363366,    │ │
+         │ │                     │   │   │   │   ... +6                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ButtonState(                       │ │
+         │ │                     │   │   │   name='3',                      │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   interactable=True,             │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   point=Point(                   │ │
+         │ │                     │   │   │   │   x=402.382,                 │ │
+         │ │                     │   │   │   │   y=7.687                    │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=205.177,              │ │
+         │ │                     │   │   │   │   top=-3.024,                │ │
+         │ │                     │   │   │   │   right=599.587,             │ │
+         │ │                     │   │   │   │   bottom=87.25               │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'name': '3',               │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'canvas': 'Canvas',        │ │
+         │ │                     │   │   │   │   'flags': 1535,             │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'interactable': True,      │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'canvas_render_mode': 1,   │ │
+         │ │                     │   │   │   │   'instance_id': -363254,    │ │
+         │ │                     │   │   │   │   ... +6                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ButtonState(                       │ │
+         │ │                     │   │   │   name='2',                      │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   interactable=True,             │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   point=Point(                   │ │
+         │ │                     │   │   │   │   x=206.8,                   │ │
+         │ │                     │   │   │   │   y=609.627                  │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=9.595,                │ │
+         │ │                     │   │   │   │   top=598.915,               │ │
+         │ │                     │   │   │   │   right=404.005,             │ │
+         │ │                     │   │   │   │   bottom=689.189             │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'name': '2',               │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'canvas': 'Canvas',        │ │
+         │ │                     │   │   │   │   'flags': 1535,             │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'interactable': True,      │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'canvas_render_mode': 1,   │ │
+         │ │                     │   │   │   │   'instance_id': -363142,    │ │
+         │ │                     │   │   │   │   ... +6                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ... +8                             │ │
+         │ │                     │   )                                      │ │
+         │ │                     )                                          │ │
+         │ │ candidate_pattern = re.compile('.*/WorldBossUI\\(Clone\\)/pag… │ │
+         │ │        candidates = (                                          │ │
+         │ │                     │   ButtonState(                           │ │
+         │ │                     │   │   name='8',                          │ │
+         │ │                     │   │                                      │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   active_in_hierarchy=True,          │ │
+         │ │                     │   │   active_and_enabled=True,           │ │
+         │ │                     │   │   interactable=True,                 │ │
+         │ │                     │   │   raycast_top=None,                  │ │
+         │ │                     │   │   point=Point(x=258.97, y=449.065),  │ │
+         │ │                     │   │   bounds=Bounds(                     │ │
+         │ │                     │   │   │   left=61.765,                   │ │
+         │ │                     │   │   │   top=438.354,                   │ │
+         │ │                     │   │   │   right=456.175,                 │ │
+         │ │                     │   │   │   bottom=528.628                 │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   raw={                              │ │
+         │ │                     │   │   │   'name': '8',                   │ │
+         │ │                     │   │   │   'path':                        │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   'canvas': 'Canvas',            │ │
+         │ │                     │   │   │   'flags': 1535,                 │ │
+         │ │                     │   │   │   'active_in_hierarchy': True,   │ │
+         │ │                     │   │   │   'active_and_enabled': True,    │ │
+         │ │                     │   │   │   'interactable': True,          │ │
+         │ │                     │   │   │   'raycast_top': None,           │ │
+         │ │                     │   │   │   'canvas_render_mode': 1,       │ │
+         │ │                     │   │   │   'instance_id': -363814,        │ │
+         │ │                     │   │   │   ... +6                         │ │
+         │ │                     │   │   }                                  │ │
+         │ │                     │   ),                                     │ │
+         │ │                     │   ButtonState(                           │ │
+         │ │                     │   │   name='7',                          │ │
+         │ │                     │   │                                      │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   active_in_hierarchy=True,          │ │
+         │ │                     │   │   active_and_enabled=True,           │ │
+         │ │                     │   │   interactable=True,                 │ │
+         │ │                     │   │   raycast_top=None,                  │ │
+         │ │                     │   │   point=Point(                       │ │
+         │ │                     │   │   │   x=285.055,                     │ │
+         │ │                     │   │   │   y=368.785                      │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   bounds=Bounds(                     │ │
+         │ │                     │   │   │   left=87.85,                    │ │
+         │ │                     │   │   │   top=358.073,                   │ │
+         │ │                     │   │   │   right=482.259,                 │ │
+         │ │                     │   │   │   bottom=448.347                 │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   raw={                              │ │
+         │ │                     │   │   │   'name': '7',                   │ │
+         │ │                     │   │   │   'path':                        │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   'canvas': 'Canvas',            │ │
+         │ │                     │   │   │   'flags': 1535,                 │ │
+         │ │                     │   │   │   'active_in_hierarchy': True,   │ │
+         │ │                     │   │   │   'active_and_enabled': True,    │ │
+         │ │                     │   │   │   'interactable': True,          │ │
+         │ │                     │   │   │   'raycast_top': None,           │ │
+         │ │                     │   │   │   'canvas_render_mode': 1,       │ │
+         │ │                     │   │   │   'instance_id': -363702,        │ │
+         │ │                     │   │   │   ... +6                         │ │
+         │ │                     │   │   }                                  │ │
+         │ │                     │   ),                                     │ │
+         │ │                     │   ButtonState(                           │ │
+         │ │                     │   │   name='6',                          │ │
+         │ │                     │   │                                      │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   active_in_hierarchy=True,          │ │
+         │ │                     │   │   active_and_enabled=True,           │ │
+         │ │                     │   │   interactable=True,                 │ │
+         │ │                     │   │   raycast_top=None,                  │ │
+         │ │                     │   │   point=Point(                       │ │
+         │ │                     │   │   │   x=317.634,                     │ │
+         │ │                     │   │   │   y=268.517                      │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   bounds=Bounds(                     │ │
+         │ │                     │   │   │   left=120.429,                  │ │
+         │ │                     │   │   │   top=257.805,                   │ │
+         │ │                     │   │   │   right=514.838,                 │ │
+         │ │                     │   │   │   bottom=348.079                 │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   raw={                              │ │
+         │ │                     │   │   │   'name': '6',                   │ │
+         │ │                     │   │   │   'path':                        │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   'canvas': 'Canvas',            │ │
+         │ │                     │   │   │   'flags': 1535,                 │ │
+         │ │                     │   │   │   'active_in_hierarchy': True,   │ │
+         │ │                     │   │   │   'active_and_enabled': True,    │ │
+         │ │                     │   │   │   'interactable': True,          │ │
+         │ │                     │   │   │   'raycast_top': None,           │ │
+         │ │                     │   │   │   'canvas_render_mode': 1,       │ │
+         │ │                     │   │   │   'instance_id': -363590,        │ │
+         │ │                     │   │   │   ... +6                         │ │
+         │ │                     │   │   }                                  │ │
+         │ │                     │   ),                                     │ │
+         │ │                     │   ButtonState(                           │ │
+         │ │                     │   │   name='5',                          │ │
+         │ │                     │   │                                      │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   active_in_hierarchy=True,          │ │
+         │ │                     │   │   active_and_enabled=True,           │ │
+         │ │                     │   │   interactable=True,                 │ │
+         │ │                     │   │   raycast_top=None,                  │ │
+         │ │                     │   │   point=Point(                       │ │
+         │ │                     │   │   │   x=350.212,                     │ │
+         │ │                     │   │   │   y=168.249                      │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   bounds=Bounds(                     │ │
+         │ │                     │   │   │   left=153.008,                  │ │
+         │ │                     │   │   │   top=157.537,                   │ │
+         │ │                     │   │   │   right=547.417,                 │ │
+         │ │                     │   │   │   bottom=247.812                 │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   raw={                              │ │
+         │ │                     │   │   │   'name': '5',                   │ │
+         │ │                     │   │   │   'path':                        │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   'canvas': 'Canvas',            │ │
+         │ │                     │   │   │   'flags': 1535,                 │ │
+         │ │                     │   │   │   'active_in_hierarchy': True,   │ │
+         │ │                     │   │   │   'active_and_enabled': True,    │ │
+         │ │                     │   │   │   'interactable': True,          │ │
+         │ │                     │   │   │   'raycast_top': None,           │ │
+         │ │                     │   │   │   'canvas_render_mode': 1,       │ │
+         │ │                     │   │   │   'instance_id': -363478,        │ │
+         │ │                     │   │   │   ... +6                         │ │
+         │ │                     │   │   }                                  │ │
+         │ │                     │   ),                                     │ │
+         │ │                     │   ButtonState(                           │ │
+         │ │                     │   │   name='4',                          │ │
+         │ │                     │   │                                      │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   active_in_hierarchy=True,          │ │
+         │ │                     │   │   active_and_enabled=True,           │ │
+         │ │                     │   │   interactable=True,                 │ │
+         │ │                     │   │   raycast_top=None,                  │ │
+         │ │                     │   │   point=Point(x=376.297, y=87.968),  │ │
+         │ │                     │   │   bounds=Bounds(                     │ │
+         │ │                     │   │   │   left=179.092,                  │ │
+         │ │                     │   │   │   top=77.257,                    │ │
+         │ │                     │   │   │   right=573.502,                 │ │
+         │ │                     │   │   │   bottom=167.531                 │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   raw={                              │ │
+         │ │                     │   │   │   'name': '4',                   │ │
+         │ │                     │   │   │   'path':                        │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   'canvas': 'Canvas',            │ │
+         │ │                     │   │   │   'flags': 1535,                 │ │
+         │ │                     │   │   │   'active_in_hierarchy': True,   │ │
+         │ │                     │   │   │   'active_and_enabled': True,    │ │
+         │ │                     │   │   │   'interactable': True,          │ │
+         │ │                     │   │   │   'raycast_top': None,           │ │
+         │ │                     │   │   │   'canvas_render_mode': 1,       │ │
+         │ │                     │   │   │   'instance_id': -363366,        │ │
+         │ │                     │   │   │   ... +6                         │ │
+         │ │                     │   │   }                                  │ │
+         │ │                     │   ),                                     │ │
+         │ │                     │   ButtonState(                           │ │
+         │ │                     │   │   name='3',                          │ │
+         │ │                     │   │                                      │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   active_in_hierarchy=True,          │ │
+         │ │                     │   │   active_and_enabled=True,           │ │
+         │ │                     │   │   interactable=True,                 │ │
+         │ │                     │   │   raycast_top=None,                  │ │
+         │ │                     │   │   point=Point(x=402.382, y=7.687),   │ │
+         │ │                     │   │   bounds=Bounds(                     │ │
+         │ │                     │   │   │   left=205.177,                  │ │
+         │ │                     │   │   │   top=-3.024,                    │ │
+         │ │                     │   │   │   right=599.587,                 │ │
+         │ │                     │   │   │   bottom=87.25                   │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   raw={                              │ │
+         │ │                     │   │   │   'name': '3',                   │ │
+         │ │                     │   │   │   'path':                        │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   'canvas': 'Canvas',            │ │
+         │ │                     │   │   │   'flags': 1535,                 │ │
+         │ │                     │   │   │   'active_in_hierarchy': True,   │ │
+         │ │                     │   │   │   'active_and_enabled': True,    │ │
+         │ │                     │   │   │   'interactable': True,          │ │
+         │ │                     │   │   │   'raycast_top': None,           │ │
+         │ │                     │   │   │   'canvas_render_mode': 1,       │ │
+         │ │                     │   │   │   'instance_id': -363254,        │ │
+         │ │                     │   │   │   ... +6                         │ │
+         │ │                     │   │   }                                  │ │
+         │ │                     │   ),                                     │ │
+         │ │                     │   ButtonState(                           │ │
+         │ │                     │   │   name='2',                          │ │
+         │ │                     │   │                                      │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   active_in_hierarchy=True,          │ │
+         │ │                     │   │   active_and_enabled=True,           │ │
+         │ │                     │   │   interactable=True,                 │ │
+         │ │                     │   │   raycast_top=None,                  │ │
+         │ │                     │   │   point=Point(x=206.8, y=609.627),   │ │
+         │ │                     │   │   bounds=Bounds(                     │ │
+         │ │                     │   │   │   left=9.595,                    │ │
+         │ │                     │   │   │   top=598.915,                   │ │
+         │ │                     │   │   │   right=404.005,                 │ │
+         │ │                     │   │   │   bottom=689.189                 │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   raw={                              │ │
+         │ │                     │   │   │   'name': '2',                   │ │
+         │ │                     │   │   │   'path':                        │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   'canvas': 'Canvas',            │ │
+         │ │                     │   │   │   'flags': 1535,                 │ │
+         │ │                     │   │   │   'active_in_hierarchy': True,   │ │
+         │ │                     │   │   │   'active_and_enabled': True,    │ │
+         │ │                     │   │   │   'interactable': True,          │ │
+         │ │                     │   │   │   'raycast_top': None,           │ │
+         │ │                     │   │   │   'canvas_render_mode': 1,       │ │
+         │ │                     │   │   │   'instance_id': -363142,        │ │
+         │ │                     │   │   │   ... +6                         │ │
+         │ │                     │   │   }                                  │ │
+         │ │                     │   ),                                     │ │
+         │ │                     │   ButtonState(                           │ │
+         │ │                     │   │   name='1',                          │ │
+         │ │                     │   │                                      │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   active_in_hierarchy=True,          │ │
+         │ │                     │   │   active_and_enabled=True,           │ │
+         │ │                     │   │   interactable=True,                 │ │
+         │ │                     │   │   raycast_top=None,                  │ │
+         │ │                     │   │   point=Point(                       │ │
+         │ │                     │   │   │   x=232.885,                     │ │
+         │ │                     │   │   │   y=529.346                      │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   bounds=Bounds(                     │ │
+         │ │                     │   │   │   left=35.68,                    │ │
+         │ │                     │   │   │   top=518.634,                   │ │
+         │ │                     │   │   │   right=430.09,                  │ │
+         │ │                     │   │   │   bottom=608.909                 │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   raw={                              │ │
+         │ │                     │   │   │   'name': '1',                   │ │
+         │ │                     │   │   │   'path':                        │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   'canvas': 'Canvas',            │ │
+         │ │                     │   │   │   'flags': 1535,                 │ │
+         │ │                     │   │   │   'active_in_hierarchy': True,   │ │
+         │ │                     │   │   │   'active_and_enabled': True,    │ │
+         │ │                     │   │   │   'interactable': True,          │ │
+         │ │                     │   │   │   'raycast_top': None,           │ │
+         │ │                     │   │   │   'canvas_render_mode': 1,       │ │
+         │ │                     │   │   │   'instance_id': -363030,        │ │
+         │ │                     │   │   │   ... +6                         │ │
+         │ │                     │   │   }                                  │ │
+         │ │                     │   )                                      │ │
+         │ │                     )                                          │ │
+         │ │              root = 'WorldBossUI(Clone)/pages/CurrentWorldBos… │ │
+         │ │              self = <alas_headless.semantic_oracle.SemanticOr… │ │
+         │ │                     object at 0x0000026639373C80>              │ │
+         │ │             start = ButtonState(                               │ │
+         │ │                     │   name='start_btn',                      │ │
+         │ │                     │                                          │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   active_in_hierarchy=True,              │ │
+         │ │                     │   active_and_enabled=True,               │ │
+         │ │                     │   interactable=True,                     │ │
+         │ │                     │   raycast_top=None,                      │ │
+         │ │                     │   point=Point(x=1159.022, y=670.733),    │ │
+         │ │                     │   bounds=Bounds(                         │ │
+         │ │                     │   │   left=1043.669,                     │ │
+         │ │                     │   │   top=623.725,                       │ │
+         │ │                     │   │   right=1274.375,                    │ │
+         │ │                     │   │   bottom=717.741                     │ │
+         │ │                     │   ),                                     │ │
+         │ │                     │   raw={                                  │ │
+         │ │                     │   │   'name': 'start_btn',               │ │
+         │ │                     │   │   'path':                            │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   'canvas': 'Canvas',                │ │
+         │ │                     │   │   'flags': 1535,                     │ │
+         │ │                     │   │   'active_in_hierarchy': True,       │ │
+         │ │                     │   │   'active_and_enabled': True,        │ │
+         │ │                     │   │   'interactable': True,              │ │
+         │ │                     │   │   'raycast_top': None,               │ │
+         │ │                     │   │   'canvas_render_mode': 1,           │ │
+         │ │                     │   │   'instance_id': -362882,            │ │
+         │ │                     │   │   ... +6                             │ │
+         │ │                     │   }                                      │ │
+         │ │                     )                                          │ │
+         │ │          ui_state = UiState(                                   │ │
+         │ │                     │   generation=28484,                      │ │
+         │ │                     │   method_mask=15,                        │ │
+         │ │                     │   skipped_count=0,                       │ │
+         │ │                     │   image_truncated=False,                 │ │
+         │ │                     │   snapshot={                             │ │
+         │ │                     │   │   'protocol_schema':                 │ │
+         │ │                     'alas-headless.observer/v1',               │ │
+         │ │                     │   │   'semantic_schema':                 │ │
+         │ │                     'alas-headless.ui/v1',                     │ │
+         │ │                     │   │   'status': 'ok',                    │ │
+         │ │                     │   │   'package':                         │ │
+         │ │                     'com.bilibili.azurlane',                   │ │
+         │ │                     │   │   'pid': 10683,                      │ │
+         │ │                     │   │   'uid': 10105,                      │ │
+         │ │                     │   │   'peer_uid': 2000,                  │ │
+         │ │                     │   │   'driver_revision':                 │ │
+         │ │                     '506b76f698b5089aaa29c4e7908b48edb8532a44… │ │
+         │ │                     │   │   'schema': 1,                       │ │
+         │ │                     │   │   'struct_size': 1533000,            │ │
+         │ │                     │   │   ... +18                            │ │
+         │ │                     │   },                                     │ │
+         │ │                     │   toggles=(                              │ │
+         │ │                     │   │   ToggleState(                       │ │
+         │ │                     │   │   │   name='guild',                  │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   interactable=True,             │ │
+         │ │                     │   │   │   checked=True,                  │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   point=Point(                   │ │
+         │ │                     │   │   │   │   x=525.696,                 │ │
+         │ │                     │   │   │   │   y=28.034                   │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=482.366,              │ │
+         │ │                     │   │   │   │   top=8.368,                 │ │
+         │ │                     │   │   │   │   right=569.026,             │ │
+         │ │                     │   │   │   │   bottom=47.699              │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'kind': 'toggle',          │ │
+         │ │                     │   │   │   │   'name': 'guild',           │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'flags': 1535,             │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'interactable': True,      │ │
+         │ │                     │   │   │   │   'checked': True,           │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'adb_point': {             │ │
+         │ │                     │   │   │   │   │   'x': 525.696,          │ │
+         │ │                     │   │   │   │   │   'y': 28.034            │ │
+         │ │                     │   │   │   │   },                         │ │
+         │ │                     │   │   │   │   ... +1                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ToggleState(                       │ │
+         │ │                     │   │   │   name='friend',                 │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   interactable=True,             │ │
+         │ │                     │   │   │   checked=True,                  │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   point=Point(                   │ │
+         │ │                     │   │   │   │   x=399.013,                 │ │
+         │ │                     │   │   │   │   y=28.034                   │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=355.683,              │ │
+         │ │                     │   │   │   │   top=8.368,                 │ │
+         │ │                     │   │   │   │   right=442.343,             │ │
+         │ │                     │   │   │   │   bottom=47.699              │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'kind': 'toggle',          │ │
+         │ │                     │   │   │   │   'name': 'friend',          │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'flags': 1535,             │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'interactable': True,      │ │
+         │ │                     │   │   │   │   'checked': True,           │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'adb_point': {             │ │
+         │ │                     │   │   │   │   │   'x': 399.013,          │ │
+         │ │                     │   │   │   │   │   'y': 28.034            │ │
+         │ │                     │   │   │   │   },                         │ │
+         │ │                     │   │   │   │   ... +1                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ToggleState(                       │ │
+         │ │                     │   │   │   name='world',                  │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   interactable=True,             │ │
+         │ │                     │   │   │   checked=True,                  │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   point=Point(                   │ │
+         │ │                     │   │   │   │   x=272.331,                 │ │
+         │ │                     │   │   │   │   y=28.034                   │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=228.992,              │ │
+         │ │                     │   │   │   │   top=8.365,                 │ │
+         │ │                     │   │   │   │   right=315.669,             │ │
+         │ │                     │   │   │   │   bottom=47.703              │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'kind': 'toggle',          │ │
+         │ │                     │   │   │   │   'name': 'world',           │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'flags': 1535,             │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'interactable': True,      │ │
+         │ │                     │   │   │   │   'checked': True,           │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'adb_point': {             │ │
+         │ │                     │   │   │   │   │   'x': 272.331,          │ │
+         │ │                     │   │   │   │   │   'y': 28.034            │ │
+         │ │                     │   │   │   │   },                         │ │
+         │ │                     │   │   │   │   ... +1                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   )                                  │ │
+         │ │                     │   ),                                     │ │
+         │ │                     │   texts=(                                │ │
+         │ │                     │   │   TextState(                         │ │
+         │ │                     │   │   │   kind='ugui-text',              │ │
+         │ │                     │   │   │   name='Text',                   │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   text='',                       │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   truncated=False,               │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=394.449,              │ │
+         │ │                     │   │   │   │   top=299.301,               │ │
+         │ │                     │   │   │   │   right=501.044,             │ │
+         │ │                     │   │   │   │   bottom=340.16              │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'kind': 'ugui-text',       │ │
+         │ │                     │   │   │   │   'name': 'Text',            │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'text': '',                │ │
+         │ │                     │   │   │   │   'flags': 271,              │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'adb_bounds': {            │ │
+         │ │                     │   │   │   │   │   'left': 394.449,       │ │
+         │ │                     │   │   │   │   │   'top': 299.301,        │ │
+         │ │                     │   │   │   │   │   'right': 501.044,      │ │
+         │ │                     │   │   │   │   │   'bottom': 340.16       │ │
+         │ │                     │   │   │   │   }                          │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   TextState(                         │ │
+         │ │                     │   │   │   kind='ugui-text',              │ │
+         │ │                     │   │   │   name='Text',                   │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   text='0/3',                    │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   truncated=False,               │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=974.276,              │ │
+         │ │                     │   │   │   │   top=19.642,                │ │
+         │ │                     │   │   │   │   right=1110.209,            │ │
+         │ │                     │   │   │   │   bottom=55.042              │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'kind': 'ugui-text',       │ │
+         │ │                     │   │   │   │   'name': 'Text',            │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'text': '0/3',             │ │
+         │ │                     │   │   │   │   'flags': 271,              │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'adb_bounds': {            │ │
+         │ │                     │   │   │   │   │   'left': 974.276,       │ │
+         │ │                     │   │   │   │   │   'top': 19.642,         │ │
+         │ │                     │   │   │   │   │   'right': 1110.209,     │ │
+         │ │                     │   │   │   │   │   'bottom': 55.042       │ │
+         │ │                     │   │   │   │   }                          │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   TextState(                         │ │
+         │ │                     │   │   │   kind='ugui-text',              │ │
+         │ │                     │   │   │   name='Text',                   │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   text='HP:66000',               │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   truncated=False,               │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=268.568,              │ │
+         │ │                     │   │   │   │   top=577.203,               │ │
+         │ │                     │   │   │   │   right=1258.035,            │ │
+         │ │                     │   │   │   │   bottom=613.546             │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'kind': 'ugui-text',       │ │
+         │ │                     │   │   │   │   'name': 'Text',            │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'text': 'HP:66000',        │ │
+         │ │                     │   │   │   │   'flags': 271,              │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'adb_bounds': {            │ │
+         │ │                     │   │   │   │   │   'left': 268.568,       │ │
+         │ │                     │   │   │   │   │   'top': 577.203,        │ │
+         │ │                     │   │   │   │   │   'right': 1258.035,     │ │
+         │ │                     │   │   │   │   │   'bottom': 613.546      │ │
+         │ │                     │   │   │   │   }                          │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   TextState(                         │ │
+         │ │                     │   │   │   kind='ugui-text',              │ │
+         │ │                     │   │   │   name='Text',                   │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   text='2',                      │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   truncated=False,               │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=94.438,               │ │
+         │ │                     │   │   │   │   top=577.666,               │ │
+         │ │                     │   │   │   │   right=201.104,             │ │
+         │ │                     │   │   │   │   bottom=619.0               │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'kind': 'ugui-text',       │ │
+         │ │                     │   │   │   │   'name': 'Text',            │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'text': '2',               │ │
+         │ │                     │   │   │   │   'flags': 271,              │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'adb_bounds': {            │ │
+         │ │                     │   │   │   │   │   'left': 94.438,        │ │
+         │ │                     │   │   │   │   │   'top': 577.666,        │ │
+         │ │                     │   │   │   │   │   'right': 201.104,      │ │
+         │ │                     │   │   │   │   │   'bottom': 619.0        │ │
+         │ │                     │   │   │   │   }                          │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   TextState(                         │ │
+         │ │                     │   │   │   kind='ugui-text',              │ │
+         │ │                     │   │   │   name='FpsPanel',               │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='OverlayCamera/Overlay/UIOverlay/Fps… │ │
+         │ │                     │   │   │   text='',                       │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   truncated=False,               │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=573.333,              │ │
+         │ │                     │   │   │   │   top=0.0,                   │ │
+         │ │                     │   │   │   │   right=706.667,             │ │
+         │ │                     │   │   │   │   bottom=34.667              │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'kind': 'ugui-text',       │ │
+         │ │                     │   │   │   │   'name': 'FpsPanel',        │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'OverlayCamera/Overlay/UIOverlay/FpsPanel… │ │
+         │ │                     │   │   │   │   'text': '',                │ │
+         │ │                     │   │   │   │   'flags': 271,              │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'adb_bounds': {            │ │
+         │ │                     │   │   │   │   │   'left': 573.333,       │ │
+         │ │                     │   │   │   │   │   'top': 0.0,            │ │
+         │ │                     │   │   │   │   │   'right': 706.667,      │ │
+         │ │                     │   │   │   │   │   'bottom': 34.667       │ │
+         │ │                     │   │   │   │   }                          │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   )                                  │ │
+         │ │                     │   ),                                     │ │
+         │ │                     │   images=(                               │ │
+         │ │                     │   │   ImageState(                        │ │
+         │ │                     │   │   │   name='world',                  │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   sprite='tag_world',            │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   raycast_target=True,           │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   color=(1.0, 1.0, 1.0, 1.0),    │ │
+         │ │                     │   │   │   fill_amount=1.0,               │ │
+         │ │                     │   │   │   truncated=False,               │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=80.006,               │ │
+         │ │                     │   │   │   │   top=446.877,               │ │
+         │ │                     │   │   │   │   right=173.303,             │ │
+         │ │                     │   │   │   │   bottom=471.534             │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'kind': 'image',           │ │
+         │ │                     │   │   │   │   'name': 'world',           │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'sprite': 'tag_world',     │ │
+         │ │                     │   │   │   │   'flags': 495,              │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'raycast_target': True,    │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'color': {                 │ │
+         │ │                     │   │   │   │   │   'red': 1.0,            │ │
+         │ │                     │   │   │   │   │   'green': 1.0,          │ │
+         │ │                     │   │   │   │   │   'blue': 1.0,           │ │
+         │ │                     │   │   │   │   │   'alpha': 1.0           │ │
+         │ │                     │   │   │   │   },                         │ │
+         │ │                     │   │   │   │   ... +3                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ImageState(                        │ │
+         │ │                     │   │   │   name='raiding',                │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   sprite='item_03',              │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   raycast_target=True,           │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   color=(1.0, 1.0, 1.0, 1.0),    │ │
+         │ │                     │   │   │   fill_amount=1.0,               │ │
+         │ │                     │   │   │   truncated=False,               │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=61.714,               │ │
+         │ │                     │   │   │   │   top=447.505,               │ │
+         │ │                     │   │   │   │   right=456.225,             │ │
+         │ │                     │   │   │   │   bottom=519.477             │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'kind': 'image',           │ │
+         │ │                     │   │   │   │   'name': 'raiding',         │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'sprite': 'item_03',       │ │
+         │ │                     │   │   │   │   'flags': 495,              │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'raycast_target': True,    │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'color': {                 │ │
+         │ │                     │   │   │   │   │   'red': 1.0,            │ │
+         │ │                     │   │   │   │   │   'green': 1.0,          │ │
+         │ │                     │   │   │   │   │   'blue': 1.0,           │ │
+         │ │                     │   │   │   │   │   'alpha': 1.0           │ │
+         │ │                     │   │   │   │   },                         │ │
+         │ │                     │   │   │   │   ... +3                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ImageState(                        │ │
+         │ │                     │   │   │   name='world',                  │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   sprite='tag_world',            │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   raycast_target=True,           │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   color=(1.0, 1.0, 1.0, 1.0),    │ │
+         │ │                     │   │   │   fill_amount=1.0,               │ │
+         │ │                     │   │   │   truncated=False,               │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=106.091,              │ │
+         │ │                     │   │   │   │   top=366.597,               │ │
+         │ │                     │   │   │   │   right=199.387,             │ │
+         │ │                     │   │   │   │   bottom=391.254             │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'kind': 'image',           │ │
+         │ │                     │   │   │   │   'name': 'world',           │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'sprite': 'tag_world',     │ │
+         │ │                     │   │   │   │   'flags': 495,              │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'raycast_target': True,    │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'color': {                 │ │
+         │ │                     │   │   │   │   │   'red': 1.0,            │ │
+         │ │                     │   │   │   │   │   'green': 1.0,          │ │
+         │ │                     │   │   │   │   │   'blue': 1.0,           │ │
+         │ │                     │   │   │   │   │   'alpha': 1.0           │ │
+         │ │                     │   │   │   │   },                         │ │
+         │ │                     │   │   │   │   ... +3                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ImageState(                        │ │
+         │ │                     │   │   │   name='raiding',                │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   sprite='item_03',              │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   raycast_target=True,           │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   color=(1.0, 1.0, 1.0, 1.0),    │ │
+         │ │                     │   │   │   fill_amount=1.0,               │ │
+         │ │                     │   │   │   truncated=False,               │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=87.799,               │ │
+         │ │                     │   │   │   │   top=367.224,               │ │
+         │ │                     │   │   │   │   right=482.31,              │ │
+         │ │                     │   │   │   │   bottom=439.196             │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'kind': 'image',           │ │
+         │ │                     │   │   │   │   'name': 'raiding',         │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'sprite': 'item_03',       │ │
+         │ │                     │   │   │   │   'flags': 495,              │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'raycast_target': True,    │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'color': {                 │ │
+         │ │                     │   │   │   │   │   'red': 1.0,            │ │
+         │ │                     │   │   │   │   │   'green': 1.0,          │ │
+         │ │                     │   │   │   │   │   'blue': 1.0,           │ │
+         │ │                     │   │   │   │   │   'alpha': 1.0           │ │
+         │ │                     │   │   │   │   },                         │ │
+         │ │                     │   │   │   │   ... +3                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ImageState(                        │ │
+         │ │                     │   │   │   name='world',                  │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   sprite='tag_world',            │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   raycast_target=True,           │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   color=(1.0, 1.0, 1.0, 1.0),    │ │
+         │ │                     │   │   │   fill_amount=1.0,               │ │
+         │ │                     │   │   │   truncated=False,               │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=127.344,              │ │
+         │ │                     │   │   │   │   top=247.881,               │ │
+         │ │                     │   │   │   │   right=220.64,              │ │
+         │ │                     │   │   │   │   bottom=272.538             │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'kind': 'image',           │ │
+         │ │                     │   │   │   │   'name': 'world',           │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'sprite': 'tag_world',     │ │
+         │ │                     │   │   │   │   'flags': 495,              │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'raycast_target': True,    │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'color': {                 │ │
+         │ │                     │   │   │   │   │   'red': 1.0,            │ │
+         │ │                     │   │   │   │   │   'green': 1.0,          │ │
+         │ │                     │   │   │   │   │   'blue': 1.0,           │ │
+         │ │                     │   │   │   │   │   'alpha': 1.0           │ │
+         │ │                     │   │   │   │   },                         │ │
+         │ │                     │   │   │   │   ... +3                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ImageState(                        │ │
+         │ │                     │   │   │   name='challenging',            │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   sprite='item_01',              │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   raycast_target=True,           │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   color=(1.0, 1.0, 1.0, 1.0),    │ │
+         │ │                     │   │   │   fill_amount=1.0,               │ │
+         │ │                     │   │   │   truncated=False,               │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=101.781,              │ │
+         │ │                     │   │   │   │   top=249.645,               │ │
+         │ │                     │   │   │   │   right=533.489,             │ │
+         │ │                     │   │   │   │   bottom=356.24              │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'kind': 'image',           │ │
+         │ │                     │   │   │   │   'name': 'challenging',     │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'sprite': 'item_01',       │ │
+         │ │                     │   │   │   │   'flags': 495,              │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'raycast_target': True,    │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'color': {                 │ │
+         │ │                     │   │   │   │   │   'red': 1.0,            │ │
+         │ │                     │   │   │   │   │   'green': 1.0,          │ │
+         │ │                     │   │   │   │   │   'blue': 1.0,           │ │
+         │ │                     │   │   │   │   │   'alpha': 1.0           │ │
+         │ │                     │   │   │   │   },                         │ │
+         │ │                     │   │   │   │   ... +3                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ImageState(                        │ │
+         │ │                     │   │   │   name='raiding',                │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   sprite='item_03',              │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   raycast_target=True,           │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   color=(1.0, 1.0, 1.0, 1.0),    │ │
+         │ │                     │   │   │   fill_amount=1.0,               │ │
+         │ │                     │   │   │   truncated=False,               │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=120.378,              │ │
+         │ │                     │   │   │   │   top=266.956,               │ │
+         │ │                     │   │   │   │   right=514.889,             │ │
+         │ │                     │   │   │   │   bottom=338.928             │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'kind': 'image',           │ │
+         │ │                     │   │   │   │   'name': 'raiding',         │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'sprite': 'item_03',       │ │
+         │ │                     │   │   │   │   'flags': 495,              │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'raycast_target': True,    │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'color': {                 │ │
+         │ │                     │   │   │   │   │   'red': 1.0,            │ │
+         │ │                     │   │   │   │   │   'green': 1.0,          │ │
+         │ │                     │   │   │   │   │   'blue': 1.0,           │ │
+         │ │                     │   │   │   │   │   'alpha': 1.0           │ │
+         │ │                     │   │   │   │   },                         │ │
+         │ │                     │   │   │   │   ... +3                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ImageState(                        │ │
+         │ │                     │   │   │   name='world',                  │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   sprite='tag_world',            │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   raycast_target=True,           │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   color=(1.0, 1.0, 1.0, 1.0),    │ │
+         │ │                     │   │   │   fill_amount=1.0,               │ │
+         │ │                     │   │   │   truncated=False,               │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=171.249,              │ │
+         │ │                     │   │   │   │   top=166.061,               │ │
+         │ │                     │   │   │   │   right=264.545,             │ │
+         │ │                     │   │   │   │   bottom=190.718             │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'kind': 'image',           │ │
+         │ │                     │   │   │   │   'name': 'world',           │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'sprite': 'tag_world',     │ │
+         │ │                     │   │   │   │   'flags': 495,              │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'raycast_target': True,    │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'color': {                 │ │
+         │ │                     │   │   │   │   │   'red': 1.0,            │ │
+         │ │                     │   │   │   │   │   'green': 1.0,          │ │
+         │ │                     │   │   │   │   │   'blue': 1.0,           │ │
+         │ │                     │   │   │   │   │   'alpha': 1.0           │ │
+         │ │                     │   │   │   │   },                         │ │
+         │ │                     │   │   │   │   ... +3                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ImageState(                        │ │
+         │ │                     │   │   │   name='raiding',                │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   sprite='item_03',              │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   raycast_target=True,           │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   color=(1.0, 1.0, 1.0, 1.0),    │ │
+         │ │                     │   │   │   fill_amount=1.0,               │ │
+         │ │                     │   │   │   truncated=False,               │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=152.957,              │ │
+         │ │                     │   │   │   │   top=166.689,               │ │
+         │ │                     │   │   │   │   right=547.468,             │ │
+         │ │                     │   │   │   │   bottom=238.66              │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'kind': 'image',           │ │
+         │ │                     │   │   │   │   'name': 'raiding',         │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'sprite': 'item_03',       │ │
+         │ │                     │   │   │   │   'flags': 495,              │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'raycast_target': True,    │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'color': {                 │ │
+         │ │                     │   │   │   │   │   'red': 1.0,            │ │
+         │ │                     │   │   │   │   │   'green': 1.0,          │ │
+         │ │                     │   │   │   │   │   'blue': 1.0,           │ │
+         │ │                     │   │   │   │   │   'alpha': 1.0           │ │
+         │ │                     │   │   │   │   },                         │ │
+         │ │                     │   │   │   │   ... +3                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ImageState(                        │ │
+         │ │                     │   │   │   name='world',                  │ │
+         │ │                     │   │   │                                  │ │
+         │ │                     path='UICamera/Canvas/UIMain/WorldBossUI(… │ │
+         │ │                     │   │   │   sprite='tag_world',            │ │
+         │ │                     │   │   │   active_in_hierarchy=True,      │ │
+         │ │                     │   │   │   active_and_enabled=True,       │ │
+         │ │                     │   │   │   raycast_target=True,           │ │
+         │ │                     │   │   │   raycast_top=None,              │ │
+         │ │                     │   │   │   color=(1.0, 1.0, 1.0, 1.0),    │ │
+         │ │                     │   │   │   fill_amount=1.0,               │ │
+         │ │                     │   │   │   truncated=False,               │ │
+         │ │                     │   │   │   bounds=Bounds(                 │ │
+         │ │                     │   │   │   │   left=197.334,              │ │
+         │ │                     │   │   │   │   top=85.78,                 │ │
+         │ │                     │   │   │   │   right=290.63,              │ │
+         │ │                     │   │   │   │   bottom=110.437             │ │
+         │ │                     │   │   │   ),                             │ │
+         │ │                     │   │   │   raw={                          │ │
+         │ │                     │   │   │   │   'kind': 'image',           │ │
+         │ │                     │   │   │   │   'name': 'world',           │ │
+         │ │                     │   │   │   │   'path':                    │ │
+         │ │                     'UICamera/Canvas/UIMain/WorldBossUI(Clone… │ │
+         │ │                     │   │   │   │   'sprite': 'tag_world',     │ │
+         │ │                     │   │   │   │   'flags': 495,              │ │
+         │ │                     │   │   │   │   'active_in_hierarchy':     │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'active_and_enabled':      │ │
+         │ │                     True,                                      │ │
+         │ │                     │   │   │   │   'raycast_target': True,    │ │
+         │ │                     │   │   │   │   'raycast_top': None,       │ │
+         │ │                     │   │   │   │   'color': {                 │ │
+         │ │                     │   │   │   │   │   'red': 1.0,            │ │
+         │ │                     │   │   │   │   │   'green': 1.0,          │ │
+         │ │                     │   │   │   │   │   'blue': 1.0,           │ │
+         │ │                     │   │   │   │   │   'alpha': 1.0           │ │
+         │ │                     │   │   │   │   },                         │ │
+         │ │                     │   │   │   │   ... +3                     │ │
+         │ │                     │   │   │   }                              │ │
+         │ │                     │   │   ),                                 │ │
+         │ │                     │   │   ... +40                            │ │
+         │ │                     │   ),                                     │ │
+         │ │                     │   image_source_count=1652,               │ │
+         │ │                     │   image_source_capacity=16384            │ │
+         │ │                     )                                          │ │
+         │ └────────────────────────────────────────────────────────────────┘ │
+         └────────────────────────────────────────────────────────────────────┘
+         SemanticGateClosed: META assist snapshots are not coherent            
+INFO     2026-09-12 11:47:56.348 │ No provider specified, skip sending         
+passed False attacks 1

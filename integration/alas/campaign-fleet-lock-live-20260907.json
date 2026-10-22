@@ -1,0 +1,40 @@
+{
+  "schema": "alas-headless.fleet-lock-live/v1",
+  "passed": true,
+  "serial": "emulator-5580",
+  "stage": "12-4",
+  "actions": [
+    [
+      1202,
+      525
+    ],
+    [
+      1202,
+      525
+    ],
+    [
+      1202,
+      525
+    ]
+  ],
+  "map_generation": 11276,
+  "pid": 1929,
+  "initial": false,
+  "cases": [
+    {
+      "desired": true,
+      "changed": true,
+      "observed": true
+    },
+    {
+      "desired": false,
+      "changed": true,
+      "observed": false
+    },
+    {
+      "desired": true,
+      "changed": true,
+      "observed": true
+    }
+  ]
+}

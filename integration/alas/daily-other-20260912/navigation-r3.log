@@ -1,0 +1,119 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 18:21:55.987 │ [Server] cn                                 
+read: ./config\semantic_e2e.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 18:21:55.997 │ Bind task ['General', 'Alas']               
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 18:21:56.002 │ DEVICE                                      
+INFO     2026-09-12 18:21:56.004 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 18:21:56.006 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 18:21:56.010 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 18:21:56.012 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 18:21:56.014 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 18:21:56.018 │ emulator-5580                               
+INFO     2026-09-12 18:21:56.020 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 18:21:56.021 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 18:21:56.028 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 18:21:56.030 │ [Server] cn                                 
+WARNING  2026-09-12 18:21:56.033 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 18:21:56.036 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 18:21:56.100 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 18:21:56.103 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 18:21:56.106 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 18:21:56.108 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 18:21:56.760 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 18:21:56.762 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 18:21:58.566 │ UI get current page                         
+INFO     2026-09-12 18:22:04.526 │ [UI] page_daily                             
+INFO     2026-09-12 18:22:04.527 │ Goto page_main                              
+INFO     2026-09-12 18:22:04.529 │ <<< UI GOTO PAGE_MAIN >>>                   
+INFO     2026-09-12 18:22:10.292 │ Page switch: page_daily -> page_main        
+INFO     2026-09-12 18:22:12.381 │ Semantic click daily/page/back @            
+         UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_b
+         utton                                                                 
+INFO     2026-09-12 18:22:17.132 │ Page switch: page_campaign_menu -> page_main
+INFO     2026-09-12 18:22:19.010 │ Semantic click campaign-menu/page/back @    
+         UICamera/Canvas/UIMain/LevelMainScene(Clone)/top/top_chapter/back_butt
+         on                                                                    
+INFO     2026-09-12 18:22:22.083 │ Page arrive: page_main                      
+INFO     2026-09-12 18:22:22.203 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 18:22:23.948 │ UI get current page                         
+INFO     2026-09-12 18:22:25.666 │ [UI] page_main                              
+INFO     2026-09-12 18:22:25.668 │ Goto page_daily                             
+INFO     2026-09-12 18:22:25.669 │ <<< UI GOTO PAGE_DAILY >>>                  
+INFO     2026-09-12 18:22:29.041 │ Page switch: page_main -> page_campaign_menu
+INFO     2026-09-12 18:22:29.528 │ Semantic click main/battle @                
+         OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/right/1/b
+         attle                                                                 
+INFO     2026-09-12 18:22:37.980 │ Page switch: page_main_white ->             
+         page_campaign_menu                                                    
+INFO     2026-09-12 18:22:38.522 │ Semantic click main/battle @                
+         OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/right/1/b
+         attle                                                                 
+INFO     2026-09-12 18:22:42.462 │ Page switch: page_campaign_menu ->          
+         page_daily                                                            
+INFO     2026-09-12 18:22:43.059 │ Semantic click campaign-menu/daily @        
+         UICamera/Canvas/UIMain/LevelMainScene(Clone)/entrance/btns/btn_daily  
+INFO     2026-09-12 18:22:44.394 │ Page arrive: page_daily                     
+INFO     2026-09-12 18:22:44.680 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 18:22:46.048 │ UI get current page                         
+INFO     2026-09-12 18:22:51.534 │ [UI] page_daily                             
+INFO     2026-09-12 18:22:51.536 │ Goto page_main                              
+INFO     2026-09-12 18:22:51.537 │ <<< UI GOTO PAGE_MAIN >>>                   
+INFO     2026-09-12 18:22:57.288 │ Page switch: page_daily -> page_main        
+INFO     2026-09-12 18:22:59.308 │ Semantic click daily/page/back @            
+         UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_b
+         utton                                                                 
+INFO     2026-09-12 18:23:03.761 │ Page switch: page_campaign_menu -> page_main
+INFO     2026-09-12 18:23:05.582 │ Semantic click campaign-menu/page/back @    
+         UICamera/Canvas/UIMain/LevelMainScene(Clone)/top/top_chapter/back_butt
+         on                                                                    
+INFO     2026-09-12 18:23:08.035 │ Page arrive: page_main                      
+INFO     2026-09-12 18:23:08.120 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 18:23:09.620 │ UI get current page                         
+INFO     2026-09-12 18:23:11.162 │ [UI] page_main                              
+INFO     2026-09-12 18:23:11.163 │ Goto page_daily                             
+INFO     2026-09-12 18:23:11.164 │ <<< UI GOTO PAGE_DAILY >>>                  
+INFO     2026-09-12 18:23:14.398 │ Page switch: page_main -> page_campaign_menu
+INFO     2026-09-12 18:23:14.878 │ Semantic click main/battle @                
+         OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/right/1/b
+         attle                                                                 
+INFO     2026-09-12 18:23:22.475 │ Page switch: page_main_white ->             
+         page_campaign_menu                                                    
+INFO     2026-09-12 18:23:22.956 │ Semantic click main/battle @                
+         OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/right/1/b
+         attle                                                                 
+INFO     2026-09-12 18:23:27.021 │ Page switch: page_campaign_menu ->          
+         page_daily                                                            
+INFO     2026-09-12 18:23:27.701 │ Semantic click campaign-menu/daily @        
+         UICamera/Canvas/UIMain/LevelMainScene(Clone)/entrance/btns/btn_daily  
+INFO     2026-09-12 18:23:29.035 │ Page arrive: page_daily                     
+INFO     2026-09-12 18:23:29.323 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 18:23:30.730 │ UI get current page                         
+INFO     2026-09-12 18:23:36.591 │ [UI] page_daily                             
+INFO     2026-09-12 18:23:36.594 │ Goto page_main                              
+INFO     2026-09-12 18:23:36.596 │ <<< UI GOTO PAGE_MAIN >>>                   
+INFO     2026-09-12 18:23:43.009 │ Page switch: page_daily -> page_main        
+INFO     2026-09-12 18:23:44.926 │ Semantic click daily/page/back @            
+         UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_b
+         utton                                                                 
+INFO     2026-09-12 18:24:09.238 │ Page switch: page_daily -> page_main        
+INFO     2026-09-12 18:24:11.116 │ Semantic click campaign-menu/page/back @    
+         UICamera/Canvas/UIMain/LevelMainScene(Clone)/top/top_chapter/back_butt
+         on                                                                    
+INFO     2026-09-12 18:24:13.177 │ Page arrive: page_main                      
+PASSED True

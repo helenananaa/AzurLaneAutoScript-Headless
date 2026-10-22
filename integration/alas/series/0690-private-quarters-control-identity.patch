@@ -1,0 +1,18 @@
+diff --git a/module/device/control.py b/module/device/control.py
+--- a/module/device/control.py
++++ b/module/device/control.py
+@@ -41,9 +41,12 @@
+             button (button.Button): AzurLane Button instance.
+             control_check (bool):
+         """
++        semantic_adapter = getattr(self, 'semantic_adapter', None)
+         if control_check:
+-            self.handle_control_check(button)
+-        semantic_adapter = getattr(self, 'semantic_adapter', None)
++            control_identity = button
++            if semantic_adapter is not None and str(button) == 'PRIVATE_QUARTERS_ROOM_BACK':
++                control_identity = semantic_adapter.private_quarters_room_back_control_identity()
++            self.handle_control_check(control_identity)
+         if semantic_adapter is not None:
+             if (
+                 semantic_adapter.campaign_combat_active()

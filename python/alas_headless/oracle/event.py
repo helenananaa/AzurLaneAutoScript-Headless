@@ -20,6 +20,59 @@ from .errors import SemanticGateClosed, SemanticTargetMissing
 class EventOracle:
     """Event operations sharing the oracle frame and input boundary."""
 
+    def _player_profile_back_proven(self, state: OracleState) -> bool:
+        buttons = self._matches(state, 'player/profile/back')
+        if len(buttons) > 1:
+            raise SemanticGateClosed('player profile Back is ambiguous')
+        if not buttons:
+            return False
+        button = buttons[0]
+        if not (button.active_in_hierarchy and button.active_and_enabled
+                and button.interactable and button.raycast_top is not False
+                and button.point is not None and button.bounds is not None
+                and button.bounds.contains(button.point)):
+            return False
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('player profile Back snapshots are not coherent')
+        if ui.image_truncated:
+            raise SemanticGateClosed('player profile Back image snapshot is incomplete')
+        images = [image for image in ui.images
+                  if image.path == button.path + '/mask/Image']
+        return bool(len(images) == 1 and images[0].sprite == 'back_btn'
+                    and images[0].active_in_hierarchy and images[0].active_and_enabled
+                    and not images[0].truncated and images[0].raycast_top is not False
+                    and images[0].bounds is not None
+                    and 0 <= images[0].bounds.left < images[0].bounds.right <= self.fingerprint.width
+                    and 0 <= images[0].bounds.top < images[0].bounds.bottom <= self.fingerprint.height
+                    and images[0].bounds.contains(button.point))
+
+    def _activity_archive_home_proven(self, state: OracleState) -> bool:
+        target_id = 'archive/activity-list/home'
+        buttons = self._matches(state, target_id)
+        if len(buttons) > 1:
+            raise SemanticGateClosed('activity archive Home is ambiguous')
+        if not buttons:
+            return False
+        button = buttons[0]
+        if not (button.active_in_hierarchy and button.active_and_enabled
+                and button.interactable and button.raycast_top is not False
+                and button.point is not None and button.bounds is not None
+                and button.bounds.contains(button.point)):
+            return False
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('activity archive Home snapshots are not coherent')
+        if ui.image_truncated:
+            raise SemanticGateClosed('activity archive Home image snapshot is incomplete')
+        images = tuple(image for image in ui.images if image.path == button.path
+                       and image.active_in_hierarchy and image.active_and_enabled)
+        return bool(len(images) == 1 and not images[0].truncated
+                    and images[0].sprite == 'btn_home'
+                    and images[0].raycast_target and images[0].raycast_top is not False
+                    and images[0].color[3] > 0 and images[0].bounds == button.bounds
+                    and not self._blocking_rules(state, target_id))
+
     def campaign_event_entrance_available(self) -> bool:
         """Report whether the proven campaign menu exposes an event card."""
 
@@ -197,7 +250,7 @@ class EventOracle:
         return self._retry_transition_read(self._event_points_once)
 
     def event_coin(self, stage_code: Optional[str] = None) -> int:
-        """Read coins from a proven event selector or requested stage detail."""
+        """Read the global coin counter on a proven selector, detail or map."""
 
         return self._retry_transition_read(
             lambda: self._event_coin_once(stage_code=stage_code)
@@ -212,14 +265,24 @@ class EventOracle:
                 raise
             preparation = self.campaign_preparation_state(stage_code)
             if preparation is None:
-                raise SemanticGateClosed(
-                    "event coin requires the selector or requested stage detail"
-                )
-            surface_generation = preparation.generation
-            surface_kind = preparation.kind
+                # Native auto-search watches resources while the fleet moves.
+                # The same global ResPanel is retained on a proven map; no
+                # selector/detail underlay or pixel observation is required.
+                entry = self.campaign_map_entry_state()
+                if self._blocking_rules(self.read_state(), "ui/absence-probe"):
+                    raise SemanticGateClosed("campaign map coin surface is obscured")
+                surface_generation = entry.generation
+                surface_kind = "campaign-map"
+            else:
+                surface_generation = preparation.generation
+                surface_kind = preparation.kind
         ui_state = self.read_ui_state()
         if surface_kind == "selector":
             surface_after_generation = self.event_campaign_page_state().generation
+        elif surface_kind == "campaign-map":
+            surface_after_generation = self.campaign_map_entry_state().generation
+            if self._blocking_rules(self.read_state(), "ui/absence-probe"):
+                raise SemanticGateClosed("campaign map coin surface is obscured")
         else:
             assert stage_code is not None
             preparation_after = self.campaign_preparation_state(stage_code)
@@ -518,6 +581,24 @@ class EventOracle:
         )
         return completed, total, min(visible) if visible else None
 
+    def event_story_surface_absent(self) -> bool:
+        """Prove the idle story boundary without entering legacy pixel probes."""
+        state = self.read_state()
+        ui = self.read_ui_state(check_foreground=False)
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed("story absence frames are incoherent")
+        records = tuple(state.buttons) + tuple(ui.texts) + tuple(ui.images)
+        for record in records:
+            if not record.active_in_hierarchy:
+                continue
+            # The dialogue UI family owns this branch even if its reviewed
+            # controls have not appeared. EventStoryScene is a separate page,
+            # not a dialogue overlay, and remains owned by its native task.
+            if any(part.lower().endswith("storyui(clone)")
+                   for part in record.path.split("/")):
+                raise SemanticGateClosed("mounted story surface is incomplete or unsupported")
+        return True
+
     def event_story_dialogue_visible(self) -> bool:
         """Return whether the current overlay is the exact modern story UI."""
 
@@ -591,20 +672,51 @@ class EventOracle:
         state = self.read_state()
         if not self.event_story_dialogue_visible():
             return 0
-        suffix = "/options_panel/options_c/option_tpl"
-        options = tuple(
-            button
-            for button in state.buttons
-            if button.name == "option_tpl"
-            and button.path.endswith(suffix)
-            and button.active_in_hierarchy
-            and button.active_and_enabled
-            and button.interactable
-            and button.point is not None
-            and button.bounds is not None
-            and button.bounds.contains(button.point)
-        )
+        options, _ = self._event_story_options(state)
         return len(options)
+
+    def _event_story_options(self, state):
+        candidates = [b for b in state.buttons
+                      if '/NewStoryUI(Clone)/front/dialogue/1/options_panel/' in b.path
+                      and b.name in ('option_tpl', 'option_tpl(Clone)')
+                      and b.active_in_hierarchy and b.active_and_enabled]
+        options = []
+        labels = []
+        ui = None
+        for b in candidates:
+            if not re.search(r'/options_panel/options_[cl]/option_tpl(?:\(Clone\))?$', b.path):
+                raise SemanticGateClosed('story option layout is unsupported')
+            if (not b.interactable or b.point is None or b.bounds is None
+                    or not b.bounds.contains(b.point) or b.raycast_top is False):
+                raise SemanticGateClosed('story option is not actionable')
+            if any(x.path == b.path and x.bounds == b.bounds for x in options):
+                raise SemanticGateClosed('story option geometry is ambiguous')
+            if '/options_l/' in b.path:
+                if ui is None:
+                    ui = self.read_ui_state()
+                    if not state.generation <= ui.generation <= state.generation + 2:
+                        raise SemanticGateClosed('story option frames are incoherent')
+                    if ui.image_truncated:
+                        raise SemanticGateClosed('story option graphics are truncated')
+                    if any(x.blocker_id not in ('event-story', 'operation-siren-map')
+                           for x in self._blocking_rules(state, 'ui/absence-probe')):
+                        raise SemanticGateClosed('story options have another blocker')
+                # Unity clones share paths. Correlate each complete label and
+                # reviewed raycast graphic with this exact Button rectangle.
+                text = [t for t in ui.texts if t.path == b.path+'/content/Text'
+                        and t.active_in_hierarchy and t.active_and_enabled and not t.truncated
+                        and t.text.strip() and t.bounds is not None and b.bounds.contains(Point(
+                            (t.bounds.left+t.bounds.right)/2, (t.bounds.top+t.bounds.bottom)/2))]
+                images = [i for i in ui.images if i.path == b.path+'/content'
+                          and i.sprite == 'option_bg_left' and i.active_in_hierarchy
+                          and i.active_and_enabled and i.raycast_target and i.raycast_top is not False
+                          and not i.truncated and i.bounds is not None and i.bounds.contains(b.point)]
+                if len(text) != 1 or len(images) != 1:
+                    raise SemanticGateClosed('story option label or graphic is ambiguous')
+                labels.append((b.path, b.bounds, text[0].text))
+            options.append(b)
+        ordered = tuple(sorted(options, key=lambda b: (b.bounds.top, b.bounds.left)))
+        return ordered, tuple(sorted(labels, key=lambda x: (x[1].top, x[1].left)))
 
     def click_event_story_option(self, option_index: int) -> ActionReceipt:
         """Choose one current story option by ALAS' configured zero-based index."""
@@ -614,24 +726,7 @@ class EventOracle:
         state = self.read_state()
         if not self.event_story_dialogue_visible():
             raise SemanticGateClosed("event story dialogue identity is absent")
-        suffix = "/options_panel/options_c/option_tpl"
-        options = tuple(
-            sorted(
-                (
-                    button
-                    for button in state.buttons
-                    if button.name == "option_tpl"
-                    and button.path.endswith(suffix)
-                    and button.active_in_hierarchy
-                    and button.active_and_enabled
-                    and button.interactable
-                    and button.point is not None
-                    and button.bounds is not None
-                    and button.bounds.contains(button.point)
-                ),
-                key=lambda button: (button.bounds.top, button.bounds.left),
-            )
-        )
+        options, labels = self._event_story_options(state)
         if not options:
             raise SemanticGateClosed("event story options are absent")
         if not -len(options) <= option_index < len(options):
@@ -645,13 +740,24 @@ class EventOracle:
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("game activity changed before story option input")
         self._tap(int(round(point.x)), int(round(point.y)))
-        return ActionReceipt(
+        receipt = ActionReceipt(
             semantic_id="story/option/{0}".format(option_index),
             generation=state.generation,
             point=point,
             bounds=target.bounds,
             path=target.path,
         )
+        if labels:
+            def completed():
+                after = self.read_state()
+                if after.generation <= state.generation:
+                    raise SemanticGateClosed('story option generation did not advance')
+                _, after_labels = self._event_story_options(after)
+                if after_labels == labels:
+                    raise SemanticGateClosed('story option selection did not advance; do not retry')
+                return True
+            self._retry_transition_read(completed, attempts=20, interval_seconds=0.25)
+        return receipt
 
     def click_event_story_skip(self) -> ActionReceipt:
         """Click the exact modern-story skip control at its visible centre."""

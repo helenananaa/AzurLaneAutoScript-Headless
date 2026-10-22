@@ -1,0 +1,15 @@
+diff --git a/module/commission/project.py b/module/commission/project.py
+--- a/module/commission/project.py
++++ b/module/commission/project.py
+@@ -117,7 +117,10 @@
+         self.duration = timedelta(seconds=state.duration_seconds)
+         self.expire = timedelta(seconds=0)
+         self.status = state.status.value
+-        self.valid = True
++        # Keep known running occupancy even when one row's type Image has
++        # not mounted. The original invalid-row filter excludes it from
++        # selection; independent complete rows remain available.
++        self.valid = bool(state.type_sprite)
+         self.semantic_signature = state.signature
+         self.semantic_row_key = (list_mode, state.index)
+         self.genre = self.commission_name_parse(self.name)

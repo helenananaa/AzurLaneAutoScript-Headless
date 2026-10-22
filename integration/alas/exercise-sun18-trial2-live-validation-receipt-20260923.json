@@ -1,0 +1,40 @@
+{
+  "schema": "alas-headless.exercise-live-validation/v1",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "passed": true,
+  "mode": "easiest",
+  "strategy": "sun18",
+  "opponent_trial": 2,
+  "serial": "emulator-5554",
+  "expect_outcome": "complete",
+  "execute_budget": 1,
+  "refresh_budget": 0,
+  "remaining_before": 8,
+  "period_before": "11d02:34:23",
+  "powers_before": [
+    [
+      1577,
+      4657
+    ],
+    [
+      16694,
+      17174
+    ],
+    [
+      13536,
+      15004
+    ],
+    [
+      11032,
+      3074
+    ]
+  ],
+  "task_result": true,
+  "elapsed_seconds": 68.984,
+  "result_stack_receipts": [],
+  "remaining_after": 7,
+  "execute_grant_remaining": 0,
+  "refresh_grant_remaining": 0,
+  "observed_outcome": "complete",
+  "temporary_config_removed": true
+}

@@ -86,9 +86,16 @@ class EventPorts:
                 ):
                     context = self._require_campaign_context()
                     if (
-                        context.map_preparation_receipt is not None
+                        (context.map_preparation_receipt is not None
+                         or (context.entry_receipt is not None
+                             and name in ("MAP_PREPARATION", "FLEET_PREPARATION")))
                         and time.monotonic() <= context.passive_transition_until
                     ):
+                        # A reviewed stage input can also expose title and
+                        # achievement records before the detail view settles.
+                        # Leave the passive preparation probe to its existing
+                        # owned transition handling; input still needs full
+                        # fresh preparation proof.
                         # Unity can reparent the just-closed LevelInfoSPUI
                         # under UIOrigin for a few frames while the selector
                         # remains mounted.  Do not classify that transient as

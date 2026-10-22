@@ -1,0 +1,12 @@
+--- a/module/os/globe_operation.py
++++ b/module/os/globe_operation.py
+@@ -398,6 +398,9 @@
+             entry_name = zone.cn if pinned in ('SAFE', 'DANGEROUS') else None
+             if semantic_adapter.open().oracle.operation_siren_globe_zone_locked():
+                 logger.warning(f'Zone {zone} locked, neighbouring zones may not have been explored')
++                if pinned == 'STRONGHOLD':
++                    from alas_headless.oracle.errors import SemanticStrongholdEntryLocked
++                    raise SemanticStrongholdEntryLocked(zone.zone_id)
+                 raise OSExploreError
+             semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
+             for attempt in range(80):

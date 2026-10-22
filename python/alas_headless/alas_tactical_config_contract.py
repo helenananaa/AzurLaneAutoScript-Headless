@@ -30,13 +30,13 @@ class AlasTacticalConfigSnapshot:
     tactical_filter: str
     rapid_training_slot: str
     control_exp_overflow_enable: bool
-    t1_allow: int
-    t2_allow: int
-    t3_allow: int
-    t4_allow: int
+    t1_allow: int | None
+    t2_allow: int | None
+    t3_allow: int | None
+    t4_allow: int | None
     add_new_student_enable: bool
-    add_new_student_favorite: bool
-    add_new_student_min_level: int
+    add_new_student_favorite: bool | None
+    add_new_student_min_level: int | None
 
 
 def _bool(value: object, *, field: str) -> bool:
@@ -103,37 +103,48 @@ def validate_alas_tactical_config(
     add_new_student_favorite: object,
     add_new_student_min_level: object,
 ) -> AlasTacticalConfigSnapshot:
-    """Validate all ten shared tactical settings before original decisions."""
+    """Validate the settings consumed by enabled original tactical branches."""
+
+    overflow_enabled = _bool(
+        control_exp_overflow_enable, field="ControlExpOverflow.Enable"
+    )
+    student_enabled = _bool(add_new_student_enable, field="AddNewStudent.Enable")
+
+    def overflow_allowance(value: object, *, field: str) -> int | None:
+        # Original ALAS reads allowances only inside the enabled overflow
+        # branch.  Unused saved values must not block reward/book handling.
+        if not overflow_enabled:
+            return None
+        return _bounded_integer(value, field=field, low=0, high=MAX_TACTICAL_OVERFLOW)
 
     return AlasTacticalConfigSnapshot(
         tactical_filter=_tactical_filter(tactical_filter),
         rapid_training_slot=_rapid_training_slot(rapid_training_slot),
-        control_exp_overflow_enable=_bool(
-            control_exp_overflow_enable, field="ControlExpOverflow.Enable"
+        control_exp_overflow_enable=overflow_enabled,
+        t1_allow=overflow_allowance(
+            t1_allow, field="ControlExpOverflow.T1Allow"
         ),
-        t1_allow=_bounded_integer(
-            t1_allow, field="ControlExpOverflow.T1Allow", low=0, high=MAX_TACTICAL_OVERFLOW
+        t2_allow=overflow_allowance(
+            t2_allow, field="ControlExpOverflow.T2Allow"
         ),
-        t2_allow=_bounded_integer(
-            t2_allow, field="ControlExpOverflow.T2Allow", low=0, high=MAX_TACTICAL_OVERFLOW
+        t3_allow=overflow_allowance(
+            t3_allow, field="ControlExpOverflow.T3Allow"
         ),
-        t3_allow=_bounded_integer(
-            t3_allow, field="ControlExpOverflow.T3Allow", low=0, high=MAX_TACTICAL_OVERFLOW
+        t4_allow=overflow_allowance(
+            t4_allow, field="ControlExpOverflow.T4Allow"
         ),
-        t4_allow=_bounded_integer(
-            t4_allow, field="ControlExpOverflow.T4Allow", low=0, high=MAX_TACTICAL_OVERFLOW
+        add_new_student_enable=student_enabled,
+        add_new_student_favorite=(
+            _bool(add_new_student_favorite, field="AddNewStudent.Favorite")
+            if student_enabled else None
         ),
-        add_new_student_enable=_bool(
-            add_new_student_enable, field="AddNewStudent.Enable"
-        ),
-        add_new_student_favorite=_bool(
-            add_new_student_favorite, field="AddNewStudent.Favorite"
-        ),
-        add_new_student_min_level=_bounded_integer(
-            add_new_student_min_level,
-            field="AddNewStudent.MinLevel",
-            low=1,
-            high=MAX_TACTICAL_LEVEL,
-            allow_text=True,
+        add_new_student_min_level=(
+            _bounded_integer(
+                add_new_student_min_level,
+                field="AddNewStudent.MinLevel",
+                low=1,
+                high=MAX_TACTICAL_LEVEL,
+                allow_text=True,
+            ) if student_enabled else None
         ),
     )

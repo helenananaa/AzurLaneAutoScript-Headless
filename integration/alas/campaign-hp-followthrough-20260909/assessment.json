@@ -1,0 +1,36 @@
+{
+  "schema": "alas-headless.campaign-hp-followthrough/v1",
+  "repair_fresh_process_passed": true,
+  "navigation_roundtrip_passed": true,
+  "sparse_vitals_offline_passed": true,
+  "sparse_vitals_live_qualified": false,
+  "tests_passed": 295,
+  "oil_before": 13580,
+  "oil_after": 13538,
+  "completed_battles": 1,
+  "repair_items_used": 1,
+  "repair_source_scope": "repair run launched before sparse-vitals refactor; sparse changes are separately offline-validated",
+  "remaining": [
+    "sparse-fleet controlled live validation",
+    "natural default HP thresholds",
+    "enemy-covered retained-map ambiguity",
+    "dock-full retirement and map continuation"
+  ],
+  "source_sha256": {
+    "python/alas_headless/oracle/campaign_state.py": "05faa855bf6e78e9b4544852049a2e24b0ad7e610cf98efe60bd852025f40a15",
+    "python/alas_headless/adapter/semantic/campaign_preparation.py": "e89fee2e0288ddd8c5a3a8db1fb019a07feaffd8bee17522c8aed9227493a6ac",
+    "python/alas_headless/adapter/semantic/campaign_health.py": "a148a0b346989b625efd7b0a1e7d1aa6c2af85c928ab2a07c998e1424587dcba",
+    "python/alas_headless/adapter/semantic/dispatch_observation.py": "6a419ba9b7ec53f34cab5e9f6b17536d17430319964bd8ce1062bbc617cb59a9",
+    "python/alas_headless/adapter/flows/login.py": "e72af122826bd42adf8cdb4f00c836ec386578c5a12927176908db6a61396ced",
+    "python/alas_headless/alas_hp_control_config_replay.py": "c77ae6931558a606358bb3bc774a46592ce3bfdc82b8c8729542eb94a23c4334",
+    "tests/test_campaign_sparse_vitals.py": "c35dd3827e5841a7bbba5586cd2eeb096189ffe5762471eff962eb8f5ea0412e"
+  },
+  "integration_checks": {
+    "patch_series": true,
+    "support_matrix": true,
+    "hp_config_replay": true,
+    "login_replay": true,
+    "frame_clock": true,
+    "pixel_inventory": true
+  }
+}

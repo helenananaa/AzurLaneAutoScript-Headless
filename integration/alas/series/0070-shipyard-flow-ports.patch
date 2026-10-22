@@ -1,9 +1,55 @@
 diff --git a/module/shipyard/shipyard_reward.py b/module/shipyard/shipyard_reward.py
-index 9cb098b8..8f5fb97a 100644
+index 9cb098b888be87f98d56041a32a1035fca372201..c7553d48dbbb5382869904c6f6ff2842044f5c07 100644
 --- a/module/shipyard/shipyard_reward.py
 +++ b/module/shipyard/shipyard_reward.py
-@@ -218,7 +218,18 @@ class RewardShipyard(ShipyardUI):
-         Pages:
+@@ -130,12 +130,26 @@
+             if remain is None:
+                 break
+ 
++            from alas_headless import current_semantic_session
++            semantic_session = current_semantic_session()
++            if semantic_session is not None and count == remain:
++                break
++
+             if self._shipyard_bp_rarity == 'DR':
+                 self.config.ShipyardDr_LastRun = datetime.now().replace(microsecond=0)
+             else:
+                 self.config.Shipyard_LastRun = datetime.now().replace(microsecond=0)
+ 
+-            self._shipyard_buy_confirm('BP_BUY')
++            if semantic_session is not None:
++                semantic_session.begin_shipyard_purchase(
++                    self._shipyard_focus_index, self._shipyard_bp_rarity, count - remain,
++                    sum(self._shipyard_get_cost(i) for i in range(prev, prev + count - remain)),
++                )
++            try:
++                self._shipyard_buy_confirm('BP_BUY')
++            finally:
++                if semantic_session is not None:
++                    semantic_session.end_shipyard_purchase()
+ 
+             # Pay for actual amount bought based on 'remain'
+             # which also updates 'start' as a result
+@@ -160,7 +174,17 @@
+             remain = self._shipyard_ensure_index(count)
+             if remain is None:
+                 break
+-            self._shipyard_buy_confirm('BP_USE')
++            from alas_headless import current_semantic_session
++            semantic_session = current_semantic_session()
++            if semantic_session is not None and count == remain:
++                break
++            if semantic_session is not None:
++                semantic_session.begin_shipyard_blueprint_use(index, count - remain)
++            try:
++                self._shipyard_buy_confirm('BP_USE')
++            finally:
++                if semantic_session is not None:
++                    semantic_session.end_shipyard_blueprint_use()
+ 
+             count = self._shipyard_get_bp_count(index)
+ 
+@@ -221,6 +245,19 @@
              in: Any page
              out: page_shipyard
          """
@@ -17,41 +63,90 @@ index 9cb098b8..8f5fb97a 100644
 +            dr_index=self.config.ShipyardDr_ShipIndex,
 +            dr_buy_amount=self.config.ShipyardDr_BuyAmount,
 +            dr_last_run=self.config.ShipyardDr_LastRun,
++            pr_options=getattr(self.config, 'args', {}).get('Shipyard', {}).get('Shipyard', {}),
++            dr_options=getattr(self.config, 'args', {}).get('Shipyard', {}).get('ShipyardDr', {}),
 +        )
          if self.config.Shipyard_BuyAmount <= 0 and self.config.ShipyardDr_BuyAmount <= 0:
              self.config.Scheduler_Enable = False
              self.config.task_stop()
 diff --git a/module/shipyard/ui.py b/module/shipyard/ui.py
-index abb6c787..0978105f 100644
+index abb6c787726c33d0516d737508513b4b3dc66743..2fb9290cbb1a0d5698155a82f561c14d43388554 100644
 --- a/module/shipyard/ui.py
 +++ b/module/shipyard/ui.py
-@@ -31,6 +31,14 @@ class ShipyardUI(UI):
+@@ -31,6 +31,14 @@
          Returns:
              bool if appear
          """
 +        from alas_headless import current_semantic_session
 +        semantic_session = current_semantic_session()
 +        if semantic_session is not None:
-+            state = semantic_session.shipyard_state(self._shipyard_focus_index)
-+            if state.cannot_strengthen:
++            cannot_strengthen = semantic_session.shipyard_cannot_strengthen(self._shipyard_focus_index)
++            if cannot_strengthen:
 +                logger.info('Ship at full strength for current level, '
 +                            'no more BPs can be consumed')
-+            return state.cannot_strengthen
++            return cannot_strengthen
          if self.appear(SHIPYARD_PROGRESS_DEV, offset=(20, 20)) \
                  or self.appear(SHIPYARD_PROGRESS_FATE, offset=(20, 20)) \
                  or self.appear(SHIPYARD_LEVEL_NOT_ENOUGH_FATE, offset=(20, 20)) \
-@@ -131,6 +139,10 @@ class ShipyardUI(UI):
+@@ -47,6 +55,10 @@
+         Returns:
+             string 'FATE' or 'DEV'
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return semantic_session.shipyard_active_phase().upper()
+         if self.appear(SHIPYARD_IN_FATE, offset=(20, 20)):
+             return 'FATE'
+         else:
+@@ -61,6 +73,13 @@
+         Returns:
+             Button, Button, int (ocr read value)
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            panel = semantic_session.shipyard_strengthen_panel(self._shipyard_focus_index)
++            append = panel.phase.upper()
++            return (globals()[f'SHIPYARD_PLUS_{append}'],
++                    globals()[f'SHIPYARD_MINUS_{append}'], panel.quantity)
+         # Game UI is messy here. Situation varies with DEV/FATE and MAX button.
+         # Having a MAX button is like:
+         # | - |   0   | + | | MAX |
+@@ -110,7 +129,20 @@
+ 
+             diff = count - current
+             button = plus if diff > 0 else minus
+-            self.device.multi_click(button, n=diff, interval=(0.3, 0.5))
++            from alas_headless import current_semantic_session
++            semantic_session = current_semantic_session()
++            if semantic_session is not None:
++                for _ in range(abs(diff)):
++                    if not semantic_session.shipyard_change_quantity(
++                            self._shipyard_focus_index, 1 if diff > 0 else -1):
++                        self.device.screenshot()
++                        remaining = count - self._shipyard_get_total()[2]
++                        if remaining < 0:
++                            from alas_headless import SemanticGateClosed
++                            raise SemanticGateClosed('shipyard quantity could not be reduced to the ALAS request')
++                        return remaining
++            else:
++                self.device.multi_click(button, n=diff, interval=(0.3, 0.5))
+             self.device.sleep((0.3, 0.5))
+ 
+         logger.info(f'Current interface does not allow consumption of {count} BPs\n')
+@@ -131,6 +163,10 @@
              logger.warning(f'Cannot parse for count from index {index}')
              return -1
  
 +        from alas_headless import current_semantic_session
 +        semantic_session = current_semantic_session()
 +        if semantic_session is not None:
-+            return semantic_session.shipyard_state(index).blueprint_count
++            return semantic_session.shipyard_blueprint_count(index)
          result = OCR_SHIPYARD_BP_COUNT_GRID.ocr(self.device.image)
  
          return result[index - 1]
-@@ -163,6 +175,11 @@ class ShipyardUI(UI):
+@@ -163,6 +199,11 @@
              logger.warning(f'Research Series {series} is not selectable')
              return False
  
@@ -63,7 +158,7 @@ index abb6c787..0978105f 100644
          self.ui_click(SHIPYARD_SERIES_SELECT_ENTER, appear_button=self._shipyard_in_ui,
                        check_button=SHIPYARD_SERIES_SELECT_CHECK,
                        skip_first_screenshot=skip_first_screenshot)
-@@ -205,6 +222,14 @@ class ShipyardUI(UI):
+@@ -205,6 +246,14 @@
                  logger.warning(f'Index for bottom Navbar {left} is not selectable')
                  return False
  
@@ -78,18 +173,82 @@ index abb6c787..0978105f 100644
          ensured = False
          if self._shipyard_bottom_navbar.set(self, left=left, right=right, skip_first_screenshot=skip_first_screenshot):
              ensured = True
-@@ -359,6 +384,15 @@ class ShipyardUI(UI):
+@@ -291,6 +340,19 @@
+             text (str): for handle_popup_confirm
+             skip_first_screenshot (bool):
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        semantic_use = text == 'BP_USE'
++        if semantic_session is not None:
++            if text not in ('BP_USE', 'BP_BUY'):
++                from alas_headless import SemanticGateClosed
++                raise SemanticGateClosed('shipyard strengthening operation is unknown')
++            completed = (semantic_session.shipyard_blueprint_use_completed if semantic_use
++                         else semantic_session.shipyard_purchase_completed)
++            submit = (semantic_session.shipyard_blueprint_use_submit if semantic_use
++                      else semantic_session.shipyard_purchase_submit)
++            verify = (semantic_session.verify_shipyard_blueprint_use if semantic_use
++                      else semantic_session.verify_shipyard_purchase)
+         success = False
+         append = self._shipyard_get_append()
+         button = globals()[f'SHIPYARD_CONFIRM_{append}']
+@@ -304,7 +366,10 @@
+             else:
+                 self.device.screenshot()
+ 
+-            if ocr_timer.reached():
++            if semantic_session is not None and completed():
++                success = True
++
++            if semantic_session is None and ocr_timer.reached():
+                 logger.warning('Failed to detect for normal exit routine, resort to OCR check')
+                 _, _, current = self._shipyard_get_total()
+                 if not current:
+@@ -314,10 +379,13 @@
+                 ocr_timer.reset()
+                 continue
+ 
+-            if self.appear_then_click(button, offset=(20, 20), interval=3):
+-                continue
+-
+-            if self.handle_popup_confirm(text):
++            if (submit() if semantic_session is not None
++                    else self.appear_then_click(button, offset=(20, 20), interval=3)):
++                continue
++
++            if ((False if semantic_use else semantic_session.shipyard_purchase_confirm(text))
++                    if semantic_session is not None
++                    else self.handle_popup_confirm(text)):
+                 self.interval_reset(button)
+                 ocr_timer.reset()
+                 confirm_timer.reset()
+@@ -351,6 +419,8 @@
+                     break
+             else:
+                 confirm_timer.reset()
++        if semantic_session is not None:
++            verify()
+ 
+     def _shipyard_buy_enter(self):
+         """
+@@ -359,6 +429,20 @@
          Returns:
              bool whether entered
          """
 +        from alas_headless import current_semantic_session
 +        semantic_session = current_semantic_session()
 +        if semantic_session is not None:
++            if semantic_session.shipyard_active_phase() == 'fate':
++                return True
 +            state = semantic_session.shipyard_state(self._shipyard_focus_index)
 +            if state.research_status != 'complete':
 +                logger.warning('Cannot enter buy interface, focused '
 +                               'ship has not yet been fully researched')
 +                return False
++            if semantic_session.shipyard_fate_available():
++                semantic_session.shipyard_enter_fate(self._shipyard_focus_index)
++                self.device.screenshot()
 +            return True
          if self.appear(SHIPYARD_RESEARCH_INCOMPLETE, offset=(20, 20)) \
                  or self.appear(SHIPYARD_RESEARCH_IN_PROGRESS, offset=(20, 20)):

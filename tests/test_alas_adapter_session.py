@@ -1,6 +1,7 @@
 """Session regression cases for the adapter."""
 
 import unittest
+from contextlib import nullcontext
 from alas_headless import (
     AlasCombatObserverManifest,
     AlasSemanticSession,
@@ -13,6 +14,40 @@ from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_session_safe_area_alias_requires_meta_owner_and_exact_award(self):
+        adapter = Mock()
+        adapter._meta_beacon_active = True
+        adapter._meta_assist_active = False
+        adapter._meta_reward_close_receipt = None
+        adapter._exercise_execution_active = False
+        frame = adapter._require_frame_observation_oracle.return_value
+        frame.exercise_reward_item_info_visible.return_value = False
+        frame.daily_battle_result_visible.return_value = False
+        frame.operation_siren_battle_result_visible.return_value = False
+        frame.enabled.return_value = False
+        adapter.campaign_combat_committed.return_value = False
+        adapter.operation_siren_combat_committed.return_value = False
+        adapter._operation_siren_reward_return_completed.return_value = None
+        adapter.oracle.award_info_page_visible.return_value = True
+        adapter.prepared_input_frame.side_effect = lambda provider: nullcontext()
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session._opsi_sample_use = None
+        session._combat_result_action_oracle = lambda _adapter: frame
+        session._combat_result_observation = None
+        session.open = lambda: adapter
+        session.refresh_frame = Mock()
+        session.click(NamedButton('CLICK_SAFE_AREA'))
+        self.assertEqual(adapter.click.call_count, 1, adapter.mock_calls)
+        adapter.oracle.award_info_page_visible.return_value = False
+        with self.assertRaises(AlasSemanticUnmapped):
+            session.click(NamedButton('CLICK_SAFE_AREA'))
+        adapter.oracle.award_info_page_visible.return_value = True
+        adapter._meta_beacon_active = False
+        with self.assertRaises(AlasSemanticUnmapped):
+            session.click(NamedButton('CLICK_SAFE_AREA'))
+        self.assertEqual(adapter.click.call_count, 1)
+
     def test_lazy_session_rejects_unmapped_before_opening_adb(self):
         session = AlasSemanticSession(
             "emulator-test", "be80ce591a481c12d60c50d6040d40c035b40a2b"
@@ -29,6 +64,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         adapter.campaign_combat_committed.return_value = False
         adapter.operation_siren_combat_committed.return_value = False
         adapter.click.return_value = receipt
+        adapter.prepared_input_frame.side_effect = lambda provider: nullcontext()
         session = AlasSemanticSession.__new__(AlasSemanticSession)
         session.adapter = adapter
         session.open = lambda: adapter
@@ -41,7 +77,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertEqual(session.refresh_frame.call_count, 2)
         self.assertEqual(adapter.click.call_count, 2)
 
-    def test_live_combat_manifest_rebinds_only_reviewed_capacity_successor(self):
+    def test_live_combat_manifest_rebinds_capacity_successor_without_mutating_baseline(self):
         base_revision = "be80ce591a481c12d60c50d6040d40c035b40a2b"
         live_revision = "506b76f698b5089aaa29c4e7908b48edb8532a44"
         manifest = AlasCombatObserverManifest(
@@ -62,24 +98,31 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertEqual(manifest.driver_revision, base_revision)
         self.assertIs(session._live_combat_manifest(), rebound)
 
-    def test_live_combat_manifest_rejects_unknown_driver_transition(self):
+    def test_live_combat_manifest_reports_unknown_driver_as_best_effort(self):
         manifest = AlasCombatObserverManifest(
             package="com.bilibili.azurlane",
             driver_revision="be80ce591a481c12d60c50d6040d40c035b40a2b",
             game_fingerprint="reviewed-game",
             resources=(),
         )
-        session = AlasSemanticSession("emulator-test", "a" * 40)
+        trace = Mock()
+        session = AlasSemanticSession("emulator-test", "a" * 40, trace=trace)
 
         with patch(
             "alas_headless.adapter.semantic.session_combat.load_alas_combat_observer_manifest",
             return_value=manifest,
         ):
-            with self.assertRaisesRegex(
-                SemanticGateClosed,
-                "not qualified",
-            ):
-                session._live_combat_manifest()
+            rebound = session._live_combat_manifest()
+        self.assertEqual(rebound.driver_revision, "a" * 40)
+        self.assertEqual(manifest.driver_revision, "be80ce591a481c12d60c50d6040d40c035b40a2b")
+        trace.emit.assert_called_once_with(
+            "semantic.combat.compatibility",
+            fields={
+                "status": "best-effort",
+                "baseline_driver_revision": manifest.driver_revision,
+                "active_driver_revision": "a" * 40,
+            },
+        )
 
     def test_environment_factory_requires_explicit_opt_in(self):
         environment = {

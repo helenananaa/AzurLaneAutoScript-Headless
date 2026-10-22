@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import re
+import time
+from dataclasses import dataclass
 from typing import Optional, Tuple
 from .contracts import (
     ActionReceipt,
@@ -12,11 +14,89 @@ from .contracts import (
     TextState,
     UiState,
 )
-from .errors import SemanticGateClosed
+from .errors import SemanticGateClosed, SemanticInputBlocked
+
+DAILY_KIND_BY_SPRITE = {
+    'shangchuanhuwei_zi': 'escort_mission',
+    'haiyutujin_zi': 'advance_mission',
+    'zhanshouxingdong_zi': 'fierce_assault',
+    'zhanshuzuanyan_zi': 'tactical_training',
+    'pojiaozuozhan_zi': 'supply_line_disruption',
+    'bingzhuangDesc': 'module_development',
+}
+
+
+@dataclass(frozen=True)
+class SubmarineCallState:
+    """Observed weapon control, not evidence that a submarine was deployed."""
+
+    generation: int
+    battle_instance_id: int
+    button: Optional[ButtonState]
 
 
 class CombatOracle:
     """Combat operations sharing the oracle frame and input boundary."""
+
+    def campaign_submarine_call_state(self) -> Optional[SubmarineCallState]:
+        state = self.read_state()
+        root = 'UICamera/Canvas/UIMain/CombatUIStandard(Clone)'
+        pauses = [b for b in state.buttons if b.path == root + '/PauseBtn'
+                  and b.active_in_hierarchy and b.active_and_enabled]
+        if not pauses:
+            return None
+        if self._daily_battle_result_buttons(state) or self._blocking_rules(state, 'campaign/combat/submarine/call'):
+            return None
+        if len(pauses) != 1:
+            raise SemanticGateClosed('submarine combat identity is ambiguous')
+        identity = pauses[0].raw.get('instance_id')
+        if type(identity) is not int or identity == 0:
+            raise SemanticGateClosed('submarine combat identity is unavailable')
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2 or ui.image_truncated:
+            raise SemanticGateClosed('submarine combat frame is incomplete')
+        path = root + '/Weapon_button_container/Weapon_button(Clone)/ActCtl'
+        icons = [i for i in ui.images if i.path == path + '/skill_icon/filled'
+                 and i.sprite == 'filled_combined_submarine'
+                 and i.active_in_hierarchy and i.active_and_enabled]
+        if not icons:
+            return SubmarineCallState(ui.generation, identity, None)
+        if len(icons) != 1 or icons[0].truncated or icons[0].bounds is None:
+            raise SemanticGateClosed('submarine weapon icon is ambiguous or incomplete')
+        bounds = icons[0].bounds
+        centre = Point((bounds.left + bounds.right) / 2, (bounds.top + bounds.bottom) / 2)
+        buttons = [b for b in state.buttons if b.path == path
+                   and b.active_in_hierarchy and b.active_and_enabled
+                   and b.bounds is not None and b.bounds.contains(centre)]
+        backgrounds = [i for i in ui.images if i.path == path + '/unselect'
+                       and i.sprite == 'sub_unselecte' and i.active_in_hierarchy
+                       and i.active_and_enabled and not i.truncated
+                       and i.bounds is not None and i.bounds.contains(centre)]
+        if len(buttons) != 1 or len(backgrounds) != 1:
+            raise SemanticGateClosed('submarine weapon binding is ambiguous or incomplete')
+        return SubmarineCallState(ui.generation, identity, buttons[0])
+
+    def click_campaign_submarine_call(self, expected_battle_instance_id: int) -> ActionReceipt:
+        observed = self.campaign_submarine_call_state()
+        if (observed is None or type(expected_battle_instance_id) is not int
+                or observed.battle_instance_id != expected_battle_instance_id):
+            raise SemanticGateClosed('submarine battle changed before input')
+        target = observed.button
+        if target is None or not target.actionable:
+            raise SemanticGateClosed('submarine call is not actionable')
+        state = self.read_state()
+        semantic_id = 'campaign/combat/submarine/call'
+        pauses = [b for b in state.buttons if b.path == 'UICamera/Canvas/UIMain/CombatUIStandard(Clone)/PauseBtn'
+                  and b.active_in_hierarchy and b.active_and_enabled]
+        if len(pauses) != 1 or pauses[0].raw.get('instance_id') != expected_battle_instance_id:
+            raise SemanticGateClosed('submarine battle changed before input')
+        if state.generation - observed.generation not in (0, 1, 2):
+            raise SemanticGateClosed('submarine call frame changed before input')
+        if self._blocking_rules(state, semantic_id) or self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('submarine call is blocked')
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(semantic_id=semantic_id, generation=observed.generation,
+                             point=target.point, bounds=target.bounds, path=target.path)
 
     def daily_page_visible(self) -> bool:
         state = self.read_state()
@@ -24,6 +104,16 @@ class CombatOracle:
             self._matches(state, "daily/page/back")
             and not self._daily_precombat_visible(state)
         )
+
+    def daily_entry_visible(self) -> bool:
+        """Prove arrival without treating a UI observation as new input authority."""
+        state = self.read_state()
+        targets = self._matches(state, 'daily/page/back')
+        return bool(len(targets) == 1 and targets[0].active_in_hierarchy
+                    and targets[0].active_and_enabled and targets[0].interactable
+                    and targets[0].raycast_top is not False
+                    and not self._daily_precombat_visible(state)
+                    and not self._blocking_rules(state, 'daily/page/back'))
 
     def daily_detail_visible(self) -> bool:
         state = self.read_state()
@@ -75,6 +165,26 @@ class CombatOracle:
             and button.interactable
             for button in state.buttons
         )
+
+    def daily_battle_loading_visible(self) -> bool:
+        """Recognize the typed combat loader without requiring a Loading button."""
+        state = self.read_state()
+        if any(b.active_in_hierarchy and b.active_and_enabled
+               and b.path != 'OverlayCamera/Overlay/UIOverlay/Loading(Clone)'
+               for b in state.buttons):
+            return False
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2 or ui.skipped_count:
+            raise SemanticGateClosed('combat loading snapshots are not coherent or complete')
+        root = 'UICamera/Canvas/UIMain/CombatLoadUI(Clone)/loading/loading_label'
+        def texts(path):
+            return [t for t in ui.texts if t.path == path and t.active_in_hierarchy
+                    and t.active_and_enabled and not t.truncated and t.bounds is not None]
+        labels, percents = texts(root), texts(root + '/percent')
+        return bool(len(labels) == len(percents) == 1
+                    and labels[0].text == 'NOW LOADING...'
+                    and re.fullmatch(r'(?:100(?:\.0+)?|\d{1,2}(?:\.\d+)?)%', percents[0].text)
+                    and all(r.blocker_id == 'loading' for r in self._blocking_rules(state, 'ui/absence-probe')))
 
     @staticmethod
     def _daily_combat_visible(state: OracleState) -> bool:
@@ -169,14 +279,25 @@ class CombatOracle:
         # Operation Siren's result grade page is an EventTrigger surface, not
         # a Unity Button.  Prove that exact typed stack instead of allowing the
         # still-mounted CombatUI underneath to win the surface classification.
-        ui_state = self.read_ui_state()
+        # This fallback consumes only complete grade/continue text. Dock ship
+        # toggles may exceed their independent cap while ALAS is entering
+        # retirement; retain that flag without rejecting an unrelated probe.
+        ui_state = self.read_ui_state(
+            check_foreground=False, _preserve_partial_toggles=True
+        )
+        # This is a passive probe used even on Campaign preparation. A fresh
+        # UI without the result identity proves absence by itself; only a
+        # positive result needs to combine that UI with state blocker proof.
+        result = self._operation_siren_battle_result_continue(ui_state)
+        if result is None:
+            return False
         if (
             ui_state.generation < state.generation
             or ui_state.generation > state.generation + 2
         ):
             raise SemanticGateClosed("battle result snapshots are not coherent")
         return bool(
-            self._operation_siren_battle_result_continue(ui_state) is not None
+            result is not None
             and not self._blocking_rules(
                 state, "operation-siren/battle/result"
             )
@@ -199,6 +320,58 @@ class CombatOracle:
         grade = self._operation_siren_battle_result_grade(ui_state)
         if grade is None:
             raise SemanticGateClosed("operation siren battle result grade is absent")
+        return grade
+
+    @staticmethod
+    def _operation_siren_statistics_targets(state):
+        root = ("OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/"
+                "NewBattleResultStatisticsPage(Clone)")
+        return tuple(b for b in state.buttons
+                     if b.path == root + "/bottom/confirmBtn"
+                     and b.active_in_hierarchy and b.active_and_enabled)
+
+    def operation_siren_battle_statistics_visible(self) -> bool:
+        state = self.read_state()
+        targets = self._operation_siren_statistics_targets(state)
+        if len(targets) > 1:
+            raise SemanticGateClosed("operation siren statistics target is ambiguous")
+        return bool(targets and not self._blocking_rules(state, "daily/battle/result"))
+
+    def operation_siren_battle_statistics_grade(self) -> Optional[str]:
+        """Read the native statistics grade above any retained CombatUI."""
+
+        root = ("OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/"
+                "NewBattleResultStatisticsPage(Clone)")
+        state = self.read_state()
+        targets = self._operation_siren_statistics_targets(state)
+        if not targets:
+            return None
+        if len(targets) != 1:
+            raise SemanticGateClosed("operation siren statistics target is ambiguous")
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed("operation siren statistics snapshots are not coherent")
+        icons = tuple(i for i in ui.images
+                      if i.path == root + "/top/grade/icon"
+                      and i.active_in_hierarchy and i.active_and_enabled)
+        labels = tuple(i for i in ui.images
+                       if i.path == root + "/top/grade/Text"
+                       and i.active_in_hierarchy and i.active_and_enabled)
+        if len(icons) != 1 or len(labels) != 1:
+            if (len(icons) <= 1 and len(labels) <= 1
+                    and not ui.image_truncated and not ui.skipped_count
+                    and (targets[0].raycast_top is False or not targets[0].interactable)):
+                # The statistics prefab can mount its disabled/covered
+                # confirm before the grade Images. No grade or input is
+                # available yet; native ALAS owns the next screenshot.
+                return None
+            raise SemanticGateClosed("operation siren statistics grade is ambiguous or incomplete")
+        grade = icons[0].sprite.removeprefix("letter_")
+        if (grade not in ("S", "A", "B", "C", "D")
+                or icons[0].sprite != "letter_" + grade
+                or labels[0].sprite.casefold() != "label_" + grade.casefold()
+                or icons[0].truncated or labels[0].truncated):
+            raise SemanticGateClosed("operation siren statistics grade is unsupported or inconsistent")
         return grade
 
     def combat_pause_visible(self) -> bool:
@@ -225,6 +398,9 @@ class CombatOracle:
         state = self.read_state()
         target = self._unique(state, "exercise/combat/pause")
         assert target.point is not None and target.bounds is not None
+        if (self._blocking_rules(state, 'exercise/combat/pause')
+                or self._foreground_component() != self.fingerprint.component):
+            raise SemanticGateClosed('combat pause is covered or foreground changed')
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
         return ActionReceipt(
             semantic_id="combat/pause", generation=state.generation,
@@ -288,9 +464,32 @@ class CombatOracle:
         )
 
     def click_daily_precombat_back(self) -> ActionReceipt:
-        state = self.read_state()
-        if not self._daily_precombat_visible(state):
-            raise SemanticGateClosed("daily precombat page is absent")
+        return self._click_shared_precombat_back(owned_meta_assist=False)
+
+    def click_meta_assist_precombat_back(self) -> ActionReceipt:
+        return self._click_shared_precombat_back(owned_meta_assist=True)
+
+    def _click_shared_precombat_back(self, *, owned_meta_assist: bool) -> ActionReceipt:
+        def ready_state():
+            state = self.read_state()
+            if not self._daily_precombat_visible(state):
+                raise SemanticGateClosed("daily precombat page is absent")
+            if owned_meta_assist:
+                # Returning spends no assist attempt, including after exhaustion.
+                # Prove the same typed owner as start before ignoring its underlay.
+                self.meta_assist_state()
+                state = self.read_state()
+                if not self._daily_precombat_visible(state):
+                    raise SemanticGateClosed('META assist precombat changed during observation')
+            blockers = self._blocking_rules(state, 'daily/precombat/back')
+            if owned_meta_assist:
+                blockers = tuple(rule for rule in blockers
+                    if not (rule.blocker_id == 'meta-assist' and rule.path_fragment ==
+                        '/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/'))
+            if blockers:
+                raise SemanticGateClosed('daily precombat back is blocked: '+','.join(b.blocker_id for b in blockers))
+            return state
+        state = self._retry_transition_read(ready_state)
         target = self._unique(state, "daily/precombat/back")
         if (
             not target.active_in_hierarchy
@@ -302,7 +501,14 @@ class CombatOracle:
             or not target.bounds.contains(target.point)
         ):
             raise SemanticGateClosed("daily precombat back is not actionable")
+        if not (0 <= target.point.x < self.fingerprint.width
+                and 0 <= target.point.y < self.fingerprint.height):
+            raise SemanticGateClosed('daily precombat back is outside the screen')
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed before daily precombat back')
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed after daily precombat back')
         return ActionReceipt(
             semantic_id="daily/precombat/back",
             generation=state.generation,
@@ -311,22 +517,145 @@ class CombatOracle:
             path=target.path,
         )
 
-    def click_daily_precombat_start(self) -> ActionReceipt:
+    def click_daily_precombat_start(self, *, input_frame=None) -> ActionReceipt:
+        return self._click_shared_precombat_start(owned_meta_assist=False, input_frame=input_frame)
+
+    def combat_automation_info_visible(self) -> bool:
         state = self.read_state()
-        if not self._daily_precombat_visible(state):
-            raise SemanticGateClosed("daily precombat page is absent")
-        target = self._unique(state, "daily/precombat/start")
-        if (
-            not target.active_in_hierarchy
-            or not target.active_and_enabled
-            or not target.interactable
-            or target.raycast_top is not None
-            or target.point is None
-            or target.bounds is None
-            or not target.bounds.contains(target.point)
-        ):
-            raise SemanticGateClosed("daily precombat start is not actionable")
-        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        if not (self._daily_precombat_visible(state) or self._daily_combat_visible(state)):
+            return False
+        targets = [b for b in self._matches(state, 'os/precombat/info/confirm')
+                   if b.active_in_hierarchy and b.active_and_enabled]
+        if not targets:
+            return False
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('automation information frames are incoherent')
+        def texts(suffix):
+            return [re.sub(r'\s+', '', t.text) for t in ui.texts
+                    if t.path.endswith('Msgbox(Clone)/window/' + suffix)
+                    and t.active_in_hierarchy and t.active_and_enabled
+                    and not t.truncated and t.bounds is not None]
+        if texts('help_panel/list/help_tpl') != ['注意，自律战斗时可能出现以下情况']:
+            return False
+        if texts('button_container/custom_button_1(Clone)/pic') != ['知道了']:
+            return False
+        if any(b.active_in_hierarchy and b.active_and_enabled
+               and '/Msgbox(Clone)/window/button_container/' in b.path
+               and b.path != targets[0].path for b in state.buttons):
+            raise SemanticGateClosed('automation information choices are ambiguous')
+        return len(targets) == 1 and targets[0].actionable
+
+    def click_combat_automation_info(self) -> ActionReceipt:
+        if not self.combat_automation_info_visible():
+            raise SemanticGateClosed('automation information identity is not proven')
+        state = self.read_state()
+        precombat = self._daily_precombat_visible(state)
+        target = self._unique(state, 'os/precombat/info/confirm')
+        blockers = [rule for rule in self._blocking_rules(state, 'os/precombat/info/confirm')
+                    if (rule.blocker_id, rule.path_fragment) not in (
+                        ('daily-precombat', '/PreCombatUI(Clone)/'),
+                        ('meta-current-detail', '/WorldBossUI(Clone)/pages/CurrentWorldBossDetailUI(Clone)/'),
+                        ('meta-assist', '/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/'))]
+        if (not target.actionable or target.point is None or target.bounds is None
+                or not target.bounds.contains(target.point) or blockers
+                or self._foreground_component() != self.fingerprint.component):
+            raise SemanticGateClosed('automation information target is not actionable')
+        self._tap(round(target.point.x), round(target.point.y))
+        receipt = ActionReceipt(semantic_id='os/precombat/info/confirm', generation=state.generation,
+                                path=target.path, point=target.point, bounds=target.bounds)
+        deadline = time.monotonic() + 8
+        while time.monotonic() < deadline:
+            after = self.read_state()
+            if after.generation > receipt.generation and not self.combat_automation_info_visible():
+                restored = (self._daily_precombat_visible(after) if precombat
+                            else self._daily_combat_visible(after))
+                if not restored:
+                    raise SemanticGateClosed('automation information did not restore its combat page')
+                return receipt
+            self._sleep(.2)
+        raise SemanticGateClosed('automation information did not close after input')
+
+    def click_meta_assist_precombat_start(self, *, input_frame=None) -> ActionReceipt:
+        return self._click_shared_precombat_start(owned_meta_assist=True, input_frame=input_frame)
+
+    def _click_shared_precombat_start(self, *, owned_meta_assist: bool, input_frame=None) -> ActionReceipt:
+        previous_target = None
+        observations = []
+        def ready_state(reader=None):
+            nonlocal previous_target
+            reader = self if reader is None else reader
+            state = reader.read_state()
+            observation = {'generation': state.generation}
+            observations.append(observation)
+            if not reader._daily_precombat_visible(state):
+                raise SemanticGateClosed("daily precombat page is absent")
+            if owned_meta_assist:
+                summary = reader.meta_assist_state()
+                if summary.remaining_attempts <= 0:
+                    raise SemanticGateClosed('META assist has no remaining attempts')
+                state = reader.read_state()
+                if not reader._daily_precombat_visible(state):
+                    raise SemanticGateClosed('META assist precombat changed during observation')
+            blockers = reader._blocking_rules(state, 'daily/precombat/start')
+            if owned_meta_assist:
+                blockers = tuple(rule for rule in blockers
+                    if not (rule.blocker_id == 'meta-assist' and rule.path_fragment ==
+                        '/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/'))
+            if len(blockers) == 1 and blockers[0].blocker_id == 'loading':
+                raise SemanticInputBlocked('daily/precombat/start', state.generation, ('loading',))
+            if blockers:
+                raise SemanticGateClosed('daily precombat start is blocked: '+','.join(b.blocker_id for b in blockers))
+            target = reader._unique(state, "daily/precombat/start")
+            observation.update(path=target.path,
+                point=(target.point.x, target.point.y) if target.point else None)
+            if (
+                not target.active_in_hierarchy
+                or not target.active_and_enabled
+                or not target.interactable
+                or target.raycast_top is not None
+                or target.point is None
+                or target.bounds is None
+                or not target.bounds.contains(target.point)
+                or not (0 <= target.point.x < self.fingerprint.width
+                        and 0 <= target.point.y < self.fingerprint.height)
+            ):
+                raise SemanticGateClosed("daily precombat start is not actionable")
+            prior = previous_target
+            previous_target = target
+            if (prior is None or prior.path != target.path
+                    or abs(prior.point.x - target.point.x) > 1.0
+                    or abs(prior.point.y - target.point.y) > 1.0):
+                # This delegated control has no raycast proof while its panel
+                # slides in. Reuse the short read-only transition wait, then
+                # tap the latest native point once. Subpixel motion is harmless
+                # at ADB input precision; no absolute position is prescribed.
+                raise SemanticGateClosed("daily precombat start geometry is moving")
+            return state, target
+        try:
+            state, target = self._retry_transition_read(ready_state)
+        except SemanticGateClosed as exc:
+            if str(exc) == 'daily precombat start geometry is moving':
+                # Retain every read-only attempt, including attempts that fail
+                # before geometry comparison. A first warmup traceback alone
+                # cannot establish that the final target was still moving.
+                raise SemanticGateClosed(
+                    f'{exc}; readiness observations={observations}') from exc
+            raise
+        input_reader = self
+        if input_frame is not None:
+            # Live readiness can outlast its entry lease during slow ADB reads.
+            # Reacquire once, then prove the same stable target and META fleet
+            # from that coherent frame. Never retry a submitted input.
+            input_reader = input_frame()
+            state, target = ready_state(input_reader)
+            if not input_reader.meta_precombat_fleet_ready():
+                raise SemanticGateClosed('META precombat requires non-empty main and vanguard fleets')
+        if input_reader._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed before daily precombat start')
+        input_reader._tap(int(round(target.point.x)), int(round(target.point.y)))
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed after daily precombat start')
         return ActionReceipt(
             semantic_id="daily/precombat/start",
             generation=state.generation,
@@ -397,18 +726,34 @@ class CombatOracle:
         )
         if len(titles) != 1:
             raise SemanticGateClosed("centered daily identity is absent or ambiguous")
-        kinds = {
-            "shangchuanhuwei_zi": "escort_mission",
-            "haiyutujin_zi": "advance_mission",
-            "zhanshouxingdong_zi": "fierce_assault",
-            "zhanshuzuanyan_zi": "tactical_training",
-            "pojiaozuozhan_zi": "supply_line_disruption",
-            "bingzhuangDesc": "module_development",
-        }
         try:
-            return kinds[titles[0].sprite]
+            return DAILY_KIND_BY_SPRITE[titles[0].sprite]
         except KeyError as exc:
             raise SemanticGateClosed("centered daily identity is not reviewed") from exc
+
+    def daily_remaining_for_kind(self, kind: str) -> int:
+        """Read a challenge after the native carousel reorders on completion."""
+        if kind not in DAILY_KIND_BY_SPRITE.values() or not self.daily_page_visible():
+            raise SemanticGateClosed('daily challenge page or kind is unavailable')
+        ui = self.read_ui_state()
+        if ui.image_truncated:
+            raise SemanticGateClosed('daily challenge identity snapshot is truncated')
+        prefix = 'UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/'
+        titles = [i for i in ui.images if i.path.startswith(prefix)
+                  and i.path.endswith('/icon/card/title') and i.active_in_hierarchy
+                  and i.active_and_enabled and not i.truncated
+                  and DAILY_KIND_BY_SPRITE.get(i.sprite) == kind]
+        if len(titles) != 1:
+            raise SemanticGateClosed('daily challenge identity is absent or ambiguous')
+        path = titles[0].path[:-len('/icon/card/title')] + '/count'
+        counts = [t for t in ui.texts if t.path == path and t.active_in_hierarchy
+                  and t.active_and_enabled and not t.truncated]
+        if len(counts) != 1:
+            raise SemanticGateClosed('daily challenge remaining count is ambiguous')
+        match = re.fullmatch(r'([0-4])/([0-4])', counts[0].text.strip())
+        if match is None or int(match[1]) > int(match[2]):
+            raise SemanticGateClosed('daily challenge remaining count is malformed')
+        return int(match[1])
 
     def daily_current_remain(self) -> int:
         """Return the remaining count from the centered card's exact text."""
@@ -609,6 +954,12 @@ class CombatOracle:
         if len(matches) != 1:
             raise SemanticGateClosed("daily run choice is absent or ambiguous")
         target = matches[0]
+        semantic_id = 'daily/run/' + choice
+        if (target.raycast_top is False or (choice == 'skip' and target.raycast_top is not True)
+                or self._blocking_rules(state, semantic_id)):
+            raise SemanticGateClosed('daily run choice is obscured or not top-raycast actionable')
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed immediately before daily input')
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
         return ActionReceipt(
             semantic_id="daily/run/{0}".format(choice),

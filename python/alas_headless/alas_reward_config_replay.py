@@ -355,8 +355,14 @@ def _verify_semantic_claim_budget(
     device = Device(budget)
     host = object.__new__(reward_type)
     host.device = device
-    host.loop = lambda: range(3)
-    host.ui_page_appear = lambda page: True
+    host.loop = lambda: range(4)
+    page_checks = []
+    page_states = iter((True, True, False))
+    def page_appear(page):
+        visible = next(page_states)
+        page_checks.append(visible)
+        return visible
+    host.ui_page_appear = page_appear
     host.appear_then_click = lambda button, **kwargs: False
     host.match_template_color = lambda button, **kwargs: True
     host.appear = lambda button, **kwargs: False
@@ -368,12 +374,14 @@ def _verify_semantic_claim_budget(
         claimed = reward_type._reward_mission_claim_click(host)
     finally:
         reward_module.Timer = original_timer
-    if claimed is not True or len(device.clicks) != 1 or budget.checks != 2:
+    if (claimed is not True or len(device.clicks) != 1 or budget.checks != 3
+            or page_checks != [True, True, False]):
         raise AssertionError("semantic mission claim budget loop drifted")
     return {
         "claimed": claimed,
         "input_count": len(device.clicks),
         "budget_checks": budget.checks,
+        "popup_transition_observed": page_checks[-1] is False,
     }
 
 

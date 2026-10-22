@@ -1,0 +1,19 @@
+diff --git a/alas.py b/alas.py
+--- a/alas.py
++++ b/alas.py
+@@ -79,7 +79,14 @@
+             logger.warning(e)
+             # Reuse ALAS' configured failure interval for this task only.
+             # None is deferred, not completed and not a runtime failure.
+-            self.config.task_delay(success=False)
++            # Keep a future schedule already selected by the original task
++            # (for example its recon-scan cooldown). A zero failure interval
++            # must not erase that native resource/re-entry decision.
++            next_run = getattr(self.config, 'Scheduler_NextRun', None)
++            if isinstance(next_run, datetime) and next_run > datetime.now():
++                self.config.task_delay(target=next_run)
++            else:
++                self.config.task_delay(success=False)
+             return None
+         except GameNotRunningError as e:
+             logger.warning(e)

@@ -1,0 +1,38 @@
+diff --git a/module/os/globe_operation.py b/module/os/globe_operation.py
+--- a/module/os/globe_operation.py
++++ b/module/os/globe_operation.py
+@@ -403,10 +403,23 @@
+                     raise SemanticStrongholdEntryLocked(zone.zone_id)
+                 raise OSExploreError
+             semantic_adapter.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
++            from alas_headless.oracle.errors import SemanticSnapshotStale
++            last_stale = None
+             for attempt in range(80):
+                 self.device.sleep(0.25)
+-                self.device.screenshot()
+-                if semantic_adapter.operation_siren_map_visible():
++                try:
++                    self.device.screenshot()
++                    map_visible = semantic_adapter.operation_siren_map_visible()
++                except SemanticSnapshotStale as exc:
++                    if exc.input_outcome_uncertain:
++                        raise
++                    # The accepted entrance owns this existing passive wait.
++                    # Reject the stale frame and let the next screenshot prove
++                    # the destination; do not retry input or consume old data.
++                    last_stale = exc
++                    continue
++                last_stale = None
++                if map_visible:
+                     return
+                 if self.handle_action_point(zone=zone, pinned=pinned):
+                     # The AP panel dismisses the selected-zone float panel.
+@@ -453,6 +466,8 @@
+                     # but re-prove the pinned typed control before every tap.
+                     logger.info('Retry exact typed zone entrance')
+                     semantic_adapter.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
++            if last_stale is not None:
++                raise last_stale
+             raise OSExploreError(f'Unable to enter typed zone {zone}')
+ 
+         click_timer = Timer(10)

@@ -1,0 +1,96 @@
+{
+  "schema": "alas-headless.retirement-config-replay/v1",
+  "passed": true,
+  "field_count": 1,
+  "accepted_case_count": 3,
+  "invalid_case_count": 7,
+  "semantic_admission": {
+    "one_click_retire": true,
+    "enhance": true,
+    "old_retire": false
+  },
+  "retire_amount_mapping": {
+    "one_click_retire": 3000,
+    "enhance": 3000,
+    "old_retire_all": 3000,
+    "old_retire_10": 10
+  },
+  "original_handlers": {
+    "one_click_retire": {
+      "total": 3,
+      "events": [
+        "one_click",
+        [
+          "gems",
+          true
+        ],
+        "quit"
+      ],
+      "dock_full_triggered": true
+    },
+    "old_retire": {
+      "total": 3,
+      "events": [
+        "dock_loading",
+        "old_retire",
+        [
+          "gems",
+          false
+        ],
+        "quit"
+      ],
+      "dock_full_triggered": true
+    },
+    "invalid": "ScriptError"
+  },
+  "runtime_consumers": {
+    "Retirement_RetireMode": [
+      "handle_retirement",
+      "_retire_handler",
+      "_retire_amount"
+    ]
+  },
+  "patched_guard_present": true,
+  "entry_dispatch": {
+    "one_click_retire": [
+      "game_tips",
+      [
+        "retire",
+        null
+      ],
+      "reset",
+      "timer_reset"
+    ],
+    "enhance": [
+      "game_tips",
+      "dock_loading",
+      "enhance",
+      "reset",
+      "timer_reset"
+    ],
+    "old_retire_legacy": [
+      "game_tips",
+      [
+        "retire",
+        null
+      ],
+      "reset",
+      "timer_reset"
+    ],
+    "refused_before_events": {
+      "old_retire_semantic": [],
+      "unknown": [],
+      "wrong_type": []
+    }
+  },
+  "temporary_config_only": true,
+  "mutation_budget": 0,
+  "real_retirement_performed": false,
+  "real_enhancement_performed": false,
+  "android_input_injected": false,
+  "source_sha256": {
+    "args": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+    "retirement": "e5451dedd9393f55695bf9ff7ba60e205d9e71d8f1e74e9f7ef6bdff4eed88af",
+    "enhancement": "b83c01549b6a013fb0bd01aba2bdc8e1c1b721a156d219faf9df18721cce6a9d"
+  }
+}

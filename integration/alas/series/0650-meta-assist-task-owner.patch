@@ -1,0 +1,44 @@
+diff --git a/module/os_ash/meta.py b/module/os_ash/meta.py
+--- a/module/os_ash/meta.py
++++ b/module/os_ash/meta.py
+@@ -54,8 +54,12 @@
+ class Meta(UI, MapEventHandler):
+ 
+     def digit_ocr_point_and_check(self, button: Button, check_number: int):
+-        point_ocr = MetaDigitCounter(button, letter=(235, 235, 235), threshold=160, name='POINT_OCR')
+-        point, _, _ = point_ocr.ocr(self.device.image)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and getattr(button, 'name', None) == 'BEACON_REMAIN':
++            point = semantic_adapter.meta_assist_state().remaining_attempts
++        else:
++            point_ocr = MetaDigitCounter(button, letter=(235, 235, 235), threshold=160, name='POINT_OCR')
++            point, _, _ = point_ocr.ocr(self.device.image)
+         if point >= check_number:
+             return True
+         return False
+@@ -715,10 +719,18 @@
+         return self._attack_meta(skip_first_screenshot=False)
+ 
+     def run(self):
+-        self.ui_ensure(page_reward)
+-
+-        if self._begin_meta_assist():
+-            MetaReward(self.config, self.device).run()
+-            self.config.task_delay(server_update=True)
+-        else:
+-            self.config.task_delay(minute=(10, 20))
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.begin_meta_assist()
++        try:
++            if semantic_adapter is None or not self._in_meta_assist_page():
++                self.ui_ensure(page_reward)
++
++            if self._begin_meta_assist():
++                MetaReward(self.config, self.device).run()
++                self.config.task_delay(server_update=True)
++            else:
++                self.config.task_delay(minute=(10, 20))
++        finally:
++            if semantic_adapter is not None:
++                semantic_adapter.end_meta_assist()

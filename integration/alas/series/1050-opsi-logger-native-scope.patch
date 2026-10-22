@@ -1,0 +1,18 @@
+diff --git a/module/os/tasks/voucher.py b/module/os/tasks/voucher.py
+--- a/module/os/tasks/voucher.py
++++ b/module/os/tasks/voucher.py
+@@ -30,13 +30,7 @@
+         self._os_voucher_enter()
+         VoucherShop(self.config, self.device).run()
+         self._os_voucher_exit()
+-        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+-        if semantic_adapter is not None and not semantic_adapter.shop_purchase_allowed():
+-            logger.info(
+-                'Skip Operation Siren storage logger use; mutation budget is 0'
+-            )
+-        else:
+-            self.logger_use()
++        self.logger_use()
+ 
+         next_reset = get_os_next_reset()
+         logger.info('OS voucher finished, delay to next reset')

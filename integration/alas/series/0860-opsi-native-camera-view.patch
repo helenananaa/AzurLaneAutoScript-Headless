@@ -1,0 +1,33 @@
+diff --git a/module/os/camera.py b/module/os/camera.py
+--- a/module/os/camera.py
++++ b/module/os/camera.py
+@@ -18,6 +18,19 @@
+ 
+     def _map_swipe(self, vector, box=(239, 128, 993, 628)):
+         return super()._map_swipe(vector, box=box)
++
++    def _update_view(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is None:
++            return super()._update_view()
++        from alas_headless.alas_opsi_camera_view import install_alas_opsi_camera_view
++        shape = location_ensure(self.zone.shape)
++        geometry = semantic_adapter.operation_siren_map_geometry(
++            self.zone.cn, rows=shape[1] + 1, columns=shape[0] + 1)
++        observed = install_alas_opsi_camera_view(self, geometry)
++        logger.info(f'Semantic OS camera view: camera={observed.camera_location}, '
++                    f'visible={len(observed.visible_nodes)}, generation={observed.generation}')
++        return True
+ 
+     def _view_init(self):
+         if not hasattr(self, 'view'):
+@@ -94,6 +107,9 @@
+         Similar to `Camera.update()`, but for OPSI.
+         """
+         # self.device.screenshot()
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            self._update_view()
++            return
+         self._view_init()
+ 
+         try:

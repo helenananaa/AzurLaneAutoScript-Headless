@@ -1,0 +1,147 @@
+{
+  "reason": "Scout probe restored config but retained weighted HP; stop before natural repair qualification",
+  "panel": {
+    "generation": 198622,
+    "count": 3,
+    "description": "当前舰队存活角色回复总血量的10%",
+    "use": {
+      "name": "use_button",
+      "path": "OverlayCamera/Overlay/UIMain/strategy_info/window/panel/actions/use_button",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "interactable": true,
+      "raycast_top": true,
+      "point": {
+        "x": 755.667,
+        "y": 450.4
+      },
+      "bounds": {
+        "left": 664.667,
+        "top": 416.733,
+        "right": 846.667,
+        "bottom": 484.067
+      },
+      "raw": {
+        "name": "use_button",
+        "path": "OverlayCamera/Overlay/UIMain/strategy_info/window/panel/actions/use_button",
+        "canvas": "Overlay",
+        "flags": 7679,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "canvas_render_mode": 1,
+        "instance_id": -618526,
+        "world_position": {
+          "x": 2.57,
+          "y": -2.009,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -136.5,
+          "y": -50.5,
+          "width": 273.0,
+          "height": 101.0
+        },
+        "screen_point": {
+          "x": 755.667,
+          "y": 269.6
+        },
+        "adb_point": {
+          "x": 755.667,
+          "y": 450.4
+        },
+        "screen_bounds": {
+          "left": 664.667,
+          "bottom": 235.933,
+          "right": 846.667,
+          "top": 303.267
+        },
+        "adb_bounds": {
+          "left": 664.667,
+          "top": 416.733,
+          "right": 846.667,
+          "bottom": 484.067
+        }
+      }
+    },
+    "cancel": {
+      "name": "cancel_button",
+      "path": "OverlayCamera/Overlay/UIMain/strategy_info/window/panel/actions/cancel_button",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "interactable": true,
+      "raycast_top": true,
+      "point": {
+        "x": 527.0,
+        "y": 450.4
+      },
+      "bounds": {
+        "left": 436.0,
+        "top": 416.733,
+        "right": 618.0,
+        "bottom": 484.067
+      },
+      "raw": {
+        "name": "cancel_button",
+        "path": "OverlayCamera/Overlay/UIMain/strategy_info/window/panel/actions/cancel_button",
+        "canvas": "Overlay",
+        "flags": 7679,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "canvas_render_mode": 1,
+        "instance_id": -618498,
+        "world_position": {
+          "x": -2.511,
+          "y": -2.009,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -136.5,
+          "y": -50.5,
+          "width": 273.0,
+          "height": 101.0
+        },
+        "screen_point": {
+          "x": 527.0,
+          "y": 269.6
+        },
+        "adb_point": {
+          "x": 527.0,
+          "y": 450.4
+        },
+        "screen_bounds": {
+          "left": 436.0,
+          "bottom": 235.933,
+          "right": 618.0,
+          "top": 303.267
+        },
+        "adb_bounds": {
+          "left": 436.0,
+          "top": 416.733,
+          "right": 618.0,
+          "bottom": 484.067
+        }
+      }
+    }
+  },
+  "cancel": {
+    "semantic_id": "campaign/repair/cancel",
+    "generation": 198622,
+    "point": {
+      "x": 527.0,
+      "y": 450.4
+    },
+    "bounds": {
+      "left": 436.0,
+      "top": 416.733,
+      "right": 618.0,
+      "bottom": 484.067
+    },
+    "path": "OverlayCamera/Overlay/UIMain/strategy_info/window/panel/actions/cancel_button",
+    "policy_sha256": null,
+    "capability_id": null
+  }
+}

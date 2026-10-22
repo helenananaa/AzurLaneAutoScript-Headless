@@ -321,11 +321,12 @@ class AlasIntegrationPatchTests(unittest.TestCase):
         )
         self.assertIn("self.device.click(DORM_FEED_ENTER)", self.patch_text)
 
-    def test_shared_scheduler_is_validated_before_original_queueing(self):
+    def test_shared_scheduler_keeps_native_queue_admission(self):
         self.assertIn("diff --git a/module/config/config.py", self.patch_text)
-        gate = self.patch_text.index("validate_alas_scheduler_config(self.data)")
-        queue = self.patch_text.index("pending = []", gate)
-        self.assertLess(gate, queue)
+        # Offline configuration diagnostics must not reject the entire queue
+        # for a disabled optional feature or harmless upstream metadata.
+        self.assertNotIn("validate_alas_scheduler_config(self.data)", self.patch_text)
+        self.assertNotIn("validate_alas_task_hoarding_config(self.data)", self.patch_text)
 
     def test_five_new_flows_preserve_alas_state_machine_ownership(self):
         for begin, end in (

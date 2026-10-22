@@ -1,0 +1,215 @@
+{
+  "schema": "alas-headless.authorized-retirement-live/v1",
+  "passed": true,
+  "serial": "emulator-5580",
+  "observer_apk_sha256": "dad26171386fae7daa99bc8e02c33264045df5f5e29bb830df06273108655511",
+  "transaction_budget": 1,
+  "premium_spending_authorized": false,
+  "before": {
+    "generation": 22235,
+    "capacity_used": 845,
+    "capacity_total": 930,
+    "selected_count": 0
+  },
+  "fingerprint": {
+    "package": "com.bilibili.azurlane",
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "width": 1280,
+    "height": 720,
+    "max_age_ms": 10000,
+    "peer_uid": 2000,
+    "expected_pid": 9181
+  },
+  "full_handler": true,
+  "retired_count": 8,
+  "receipt": {
+    "retired_count": 8,
+    "capacity_before": 845,
+    "capacity_after": 837,
+    "capacity_total": 930,
+    "settings": {
+      "generation": 22255,
+      "unique_ship_protection": true,
+      "priority": [
+        "R",
+        "SR",
+        "N"
+      ],
+      "full_star_policy": "keep_none",
+      "no_full_star_policy": "keep_needed"
+    },
+    "rewards": [
+      [
+        "物资",
+        148
+      ],
+      [
+        "荣誉勋章",
+        5
+      ]
+    ],
+    "rarity_warning_confirmed": true,
+    "equipment_preserved": true,
+    "actions": [
+      {
+        "semantic_id": "retirement/settings/open",
+        "generation": 22241,
+        "point": {
+          "x": 35.53,
+          "y": 519.948
+        },
+        "bounds": {
+          "left": 7.872,
+          "top": 488.958,
+          "right": 63.188,
+          "bottom": 550.938
+        },
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/setting",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/settings/close",
+        "generation": 22257,
+        "point": {
+          "x": 1001.277,
+          "y": 110.867
+        },
+        "bounds": {
+          "left": 964.554,
+          "top": 85.2,
+          "right": 1038.0,
+          "bottom": 136.533
+        },
+        "path": "OverlayCamera/Overlay/UIMain/DockyardQuickSelectSettingUI(Clone)/window/top/btnBack",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/one-click",
+        "generation": 22262,
+        "point": {
+          "x": 725.0,
+          "y": 673.333
+        },
+        "bounds": {
+          "left": 634.03,
+          "top": 639.678,
+          "right": 815.97,
+          "bottom": 706.989
+        },
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/select_panel/quick_select",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/ships/confirm",
+        "generation": 22271,
+        "point": {
+          "x": 1014.0,
+          "y": 649.067
+        },
+        "bounds": {
+          "left": 923.0,
+          "top": 615.4,
+          "right": 1105.0,
+          "bottom": 682.733
+        },
+        "path": "OverlayCamera/Overlay/UIMain/DestoryInfoUI(Clone)/frame/confirm_button",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/rarity-warning/confirm",
+        "generation": 22278,
+        "point": {
+          "x": 793.333,
+          "y": 504.933
+        },
+        "bounds": {
+          "left": 702.333,
+          "top": 471.267,
+          "right": 884.333,
+          "bottom": 538.6
+        },
+        "path": "OverlayCamera/Overlay/UIMain/DestoryConfirmWindow(Clone)/window/confirm_btn",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/reward/close",
+        "generation": 22289,
+        "point": {
+          "x": 640.0,
+          "y": 482.067
+        },
+        "bounds": {
+          "left": 564.667,
+          "top": 465.4,
+          "right": 715.333,
+          "bottom": 498.733
+        },
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/equipment/deselect-all",
+        "generation": 22299,
+        "point": {
+          "x": 200.333,
+          "y": 601.333
+        },
+        "bounds": {
+          "left": 143.667,
+          "top": 584.667,
+          "right": 257.0,
+          "bottom": 618.0
+        },
+        "path": "OverlayCamera/Overlay/UIMain/ResolveEquipmentUI(Clone)/main/options/ALL",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/equipment/cancel-disassembly",
+        "generation": 22306,
+        "point": {
+          "x": 844.267,
+          "y": 605.867
+        },
+        "bounds": {
+          "left": 753.267,
+          "top": 572.2,
+          "right": 935.267,
+          "bottom": 639.533
+        },
+        "path": "OverlayCamera/Overlay/UIMain/ResolveEquipmentUI(Clone)/main/cancel_btn",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/equipment/preserve/confirm",
+        "generation": 22311,
+        "point": {
+          "x": 790.0,
+          "y": 515.0
+        },
+        "bounds": {
+          "left": 699.0,
+          "top": 481.333,
+          "right": 881.0,
+          "bottom": 548.667
+        },
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+        "policy_sha256": null,
+        "capability_id": null
+      }
+    ],
+    "policy_sha256": "b7f5797c46477d435880012aaefde4a16ab2a8ebc1dd6d17d3e4e5db998ff6b3",
+    "capability_id": "retirement.execute"
+  },
+  "returned_to_main": false,
+  "returned_to_build": true,
+  "dock_full_triggered": true
+}

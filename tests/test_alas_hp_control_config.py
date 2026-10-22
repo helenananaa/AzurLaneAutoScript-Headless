@@ -26,7 +26,7 @@ def defaults():
 
 
 class AlasHpControlConfigTests(unittest.TestCase):
-    def test_disabled_safe_surface_accepts_ratio_boundaries_and_weights(self):
+    def test_active_thresholds_accept_ratio_boundaries_and_weights(self):
         for field in (
             "hp_balance_threshold",
             "repair_use_single_threshold",
@@ -36,6 +36,7 @@ class AlasHpControlConfigTests(unittest.TestCase):
             for value in (0, 0.5, 1):
                 with self.subTest(field=field, value=value):
                     config = defaults()
+                    config.update(use_hp_balance=True, use_emergency_repair=True, use_low_hp_retreat=True)
                     config[field] = value
                     self.assertEqual(
                         getattr(validate_alas_hp_control_config(**config), field),
@@ -52,18 +53,20 @@ class AlasHpControlConfigTests(unittest.TestCase):
                 expected,
             )
 
-    def test_each_enabled_feature_fails_before_campaign_navigation(self):
-        for field, reason in (
-            ("use_hp_balance", "drag"),
-            ("use_emergency_repair", "template"),
-            ("use_low_hp_retreat", "withdrawal"),
-        ):
+    def test_features_admit_configuration_and_keep_input_checks_local(self):
+        for field in ('use_hp_balance', 'use_emergency_repair', 'use_low_hp_retreat'):
             config = defaults()
             config[field] = True
-            with self.subTest(field=field), self.assertRaisesRegex(
-                SemanticGateClosed, reason
-            ):
-                validate_alas_hp_control_config(**config)
+            with self.subTest(field=field):
+                self.assertTrue(getattr(validate_alas_hp_control_config(**config), field))
+
+    def test_low_hp_retreat_is_admitted_with_original_threshold(self):
+        config = defaults()
+        config['use_low_hp_retreat'] = True
+        config['low_hp_retreat_threshold'] = 0.3
+        snapshot = validate_alas_hp_control_config(**config)
+        self.assertTrue(snapshot.use_low_hp_retreat)
+        self.assertEqual(snapshot.low_hp_retreat_threshold, 0.3)
 
     def test_invalid_values_fail_closed(self):
         for field, value in (
@@ -78,6 +81,7 @@ class AlasHpControlConfigTests(unittest.TestCase):
             ("hp_balance_weight", "1,nan,2"),
         ):
             config = defaults()
+            config.update(use_hp_balance=True, use_emergency_repair=True, use_low_hp_retreat=True)
             config[field] = value
             with self.subTest(field=field, value=value), self.assertRaises(
                 SemanticGateClosed

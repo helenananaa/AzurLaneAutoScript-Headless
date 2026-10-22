@@ -1,0 +1,52 @@
+diff --git a/module/tactical/tactical_class.py b/module/tactical/tactical_class.py
+--- a/module/tactical/tactical_class.py
++++ b/module/tactical/tactical_class.py
+@@ -369,6 +369,10 @@
+         """
+         tactical_config = self._validate_tactical_config()
+         logger.hr('Tactical books choose', level=2)
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            self.device.screenshot()
++            if self.appear(POPUP_CONFIRM, offset=(20, 20)):
++                return True
+         if not self._tactical_books_get():
+             return False
+ 
+@@ -470,10 +474,14 @@
+         if semantic_session is None:
+             self.device.click(BACK_ARROW)
+             return False
+-        oracle = semantic_session.open().oracle
++        adapter = semantic_session.open()
++        context = getattr(adapter, '_commission_context', None)
++        if context is not None and context.tactical_empty_slot_receipt is not None:
++            return False
++        oracle = adapter._fresh_input_oracle()
+         if not oracle.enabled('tactical/page/back'):
+             return False
+-        oracle.click('tactical/page/back')
++        adapter._record_mission_transition(oracle.click('tactical/page/back'))
+         return True
+ 
+     def _tactical_dock_selected(self):
+@@ -857,7 +865,19 @@
+         if semantic_adapter is not None:
+             semantic_adapter.begin_tactical()
+         try:
+-            if (
++            inherited_tactical = False
++            if semantic_adapter is not None:
++                self.device.screenshot()
++                # Re-enter the original popup owner after a task-local defer.
++                inherited_tactical = semantic_adapter.cancel_tactical_continue_if_present()
++                if not inherited_tactical:
++                    inherited_tactical = (
++                        semantic_adapter.open().oracle.exists('tactical/page/back')
++                        and (self.appear(DOCK_CHECK, offset=(20, 20))
++                             or self.appear(TACTICAL_CLASS_START, offset=(30, 30))
++                             or self.appear(POPUP_CONFIRM, offset=(20, 20)))
++                    )
++            if not inherited_tactical and (
+                     semantic_adapter is None
+                     or not semantic_adapter.open().oracle.exists('reward/page/back')
+             ):

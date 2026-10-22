@@ -1,0 +1,15 @@
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -496,7 +496,10 @@
+                     'Recovered NetworkDown before campaign startup surface check')
+                 self.device.screenshot()
+                 self.campaign.device.image = self.device.image
+-            if semantic_adapter is not None and semantic_adapter.campaign_dock_full_visible():
++            if semantic_adapter is not None and (
++                semantic_adapter.campaign_dock_full_visible()
++                or semantic_adapter.campaign_retirement_visible()
++            ):
+                 for _ in self.campaign.loop(timeout=30):
+                     if self.campaign._semantic_campaign_retirement_recovery():
+                         break

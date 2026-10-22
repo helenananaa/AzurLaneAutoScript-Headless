@@ -1,0 +1,12 @@
+diff --git a/module/guild/guild_reward.py b/module/guild/guild_reward.py
+--- a/module/guild/guild_reward.py
++++ b/module/guild/guild_reward.py
+@@ -47,6 +47,8 @@
+         if guild_config.operation_enable:
+             success &= self.guild_operations()
+ 
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            self.device.screenshot()
+         self.ui_goto(page_main)
+ 
+         # Scheduler

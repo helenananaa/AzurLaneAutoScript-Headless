@@ -1,0 +1,4 @@
+{
+  "passed": false,
+  "error": "AlasSemanticUnmapped('ALAS virtual resource has no active semantic flow: MAP_PREPARATION')"
+}

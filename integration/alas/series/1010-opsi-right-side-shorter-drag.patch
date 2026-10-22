@@ -1,0 +1,17 @@
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -223,9 +223,11 @@
+                     self.device.swipe_vector(tuple(vector), name=f'GLOBE_SWIPE_{int(vector[0])}_{int(vector[1])}', box=sight)
+                 except SemanticGlobeDragPathUnavailable:
+                     # Native proofs rejected all candidates before any input.
+-                    # ALAS samples one shorter leg, retaining the same target.
++                    # ALAS samples one shorter leg in its existing right-side
++                    # globe box, avoiding the left WorldUI background. The
++                    # original sampler still requires a complete native proof.
+                     vector = vector * 0.5
+-                    self.device.swipe_vector(tuple(vector), name=f'GLOBE_SWIPE_{int(vector[0])}_{int(vector[1])}', box=sight)
++                    self.device.swipe_vector(tuple(vector), name=f'GLOBE_SWIPE_{int(vector[0])}_{int(vector[1])}', box=(600, 220, 980, 620))
+                 self.device.sleep(1)
+                 after = project()
+                 if np.linalg.norm(np.array((after.x-point.x, after.y-point.y))) < 10:

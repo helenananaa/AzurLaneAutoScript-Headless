@@ -19,6 +19,57 @@ from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_login_inherited_new_ship_uses_exact_reward_boundary(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_login()
+        oracle.new_ship_reward_visible_value = True
+        self.assertTrue(adapter.appear(NamedButton('GET_SHIP')))
+        receipt = adapter.click(NamedButton('GET_SHIP'))
+        self.assertEqual(receipt.semantic_id, 'reward/new-ship/continue')
+        self.assertEqual(oracle.click_calls, ['reward/new-ship/continue'])
+
+    def test_login_new_ship_rejects_absent_acquisition_page(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_login()
+        oracle.new_ship_reward_visible_value = False
+        self.assertFalse(adapter.appear(NamedButton('GET_SHIP')))
+        with self.assertRaisesRegex(SemanticGateClosed, 'popup is absent'):
+            adapter.click(NamedButton('GET_SHIP'))
+        self.assertEqual(oracle.click_calls, [])
+
+    def test_update_restart_probe_uses_current_immutable_frame(self):
+        adapter, oracle, _ = self.make_adapter()
+        frame = Mock()
+        frame.login_update_restart_prompt_available.return_value = False
+        adapter._frame_observation_oracle = lambda: frame
+        oracle.login_update_restart_prompt_available = Mock(
+            side_effect=AssertionError("live cross-frame probe was used")
+        )
+
+        self.assertFalse(adapter.login_update_restart_prompt_available())
+        frame.login_update_restart_prompt_available.assert_called_once_with()
+        oracle.login_update_restart_prompt_available.assert_not_called()
+
+    def test_login_retry_attempt_is_copied_to_new_observation_frame(self):
+        adapter, oracle, _ = self.make_adapter()
+        frame = Mock()
+        adapter._frame_observation_oracle = lambda: frame
+        oracle._login_update_retry_attempted = True
+
+        self.assertIs(adapter._require_frame_observation_oracle(), frame)
+        self.assertTrue(frame._login_update_retry_attempted)
+
+    def test_login_does_not_finish_on_the_main_underlay_below_bulletin(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_login()
+        oracle.main_page_visible_value = True
+        oracle.enabled_values['overlay/bulletin/close'] = True
+        self.assertFalse(adapter.appear(NamedButton('MAIN_GOTO_CAMPAIGN_WHITE')))
+        self.assertTrue(adapter.appear(NamedButton('LOGIN_ANNOUNCE')))
+        oracle.enabled_values['overlay/bulletin/close'] = False
+        self.assertTrue(adapter.appear(NamedButton('MAIN_GOTO_CAMPAIGN_WHITE')))
+        self.assertEqual(oracle.click_calls, [])
+
     def test_original_login_handler_uses_exact_semantic_entry_context(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.enabled_values["login/enter"] = True
@@ -84,6 +135,32 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
 
         self.assertEqual(receipt.semantic_id, "event-list/page/back")
         self.assertEqual(oracle.click_calls, ["event-list/page/back"])
+
+    def test_login_shipyard_exit_requires_owned_actionable_unique_page(self):
+        for present, enabled in ((True, True), (False, True), (True, False)):
+            with self.subTest(present=present, enabled=enabled):
+                adapter, oracle, _ = self.make_adapter()
+                oracle.exists_values['shipyard/page/root'] = present
+                oracle.enabled_values['shipyard/page/back'] = enabled
+                adapter.begin_login()
+                self.assertEqual(adapter.appear(NamedButton('GOTO_MAIN')), present and enabled)
+                if present and enabled:
+                    self.assertEqual(adapter.click(NamedButton('GOTO_MAIN')).semantic_id,
+                                     'shipyard/page/back')
+                else:
+                    with self.assertRaises(SemanticGateClosed):
+                        adapter.click(NamedButton('GOTO_MAIN'))
+                    self.assertEqual(oracle.click_calls, [])
+
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_login()
+        for identity in ('shipyard/page/root', 'research/page/back'):
+            oracle.exists_values[identity] = True
+        for target in ('shipyard/page/back', 'research/page/back'):
+            oracle.enabled_values[target] = True
+        with self.assertRaisesRegex(SemanticGateClosed, 'ambiguous'):
+            adapter.click(NamedButton('GOTO_MAIN'))
+        self.assertEqual(oracle.click_calls, [])
 
     def test_login_accepts_exact_main_identity_across_main_skins(self):
         adapter, oracle, _ = self.make_adapter()

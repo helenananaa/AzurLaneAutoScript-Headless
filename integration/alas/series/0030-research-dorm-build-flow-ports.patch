@@ -86,7 +86,7 @@ index c3c95459..870f5d96 100644
          """
          Pages:
              in: Any page
-@@ -627,3 +657,28 @@ class RewardDorm(UI):
+@@ -627,3 +657,29 @@ class RewardDorm(UI):
          delay = self.cal_dorm_delay(ships)
          logger.info(f'Ships in dorm: {ships}, task to delay: {delay}')
          self.config.task_delay(minute=delay)
@@ -101,11 +101,12 @@ index c3c95459..870f5d96 100644
 +            feed=self.config.Dorm_Feed,
 +            feed_filter=self.config.Dorm_FeedFilter,
 +        )
-+        validate_alas_buy_furniture_config(
-+            enable=self.config.BuyFurniture_Enable,
-+            buy_option=self.config.BuyFurniture_BuyOption,
-+            last_run=self.config.BuyFurniture_LastRun,
-+        )
++        if self.config.BuyFurniture_Enable is not False:
++            validate_alas_buy_furniture_config(
++                enable=self.config.BuyFurniture_Enable,
++                buy_option=self.config.BuyFurniture_BuyOption,
++                last_run=self.config.BuyFurniture_LastRun,
++            )
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if semantic_adapter is not None:
 +            semantic_adapter.begin_dorm()

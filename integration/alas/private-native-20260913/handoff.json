@@ -1,0 +1,30 @@
+{
+  "scope": "native new_jersey pq_run segmented live evidence; no continuous qualification",
+  "tests": {
+    "private_and_session": 110,
+    "research_and_config": 61,
+    "support_matrix": 8,
+    "patch_builder": 7
+  },
+  "patch_members": 116,
+  "watchdog_replay": {
+    "old_alias_collision_rejected": true,
+    "distinct_views_allowed": true,
+    "repeated_same_control_rejected": true,
+    "two_control_loop_rejected": true,
+    "source_sha256": "c2e6d737d1b412038c53c7d62b86bccb1ab644b13714bf002b52ad63f066749d",
+    "passed": true
+  },
+  "recovery_home": true,
+  "live_interactions": 3,
+  "favor_before": 60,
+  "favor_after": 180,
+  "favor_capacity": 400,
+  "premium_purchase": false,
+  "support_promotion": false,
+  "final_remaining": 0,
+  "final_capacity": 3,
+  "final_home": true,
+  "final_disabled_original_task_passed": true,
+  "temporary_config_removed": true
+}

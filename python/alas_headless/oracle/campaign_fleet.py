@@ -16,7 +16,7 @@ from .contracts import (
     UNCAPPED_CAMPAIGN_SORTIE_OIL_RESERVE,
     UiState,
 )
-from .errors import SemanticGateClosed
+from .errors import SemanticGateClosed, SemanticCampaignFleetIncomplete
 
 
 class CampaignFleetOracle:
@@ -53,7 +53,7 @@ class CampaignFleetOracle:
             raise ValueError("fleet preparation snapshots must be supplied together")
         if button_state is None:
             button_state = self.read_state()
-            ui_state = self.read_ui_state()
+            ui_state = self.read_ui_state(check_foreground=False)
         assert ui_state is not None
         map_roots, fleet_roots = self._campaign_preparation_roots(
             button_state, ui_state
@@ -202,6 +202,44 @@ class CampaignFleetOracle:
             self._campaign_auto_search_role_state_once,
             attempts=12,
         )
+
+    def campaign_submarine_auto_mode(self) -> str:
+        return self._retry_transition_read(self._campaign_submarine_auto_mode_once)
+
+    def _campaign_submarine_auto_mode_once(self) -> str:
+        state = self.read_state()
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2 or ui.image_truncated:
+            raise SemanticGateClosed('submarine duty frame is incomplete')
+        tabs = self._toggle_matches(ui, 'campaign/fleet-preparation/roles/tab')
+        if len(tabs) != 1 or not tabs[0].checked:
+            raise SemanticGateClosed('submarine duty tab is not selected')
+        root = 'LevelFleetSelectView(Clone)/panel/ShipList/sub/1/DutySelect/'
+        selected = []
+        for index, mode, label in ((1, 'sub_auto_call', '自动召唤潜艇'), (2, 'sub_standby', '待机')):
+            prefix = root + 'Item' + str(index)
+            targets = self._matches(state, 'campaign/fleet-preparation/roles/submarine/' + mode)
+            labels = [t for t in ui.texts if t.path.endswith(prefix + '/Text')
+                      and t.active_in_hierarchy and t.active_and_enabled and not t.truncated and t.text == label]
+            if len(targets) != 1 or len(labels) != 1:
+                raise SemanticGateClosed('submarine duty identity is ambiguous')
+            marks = [i for i in ui.images if i.path.endswith(prefix + '/Checkmark')
+                     and i.active_in_hierarchy and i.active_and_enabled and not i.truncated
+                     and i.sprite == 'gou' and i.color[3] > .99]
+            if len(marks) > 1:
+                raise SemanticGateClosed('submarine duty checkmark is ambiguous')
+            if marks:
+                selected.append(mode)
+        if len(selected) != 1:
+            raise SemanticGateClosed('submarine duty selection is not exclusive')
+        return selected[0]
+
+    def click_campaign_submarine_auto_mode(self, expected: str, desired: str) -> ActionReceipt:
+        if desired not in ('sub_auto_call', 'sub_standby') or expected == desired:
+            raise SemanticGateClosed('submarine duty change is invalid')
+        if self.campaign_submarine_auto_mode() != expected:
+            raise SemanticGateClosed('submarine duty changed before input')
+        return self.click('campaign/fleet-preparation/roles/submarine/' + desired)
 
     def _campaign_auto_search_role_state_once(
         self,
@@ -455,9 +493,24 @@ class CampaignFleetOracle:
                 if row_kind == "surface"
                 else ()
             )
+            fixed_hard_row = False
+            if (hard_mode and row_kind == 'surface'
+                    and not select_matches and not clear_matches and not recommend_matches):
+                duty_root = 'OverlayCamera/Overlay/UIMain/' + path_root + '/DutySelect/'
+                duties = [b for b in button_state.buttons if b.path.startswith(duty_root)
+                          and b.active_in_hierarchy and b.active_and_enabled]
+                selected = [i for i in ui_state.images if i.path.startswith(duty_root)
+                            and i.path.endswith('/Checkmark') and i.sprite == 'gou'
+                            and i.active_in_hierarchy and i.active_and_enabled
+                            and not i.truncated and i.bounds is not None]
+                expected = {duty_root + 'Item' + str(index) for index in range(1, 5)}
+                fixed_hard_row = (len(duties) == 4 and {b.path for b in duties} == expected
+                                  and all(b.bounds is not None for b in duties)
+                                  and len(selected) == 1
+                                  and selected[0].path[:-len('/Checkmark')] in expected)
             if hard_mode and row_kind == "surface":
-                available = bool(recommend_matches or clear_matches)
-                if len(recommend_matches) != 1 or len(clear_matches) != 1:
+                available = fixed_hard_row or bool(recommend_matches or clear_matches)
+                if not fixed_hard_row and (len(recommend_matches) != 1 or len(clear_matches) != 1):
                     raise SemanticGateClosed(
                         "hard campaign fleet row controls are absent or ambiguous: "
                         + row_key
@@ -476,7 +529,7 @@ class CampaignFleetOracle:
                     )
                 available = bool(select_matches or clear_matches)
             if available:
-                if not hard_submarine and (
+                if not hard_submarine and not fixed_hard_row and (
                     len(select_matches) != 1 or len(clear_matches) != 1
                 ):
                     raise SemanticGateClosed(
@@ -550,6 +603,10 @@ class CampaignFleetOracle:
             )
             maximum_ships = 3 if row_kind == "submarine" else 6
             if len(icons) != len(level_texts) or len(icons) > maximum_ships:
+                if (len(icons) < len(level_texts) <= maximum_ships
+                        and all(1 <= int(text.text.strip()) <= 125 for text in level_texts)
+                        and not ui_state.skipped_count):
+                    raise SemanticCampaignFleetIncomplete(row_key, button_state.generation)
                 raise SemanticGateClosed(
                     "campaign fleet row ship identity is inconsistent: " + row_key
                 )
@@ -558,7 +615,8 @@ class CampaignFleetOracle:
                 raise SemanticGateClosed(
                     "campaign fleet row level is outside the pinned range"
                 )
-            if not available and (levels or any(name.text.strip() for name in names)):
+            if not available and (levels or (
+                    not hard_submarine and any(name.text.strip() for name in names))):
                 raise SemanticGateClosed(
                     "campaign unavailable fleet row contains a selection: " + row_key
                 )
@@ -665,6 +723,9 @@ class CampaignFleetOracle:
             if hard_mode:
                 costs = (mob, boss, sub_cost)
                 sortie_oil_requirement = (mob or 0) + boss
+                if submarine_counts[0]:
+                    sortie_oil_requirement = (None if sub_cost is None
+                                             else sortie_oil_requirement + sub_cost)
                 oil_cost_source = "fleet-summary-hard-omitted-zero"
             else:
                 if mob is None or sub_cost is None:
@@ -672,7 +733,7 @@ class CampaignFleetOracle:
                         "campaign fleet summary text is absent or ambiguous"
                     )
                 costs = (mob, boss, sub_cost)
-                sortie_oil_requirement = mob + boss
+                sortie_oil_requirement = mob + boss + (sub_cost if submarine_counts[0] else 0)
                 oil_cost_source = "observed-fleet-summary"
         else:
             numeric_stage = re.fullmatch(
@@ -732,7 +793,7 @@ class CampaignFleetOracle:
     def campaign_fleet_dropdown_state(
         self,
     ) -> Optional[CampaignFleetDropdownState]:
-        """Read the exact six-option fleet dropdown, or return None if closed."""
+        """Read a complete surface (six) or submarine (two) fleet dropdown."""
 
         return self._retry_transition_read(
             self._campaign_fleet_dropdown_state_once,
@@ -754,7 +815,8 @@ class CampaignFleetOracle:
         )
         if all(not matches for matches in option_matches):
             return None
-        if any(len(matches) != 1 for matches in option_matches):
+        indices = tuple(index for index, matches in enumerate(option_matches, 1) if matches)
+        if indices not in ((1, 2), (1, 2, 3, 4, 5, 6)) or any(len(matches) > 1 for matches in option_matches):
             raise SemanticGateClosed(
                 "campaign fleet dropdown options are incomplete or ambiguous"
             )
@@ -775,7 +837,7 @@ class CampaignFleetOracle:
         )
         if len(masks) != 1:
             raise SemanticGateClosed("campaign fleet dropdown mask is absent")
-        options = tuple(matches[0] for matches in option_matches)
+        options = tuple(matches[0] for matches in option_matches if matches)
         for index, option in enumerate(options, 1):
             semantic_id = "campaign/fleet-preparation/option/{0}".format(index)
             if not option.actionable or self._blocking_rules(button_state, semantic_id):
@@ -783,7 +845,7 @@ class CampaignFleetOracle:
                     "campaign fleet dropdown option is not actionable"
                 )
         active_indices = []
-        for index in range(1, 7):
+        for index in indices:
             prefix = "LevelFleetSelectView(Clone)/mask/list/item{0}/".format(index)
             states = tuple(
                 state
@@ -980,6 +1042,17 @@ class CampaignFleetOracle:
                 self._sleep(0.1)
         if state is None or target is None:
             raise SemanticGateClosed("campaign stage is not actionable")
+        # The page reader has established LevelMainScene as this stage's
+        # owner. Recheck every other blocker on the actual input frame.
+        if any(rule.blocker_id != "campaign-menu" for rule in
+               self._blocking_rules(state, "campaign/stage/" + stage_code)):
+            raise SemanticGateClosed("campaign stage input is blocked")
+        if not (
+            target.bounds.contains(target.point)
+            and target.bounds.left <= round(target.point.x) <= target.bounds.right
+            and target.bounds.top <= round(target.point.y) <= target.bounds.bottom
+        ):
+            raise SemanticGateClosed("campaign stage point is outside its button")
         if not (
             0 <= target.point.x < self.fingerprint.width
             and 0 <= target.point.y < self.fingerprint.height

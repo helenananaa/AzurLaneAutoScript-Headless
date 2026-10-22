@@ -1,0 +1,13 @@
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+index 8619601af386d7ff4258669045affee75fc3a447..1808d03393af05003e6afb95f9f484212ff5b9cb 100644
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -272,6 +272,8 @@
+                 if semantic_adapter.campaign_result_ready():
+                     return True
+                 oracle = semantic_adapter.open().oracle
++                if self.handle_combat_automation_confirm():
++                    continue
+                 if semantic_adapter.meta_beacon_active() \
+                         and oracle.meta_assist_sortie_prompt_visible():
+                     semantic_adapter.click_meta_beacon_sortie_confirm()

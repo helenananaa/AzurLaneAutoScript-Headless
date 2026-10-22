@@ -27,7 +27,7 @@ class AlasCommissionConfigTests(unittest.TestCase):
         self.assertEqual(result["field_count"], 3)
         self.assertEqual(result["accepted_case_count"], 12)
         self.assertEqual(result["preset_resolution_case_count"], 12)
-        self.assertEqual(result["invalid_case_count"], 22)
+        self.assertEqual(result["invalid_case_count"], 21)
         self.assertEqual(result["mutation_budget"], 0)
         self.assertFalse(result["real_reward_claimed"])
         self.assertFalse(result["real_commission_started"])
@@ -44,7 +44,19 @@ class AlasCommissionConfigTests(unittest.TestCase):
             )
             self.assertEqual(snapshot.preset_filter, preset)
             self.assertEqual(snapshot.do_major_commission, do_major)
-            self.assertTrue(snapshot.custom_tokens)
+            self.assertEqual(bool(snapshot.custom_tokens), preset == "custom")
+
+    def test_presets_ignore_inactive_custom_filter_and_allow_upstream_fallback(self):
+        for preset in ("cube", "future-upstream-preset"):
+            for custom_filter in (None, "", "obsolete-filter", []):
+                with self.subTest(preset=preset, custom_filter=custom_filter):
+                    snapshot = validate_alas_commission_config(
+                        preset_filter=preset,
+                        custom_filter=custom_filter,
+                        do_major_commission=False,
+                    )
+                    self.assertEqual(snapshot.preset_filter, preset)
+                    self.assertEqual(snapshot.custom_tokens, ())
 
     def test_custom_filter_grammar_and_invalid_fields(self):
         self.assertEqual(
@@ -54,7 +66,7 @@ class AlasCommissionConfigTests(unittest.TestCase):
             ("major", "gem-8", "extracube-0:30", "1.5", "shortest"),
         )
         invalid_values = {
-            "preset_filter": (None, True, 1, "", "unknown", []),
+            "preset_filter": (None, True, 1, "", []),
             "do_major_commission": (0, 1, None, "true", [], {}),
         }
         for field, values in invalid_values.items():
@@ -85,7 +97,7 @@ class AlasCommissionConfigTests(unittest.TestCase):
                 SemanticGateClosed
             ):
                 validate_alas_commission_config(
-                    preset_filter="cube",
+                    preset_filter="custom",
                     custom_filter=value,
                     do_major_commission=False,
                 )

@@ -1,5 +1,5 @@
 diff --git a/module/research/research.py b/module/research/research.py
-index 8b2e45b5..bbca8144 100644
+index bb4cb40478267186cf80420698ec93b821b670ac..fcab86b3d3f0704ef3dff29a459c7b47255cd9fa 100644
 --- a/module/research/research.py
 +++ b/module/research/research.py
 @@ -211,5 +211,9 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
@@ -9,7 +9,7 @@ index 8b2e45b5..bbca8144 100644
 -                self.device.click(RESEARCH_ENTRANCE[i])
 +                if semantic_session is not None:
 +                    semantic_session.click_research_project_code(
-+                        project.name, position=index)
++                        project.name, position=index, series=project.series)
 +                else:
 +                    self.device.click(RESEARCH_ENTRANCE[i])
                  self.ensure_research_stable()

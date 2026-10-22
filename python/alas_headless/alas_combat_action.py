@@ -1,13 +1,13 @@
-"""Qualification-only live input for reviewed combat observer resources.
+"""Reviewed combat-resource input for ALAS and controlled qualification.
 
-The canonical ALAS patch does not import this module.  It exists only so a
-reviewed action target can be advanced during evidence acquisition after two
-fresh, coherent endpoint triples prove the same exact control. Contextual
-resources also require the target selected by original ALAS.
+The semantic session uses this boundary for original ALAS combat actions.
+Two fresh, coherent endpoint triples must prove the same exact control;
+contextual resources also require the target selected by original ALAS.
 """
 
 from __future__ import annotations
 
+import math
 import time
 from dataclasses import dataclass
 from typing import Any, Callable, Mapping, Optional, Tuple
@@ -16,13 +16,14 @@ from .alas_combat_observer import (
     AlasCombatActionMapping,
     AlasCombatObserverManifest,
     AlasCombatObserverSnapshot,
-    alas_combat_unity_selector_present,
+    alas_combat_unity_selectors_present,
     prepare_alas_combat_resource_action,
 )
 from .alas_combat_state_replay import ALAS_COMBAT_RESOURCE_ACTION_TARGETS
 from .alas_combat_trace import build_alas_combat_trace_frame
 from .semantic_oracle import (
     ActionReceipt,
+    OracleFingerprint,
     SemanticGateClosed,
     request_observer_state,
 )
@@ -100,10 +101,7 @@ def _action_variant_evidence(
             selector.require_top_raycast and selector.path == path
             for selector in variant.selectors
         )
-        and all(
-            alas_combat_unity_selector_present(snapshot, selector)
-            for selector in variant.selectors
-        )
+        and alas_combat_unity_selectors_present(snapshot, variant.selectors)
     )
     if len(matches) != 1 or not matches[0].qualified:
         raise SemanticGateClosed(
@@ -144,7 +142,7 @@ def commit_alas_combat_resource_action_for_evidence(
     settle_interval_seconds: float = 0.05,
     sleep: Callable[[float], None] = time.sleep,
 ) -> AlasCombatResourceActionCommit:
-    """Inject exactly one reviewed combat-resource action for evidence.
+    """Inject one reviewed action selected by ALAS or a qualification probe.
 
     The explicit PID and generation floor bind this action to the preceding
     trace.  Two increasing snapshots must resolve to the same point, bounds,
@@ -179,7 +177,7 @@ def commit_alas_combat_resource_action_for_evidence(
     ):
         raise SemanticGateClosed("combat evidence session identity changed")
 
-    session.open()  # includes the independent pinned-package fingerprint gate
+    session.open()  # includes the independent runtime package gate
     runtime_handle = getattr(session, "runtime_handle", None)
     component = getattr(session, "component", None)
     if runtime_handle is None or not component:
@@ -205,9 +203,11 @@ def commit_alas_combat_resource_action_for_evidence(
     second_frame: Optional[Mapping[str, Any]] = None
     second_snapshot = None
     second_receipt: Optional[ActionReceipt] = None
+    second_read_started = 0.0
     last_error: Optional[SemanticGateClosed] = None
     for _ in range(settle_attempts):
         sleep(settle_interval_seconds)
+        candidate_read_started = time.monotonic()
         try:
             candidate_frame, candidate_snapshot, candidate_receipt = _read_action(
                 runtime_handle, manifest, resource_name, resolved_action
@@ -222,6 +222,7 @@ def commit_alas_combat_resource_action_for_evidence(
         second_frame = candidate_frame
         second_snapshot = candidate_snapshot
         second_receipt = candidate_receipt
+        second_read_started = candidate_read_started
         break
     if second_frame is None or second_snapshot is None or second_receipt is None:
         if last_error is not None:
@@ -258,12 +259,41 @@ def commit_alas_combat_resource_action_for_evidence(
         or not 0 <= point.y < height
     ):
         raise SemanticGateClosed("combat evidence action point is outside screen")
+    bounds = second_receipt.bounds
+    minimum_x = max(0, math.ceil(bounds.left))
+    maximum_x = min(width - 1, math.floor(bounds.right))
+    minimum_y = max(0, math.ceil(bounds.top))
+    maximum_y = min(height - 1, math.floor(bounds.bottom))
+    if minimum_x > maximum_x or minimum_y > maximum_y:
+        raise SemanticGateClosed("combat action has no in-bounds integer input point")
+    x = min(max(int(round(point.x)), minimum_x), maximum_x)
+    y = min(max(int(round(point.y)), minimum_y), maximum_y)
+    # A runtime handle's attached PID can outlive the package process. The ADB
+    # handle re-reads that process here; other handles keep their own contract.
+    validate_process = getattr(runtime_handle, "validate_input_process", None)
+    if validate_process is not None:
+        validate_process()
     if runtime_handle.pid != expected_pid:
         raise SemanticGateClosed("combat evidence process changed before input")
     if runtime_handle.foreground_component() != component:
         raise SemanticGateClosed("combat evidence foreground changed before input")
+    maximum_age_ms = getattr(session, "observer_max_age_ms", None)
+    if type(maximum_age_ms) is not int or maximum_age_ms <= 0:
+        maximum_age_ms = OracleFingerprint.max_age_ms
+    endpoint_ages = (
+        second_snapshot.oracle_state.snapshot["age_ms"],
+        second_snapshot.oracle_state.buttons_snapshot["age_ms"],
+        second_snapshot.ui_state.snapshot["age_ms"],
+    )
+    elapsed_ms = (time.monotonic() - second_read_started) * 1000.0
+    if (
+        any(age < 0 for age in endpoint_ages)
+        or elapsed_ms < 0
+        or max(endpoint_ages) + elapsed_ms > maximum_age_ms
+    ):
+        raise SemanticGateClosed("combat action snapshot became stale before input")
 
-    runtime_handle.tap(int(round(point.x)), int(round(point.y)))
+    runtime_handle.tap(x, y)
     return AlasCombatResourceActionCommit(
         resource_name=resource_name,
         action_name=resolved_action,

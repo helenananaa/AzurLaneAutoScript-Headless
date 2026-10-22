@@ -3,6 +3,7 @@
 import unittest
 from alas_headless import SemanticGateClosed
 from tests.semantic_support.adapter_cases import AlasSemanticAdapterTestsSupport
+from alas_headless.adapter.semantic.contracts import AlasSemanticActionDeferred
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
@@ -26,5 +27,5 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
     def test_official_retirement_is_default_denied(self):
         adapter, _, _ = self.make_adapter()
 
-        with self.assertRaisesRegex(SemanticGateClosed, "positive transaction budget"):
+        with self.assertRaises(AlasSemanticActionDeferred):
             adapter.retire_ships_one_click(True)

@@ -4,13 +4,224 @@ from __future__ import annotations
 
 import math
 import re
+import time
 from typing import Optional, Tuple
-from .contracts import ActionReceipt, ButtonState, OracleState
-from .errors import SemanticGateClosed
+from .contracts import ActionReceipt, ButtonState, OracleState, Point
+from .errors import SemanticGateClosed, SemanticInputBlocked, SemanticTargetNotActionable, SemanticNavigationPending
 
 
 class RewardsOracle:
     """Rewards operations sharing the oracle frame and input boundary."""
+
+    def reward_sidebar_entry_ready(self, state: OracleState) -> bool:
+        """Prove an accepted entry's destination from one validated live state."""
+        roots = self._matches(state, 'reward/page/back')
+        if len(roots) > 1:
+            raise SemanticGateClosed('semantic target mapping is ambiguous')
+        if not roots:
+            return False
+        root = roots[0]
+        if root.actionable and not self._blocking_rules(state, 'reward/page/back'):
+            return True
+        if not (root.active_in_hierarchy and root.active_and_enabled):
+            return False
+        children = self._matches(state, 'reward/tactical/go')
+        if len(children) > 1:
+            raise SemanticGateClosed('semantic target mapping is ambiguous')
+        return bool(children and children[0].actionable
+                    and not self._blocking_rules(state, 'reward/tactical/go'))
+
+    def _reward_sidebar_scroll_plan(self, semantic_id):
+        if semantic_id not in ('reward/tactical/finish', 'reward/tactical/go'):
+            raise ValueError('reward sidebar scroll target is not reviewed')
+        state = self.read_state()
+        matches = self._matches(state, semantic_id)
+        if not matches:
+            return None
+        if len(matches) != 1:
+            raise SemanticGateClosed('reward sidebar target is ambiguous')
+        target = matches[0]
+        if not (target.active_in_hierarchy and target.active_and_enabled and target.interactable):
+            return None
+        if (target.point is None or target.bounds is None
+                or not target.bounds.contains(target.point)):
+            raise SemanticTargetNotActionable(semantic_id, state.generation)
+        # A covered on-screen button is not permission to scroll or tap it.
+        if target.actionable:
+            return None
+        blockers = self._blocking_rules(state, 'reward/page/back')
+        if blockers:
+            raise SemanticInputBlocked(semantic_id, state.generation,
+                                       [rule.blocker_id for rule in blockers])
+        page = self._unique(state, 'reward/page/back')
+        if not page.actionable:
+            raise SemanticTargetNotActionable(semantic_id, state.generation)
+        ui = self.read_ui_state()
+        if (ui.image_truncated or not ui.method_mask & 8
+                or not state.generation <= ui.generation <= state.generation + 2):
+            raise SemanticGateClosed('reward sidebar Images are incomplete or incoherent')
+        prefix = page.path + '/frame'
+        images = tuple(i for i in ui.images if i.active_in_hierarchy
+                       and i.active_and_enabled and not i.truncated and i.bounds is not None)
+        backgrounds = [i for i in images if i.path == prefix and i.sprite == 'bg' and i.raycast_target]
+        resources = [i for i in images if i.path.startswith(prefix + '/resources/')
+                     and i.path.rsplit('/', 1)[-1] in ('class', 'merchant', 'canteen')]
+        if len(backgrounds) != 1 or not resources:
+            raise SemanticTargetNotActionable(semantic_id, state.generation)
+        viewport = backgrounds[0].bounds
+        top = max(viewport.top, max(i.bounds.bottom for i in resources))
+        if not (0 <= viewport.left < viewport.right <= self.fingerprint.width
+                and 0 <= top < viewport.bottom <= self.fingerprint.height):
+            raise SemanticTargetNotActionable(semantic_id, state.generation)
+        # A Button can enter the outer frame while its owning card remains
+        # clipped and cannot receive raycasts. Use that exact reviewed card's
+        # observed bounds too; never tap the covered Button to work around it.
+        card_path = target.path.rsplit('/', 1)[0]
+        cards = [i for i in images if i.path == card_path
+                 and i.sprite in ('frame_class', 'frame_tech')]
+        if len(cards) > 1:
+            raise SemanticGateClosed('reward sidebar target card is ambiguous')
+        content_bounds = cards[0].bounds if cards else target.bounds
+        if top <= content_bounds.top and content_bounds.bottom <= viewport.bottom:
+            return None
+        anchors = [i for i in images if i.raycast_target and i.path.startswith(prefix + '/main/content/')
+                   and (re.search(r'/event/list/mission_[0-9]+\(Clone\)$', i.path)
+                        and i.sprite == 'frame_lock'
+                        or re.search(r'/(event|class|technology|chapterauto)/frame$', i.path)
+                        and i.sprite in ('frame_event', 'frame_class', 'frame_tech', 'frame_chapter_auto'))
+                   and viewport.left <= i.bounds.left < i.bounds.right <= viewport.right
+                   and top <= i.bounds.top < i.bounds.bottom <= viewport.bottom]
+        if not anchors or self._swipe is None:
+            raise SemanticTargetNotActionable(semantic_id, state.generation)
+        downward_content = content_bounds.bottom > viewport.bottom
+        edge = max(i.bounds.bottom for i in anchors) if downward_content else min(i.bounds.top for i in anchors)
+        selected = [i for i in anchors if (i.bounds.bottom if downward_content else i.bounds.top) == edge]
+        if len(selected) != 1:
+            raise SemanticGateClosed('reward sidebar scroll anchor is ambiguous')
+        anchor = selected[0]
+        start = Point((anchor.bounds.left + anchor.bounds.right) / 2,
+                      (anchor.bounds.top + anchor.bounds.bottom) / 2)
+        distance = min(2 * (anchor.bounds.bottom - anchor.bounds.top), (viewport.bottom - top) / 2)
+        end = Point(start.x, max(top, start.y - distance) if downward_content
+                    else min(viewport.bottom, start.y + distance))
+        if abs(end.y - start.y) < 1:
+            raise SemanticTargetNotActionable(semantic_id, state.generation)
+        return state, target, anchor, start, end
+
+    def reward_sidebar_control_offscreen(self, semantic_id):
+        return self._reward_sidebar_scroll_plan(semantic_id) is not None
+
+    def scroll_reward_sidebar_control(self, semantic_id):
+        """One reviewed content drag; ALAS observes and claims on its next loop."""
+        plan = self._reward_sidebar_scroll_plan(semantic_id)
+        if plan is None:
+            raise SemanticGateClosed('reward sidebar control does not need scrolling')
+        state, target, anchor, start, end = plan
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed before reward sidebar scroll')
+        duration_ms = 1500
+        self._swipe(round(start.x), round(start.y), round(end.x), round(end.y), duration_ms)
+        deadline = time.monotonic() + 5.0
+        while time.monotonic() < deadline:
+            after = self.read_state()
+            current = self._matches(after, semantic_id)
+            if (after.generation > state.generation and len(current) == 1
+                    and current[0].path == target.path and current[0].point is not None
+                    and current[0].active_in_hierarchy and current[0].active_and_enabled
+                    and not self._blocking_rules(after, 'reward/page/back')
+                    and (current[0].point.y - target.point.y) * (end.y - start.y) > 1):
+                return ActionReceipt(semantic_id='reward/sidebar/scroll', generation=state.generation,
+                                     point=start, bounds=anchor.bounds, path=anchor.path)
+            time.sleep(.1)
+        # A missed drag on a still-complete owning sidebar is local navigation
+        # delay. Preserve the actual gesture and let native task deferral own
+        # re-entry, rather than making unrelated scheduled tasks exit too.
+        pending = self._reward_sidebar_scroll_plan(semantic_id)
+        if pending is not None:
+            current_state, current_target, current_anchor, _, _ = pending
+            if (current_state.generation > state.generation
+                    and current_target.path == target.path
+                    and current_target.point is not None
+                    and abs(current_target.point.x - target.point.x) <= 1.0
+                    and abs(current_target.point.y - target.point.y) <= 1.0
+                    and current_anchor.path == anchor.path):
+                raise SemanticNavigationPending(
+                    semantic_id,
+                    dict(semantic_id='reward/sidebar/scroll', generation=state.generation,
+                         path=anchor.path, points=[round(start.x), round(start.y),
+                                                 round(end.x), round(end.y), duration_ms],
+                         before_target_point=[target.point.x, target.point.y],
+                         after_target_point=[current_target.point.x, current_target.point.y]),
+                    current_state.generation,
+                    'reward sidebar did not move on its fresh owning page')
+        raise SemanticGateClosed('reward sidebar scroll movement was not observed; do not retry')
+
+    def reward_item_info_visible(self) -> bool:
+        state = self.read_state()
+        if not self._matches(state, 'reward/item-info/close'):
+            return False
+        ui = self.read_ui_state()
+        if not any('/Msgbox(Clone)/window/single_item_panel/' in text.path
+                   and text.active_in_hierarchy and text.active_and_enabled
+                   for text in ui.texts):
+            return False
+        self._reward_item_info_close_state()
+        return True
+
+    def _reward_item_info_close_state(self):
+        state = self.read_state()
+        target = self._unique(state, 'reward/item-info/close')
+        if (not target.active_in_hierarchy or not target.active_and_enabled
+                or not target.interactable or target.raycast_top is False
+                or target.point is None or target.bounds is None
+                or not target.bounds.contains(target.point)
+                or not (0 <= target.point.x < self.fingerprint.width
+                        and 0 <= target.point.y < self.fingerprint.height)
+                or self._blocking_rules(state, 'reward/item-info/close')):
+            raise SemanticGateClosed('reward item-info close is not actionable')
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('reward item-info snapshots are not coherent')
+        prefix = target.path.rsplit('/window/top/btnBack', 1)[0] + '/window/single_item_panel/'
+        # Dismissal needs the panel identity, not inventory/count semantics.
+        # Numeric decoration may change without changing this safe close action.
+        names = tuple(text for text in ui.texts
+            if text.path == prefix + 'display_panel/name_container/name/Text'
+            and text.active_in_hierarchy and text.active_and_enabled
+            and not text.truncated and text.bounds is not None and text.text.strip())
+        if len(names) != 1:
+            raise SemanticGateClosed('reward item-info identity is absent or ambiguous')
+        icons = tuple(image for image in ui.images
+            if image.path == prefix + 'left/IconTpl/icon_bg/icon'
+            and image.active_in_hierarchy and image.active_and_enabled
+            and image.bounds is not None and image.sprite)
+        close_images = tuple(image for image in ui.images if image.path == target.path
+            and image.active_in_hierarchy and image.active_and_enabled
+            and image.bounds is not None and image.raycast_target
+            and image.color[3] > 0)
+        if len(icons) != 1 or len(close_images) != 1:
+            raise SemanticGateClosed('reward item-info image identity is ambiguous')
+        return state, target
+
+    def click_reward_item_info_close(self) -> ActionReceipt:
+        """Dismiss only a complete typed single-item description, once."""
+        state, target = self._retry_transition_read(self._reward_item_info_close_state)
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('game activity is not top-resumed')
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        def completed():
+            current = self.read_state()
+            ui = self.read_ui_state()
+            if (current.generation <= state.generation
+                    or not current.generation <= ui.generation <= current.generation + 2
+                    or self._matches(current, 'reward/item-info/close')
+                    or any('/Msgbox(Clone)/window/single_item_panel/' in text.path
+                           and text.active_in_hierarchy and text.active_and_enabled
+                           for text in ui.texts)):
+                raise SemanticGateClosed('reward item-info did not close after one input')
+        self._retry_transition_read(completed, attempts=20, interval_seconds=.1)
+        return ActionReceipt(semantic_id='reward/item-info/close', generation=state.generation,
+            point=target.point, bounds=target.bounds, path=target.path)
 
     def reward_summary_count(self, section: str, counter: str) -> int:
         """Read one exact non-negative counter from the reward side panel."""
@@ -59,10 +270,20 @@ class RewardsOracle:
 
         button_state = self.read_state()
         page = self._unique(button_state, "reward/page/back")
+        if (
+            page.active_in_hierarchy and page.active_and_enabled
+            and page.interactable and page.point is not None
+            and page.bounds is not None and page.bounds.contains(page.point)
+            and page.raycast_top is False
+            and not self._blocking_rules(button_state, "reward/page/back")
+        ):
+            raise SemanticGateClosed("reward resource page close is temporarily covered")
         if not page.actionable or self._blocking_rules(
             button_state, "reward/page/back"
         ):
-            raise SemanticGateClosed("reward resource page identity is not proven")
+            blockers = self._blocking_rules(button_state, 'reward/page/back')
+            raise SemanticGateClosed('reward resource page identity is not proven: blockers='
+                +','.join(rule.blocker_id for rule in blockers))
         ui_state = self.read_ui_state()
         if (
             ui_state.generation < button_state.generation

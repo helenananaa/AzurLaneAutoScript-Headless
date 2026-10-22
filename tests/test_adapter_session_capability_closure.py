@@ -7,6 +7,7 @@ from alas_headless.adapter import (
     CapabilityInventory,
     RecoveryPolicy,
     RunPolicy,
+    RunPolicyError,
     RunPolicyIdentity,
     TaskCapabilityProfile,
 )
@@ -44,6 +45,47 @@ def profile(*actions, profile_id="session-profile", observations=()):
 
 
 class SessionCapabilityClosureTests(unittest.TestCase):
+    def test_explicit_empty_grants_do_not_restore_legacy_purchase_authority(self):
+        session = AlasSemanticSession(
+            "device-1", REVISION, policy_grants={}, shop_purchase_budget=2,
+            allow_mission_claim_once=True,
+        )
+        self.assertEqual(dict(session.policy_grants), {})
+        self.assertEqual(session.shop_purchase_budget, 0)
+        self.assertFalse(session.allow_mission_claim_once)
+        called = []
+        with self.assertRaises(ActionLeaseError):
+            session.action_ledger.dispatch("shop.purchase", lambda: called.append(True))
+        self.assertEqual(called, [])
+
+    def test_policy_alone_supplies_its_profile_and_task_port_budgets(self):
+        run_policy = policy({"shop.purchase": 1})
+        session = AlasSemanticSession(
+            "device-1", REVISION, run_policy=run_policy, shop_purchase_budget=2,
+        )
+        self.assertEqual(dict(session.policy_grants), dict(run_policy.grants))
+        self.assertEqual(session.shop_purchase_budget, 1)
+        self.assertEqual(session.action_ledger.policy_sha256, run_policy.sha256)
+        called = []
+        session.action_ledger.dispatch("shop.purchase", lambda: called.append(True))
+        with self.assertRaises(ActionLeaseError):
+            session.action_ledger.dispatch("shop.purchase", lambda: called.append(True))
+        self.assertEqual(called, [True])
+
+    def test_conflicting_compatibility_copy_cannot_change_policy_grants(self):
+        run_policy = policy({"shop.purchase": 1})
+        for grants in ({"shop.purchase": 2}, {"shop.purchase": 0}, {}):
+            with self.subTest(grants=grants), self.assertRaises(RunPolicyError):
+                AlasSemanticSession(
+                    "device-1", REVISION, run_policy=run_policy,
+                    policy_grants=grants, capability_profile=profile("shop.purchase"),
+                )
+        session = AlasSemanticSession(
+            "device-1", REVISION, run_policy=run_policy,
+            policy_grants=run_policy.grants, capability_profile=profile("shop.purchase"),
+        )
+        self.assertTrue(session.action_ledger.allowed("shop.purchase"))
+
     def test_default_session_admits_only_a_zero_input_profile(self):
         session = AlasSemanticSession("device-1", REVISION)
         self.assertTrue(session.capability_report.ready)

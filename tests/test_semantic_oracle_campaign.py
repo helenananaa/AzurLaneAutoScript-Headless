@@ -2,6 +2,8 @@
 
 import copy
 import unittest
+from types import SimpleNamespace
+from unittest.mock import Mock
 from alas_headless.semantic_oracle import CampaignMapEntryState, SemanticGateClosed
 from tests.semantic_support.campaign_fixtures import make_campaign_map_backend
 from tests.semantic_support.observer_fixtures import (
@@ -21,6 +23,76 @@ from tests.semantic_support.oracle_cases import (
 
 
 class CampaignDockFullTests(CampaignDockFullTestsSupport, unittest.TestCase):
+    def test_os_underlay_allows_exact_dock_choices_but_other_blockers_do_not(self):
+        backend = self._backend()
+        backend.buttons['buttons'].append(make_button('stamina',
+            'LevelCamera/Canvas/LevelOrigin/top/adapt/top_stage/resources/WorldResPanel(Clone)/res/stamina'))
+        backend.buttons['button_count'] += 1
+        oracle = make_oracle(backend)
+        self.assertTrue(oracle.campaign_dock_full_visible(''))
+        with self.assertRaises(SemanticGateClosed):
+            oracle.click_campaign_dock_full_choice('', 'expand')
+        oracle.click_campaign_dock_full_choice('', 'enhance')
+        self.assertEqual(backend.taps, [(840, 515)])
+        backend.buttons['buttons'].append(make_button('Loading(Clone)',
+            'OverlayCamera/Overlay/UIOverlay/Loading(Clone)'))
+        backend.buttons['button_count'] += 1
+        with self.assertRaises(SemanticGateClosed):
+            oracle.click_campaign_dock_full_choice('', 'enhance')
+        self.assertEqual(len(backend.taps), 1)
+
+    def test_transient_modal_close_retries_complete_observation(self):
+        backend = self._backend()
+        oracle = make_oracle(backend)
+        before = oracle.read_state()
+        backend.buttons = make_buttons([])
+        after = oracle.read_state()
+        oracle.read_state = Mock(side_effect=[before] + [after] * 6)
+
+        self.assertFalse(oracle.campaign_dock_full_visible('d3'))
+        self.assertGreater(oracle.read_state.call_count, 2)
+        self.assertEqual(backend.taps, [])
+
+    def test_persistently_incoherent_modal_remains_closed(self):
+        backend = self._backend()
+        oracle = make_oracle(backend)
+        before = oracle.read_state()
+        backend.buttons = make_buttons([])
+        after = oracle.read_state()
+        # Each complete attempt opens on a modal which disappears while read.
+        oracle.read_state = Mock(side_effect=[before, after, after, after, after] * 4)
+        with self.assertRaisesRegex(SemanticGateClosed, 'not coherent'):
+            oracle.campaign_dock_full_visible('d3')
+        self.assertEqual(backend.taps, [])
+
+    def test_dock_full_modal_owns_organize_above_preparation_underlays(self):
+        for root in ('LevelStageInfoView(Clone)', 'LevelFleetSelectView(Clone)'):
+            with self.subTest(root=root):
+                backend = self._backend()
+                backend.buttons['buttons'].append(make_button('start_button',
+                    'OverlayCamera/Overlay/UIMain/' + root + '/panel/start_button'))
+                backend.buttons['button_count'] += 1
+                oracle = make_oracle(backend)
+                self.assertTrue(oracle.campaign_dock_full_visible('10-2'))
+                with self.assertRaises(SemanticGateClosed):
+                    oracle.click_campaign_dock_full_choice('10-2', 'expand')
+                self.assertEqual(backend.taps, [])
+                oracle.click_campaign_dock_full_choice('10-2', 'organize')
+                self.assertEqual(len(backend.taps), 1)
+
+    def test_shared_dock_full_without_historical_stage_title(self):
+        backend = self._backend()
+        backend.ui["texts"] = [t for t in backend.ui["texts"] if not t["path"].endswith("title_index")]
+        backend.ui["text_count"] = len(backend.ui["texts"])
+        oracle = make_oracle(backend)
+        self.assertTrue(oracle.campaign_dock_full_visible("12-4"))
+        self.assertEqual(oracle.click_campaign_dock_full_choice("12-4", "organize").semantic_id,
+                         "campaign/dock-full/organize")
+        backend.ui["texts"][2]["text"] = "是否购买道具？"
+        with self.assertRaisesRegex(SemanticGateClosed, "message"):
+            oracle.click_campaign_dock_full_choice("12-4", "organize")
+        self.assertEqual(len(backend.taps), 1)
+
     def test_d3_dock_full_maps_only_labelled_nonpremium_choices(self):
         backend = self._backend()
         oracle = make_oracle(backend)
@@ -282,6 +354,17 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "campaign/stage/12-4")
         self.assertEqual(receipt.path, stage_path)
         self.assertEqual(backend.taps, [(905, 353)])
+        self.assertTrue(oracle.campaign_stage_actionable('12-4'))
+        self.assertFalse(oracle.campaign_stage_actionable('13-4'))
+        with self.assertRaisesRegex(SemanticGateClosed, 'stage is absent'):
+            oracle.click_campaign_stage('13-4')
+        exact_stage = oracle.campaign_stage_state('12-4')
+        original_page_reader = oracle.campaign_page_state
+        oracle.campaign_page_state = Mock(return_value=SimpleNamespace(stages=(exact_stage, exact_stage)))
+        with self.assertRaisesRegex(SemanticGateClosed, 'ambiguous'):
+            oracle.campaign_stage_actionable('12-4')
+        oracle.campaign_page_state = original_page_reader
+        self.assertEqual(backend.taps, [(905, 353)])
 
         backend.buttons["buttons"][1]["raycast_top"] = False
         with self.assertRaisesRegex(SemanticGateClosed, "not actionable"):
@@ -363,6 +446,9 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
             make_oracle(backend).campaign_map_achievement_state("12-4")
 
     def test_campaign_in_map_probe_only_admits_reviewed_non_map_surfaces(self):
+        daily = FakeBackend([make_button('back_button', 'UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_button')])
+        self.assertFalse(make_oracle(daily).campaign_is_in_map())
+        self.assertEqual(daily.taps, [])
         login = FakeBackend(
             [
                 make_button(
@@ -741,7 +827,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
             x=1260,
             y=441,
             bounds={"left": 1178, "top": 395, "right": 1260, "bottom": 487},
-            raycast_top=None,
+            raycast_top=True,
         )
         backend.buttons["buttons"].append(button)
         backend.buttons["button_count"] += 1
@@ -759,6 +845,26 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "campaign/map/strategy/open")
         self.assertEqual(receipt.path, path)
         self.assertEqual(backend.taps, [(1219, 441)])
+        for top in (None, False):
+            button["raycast_top"] = top
+            with self.assertRaises(SemanticGateClosed):
+                make_oracle(backend).click_campaign_strategy_open()
+        self.assertEqual(backend.taps, [(1219, 441)])
+
+    def test_map_fleet_switch_requires_positive_hit_proof(self):
+        path = "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/bottom_stage/Normal/switch_button"
+        for top in (True, None, False):
+            backend = make_campaign_map_backend()
+            backend.buttons["buttons"].append(make_button("switch_button", path, raycast_top=top))
+            backend.buttons["button_count"] += 1
+            oracle = make_oracle(backend)
+            if top is True:
+                self.assertEqual(oracle.click_campaign_map_fleet_switch().path, path)
+                self.assertEqual(len(backend.taps), 1)
+            else:
+                with self.assertRaises(SemanticGateClosed):
+                    oracle.click_campaign_map_fleet_switch()
+                self.assertEqual(backend.taps, [])
 
     def test_campaign_strategy_panel_reads_cycles_and_closes_formation(self):
         backend = make_campaign_map_backend()
@@ -773,7 +879,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
                     x=1004,
                     y=445,
                     bounds={"left": 1004, "top": 402, "right": 1089, "bottom": 488},
-                    raycast_top=None,
+                    raycast_top=True,
                 ),
                 make_button(
                     "click",
@@ -781,7 +887,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
                     x=930,
                     y=445,
                     bounds={"left": 930, "top": 386, "right": 996, "bottom": 505},
-                    raycast_top=None,
+                    raycast_top=True,
                 ),
             )
         )
@@ -823,6 +929,15 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
             "campaign/map/strategy/formation/line_ahead",
         )
         self.assertEqual(close.semantic_id, "campaign/map/strategy/close")
+        self.assertEqual(backend.taps, [(1046, 445), (963, 446)])
+        for top in (None, False):
+            for button in backend.buttons["buttons"]:
+                if button["path"] in (item, detail + "/click"):
+                    button["raycast_top"] = top
+            with self.assertRaises(SemanticGateClosed):
+                oracle.click_campaign_strategy_formation("line_ahead")
+            with self.assertRaises(SemanticGateClosed):
+                oracle.click_campaign_strategy_close()
         self.assertEqual(backend.taps, [(1046, 445), (963, 446)])
 
     def test_campaign_map_model_retries_transient_second_snapshot(self):
@@ -1186,7 +1301,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
                     root + "/window/dodge_button",
                     430,
                     520,
-                    raycast_top=None,
+                    raycast_top=True,
                 ),
                 make_button(
                     "fight_button",
@@ -1205,6 +1320,10 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         self.assertEqual(evade.semantic_id, "campaign/ambush/evade")
         self.assertEqual(fight.semantic_id, "campaign/ambush/fight")
         self.assertEqual(backend.taps, [(430, 520), (850, 520)])
+
+        backend.buttons["buttons"][1]["raycast_top"] = None
+        with self.assertRaisesRegex(SemanticGateClosed, "not actionable"):
+            make_oracle(backend).click_campaign_ambush(evade=True)
 
         backend.buttons["buttons"][1]["raycast_top"] = False
         with self.assertRaisesRegex(SemanticGateClosed, "not actionable"):

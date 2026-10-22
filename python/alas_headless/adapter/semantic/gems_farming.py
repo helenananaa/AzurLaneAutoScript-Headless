@@ -95,10 +95,6 @@ class GemsFarmingAdapterPorts:
     def gems_farming_hard_unmount(
         self, stage_code: str, fleet_index: int, role: str
     ) -> ActionReceipt:
-        if not self._action_ledger.allowed("campaign.fleet_mutation"):
-            raise SemanticGateClosed(
-                "GemsFarming hard unmount requires a campaign fleet mutation budget"
-            )
         self._package_gate()
         return self._dispatch_mutation(
             "campaign.fleet_mutation",
@@ -118,10 +114,7 @@ class GemsFarmingAdapterPorts:
     def gems_farming_equipment_take_off(
         self, role: str
     ) -> GemsFarmingEquipmentLoadout:
-        if not self._action_ledger.allowed("campaign.fleet_mutation"):
-            raise SemanticGateClosed(
-                "GemsFarming equipment transfer requires a positive campaign fleet mutation budget"
-            )
+        self._require_action_grant("campaign.fleet_mutation")
         self._package_gate()
         return self.oracle.gems_farming_equipment_take_off(role)
 
@@ -252,10 +245,6 @@ class GemsFarmingAdapterPorts:
     def gems_farming_confirm_candidate_selection(
         self, candidate: GemsFarmingDockCandidate, role: str
     ) -> ActionReceipt:
-        if not self._action_ledger.allowed("campaign.fleet_mutation"):
-            raise SemanticGateClosed(
-                "GemsFarming replacement requires a positive campaign fleet mutation budget"
-            )
         self._package_gate()
         return self._dispatch_mutation(
             "campaign.fleet_mutation",

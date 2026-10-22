@@ -15,7 +15,7 @@ from .capabilities import (
     TaskCapabilityProfile,
     capability_closure_report,
 )
-from .errors import ActionLeaseError, CapabilityClosureError
+from .errors import ActionGrantExhausted, ActionLeaseError, CapabilityClosureError
 from .policy import RecoveryPolicy
 
 
@@ -120,6 +120,25 @@ class ActionLedger:
             return False
         with self._lock:
             return not self._closed and self._remaining.get(capability, 0) > 0
+
+    def require_available(self, capability: str) -> None:
+        """Classify a no-input budget refusal without reserving a grant.
+
+        Compatibility profiles omit explicitly zero grants from required
+        actions. They are still a budget refusal, whereas a closed ledger,
+        missing capability, or incomplete preflight remains a contract error.
+        Dispatch keeps its atomic reservation and authority checks.
+        """
+        self.require_preflight()
+        with self._lock:
+            if self._closed:
+                raise ActionLeaseError()
+            if (capability in self._initial
+                    and capability in self.inventory.actions
+                    and self._remaining.get(capability, 0) <= 0):
+                raise ActionGrantExhausted()
+            if capability not in self.profile.required_grants:
+                raise ActionLeaseError()
 
     def dispatch(
         self,

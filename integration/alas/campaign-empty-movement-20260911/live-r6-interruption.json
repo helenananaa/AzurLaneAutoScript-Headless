@@ -1,0 +1,7 @@
+{
+  "passed": false,
+  "reason": "Original map initialization requests fleet 1 before combat admission on a retained fleet-2 map",
+  "last_observed_fleet": 2,
+  "grid_inputs": 0,
+  "combat": 0
+}

@@ -396,6 +396,36 @@ class EnhancementSemanticOracleTests(unittest.TestCase):
 
         self.assertFalse(preview.material_protection_proven)
 
+    def test_partial_experience_enhancement_requires_exact_result(self):
+        for result_exp in (14, 0):
+            with self.subTest(result_exp=result_exp):
+                backend = FakeBackend([])
+                def page(generation, materials=(), exp=0):
+                    set_enhancement_page(backend, generation, materials=materials,
+                                         complete_card_images=bool(materials))
+                    for text in backend.ui['texts']:
+                        if '/attrs/attr_2/' in text['path']:
+                            if text['path'].endswith('/addition'): text['text']='+0'
+                            if text['path'].endswith('/exp_container/Text'):
+                                text['text']=f'{exp}/25'
+                page(20)
+                step = 0
+                def advance():
+                    nonlocal step
+                    step += 1
+                    if step == 1: page(21, ((0, 'maikaoer'),), 14)
+                    else: page(22, exp=result_exp)
+                backend.on_tap = advance
+                oracle = make_oracle(backend)
+                if result_exp == 14:
+                    receipt = oracle.enhance_with_official_recommendation(timeout_seconds=.1)
+                    self.assertEqual(receipt.consumed_count, 1)
+                    self.assertEqual(receipt.attributes_after[0].exp_current, 14)
+                else:
+                    with self.assertRaisesRegex(SemanticGateClosed, 'do not retry'):
+                        oracle.enhance_with_official_recommendation(timeout_seconds=.1)
+                self.assertEqual(backend.taps, [(1024, 626), (1191, 626)])
+
     def test_official_enhancement_confirms_only_a_protected_preview(self):
         backend = FakeBackend([])
         set_enhancement_page(backend, 20)
@@ -484,14 +514,14 @@ class EnhancementSemanticOracleTests(unittest.TestCase):
                     equipment_root + "cancel_btn",
                     844,
                     606,
-                    raycast_top=None,
+                    raycast_top=True,
                 ),
                 make_button(
                     "ALL",
                     equipment_root + "options/ALL",
                     200,
                     601,
-                    raycast_top=None,
+                    raycast_top=True,
                 ),
             ]
             if selected:
@@ -502,7 +532,7 @@ class EnhancementSemanticOracleTests(unittest.TestCase):
                         + "frame/view/content/0/frame/bg/selected/reduce",
                         250,
                         156,
-                        raycast_top=None,
+                        raycast_top=True,
                     )
                 )
             images = []
@@ -542,7 +572,7 @@ class EnhancementSemanticOracleTests(unittest.TestCase):
                         root + "button_container/custom_button_1(Clone)",
                         790,
                         515,
-                        raycast_top=None,
+                        raycast_top=True,
                     )
                 ],
                 generation=generation,
@@ -592,6 +622,32 @@ class EnhancementSemanticOracleTests(unittest.TestCase):
             ),
         )
         self.assertEqual(len(backend.taps), 5)
+
+    def test_equipment_preservation_still_rejects_wrong_or_obscured_confirmation(self):
+        root = "root/OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+        message = "不进行任何操作，所有装备会放入<color=#5f984d>仓库</color>\n是否退出？"
+        for case in ("text", "raycast", "loading", "duplicate"):
+            with self.subTest(case=case):
+                button = make_button("custom_button_1(Clone)", root + "button_container/custom_button_1(Clone)")
+                buttons = [button]
+                if case == "raycast":
+                    button["raycast_top"] = None
+                elif case == "loading":
+                    buttons.append(make_button("loading", "root/UIOverlay/Loading(Clone)/mask"))
+                elif case == "duplicate":
+                    buttons.append(dict(button))
+                backend = FakeBackend(buttons)
+                backend.ui = make_ui([make_text(
+                    "其他确认" if case == "text" else message, root + "msg_panel/content"
+                )])
+                with self.assertRaises(SemanticGateClosed):
+                    make_oracle(backend)._click_retirement_button(
+                        "enhancement/equipment/preserve/confirm",
+                        "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+                        identity_text_suffix="Msgbox(Clone)/window/msg_panel/content",
+                        identity_text=message,
+                    )
+                self.assertEqual(backend.taps, [])
 
     def test_official_enhancement_skips_when_recommendation_is_empty(self):
         backend = FakeBackend([])

@@ -1,0 +1,85 @@
+{
+  "schema": "alas-headless.main-task-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-09-09T04:26:42.573629Z",
+  "finished_at": "2026-09-09T04:31:04.910773Z",
+  "task": "Main",
+  "stage": "10-2",
+  "serial": "emulator-5580",
+  "run_count_requested": 1,
+  "execution_status": "incomplete",
+  "error": "SystemExit: 1",
+  "preparations": [],
+  "completed_sorties": [],
+  "auto_menu_observations": [],
+  "continuation_receipts": [],
+  "submarine_observations": [],
+  "submarine_calls": [],
+  "combat_admissions": [
+    {
+      "generation": 134278,
+      "battle_count": 6,
+      "target": "H6",
+      "expected": "combat_boss",
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "E4",
+        "ammo": 3,
+        "ammo_capacity": 6
+      },
+      "hunting_nodes": [
+        "B3",
+        "B4",
+        "D2",
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "F3",
+        "F4",
+        "G2",
+        "G3",
+        "G4",
+        "H5"
+      ],
+      "submarine_destination": "G5"
+    }
+  ],
+  "submarine_moves": [],
+  "submarine_strategy": [
+    {
+      "semantic_id": "campaign/map/strategy/submarine/view",
+      "generation": 133905,
+      "point": {
+        "x": 1230.667,
+        "y": 398.0
+      },
+      "bounds": {
+        "left": 1188.0,
+        "top": 355.333,
+        "right": 1273.333,
+        "bottom": 440.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/detail/items/item(Clone)/icon",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "campaign/map/strategy/submarine/view",
+      "generation": 134171,
+      "point": {
+        "x": 1230.667,
+        "y": 398.0
+      },
+      "bounds": {
+        "left": 1188.0,
+        "top": 355.333,
+        "right": 1273.333,
+        "bottom": 440.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/detail/items/item(Clone)/icon",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ]
+}

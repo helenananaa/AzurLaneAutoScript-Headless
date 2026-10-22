@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "reason": "Withdraw after interrupted empty-movement arrival before final fresh run",
+  "battles": 0,
+  "oil_before": 9319,
+  "campaign_end": "In stage.",
+  "chapter": true,
+  "oil_after": 9319,
+  "keys": [
+    295,
+    300
+  ]
+}

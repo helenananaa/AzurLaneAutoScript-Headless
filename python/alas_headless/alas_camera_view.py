@@ -175,7 +175,8 @@ class AlasSemanticCampaignGrid:
         # ``GridInfo.merge``.  Keep the typed record structurally compatible
         # with every field that merge reads, using conservative false/empty
         # defaults for categories the observer did not prove.
-        self.is_submarine = False
+        self.is_submarine = state.submarine is not None and state.submarine.node == cell.node
+        self.is_submarine_destination = state.submarine_destination_node == cell.node
         self.is_caught_by_siren = False
         self.is_carrier = False
         self.is_missile_attack = False
@@ -195,6 +196,8 @@ class AlasSemanticCampaignGrid:
             return "FL"
         if self.is_fleet:
             return "Fl"
+        if self.is_submarine:
+            return 'ss'
         if self.is_mystery:
             return "MY"
         if self.is_ammo:
@@ -213,7 +216,10 @@ class AlasSemanticCampaignGrid:
         return self.is_current_fleet
 
     def predict_submarine(self) -> bool:
-        return False
+        return self.is_submarine
+
+    def predict_submarine_move(self) -> bool:
+        return self.is_submarine_destination
 
 
 class _AlasSemanticGridSelection:
@@ -311,9 +317,24 @@ class AlasSemanticCampaignView:
         after_enemies = set(current.semantic_state.enemies)
         added_enemies = after_enemies - before_enemies
         removed_enemies = before_enemies - after_enemies
+        before_sub = self.semantic_state.submarine
+        after_sub = current.semantic_state.submarine
+        submarine_compatible = (before_sub is None and after_sub is None) or (
+            before_sub is not None and after_sub is not None
+            and before_sub.marker == after_sub.marker
+            and (before_sub.node == after_sub.node or before_sub.ammo is None or after_sub.ammo is None)
+            and (before_sub.ammo_capacity is None or after_sub.ammo_capacity is None
+                 or before_sub.ammo_capacity == after_sub.ammo_capacity)
+            and (before_sub.ammo is None or after_sub.ammo is None
+                 or 0 <= after_sub.ammo <= before_sub.ammo))
+        # Hunting can move the same submarine and hide its ammo widgets.
+        # Neither changes camera geometry. Input receipts still own action
+        # qualification; unknown ammo is not a consumption postcondition.
+        submarine_only_update = before_signature[:11] == after_signature[:11] and submarine_compatible
         additive_boss = (
-            before_signature[:6] + before_signature[7:]
-            == after_signature[:6] + after_signature[7:]
+            before_signature[:6] + before_signature[7:11]
+            == after_signature[:6] + after_signature[7:11]
+            and submarine_compatible
             and not removed_enemies
             and len(added_enemies) == 1
             and next(iter(added_enemies)).genre == "Boss"
@@ -329,7 +350,8 @@ class AlasSemanticCampaignView:
         after_fleet = after_fleets.get(current_marker)
         same_static_state = (
             before_signature[:5] == after_signature[:5]
-            and before_signature[7:] == after_signature[7:]
+            and before_signature[7:11] == after_signature[7:11]
+            and submarine_compatible
         )
         post_combat_wave = bool(
             same_static_state
@@ -341,7 +363,13 @@ class AlasSemanticCampaignView:
                 for marker in before_fleets
                 if marker != current_marker
             )
-            and before_fleet.node != after_fleet.node
+            # A resumed precombat already places the fleet on the enemy cell.
+            # Only its explicit fighting marker permits a stationary victory.
+            and (
+                before_fleet.node != after_fleet.node
+                or (len(removed_enemies) == 1
+                    and next(iter(removed_enemies)).fighting)
+            )
             and after_fleet.ammo == max(0, before_fleet.ammo - 1)
             and after_fleet.ammo_capacity == before_fleet.ammo_capacity
             and len(removed_enemies) == 1
@@ -353,6 +381,7 @@ class AlasSemanticCampaignView:
                 before_signature != after_signature
                 and not additive_boss
                 and not post_combat_wave
+                and not submarine_only_update
             )
             or after.generation <= before.generation
         ):

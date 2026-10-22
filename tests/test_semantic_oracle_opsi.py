@@ -2,6 +2,7 @@
 
 import unittest
 from alas_headless.semantic_oracle import SemanticGateClosed, SemanticTargetMissing
+from alas_headless.oracle.errors import SemanticInputBlocked
 from tests.semantic_support.observer_fixtures import (
     FakeBackend,
     make_button,
@@ -20,6 +21,70 @@ from unittest import mock
 
 
 class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
+    def test_statistics_grade_accepts_native_s_label_case_and_rejects_other_grade(self):
+        root = ('OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/'
+                'NewBattleResultStatisticsPage(Clone)')
+        backend = FakeBackend([make_button('confirmBtn', root + '/bottom/confirmBtn')])
+        backend.ui = make_ui([], images=[
+            make_image(root + '/top/grade/icon', 'letter_S'),
+            make_image(root + '/top/grade/Text', 'label_S'),
+        ])
+        oracle = make_oracle(backend)
+        self.assertEqual(oracle.operation_siren_battle_statistics_grade(), 'S')
+        backend.ui['images'][1]['sprite'] = 'label_s'
+        self.assertEqual(oracle.operation_siren_battle_statistics_grade(), 'S')
+        backend.ui['images'][1]['sprite'] = 'label_d'
+        with self.assertRaisesRegex(SemanticGateClosed, 'inconsistent'):
+            oracle.operation_siren_battle_statistics_grade()
+        self.assertEqual(backend.taps, [])
+
+        backend.buttons['buttons'].append(make_button(
+            'confirm', 'root/Msgbox(Clone)/window/button_container/custom_button_1(Clone)'))
+        backend.buttons['button_count'] += 1
+        # A retained statistics underlay must not hide the owning popup.
+        self.assertFalse(oracle.operation_siren_battle_statistics_visible())
+
+    def test_retained_r5_frame_preserves_real_s_grade(self):
+        import json
+        from pathlib import Path
+        receipt = Path(__file__).resolve().parents[1] / 'artifacts/continuity-20261004/goal-scheduler-r5.json'
+        if not receipt.exists():
+            self.skipTest('retained r5 frame unavailable')
+        failed = json.loads(receipt.read_text(encoding='utf-8'))['tasks'][-1]['failed_presence']
+        backend = FakeBackend(failed['state']['buttons_snapshot']['buttons'])
+        backend.ui = make_ui([], images=failed['ui']['snapshot']['images'])
+        oracle = make_oracle(backend)
+        self.assertTrue(oracle.operation_siren_battle_statistics_visible())
+        self.assertEqual(oracle.operation_siren_battle_statistics_grade(), 'S')
+        self.assertEqual(backend.taps, [])
+
+    def test_statistics_native_grade_preserves_d_and_rejects_ambiguous_or_covered_input(self):
+        root = ('OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/'
+                'NewBattleResultStatisticsPage(Clone)')
+        backend = FakeBackend([make_button('confirmBtn', root + '/bottom/confirmBtn')])
+        backend.ui = make_ui([], images=[
+            make_image(root + '/top/grade/icon', 'letter_D'),
+            make_image(root + '/top/grade/Text', 'label_d'),
+        ])
+        oracle = make_oracle(backend)
+        self.assertEqual(oracle.operation_siren_battle_statistics_grade(), 'D')
+        oracle.click_daily_battle_result()
+        self.assertEqual(len(backend.taps), 1)
+        backend.buttons['buttons'][0]['raycast_top'] = False
+        self.assertEqual(oracle.operation_siren_battle_statistics_grade(), 'D')
+        with self.assertRaisesRegex(SemanticGateClosed, 'not actionable'):
+            oracle.click_daily_battle_result()
+        self.assertEqual(len(backend.taps), 1)
+        backend.ui['images'][1]['sprite'] = 'label_s'
+        self.assertTrue(oracle.operation_siren_battle_statistics_visible())
+        with self.assertRaisesRegex(SemanticGateClosed, 'inconsistent'):
+            oracle.operation_siren_battle_statistics_grade()
+        backend.ui['images'][1]['sprite'] = 'label_d'
+        backend.ui['images'].append(dict(backend.ui['images'][0]))
+        backend.ui['image_count'] += 1
+        with self.assertRaisesRegex(SemanticGateClosed, 'ambiguous'):
+            oracle.operation_siren_battle_statistics_grade()
+
     def test_operation_siren_event_trigger_result_click_is_exact(self):
         root = "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)"
         continue_path = (
@@ -114,6 +179,52 @@ class OperationSirenSemanticOracleTests(OperationSirenSemanticOracleTestsSupport
 
         self.assertEqual(state.action_points, 340)
         self.assertEqual(state.action_point_capacity, 200)
+
+    def test_operation_siren_back_rejects_msgbox_underlay_and_foreground_change(self):
+        backend = self._operation_siren_header_backend(200)
+        backend.buttons["buttons"][0]["raycast_top"] = None
+        oracle = make_oracle(backend)
+        receipt = oracle.click_operation_siren_back()
+        self.assertEqual(receipt.semantic_id, "os/page/back")
+        self.assertEqual(len(backend.taps), 1)
+        backend.taps.clear()
+        backend.buttons["buttons"].append(make_button("custom_button_1(Clone)",
+            "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)"))
+        backend.buttons["button_count"] += 1
+        with self.assertRaises(SemanticInputBlocked) as blocked:
+            oracle.click_operation_siren_back()
+        self.assertIn('tactical-continue', blocked.exception.blockers)
+        self.assertEqual(backend.taps, [])
+        backend.buttons["buttons"].pop()
+        backend.buttons["button_count"] -= 1
+        state = oracle.read_state()
+        with mock.patch.object(oracle, "operation_siren_state"), \
+                mock.patch.object(oracle, "read_state", return_value=state), \
+                mock.patch.object(oracle, "_foreground_component", return_value="another/package"):
+            with self.assertRaisesRegex(SemanticGateClosed, "foreground changed|not top-resumed"):
+                oracle.click_operation_siren_back()
+        self.assertEqual(backend.taps, [])
+
+    def test_operation_siren_back_closes_exact_inherited_inventory(self):
+        backend = self._operation_siren_header_backend(200)
+        path = 'OverlayCamera/Overlay/UIMain/WorldInventoryUI(Clone)/adapt/blur_panel/adapt/top/back_btn'
+        backend.buttons['buttons'].append(make_button('back_btn', path))
+        backend.buttons['button_count'] += 1
+        receipt = make_oracle(backend).click_operation_siren_back()
+        self.assertEqual(receipt.semantic_id, 'os/storage/back')
+        self.assertEqual(receipt.path, path)
+        self.assertEqual(len(backend.taps), 1)
+
+    def test_operation_siren_inherited_inventory_does_not_bypass_foreign_modal(self):
+        backend = self._operation_siren_header_backend(200)
+        backend.buttons['buttons'].extend([
+            make_button('back_btn', 'OverlayCamera/Overlay/UIMain/WorldInventoryUI(Clone)/adapt/blur_panel/adapt/top/back_btn'),
+            make_button('custom_button_1(Clone)', 'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)'),
+        ])
+        backend.buttons['button_count'] += 2
+        with self.assertRaisesRegex(SemanticGateClosed, 'storage back is not actionable'):
+            make_oracle(backend).click_operation_siren_back()
+        self.assertEqual(backend.taps, [])
 
     def test_operation_siren_header_rejects_ap_above_legacy_safety_bound(self):
         with self.assertRaisesRegex(SemanticGateClosed, "summary is inconsistent"):
@@ -210,12 +321,11 @@ class OperationSirenSemanticOracleTests(OperationSirenSemanticOracleTestsSupport
             "root/OverlayCamera/Overlay/UIMain/top/adapt/right_stage/"
             "btn_list/auto_switch/off"
         )
-        backend = FakeBackend(
-            [make_button("off", switch, x=1225, y=598, raycast_top=None)]
-        )
+        backend = self._operation_siren_header_backend(200)
+        backend.buttons['buttons'].append(make_button("off", switch, x=1225, y=598, raycast_top=None))
+        backend.buttons['button_count'] += 1
         oracle = make_oracle(backend)
-        with mock.patch.object(oracle, "operation_siren_state"):
-            receipt = oracle.click("os/map/strategic-search/off")
+        receipt = oracle.click("os/map/strategic-search/off")
         self.assertEqual(receipt.semantic_id, "os/map/strategic-search/off")
         self.assertEqual(backend.taps, [(1225, 598)])
 
@@ -613,19 +723,31 @@ class OperationSirenSemanticOracleTests(OperationSirenSemanticOracleTestsSupport
             make_oracle(backend).operation_siren_auto_search_info_count(),
             2,
         )
+        backend.ui['texts'][1]['text'] = backend.ui['texts'][0]['text']
+        self.assertEqual(make_oracle(backend).operation_siren_auto_search_info_count(), 1)
 
     def test_auto_search_reward_close_is_exact_and_actionable(self):
-        path = (
-            "root/OverlayCamera/Overlay/UIMain/WorldAutoFightRewardUI(Clone)/"
-            "Window/Fixed/ButtonExit"
-        )
+        root = "OverlayCamera/Overlay/UIMain/WorldAutoFightRewardUI(Clone)"
+        path = root + "/Window/Fixed/ButtonExit"
         backend = FakeBackend(
             [make_button("ButtonExit", path, x=640, y=600, raycast_top=True)]
         )
+        graphic = make_image(path, "btn_big_grey", backend.buttons["buttons"][0]["adb_bounds"])
+        graphic["raycast_target"] = True
+        graphic["raycast_top"] = True
+        backend.ui = make_ui([
+            make_text("离开", path + "/pic"),
+            make_text("TOTAL REWARDS", root + "/Window/Fixed/top/bg/obtain/title/title_en"),
+        ], images=[graphic])
         oracle = make_oracle(backend)
         self.assertTrue(oracle.enabled("os/auto-search/reward/close"))
         receipt = oracle.click("os/auto-search/reward/close")
         self.assertEqual(receipt.semantic_id, "os/auto-search/reward/close")
+        self.assertEqual(backend.taps, [(640, 600)])
+        backend.ui["images"][0]["raycast_top"] = False
+        self.assertFalse(oracle.enabled("os/auto-search/reward/close"))
+        with self.assertRaises(SemanticGateClosed):
+            oracle.click("os/auto-search/reward/close")
         self.assertEqual(backend.taps, [(640, 600)])
 
     def test_operation_siren_order_confirmation_uses_exact_cost_prompt(self):

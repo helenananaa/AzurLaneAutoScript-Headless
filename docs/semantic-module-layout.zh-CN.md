@@ -14,6 +14,7 @@
 | 公共观察的页面/遮挡归属 | `oracle/surfaces.py` | `test_semantic_task_isolation.py` |
 | 通用目标定位和最终输入 | `oracle/targets.py`、`oracle/actions.py` | `test_semantic_oracle_boundary.py` |
 | 科研、委托、后宅等语义读写 | `oracle/research.py`、`commission.py`、`dorm.py` 等 | `test_semantic_oracle_<能力>.py` |
+| 当前游戏与 ALAS 活动身份绑定 | `oracle/activity_identity.py`、`archives.py`、`raid.py` | `test_dynamic_activity_identity.py`、`test_semantic_oracle_raid.py` |
 | 战役地图、准备、舰队 | `oracle/campaign_map.py`、`campaign_navigation.py`、`campaign_preparation.py`、`campaign_fleet.py` | `test_semantic_oracle_campaign_*.py` |
 | 大世界 | `oracle/opsi_state.py`、`opsi_navigation.py`、`opsi_globe.py`、`opsi_storage.py`、`opsi_mission.py`、`opsi_resources.py`、`opsi_shop.py` | `test_semantic_oracle_opsi*.py` |
 | ALAS 资源名称和任务端口 | `adapter/semantic/resources.py` 及对应能力模块 | `test_alas_adapter_<能力>.py` |
@@ -24,6 +25,63 @@
 | 会话的战斗和任务委派 | `adapter/semantic/session_combat.py`、`session_opsi.py`、`session_tasks.py`、`session_dispatch.py` | 对应会话和任务测试 |
 
 ## 共享状态和分派顺序
+
+截图边界仍采集并冻结一帧。UI 的文字、开关、图片及图片源元数据在实际消费时
+分别解析，成功结果只缓存在该 `UiState` 内；不能把解析失败替换成空列表。
+这允许坏图片不阻断只读文字的功能，同时保留输入所需字段的完整性检查。
+共享包/PID、schema、代次、时效及无法归属的错误仍在采集边界拒绝。
+
+`alas-headless.ui/v1` 可附带 `error_counts`，键为 `toggle`、`text`、`image`、
+`shared`，保留原有总计 `error_count`；计数必须与总计一致。`shared` 或未知族的
+非零错误仍影响整帧，已知族的错误仅在消费该族时拒绝。旧 observer 没有该字段且
+总错误为零时继续兼容；旧版非零总错误不能凭空归属给某个字段族。对应验证在
+`test_ui_family_isolation.py` 和 `test_observer_ui_error_attribution.py`。
+
+### 可选 Lua 模型观察
+
+`/v1/ui` 的 `shipyard_strengthen` 和 `activity_identity` 来自
+`NativeLuaShipyardProbe.h`、`NativeLuaActivityIdentity.h`。它们只读取当前 Unity
+主线程 Lua 状态中已经存在的原始表，不调用 Lua 函数、元方法或延迟加载器，不写游戏
+状态。每个 reader 检查自己实际需要的 native 符号；Globe 使用的 upvalue、对象指针
+等接口缺失，不会连带关闭不依赖这些接口的 Shipyard/Activity reader。
+
+`shipyard_strengthen` 关联当前 `ShipBluePrintMediator` 选中蓝图、筛选结果及原有
+模型中的进度、稀有度、免费追赶和购买数据。它只提供实际字段；Python 仍负责验证
+所选舰船、当前窗口、资源授权和输入后置条件，不能把完整观察等同于购买许可。
+可选 `gems_known`、`paid_gems`、`free_gems` 从同一 PlayerProxy 原始字段读取；
+缺失不关闭此 reader 或独立导航。存量蓝图消费用它们证明钻石未变化，同时要求
+库存精确减少、强化进度推进及金币/购买计数不变；最终完成读取不依赖动画中隐藏的
+DEV 等级文字或数量面板。ALAS 的数量选择、确认循环和后续任务策略保持原样。
+
+`activity_identity` 的 `archives`、`raids` 各有独立 `status`、数量和截断标记。
+外层栈平衡成功不意味着两个族都可用；读取失败不会计入无关 UI 族的错误数。
+
+- Archives 核对 `pg.re_map_template.all` 与已加载的 `pg.base.re_map_template`。
+  未完整加载时只能报告该族不可用，不能从部分目录推断唯一活动。Python 用实际安装
+  ALAS 的游戏语言标题与游戏活动名精确关联，仅处理已知的档案前后缀，然后读取游戏
+  当前类别和 banner；不按文件夹日期、列表位置或相似图标猜测。旧条目保留已审阅
+  的资源身份关联，完整动态目录可兼容同一活动的 banner 更新。
+  列表移动中的卡片位置/几何观察不要求 Button 与 Image 已完全对齐；点卡仍要求
+  唯一控件及精确相同边界。仅“尚未对齐”的输入前拒绝可有界重读，真正重复控件、
+  遮挡和输入异常立即失败。半露卡片继续沿已证明列表滚动，不作为可点击目标。
+  原生射线命中已确认时使用其证明的输入点；旧 publisher 没有射线字段时，使用
+  已审阅 `bg/icon` 按钮当前矩形的内部中心，避免边缘 pivot 取整后落到按钮外。
+  整数输入点仍须严格位于按钮内，明确未命中的射线结果不能走兼容分支。
+  档案关卡列表同时识别旧 `float/levels/items` 和已支持的
+  `LevelSelectSPFullUI/Battle/Nodes` 布局；后者复用 Event 的父节点、标题与次数解析。
+  两种布局必须属于同一已识别页面，混合或未知容器不能授权关卡输入。
+- Raid 用 `pg.m02.model.proxyMap.ActivityProxy.data` 中服务器创建的活动 ID，关联
+  游戏配置的同一 ID、活动类型、`mark` 和 `page_core`。`raid_<mark>` 是动态连接键，
+  无需为每个发布日期添加允许名单；存在于静态配置而未出现在 proxy 的旧活动不会
+  被当成当前活动。完整读取后的空列表是正常的“当前没有该类活动”，不是读取失败。
+- 未选中条目的类别/banner/layout 缺失只令该条目未知，不关闭整个目录。影响唯一
+  身份的 ID、档案名或 Raid mark 缺失仍需局部拒绝。已识别的 Raid 目前仅复用已支持
+  的界面结构；新布局需要新的 typed 端口，不能因为活动身份匹配就授权任意按钮。
+
+活动过期、剩余次数、任务选择和战斗仍由游戏与原 ALAS 决定。身份观察和元数据匹配
+不替代包/PID、freshness、不可变帧、目标唯一性、遮挡和输入后置条件，也不自动提高
+任务支持等级。对应离线测试另见 `tests/cpp/native_lua_activity_identity_test.cpp`
+与 `native_lua_shipyard_probe_test.cpp`；实机收据的覆盖范围单独记录。
 
 能力模块以显式 mixin 组合到原来的 `SemanticOracle`、`AlasSemanticAdapter`、
 `AlasSemanticSession` 对象上。各模块共享该对象原有的帧、任务上下文和输入台账，

@@ -16,6 +16,19 @@ from .contracts import (
 from .errors import SemanticGateClosed
 
 
+def _native_grid_projection_point(item):
+    raw = item.raw.get("adb_point")
+    if not isinstance(raw, dict):
+        raise SemanticGateClosed("operation siren native grid projection is absent")
+    values = (raw.get("x"), raw.get("y"))
+    if any(type(v) not in (int, float) or not math.isfinite(v) for v in values):
+        raise SemanticGateClosed("operation siren native grid projection is malformed")
+    point = Point(*values)
+    if item.bounds is None or not item.bounds.contains(point):
+        raise SemanticGateClosed("operation siren native grid projection is outside bounds")
+    return point
+
+
 class OpsiNavigationOracle:
     """Opsi navigation operations sharing the oracle frame and input boundary."""
 
@@ -592,8 +605,10 @@ class OpsiNavigationOracle:
         relative_position: Tuple[int, int],
         *,
         prefer_adjacent_event: bool = False,
+        expected_path: Optional[str] = None,
+        fleet_relative: bool = False,
     ) -> ActionReceipt:
-        """Click one exact typed world grid relative to the camera center."""
+        """Click a typed world grid in the caller's explicit reference frame."""
 
         if (
             not isinstance(relative_position, tuple)
@@ -628,13 +643,29 @@ class OpsiNavigationOracle:
             ):
                 continue
             grids.append((int(match.group(1)), int(match.group(2)), item))
-        centers = tuple(
-            (row, column, item)
-            for row, column, item in grids
-            if item.bounds is not None
-            and item.bounds.contains(Point(640.0, 360.0))
-        )
-        if not centers:
+        if fleet_relative:
+            fleet = self._operation_siren_current_fleet_from_ui_state(state)
+            fleet_path = f'/LevelGrid/DragLayer/plane/cells/fleet_{fleet}/shadow'
+            fleet_anchors = [item for item in state.images
+                if item.path.endswith(fleet_path) and item.name == 'shadow'
+                and item.sprite == 'shadow' and item.active_in_hierarchy
+                and item.active_and_enabled and not item.truncated
+                and item.bounds is not None]
+            if len(fleet_anchors) != 1:
+                raise SemanticGateClosed('operation siren relative-grid fleet anchor is absent or ambiguous')
+            fleet_point = _native_grid_projection_point(fleet_anchors[0])
+            centers = tuple((row, column, item) for row, column, item in grids
+                if item.bounds.contains(fleet_point)
+                and math.hypot(_native_grid_projection_point(item).x-fleet_point.x,
+                              _native_grid_projection_point(item).y-fleet_point.y) <= .05)
+        else:
+            centers = tuple(
+                (row, column, item)
+                for row, column, item in grids
+                if item.bounds is not None
+                and item.bounds.contains(Point(640.0, 360.0))
+            )
+        if not centers and not fleet_relative:
             occupied_center_pattern = re.compile(
                 r"LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
                 r"cell_([0-9]+)_([0-9]+)/attachments/event_[0-9]+/"
@@ -707,6 +738,12 @@ class OpsiNavigationOracle:
             raise SemanticGateClosed(
                 "operation siren relative target grid is absent or ambiguous"
             )
+        if expected_path is not None and click_path != expected_path:
+            raise SemanticGateClosed('operation siren camera target changed before input')
+        button_state = self.read_state()
+        if (not state.generation <= button_state.generation <= state.generation + 2
+                or self._blocking_rules(button_state, 'os/map/guidepost/relative')):
+            raise SemanticGateClosed('operation siren relative grid is incoherent or covered')
         point = Point(
             (click_bounds.left + click_bounds.right) / 2.0,
             (click_bounds.top + click_bounds.bottom) / 2.0,
@@ -752,7 +789,10 @@ class OpsiNavigationOracle:
             raise SemanticGateClosed(
                 "operation siren guidepost changed before input"
             )
+        before = self.read_state()
         state = self.read_ui_state()
+        if not before.generation <= state.generation <= before.generation + 2:
+            raise SemanticGateClosed("operation siren guidepost frame is incoherent")
         fleet = self._operation_siren_current_fleet_from_ui_state(state)
         fleet_path = (
             f"/LevelGrid/DragLayer/plane/cells/fleet_{fleet}/shadow"
@@ -772,41 +812,48 @@ class OpsiNavigationOracle:
             raise SemanticGateClosed(
                 "operation siren selected-fleet guidepost anchor is ambiguous"
             )
-        fleet_bounds = fleet_anchors[0].bounds
-        assert fleet_bounds is not None
-        fleet_x = (fleet_bounds.left + fleet_bounds.right) / 2.0
-        fleet_y = (fleet_bounds.top + fleet_bounds.bottom) / 2.0
-        expected_x = fleet_x + relative_position[0] * 99.0
-        expected_y = fleet_y + relative_position[1] * 70.0
+        native_point = _native_grid_projection_point
+
+        # Unity's own grid projections join the selected fleet to one cell.
+        # WSMapCell hides attachment models in fog; a positive radar target
+        # still identifies the adjacent native walk cell used by ALAS.
+        fleet_point = native_point(fleet_anchors[0])
+        grid_pattern = re.compile(
+            r"LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/"
+            r"world_quad_([0-9]+)_([0-9]+)/walk_quad$"
+        )
+        grids = []
+        for item in state.images:
+            match = grid_pattern.fullmatch(item.path)
+            if (match is not None and item.name == "walk_quad"
+                    and item.sprite == "cell_white" and item.active_in_hierarchy
+                    and item.active_and_enabled and not item.truncated
+                    and item.bounds is not None):
+                grids.append((int(match[1]), int(match[2]), item, native_point(item)))
+        anchors = [(r, c) for r, c, _, p in grids
+                   if math.hypot(p.x-fleet_point.x, p.y-fleet_point.y) <= 0.05]
+        if len(anchors) != 1:
+            raise SemanticGateClosed("operation siren guidepost fleet cell is absent or ambiguous")
+        row = anchors[0][0] + relative_position[1]
+        column = anchors[0][1] + relative_position[0]
+        cells = [(item, p) for r, c, item, p in grids if (r, c) == (row, column)]
+        if len(cells) != 1:
+            raise SemanticGateClosed("operation siren guidepost target cell is absent or ambiguous")
         guidepost_pattern = re.compile(
             r"LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
-            r"cell_[0-9]+_[0-9]+/attachments/event_[0-9]+/char/shadow$"
+            rf"cell_{row}_{column}/attachments/event_[0-9]+/char/shadow$"
         )
-        candidates = []
-        for item in state.images:
-            if (
-                not guidepost_pattern.fullmatch(item.path)
-                or item.name != "shadow"
-                or item.sprite != "shadow"
-                or not item.active_in_hierarchy
-                or not item.active_and_enabled
-                or item.truncated
-                or item.bounds is None
-            ):
-                continue
-            center_x = (item.bounds.left + item.bounds.right) / 2.0
-            center_y = (item.bounds.top + item.bounds.bottom) / 2.0
-            if (
-                abs(center_x - expected_x) <= 24.0
-                and abs(center_y - expected_y) <= 24.0
-            ):
-                candidates.append((item, Point(center_x, center_y)))
-        if len(candidates) != 1:
-            raise SemanticGateClosed(
-                "operation siren adjacent guidepost is absent or ambiguous"
-            )
-        target, point = candidates[0]
+        candidates = [item for item in state.images
+                      if guidepost_pattern.fullmatch(item.path)
+                      and item.name == "shadow" and item.sprite == "shadow"
+                      and item.active_in_hierarchy and item.active_and_enabled
+                      and not item.truncated and item.bounds is not None]
+        if len(candidates) > 1:
+            raise SemanticGateClosed("operation siren adjacent guidepost is absent or ambiguous")
+        target, point = (candidates[0], native_point(candidates[0])) if candidates else cells[0]
         assert target.bounds is not None
+        if self._blocking_rules(self.read_state(), "os/map/guidepost/relative"):
+            raise SemanticGateClosed("operation siren guidepost is obscured before input")
         if (
             not target.bounds.contains(point)
             or not 80.0 <= point.x <= 960.0

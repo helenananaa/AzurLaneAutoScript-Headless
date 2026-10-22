@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from ...semantic_oracle import SemanticGateClosed
+from ...semantic_oracle import SemanticGateClosed, SemanticTargetMissing
 from .contracts import _MinigameFlowContext
 from .dispatch_result import UNHANDLED
 from .resources import MINIGAME_VIRTUAL_RESOURCES
@@ -41,18 +41,29 @@ class MinigameAdapterPorts:
 
     def minigame_play_allowed(self) -> bool:
         context = self._require_minigame_context()
+        if context.play_receipt is not None:
+            oracle = self._frame_or_live_observation_oracle()
+            state = oracle.read_state()
+            if (state.generation > context.play_receipt.generation
+                    and oracle.game_room_page_visible()
+                    and not oracle.game_room_list_visible()
+                    and not oracle._blocking_rules(state, 'ui/absence-probe')
+                    and not any(b.active_in_hierarchy and b.active_and_enabled
+                                and '/GameRoomFushun2UI(Clone)/' in b.path for b in state.buttons)):
+                # Native exit_game completed this play. Release only its input
+                # lease; original ALAS still owns play_count and the next run.
+                context.play_receipt = None
+                context.selected_tickets = None
         return (
             context.play_receipt is None
             and self._action_ledger.allowed("minigame.play")
         )
 
     def minigame_prepare_default_ticket(self) -> int:
-        """Prove Fushun's current default one-ticket play without mutating UI."""
+        """Read Fushun's default selection for ALAS' use_coin decision."""
 
         self._package_gate()
         context = self._require_minigame_context()
-        if not self._action_ledger.allowed("minigame.play"):
-            raise SemanticGateClosed("minigame play requires a positive budget")
         selected, counter_owned = self.oracle.new_year_challenge_ticket_count()
         observed_owned = context.coins_owned
         if observed_owned is None:
@@ -60,7 +71,7 @@ class MinigameAdapterPorts:
                 "new-year challenge ticket inventory was not proven before entry"
             )
         if (
-            selected != 1
+            selected not in (0, 1)
             or counter_owned != observed_owned
             or observed_owned < selected
         ):
@@ -68,6 +79,8 @@ class MinigameAdapterPorts:
                 "new-year challenge default ticket state is inconsistent"
             )
         context.selected_tickets = selected
+        # The game can leave the selection at zero when monthly rewards are
+        # exhausted. Returning zero lets original ALAS skip this play normally.
         return selected
 
     def _require_minigame_context(self) -> _MinigameFlowContext:
@@ -77,17 +90,31 @@ class MinigameAdapterPorts:
             )
         return self._minigame_context
 
+    def minigame_prepare_selected_tickets(self) -> int:
+        """Bind the native ALAS coin selection to this play's typed inventory."""
+        self._package_gate()
+        context = self._require_minigame_context()
+        selected, owned = self.oracle.new_year_challenge_ticket_count()
+        if context.coins_owned != owned or not 0 <= selected <= owned:
+            raise SemanticGateClosed('native minigame ticket selection does not match inventory')
+        context.selected_tickets = selected
+        return selected
+
     def _known_minigame_surface_exists(self) -> bool:
         if self._minigame_context is None:
             return False
+        oracle = self._frame_or_live_observation_oracle()
         try:
             return bool(
-                self.oracle.game_room_page_visible()
-                or self.oracle.academy_page_visible()
-                or self.oracle.exists("dorm-menu/page/root")
-                or self.oracle.minigame_ticket_prompt_visible()
-                or self.oracle.new_year_challenge_help_visible()
-                or self.oracle.new_year_challenge_result() is not None
+                oracle.game_room_page_visible()
+                or oracle.game_room_list_visible()
+                or getattr(oracle, 'poke_minigame_prepare_visible', lambda: False)()
+                or getattr(oracle, 'shooting_minigame_prepare_visible', lambda: False)()
+                or oracle.academy_page_visible()
+                or oracle.exists("dorm-menu/page/root")
+                or oracle.minigame_ticket_prompt_visible()
+                or oracle.new_year_challenge_help_visible()
+                or oracle.new_year_challenge_result() is not None
                 or self._new_year_challenge_surface_visible()
             )
         except SemanticGateClosed:
@@ -115,17 +142,10 @@ class MinigameAdapterPorts:
                 return self.oracle.game_room_list_visible()
             if name == "NEW_YEAR_CHALLENGE_ENTRANCE":
                 try:
-                    ui_state = self.oracle.read_ui_state()
-                except SemanticGateClosed:
+                    self.oracle.new_year_challenge_entry_target()
+                except SemanticTargetMissing:
                     return False
-                return any(
-                    image.active_in_hierarchy
-                    and image.bounds is not None
-                    and image.sprite == "fushun2"
-                    and image.bounds.bottom > 0
-                    and image.bounds.top < 720
-                  for image in ui_state.images
-                )
+                return True
             if name == "NEW_YEAR_CHALLENGE_FIRST_TIME":
                 # The reviewed current surface is the normal Fushun prepare
                 # page (help/start pair), not the one-time tutorial overlay.
@@ -139,7 +159,7 @@ class MinigameAdapterPorts:
                 except SemanticGateClosed:
                     return False
                 if name == "NEW_YEAR_CHALLENGE_ADD_COIN":
-                    return selected < owned and (
+                    return (
                         self._minigame_context.play_receipt is not None
                         or self._action_ledger.allowed("minigame.play")
                     )
@@ -175,6 +195,8 @@ class MinigameAdapterPorts:
                 return len(starts) == 1 and len(helps) == 1
             if name == "NEW_YEAR_CHALLENGE_END":
                 try:
+                    if self.oracle._blocking_rules(self.oracle.read_state(), 'minigame/new-year/result-close'):
+                        return False
                     return self.oracle.new_year_challenge_result() is not None
                 except SemanticGateClosed:
                     return False
@@ -185,6 +207,8 @@ class MinigameAdapterPorts:
             if name == "BACK":
                 if self.oracle.new_year_challenge_result() is not None:
                     return False
+                if self.oracle.new_year_challenge_home_visible():
+                    return True
                 try:
                     self.oracle.new_year_challenge_ticket_count()
                     return True
@@ -193,7 +217,7 @@ class MinigameAdapterPorts:
             if name == "COIN_POPUP":
                 return False
             if name in ("POPUP_CANCEL", "POPUP_CONFIRM"):
-                return self.oracle.minigame_ticket_prompt_visible()
+                return True if self.oracle.minigame_ticket_prompt_visible() else UNHANDLED
         return UNHANDLED
 
     def _click_minigame(self, name):
@@ -208,20 +232,43 @@ class MinigameAdapterPorts:
                 receipt = self.oracle.click_new_year_challenge_entry()
                 context.entry_receipt = receipt
                 context.passive_transition_until = time.monotonic() + 12.0
-                return receipt
+                deadline = time.monotonic() + 5.0
+                while time.monotonic() < deadline:
+                    if self.oracle.new_year_challenge_prepare_visible():
+                        return receipt
+                    time.sleep(0.1)
+                raise SemanticGateClosed('new-year entry did not reach its exact prepare page')
             if name == "NEW_YEAR_CHALLENGE_ADD_COIN":
-                raise SemanticGateClosed(
-                    "qualification play uses the reviewed default one-ticket cost"
-                )
+                if context.play_receipt is not None:
+                    raise SemanticGateClosed('minigame coin selection requires an unstarted play')
+                self._require_action_grant('minigame.play')
+                oracle = self._fresh_input_oracle()
+                selected, owned = oracle.new_year_challenge_ticket_count()
+                if context.coins_owned != owned or not 0 < selected < owned:
+                    raise SemanticGateClosed('minigame coin addition exceeds proven inventory')
+                receipt = oracle.click_new_year_challenge_prepare_control('add')
+                deadline = time.monotonic() + 3.0
+                while time.monotonic() < deadline:
+                    try:
+                        if (self.oracle.read_state().generation > receipt.generation
+                                and self.oracle.new_year_challenge_ticket_count() == (selected + 1, owned)):
+                            return receipt
+                    except SemanticGateClosed:
+                        pass
+                    time.sleep(.1)
+                raise SemanticGateClosed('minigame coin selection did not advance; inspect before retry')
             if name == "NEW_YEAR_CHALLENGE_DEC_COIN":
                 raise SemanticGateClosed(
                     "qualification play does not permit deselecting its consumed lease"
                 )
             if name == "NEW_YEAR_CHALLENGE_START":
-                if context.selected_tickets != 1 or context.play_receipt is not None:
+                if context.selected_tickets < 1 or context.play_receipt is not None:
                     raise SemanticGateClosed(
-                        "new-year challenge start requires one admitted ticket"
+                        "new-year challenge start requires an admitted ticket selection"
                     )
+                selected, owned = self._frame_or_live_observation_oracle().new_year_challenge_ticket_count()
+                if selected != context.selected_tickets or owned != context.coins_owned:
+                    raise SemanticGateClosed('new-year challenge selected ticket cost changed before start')
                 receipt = self._dispatch_mutation(
                     "minigame.play",
                     lambda: self.oracle.click_new_year_challenge_prepare_control(
@@ -232,7 +279,7 @@ class MinigameAdapterPorts:
                 context.passive_transition_until = time.monotonic() + 12.0
                 return receipt
             if name == "NEW_YEAR_CHALLENGE_END":
-                receipt = self.oracle.click_new_year_challenge_result_close()
+                receipt = self._fresh_input_oracle().click_new_year_challenge_result_close()
                 context.passive_transition_until = time.monotonic() + 12.0
                 return receipt
             if name == "NEW_YEAR_CHALLENGE_EXIT":
@@ -244,18 +291,41 @@ class MinigameAdapterPorts:
                     raise SemanticGateClosed(
                         "new-year challenge result must close before back"
                     )
+                if self.oracle.new_year_challenge_home_visible():
+                    return self._fresh_input_oracle().click_new_year_challenge_prepare_control('back')
                 try:
                     self.oracle.new_year_challenge_ticket_count()
                 except SemanticGateClosed:
                     if self.oracle.game_room_list_visible():
-                        return self.oracle.click("game-room/list")
-                    return self.oracle.click("game-room/back")
+                        receipt = self._fresh_input_oracle().click("game-room/back")
+                        deadline = time.monotonic() + 5.0
+                        while time.monotonic() < deadline:
+                            if (self.oracle.game_room_page_visible()
+                                    and not self.oracle.game_room_list_visible()):
+                                return receipt
+                            time.sleep(0.1)
+                        raise SemanticGateClosed('game-room back did not close its list')
+                    return self._fresh_input_oracle().click("game-room/back")
                 receipt = self.oracle.click_new_year_challenge_prepare_control(
                     "back"
                 )
                 context.passive_transition_until = time.monotonic() + 12.0
                 return receipt
             if name in ("POPUP_CANCEL", "POPUP_CONFIRM"):
+                ticket_visible = self.oracle.minigame_ticket_prompt_visible()
+                if not ticket_visible and self.oracle.observation_prompt_kind() is not None:
+                    return UNHANDLED
+                if (
+                    name == "POPUP_CONFIRM"
+                    and context.ticket_confirm_receipt is not None
+                    and time.monotonic() <= context.passive_transition_until
+                    and not ticket_visible
+                    and self.oracle.read_state().generation
+                    > context.ticket_confirm_receipt.generation
+                ):
+                    return context.ticket_confirm_receipt
+                if not ticket_visible:
+                    return UNHANDLED
                 target = (
                     "minigame/tickets/cancel"
                     if name == "POPUP_CANCEL"
@@ -264,6 +334,7 @@ class MinigameAdapterPorts:
                 receipt = self.oracle.click(target)
                 if name == "POPUP_CONFIRM":
                     context.ticket_prompt_confirmed = True
+                    context.ticket_confirm_receipt = receipt
                 context.passive_transition_until = time.monotonic() + 12.0
                 return receipt
         return UNHANDLED

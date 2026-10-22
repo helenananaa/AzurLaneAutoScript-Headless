@@ -1,0 +1,543 @@
+{
+  "state": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "status": "ok",
+    "snapshot": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 1383,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "abi": "x86_64",
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "snapshot_schema": 1,
+      "snapshot_struct_size": 104,
+      "generation": 2031,
+      "scene_generation": 3,
+      "semantic_generation": 2,
+      "snapshot_monotonic_ns": 261947510500,
+      "response_monotonic_ns": 261963662600,
+      "age_ms": 16,
+      "observer_tid": 1601,
+      "assembly_count": 129,
+      "semantic_code": 1,
+      "width": 1280,
+      "height": 720,
+      "flags": 15,
+      "observer_attached": false,
+      "main_thread": true,
+      "button_count": 92,
+      "active_button_count": 3,
+      "interactable_button_count": 92,
+      "scene_handle": -55774,
+      "ui_stage": 100,
+      "ui_method_mask": 15
+    },
+    "buttons": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "semantic_schema": "alas-headless.buttons/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 1383,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "schema": 1,
+      "struct_size": 340008,
+      "generation": 2031,
+      "snapshot_monotonic_ns": 261947510500,
+      "response_monotonic_ns": 261966384800,
+      "age_ms": 18,
+      "button_count": 3,
+      "truncated": false,
+      "error_count": 0,
+      "buttons": [
+        {
+          "name": "btn_back",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/ik/btn_back",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -55018,
+          "world_position": {
+            "x": -14.222,
+            "y": 7.526,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -0.0,
+            "y": -98.0,
+            "width": 256.0,
+            "height": 98.0
+          },
+          "screen_point": {
+            "x": 85.0,
+            "y": 666.0
+          },
+          "adb_point": {
+            "x": 85.0,
+            "y": 54.0
+          },
+          "screen_bounds": {
+            "left": -0.0,
+            "bottom": 633.333,
+            "right": 170.667,
+            "top": 698.667
+          },
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 21.333,
+            "right": 170.667,
+            "bottom": 86.667
+          }
+        },
+        {
+          "name": "MenuSmall",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/ik/Right/MenuSmall",
+          "canvas": "Canvas",
+          "flags": 3583,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": false,
+          "canvas_render_mode": 1,
+          "instance_id": -55046,
+          "world_position": {
+            "x": 13.748,
+            "y": -7.289,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -74.0,
+            "y": -0.0,
+            "width": 74.0,
+            "height": 74.0
+          },
+          "screen_point": {
+            "x": 1258.667,
+            "y": 32.0
+          },
+          "adb_point": {
+            "x": 1258.667,
+            "y": 688.0
+          },
+          "screen_bounds": {
+            "left": 1209.333,
+            "bottom": 32.0,
+            "right": 1258.667,
+            "top": 81.333
+          },
+          "adb_bounds": {
+            "left": 1209.333,
+            "top": 638.667,
+            "right": 1258.667,
+            "bottom": 688.0
+          }
+        },
+        {
+          "name": "btn_camera",
+          "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/ik/Right/btn_camera",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "instance_id": -55038,
+          "world_position": {
+            "x": 13.763,
+            "y": 5.926,
+            "z": 10.0
+          },
+          "local_rect": {
+            "x": -94.0,
+            "y": -94.0,
+            "width": 94.0,
+            "height": 94.0
+          },
+          "screen_point": {
+            "x": 1259.333,
+            "y": 626.667
+          },
+          "adb_point": {
+            "x": 1259.333,
+            "y": 93.333
+          },
+          "screen_bounds": {
+            "left": 1196.667,
+            "bottom": 564.0,
+            "right": 1259.333,
+            "top": 626.667
+          },
+          "adb_bounds": {
+            "left": 1196.667,
+            "top": 93.333,
+            "right": 1259.333,
+            "bottom": 156.0
+          }
+        }
+      ]
+    }
+  },
+  "ui": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": "alas-headless.ui/v1",
+    "status": "ok",
+    "package": "com.bilibili.azurlane",
+    "pid": 1383,
+    "uid": 10105,
+    "peer_uid": 2000,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "schema": 1,
+    "struct_size": 1769944,
+    "generation": 2031,
+    "snapshot_monotonic_ns": 261947510500,
+    "response_monotonic_ns": 261986304300,
+    "age_ms": 38,
+    "method_mask": 15,
+    "toggle_count": 0,
+    "text_count": 1,
+    "image_count": 12,
+    "toggle_truncated": false,
+    "text_truncated": false,
+    "image_truncated": false,
+    "error_count": 0,
+    "skipped_count": 0,
+    "image_source_count": 677,
+    "image_source_capacity": 16384,
+    "toggles": [],
+    "texts": [
+      {
+        "kind": "ugui-text",
+        "name": "FpsPanel",
+        "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+        "text": "",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 573.333,
+          "top": 0.0,
+          "right": 706.667,
+          "bottom": 34.667
+        }
+      }
+    ],
+    "images": [
+      {
+        "kind": "image",
+        "name": "Icon",
+        "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/ik/Right/MenuSmall/Icon",
+        "sprite": "icon_menu",
+        "flags": 431,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1222.667,
+          "top": 653.333,
+          "right": 1245.333,
+          "bottom": 678.667
+        },
+        "anchor_world_position": null
+      },
+      {
+        "kind": "image",
+        "name": "MenuSmall",
+        "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/ik/Right/MenuSmall",
+        "sprite": "bg_menu_collapse",
+        "flags": 495,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1209.333,
+          "top": 638.667,
+          "right": 1258.667,
+          "bottom": 688.0
+        },
+        "anchor_world_position": null
+      },
+      {
+        "kind": "image",
+        "name": "btn_camera",
+        "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/ik/Right/btn_camera",
+        "sprite": "icon_camera",
+        "flags": 495,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1196.667,
+          "top": 93.333,
+          "right": 1259.333,
+          "bottom": 156.0
+        },
+        "anchor_world_position": null
+      },
+      {
+        "kind": "image",
+        "name": "btn_back",
+        "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/ik/btn_back",
+        "sprite": "btn_back",
+        "flags": 495,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 21.333,
+          "right": 170.667,
+          "bottom": 86.667
+        },
+        "anchor_world_position": null
+      },
+      {
+        "kind": "image",
+        "name": "deco",
+        "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/bg/bottom/deco",
+        "sprite": "bg_deco",
+        "flags": 495,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 21.333,
+          "top": 694.667,
+          "right": 172.0,
+          "bottom": 698.667
+        },
+        "anchor_world_position": null
+      },
+      {
+        "kind": "image",
+        "name": "right",
+        "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/bg/bottom/right",
+        "sprite": "bg_texture",
+        "flags": 431,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 618.0,
+          "top": 424.667,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null
+      },
+      {
+        "kind": "image",
+        "name": "left",
+        "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/bg/bottom/left",
+        "sprite": "bg_texture",
+        "flags": 431,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 424.667,
+          "right": 662.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null
+      },
+      {
+        "kind": "image",
+        "name": "bottom",
+        "path": "UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/bg/bottom",
+        "sprite": "bg_mask",
+        "flags": 431,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 653.333,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null
+      },
+      {
+        "kind": "image",
+        "name": "top",
+        "path": "OverlayCamera/Adpter/top/top",
+        "sprite": "mask1",
+        "flags": 495,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": -140.667,
+          "right": 1280.0,
+          "bottom": 0.0
+        },
+        "anchor_world_position": null
+      },
+      {
+        "kind": "image",
+        "name": "left",
+        "path": "OverlayCamera/Adpter/left/left",
+        "sprite": "mask",
+        "flags": 495,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -140.667,
+          "top": 0.0,
+          "right": -0.0,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null
+      },
+      {
+        "kind": "image",
+        "name": "bottom",
+        "path": "OverlayCamera/Adpter/bottom/bottom",
+        "sprite": "mask1",
+        "flags": 495,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": -0.0,
+          "top": 720.0,
+          "right": 1280.0,
+          "bottom": 860.667
+        },
+        "anchor_world_position": null
+      },
+      {
+        "kind": "image",
+        "name": "right",
+        "path": "OverlayCamera/Adpter/right/right",
+        "sprite": "mask",
+        "flags": 495,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1280.0,
+          "top": 0.0,
+          "right": 1420.667,
+          "bottom": 720.0
+        },
+        "anchor_world_position": null
+      }
+    ],
+    "private_quarters_physics": {
+      "schema": "alas-headless.private-colliders/v1",
+      "status": 0,
+      "truncated": false,
+      "error_count": 0,
+      "camera_path": "",
+      "colliders": []
+    }
+  }
+}

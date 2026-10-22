@@ -267,6 +267,12 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         ):
             oracle.war_archives_entry_confirmation_cost()
         self.assertEqual(backend.taps, [(800, 520)])
+        backend.ui["texts"] = []
+        backend.ui["text_count"] = 0
+        self.assertIsNone(oracle.war_archives_entry_confirmation_cost())
+        with self.assertRaises(SemanticGateClosed):
+            oracle.confirm_war_archives_entry()
+        self.assertEqual(backend.taps, [(800, 520)])
 
     def test_foreground_parser_accepts_resumed_markers_only(self):
         for output in (
@@ -1044,7 +1050,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         backend.ui["text_truncated"] = True
 
         with self.assertRaises(SemanticGateClosed):
-            make_oracle(backend).read_ui_state()
+            _ = make_oracle(backend).read_ui_state().texts
 
     def test_typed_image_exposes_sprite_color_and_bounds(self):
         backend = FakeBackend([])
@@ -1055,6 +1061,36 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         self.assertEqual(state.images[0].sprite, "red_dot")
         self.assertEqual(state.images[0].color, (1.0, 0.5, 0.25, 1.0))
         self.assertEqual(state.images[0].bounds, Bounds(200, 100, 240, 140))
+
+    def test_absent_sprite_ignores_legacy_residue_without_closing_images(self):
+        backend = FakeBackend([])
+        valid = make_image("root/valid", "current")
+        absent = make_image("root/absent", "")
+        absent["flags"] &= ~0x8
+        stale = make_image("root/stale", "legacy-residue")
+        stale["flags"] &= ~0x8
+        backend.ui = make_ui([], images=[valid, absent, stale])
+
+        images = make_oracle(backend).read_ui_state().images
+
+        self.assertEqual([image.sprite for image in images], ["current", "", ""])
+        self.assertTrue(all(not image.truncated for image in images))
+
+    def test_legacy_sprite_residue_cannot_select_an_image_target(self):
+        backend = FakeBackend([])
+        root = (
+            "root/EventUI(Clone)/blur_panel/adapt/left_length/frame/scroll_rect/"
+            "tagRoot"
+        )
+        stale = make_image(root + "/daily_btn/selected/Image", "toggle_meiri_sel 1")
+        stale["flags"] &= ~0x8
+        valid = make_image(root + "/urgency_btn/selected/Image", "toggle_jinji_sel 1")
+        backend.ui = make_ui([], images=[stale, valid])
+        oracle = make_oracle(backend)
+
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or ambiguous"):
+            oracle.image_selected("commission/nav/daily")
+        self.assertTrue(oracle.image_selected("commission/nav/urgent"))
 
     def test_image_state_retries_a_truncated_transition_frame(self):
         backend = FakeBackend([])

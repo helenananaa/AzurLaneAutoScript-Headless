@@ -1,0 +1,253 @@
+{
+  "runs": [
+    {
+      "path": "artifacts/private-quarters-before-continuity-home-20260926-r2.json",
+      "sha256": "6b86d5f7d8ff2a69b531fa2dabede4f739d8b21f478e814a107369b8256bc9d5",
+      "passed": true,
+      "error": null,
+      "receipts": []
+    },
+    {
+      "path": "artifacts/private-quarters-before-continuity-home-20260926-r3.json",
+      "sha256": "e2df1e5db819e65a50cd456ccc548308128afcee93603ca3b79779d946d5d727",
+      "passed": true,
+      "error": null,
+      "receipts": []
+    },
+    {
+      "path": "artifacts/private-quarters-before-continuity-home-20260926.json",
+      "sha256": "353f42f30add7e28ae791ce1c74e05a53a439810064ee08233801195aa0376e8",
+      "passed": false,
+      "error": "ALAS virtual resource has no active semantic flow: MAP_PREPARATION",
+      "receipts": []
+    },
+    {
+      "path": "artifacts/private-quarters-cold-recovery-20260926-r2.json",
+      "sha256": "38da9a27c42216e8097549b9e91ef8d477f692b2f9dd1669ad7993c09c888b68",
+      "passed": true,
+      "error": null,
+      "receipts": []
+    },
+    {
+      "path": "artifacts/private-quarters-cold-recovery-20260926.json",
+      "sha256": "e4e2171713e6d60c91ca372202c36e6a5ad17fd3f6d8dc848574acaef81ae06b",
+      "passed": false,
+      "error": "observer snapshot is stale",
+      "receipts": []
+    },
+    {
+      "path": "artifacts/private-quarters-levelup-observation-20260926.json",
+      "sha256": "46120dc02bbc57b40935c6fb3e30943a47c14138b557e4cc3e7e46ecd9f00912",
+      "passed": null,
+      "error": null,
+      "receipts": []
+    },
+    {
+      "path": "artifacts/private-quarters-native-continuity-20260926-r1.json",
+      "sha256": "26853bfbe3446224746f2e86ad11bee3102d85e942329b739b832201c279ae37",
+      "passed": false,
+      "error": "semantic target is absent: main/live",
+      "receipts": [
+        [
+          "daily/page/back",
+          40109
+        ],
+        [
+          "campaign-menu/page/back",
+          40241
+        ],
+        [
+          "main/live",
+          40265
+        ],
+        [
+          "main/live",
+          40265
+        ],
+        [
+          "dorm-menu/private-quarters",
+          40276
+        ]
+      ]
+    },
+    {
+      "path": "artifacts/private-quarters-native-continuity-20260926-r2.json",
+      "sha256": "1daf84381fd105e3a75822bb72b0771f61813ccf88bde03c4578022f5b57386e",
+      "passed": false,
+      "error": "semantic target is not actionable",
+      "receipts": []
+    },
+    {
+      "path": "artifacts/private-quarters-native-continuity-20260926-r3.json",
+      "sha256": "de01957565299639a01ec67ced7e44978e16a9d309633674e441f2c9d5eb5199",
+      "passed": false,
+      "error": "ALAS resource is not semantically mapped: GET_MISSION",
+      "receipts": [
+        [
+          "main/live",
+          42847
+        ],
+        [
+          "main/live",
+          42847
+        ],
+        [
+          "dorm-menu/private-quarters",
+          42858
+        ]
+      ]
+    },
+    {
+      "path": "artifacts/private-quarters-native-continuity-20260926-r4.json",
+      "sha256": "cc263546714854102d81ce41cf13e317ee5d4ae8af2f6e0d3095068a0a7abca8",
+      "passed": false,
+      "error": "ALAS resource is not semantically mapped: MONTHLY_PASS_NOTICE",
+      "receipts": [
+        [
+          "main/live",
+          45266
+        ],
+        [
+          "main/live",
+          45266
+        ],
+        [
+          "dorm-menu/private-quarters",
+          45280
+        ]
+      ]
+    },
+    {
+      "path": "artifacts/private-quarters-native-continuity-20260926-r5.json",
+      "sha256": "4efef03621f1dd42b3ed035573cfc11a737d451092e18adfecf8980d12c31d6f",
+      "passed": false,
+      "error": "Wait too long",
+      "receipts": [
+        [
+          "main/live",
+          47291
+        ],
+        [
+          "main/live",
+          47291
+        ],
+        [
+          "dorm-menu/private-quarters",
+          47301
+        ],
+        [
+          "private-quarters/room/new-jersey",
+          47447
+        ],
+        [
+          "private-quarters/dialogue/continue",
+          47607
+        ],
+        [
+          "private-quarters/dialogue/continue",
+          47632
+        ],
+        [
+          "private-quarters/dialogue/continue",
+          47632
+        ],
+        [
+          "private-quarters/dialogue/continue",
+          47632
+        ],
+        [
+          "private-quarters/character/new-jersey",
+          47710
+        ],
+        [
+          "private-quarters/interact",
+          47723
+        ],
+        [
+          "private-quarters/room/back",
+          47734
+        ],
+        [
+          "private-quarters/interact",
+          47747
+        ],
+        [
+          "private-quarters/room/back",
+          47758
+        ],
+        [
+          "private-quarters/interact",
+          47771
+        ],
+        [
+          "private-quarters/room/back",
+          47778
+        ],
+        [
+          "private-quarters/room/back",
+          47791
+        ]
+      ]
+    },
+    {
+      "path": "artifacts/private-quarters-zero-recovery-20260926-r2.json",
+      "sha256": "1749df0891ad4c96a66010c020041c9af630ce8bc6821f9c27635277b284b96d",
+      "passed": false,
+      "error": "ALAS virtual resource has no active semantic flow: MAP_PREPARATION",
+      "receipts": [
+        [
+          "main/live",
+          1715
+        ],
+        [
+          "main/live",
+          1715
+        ],
+        [
+          "dorm-menu/private-quarters",
+          1724
+        ]
+      ]
+    },
+    {
+      "path": "artifacts/private-quarters-zero-recovery-20260926-r3.json",
+      "sha256": "bbb4a0d391fa18edb0572bb7950052f3a34abfd001f1ee31dab392cb0ee74bc2",
+      "passed": true,
+      "error": null,
+      "receipts": [
+        [
+          "private-quarters/home",
+          4445
+        ],
+        [
+          "main/live",
+          4478
+        ],
+        [
+          "main/live",
+          4478
+        ],
+        [
+          "dorm-menu/private-quarters",
+          4491
+        ],
+        [
+          "private-quarters/home",
+          4658
+        ]
+      ]
+    },
+    {
+      "path": "artifacts/private-quarters-zero-recovery-20260926.json",
+      "sha256": "7f372cbea544cf0e3d2050e106f3b8232a00342fead2ee08f72a941faf87df30",
+      "passed": false,
+      "error": "ALAS virtual resource has no active semantic flow: MAP_PREPARATION",
+      "receipts": [
+        [
+          "overlay/bulletin/close",
+          739
+        ]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "passed": false,
+  "reason": "Archive overlay retains campaign entrance underlay; page ownership correction required",
+  "archive_page_observed": true,
+  "sorties": 0,
+  "combat": 0,
+  "termination": "Runner had already exited before attempted process stop"
+}

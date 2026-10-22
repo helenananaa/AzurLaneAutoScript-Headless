@@ -1,0 +1,36 @@
+diff --git a/module/device/control.py b/module/device/control.py
+--- a/module/device/control.py
++++ b/module/device/control.py
+@@ -186,11 +186,15 @@
+         semantic_adapter = getattr(self, 'semantic_adapter', None)
+         semantic_intent = None
+         if semantic_adapter is not None:
+-            begin_swipe = (
+-                semantic_adapter.begin_operation_siren_globe_swipe_vector
+-                if name.startswith('GLOBE_SWIPE_')
+-                else semantic_adapter.begin_campaign_map_swipe_vector
+-            )
++            if name.startswith('GLOBE_SWIPE_'):
++                begin_swipe = semantic_adapter.begin_operation_siren_globe_swipe_vector
++                end_swipe = semantic_adapter.end_operation_siren_globe_swipe_vector
++            elif name.startswith('MAP_SWIPE_') and semantic_adapter.operation_siren_map_swipe_owned():
++                begin_swipe = semantic_adapter.begin_operation_siren_map_swipe_vector
++                end_swipe = semantic_adapter.end_operation_siren_map_swipe_vector
++            else:
++                begin_swipe = semantic_adapter.begin_campaign_map_swipe_vector
++                end_swipe = semantic_adapter.end_campaign_map_swipe_vector
+             semantic_intent = begin_swipe(
+                 vector,
+                 box=box,
+@@ -216,11 +220,6 @@
+                 distance_check=distance_check)
+         finally:
+             if semantic_intent is not None:
+-                end_swipe = (
+-                    semantic_adapter.end_operation_siren_globe_swipe_vector
+-                    if name.startswith('GLOBE_SWIPE_')
+-                    else semantic_adapter.end_campaign_map_swipe_vector
+-                )
+                 end_swipe(semantic_intent)
+ 
+     def drag(self, p1, p2, segments=1, shake=(0, 15), point_random=(-10, -10, 10, 10), shake_random=(-5, -5, 5, 5),
