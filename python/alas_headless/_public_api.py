@@ -642,6 +642,8 @@ from .runtime_backends import (
     ExternalAdbConfig,
     KvmBackend,
     KvmRuntimeConfig,
+    MacosHvfBackend,
+    MacosHvfRuntimeConfig,
     RedroidBackend,
     RedroidRuntimeConfig,
     RuntimeBackendError,
@@ -649,6 +651,7 @@ from .runtime_backends import (
     RuntimeIdentityMismatch,
     backend_from_config,
     probe_linux_kvm,
+    probe_apple_silicon_macos,
 )
 from .runtime_qualification import (
     RUNTIME_QUALIFICATION_SCHEMA,
@@ -894,6 +897,8 @@ __all__ = (
     "ExternalAdbConfig",
     "KvmBackend",
     "KvmRuntimeConfig",
+    "MacosHvfBackend",
+    "MacosHvfRuntimeConfig",
     "RedroidBackend",
     "RedroidRuntimeConfig",
     "SemanticGateClosed",
@@ -963,6 +968,7 @@ __all__ = (
     "preview_alas_campaign_viewport_continuation",
     "position_alas_campaign_camera_for_qualification",
     "probe_linux_kvm",
+    "probe_apple_silicon_macos",
     "prepare_alas_campaign_combat_admission",
     "prepare_alas_combat_resource_action",
     "prove_alas_campaign_combat_transition",

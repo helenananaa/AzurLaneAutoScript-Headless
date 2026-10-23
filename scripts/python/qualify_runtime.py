@@ -5,8 +5,20 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
+import types
 from pathlib import Path
 from typing import Any, Mapping, Sequence
+
+# Keep backend qualification runnable from a source snapshot with the macOS
+# system Python.  Qualification depends only on the runtime modules below, not
+# the broad ALAS package initializer and its unrelated optional dependencies.
+_source_package = Path(__file__).resolve().parents[2] / "python" / "alas_headless"
+if _source_package.is_dir() and "alas_headless" not in sys.modules:
+    package = types.ModuleType("alas_headless")
+    package.__path__ = [str(_source_package)]
+    package.__package__ = "alas_headless"
+    sys.modules["alas_headless"] = package
 
 from alas_headless.runtime_artifacts import RuntimeLock
 from alas_headless.runtime_backends import backend_from_config

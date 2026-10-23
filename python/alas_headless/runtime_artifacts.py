@@ -153,7 +153,14 @@ class RuntimeLock:
             ),
         )
         backend = _required_text(android, "backend")
-        if backend not in ("kvm", "redroid", "tcg", "arm64-qemu", "external-adb"):
+        if backend not in (
+            "kvm",
+            "redroid",
+            "macos-hvf",
+            "tcg",
+            "arm64-qemu",
+            "external-adb",
+        ):
             raise RuntimeLockError("android.backend is unsupported")
         _required_text(android, "build_fingerprint")
         api_level = android.get("api_level")
@@ -216,8 +223,8 @@ class RuntimeLock:
             raise RuntimeLockError("runtime lock contains an unsupported ABI")
         if len({angle_abi, android_abi, game_abi}) != 1:
             raise RuntimeLockError("ANGLE, Android, and game ABIs must match")
-        if backend == "arm64-qemu" and android_abi != "arm64-v8a":
-            raise RuntimeLockError("arm64-qemu requires the arm64-v8a ABI")
+        if backend in ("arm64-qemu", "macos-hvf") and android_abi != "arm64-v8a":
+            raise RuntimeLockError("{0} requires the arm64-v8a ABI".format(backend))
         expected_resource_set_id = resource_set_id(
             _required_text(game, "region"),
             _required_text(game, "version_name"),

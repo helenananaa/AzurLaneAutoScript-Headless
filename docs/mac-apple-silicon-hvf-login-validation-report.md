@@ -80,10 +80,99 @@ login=LoginUI2
 
 - 没有账号登录和主页面闭环；
 - 没有当前 ALAS task workload；
-- 没有 game/Android recovery、cleanup 和 runtime-lock 的仓库化 runner；
 - 没有长期 soak、热状态、资源占用和休眠/唤醒证据；
-- 主线尚未实现独立 `macos-hvf` lifecycle backend。
+- 没有快照恢复或多实例资格。
 
-下一阶段应先通过现有 `external-adb` 边界完成 Mac 上的登录/主页面、observer
-freshness、重启恢复和一个零/低 mutation ALAS 任务，再决定是否实现负责 AVD
-启停、ready、recover 和 cleanup 的 `macos-hvf` backend。
+独立 `macos-hvf` backend、exact runtime lock、重启恢复与 cleanup 已在后续
+2026-09-07 资格中通过。下一阶段是在用户设备侧完成账号登录后，验证主页面和一个
+零/低 mutation ALAS 任务。
+
+仓库中的 guest 只读 preflight 可先发现唯一正在运行的 ARM64 Emulator，并生成
+绑定该 serial 的 `external-adb` 候选配置。它不启动 AVD、不修改 guest/ANGLE
+路由、不启动游戏，也不创建 observer forward；和任何 ADB inventory 命令一样，
+当本机 ADB server 尚未运行时，它可能启动这个 host-local server：
+
+```bash
+PYTHONPATH=python python3 scripts/python/preflight_macos_hvf_external_adb.py \
+  --avd-name alas_api32_arm64 \
+  --output /tmp/alas-macos-hvf-preflight.json
+```
+
+只有 host、HVF、AVD、唯一 ADB transport、API/ABI 与游戏包身份全部通过时，输出
+中的 `runtime_config` 才非空。示例字段见
+`integration/runtime/external-adb.macos-hvf.example.json`；实机运行时必须使用
+preflight 发现的 serial 和工具路径，不能直接假定示例端口。
+
+独立生命周期后端的计划输入见
+`integration/runtime/macos-hvf.config.example.json` 和
+`integration/runtime/runtime-lock.macos-hvf.example.json`。两者只用于生成计划；
+示例哈希不得用于实机 qualification。实机执行前必须从当前 Mac/AVD、ANGLE APK
+和集成产物生成 exact runtime lock。
+
+游戏按必需的 `-force-gfx-st` 冷启动后，可用一次性诊断入口读取原子 typed frame；
+该入口只创建一个 PID 绑定的临时 ADB forward，并在退出时删除：
+
+```bash
+PYTHONPATH=python python3 scripts/python/probe_macos_hvf_observer.py \
+  --serial emulator-5554 \
+  --adb "$HOME/Library/Android/sdk/platform-tools/adb"
+```
+
+如 typed state 命中仓库已审查的国服更新下载弹窗，可用
+`accept_macos_hvf_login_update.py --allow-update-download` 给出一次性下载确认；脚本
+复用 `SemanticOracle` 的精确文案、唯一按钮、bounds、前台 Activity、PID 与新鲜帧
+门，不新增坐标回退。该开关只授权一次普通资源更新确认，不授权购买、账号或数据
+清除操作。
+
+## 2026-09-06 开发复验
+
+本轮在同一台 Apple Silicon Mac 上完成了新的开发级复验，但尚未生成 exact runtime
+lock，因此不提升正式支持状态：
+
+- mDNS SSH、`darwin/arm64`、macOS 26.6.2、HVF、`alas_api32_arm64`、API 32
+  ARM64 guest 与唯一 `emulator-5554` 均通过新 preflight；
+- 仓库新增独立 `macos-hvf` backend，负责 owned AVD 的 start、ready、game/Android
+  recovery、observer cleanup 和 stop；不宣称快照恢复、多实例或 host metrics；
+- 游戏按 `-force-gfx-st` 冷启动后，原子 observer 返回 `status=ok`、主线程、新鲜
+  generation、正确 package/PID 与固定 ANGLE revision；
+- 首次版本检查因当时代理节点无法访问目标 HTTPS 而出现 typed 网络弹窗。恢复可用
+  TUN 节点后，复用既有 `SemanticOracle` 更新合同，以一次输入确认 638.4 MB 普通
+  资源更新；336 个文件完成、失败为 0；
+- 更新完成后的旧 Unity 帧变陈旧，按冷启动合同恢复到新 PID；随后 observer 恢复至
+  亚百毫秒 age 并自然进入同包 `com.gsc.phone_login.PhoneLoginActivity`；
+- Native Activity 可访问性诊断发现非空手机号字段、禁用的“下一步”和独立账号登录
+  入口。本轮未读取字段内容、未点击账号入口、未提交凭据，因此仍没有主页面或 ALAS
+  workload 证据。
+
+这次复验关闭了 Mac/HVF 的 host、AVD、启动、ANGLE NULL、更新与 game recovery
+开发路径；正式 qualification 仍需 exact runtime lock、backend runner 的完整
+start-to-cleanup 收据，以及用户在设备侧完成账号登录后的主页面和零输入 workload。
+
+## 2026-09-07 exact lifecycle/recovery 资格
+
+本轮以实现提交 `67ec146c2e5ea3b4b97b2126d0615697b84d43d3` 生成 account-free
+identity、provision profile、空资源声明与 exact runtime lock。runtime lock SHA-256
+为 `0728bb29bd2ef8dd2c2f29255e43266f3891100fb08561ccfe1b1e315549f6f6`，其中：
+
+- system image：`8428c469f6e3a6056f68ad2fd175e61a70ca6e6cffa58ee0b444a6616a39d26f`；
+- provision profile：`e1447acd880e96105534f69ae210d81b3f4b9e3acbf40e794e1f662214f88340`；
+- ANGLE APK：`8670115d326ddc39ccc5ae2cd36352e7377c3c23f8360aa358649ec959e40ccb`；
+- game base APK：`e6d3ef4baac2509cc97a289b91bfd5f9d0dcd7ad8994880a192298983208699f`；
+- `libil2cpp.so`：`0359952f19c449e7a0fcef8a3164fb1cb1dc23d5fd8ef33d17cde72367e9267f`。
+
+三条独立 runner 结果：
+
+| Gate | Phases | PID 证据 | Trace | Cleanup |
+|---|---:|---|---|---|
+| lifecycle | 10/10 pass | baseline observer 已绑定 | 32 records，0 dropped/invalid | device 0，forward 0 |
+| game recovery | 14/14 pass | `1692 -> 4381` | 49 records，0 dropped/invalid | device 0，forward 0 |
+| Android recovery | 17/17 pass | `1743 -> 1721`，含 ADB offline | 62 records，0 dropped/invalid | device 0，forward 0 |
+
+三个 manifest 的 observed fingerprint 均与 exact lock 一致，且
+`cleanup_failure_code=null`。本机索引拒绝项为 0。原始 manifest、trace、identity、
+lock 与索引保留在本地 `evidence/runtime/macos-hvf/qualification-20260907/`，Mac 侧
+保留同名 evidence 根目录。
+
+这使 Apple Silicon Mac/HVF 达到工程生命周期基线，但仍不是登录后 ALAS 或生产
+资格。未读取或提交账号信息，resource manifest 的共享路径为空；账号登录、主页面、
+代表性 workload、soak、快照恢复和多实例仍保持未验证。

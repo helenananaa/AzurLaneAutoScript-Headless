@@ -50,6 +50,8 @@ cross-backend monolith.
 
 - `kvm`: golden AVD/userdata storage and hardware acceleration capability.
 - `redroid`: OCI plus persistent `/data`, BinderFS/cgroup host prerequisites.
+- `macos-hvf`: one owned Apple Silicon Android Emulator AVD with
+  Hypervisor.Framework acceleration and exact ARM64 qualification artifacts.
 - `tcg`: software translation with its optimization policy explicitly frozen
   until a repeatable real workload exists.
 - `arm64-qemu`: payload disk plus userdata and an enforced `arm64-v8a` lock.
@@ -61,14 +63,14 @@ for the run. It never falls from one active backend to another silently.
 
 ## Reference qualification runner
 
-The first executable adapters deliberately cover only the two environments
-whose lifecycle and identity boundaries are already concrete:
+Executable adapters remain backend-local and expose the same lifecycle:
 
 | Backend | Current state | Ownership boundary |
 | --- | --- | --- |
 | `external-adb` | Executable reference adapter | Attaches to an explicitly named device; it never claims device provisioning or ownership |
 | `kvm` | Executable Linux reference adapter | Starts and stops only the emulator process created by the current runner |
-| `redroid` | Plan-only, fail closed | BinderFS, OCI image, persistent `/data`, and instance isolation still require an implementation |
+| `redroid` | Executable implementation; host qualification remains separate | Owns the selected container lifecycle and persistent `/data` according to its exact config |
+| `macos-hvf` | Executable Apple Silicon reference adapter | Starts and stops only its owned AVD; exact system image and provision-profile hashes are checked during qualification |
 | `tcg` | Plan-only, fail closed | The frozen compatibility profile has no executable provisioner yet |
 | `arm64-qemu` | Plan-only, fail closed | Payload disk, restart ownership, and recovery still require an implementation |
 

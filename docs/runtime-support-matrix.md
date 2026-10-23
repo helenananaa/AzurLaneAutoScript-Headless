@@ -153,19 +153,18 @@ Apple 设备当前全部属于后续支持或实验研究，不计入已支持�
 | Mac 路径 | 当前状态 | 可行性与边界 |
 | --- | --- | --- |
 | Intel x86_64 Mac + Android Emulator | **后续候选。** | Android Emulator 可在 macOS 上使用 Hypervisor.Framework，并运行同架构 x86/x86_64 guest。可复用现有 x86_64 Android 经验，但当前 `kvm` 后端是 Linux `/dev/kvm` 专用，本仓库没有 Intel Mac 生命周期或真实游戏证据。 |
-| Apple Silicon Mac + Android Emulator | **真实探索：G4 登录页与 typed observer 已通过。** | 真实 M1 MacBook Air 上的 Android Emulator 37.1.11 以 `-no-window -accel on` 运行 API 32 ARM64 guest；`-accel-check` 确认 Hypervisor.Framework。国服 9.7.10 ARM64 游戏经 ANGLE NULL observer 到达 `LoginUI2`，快照 `status=ok`、`age_ms=52`，并读出精确登录页 Button/Text/Image 路径。仍缺账号登录、主页面、ALAS workload、recovery、cleanup、soak 和独立 `macos-hvf` backend；见 [Mac/HVF 登录页验证报告](mac-apple-silicon-hvf-login-validation-report.md)。 |
+| Apple Silicon Mac + Android Emulator | **工程基线：独立 backend、lifecycle 与双 recovery 已通过。** | 真实 M1 MacBook Air 上，`macos-hvf` backend 以 exact ARM64 system image、provision profile、ANGLE APK、游戏 ABI 和 runtime lock 完成 owned AVD lifecycle、game recovery、Android reboot recovery 与 cleanup；三份 manifest 均通过，trace 无 dropped/invalid，结束后设备与 observer forward 均为 0。游戏仍只到 `PhoneLoginActivity`，缺账号登录、主页面、ALAS workload、长期 soak 与多实例资格；见 [Mac/HVF 登录页验证报告](mac-apple-silicon-hvf-login-validation-report.md)。 |
 | Apple Silicon Mac + MuMu Pro | **上游真实探索，本仓库未验证。** | 上游 ALAS 已合并 macOS MuMu Pro 设备识别修复并报告真实截图方向验证；本仓库仍固定在较早的 ALAS revision，尚未吸收或复验该路径。 |
 | Apple Silicon Mac + PlayCover | **实验性上游候选。** | 上游有开放中的 PlayCover 支持 PR，通过修改版 PlayCover/PlayTools 提供截图、触控和应用控制并绕过 ADB；仍有字体、抗锯齿、模板及 ADB 专属功能差异，不能视为正式支持。 |
 | Intel Mac + PlayCover/iOS 应用 | **不作为候选。** | macOS 直接运行兼容 iPhone/iPad 应用是 Apple Silicon 路径，不能推广到 Intel Mac。 |
 | Mac + Redroid | **暂不支持。** | Redroid 依赖 Linux Binder/BinderFS 等宿主内核能力；Docker Desktop 的 Linux VM 不能等同于原生可控的 Redroid 宿主。 |
 | Mac + QEMU TCG | **低优先级 fallback。** | 理论上可运行，但 Mac 已有 Hypervisor.Framework；在 HVF 路径未验证前不投入 TCG 性能和产品化工作。 |
 
-Mac Android 第一阶段已经通过真实 Apple Silicon Mac 上的 Android Emulator/HVF、
-ARM64 guest、ANGLE NULL observer 和游戏 `LoginUI2` 边界。下一阶段仍应复用
-`external-adb`，补齐账号登录/主页面、observer freshness、game/Android recovery
-和一个有界 ALAS workload。通过后再实现独立 `macos-hvf` 后端，负责 AVD 启停、
-ready、recovery、cleanup 和 runtime lock；不得把 Hypervisor.Framework 冒充
-Linux KVM。
+Mac Android 平台线已经通过真实 Apple Silicon Mac 上的 Android Emulator/HVF、
+ARM64 guest、ANGLE NULL observer、exact runtime lock、owned lifecycle、game/Android
+recovery 和 cleanup。独立 `macos-hvf` 后端明确使用 Hypervisor.Framework，不冒充
+Linux KVM。下一阶段只需在用户设备侧完成账号登录后补主页面和一个有界零输入 ALAS
+workload；在此之前不做无代表性 workload 的刷新率、密度或多实例调优。
 
 参考外部状态：
 
@@ -239,11 +238,11 @@ arm64-qemu-qualification 和 arm64-venus-qualification 分支是证据与实现�
 5. 获得真实 ARM64 KVM 服务器后，从 host Q0 开始建立独立 ARM KVM 证据。
 6. TCG 保持 fallback；在有可重复 ALAS trace 前不继续 MTTCG、密度或主机特化调优。
 7. 无 root 设备直接路由 release 游戏不作为当前主产品方向。
-8. Apple Silicon Mac 的 Android Emulator/HVF、ARM64 guest、ANGLE NULL
-   observer 和 G4 `LoginUI2` 已通过；下一步以 external-adb 补账号登录/主页面、
-   freshness、game/Android recovery 和一个有界 ALAS workload。
-9. 上述 Mac external-adb 生命周期与 workload 资格通过后再实现 `macos-hvf`
-   后端；Intel Mac 仅在有真实设备和维护价值时补充 x86_64 对照。
+8. Apple Silicon Mac 的独立 `macos-hvf` backend、ARM64 guest、ANGLE NULL、exact
+   runtime lock、owned lifecycle、game/Android recovery 和 cleanup 已通过；下一步
+   是账号登录后的主页面与一个有界零输入 ALAS workload。
+9. Intel Mac 仅在有真实设备和维护价值时补充 x86_64 对照；Mac 性能调优等待代表性
+   workload，不用空转或登录页数据替代。
 10. PlayCover 只跟踪上游并保持实验隔离；iPhone/iPad 实机只做有停止条件的 WDA
     spike，越狱与 iOS Simulator 不进入当前路线图。
 

@@ -13,10 +13,16 @@ from .runtime_backend_adb import (
     ExternalAdbConfig,
     RuntimeBackendError,
     RuntimeBackendNotReady,
+    RuntimeAwaitingUserLogin,
     RuntimeIdentityMismatch,
 )
 from .runtime_backend_deferred import DeferredRuntimeBackend
 from .runtime_backend_kvm import KvmBackend, KvmRuntimeConfig, probe_linux_kvm
+from .runtime_backend_macos_hvf import (
+    MacosHvfBackend,
+    MacosHvfRuntimeConfig,
+    probe_apple_silicon_macos,
+)
 from .runtime_backend_redroid import RedroidBackend, RedroidRuntimeConfig
 from .runtime_backend_redroid_wsl import WslRedroidBackend, WslRedroidRuntimeConfig
 from .runtime_command import RuntimeCommandExecutor
@@ -145,6 +151,55 @@ def backend_from_config(
         )
         return KvmBackend(config, executor, trace=trace, **kwargs)
 
+    if kind == BackendKind.MACOS_HVF:
+        required = common_required | {
+            "emulator",
+            "adb",
+            "sdk_root",
+            "avd_name",
+            "avd_home",
+            "provision_profile",
+            "console_port",
+            "adb_server_port",
+        }
+        allowed = required | {
+            "angle_package",
+            "unity_command_line",
+            "null_refresh_hz",
+            "launch_game",
+            "manage_angle_routing",
+            "poll_interval_seconds",
+        }
+        missing = sorted(required - set(value))
+        unknown = sorted(set(value) - allowed)
+        if missing or unknown:
+            raise ValueError(
+                "macOS HVF config fields differ (missing={0}; unknown={1})".format(
+                    ",".join(missing), ",".join(unknown)
+                )
+            )
+        config = MacosHvfRuntimeConfig(
+            serial=value["serial"],
+            package=value["package"],
+            component=value["component"],
+            host_class=value["host_class"],
+            emulator=path_field("emulator"),
+            adb=path_field("adb"),
+            sdk_root=path_field("sdk_root"),
+            avd_name=value["avd_name"],
+            avd_home=path_field("avd_home"),
+            provision_profile=path_field("provision_profile"),
+            console_port=value["console_port"],
+            adb_server_port=value["adb_server_port"],
+            angle_package=value.get("angle_package", "org.chromium.angle"),
+            unity_command_line=value.get("unity_command_line", "-force-gfx-st"),
+            null_refresh_hz=value.get("null_refresh_hz", 30),
+            launch_game=value.get("launch_game", True),
+            manage_angle_routing=value.get("manage_angle_routing", False),
+            poll_interval_seconds=value.get("poll_interval_seconds", 1.0),
+        )
+        return MacosHvfBackend(config, executor, trace=trace, **kwargs)
+
     if kind == BackendKind.REDROID:
         if value.get("container_engine") == "wsl-docker":
             config_fields = fields(WslRedroidRuntimeConfig)
@@ -240,13 +295,17 @@ __all__ = [
     "ExternalAdbConfig",
     "KvmBackend",
     "KvmRuntimeConfig",
+    "MacosHvfBackend",
+    "MacosHvfRuntimeConfig",
     "RedroidBackend",
     "RedroidRuntimeConfig",
     "WslRedroidBackend",
     "WslRedroidRuntimeConfig",
     "RuntimeBackendError",
     "RuntimeBackendNotReady",
+    "RuntimeAwaitingUserLogin",
     "RuntimeIdentityMismatch",
     "backend_from_config",
     "probe_linux_kvm",
+    "probe_apple_silicon_macos",
 ]

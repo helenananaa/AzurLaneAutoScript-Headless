@@ -45,7 +45,11 @@ COMPONENT = PACKAGE + "/com.manjuu.azurlane.MainActivity"
 
 def make_lock(backend):
     manifest_hash = HASH
-    abi = "arm64-v8a" if backend in ("external-adb", "arm64-qemu") else "x86_64"
+    abi = (
+        "arm64-v8a"
+        if backend in ("external-adb", "arm64-qemu", "macos-hvf")
+        else "x86_64"
+    )
     return RuntimeLock.from_mapping(
         {
             "schema": "alas-headless.runtime-lock/v1",

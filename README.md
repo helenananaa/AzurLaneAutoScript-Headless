@@ -211,7 +211,7 @@ Unity.exe -batchmode -quit `
 | 已 root ARM64 Android 设备 | **真实工具链探索** | systemless ANGLE 安装、验证、移除和回滚；G1 NULL renderer 合同 | 未验证当前游戏、完整 observer、ALAS、温控和长期运行 |
 | 无 root ARM64 手机/平板作为 QEMU 宿主 | **实验性部分通过** | 普通应用权限托管 ARM64 guest、ANGLE NULL、Unity，游戏到达无输入登录前 | 无硬件加速且很慢；没有 observer、ALAS 和恢复闭环 |
 | 无 root 设备直接路由 release 游戏 | **当前不支持** | debug/queryable GLES probe 可以加载调试 ANGLE | locked user build 不能把 side-loaded debug ANGLE 直接路由给 release 游戏 |
-| Apple Silicon Mac + Android Emulator/HVF | **真实探索：G4 登录页与 typed observer 已通过** | M1、Emulator 37.1.11、API 32 ARM64、`-accel on`；ANGLE NULL observer 读取到国服 9.7.10 的 `LoginUI2` 精确路径 | 未完成账号登录、主页面、ALAS workload、recovery、soak 和独立 `macos-hvf` backend |
+| Apple Silicon Mac + Android Emulator/HVF | **工程基线：独立 backend、lifecycle 与双 recovery 已通过** | M1、API 32 ARM64、Hypervisor.Framework、exact runtime lock；owned AVD lifecycle、game recovery、Android reboot recovery 和 cleanup 实机通过 | 未完成账号登录、主页面、ALAS workload、soak、快照恢复和多实例资格 |
 | Intel Mac + Android Emulator/HVF | **后续候选** | 同架构 x86/x86_64 guest 路径可行 | 本仓库尚无真实 Intel Mac 生命周期或游戏证据 |
 
 这张表展示的是跨设备路线，而不是用一个模糊的“全平台支持”标签掩盖成熟度差异。

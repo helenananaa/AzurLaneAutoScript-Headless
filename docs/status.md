@@ -627,6 +627,27 @@ See [the implementation and evidence scope](campaign-preparation-20260906.zh-CN.
 - Account login and post-login ALAS tasks are deferred until an account is
   available. See the [local KVM guide](local-wsl-kvm-dev.zh-CN.md) and retained
   evidence under `/srv/android-build/kvm/evidence/local-runtime-20260907-r1`.
+## 2026-09-07
+
+### Apple Silicon macOS/HVF lifecycle and both recovery gates pass
+
+- Commit `67ec146c2e5ea3b4b97b2126d0615697b84d43d3` adds the independent
+  `macos-hvf` backend and exact account-free identity collection. Runtime lock
+  `0728bb29bd2ef8dd2c2f29255e43266f3891100fb08561ccfe1b1e315549f6f6`
+  binds the ARM64 SDK system image, provision profile, ANGLE APK, game package,
+  ALAS integration and empty platform-only resource claim.
+- Real owned-AVD lifecycle passes all 10 phases. Game recovery passes all 14
+  phases with PID `1692 -> 4381`; Android recovery passes all 17 phases,
+  including an observed ADB-offline boundary, with PID `1743 -> 1721`.
+- All three manifests preserve the exact runtime fingerprint, report no cleanup
+  failure, and end with zero attached emulators and zero observer forwards.
+  Their traces contain 32, 49 and 62 records respectively, with zero dropped or
+  invalid records and no writer error.
+- This qualifies the platform lifecycle through the typed game boundary. It
+  does not qualify account login, the main page, an ALAS workload, resource
+  sharing, soak, snapshot restore or multi-instance operation. The detailed
+  boundary and commands remain in the
+  [Mac/HVF validation report](mac-apple-silicon-hvf-login-validation-report.md).
 
 ## 2026-09-02
 
