@@ -915,28 +915,28 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
             "research/queue/enter", "research/page/back",
         ])
 
-    def test_research_queue_snapshot_is_bounded_across_queue_exit(self):
+    def test_research_queue_snapshot_is_not_reused_after_queue_exit(self):
         adapter, oracle, _ = self.make_adapter()
         adapter.begin_research()
 
         self.assertEqual(adapter.research_queue_empty_slots(), 5)
         oracle.research_queue_visible_value = False
 
-        self.assertEqual(adapter.research_queue_empty_slots(), 5)
         self.assertFalse(adapter.appear(NamedButton("QUEUE_CHECK")))
-        adapter._research_context.last_queue_observed_at = time.monotonic() - 31.0
         with self.assertRaisesRegex(SemanticGateClosed, "identity is not proven"):
             adapter.research_queue_empty_slots()
 
-    def test_research_queue_exit_caches_the_last_typed_capacity(self):
-        adapter, oracle, _ = self.make_adapter()
+    def test_research_queue_exit_uses_current_card_page_capacity(self):
+        adapter, oracle, _ = self.make_adapter(research_start_budget=1)
         adapter.begin_research()
         oracle.research_queue_visible_value = True
 
         adapter.click(NamedButton("BACK_ARROW"))
         oracle.research_queue_visible_value = False
+        oracle.enabled_values["research/queue/enter"] = True
+        oracle.research_queue_indicator_empty_slots = lambda: 3
 
-        self.assertEqual(adapter.research_queue_empty_slots(), 5)
+        self.assertEqual(adapter.research_queue_fill_slots(), 3)
 
     def test_research_fill_slots_are_limited_by_current_run_budget(self):
         oracle = FakeOracle()

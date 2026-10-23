@@ -297,7 +297,6 @@ class ResearchAdapterPorts:
             )
             context.start_receipt = receipt
             context.start_confirm_receipt = receipt
-            context.last_queue_state = None
             context.last_projects = None
         else:
             start_receipt = self._click_selected_research_target("research/detail/start")
@@ -320,7 +319,6 @@ class ResearchAdapterPorts:
                 if prompt_cost == expected_cost:
                     receipt = self._confirm_research_start(expected_cost)
                     context.start_confirm_receipt = receipt
-                    context.last_queue_state = None
                     context.last_projects = None
                     break
                 time.sleep(0.25)
@@ -632,20 +630,7 @@ class ResearchAdapterPorts:
         self._package_gate()
         if self._research_context is None:
             raise SemanticGateClosed("research queue used outside ALAS research flow")
-        try:
-            state = self.oracle.research_queue_state()
-        except SemanticGateClosed:
-            if (
-                self._research_context.last_queue_state is None
-                or time.monotonic()
-                - self._research_context.last_queue_observed_at
-                > 30.0
-            ):
-                raise
-            return self._research_context.last_queue_state
-        self._research_context.last_queue_state = state
-        self._research_context.last_queue_observed_at = time.monotonic()
-        return state
+        return self.oracle.research_queue_state()
 
     def research_queue_empty_slots(self) -> int:
         return self.research_queue_state().empty_slots
@@ -956,7 +941,6 @@ class ResearchAdapterPorts:
                         return context.stop_confirm_receipt
                     receipt = self._click_selected_research_target("research/stop/confirm")
                     context.stop_confirm_receipt = receipt
-                    context.last_queue_state = None
                     context.last_projects = None
                     def stopped():
                         detail = self.oracle.research_detail_state()
@@ -980,7 +964,6 @@ class ResearchAdapterPorts:
                     else:
                         receipt = self._click_selected_research_target("research/queue/confirm")
                     context.queue_confirm_receipt = receipt
-                    context.last_queue_state = None
                     context.last_projects = None
                     return receipt
                 expected = context.pending_resource_costs
@@ -994,7 +977,6 @@ class ResearchAdapterPorts:
                     )
                 receipt = self._confirm_research_start(expected)
                 context.start_confirm_receipt = receipt
-                context.last_queue_state = None
                 context.last_projects = None
                 return receipt
             if name == "RESEARCH_QUEUE_ADD":
@@ -1023,7 +1005,6 @@ class ResearchAdapterPorts:
                 context.queue_add_receipt = receipt
                 context.queue_confirm_receipt = None
                 context.queue_add_requires_start_grant = existing_running
-                context.last_queue_state = None
                 context.last_projects = None
                 return self._record_mission_transition(receipt)
             if name == "RESEARCH_STOP":
@@ -1044,7 +1025,6 @@ class ResearchAdapterPorts:
                     lambda: input_oracle.click("research/queue/claim"),
                 )
                 context.reward_receipts.append(receipt)
-                context.last_queue_state = None
                 context.last_projects = None
                 return receipt
             if name in (
@@ -1077,16 +1057,6 @@ class ResearchAdapterPorts:
                     and time.monotonic() <= context.passive_transition_until
                 ):
                     return cached
-                # ALAS asks for queue capacity immediately after leaving the
-                # queue page. Preserve the last complete typed snapshot so the
-                # post-exit query neither guesses nor falls back to pixels.
-                try:
-                    queue_state = self.oracle.research_queue_state()
-                except SemanticGateClosed:
-                    pass
-                else:
-                    context.last_queue_state = queue_state
-                    context.last_queue_observed_at = time.monotonic()
                 receipt = self._record_mission_transition(
                     self.oracle.click("research/page/back")
                 )

@@ -1611,7 +1611,6 @@ class DispatchActionsPorts:
                     self._research_context.pending_resource_id = None
                     self._research_context.pending_resource_required = None
                     self._research_context.pending_resource_costs = ()
-                    self._research_context.last_queue_state = None
                     self._research_context.last_projects = None
                     self._research_context.queue_add_receipt = None
                     self._research_context.queue_confirm_receipt = None
