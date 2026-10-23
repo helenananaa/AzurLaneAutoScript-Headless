@@ -208,6 +208,14 @@ class MailAdapterPorts:
             and name in MAIL_VIRTUAL_RESOURCES
             and name not in MISSION_VIRTUAL_RESOURCES
         ):
+            if name == 'GOTO_MAIN_WHITE':
+                reader = self._frame_or_live_observation_oracle()
+                if not any(reader.exists(target) for target in
+                           ('mail/manage/back', 'mail/page/back')):
+                    # Native UI discovery probes this before campaign's
+                    # withdrawal confirmation. A complete frame without a
+                    # Mail back control proves absence, not flow misuse.
+                    return False
             if self._inherited_login_allows_passive_probe():
                 # Native page discovery can inherit LoginUI2 while another
                 # task still owns the adapter. This is only a mail absence

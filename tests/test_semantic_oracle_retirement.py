@@ -217,7 +217,44 @@ class RetirementSemanticOracleTests(unittest.TestCase):
         self.assertEqual(len(backend.taps), 4)
 
     def test_official_retirement_transaction_uses_real_count_and_keeps_equipment(self):
+        self._run_official_retirement_transaction(wrapped=False)
+
+    def test_additive_selection_wrapper_keeps_the_full_retirement_transaction(self):
+        self._run_official_retirement_transaction(wrapped=True)
+
+    def test_inactive_wrapped_selection_does_not_block_ordinary_dock_back(self):
+        root = 'OverlayCamera/Overlay/UIMain/blur_panel/'
+        selection = make_button('quick_select', root+'select_panel_adapt/select_panel/quick_select')
+        selection.update(active_in_hierarchy=False, active_and_enabled=False)
+        backend = FakeBackend([make_button('back', root+'adapt/top/back', 58, 54), selection])
+        backend.ui = make_ui([make_text('船坞容量:', root+'adapt/top/capacity/label')])
+        make_oracle(backend).click_dock_page_back()
+        self.assertEqual(len(backend.taps), 1)
+        selection.update(active_in_hierarchy=True, active_and_enabled=True)
+        with self.assertRaisesRegex(SemanticGateClosed, 'active selection'):
+            make_oracle(backend).click_dock_page_back()
+        self.assertEqual(len(backend.taps), 1)
+
+    def _run_official_retirement_transaction(self, *, wrapped):
         backend = FakeBackend([])
+        if wrapped:
+            original = backend.request
+            def request(line):
+                value = original(line)
+                def wrap(record):
+                    if isinstance(record, dict):
+                        for key, child in record.items():
+                            if key == 'path' and isinstance(child, str):
+                                record[key] = child.replace('/blur_panel/select_panel/',
+                                    '/blur_panel/select_panel_adapt/select_panel/')
+                            else:
+                                wrap(child)
+                    elif isinstance(record, list):
+                        for child in record:
+                            wrap(child)
+                wrap(value)
+                return value
+            backend.request = request
         stages = []
 
         def stage_selection(generation, used):

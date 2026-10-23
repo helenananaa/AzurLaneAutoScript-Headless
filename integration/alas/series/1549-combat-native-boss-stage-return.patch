@@ -1,0 +1,41 @@
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -732,11 +732,10 @@
+                     continue
+                 if self.handle_auto_search_exit(drop=drop):
+                     continue
+-                if semantic_adapter.open().oracle.campaign_page_is_normal():
+-                    logger.info(
+-                        'Semantic boss result returned to stable campaign stage'
+-                    )
+-                    break
++                # The original stage handler owns its timer, info-bar wait
++                # and CampaignEnd. A direct break here would return to map HP
++                # reads while a late total-reward panel is still mounting.
++                self.handle_in_stage()
+                 continue
+             if isinstance(expected_end, str):
+                 if expected_end == 'in_stage' and self.handle_in_stage():
+diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
+--- a/module/campaign/campaign_base.py
++++ b/module/campaign/campaign_base.py
+@@ -256,10 +256,14 @@
+                 else:
+                     self.auto_search_execute_a_battle()
+             except CampaignEnd:
+-                if semantic_adapter is not None and self.map_is_auto_search:
+-                    # Capture evidence from the native loop's current frame.
+-                    # ALAS still owns menu exit, continuation and scheduling.
+-                    semantic_adapter.campaign_auto_search_result_visible()
++                if semantic_adapter is not None:
++                    if self.map_is_auto_search:
++                        # Capture evidence from the native loop's current frame.
++                        # ALAS still owns menu exit, continuation and scheduling.
++                        semantic_adapter.campaign_auto_search_result_visible()
++                    else:
++                        self.ensure_auto_search_exit()
++                        semantic_adapter.campaign_boss_returned_to_stage()
+                 logger.hr('Campaign end')
+                 return True
+ 

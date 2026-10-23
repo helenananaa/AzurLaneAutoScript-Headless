@@ -386,6 +386,7 @@ bool IsRetirementControl(std::string_view path) {
       "UICamera/Canvas/UIOrigin/blur_panel/adapt/top/back",
       "Overlay/UIMain/blur_panel/adapt/left_length/frame/setting",
       "Overlay/UIMain/blur_panel/select_panel/quick_select",
+      "Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/quick_select",
       "DockyardQuickSelectSettingUI(Clone)/window/top/btnBack",
       "DestoryInfoUI(Clone)/frame/confirm_button",
       "DestoryConfirmWindow(Clone)/window/confirm_btn",

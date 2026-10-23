@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 import re
 import re
-from typing import List, Optional, Sequence, Tuple
+from typing import Callable, List, Optional, Sequence, Tuple
 from .contracts import (
     ActionReceipt,
     ButtonState,
@@ -339,7 +339,7 @@ class CampaignNavigationOracle:
             letters = chr(ord("A") + remainder) + letters
         return letters + str(row)
 
-    def campaign_map_state(
+    def _campaign_map_reader(
         self,
         stage_code: str,
         *,
@@ -348,14 +348,8 @@ class CampaignNavigationOracle:
         land_cells: Sequence[Tuple[int, int]],
         expected_fleet_count: int,
         allow_deployment: bool = False,
-    ) -> CampaignMapState:
-        """Build a stable, complete, read-only map model from typed Unity state.
-
-        ``land_cells`` uses ALAS's zero-based ``CampaignMap`` locations.  The
-        complete Button topology is checked against that map definition, while
-        all dynamic objects require a non-truncated Image/Text snapshot.  Two
-        increasing generations must expose the same logical signature.
-        """
+    ) -> Callable[[], CampaignMapState]:
+        """Validate ALAS topology and construct the complete typed map reader."""
 
         numeric_stage = re.fullmatch(r"[1-9][0-9]*-[1-9][0-9]*", stage_code)
         event_stage = re.fullmatch(r"[a-z]+[0-9]*", stage_code)
@@ -405,7 +399,7 @@ class CampaignNavigationOracle:
         if len(land) >= rows * columns:
             raise SemanticGateClosed("campaign map land topology is incomplete")
 
-        reader = lambda: self._campaign_map_state_once(
+        return lambda: self._campaign_map_state_once(
             stage_code,
             columns=columns,
             rows=rows,
@@ -413,6 +407,30 @@ class CampaignNavigationOracle:
             expected_fleet_count=expected_fleet_count,
             **({'allow_deployment': True} if allow_deployment else {}),
         )
+    def campaign_map_observation(
+        self, stage_code: str, *, columns: int, rows: int,
+        land_cells: Sequence[Tuple[int, int]], expected_fleet_count: int,
+        allow_deployment: bool = False,
+    ) -> CampaignMapState:
+        """Project the current ALAS frame without waiting for a future frame.
+
+        Input planning and dispatch use campaign_map_state's independent live
+        stability check. Camera.update only observes this screenshot boundary.
+        """
+        reader = self._campaign_map_reader(stage_code, columns=columns, rows=rows,
+            land_cells=land_cells, expected_fleet_count=expected_fleet_count,
+            allow_deployment=allow_deployment)
+        return self._retry_transition_read(reader)
+
+    def campaign_map_state(
+        self, stage_code: str, *, columns: int, rows: int,
+        land_cells: Sequence[Tuple[int, int]], expected_fleet_count: int,
+        allow_deployment: bool = False,
+    ) -> CampaignMapState:
+        """Require two increasing live generations with identical logical state."""
+        reader = self._campaign_map_reader(stage_code, columns=columns, rows=rows,
+            land_cells=land_cells, expected_fleet_count=expected_fleet_count,
+            allow_deployment=allow_deployment)
         previous = self._retry_transition_read(reader, attempts=12)
         for _ in range(11):
             self._sleep(0.25)
@@ -468,14 +486,13 @@ class CampaignNavigationOracle:
             )
         else:
             geometry_delta = math.inf
-        # A viewport move does not tap this coordinate.  Unity can continue a
-        # sub-pixel easing step between the stabilized map read and this final
-        # identity check, so allow only a tightly bounded drift there.  Actual
-        # grid taps retain exact geometry below.
+        # A viewport lookup observes the current unique Button; it sends no
+        # input. Unity may still be re-centering after combat, so comparing its
+        # fresh geometry with an older map frame is not an input safeguard.
+        # Gesture admission/postconditions and actual grid taps stay separate.
         geometry_matches = (
-            geometry_delta == 0.0
-            if require_top_raycast
-            else geometry_delta <= 5.0
+            not require_unblocked
+            or (geometry_delta == 0.0 if require_top_raycast else geometry_delta <= 5.0)
         )
         if (
             not target.active_in_hierarchy

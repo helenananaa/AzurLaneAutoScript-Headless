@@ -13,7 +13,7 @@ def retained(drift=False):
     # Retain the original immutable pair; no repeated old transport responses.
     state, ui = oracle.read_state(), oracle.read_ui_state()
     oracle.read_state = lambda: state
-    oracle.read_ui_state = lambda: ui
+    oracle.read_ui_state = lambda **_kwargs: ui
     adapter.begin_commission()
     return backend, oracle, adapter
 

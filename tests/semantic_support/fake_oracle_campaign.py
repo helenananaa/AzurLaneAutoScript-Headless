@@ -256,6 +256,9 @@ class FakeCampaignOracle:
         )
         return self.campaign_map_state_value
 
+    def campaign_map_observation(self, *args, **kwargs):
+        return self.campaign_map_state(*args, **kwargs)
+
     def campaign_map_cell_input(
         self, state, node, *, allow_expected_enemy_coverage=False
     ):

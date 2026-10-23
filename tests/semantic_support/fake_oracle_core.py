@@ -49,6 +49,7 @@ class FakeCoreOracle:
             "overlay/network-reconnect/confirm": False,
             "reward/award-info/close": False,
             "reward/award-info1/close": False,
+            "reward/campaign-total/exit": False,
             "reward/ship-exp/close": False,
             "meowfficer/page/back": False,
         }

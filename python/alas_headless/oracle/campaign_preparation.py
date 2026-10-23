@@ -1870,8 +1870,14 @@ class CampaignPreparationOracle:
             raise SemanticGateClosed(
                 "campaign dock expansion is not authorized by semantic recovery"
             )
-        state = self.read_state()
-        target = self._campaign_dock_full_targets(state, stage_code)[choice]
+        def read_target():
+            # A modal can finish moving between presence and input preflight.
+            # Rebind both its opening Button frame and text, never retry a tap
+            # or keep comparing against an obsolete opening signature.
+            state = self.read_state()
+            return state, self._campaign_dock_full_targets(state, stage_code)[choice]
+
+        state, target = self._retry_transition_read(read_target)
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed immediately before input")
         assert target.bounds is not None

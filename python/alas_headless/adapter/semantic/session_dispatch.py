@@ -121,8 +121,12 @@ class SessionDispatchPorts:
             return adapter.appear(button)
         if name == 'GET_MISSION' and adapter._campaign_context is not None:
             oracle = adapter._frame_or_live_observation_oracle()
-            if oracle._campaign_urgent_notice_matches(oracle.read_state()):
-                return True
+            # Negative identity belongs to this port too. Generic combat
+            # aliases can match a reward transition as GET_MISSION and must
+            # not override the exact informational commission reader.
+            state = oracle.read_state()
+            return (oracle._campaign_urgent_notice_matches(state)
+                    and oracle._unique(state, 'campaign/urgent-notice/confirm').actionable)
         if (name in ('POPUP_CONFIRM', 'POPUP_CANCEL') and getattr(adapter, '_campaign_context', None) is not None
                 and adapter._campaign_context.submarine_move_confirm is not None):
             return adapter.campaign_submarine_move_popup_appear(name)
@@ -135,7 +139,8 @@ class SessionDispatchPorts:
             state = adapter._frame_or_live_observation_oracle().read_state()
             still_dock = state.generation <= retirement_return.generation or any(
                 b.active_in_hierarchy and ('/DockyardUI(Clone)/' in b.path
-                    or b.path.endswith('/blur_panel/select_panel/quick_select')) for b in state.buttons)
+                    or b.path.endswith(('/blur_panel/select_panel/quick_select',
+                                        '/blur_panel/select_panel_adapt/select_panel/quick_select'))) for b in state.buttons)
             if not still_dock and name == 'DOCK_CHECK':
                 self._retirement_return_receipt = None
             return still_dock
@@ -189,8 +194,13 @@ class SessionDispatchPorts:
                 adapter._meta_assist_active or adapter.meta_beacon_active()
                 or adapter.daily_execution_active()
                 or adapter.operation_siren_combat_committed()
-                or getattr(adapter, 'campaign_auto_search_owned', lambda: False)()):
+                or adapter.campaign_combat_committed()):
             return observation_oracle.combat_automation_info_visible()
+        if name == 'IN_MAP' and adapter._campaign_context is not None:
+            # A retained grid underneath precombat/information is not a map
+            # observation. Its complete typed port owns blockers and presence;
+            # the generic combat selector union cannot classify that underlay.
+            return adapter.appear(button)
         if observation_oracle.enabled("overlay/network-reconnect/confirm"):
             # NetworkDown is a global exact overlay and may mount over any
             # owned page. Observe it in ALAS' current screenshot frame; input
@@ -526,6 +536,11 @@ class SessionDispatchPorts:
                 return self.open().click_campaign_submarine_grid(button)
             return self.open().click_campaign_combat_grid(button)
         name = AlasSemanticAdapter._button_name(button)
+        if name == 'GET_MISSION' and self.open()._campaign_context is not None:
+            self.refresh_frame()
+            # The exact commission notice owns this alias on both sides of
+            # the screenshot boundary. Generic combat controls cannot take it.
+            return self.open().oracle.click('campaign/urgent-notice/confirm')
         if (name in ('POPUP_CONFIRM', 'POPUP_CANCEL')
                 and not self.open()._login_flow.active):
             target = ('overlay/network-reconnect/confirm' if name == 'POPUP_CONFIRM'
@@ -541,7 +556,7 @@ class SessionDispatchPorts:
                 self.open()._meta_assist_active or self.open().meta_beacon_active()
                 or self.open().daily_execution_active()
                 or self.open().operation_siren_combat_committed()
-                or getattr(self.open(), 'campaign_auto_search_owned', lambda: False)()):
+                or self.open().campaign_combat_committed()):
             self.refresh_frame()
             return self.open().oracle.click_combat_automation_info()
         if (name == 'GUILD_POPUP_CANCEL'
@@ -833,19 +848,10 @@ class SessionDispatchPorts:
                 # The shared back path also belongs to Guild. Dock needs its
                 # distinct filter anchor before entering the capacity proof.
                 oracle = self.open().oracle
-                receipt = oracle.click_dock_page_back()
-                deadline = time.monotonic() + 12.0
-                while time.monotonic() < deadline:
-                    state = oracle.read_state()
-                    if (state.generation > receipt.generation
-                            and oracle.main_page_visible()
-                            and not any(
-                                button.active_in_hierarchy
-                                and button.path == "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back"
-                                for button in state.buttons)):
-                        return receipt
-                    time.sleep(0.2)
-                raise SemanticGateClosed("Dock return did not reach the exact main page")
+                # A dock entered from combat returns to that map. Original
+                # ui_goto owns page discovery and the destination postcondition,
+                # just as it does for the Exercise Back port below.
+                return oracle.click_dock_page_back()
             if name == "GOTO_MAIN" and navigation_oracle.exercise_page_visible():
                 # Original ui_goto owns screenshots, retries and destination
                 # proof. The optional Home control did not advance in live

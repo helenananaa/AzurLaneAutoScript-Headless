@@ -2,6 +2,7 @@
 
 import copy
 import unittest
+from dataclasses import replace
 from types import SimpleNamespace
 from unittest.mock import Mock
 from alas_headless.semantic_oracle import CampaignMapEntryState, SemanticGateClosed
@@ -23,6 +24,36 @@ from tests.semantic_support.oracle_cases import (
 
 
 class CampaignDockFullTests(CampaignDockFullTestsSupport, unittest.TestCase):
+    def test_dock_choice_rebinds_fresh_frame_after_modal_motion_without_replaying_input(self):
+        backend = self._backend()
+        oracle = make_oracle(backend)
+        before = oracle.read_state()
+        target = oracle._campaign_dock_full_targets(before, 'd3')['organize']
+        moved = replace(target, point=replace(target.point, x=target.point.x + 10),
+                        bounds=replace(target.bounds, left=target.bounds.left + 10,
+                                       right=target.bounds.right + 10))
+        after = replace(before, generation=before.generation + 1,
+                        buttons=tuple(moved if b.path == target.path else b for b in before.buttons))
+        oracle.read_state = Mock(side_effect=[before, after])
+        oracle._campaign_dock_full_targets = Mock(side_effect=[
+            SemanticGateClosed('Msgbox snapshots are not coherent'), {'organize': moved}])
+
+        receipt = oracle.click_campaign_dock_full_choice('d3', 'organize')
+
+        self.assertEqual(receipt.generation, after.generation)
+        self.assertEqual(backend.taps, [(450, 515)])
+        self.assertIs(oracle._campaign_dock_full_targets.call_args_list[-1].args[0], after)
+
+    def test_dock_choice_never_inputs_when_modal_does_not_stabilize(self):
+        backend = self._backend()
+        oracle = make_oracle(backend)
+        oracle._campaign_dock_full_targets = Mock(
+            side_effect=SemanticGateClosed('Msgbox snapshots are not coherent'))
+
+        with self.assertRaisesRegex(SemanticGateClosed, 'not coherent'):
+            oracle.click_campaign_dock_full_choice('d3', 'organize')
+        self.assertEqual(backend.taps, [])
+
     def test_os_underlay_allows_exact_dock_choices_but_other_blockers_do_not(self):
         backend = self._backend()
         backend.buttons['buttons'].append(make_button('stamina',
@@ -445,7 +476,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         with self.assertRaisesRegex(SemanticGateClosed, "absent or incomplete"):
             make_oracle(backend).campaign_map_achievement_state("12-4")
 
-    def test_campaign_in_map_probe_only_admits_reviewed_non_map_surfaces(self):
+    def test_campaign_map_absence_is_structural_and_never_sends_input(self):
         daily = FakeBackend([make_button('back_button', 'UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_button')])
         self.assertFalse(make_oracle(daily).campaign_is_in_map())
         self.assertEqual(daily.taps, [])
@@ -477,8 +508,8 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         unknown = FakeBackend(
             [make_button("unknown", "root/UICamera/Canvas/UIMain/Unknown(Clone)")]
         )
-        with self.assertRaisesRegex(SemanticGateClosed, "not reviewed"):
-            make_oracle(unknown).campaign_is_in_map()
+        self.assertFalse(make_oracle(unknown).campaign_is_in_map())
+        self.assertEqual(unknown.taps, [])
 
         event_list = FakeBackend(
             [
@@ -493,29 +524,6 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         event_oracle = make_oracle(event_list)
         self.assertFalse(event_oracle.campaign_is_in_map())
         self.assertTrue(event_oracle.enabled("event-list/page/back"))
-
-        settling_oracle = make_oracle(login)
-        settling_oracle._sleep = lambda _: None
-        entry_attempts = iter(
-            (
-                SemanticGateClosed("campaign map-scene identity is absent"),
-                CampaignMapEntryState(
-                    generation=12,
-                    root_path="LevelCamera/Canvas/UIMain/LevelGrid",
-                    button_paths=("map-button",),
-                    image_paths=("map-image",),
-                ),
-            )
-        )
-
-        def settling_entry_once():
-            result = next(entry_attempts)
-            if isinstance(result, Exception):
-                raise result
-            return result
-
-        settling_oracle._campaign_map_entry_state_once = settling_entry_once
-        self.assertTrue(settling_oracle.campaign_is_in_map())
 
         map_root = "LevelCamera/Canvas/UIMain/LevelGrid"
         stage_root = "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)"
@@ -553,6 +561,12 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         map_state = map_oracle.campaign_map_entry_state()
         self.assertEqual(map_state.root_path, map_root)
         self.assertTrue(map_oracle.campaign_is_in_map())
+        settling_oracle = make_oracle(in_map)
+        settling_oracle._sleep = lambda _: None
+        settling_oracle._campaign_map_entry_state_from_snapshots = Mock(side_effect=[
+            SemanticGateClosed('campaign map-scene identity is absent'), map_state])
+        self.assertTrue(settling_oracle.campaign_is_in_map())
+        self.assertEqual(settling_oracle._campaign_map_entry_state_from_snapshots.call_count, 2)
 
         in_map.ui["texts"].append(
             make_text(

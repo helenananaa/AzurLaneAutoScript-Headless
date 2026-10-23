@@ -36,16 +36,53 @@ def test_campaign_map_notice_confirms_only_informational_commission(content,vali
         assert not b.taps
 
 
-def test_campaign_notice_session_dispatch_precedes_generic_combat_probe():
+@pytest.mark.parametrize('notice', [False, True])
+def test_campaign_notice_session_dispatch_precedes_generic_combat_probe(notice):
     from types import SimpleNamespace
     from unittest.mock import Mock
     from alas_headless.adapter.semantic.session_dispatch import SessionDispatchPorts
     from alas_headless.adapter.semantic.resources import CAMPAIGN_CLICK_RESOURCES
-    oracle=SimpleNamespace(read_state=lambda: object(), _campaign_urgent_notice_matches=Mock(return_value=True))
+    oracle=SimpleNamespace(read_state=lambda: object(), _campaign_urgent_notice_matches=Mock(return_value=notice),
+        _unique=lambda *_:SimpleNamespace(actionable=True))
     adapter=SimpleNamespace(_campaign_context=object(), _frame_or_live_observation_oracle=lambda: oracle)
-    session=SimpleNamespace(open=lambda: adapter)
-    assert SessionDispatchPorts.appear(session, 'GET_MISSION') is True
+    session=SimpleNamespace(open=lambda: adapter,
+        _live_combat_visible=Mock(side_effect=AssertionError('generic alias cannot override typed absence')))
+    assert SessionDispatchPorts.appear(session, 'GET_MISSION') is notice
+    session._live_combat_visible.assert_not_called()
     assert 'POPUP_CONFIRM_CAMPAIGN_MAP' in CAMPAIGN_CLICK_RESOURCES
+
+
+@pytest.mark.parametrize('drift', [False, True])
+@pytest.mark.parametrize('case', ['notice', 'covered', 'purchase'])
+def test_campaign_notice_click_cannot_fall_through_to_generic_combat(drift, case):
+    from types import SimpleNamespace
+    from unittest.mock import Mock
+    from tests.test_presence_driven_reward_refresh import session_for
+    root='OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/'
+    backend=FakeBackend([make_button('custom_button_1(Clone)',
+        root+'button_container/custom_button_1(Clone)',raycast_top=case!='covered')])
+    backend.ui=make_ui([make_text('消耗100钻石，是否确定？' if case=='purchase'
+        else '出现紧急委托《商船护卫Ⅱ》',root+'msg_panel/content'),
+        make_text('INFORMATION',root+'top/bg/infomation/title_en'),
+        make_text('确 定',root+'button_container/custom_button_1(Clone)/pic')])
+    if drift:
+        backend.ui['texts'].reverse()
+        backend.ui['optional_metadata']={'additive':True}
+    oracle=make_oracle(backend)
+    session,adapter=session_for(oracle)
+    adapter._minigame_context=None
+    adapter.begin_campaign_pre_sortie('12-4')
+    adapter._campaign_context.combat_receipt=SimpleNamespace(generation=1)
+    adapter._campaign_context.combat_admission=SimpleNamespace(target_kind='enemy')
+    session._live_combat_click=Mock(side_effect=AssertionError('generic alias stole notice'))
+    assert session.appear('GET_MISSION') is (case=='notice')
+    if case=='notice':
+        assert session.click('GET_MISSION').semantic_id=='campaign/urgent-notice/confirm'
+        assert len(backend.taps)==1
+    else:
+        with pytest.raises(SemanticGateClosed):session.click('GET_MISSION')
+        assert not backend.taps
+    session._live_combat_click.assert_not_called()
 
 
 def test_campaign_settlement_dispatch_precedes_generic_combat_probe():

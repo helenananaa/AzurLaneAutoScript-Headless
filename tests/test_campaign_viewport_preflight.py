@@ -54,6 +54,8 @@ def test_one_available_camera_move_allows_native_route_with_another_visible_wayp
         fleets=(replace(after.fleets[0],node='C6'),))
     adapter.campaign_camera_state()
     last=adapter.click(CampaignGridButton((3,2)))
+    assert not adapter.campaign_map_viewport_swipe_committed()
+    assert adapter._campaign_context.target_recheck_proof is None
     assert oracle.campaign_map_cell_click_calls==[('C6',False),('D3',True)]
     assert adapter._action_ledger.remaining('campaign.grid_click')==0
     after=oracle.campaign_map_state_value

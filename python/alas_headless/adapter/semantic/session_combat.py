@@ -5,7 +5,7 @@ from __future__ import annotations
 import time
 from dataclasses import replace
 from pathlib import Path
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Mapping, Optional, Tuple
 from ...adapter import StaleFrameError
 from ...alas_combat_action import commit_alas_combat_resource_action_for_evidence
 from ...alas_combat_admission import (
@@ -26,7 +26,6 @@ from ...semantic_oracle import (
     ObserverTransportError,
     SemanticGateClosed,
     SemanticTargetMissing,
-    request_observer_state,
 )
 from .adapter import AlasSemanticAdapter
 from .contracts import CampaignMapTargetRecheckProof
@@ -78,22 +77,40 @@ class SessionCombatPorts:
             raise SemanticGateClosed(
                 "live combat observation requires a committed ALAS combat entry or official auto-search sortie"
             )
-        handle = self._runtime_handle
-        if handle is None:
-            raise SemanticGateClosed("semantic runtime handle is unavailable")
-        snapshot_payload, button_payload, _ = request_observer_state(
-            handle.observer_request
-        )
-        ui_payload = handle.observer_request("GET /v1/ui\n")
-        _, snapshot = build_alas_combat_trace_frame(
-            snapshot_payload,
-            button_payload,
-            ui_payload,
-            self._live_combat_manifest(),
-        )
-        return snapshot
+        oracle = adapter._frame_or_live_observation_oracle()
+
+        def plain(value):
+            # The screenshot lease freezes mappings and sequences. The retained
+            # combat trace parser consumes JSON values without changing them.
+            if isinstance(value, Mapping):
+                return {key: plain(child) for key, child in value.items()}
+            if isinstance(value, (tuple, list)):
+                return [plain(child) for child in value]
+            return value
+
+        def read():
+            # Keep passive combat probes on ALAS' immutable screenshot frame.
+            # Immediately after input, the live fallback closes its foreground
+            # check after the whole pair rather than between the endpoints.
+            state = oracle.read_state()
+            ui = oracle._paired_ui_after_state()
+            _, snapshot = build_alas_combat_trace_frame(
+                plain(state.snapshot),
+                plain(state.buttons_snapshot),
+                plain(ui.snapshot),
+                self._live_combat_manifest(),
+            )
+            return snapshot
+
+        return oracle._retry_transition_read(read)
 
     def _live_combat_visible(self) -> Tuple[str, ...]:
+        oracle = self.open()._frame_or_live_observation_oracle()
+        if oracle.combat_automation_info_visible(require_actionable=False):
+            # The dedicated native information handler owns this exact page,
+            # including its mounting frames. Generic selectors must not parse
+            # covered controls or turn a non-actionable frame into an error.
+            return ()
         official_state = self._official_auto_search_combat_state(self.open())
         if official_state == (False, False):
             # Auto-search's native loops probe optional combat popups before
@@ -292,6 +309,13 @@ class SessionCombatPorts:
             if official_state is not None:
                 return official_state[1]
             oracle = adapter._frame_or_live_observation_oracle()
+            if (getattr(oracle, 'observation_target_present', lambda _: False)(
+                    'os/precombat/info/confirm')
+                    and oracle.combat_automation_info_visible(require_actionable=False)
+                    and not oracle._blocking_rules(oracle.read_state(), 'os/precombat/info/confirm')):
+                # The original preparation handler must acknowledge this exact
+                # information page before the retained CombatUI can execute.
+                return False
             if getattr(
                 oracle,
                 "daily_battle_result_visible",
@@ -606,6 +630,7 @@ class SessionCombatPorts:
         return bool(
             oracle.daily_battle_result_visible()
             or oracle.campaign_battle_reward_visible()
+            or oracle.enabled("reward/campaign-total/exit")
         )
 
     def recover_orphan_combat_result(
@@ -627,6 +652,10 @@ class SessionCombatPorts:
             self.refresh_frame()
             adapter = self.open()
             oracle = adapter._require_frame_observation_oracle()
+            if oracle.enabled("reward/campaign-total/exit"):
+                receipts.append(oracle.click("reward/campaign-total/exit"))
+                time.sleep(0.75)
+                continue
             if oracle.daily_battle_result_visible():
                 receipts.append(oracle.click_daily_battle_result())
                 time.sleep(0.75)
@@ -647,6 +676,7 @@ class SessionCombatPorts:
                 or oracle.event_campaign_page_visible()
                 or oracle.meta_page_visible()
                 or oracle.exercise_page_visible()
+                or oracle.campaign_page_is_normal()
             ):
                 return tuple(receipts)
             if current_raid_event is not None:

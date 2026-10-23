@@ -390,9 +390,10 @@ class AlasSemanticCampaignView:
             after.camera_location[index] - before.camera_location[index]
             for index in range(2)
         )
-        # ALAS requests at most (4, 3), but Unity clamps the camera at a map
-        # edge after applying the fractional center correction.  The observed
-        # logical delta can therefore be one cell larger on either axis.
+        # This is the difference between two complete typed projections, not
+        # permission to send a swipe. Unity can re-center the camera or finish
+        # an earlier easing movement between them. The input port separately
+        # proves each requested gesture and its physical postcondition.
         if delta == (0, 0):
             active_axes = tuple(
                 index
@@ -447,8 +448,6 @@ class AlasSemanticCampaignView:
                 raise SemanticGateClosed(
                     "ALAS camera observed swipe is outside limits"
                 )
-        elif abs(delta[0]) > 5 or abs(delta[1]) > 4:
-            raise SemanticGateClosed("ALAS camera observed swipe is outside limits")
         return delta
 
 

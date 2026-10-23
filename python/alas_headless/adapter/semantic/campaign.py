@@ -271,13 +271,9 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
 
     def campaign_map_preparation_committed(self) -> bool:
         context = self._require_campaign_context()
-        if context.map_preparation_receipt is None:
-            return False
-        if time.monotonic() > context.passive_transition_until:
-            raise SemanticGateClosed(
-                "campaign map-preparation transition did not reach the fleet overlay"
-            )
-        return True
+        # This is a receipt query. Original ALAS owns waiting, recovery and
+        # timeouts, including a retirement round trip before a fresh entry.
+        return context.map_preparation_receipt is not None
 
     def dock_full_recovery_owned(self) -> bool:
         # The modal is account-wide. Original ALAS also calls Retirement

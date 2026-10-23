@@ -106,12 +106,17 @@ def test_exact_r3_r4_hud_proves_only_owned_passive_absence_and_no_map_or_complet
 
 @pytest.mark.parametrize('change', [None, 'foreign-modal', 'disabled-marker', 'unknown-owner',
                                   'missing-retreat', 'duplicate-marker'])
-def test_transition_exception_requires_owner_and_unobscured_hud_identity(change):
+def test_non_map_absence_does_not_admit_unowned_or_obscured_hud_input(change):
     handle, oracle, _clock, adapter = retained_runtime(change, owned=change is not None)
     assert (oracle.campaign_auto_search_map_transition_visible() is True) == (change is None)
     for name in ('CAMPAIGN_CHECK', 'EVENT_CHECK', 'SP_CHECK', 'GET_MISSION', 'WITHDRAW'):
-        with pytest.raises(SemanticGateClosed):
-            adapter._appear_once(name)
+        if change is None and name in ('SP_CHECK', 'GET_MISSION', 'WITHDRAW'):
+            with pytest.raises(SemanticGateClosed):
+                adapter._appear_once(name)
+        else:
+            assert adapter._appear_once(name) is False
+    with pytest.raises(SemanticGateClosed):
+        adapter.click('WITHDRAW')
     assert handle.taps == []
 
 
@@ -120,8 +125,9 @@ def test_foreign_modal_is_not_hidden_by_hud_or_loading(kind):
     handle, oracle, _clock, adapter = retained_runtime('foreign-modal', kind=kind)
     assert not oracle.campaign_auto_search_map_transition_visible()
     for name in ('CAMPAIGN_CHECK', 'GET_MISSION', 'WITHDRAW'):
-        with pytest.raises(SemanticGateClosed):
-            adapter._appear_once(name)
+        assert adapter._appear_once(name) is False
+    with pytest.raises(SemanticGateClosed):
+        adapter.click('WITHDRAW')
     assert handle.taps == []
 
 

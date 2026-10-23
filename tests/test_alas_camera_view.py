@@ -18,9 +18,9 @@ from alas_headless.alas_viewport_continuation import (
 )
 
 
-def make_state(*, generation=10, dx=0.0, dy=0.0, deform=False, columns=5):
+def make_state(*, generation=10, dx=0.0, dy=0.0, deform=False, columns=5, rows=5):
     cells = []
-    for row in range(1, 6):
+    for row in range(1, rows + 1):
         for column in range(1, columns + 1):
             x = 100.0 * (column - 0.5) + 100.0 + dx
             y = 80.0 * (row - 0.5) + 100.0 + dy
@@ -44,7 +44,7 @@ def make_state(*, generation=10, dx=0.0, dy=0.0, deform=False, columns=5):
     return CampaignMapState(
         generation=generation,
         stage_code="12-4",
-        rows=5,
+        rows=rows,
         columns=columns,
         cells=tuple(cells),
         land_nodes=("A1",),
@@ -162,6 +162,14 @@ class AlasCampaignCameraViewTests(unittest.TestCase):
         )
 
         self.assertEqual(before.predict_swipe(after), (5, 0))
+
+    def test_predict_swipe_reports_large_observed_recenter_without_authorizing_input(self):
+        before = build_alas_campaign_camera_view(
+            make_state(generation=10, columns=11, rows=8), screen_center=(350.0, 300.0))
+        after = build_alas_campaign_camera_view(
+            make_state(generation=12, dx=-300.0, dy=-400.0, columns=11, rows=8),
+            screen_center=(350.0, 300.0))
+        self.assertEqual(before.predict_swipe(after), (3, 5))
 
     def test_predict_swipe_accepts_bounded_fractional_edge_clamp(self):
         before = build_alas_campaign_camera_view(

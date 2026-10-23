@@ -1,0 +1,17 @@
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -180,8 +180,11 @@
+                         # enhancement state machine. The adapter maps only the
+                         # exact labelled non-premium entry choices; dock
+                         # expansion remains unavailable.
+-                        if self.handle_retirement() and self.is_in_map():
+-                            self.handle_auto_search_map_option()
++                        if self.handle_retirement():
++                            if self.is_in_map():
++                                self.handle_auto_search_map_option()
++                            else:
++                                semantic_adapter.prepare_campaign_run()
+                         campaign_timer.reset()
+                         fleet_timer.reset()
+                         continue

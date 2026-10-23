@@ -650,80 +650,29 @@ class CampaignMapOracle:
         )
 
     def campaign_is_in_map(self) -> bool:
-        """Prove an exact map root or one reviewed non-map startup surface."""
+        """Prove map presence; complete non-map frames are ordinary absence.
 
-        try:
-            # Reuse the exact map-entry reader's bounded transition sampling.
-            # The observer can expose the LevelGrid Button tree one refresh
-            # before the independently collected Image anchors; a single read
-            # would incorrectly classify that reviewed map as an unknown
-            # startup surface.  This remains read-only and every successful
-            # attempt still satisfies the original exact identity checks.
-            self.campaign_map_entry_state()
-        except SemanticGateClosed as exc:
-            if str(exc) in (
-                "campaign map and blocking identities overlap",
-                "campaign map and preparation identities overlap",
-            ):
+        Other task panels and battle rewards need no global startup allowlist.
+        Only a positive map observation needs the full paired map contract.
+        read_state still rejects stale, malformed, truncated or foreign data.
+        """
+        def reader():
+            state = self.read_state()
+            root = "LevelCamera/Canvas/UIMain/LevelGrid"
+            if not any(button.active_in_hierarchy and button.active_and_enabled
+                       and (button.path == root or button.path.startswith(root + "/"))
+                       for button in state.buttons):
                 return False
-        else:
+            try:
+                self._campaign_map_entry_state_from_snapshots(
+                    state, self._paired_ui_after_state())
+            except SemanticGateClosed as exc:
+                if str(exc) in (
+                    "campaign map and blocking identities overlap",
+                    "campaign map and preparation identities overlap",
+                ):
+                    return False
+                raise
             return True
 
-        # Unity can keep CombatUIStandard mounted for a short interval after
-        # the exact campaign result hierarchy becomes actionable.  That
-        # overlap is a reviewed combat-to-map transition, not an unknown
-        # startup surface.  Reuse the exact result-button identities rather
-        # than admitting the broad CombatUIStandard hierarchy here.
-        if self.daily_battle_result_visible():
-            return False
-
-        # A scheduler task can inherit the ready Operation Siren globe.
-        # Report this reviewed non-campaign surface to ALAS; its own UI graph
-        # chooses how to leave it before starting the campaign.
-        if self.operation_siren_globe_visible():
-            return False
-
-        if self.retirement_selection_visible() or self.enhancement_dock_visible():
-            # Original retirement recovery navigates through these exact
-            # non-map surfaces before returning to the campaign map.
-            return False
-
-        state = self.read_state()
-        non_map_targets = (
-            "login/enter",
-            "event-list/page/back",
-            "main/battle",
-            "campaign-menu/normal",
-            "campaign-menu/page/back",
-            "task/page/back",
-            "reward/page/back",
-            "commission/page/back",
-            "mail/page/back",
-            "build/page/start",
-            "build/page/back",
-            "dorm-menu/page/root",
-            "dorm/page/back",
-            "research-menu/page/back",
-            "research/page/back",
-            "tactical/page/back",
-            "daily/page/back",
-        )
-        observed = tuple(
-            semantic_id
-            for semantic_id in non_map_targets
-            if self._matches(state, semantic_id)
-        )
-        if observed:
-            return False
-        if (self._matches(state, "shop/home")
-                and self.recommendation_shop_visible()):
-            # Freebies leaves the reviewed Shop shell mounted. The native
-            # Campaign page graph owns leaving it before stage admission.
-            return False
-        if (self.meta_character_page_visible() or self.meta_character_menu_visible()
-                or self.meta_page_visible()):
-            # A native Campaign run may inherit any already reviewed META
-            # page. This passive absence lets ALAS use its existing UI graph;
-            # it grants neither map entry nor an input to the inherited page.
-            return False
-        raise SemanticGateClosed("campaign startup surface is not reviewed")
+        return self._retry_transition_read(reader)

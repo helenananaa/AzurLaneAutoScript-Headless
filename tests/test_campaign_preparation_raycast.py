@@ -27,7 +27,9 @@ int main() {
         assert(!ShouldEvaluateTopRaycast(name, "OtherUI/blur_panel/select_panel_adapt/select_panel/" + name));
         assert(!ShouldEvaluateTopRaycast(name, "OverlayCamera/Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/" + name + "/child"));
     }
-    assert(!ShouldEvaluateTopRaycast("quick_select", "OverlayCamera/Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/quick_select"));
+    assert(ShouldEvaluateTopRaycast("quick_select", "OverlayCamera/Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/quick_select"));
+    assert(!ShouldEvaluateTopRaycast("quick_select", "OtherUI/blur_panel/select_panel_adapt/select_panel/quick_select"));
+    assert(!ShouldEvaluateTopRaycast("quick_select", "OverlayCamera/Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/quick_select/child"));
     assert(ShouldEvaluateTopRaycast("bgNormal$", "UICamera/Canvas/UIMain/EventUI(Clone)/scrollRect$/content/0/bgNormal$"));
     assert(ShouldEvaluateTopRaycast("bgEmergence$", "UICamera/Canvas/UIMain/EventUI(Clone)/scrollRect$/content/12/bgEmergence$"));
     assert(!ShouldEvaluateTopRaycast("bgEmergence$", "OtherUI(Clone)/scrollRect$/content/0/bgEmergence$"));
@@ -68,6 +70,7 @@ bool EndsWith(std::string_view v, std::string_view s) {
 bool IsRetirementControl''' + selector + '''
 int main() {
     assert(IsRetirementControl("OverlayCamera/Overlay/UIMain/blur_panel/select_panel/quick_select"));
+    assert(IsRetirementControl("OverlayCamera/Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/quick_select"));
     assert(IsRetirementControl("OverlayCamera/Overlay/UIMain/DestoryInfoUI(Clone)/frame/confirm_button"));
     assert(IsRetirementControl("ResolveEquipmentUI(Clone)/main/cancel_btn"));
     assert(IsRetirementControl("UICamera/Canvas/UIOrigin/blur_panel/adapt/top/back"));

@@ -1,5 +1,15 @@
 # Validation status
 
+2026-10-23: Shared runtime fixes backported from Redroid; original ALAS manual
+12-4 Main then completed on Windows AVD and Windows/WSL Redroid with the same
+adapter/runtime tree. Both returned true, RunCount=0; final focused regression
+1185 passed and the 233-member patch/configuration/support checks passed.
+Removed redundant passive-map freezes, duplicate navigation timers and the
+semantic result-loop shortcut; real typed input checks remain. One account and
+stage only; uninterrupted mid-map full-dock recovery and enhancement remain
+unqualified, with no support-matrix promotion. See
+[scope and evidence](campaign-camera-refresh-20261022.zh-CN.md).
+
 2026-10-22: Local Windows/WSL Redroid completed one uninterrupted original ALAS Main
 12-4 run: native return true, RunCount 0, typed result exit and stage postcondition,
 379.484 seconds. A separate original UI check returned home; the run used 317 oil and

@@ -1073,9 +1073,9 @@ class CampaignStateOracle(CampaignHealthOracle):
             path=target.path,
         )
 
-    def campaign_precombat_visible(self) -> bool:
+    def campaign_precombat_visible(self, state=None) -> bool:
         """Observe the Campaign preparation page without depending on repair stock."""
-        state = self.read_state()
+        state = self.read_state() if state is None else state
         roots = (
             "OverlayCamera/Overlay/UIMain/ChapterPreCombatUI(Clone)",
             "LevelCamera/Canvas/LevelOrigin/ChapterPreCombatUI(Clone)",
@@ -1115,7 +1115,7 @@ class CampaignStateOracle(CampaignHealthOracle):
             )
         target = matches[0]
         root = target.path[: -len("/adapt/top/back_btn")]
-        ui_state = self.read_ui_state()
+        ui_state = self._paired_ui_after_state()
         image_contract = {
             target.path: "icon_bg_front_1920",
             target.path + "/mask": "icon_bg_mask_1920",
@@ -1153,7 +1153,7 @@ class CampaignStateOracle(CampaignHealthOracle):
 
     def campaign_map_displayed_fleet_index(self) -> int:
         buttons = self.read_state()
-        state = self.read_ui_state()
+        state = self._paired_ui_after_state()
         return self._campaign_displayed_fleet_index_from_states(buttons, state)
 
     @staticmethod
@@ -1748,7 +1748,7 @@ class CampaignStateOracle(CampaignHealthOracle):
         if (len(controls) != 1 or not controls[0].path.endswith(
                 root + "button_container/custom_button_1(Clone)")):
             return False
-        ui = self.read_ui_state()
+        ui = self._paired_ui_after_state()
         if abs(ui.generation - state.generation) > 2:
             raise SemanticGateClosed("campaign urgent notice generations are incoherent")
         def texts(suffix):

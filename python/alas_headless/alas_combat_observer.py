@@ -49,6 +49,7 @@ from .semantic_oracle import (
     OracleState,
     Point,
     SemanticGateClosed,
+    SemanticTargetMissing,
     SemanticOracle,
     TextState,
     ToggleState,
@@ -1173,7 +1174,7 @@ def prepare_alas_combat_resource_action(
             "combat action is blocked by: " + ", ".join(active_blockers)
         )
     if not _resource_visible(snapshot, mapping):
-        raise SemanticGateClosed("combat action resource is not visible")
+        raise SemanticTargetMissing("combat action resource is not visible")
     action_mappings = tuple(
         action
         for action in manifest.actions

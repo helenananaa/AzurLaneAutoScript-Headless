@@ -169,7 +169,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         adapter.oracle.click_dock_page_back.assert_not_called()
         adapter.click.assert_called_once_with('GOTO_MAIN')
 
-    def test_dock_filter_anchor_retains_strict_dock_return_port(self):
+    def test_dock_back_delegates_destination_proof_to_native_navigation(self):
         from tests.semantic_support.observer_fixtures import make_button
         handle = FrameRuntimeHandle()
         original_request = handle.observer_request
@@ -185,12 +185,14 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         adapter = session.open()
         receipt = SimpleNamespace(semantic_id='dock/page/back', generation=7)
         def dock_back():
-            adapter.oracle.read_state = mock.Mock(return_value=SimpleNamespace(generation=8, buttons=()))
-            adapter.oracle.main_page_visible = mock.Mock(return_value=True)
+            adapter.oracle.read_state = mock.Mock(side_effect=AssertionError('native UI owns refresh'))
+            adapter.oracle.main_page_visible = mock.Mock(side_effect=AssertionError('Dock may return to map'))
             return receipt
         adapter.oracle.click_dock_page_back = mock.Mock(side_effect=dock_back)
         self.assertIs(session.click('GOTO_MAIN'), receipt)
         adapter.oracle.click_dock_page_back.assert_called_once_with()
+        adapter.oracle.read_state.assert_not_called()
+        adapter.oracle.main_page_visible.assert_not_called()
 
     def test_navigation_preparation_reuses_frame_and_keeps_input_guards(self):
         from tests.semantic_support.observer_fixtures import make_button
