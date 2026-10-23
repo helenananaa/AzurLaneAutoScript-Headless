@@ -120,6 +120,15 @@ def run_native_loop(app):
     return False
 
 
+def watch_stop_file(path, stop_event, finished):
+    """Translate an operator request into ALAS' existing cooperative stop."""
+    while not finished.is_set() and not stop_event.is_set():
+        if path.is_file():
+            stop_event.set()
+            return
+        finished.wait(0.5)
+
+
 def request_startup_restart(app, requested):
     """Explicit recovery uses native Restart selection and LoginHandler."""
     if requested:
@@ -323,6 +332,8 @@ def parse_args(argv=None):
     recovery.add_argument('--resume-task',
                          help='Prioritize one enabled native popup owner for startup recovery only')
     parser.add_argument('--budget', action='append', default=[])
+    parser.add_argument('--stop-file', type=Path,
+                        help='Request native cooperative stop when this file exists; never deletes the file')
     parser.add_argument('--output', required=True, type=Path)
     args = parser.parse_args(argv)
     args.continue_after_failure = args.continuous or args.continue_after_failure
@@ -340,6 +351,7 @@ def main():
     except ValueError as exc:
         parser.error(str(exc))
     alas_root, output = args.alas_root.resolve(), args.output.resolve()
+    stop_file = args.stop_file.resolve() if args.stop_file is not None else None
     if output.exists():
         parser.error(f'output already exists: {output}')
     seed_path = alas_root / 'config' / (args.seed_config + '.json')
@@ -359,6 +371,7 @@ def main():
               'serial': config['Alas']['Emulator']['Serial'], 'budgets': args.budget,
               'campaign_run_overrides': overrides, 'max_tasks': args.max_tasks,
               'continuous': args.continuous,
+              'stop_file': str(stop_file) if stop_file is not None else None,
               'startup_restart_requested': args.restart_before_loop,
               'startup_login_requested': args.login_before_loop,
               'startup_resume_task': args.resume_task,
@@ -368,6 +381,8 @@ def main():
               'tasks': [], 'terminal': False, 'passed': False}
     started = time.monotonic()
     session = None
+    stop_watcher_finished = threading.Event()
+    stop_watcher = None
 
     def save():
         write_scheduler_receipt(output, scheduler_receipt_payload(result))
@@ -377,6 +392,13 @@ def main():
         from alas import inflection
         app = AzurLaneAutoScript(name)
         app.stop_event = threading.Event()
+        if stop_file is not None:
+            stop_watcher = threading.Thread(
+                target=watch_stop_file,
+                args=(stop_file, app.stop_event, stop_watcher_finished),
+                name='alas-operator-stop', daemon=True,
+            )
+            stop_watcher.start()
         original_run = app.run
         current = None
         oracle = None
@@ -704,6 +726,10 @@ def main():
         result['error'] = {'type': type(exc).__name__, 'message': str(exc),
                            'traceback': traceback.format_exc()}
     finally:
+        stop_watcher_finished.set()
+        if stop_watcher is not None:
+            stop_watcher.join(timeout=1)
+        result['stop_file_requested'] = stop_file is not None and stop_file.is_file()
         result['terminal'] = True
         result['elapsed_seconds'] = round(time.monotonic() - started, 3)
         if session is not None:

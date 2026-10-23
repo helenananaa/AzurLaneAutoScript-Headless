@@ -16,6 +16,8 @@ pytestmark = pytest.mark.skipif(not POWERSHELL, reason='PowerShell is unavailabl
     ([], ['--max-tasks', '3']),
     (['-MaxTasks', '1'], ['--max-tasks', '1']),
     (['-Continuous', '-RestartBeforeLoop'], ['--continuous', '--restart-before-loop']),
+    (['-Continuous', '-ContinueAfterFailure', '-StopFile', 'operator request.stop'],
+     ['--continuous', '--continue-after-failure', '--stop-file']),
 ])
 def test_plan_uses_current_checkout_and_preserves_native_arguments(tmp_path, mode, expected):
     bundle = tmp_path / 'bundle with spaces'
@@ -47,6 +49,9 @@ def test_plan_uses_current_checkout_and_preserves_native_arguments(tmp_path, mod
     assert ('--restart-before-loop' in plan['arguments']) == ('-RestartBeforeLoop' in mode)
     assert plan['arguments'][plan['arguments'].index('--persistent-config') + 1] == 'persistent'
     assert plan['arguments'][plan['arguments'].index('--budget') + 1] == manifest['scheduler_budgets'][0]
+    if '-StopFile' in mode:
+        stop_file = Path(plan['arguments'][plan['arguments'].index('--stop-file') + 1])
+        assert stop_file.is_absolute() and stop_file.name == 'operator request.stop'
     assert not plan['executes_game']
     assert list(bundle.iterdir()) == [bundle / 'manifest.json']
     assert (bundle / 'manifest.json').read_text(encoding='utf-8') == source

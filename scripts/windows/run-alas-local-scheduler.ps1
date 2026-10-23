@@ -11,6 +11,8 @@ param(
     [switch]$Continuous,
 
     [switch]$RestartBeforeLoop,
+    [switch]$ContinueAfterFailure,
+    [string]$StopFile,
     [string]$Output,
     [switch]$Plan
 )
@@ -40,6 +42,12 @@ if ($Continuous) {
 }
 if ($RestartBeforeLoop) {
     $runnerArguments += '--restart-before-loop'
+}
+if ($ContinueAfterFailure) {
+    $runnerArguments += '--continue-after-failure'
+}
+if (-not [string]::IsNullOrWhiteSpace($StopFile)) {
+    $runnerArguments += @('--stop-file', [IO.Path]::GetFullPath($StopFile))
 }
 foreach ($budget in $manifest.scheduler_budgets) {
     $runnerArguments += @('--budget', [string]$budget)

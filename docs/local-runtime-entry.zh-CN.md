@@ -36,18 +36,34 @@ manager 负责容器；游戏冷启动与登录交给公共运行时和原 Login
 & .\scripts\windows\run-alas-local-scheduler.ps1 -BundleDirectory $bundle -MaxTasks 3 -RestartBeforeLoop
 ```
 
-按原计时持续运行，使用 Ctrl+C 停止：
+按原计时持续运行，并指定一个本轮尚不存在的停止请求文件：
 
 ```powershell
-& .\scripts\windows\run-alas-local-scheduler.ps1 -BundleDirectory $bundle -Continuous -RestartBeforeLoop
+$stop = Join-Path $bundle ('stop-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.request')
+& .\scripts\windows\run-alas-local-scheduler.ps1 -BundleDirectory $bundle -Continuous -RestartBeforeLoop -StopFile $stop
+```
+
+在另一个 PowerShell 窗口向该路径写入文件，即请求原 ALAS 在任务边界或原生等待循环
+退出；当前任务可能需要先完成。此入口不强杀进程，不删除请求文件，也不重写 NextRun。
+启动下一轮时使用新的停止路径。Ctrl+C 仍可中断前台进程，但中断不等于任务成功。
+
+```powershell
+Set-Content -LiteralPath '<本轮 $stop 的完整路径>' -Value 'stop'
 ```
 
 `MaxTasks` 计数的是原调度命令，不保证恰好执行三种不同日常任务。默认是有界模式；
 脚本只转发参数，任务选择、重试、计时、NextRun 和成功判断仍归原 ALAS。
 持久配置 `semantic_daily_continuity_20261023` 继续原 NextRun，不重新复制 seed 覆盖它。
-目前仅启用 Reward、Commission、Research；高油耗委托关闭，科研不使用魔方或部件。
+2026-10-23 晚间实机扩展还启用了 Tactical、Dorm、Daily、Exercise、Freebies、Guild、
+PrivateQuarters、Meowfficer、Minigame、Gacha、Hard、Awaken，共十五项。启用不等于验证
+通过，执行与局部失败见[真实调度记录](scheduler-live-20261023.zh-CN.md)。高油耗委托
+关闭，科研不使用魔方或部件。Main 和商店采购仍关闭。
 资源额度由运行包的 `scheduler_budgets` 转交已有运行器；持续模式按原任务轮次恢复额度。
-没有采购或钻石消费授权。JSON 收据默认留在运行包目录，可用 `-Output` 指定新路径。
+普通任务资源按本轮明确预算使用；钻石消费、采购、改凭据和破坏性重置不在本轮范围。
+启用任务时也需为相应 typed 输入配置已有预算，单改 Enable 不会自动扩权。
+JSON 收据默认留在运行包目录，可用 `-Output` 指定新路径。
+持续模式沿用原 ALAS 的任务失败与局部退让策略；有界模式可用 `-ContinueAfterFailure`
+显式继续原生队列。该参数不会绕过传输错误、语义输入检查或原生致命退出。
 
 2026-10-23 已有这些任务的有界执行、配置重入、正常停止与容器恢复证据。
 自然下一轮唤醒、自然满仓后的不中断 Main 恢复、长期无人值守及已登录数据的

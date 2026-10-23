@@ -32,6 +32,31 @@ def test_native_loop_stop_exit_preserves_real_failure_codes(code, requested):
     app.loop.assert_called_once_with()
 
 
+def test_operator_stop_file_requests_native_stop_and_preserves_request(tmp_path):
+    import threading
+    stop, finished = threading.Event(), threading.Event()
+    request = tmp_path / 'operator.stop'
+    watcher = threading.Thread(target=module.watch_stop_file, args=(request, stop, finished))
+    watcher.start()
+    try:
+        assert not stop.wait(0.05)
+        request.write_text('stop after the native safe boundary')
+        assert stop.wait(2)
+        assert request.is_file()
+    finally:
+        finished.set()
+        watcher.join(timeout=2)
+    assert not watcher.is_alive()
+
+
+def test_stop_file_watcher_finishes_without_requesting_stop(tmp_path):
+    import threading
+    stop, finished = threading.Event(), threading.Event()
+    finished.set()
+    module.watch_stop_file(tmp_path / 'unused.stop', stop, finished)
+    assert not stop.is_set()
+
+
 def test_session_and_live_click_record_authority_once_without_replaying_cached_input():
     from alas_headless.semantic_oracle import ActionReceipt, Point, Bounds
     receipt = ActionReceipt('tactical/course/confirm', 10, Point(20, 20),
