@@ -200,6 +200,8 @@ class AwakenOracle:
         tip_path = (
             "/ShipDetailView(Clone)/attrs/attrs/property/level_bg/tip"
         )
+        # This exact active icon pulses its alpha while the parent remains
+        # actionable. Animation opacity is not the entry's semantic identity.
         tips = tuple(
             item
             for item in ui_state.images
@@ -209,7 +211,6 @@ class AwakenOracle:
             and item.active_and_enabled
             and not item.truncated
             and item.bounds is not None
-            and item.color[3] > 0.2
         )
         if require_entry and len(tips) != 1:
             raise SemanticGateClosed("awaken detail entry is incomplete")
@@ -353,8 +354,8 @@ class AwakenOracle:
             and item.sprite == "renzhijuexing_icon"
             and item.active_in_hierarchy
             and item.active_and_enabled
+            and not item.truncated
             and item.bounds is not None
-            and item.color[3] > 0.2
         )
         parents = tuple(
             item

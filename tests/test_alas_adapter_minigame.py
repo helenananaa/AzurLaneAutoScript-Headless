@@ -17,6 +17,29 @@ class TicketOracle:
 
 
 class AlasSemanticAdapterMinigameTests(unittest.TestCase):
+    def test_startup_discovers_inherited_build_queue_before_transition_grace(self):
+        oracle = FakeOracle()
+        oracle.build_queue_visible_value = True
+        oracle.exists_values['build/page/back'] = True
+        oracle.enabled_values['build/page/back'] = True
+        adapter = AlasSemanticAdapter(oracle, lambda: None)
+        adapter.begin_minigame()
+        self.assertTrue(adapter.appear(NamedButton('BUILD_CHECK')))
+        self.assertTrue(adapter.appear(NamedButton('GOTO_MAIN')))
+        self.assertFalse(adapter.appear(NamedButton('UNREVIEWED_PIXEL_PAGE')))
+        self.assertEqual(oracle.click_calls, [])
+
+    def test_startup_does_not_invent_a_build_page_or_covered_return(self):
+        oracle = FakeOracle()
+        oracle.build_queue_visible_value = False
+        oracle.exists_values['build/page/back'] = True
+        oracle.enabled_values['build/page/back'] = False
+        adapter = AlasSemanticAdapter(oracle, lambda: None)
+        adapter.begin_minigame()
+        self.assertFalse(adapter.appear(NamedButton('BUILD_CHECK')))
+        self.assertFalse(adapter.appear(NamedButton('GOTO_MAIN')))
+        self.assertEqual(oracle.click_calls, [])
+
     def test_live_menu_arrival_reuses_entry_receipt(self):
         oracle = FakeOracle()
         # Preserve the abstract destination-handoff model. Typed pending Main

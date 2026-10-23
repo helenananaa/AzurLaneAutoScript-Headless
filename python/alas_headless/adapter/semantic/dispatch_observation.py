@@ -1894,11 +1894,13 @@ class DispatchObservationPorts:
             self._minigame_context is not None
             and semantic_id is None
             and name not in MINIGAME_VIRTUAL_RESOURCES
+            and name not in ('BUILD_CHECK', 'GOTO_MAIN')
             and time.monotonic() <= self._minigame_context.passive_transition_until
         ):
             # The game-room transition mounts several optional pixel-only
-            # surfaces. They are passive absences until an exact typed surface
-            # below proves the next ALAS state.
+            # surfaces. Keep those passive, but let ALAS recognize an inherited
+            # build queue and use its reviewed shared return before this grace
+            # expires. A new Minigame flow does not own the inherited page.
             return False
         if name == "BACK_ARROW":
             if self.oracle.exercise_opponent_detail_visible():

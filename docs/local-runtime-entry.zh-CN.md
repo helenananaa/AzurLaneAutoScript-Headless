@@ -55,7 +55,8 @@ Set-Content -LiteralPath '<本轮 $stop 的完整路径>' -Value 'stop'
 脚本只转发参数，任务选择、重试、计时、NextRun 和成功判断仍归原 ALAS。
 持久配置 `semantic_daily_continuity_20261023` 继续原 NextRun，不重新复制 seed 覆盖它。
 2026-10-23 晚间实机扩展还启用了 Tactical、Dorm、Daily、Exercise、Freebies、Guild、
-PrivateQuarters、Meowfficer、Minigame、Gacha、Hard、Awaken，共十五项。启用不等于验证
+PrivateQuarters、Meowfficer、Minigame、Gacha、Hard、Awaken，共十五项参与测试；Awaken
+完成一次资源事务后已关闭重复调度，目前继续运行十四项。启用不等于验证
 通过，执行与局部失败见[真实调度记录](scheduler-live-20261023.zh-CN.md)。高油耗委托
 关闭，科研不使用魔方或部件。Main 和商店采购仍关闭。
 资源额度由运行包的 `scheduler_budgets` 转交已有运行器；持续模式按原任务轮次恢复额度。

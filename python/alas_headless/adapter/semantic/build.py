@@ -388,6 +388,11 @@ class BuildAdapterPorts:
                     # prompt and the proven return after confirmation.
                     return UNHANDLED
             if name == "BUILD_SUBMIT_ORDERS":
+                # Queue collection shares the existing build grant. Refuse
+                # before opening preparation if it used the last allowance;
+                # otherwise a deferred submit strands unrelated native tasks
+                # behind this modal. Final dispatch still reserves the grant.
+                self._require_action_grant("build.submit")
                 receipt = self.oracle.click("build/page/start")
                 context.prep_opened = True
                 context.prep_validated = False

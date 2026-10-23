@@ -68,9 +68,8 @@ class ResearchDormBuildLedgerTests(unittest.TestCase):
         build_oracle = FakeOracle()
         build = AlasSemanticAdapter(build_oracle, lambda: None)
         build.begin_build()
-        self.expose_build_submit(build, build_oracle)
         cases.append(
-            (build, lambda: build.click(NamedButton("POPUP_CONFIRM_GACHA_ORDER")))
+            (build, lambda: build.click(NamedButton("BUILD_SUBMIT_ORDERS")))
         )
 
         for adapter, mutate in cases:
@@ -155,10 +154,22 @@ class ResearchDormBuildLedgerTests(unittest.TestCase):
 
         adapter.end_build()
         adapter.begin_build()
-        self.expose_build_submit(adapter, oracle)
+        with self.assertRaises(SemanticGateClosed):
+            adapter.click(NamedButton("BUILD_SUBMIT_ORDERS"))
         with self.assertRaises(SemanticGateClosed):
             adapter.click(NamedButton("POPUP_CONFIRM_GACHA_ORDER"))
         self.assertEqual(oracle.click_calls.count("build/prep/confirm"), 1)
+
+    def test_build_final_submit_still_checks_ledger_after_preparation(self):
+        oracle = FakeOracle()
+        adapter = AlasSemanticAdapter(oracle, lambda: None, build_submit_budget=1)
+        adapter.begin_build()
+        self.expose_build_submit(adapter, oracle)
+        adapter._action_ledger.close()
+        before = list(oracle.click_calls)
+        with self.assertRaises(SemanticGateClosed):
+            adapter.click(NamedButton("POPUP_CONFIRM_GACHA_ORDER"))
+        self.assertEqual(oracle.click_calls, before)
 
     def test_backend_exceptions_permanently_consume_each_family_grant(self):
         research_oracle = FakeOracle()
@@ -256,10 +267,9 @@ class ResearchDormBuildLedgerTests(unittest.TestCase):
         adapter.end_dorm()
 
         adapter.begin_build()
-        self.expose_build_submit(adapter, oracle)
         before = list(oracle.click_calls)
         with self.assertRaises(SemanticGateClosed):
-            adapter.click(NamedButton("POPUP_CONFIRM_GACHA_ORDER"))
+            adapter.click(NamedButton("BUILD_SUBMIT_ORDERS"))
         self.assertEqual(oracle.click_calls, before)
 
 

@@ -9,6 +9,36 @@ from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_collected_queue_cannot_open_preparation_after_last_grant(self):
+        from alas_headless.adapter.semantic.contracts import AlasSemanticActionDeferred
+        adapter, oracle, _ = self.make_adapter(build_submit_budget=1, dorm_collect_budget=1)
+        oracle.build_queue_empty_value = False
+        adapter.begin_build()
+        adapter.click(NamedButton('BUILD_FINISH_ORDERS'))
+        self.assertEqual(adapter._action_ledger.remaining('build.submit'), 0)
+        before = list(oracle.click_calls)
+        with self.assertRaises(AlasSemanticActionDeferred):
+            adapter.click(NamedButton('BUILD_SUBMIT_ORDERS'))
+        self.assertEqual(oracle.click_calls, before)
+        self.assertFalse(adapter._build_context.prep_opened)
+        adapter.end_build()
+        adapter.begin_dorm()
+        self.assertEqual(adapter.click(NamedButton('DORM_QUICK_COLLECT')).capability_id,
+                         'dorm.collect')
+
+    def test_queue_collection_and_new_order_keep_distinct_existing_debits(self):
+        adapter, oracle, _ = self.make_adapter(build_submit_budget=2)
+        oracle.build_queue_empty_value = False
+        oracle.enabled_values.update({'build/warning/confirm': False, 'build/prep/confirm': True})
+        adapter.begin_build()
+        adapter.click(NamedButton('MAIN_GOTO_BUILD'))
+        adapter.click(NamedButton('BUILD_FINISH_ORDERS'))
+        adapter.click(NamedButton('BUILD_SUBMIT_ORDERS'))
+        self.assertEqual(adapter._action_ledger.remaining('build.submit'), 1)
+        adapter.click(NamedButton('POPUP_CONFIRM_GACHA_ORDER'))
+        self.assertEqual(adapter._action_ledger.remaining('build.submit'), 0)
+        self.assertEqual(oracle.click_calls.count('build/prep/confirm'), 1)
+
     def test_original_shared_popup_keeps_order_phase_and_submit_budget(self):
         oracle = FakeOracle()
         oracle.enabled_values.update({'build/warning/confirm': False, 'build/prep/confirm': True})
