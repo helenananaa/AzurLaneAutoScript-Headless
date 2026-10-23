@@ -79,10 +79,21 @@ class KvmImageBuildScriptTests(unittest.TestCase):
         self.assertIn("REDROID_DOMAIN_JSON", self.build)
         self.assertIn('peer_domain=$(realpath "$2")', self.build)
         self.assertIn("require_output_buildable", self.build)
+        self.assertIn('sudo -n env "PYTHONPATH=$repo_root/python"', self.build)
         check = self.build.index("require_output_buildable")
         output_prepare = self.build.index('mkdir -p "$OUT_DIR/target/product')
         self.assertLess(check, output_prepare)
         self.assertIn('for_build=True', self.build)
+
+    def test_build_elevates_only_the_read_only_cross_domain_check(self) -> None:
+        self.assertEqual(self.build.count("sudo -n"), 1)
+        privileged = self.build.index("sudo -n")
+        check = self.build.index("require_output_buildable", privileged)
+        build = self.build.index('m -j"$jobs" "$build_target"')
+        self.assertLess(privileged, check)
+        self.assertLess(check, build)
+        self.assertNotIn("sudo m ", self.build)
+        self.assertNotIn("sudo -i", self.build)
 
     def test_build_keeps_kvm_output_and_evidence_in_domain(self) -> None:
         self.assertIn('out_alias="$source_root/out-kvm"', self.build)

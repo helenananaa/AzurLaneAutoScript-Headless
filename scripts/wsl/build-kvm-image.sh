@@ -98,7 +98,11 @@ super_partition_size_bytes=${configuration[17]}
 mkdir -p "$source_root" "$repo_metadata_root" "$out_root" "$ccache_root" \
     "$build_home" "$temp_root" "$evidence_root"
 
-output_availability=$("$python_bin" - "$domain" "$peer_domain" "$repo_root/python" <<'PY'
+# The backend build accounts intentionally cannot traverse one another's
+# mutable roots.  Elevate only this read-only cross-domain ownership/alias
+# check; the Android build, caches, output, and evidence remain unprivileged.
+output_availability=$(sudo -n env "PYTHONPATH=$repo_root/python" \
+    "$python_bin" - "$domain" "$peer_domain" "$repo_root/python" <<'PY'
 import json, sys, types
 from pathlib import Path
 

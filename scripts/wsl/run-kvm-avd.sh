@@ -44,13 +44,21 @@ export PATH="$platform_tools${PATH:+:$PATH}"
 # Emulator 34.2.7 crashes in goldfish_vk while the game queries Vulkan
 # features.  The game itself is routed through the separately installed ANGLE
 # NULL provider, so guest Vulkan is unnecessary for this KVM runtime.
+# Explicit console ports suppress implicit gRPC initialization in 34.2.7;
+# teardown still uses that client. Initialize it on an authenticated ephemeral
+# loopback port to avoid the unconfigured-client shutdown crash.
+# This headless runtime does not need the Android boot animation. Skipping it
+# avoids early display contention; SurfaceFlinger and game rendering stay intact.
 exec "$emulator" \
     -avd "$avd_name" \
     -no-window \
+    -no-boot-anim \
     -no-audio \
     -no-snapshot \
     -no-snapshot-save \
     -no-metrics \
     -gpu swiftshader_indirect \
     -feature -Vulkan \
+    -grpc 0 \
+    -grpc-use-jwt \
     -port "$console_port"

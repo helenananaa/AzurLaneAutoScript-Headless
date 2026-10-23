@@ -108,9 +108,13 @@ class KvmImageSourceLock:
             if project not in EXPECTED_PATCHES or project in observed:
                 raise KvmImageSourceLockError("KVM project patch target differs")
             observed.add(project)
-            expected_path, expected_message = EXPECTED_PATCHES[project]
+            _, expected_message = EXPECTED_PATCHES[project]
             path = str(patch.get("path", ""))
-            if path != expected_path or Path(path).is_absolute() or ".." in Path(path).parts:
+            # Candidate builds may retain a separate patch payload. Content is
+            # still pinned by its digest and verified against the source tree.
+            if (not path.startswith("integration/runtime/") or not path.endswith(".patch")
+                    or "\\" in path or ".." in path.split("/")
+                    or Path(path).is_absolute()):
                 raise KvmImageSourceLockError("KVM project patch path differs")
             if patch.get("commit_message") != expected_message:
                 raise KvmImageSourceLockError("KVM project patch message differs")

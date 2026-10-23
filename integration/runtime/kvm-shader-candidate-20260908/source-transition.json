@@ -1,0 +1,10 @@
+{
+  "previous_markers": {
+    ".alas-kvm-build-source-lock": "9e8c563be2dcc193771b6d52ecf9cd8a197b975879ab120fb4fb80020872b2be",
+    ".alas-kvm-sync-complete": "9e8c563be2dcc193771b6d52ecf9cd8a197b975879ab120fb4fb80020872b2be",
+    ".alas-kvm-project-patches-applied": "457a60fc74535c5f089a5f95c64c96e4974ed587acfb8194d1aac1282d615cad"
+  },
+  "new_source_lock_sha256": "5a21c9144a930b9d8b10e279b3d164c9a8b8fa3696b8f2fe3a8be7b6bd985e7a",
+  "manifest_changed": false,
+  "note": "Retained manifest/inventory/sync receipt checked; only pinned Goldfish patch changed."
+}

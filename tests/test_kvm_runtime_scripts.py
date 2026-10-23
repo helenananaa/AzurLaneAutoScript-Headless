@@ -10,7 +10,10 @@ def test_kvm_runtime_disables_crashing_emulator_vulkan_path():
     text = RUN.read_text(encoding="utf-8")
     assert "-gpu swiftshader_indirect" in text
     assert "-feature -Vulkan" in text
+    assert "-grpc 0" in text
+    assert "-grpc-use-jwt" in text
     assert "-no-snapshot" in text
+    assert "-no-boot-anim" in text
     assert 'exec "$emulator"' in text
     assert 'export ANDROID_ADB_SERVER_PORT="$adb_server_port"' in text
     assert 'platform_tools="${sdk_root}/platform-tools"' in text

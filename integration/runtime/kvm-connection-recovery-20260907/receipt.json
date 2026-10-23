@@ -1,0 +1,147 @@
+{
+  "schema": "alas-headless.kvm-connection-recovery/v1",
+  "scope": "local retained KVM runtime; no account input or ALAS support promotion",
+  "failure_injection": {
+    "profile": "copy with mismatched source lock hash",
+    "outcome": "rejected before guest launch",
+    "observed_state": {
+      "unit": "alas-kvm-dev-alas-kvm-local-r5.service",
+      "avd": "alas-kvm-local-r5",
+      "release": "kvm-r75-x86_64-local-20260907-r1",
+      "running": false,
+      "service": {
+        "MainPID": "0",
+        "Result": "exit-code",
+        "ExecMainStatus": "1",
+        "LoadState": "loaded",
+        "ActiveState": "failed",
+        "SubState": "failed"
+      },
+      "state": "failed",
+      "failure_log": "/srv/android-build/kvm/runtime/control/alas-kvm-local-r5/launcher.log",
+      "journal_unit": "alas-kvm-dev-alas-kvm-local-r5.service"
+    },
+    "final_attempt": {
+      "seconds": 10.0279673,
+      "error": "KVM ready failed; inspect the error above."
+    },
+    "unused_adb_cleanup": "no listener after failed readiness"
+  },
+  "recovery_paths": [
+    "explicit Reconnect",
+    "repeated Start reconnect",
+    "Reconnect after private ADB server restart"
+  ],
+  "unchanged_identity": {
+    "vm_pid": "695",
+    "game_pid": "1807",
+    "boot_id": "5e6c5961-a1f4-49ae-a448-5a6323d51361",
+    "sentinel": "alas-kvm-local-r5 persistence 20260907",
+    "accounts": 0
+  },
+  "account_input": 0,
+  "normal_stop_exit_code": 0,
+  "fault_marker_cleared_after_retention": true,
+  "final_state": {
+    "unit": "alas-kvm-dev-alas-kvm-local-r5.service",
+    "avd": "alas-kvm-local-r5",
+    "release": "kvm-r75-x86_64-local-20260907-r1",
+    "running": false,
+    "service": {
+      "MainPID": "0",
+      "Result": "success",
+      "ExecMainStatus": "0",
+      "LoadState": "not-found",
+      "ActiveState": "inactive",
+      "SubState": "dead"
+    },
+    "state": "stopped"
+  },
+  "tests": {
+    "windows": "55 passed, 2 platform skips",
+    "wsl": "57 passed"
+  },
+  "evidence_root": "/srv/android-build/kvm/evidence/connection-recovery-20260907-r1",
+  "files": {
+    "expected-startup-failure-cleanup.json": {
+      "bytes": 89,
+      "sha256": "551b604566f7e5363a27358445c593337e91d68a13e3213804de8a36305a9447"
+    },
+    "start-reconnect-result.json": {
+      "bytes": 841,
+      "sha256": "2e5ffc387fd7f3fefeaa42bbc5513fc18e51fbab7198f83e417738753cbaf877"
+    },
+    "after-server.json": {
+      "bytes": 1006,
+      "sha256": "c5aeb6e36f213803c94e7e70de9491561ce9f9964cb90f3335264fee77221bae"
+    },
+    "normal-exit.json": {
+      "bytes": 45,
+      "sha256": "9708083c2264642dac3580f0ef67cbdf86d401fd95bd65bf5e67d25c771a2ba6"
+    },
+    "reconnect-result.json": {
+      "bytes": 840,
+      "sha256": "54a7470102091cdba34e006eccad3def219ff01df8a9a8ab727c72b28452a03c"
+    },
+    "failed-start.log": {
+      "bytes": 5626,
+      "sha256": "35c68bdb55840403f0f556798010462b8571221f1f7160834b9f2461a4b152f7"
+    },
+    "invalid-profile-for-recovery.json": {
+      "bytes": 804,
+      "sha256": "6fd9081563a8d69d14bb61786d8785c8a1e91a4bfe0da0e39837ab2158cbb753"
+    },
+    "after-start.json": {
+      "bytes": 1006,
+      "sha256": "513c6f35e0f514a103f4f3dd544a2861cff03ccc75cdbcb5f704945bd6a911a3"
+    },
+    "disconnect-start.json": {
+      "bytes": 762,
+      "sha256": "19951e29a1d39b4a0972f5b9b6d9800620ca0864e9c78c43424a131377804fad"
+    },
+    "expected-startup-failure.json": {
+      "bytes": 89,
+      "sha256": "8ece87ad96b21940aa9b3094fa6a43e955f01b5e7b69c6e82c7f51ab09c6c137"
+    },
+    "failed-start-after-cleanup.log": {
+      "bytes": 4934,
+      "sha256": "bceefb23f696fabb594761fa4dee0b60cca9b5d86f43d4ef729ecd712f75ca51"
+    },
+    "disconnect-explicit.json": {
+      "bytes": 762,
+      "sha256": "19951e29a1d39b4a0972f5b9b6d9800620ca0864e9c78c43424a131377804fad"
+    },
+    "disconnect-server.json": {
+      "bytes": 629,
+      "sha256": "8c9941f00a5cbf0baa15481439e5087c0b2306ea348c32a9d3b9d5b15f1278f7"
+    },
+    "failed-service-status-cleanup.json": {
+      "bytes": 455,
+      "sha256": "d2d024ee2f208597f69d33438fb7792c4607bad012e81ca750d5803ef62772b3"
+    },
+    "failed-service-status.json": {
+      "bytes": 455,
+      "sha256": "d2d024ee2f208597f69d33438fb7792c4607bad012e81ca750d5803ef62772b3"
+    },
+    "before.json": {
+      "bytes": 1006,
+      "sha256": "c5aeb6e36f213803c94e7e70de9491561ce9f9964cb90f3335264fee77221bae"
+    },
+    "recovery-stop-result.json": {
+      "bytes": 112,
+      "sha256": "93cc78fd696972265dd38892a1f67f145bc8c1e35d4e0659de0b869a7127d27c"
+    },
+    "failed-exit.json": {
+      "bytes": 45,
+      "sha256": "aaddb00618edfdce550f348e0ac8818aeb1a03fb6a45e5c0a4a2e0c4cbc4c9a0"
+    },
+    "reconnect-server-result.json": {
+      "bytes": 841,
+      "sha256": "7ca5d9c1d032d4e2971e05e5e477baf5e813513aa81f86a0a321997d7e4f9aea"
+    },
+    "after-explicit.json": {
+      "bytes": 1006,
+      "sha256": "d38676aa7d0b44c84b160252609807a060f4842892bd008754d9c27f1aeb5c88"
+    }
+  }
+}

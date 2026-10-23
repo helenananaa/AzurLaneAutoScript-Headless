@@ -1239,6 +1239,16 @@ class RuntimeBackendsTests(unittest.TestCase):
                 labels.index("kvm-logical-display-density-set"),
                 labels.index("angle-null-refresh-rate-set"),
             )
+            confirmation = next(
+                spec for spec in executor.calls
+                if spec.label == "kvm-immersive-tutorial-confirm"
+            )
+            self.assertEqual(confirmation.argv[-6:], (
+                "shell", "settings", "put", "secure",
+                "immersive_mode_confirmations", "confirmed",
+            ))
+            self.assertTrue(confirmation.mutating)
+            self.assertLess(labels.index(confirmation.label), labels.index("game-launch"))
             self.assertLess(
                 labels.index("angle-null-refresh-rate-set"),
                 labels.index("angle-apk-prewarm-path"),
@@ -1308,6 +1318,14 @@ class RuntimeBackendsTests(unittest.TestCase):
                 "required-before-every-game-launch",
             )
 
+            previous_launches = sum(spec.label == "game-relaunch" for spec in executor.calls)
+            executor.results["kvm-immersive-tutorial-confirm"] = (1, "", "permission denied")
+            with self.assertRaisesRegex(RuntimeBackendNotReady, "immersive-tutorial-confirm-failed"):
+                backend.restart_game({"instance_id": "test"})
+            self.assertEqual(
+                sum(spec.label == "game-relaunch" for spec in executor.calls), previous_launches,
+            )
+            executor.results["kvm-immersive-tutorial-confirm"] = (0, "", "")
             executor.results["angle-null-refresh-rate-readback"] = (0, "60\n", "")
             with self.assertRaisesRegex(
                 RuntimeIdentityMismatch,

@@ -336,7 +336,10 @@ class KvmBackend(AdbAttachedBackend):
     ) -> Mapping[str, Any]:
         """Wait for Goldfish provisioning, not only the early boot property."""
 
+        started = self.monotonic()
         framework = super().wait_android_ready(instance, timeout_seconds)
+        framework_seconds = self.monotonic() - started
+        network_started = self.monotonic()
 
         def ready() -> Optional[Mapping[str, Any]]:
             provisioned = self._adb(
@@ -360,6 +363,10 @@ class KvmBackend(AdbAttachedBackend):
                     **framework,
                     "device_provisioned": True,
                     "network_ready": True,
+                    "timings_seconds": {
+                        "android_framework_seconds": framework_seconds,
+                        "android_network_seconds": self.monotonic() - network_started,
+                    },
                 }
             return None
 
@@ -415,6 +422,11 @@ class KvmBackend(AdbAttachedBackend):
             "-no-snapshot-save",
             "-gpu",
             "swiftshader_indirect",
+            "-feature",
+            "-Vulkan",
+            "-grpc",
+            "0",
+            "-grpc-use-jwt",
             "-accel",
             "on",
             "-camera-back",
@@ -618,6 +630,16 @@ class KvmBackend(AdbAttachedBackend):
         # The emulator framebuffer is deliberately smaller, while Unity and
         # ALAS retain their qualified 1280x720 semantic coordinate surface.
         self._configure_logical_display()
+        # A fresh AVD's Android full-screen tutorial steals Unity focus and
+        # can leave the observer socket alive without any main-thread frames.
+        # Confirm this system tutorial before launching, without pixel input.
+        confirmed = self._adb(
+            "kvm-immersive-tutorial-confirm",
+            ("shell", "settings", "put", "secure",
+             "immersive_mode_confirmations", "confirmed"),
+            mutating=True,
+        )
+        self._require_success(confirmed, "immersive-tutorial-confirm-failed")
         # SurfaceNULL reads this property when the game's EGL surface is
         # created, so every cold launch and recovery restart must set it first.
         self._configure_null_refresh_rate()
@@ -627,6 +649,32 @@ class KvmBackend(AdbAttachedBackend):
         # window without changing renderer selection or introducing a pixel
         # fallback.
         self._prewarm_angle_apk()
+
+    def request_emulator_stop(self) -> None:
+        """Flush the guest and stop its verified emulator console target.
+
+        adb's `emu` service requires emulator-N, even when shell/observer
+        traffic uses the independently connected TCP transport.
+        """
+        console = (
+            str(self.config.adb), "-P", str(self.config.adb_server_port),
+            "-s", f"emulator-{self.config.console_port}", "emu",
+        )
+        identity = self.executor.run(RuntimeCommandSpec(
+            "kvm-console-identity", console + ("avd", "name"), timeout_seconds=10.0,
+        ))
+        lines = self._require_success(identity, "kvm-console-unavailable").splitlines()
+        if not lines or lines[0].strip() != self.config.avd_name:
+            raise RuntimeIdentityMismatch("kvm-console-avd-mismatch")
+        # The private ADB server may have been restarted since startup.
+        self._require_success(self._connect_adb_transport(), "kvm-stop-adb-connect-failed")
+        synced = self._adb("kvm-userdata-sync", ("shell", "sync"),
+                           timeout_seconds=30.0, mutating=True)
+        self._require_success(synced, "kvm-userdata-sync-failed")
+        stopped = self.executor.run(RuntimeCommandSpec(
+            "emulator-stop", console + ("kill",), timeout_seconds=15.0, mutating=True,
+        ))
+        self._require_success(stopped, "kvm-console-stop-failed")
 
     def stop(self, instance: Mapping[str, Any]) -> None:
         cleanup_failure: Optional[Exception] = None
@@ -643,17 +691,14 @@ class KvmBackend(AdbAttachedBackend):
         process = self._owned_processes.pop(instance_id, None)
         if process is not None:
             try:
-                self._adb(
-                    "emulator-stop",
-                    ("emu", "kill"),
-                    timeout_seconds=15.0,
-                    mutating=True,
-                )
+                self.request_emulator_stop()
             except Exception as exc:
                 if cleanup_failure is None:
                     cleanup_failure = exc
             try:
-                self.executor.stop_owned(process, timeout_seconds=30.0)
+                returncode = self.executor.stop_owned(process, timeout_seconds=30.0)
+                if returncode != 0:
+                    raise RuntimeBackendNotReady("kvm-emulator-abnormal-exit")
             except Exception as exc:
                 if cleanup_failure is None:
                     cleanup_failure = exc
@@ -708,6 +753,7 @@ class KvmBackend(AdbAttachedBackend):
             "unity_command_line": self.unity_command_line,
             "null_refresh_hz": self.config.null_refresh_hz,
             "angle_apk_prewarm": "required-before-every-game-launch",
+            "immersive_tutorial": "confirm-before-game-launch",
             "angle_routing": (
                 "managed-ephemeral" if self.manage_angle_routing else "verify-only"
             ),

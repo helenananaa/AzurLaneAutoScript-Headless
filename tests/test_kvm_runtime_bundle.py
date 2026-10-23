@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import contextlib
 import hashlib
+import json
 import os
 import shutil
 import stat
 from dataclasses import replace
 from pathlib import Path
+from types import MappingProxyType, SimpleNamespace
 
 import pytest
 
@@ -308,6 +310,39 @@ def test_publish_pair_check_delegates_to_independent_output_contract(
         "backend": "kvm",
         "for_build": False,
     }
+
+
+@pytest.mark.parametrize("returncode", [0, 1])
+def test_publish_peer_permission_inspection_is_read_only_and_propagates_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, returncode: int,
+) -> None:
+    inputs = replace(
+        _fixture(tmp_path),
+        domain=SimpleNamespace(document=MappingProxyType({"backend": "kvm"})),
+        peer_domain=SimpleNamespace(document=MappingProxyType({"backend": "redroid"})),
+    )
+
+    def denied(*args, **kwargs):
+        raise PermissionError("peer root")
+
+    def inspect(command, **kwargs):
+        assert command[:3] == ["sudo", "-n", "env"]
+        assert "require_output_buildable" in command[-1]
+        assert "for_build=False" in command[-1]
+        assert "publish_runtime_release" not in command[-1]
+        assert json.loads(kwargs["input"]) == [
+            inputs.domain.document, inputs.peer_domain.document,
+        ]
+        return SimpleNamespace(returncode=returncode, stderr="owner mismatch",
+                               stdout='{"peer_output_independent": true}')
+
+    monkeypatch.setattr(runtime_bundle, "require_output_buildable", denied)
+    monkeypatch.setattr(runtime_bundle.subprocess, "run", inspect)
+    if returncode:
+        with pytest.raises(KvmRuntimeBundleError, match="owner mismatch"):
+            require_publish_output(inputs)
+    else:
+        assert require_publish_output(inputs)["peer_output_independent"] is True
 
 
 def test_pinned_verifier_needs_only_the_immutable_release(tmp_path: Path) -> None:
