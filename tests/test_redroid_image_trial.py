@@ -1,7 +1,6 @@
 import json
 import os
 from pathlib import Path
-import shutil
 import subprocess
 from unittest.mock import Mock, patch
 
@@ -132,14 +131,10 @@ def test_storage_inspection_rejects_active_layout_but_allows_comments(tmp_path, 
     assert docker.call_args_list[-1].args[:2] == ("trial-storage-remove", "rm")
 
 
+@pytest.mark.skipif(os.name == "nt", reason="executes the Linux overlay helper; covered by Linux CI")
 @pytest.mark.parametrize("source,lab,success", [("/", "/rollback-labs/run-test", False), ("/tmp", "/tmp/wrong/run-test", False), ("/tmp", "/rollback-labs/run-test", True)])
 def test_overlay_path_boundary_is_read_only(source, lab, success):
     helper = Path(__file__).resolve().parents[1] / "scripts/wsl/manage-redroid-rollback-overlay.sh"
-    if os.name == "nt":
-        if not shutil.which("wsl.exe"):
-            pytest.skip("WSL unavailable")
-        shell = ["wsl.exe", "-d", "Ubuntu-22.04", "--", "bash", "-s", "--"]
-    else:
-        shell = ["bash", "-s", "--"]
+    shell = ["bash", "-s", "--"]
     result = subprocess.run(shell + ["check", source, lab], input=helper.read_bytes(), capture_output=True, timeout=15)
     assert (result.returncode == 0) is success

@@ -10,6 +10,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
+import numpy as np
+
 from .alas_submarine_config_contract import (
     SUBMARINE_AUTO_SEARCH_MODES,
     SUBMARINE_BOSS_DISTANCES,
@@ -17,6 +19,7 @@ from .alas_submarine_config_contract import (
     validate_alas_submarine_config,
 )
 from .semantic_oracle import SemanticGateClosed
+from .alas_source_replay import load_class_methods
 
 
 SCHEMA = "alas-headless.submarine-config-replay/v1"
@@ -69,12 +72,25 @@ def _load_originals(alas_root: Path) -> dict[str, Any]:
         for name in tuple(sys.modules):
             if name == "module" or name.startswith("module."):
                 del sys.modules[name]
+        logger = importlib.import_module("module.logger").logger
+        namespace = {"np": np, "logger": logger}
         return {
-            "call": importlib.import_module("module.combat.submarine").SubmarineCall,
-            "fleet": importlib.import_module("module.map.fleet").Fleet,
-            "fast": importlib.import_module(
-                "module.handler.fast_forward"
-            ).FastForwardHandler,
+            "call": load_class_methods(
+                alas_root / "module/combat/submarine.py", "SubmarineCall",
+                ("handle_submarine_call",),
+                {**vars(importlib.import_module("module.combat.assets")), **namespace},
+            ),
+            "fleet": load_class_methods(
+                alas_root / "module/map/fleet.py", "Fleet",
+                ("_submarine_mode", "submarine_move_near_boss"),
+                {**namespace,
+                 "location_ensure": importlib.import_module("module.map.utils").location_ensure,
+                 "location2node": importlib.import_module("module.base.utils").location2node},
+            ),
+            "fast": load_class_methods(
+                alas_root / "module/handler/fast_forward.py", "FastForwardHandler",
+                ("handle_auto_search_setting",), dict(namespace),
+            ),
             "selected": importlib.import_module("module.map.map_grids").SelectedGrids,
             "grid": importlib.import_module("module.map_detection.grid_info").GridInfo,
         }

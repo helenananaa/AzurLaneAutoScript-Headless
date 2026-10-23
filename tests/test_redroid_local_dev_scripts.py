@@ -3,7 +3,6 @@ from __future__ import annotations
 import pathlib
 import os
 import re
-import shutil
 import subprocess
 import unittest
 
@@ -12,16 +11,12 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
 class RedroidLocalDevScriptsTests(unittest.TestCase):
+    @unittest.skipIf(os.name == "nt", "executes Linux userdata setup; covered by Linux CI")
     def test_repeated_start_preserves_android_userdata_mode(self) -> None:
         script = (ROOT / "scripts/wsl/manage-redroid-local-dev.sh").read_text(encoding="utf-8")
         block = re.search(r'    if \[\[ ! -d \$data_root \]\]; then\n        install -d -m 0700 "\$data_root"\n    fi', script)
         self.assertIsNotNone(block)
-        if os.name == "nt":
-            if not shutil.which("wsl.exe"):
-                self.skipTest("WSL shell is unavailable")
-            shell = ["wsl.exe", "-d", "Ubuntu-22.04", "--", "bash", "-s"]
-        else:
-            shell = ["bash", "-s"]
+        shell = ["bash", "-s"]
         # A fresh empty temporary directory, never the actual Android data tree.
         command = 'set -eu\ntask_tmp=$(mktemp -d)\ndata_root="$task_tmp/data"\n' + block.group(0) + '\n[ "$(stat -c %a "$data_root")" = 700 ]\nchmod 0771 "$data_root"\n' + block.group(0) + '\n[ "$(stat -c %a "$data_root")" = 771 ]\nrmdir "$data_root" "$task_tmp"\n'
         result = subprocess.run(shell, input=command.encode("utf-8"), capture_output=True, timeout=15)

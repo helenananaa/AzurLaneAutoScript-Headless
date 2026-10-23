@@ -80,6 +80,31 @@ observer C++ 完整行接收测试 1 项。8 个 Windows 平台跳过中，6 个
 在 Linux 上也因 Windows 专属契约跳过，未将它们记成通过。
 这些是本机验证记录，不冒充 GitHub Actions 或 Mac 实机结果。
 
+## 首次远端 CI 失败与修复
+
+整合提交 `5041573` 的 [Actions 运行 39941481075](https://github.com/helenananaa/AzurLaneAutoScript-Headless/actions/runs/39941481075)
+失败：Linux 为 1 failed / 7,793 passed / 323 skipped；Windows 为
+3 failed / 7,896 passed / 295 skipped。上述本机通过记录不能替代这次远端结果。
+此前隔离 venv 只运行定向测试和完整收集，遗漏了配置交互矩阵的导入依赖链。
+
+两平台的配置矩阵均因原 HP/战斗类导入 Device 时缺少 `lxml` 而失败；潜艇和
+活动决策也存在同类依赖链。现从实际上游源码编译本次回放所需的方法与属性，
+保留方法体、装饰器、真实资源标识和轻量配置/网格依赖，不加载设备父类、OCR
+或 GUI 任务。原决策断言、零输入检查及正式补丁中的配置校验仍执行。这只证明
+离线方法回放，不证明完整运行时继承链、任务执行或实机资格。
+
+Windows 的另两处失败来自 Linux shell 测试仅检测 `wsl.exe`，却假定已安装
+`Ubuntu-22.04`。该条件还会让预期拒绝的用例因 WSL 启动失败而错误通过。
+这些 shell 用例改在 Linux 执行，Windows 明确跳过四个参数化实例，其余
+Windows 生命周期测试继续执行。未新增 WSL 安装要求。
+
+修复后隔离 venv 的定向回归为 **40 passed / 4 skipped**，包含锁定上游和
+正式补丁树的六个依赖隔离用例；测试显式禁止导入设备/OCR 依赖。本机 WSL
+执行相关 Redroid 用例 **19 passed**，包含全部四个 shell 实例。
+日志和 JUnit XML 保存在 `artifacts/ci-repair-20261023/`。远端完整回归结果见
+[主线 Actions 记录](https://github.com/helenananaa/AzurLaneAutoScript-Headless/actions/workflows/android-image-foundation.yml?query=branch%3Amain)，
+需对应实际修复提交；支持台账与补丁哈希未变。
+
 ## 保留的资格边界
 
 - 自然满仓后的退役/强化、保留装备、原图续战到任务结束仍缺不中断连续证据。

@@ -13,6 +13,8 @@ from typing import Any
 import numpy as np
 
 from .alas_hp_control_config_contract import validate_alas_hp_control_config
+from .alas_general_shop_config_replay import _assignment
+from .alas_source_replay import load_class_methods
 from .semantic_oracle import SemanticGateClosed
 
 
@@ -53,8 +55,26 @@ def _load_originals(alas_root: Path) -> tuple[type[Any], type[Any]]:
         for name in tuple(sys.modules):
             if name == "module" or name.startswith("module."):
                 del sys.modules[name]
-        hp_balancer = importlib.import_module("module.combat.hp_balancer").HPBalancer
-        combat = importlib.import_module("module.combat.combat").Combat
+        # Replay the original methods, properties and asset identities without
+        # importing ModuleBase/Combat's unrelated Device and OCR dependencies.
+        button = importlib.import_module("module.base.button")
+        utils = importlib.import_module("module.config.utils")
+        logger = importlib.import_module("module.logger").logger
+        hp_path = alas_root / "module/combat/hp_balancer.py"
+        hp_balancer = load_class_methods(
+            hp_path, "HPBalancer",
+            ("hp", "hp_has_ship", "hp_get", "_expected_scout_order",
+             "hp_retreat_triggered", "_scout_position_change"),
+            {"np": np, "logger": logger, "to_list": utils.to_list,
+             "SCOUT_POSITION": _assignment(hp_path, "SCOUT_POSITION", {})},
+            optional=("_gen_exchange_step_drag",),
+        )
+        combat = load_class_methods(
+            alas_root / "module/combat/combat.py", "Combat",
+            ("handle_emergency_repair_use",),
+            {**vars(importlib.import_module("module.combat.assets")),
+             "np": np, "logger": logger, "Button": button.Button},
+        )
         return hp_balancer, combat
     finally:
         sys.path.remove(root)

@@ -6,11 +6,12 @@ import ast
 import hashlib
 import importlib
 import json
+import re
 import sys
 from contextlib import nullcontext
 from datetime import datetime, timedelta
 from pathlib import Path
-from types import MethodType, SimpleNamespace
+from types import MethodType, ModuleType, SimpleNamespace
 from typing import Any
 
 from .alas_event_general_config_contract import (
@@ -18,6 +19,7 @@ from .alas_event_general_config_contract import (
     validate_alas_event_general_config,
 )
 from .semantic_oracle import SemanticGateClosed
+from .alas_source_replay import load_class_methods
 
 
 SCHEMA = "alas-headless.event-general-config-replay/v1"
@@ -105,7 +107,24 @@ def _load_original(alas_root: Path):
         for name in tuple(sys.modules):
             if name == "module" or name.startswith("module."):
                 del sys.modules[name]
-        module = importlib.import_module("module.campaign.campaign_event")
+        config = importlib.import_module("module.config.config_updater")
+        module = ModuleType("alas_event_general_replay")
+        module.__dict__.update(
+            {name: getattr(config, name) for name in
+             ("EVENTS", "RAIDS", "COALITIONS", "GEMS_FARMINGS", "MARITIME_ESCORTS", "HOSPITAL")}
+        )
+        module.__dict__.update(
+            re=re, datetime=datetime,
+            DEFAULT_TIME=importlib.import_module("module.config.utils").DEFAULT_TIME,
+            logger=importlib.import_module("module.logger").logger,
+        )
+        load_class_methods(
+            alas_root / "module/campaign/campaign_event.py", "CampaignEvent",
+            ("_reset_gems_farming", "_disable_tasks", "event_pt_limit_triggered",
+             "event_time_limit_triggered", "triggered_task_balancer", "handle_task_balancer"),
+            module.__dict__,
+            optional=("_validate_event_general_config",),
+        )
         return module, module.CampaignEvent
     finally:
         sys.path.remove(root)
