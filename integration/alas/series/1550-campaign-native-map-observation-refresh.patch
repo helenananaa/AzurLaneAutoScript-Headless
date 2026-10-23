@@ -1,0 +1,18 @@
+diff --git a/module/map/camera.py b/module/map/camera.py
+--- a/module/map/camera.py
++++ b/module/map/camera.py
+@@ -141,7 +141,13 @@
+         semantic_session = current_semantic_session()
+         os_view_loader = getattr(self, '_load_semantic_os_view', None)
+         if semantic_session is not None and not callable(os_view_loader):
+-            state = semantic_session.campaign_camera_state()
++            from alas_headless import SemanticGateClosed
++            try:
++                state = semantic_session.campaign_camera_state()
++            except SemanticGateClosed as exc:
++                # No partial View is installed. The original update() owns
++                # screenshot refresh, retry timing and MapDetectionError.
++                raise MapDetectionError(str(exc)) from exc
+             observation = install_alas_campaign_camera_view(
+                 self,
+                 state,

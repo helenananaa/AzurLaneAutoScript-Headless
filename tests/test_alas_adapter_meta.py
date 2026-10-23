@@ -16,6 +16,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
                    + path + ', raycast_top=False')
         for owned, count in ((True, 1), (False, 1), (True, 2)):
             adapter, oracle, _ = self.make_adapter()
+            oracle.combat_automation_info_visible = Mock(return_value=False)
             if owned:
                 adapter.begin_meta_beacon()
             result = SimpleNamespace(path=path, active_in_hierarchy=True,

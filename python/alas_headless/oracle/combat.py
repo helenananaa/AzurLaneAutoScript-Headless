@@ -520,15 +520,19 @@ class CombatOracle:
     def click_daily_precombat_start(self, *, input_frame=None) -> ActionReceipt:
         return self._click_shared_precombat_start(owned_meta_assist=False, input_frame=input_frame)
 
-    def combat_automation_info_visible(self) -> bool:
+    def combat_automation_info_visible(self, *, require_actionable: bool = True) -> bool:
+        return self._combat_automation_info_state(require_actionable=require_actionable) is not None
+
+    def _combat_automation_info_state(self, *, require_actionable: bool = True):
         state = self.read_state()
-        if not (self._daily_precombat_visible(state) or self._daily_combat_visible(state)):
-            return False
+        if not (self._daily_precombat_visible(state) or self._daily_combat_visible(state)
+                or self.campaign_precombat_visible(state)):
+            return None
         targets = [b for b in self._matches(state, 'os/precombat/info/confirm')
                    if b.active_in_hierarchy and b.active_and_enabled]
         if not targets:
-            return False
-        ui = self.read_ui_state()
+            return None
+        ui = self._paired_ui_after_state()
         if not state.generation <= ui.generation <= state.generation + 2:
             raise SemanticGateClosed('automation information frames are incoherent')
         def texts(suffix):
@@ -537,20 +541,23 @@ class CombatOracle:
                     and t.active_in_hierarchy and t.active_and_enabled
                     and not t.truncated and t.bounds is not None]
         if texts('help_panel/list/help_tpl') != ['注意，自律战斗时可能出现以下情况']:
-            return False
+            return None
         if texts('button_container/custom_button_1(Clone)/pic') != ['知道了']:
-            return False
+            return None
         if any(b.active_in_hierarchy and b.active_and_enabled
                and '/Msgbox(Clone)/window/button_container/' in b.path
                and b.path != targets[0].path for b in state.buttons):
             raise SemanticGateClosed('automation information choices are ambiguous')
-        return len(targets) == 1 and targets[0].actionable
+        return state if len(targets) == 1 and (not require_actionable or targets[0].actionable) else None
 
     def click_combat_automation_info(self) -> ActionReceipt:
-        if not self.combat_automation_info_visible():
+        # Retry only a complete read before dispatch, never the tap. Use that
+        # same Button/UI pair for identity and the actionable target.
+        state = self._retry_transition_read(self._combat_automation_info_state)
+        if state is None:
             raise SemanticGateClosed('automation information identity is not proven')
-        state = self.read_state()
         precombat = self._daily_precombat_visible(state)
+        campaign_precombat = self.campaign_precombat_visible(state)
         target = self._unique(state, 'os/precombat/info/confirm')
         blockers = [rule for rule in self._blocking_rules(state, 'os/precombat/info/confirm')
                     if (rule.blocker_id, rule.path_fragment) not in (
@@ -568,7 +575,8 @@ class CombatOracle:
         while time.monotonic() < deadline:
             after = self.read_state()
             if after.generation > receipt.generation and not self.combat_automation_info_visible():
-                restored = (self._daily_precombat_visible(after) if precombat
+                restored = (self.campaign_precombat_visible(after) if campaign_precombat
+                            else self._daily_precombat_visible(after) if precombat
                             else self._daily_combat_visible(after))
                 if not restored:
                     raise SemanticGateClosed('automation information did not restore its combat page')

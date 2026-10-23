@@ -269,6 +269,30 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
 
         self.assertEqual(session.recover_orphan_combat_result(), ())
 
+    def test_orphan_campaign_result_closes_total_reward_without_claiming_completion(self):
+        adapter, oracle, _ = self.make_adapter()
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session.refresh_frame = lambda: None
+        session._combat_result_transition_until = 0.0
+        session._frame_clock = None
+        adapter._require_frame_observation_oracle = lambda: oracle
+        oracle.daily_battle_result_visible = Mock(return_value=False)
+        oracle.campaign_battle_reward_visible = Mock(return_value=False)
+        oracle.enabled_values['reward/campaign-total/exit'] = True
+        receipt = oracle.click_receipt('reward/campaign-total/exit')
+        def close(target):
+            self.assertEqual(target, 'reward/campaign-total/exit')
+            oracle.enabled_values[target] = False
+            oracle.campaign_page_value = True
+            return receipt
+        oracle.click = Mock(side_effect=close)
+        with patch('alas_headless.alas_adapter.time.sleep', return_value=None):
+            self.assertEqual(session.recover_orphan_combat_result(), (receipt,))
+        oracle.click.assert_called_once()
+        self.assertIsNone(adapter._campaign_context)
+
     def test_orphan_campaign_result_tolerates_exact_map_mount_gap(self):
         adapter, oracle, _ = self.make_adapter()
         session = AlasSemanticSession.__new__(AlasSemanticSession)

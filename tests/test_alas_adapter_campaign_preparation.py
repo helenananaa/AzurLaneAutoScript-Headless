@@ -18,6 +18,32 @@ from alas_headless.adapter.semantic.contracts import AlasSemanticActionDeferred
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_unsubmitted_recovery_clears_obsolete_entry_without_refilling_grants(self):
+        for returned in (False, True):
+            with self.subTest(returned_to_stage=returned):
+                oracle = FakeOracle()
+                oracle.campaign_page_value = returned
+                adapter = AlasSemanticAdapter(oracle, lambda: None,
+                    campaign_stage_entry_budget=2, campaign_sortie_budget=1)
+                adapter.begin_campaign_pre_sortie('12-4')
+                previous = adapter._campaign_context
+                previous.entry_receipt = adapter._dispatch_mutation('campaign.stage_entry',
+                    lambda: oracle.click_receipt('campaign/stage/12-4'))
+                previous.map_preparation_receipt = oracle.click_receipt('campaign/map-preparation/proceed')
+                previous.declared_submarine_fleet = 2
+                adapter.prepare_campaign_run()
+                if returned:
+                    self.assertIsNot(adapter._campaign_context, previous)
+                    self.assertIsNone(adapter._campaign_context.entry_receipt)
+                    self.assertIsNone(adapter._campaign_context.map_preparation_receipt)
+                    self.assertEqual(adapter._campaign_context.declared_submarine_fleet, 2)
+                    self.assertTrue(adapter.campaign_stage_entry_allowed())
+                else:
+                    self.assertIs(adapter._campaign_context, previous)
+                self.assertEqual(adapter._action_ledger.remaining('campaign.stage_entry'), 1)
+                self.assertEqual(adapter._action_ledger.remaining('campaign.sortie'), 1)
+                self.assertEqual(oracle.click_calls, [])
+
     def test_inherited_cancel_repeat_reuses_receipt_only_after_proven_close(self):
         for failure in (None, "stale", "map", "fleet", "page", "blocker"):
             with self.subTest(failure=failure):
@@ -469,11 +495,8 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
             adapter.click(NamedButton("MAP_PREPARATION"))
         self.assertTrue(adapter.campaign_map_preparation_committed())
         adapter._campaign_context.passive_transition_until = time.monotonic() - 1
-        with self.assertRaisesRegex(
-            SemanticGateClosed,
-            "map-preparation transition did not reach the fleet overlay",
-        ):
-            adapter.campaign_map_preparation_committed()
+        # Waiting and recovery duration belong to the original ALAS loop.
+        self.assertTrue(adapter.campaign_map_preparation_committed())
         adapter._campaign_context.passive_transition_until = time.monotonic() + 20
         oracle.campaign_preparation_error = SemanticGateClosed(
             "campaign map-preparation controls are not proven"

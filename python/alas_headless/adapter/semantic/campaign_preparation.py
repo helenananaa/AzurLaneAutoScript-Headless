@@ -103,7 +103,7 @@ class CampaignPreparationAdapterPorts:
         self._campaign_context = None
 
     def prepare_campaign_run(self) -> None:
-        """Refresh per-sortie observations when ALAS chooses another run.
+        """Refresh observations when ALAS starts or recovers an entry.
 
         The task ledger is deliberately retained: a fresh preparation is not
         a new resource authorization. Incomplete runs must use ALAS recovery.
@@ -111,9 +111,11 @@ class CampaignPreparationAdapterPorts:
         self._package_gate()
         context = self._require_campaign_context()
         completed = context.auto_search_completion is not None or context.manual_completion_proven
-        if context.sortie_receipt is None and not completed:
-            return
-        if not completed:
+        unsubmitted = context.sortie_receipt is None and not completed
+        if unsubmitted:
+            if context.entry_receipt is None or not self.oracle.campaign_page_is_normal():
+                return
+        elif not completed:
             raise SemanticGateClosed("campaign next run requires proven completion")
         if (context.auto_search_completion is not None
                 and context.auto_search_completion.result_exit_receipt is None
@@ -123,7 +125,7 @@ class CampaignPreparationAdapterPorts:
             # book selection and the remaining task grant before new input.
             context.continuation_authorized = False
             return
-        if not self.oracle.campaign_page_is_normal():
+        if not unsubmitted and not self.oracle.campaign_page_is_normal():
             raise SemanticGateClosed("campaign next run requires return to stage")
         self._campaign_context = _CampaignFlowContext(
             stage_code=context.stage_code, mode=context.mode,

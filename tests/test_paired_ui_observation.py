@@ -74,6 +74,32 @@ def test_shared_prompt_still_rejects_activity_handoff_and_real_generation_gap():
 
 
 @pytest.mark.parametrize('case', ['slow-query', 'handoff', 'generation-gap'])
+def test_retirement_custom_cap_reader_closes_foreground_after_the_endpoint_pair(case):
+    backend = FakeBackend([])
+    backend.ui = make_ui([])
+    oracle = make_oracle(backend)
+    calls = []
+    if case == 'generation-gap':
+        backend.ui['generation'] = 13
+    def foreground():
+        calls.append(True)
+        if len(calls) > 1:
+            backend.ui['generation'] = 13
+            if case == 'handoff':
+                return 'other/app'
+        return oracle.fingerprint.component
+    oracle._foreground_component = foreground
+    if case == 'slow-query':
+        state, ui = oracle._retirement_records()
+        assert state.generation == ui.generation == 10
+        assert len(calls) == 2
+    else:
+        with pytest.raises(SemanticGateClosed):
+            oracle._retirement_records()
+    assert backend.taps == []
+
+
+@pytest.mark.parametrize('case', ['slow-query', 'handoff', 'generation-gap'])
 def test_campaign_return_page_pairs_before_closing_foreground_check(case):
     root = 'root/UICamera/Canvas/UIMain/LevelMainScene(Clone)/'
     stage = root + 'float/levels/items/Chapter_1204'
@@ -101,4 +127,118 @@ def test_campaign_return_page_pairs_before_closing_foreground_check(case):
     else:
         with pytest.raises(SemanticGateClosed):
             oracle._campaign_page_state_once()
+    assert backend.taps == []
+
+
+@pytest.mark.parametrize('case', ['slow-query', 'handoff', 'generation-gap'])
+def test_campaign_precombat_cancel_pairs_before_foreground_recheck(case):
+    from tests.semantic_support.observer_fixtures import make_image
+    path = 'OverlayCamera/Overlay/UIMain/ChapterPreCombatUI(Clone)/adapt/top/back_btn'
+    backend = FakeBackend([make_button('back_btn', path, raycast_top=True)])
+    backend.ui = make_ui([], images=[
+        make_image(path, 'icon_bg_front_1920'),
+        make_image(path + '/mask', 'icon_bg_mask_1920'),
+        make_image(path + '/mask/Image', 'back_btn')])
+    oracle = make_oracle(backend)
+    calls = []
+    def foreground():
+        calls.append(True)
+        if len(calls) > 1:
+            backend.ui['generation'] = 13
+            if case == 'handoff':
+                return 'other/app'
+        return oracle.fingerprint.component
+    oracle._foreground_component = foreground
+    if case == 'generation-gap':
+        backend.ui['generation'] = 13
+    if case == 'slow-query':
+        assert oracle.click_campaign_precombat_back().semantic_id == 'campaign/precombat/back'
+        assert len(backend.taps) == 1
+    else:
+        with pytest.raises(SemanticGateClosed):
+            oracle.click_campaign_precombat_back()
+        assert backend.taps == []
+
+
+@pytest.mark.parametrize('case', ['slow-query', 'handoff', 'generation-gap'])
+def test_campaign_urgent_notice_pairs_before_foreground_recheck(case):
+    root = 'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/'
+    backend = FakeBackend([make_button('custom_button_1(Clone)',
+        root+'button_container/custom_button_1(Clone)')])
+    backend.ui = make_ui([make_text('出现紧急委托《解救商船Ⅰ》', root+'msg_panel/content'),
+        make_text('INFORMATION', root+'top/bg/infomation/title_en'),
+        make_text('确 定', root+'button_container/custom_button_1(Clone)/pic')])
+    oracle = make_oracle(backend)
+    calls = []
+    def foreground():
+        calls.append(True)
+        if len(calls) > 1:
+            backend.ui['generation'] = 13
+            if case == 'handoff':
+                return 'other/app'
+        return oracle.fingerprint.component
+    oracle._foreground_component = foreground
+    if case == 'generation-gap':
+        backend.ui['generation'] = 13
+    state = oracle.read_state()
+    if case == 'slow-query':
+        assert oracle._campaign_urgent_notice_matches(state)
+        assert len(calls) == 2
+    else:
+        with pytest.raises(SemanticGateClosed):
+            oracle._campaign_urgent_notice_matches(state)
+    assert backend.taps == []
+
+
+@pytest.mark.parametrize('case', ['slow-query', 'handoff', 'generation-gap'])
+def test_campaign_fleet_index_pairs_before_foreground_recheck(case):
+    root = 'OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)'
+    backend = FakeBackend([make_button('back_button', root+'/top_stage/back_button')])
+    backend.ui = make_ui([make_text('1', root+'/top_stage/msg_panel/fleet_info/number')])
+    oracle = make_oracle(backend)
+    calls = []
+    def foreground():
+        calls.append(True)
+        if len(calls) > 1:
+            backend.ui['generation'] = 13
+            if case == 'handoff':
+                return 'other/app'
+        return oracle.fingerprint.component
+    oracle._foreground_component = foreground
+    if case == 'generation-gap':
+        backend.ui['generation'] = 13
+    if case == 'slow-query':
+        assert oracle.campaign_map_displayed_fleet_index() == 1
+        assert len(calls) == 2
+    else:
+        with pytest.raises(SemanticGateClosed):
+            oracle.campaign_map_displayed_fleet_index()
+    assert backend.taps == []
+
+
+@pytest.mark.parametrize('case', ['slow-query', 'handoff', 'generation-gap'])
+def test_reward_resource_pairs_before_foreground_recheck(case):
+    page = 'root/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)'
+    bubble = page+'/frame/resources/canteen/bubble'
+    backend = FakeBackend([make_button('CommissionInfoUI4Mellow(Clone)', page, 827, 622),
+                           make_button('bubble', bubble, 142, 67)])
+    backend.ui = make_ui([make_text('32', bubble+'/Text')])
+    oracle = make_oracle(backend)
+    calls = []
+    def foreground():
+        calls.append(True)
+        if len(calls) > 1:
+            backend.ui['generation'] = 13
+            if case == 'handoff':
+                return 'other/app'
+        return oracle.fingerprint.component
+    oracle._foreground_component = foreground
+    if case == 'generation-gap':
+        backend.ui['generation'] = 13
+    if case == 'slow-query':
+        assert oracle._reward_resource_state_once('oil')[0] == 32
+        assert len(calls) == 2
+    else:
+        with pytest.raises(SemanticGateClosed):
+            oracle._reward_resource_state_once('oil')
     assert backend.taps == []

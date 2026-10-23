@@ -1,0 +1,24 @@
+diff --git a/module/map/fleet.py b/module/map/fleet.py
+--- a/module/map/fleet.py
++++ b/module/map/fleet.py
+@@ -308,7 +308,19 @@
+                 semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+                 if semantic_adapter is not None:
+                     if self.is_in_map():
+-                        self.update()
++                        try:
++                            self.update()
++                        except MapDetectionError:
++                            # Camera.update takes its own screenshot. Unity may
++                            # have entered preparation after the map probe.
++                            # Re-enter this original loop, never fabricate a View.
++                            oracle = semantic_adapter.open()._frame_or_live_observation_oracle()
++                            if (semantic_adapter.campaign_combat_committed()
++                                    and (oracle.campaign_precombat_visible()
++                                         or oracle.daily_battle_loading_visible()
++                                         or oracle.daily_combat_visible())):
++                                continue
++                            raise
+                         # The typed semantic camera installs a fresh View for
+                         # each exact Unity snapshot. Native image detection
+                         # mutates/reuses its grid objects, but a local grid

@@ -1,5 +1,15 @@
 # Validation status
 
+2026-10-23: Shared runtime fixes backported from Redroid; original ALAS manual
+12-4 Main then completed on Windows AVD and Windows/WSL Redroid with the same
+adapter/runtime tree. Both returned true, RunCount=0; final focused regression
+1185 passed and the 233-member patch/configuration/support checks passed.
+Removed redundant passive-map freezes, duplicate navigation timers and the
+semantic result-loop shortcut; real typed input checks remain. One account and
+stage only; uninterrupted mid-map full-dock recovery and enhancement remain
+unqualified, with no support-matrix promotion. See
+[scope and evidence](campaign-camera-refresh-20261022.zh-CN.md).
+
 2026-09-13: Shipyard level parsing now tolerates numeric font-size metadata and plain text. 79 focused/isolation tests passed; original helpers observed 11 ships across series 2 and 7, restored series 9 and returned home. No actual FATE panel was found; Shipyard stays B. See [scope](shipyard-fate-survey-20260913.zh-CN.md).
 
 2026-09-13: Login shipyard home mapping fixed. Original LoginHandler shipyard return and subsequent original navigation to main passed live; cold-start notice trigger chain was not rerun. 99 focused checks passed; five pre-existing facade call-sequence parity failures remain. See [evidence](login-shipyard-recovery-20260913.zh-CN.md).

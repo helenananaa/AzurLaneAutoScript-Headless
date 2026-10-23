@@ -1,0 +1,14 @@
+diff --git a/module/map/fleet.py b/module/map/fleet.py
+--- a/module/map/fleet.py
++++ b/module/map/fleet.py
+@@ -316,6 +316,10 @@
+                         # the old fleet flags forever. Rebind only that local
+                         # observation; ALAS still owns arrival and retry logic.
+                         grid = self.convert_global_to_local(location)
++                        # A semantic refresh creates a new local Grid object.
++                        # Preserve ALAS's explicit global goto target for the
++                        # native ammunition arrival-confirmation click too.
++                        grid.__str__ = location
+                 else:
+                     self.view.update(image=self.device.image)
+                 if is_portal:

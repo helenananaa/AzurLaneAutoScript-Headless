@@ -17,7 +17,7 @@ def test_accepted_exercise_entry_can_wait_for_its_counter(alias, transition_acti
     adapter._exercise_entry_receipt = SimpleNamespace(generation=1)
     adapter._exercise_entry_transition_until = 101.0 if transition_active else 99.0
     with patch('alas_headless.adapter.semantic.dispatch_observation.time.monotonic', return_value=100.0):
-        if transition_active:
+        if transition_active or alias == 'GOTO_MAIN_WHITE':
             assert adapter.appear(alias) is False
         else:
             with pytest.raises((SemanticGateClosed, AlasSemanticUnmapped)):
@@ -62,7 +62,7 @@ def test_session_reclassifies_actual_empty_entry_frame_after_existing_refresh(ca
         refreshes.append(True)
         current[0] = after
     session.refresh_frame = refresh
-    if case == 'complete':
+    if case in ('complete', 'foreign-modal'):
         assert session.appear(alias) is False
     else:
         with pytest.raises((SemanticGateClosed, AlasSemanticUnmapped)):

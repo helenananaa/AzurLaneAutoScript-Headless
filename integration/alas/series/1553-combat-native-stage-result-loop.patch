@@ -1,0 +1,39 @@
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -701,17 +701,9 @@
+                 and battle_status
+                 and semantic_adapter.open().campaign_combat_committed()
+             )
+-            semantic_campaign_stage_wait = bool(
+-                semantic_adapter is not None
+-                and expected_end == 'in_stage'
+-                and battle_status
+-                and semantic_adapter.open().campaign_combat_committed()
+-            )
+-            if semantic_campaign_stage_wait and self.handle_popup_single(name='CAMPAIGN_MAP'):
+-                continue
+             semantic_campaign_map_state = (
+                 semantic_adapter.campaign_is_in_map_after_combat()
+-                if semantic_campaign_result_wait or semantic_campaign_stage_wait
++                if semantic_campaign_result_wait
+                 else False
+             )
+             if semantic_campaign_map_state is None:
+@@ -727,16 +719,6 @@
+                     'Semantic combat result returned to stable campaign map'
+                 )
+                 break
+-            if semantic_campaign_stage_wait:
+-                if semantic_campaign_map_stable:
+-                    continue
+-                if self.handle_auto_search_exit(drop=drop):
+-                    continue
+-                # The original stage handler owns its timer, info-bar wait
+-                # and CampaignEnd. A direct break here would return to map HP
+-                # reads while a late total-reward panel is still mounting.
+-                self.handle_in_stage()
+-                continue
+             if isinstance(expected_end, str):
+                 if expected_end == 'in_stage' and self.handle_in_stage():
+                     break

@@ -284,7 +284,7 @@ class RewardsOracle:
             blockers = self._blocking_rules(button_state, 'reward/page/back')
             raise SemanticGateClosed('reward resource page identity is not proven: blockers='
                 +','.join(rule.blocker_id for rule in blockers))
-        ui_state = self.read_ui_state()
+        ui_state = self._paired_ui_after_state()
         if (
             ui_state.generation < button_state.generation
             or ui_state.generation > button_state.generation + 2

@@ -1124,6 +1124,46 @@
       "order": 225,
       "path": "integration/alas/series/1545-campaign-progress-native-animation.patch",
       "sha256": "2d6c77b7f75edc8f51d1a89e9c7fb4bee231946c85113854170a87a7548436b3"
+    },
+    {
+      "order": 226,
+      "path": "integration/alas/series/1546-campaign-native-retirement-reentry.patch",
+      "sha256": "a2ebe4c2b2b04d9a62a22946c162b10e9a180cd02083968846da61efa91d148d"
+    },
+    {
+      "order": 227,
+      "path": "integration/alas/series/1547-combat-native-automatic-start-handoff.patch",
+      "sha256": "b291ebe3d1e8c9bfaa9614ea0cd8e9d12a244c03a5ed83016c688992f789342a"
+    },
+    {
+      "order": 228,
+      "path": "integration/alas/series/1548-campaign-refreshed-grid-target.patch",
+      "sha256": "d7717d7ad60161099fc21c64a01c8627211187798650a58bb4f5562eccaf2dc7"
+    },
+    {
+      "order": 229,
+      "path": "integration/alas/series/1549-combat-native-boss-stage-return.patch",
+      "sha256": "e3972be40c97fb7648fc8549c3bc7829ec470168721771ea74595717d8cc8aab"
+    },
+    {
+      "order": 230,
+      "path": "integration/alas/series/1550-campaign-native-map-observation-refresh.patch",
+      "sha256": "4d887eb3ae86a99beadccdbb547ae916b36ac3137fb9c9903be7fee8d7e32b60"
+    },
+    {
+      "order": 231,
+      "path": "integration/alas/series/1551-campaign-native-map-to-combat-handoff.patch",
+      "sha256": "29050bd39f7494c1e85702ace297a1f0574cce5a686ede301e795a18cf52a6b4"
+    },
+    {
+      "order": 232,
+      "path": "integration/alas/series/1552-ui-native-orphan-result-priority.patch",
+      "sha256": "c6f87d89227b1fbb05dac2aa975276d44b9f345038ee0ad1a5c01d4f8710d924"
+    },
+    {
+      "order": 233,
+      "path": "integration/alas/series/1553-combat-native-stage-result-loop.patch",
+      "sha256": "4413c531168ee08341c3abff4c7643382aa8fd80e0c9ca367b117cc33728a095"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

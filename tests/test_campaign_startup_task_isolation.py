@@ -11,6 +11,8 @@ from alas_headless.adapter.semantic.dispatch_result import UNHANDLED
 
 def non_map_oracle():
     oracle = Mock()
+    oracle.read_state.return_value = SimpleNamespace(buttons=())
+    oracle._retry_transition_read.side_effect = lambda reader: reader()
     for name in ('meta_page_visible', 'meta_character_menu_visible', 'meta_character_page_visible'):
         getattr(oracle, name).return_value = False
     return oracle
@@ -22,11 +24,11 @@ def test_ready_opsi_globe_returns_non_campaign_without_input():
     oracle.daily_battle_result_visible.return_value = False
     oracle.operation_siren_globe_visible.return_value = True
     assert CampaignMapOracle.campaign_is_in_map(oracle) is False
-    oracle.read_state.assert_not_called()
+    oracle.operation_siren_globe_visible.assert_not_called()
     oracle._tap.assert_not_called()
 
 
-def test_unknown_surface_still_fails_closed():
+def test_complete_non_map_surface_needs_no_other_task_allowlist():
     oracle = non_map_oracle()
     oracle.campaign_map_entry_state.side_effect = SemanticGateClosed('map entry absent')
     oracle.daily_battle_result_visible.return_value = False
@@ -34,12 +36,12 @@ def test_unknown_surface_still_fails_closed():
     oracle.retirement_selection_visible.return_value = False
     oracle.enhancement_dock_visible.return_value = False
     oracle._matches.return_value = ()
-    with pytest.raises(SemanticGateClosed, match='startup surface is not reviewed'):
-        CampaignMapOracle.campaign_is_in_map(oracle)
+    assert CampaignMapOracle.campaign_is_in_map(oracle) is False
+    oracle._paired_ui_after_state.assert_not_called()
     oracle._tap.assert_not_called()
 
 
-def test_inherited_shop_requires_both_atomic_anchor_and_existing_shell_reader():
+def test_non_map_probe_is_independent_of_optional_shop_parser():
     oracle = non_map_oracle()
     oracle.campaign_map_entry_state.side_effect = SemanticGateClosed('map entry absent')
     oracle.daily_battle_result_visible.return_value = False
@@ -49,8 +51,28 @@ def test_inherited_shop_requires_both_atomic_anchor_and_existing_shell_reader():
     oracle._matches.side_effect = lambda state, target: (object(),) if target == 'shop/home' else ()
     oracle.recommendation_shop_visible.return_value = True
     assert CampaignMapOracle.campaign_is_in_map(oracle) is False
-    oracle.recommendation_shop_visible.return_value = False
-    with pytest.raises(SemanticGateClosed, match='startup surface is not reviewed'):
+    oracle.recommendation_shop_visible.side_effect = AssertionError('unrelated capability')
+    assert CampaignMapOracle.campaign_is_in_map(oracle) is False
+    oracle.recommendation_shop_visible.assert_not_called()
+    oracle._tap.assert_not_called()
+
+
+@pytest.mark.parametrize('error', ['observer snapshot is stale', 'Button snapshot is truncated'])
+def test_map_absence_does_not_hide_invalid_button_frames(error):
+    oracle = non_map_oracle()
+    oracle.read_state.side_effect = SemanticGateClosed(error)
+    with pytest.raises(SemanticGateClosed, match=error):
+        CampaignMapOracle.campaign_is_in_map(oracle)
+    oracle._tap.assert_not_called()
+
+
+def test_active_map_root_still_requires_complete_map_identity():
+    oracle = non_map_oracle()
+    oracle.read_state.return_value = SimpleNamespace(buttons=(SimpleNamespace(
+        path='LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/op1/retreat',
+        active_in_hierarchy=True, active_and_enabled=True),))
+    oracle._campaign_map_entry_state_from_snapshots.side_effect = SemanticGateClosed('incomplete map')
+    with pytest.raises(SemanticGateClosed, match='incomplete map'):
         CampaignMapOracle.campaign_is_in_map(oracle)
     oracle._tap.assert_not_called()
 
@@ -147,9 +169,9 @@ def test_retained_meta_sync_owner_returns_non_campaign_without_claiming_any_inpu
         OracleFingerprint(package=b.snapshot['package'], component=b.foreground,
             driver_revision=b.snapshot['driver_revision'], expected_pid=b.snapshot['pid']))
     adapter = AlasSemanticAdapter(o, package_gate=lambda: None)
+    assert adapter.appear(SimpleNamespace(name='IN_MAP')) is False
     if change in ('ambiguous', 'unknown'):
+        # Local map absence must not weaken the unrelated action's contract.
         with pytest.raises(SemanticGateClosed):
-            adapter.appear(SimpleNamespace(name='IN_MAP'))
-    else:
-        assert adapter.appear(SimpleNamespace(name='IN_MAP')) is False
+            o.click_meta_character_sync_rewards()
     assert b.taps == []

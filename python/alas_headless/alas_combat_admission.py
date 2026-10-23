@@ -2,7 +2,7 @@
 
 This module does not execute movement or combat.  It validates the exact
 ordered grid-input sequence selected by ALAS: zero or more empty waypoints,
-followed by an enemy or an empty destination. The adapter owns the input budget
+followed by an enemy, ammunition pickup or empty destination. The adapter owns the input budget
 and the native ALAS state machine remains the only execution owner.
 """
 
@@ -101,8 +101,9 @@ def prepare_alas_campaign_combat_admission(
     marker and ALAS does not click its cell. A decision may select the other
     already-projected fleet; the adapter must prove that exact fleet switch
     before admitting the first grid input. Empty destinations preserve battle
-    count, ammunition and all unrelated map state. Ammunition pickups, portals, and
-    diagonal routes remain outside this contract.
+    count, ammunition and all unrelated map state. Ammunition pickups preserve
+    battle count and prove a bounded replenishment. Portals and diagonal routes
+    remain outside this contract.
     """
 
     if not isinstance(decision, AlasCampaignDecisionPreview):
@@ -119,7 +120,8 @@ def prepare_alas_campaign_combat_admission(
         raise SemanticGateClosed("campaign combat decision generation changed")
     if decision.stage_code != state.stage_code:
         raise SemanticGateClosed("campaign combat stage identity changed")
-    movement = decision.target_kind == 'move' and decision.expected == ''
+    pickup = decision.target_kind == 'ammo' and decision.expected == ''
+    movement = decision.target_kind in ('move', 'ammo') and decision.expected == ''
     if not movement and (decision.target_kind != "enemy" or decision.expected not in (
         "combat",
         "boss",
@@ -206,6 +208,7 @@ def prepare_alas_campaign_combat_admission(
     enemies = tuple(
         enemy for enemy in state.enemies if enemy.node == decision.target_node
     )
+    pickups = tuple(item for item in state.pickups if item.node == decision.target_node)
     fleets = tuple(
         fleet
         for fleet in state.fleets
@@ -216,6 +219,8 @@ def prepare_alas_campaign_combat_admission(
         raise SemanticGateClosed("campaign combat target cell is absent or ambiguous")
     if movement and (enemies or same_cell):
         raise SemanticGateClosed('campaign movement target must be an empty destination')
+    if pickup and (len(pickups) != 1 or pickups[0].kind != 'ammo'):
+        raise SemanticGateClosed('campaign ammunition target is absent or ambiguous')
     if not movement and (len(enemies) != 1 or enemies[0].fighting != same_cell):
         raise SemanticGateClosed(
             "campaign combat target fighting state disagrees with the route"
@@ -259,7 +264,7 @@ def prepare_alas_campaign_combat_admission(
         )
     if not same_cell and any(
         item.node == decision.target_node
-        for item in (*state.fleets, *state.pickups)
+        for item in (state.fleets if pickup else (*state.fleets, *state.pickups))
     ):
         raise SemanticGateClosed("campaign combat target has a conflicting occupant")
 
@@ -286,7 +291,7 @@ def prepare_alas_campaign_combat_admission(
         bounds=cell.bounds,
         decision_signature=decision.signature,
         map_signature=state.signature,
-        target_kind='move' if movement else 'enemy',
+        target_kind=decision.target_kind,
     )
 
 
@@ -306,7 +311,7 @@ def prove_alas_campaign_combat_transition(
     if (
         isinstance(battle_count_after, bool)
         or not isinstance(battle_count_after, int)
-        or battle_count_after != admission.battle_count + (admission.target_kind != 'move')
+        or battle_count_after != admission.battle_count + (admission.target_kind == 'enemy')
     ):
         raise SemanticGateClosed("ALAS battle count did not advance exactly once")
     if state.stage_code != admission.stage_code:
@@ -329,25 +334,38 @@ def prove_alas_campaign_combat_transition(
     if len(fleets) != 1 or state.current_fleet_marker != admission.fleet_marker:
         raise SemanticGateClosed("campaign combat fleet did not remain on target")
     ammo_after = fleets[0].ammo
+    pickup = admission.target_kind == 'ammo'
     expected_ammo_after = (admission.ammo_before if admission.target_kind == 'move'
-                           else max(0, admission.ammo_before - 1))
-    if ammo_after != expected_ammo_after:
+                          else max(0, admission.ammo_before - 1))
+    if pickup:
+        valid_ammo = 0 < ammo_after - admission.ammo_before <= min(
+            3, fleets[0].ammo_capacity - admission.ammo_before)
+    else:
+        valid_ammo = ammo_after == expected_ammo_after
+    if not valid_ammo:
         raise SemanticGateClosed(
-            "campaign combat ammunition did not apply one bounded decrement"
+            "campaign ammunition did not apply one bounded replenishment" if pickup
+            else "campaign combat ammunition did not apply one bounded decrement"
         )
     if input_path != admission.cell_path:
         raise SemanticGateClosed("campaign combat input path changed")
 
-    if admission.target_kind == 'move':
-        # An empty move cannot consume ammunition, erase enemies or move another
-        # fleet. Compare all non-position map state, allowing sibling reordering.
+    if admission.target_kind in ('move', 'ammo'):
+        # Movement cannot erase enemies or move another fleet. A pickup may
+        # replenish only this fleet and disappear when exhausted; every other
+        # pickup and all unrelated map state must remain unchanged.
         baseline = admission.map_signature
         fleets_before = tuple(sorted(baseline[5]))
         fleets_after = tuple(sorted((f.marker, admission.origin_node if f.marker == admission.fleet_marker
-            else f.node, f.ammo, f.ammo_capacity) for f in state.fleets))
+            else f.node, admission.ammo_before if pickup and f.marker == admission.fleet_marker
+            else f.ammo, f.ammo_capacity) for f in state.fleets))
+        pickups_before = tuple(sorted(baseline[7]))
+        pickups_after = tuple(sorted(state.signature[7]))
+        if pickup and not any(item.node == admission.target_node for item in state.pickups):
+            pickups_before = tuple(item for item in pickups_before if item[0] != admission.target_node)
         if (fleets_before != fleets_after or state.land_nodes != tuple(baseline[4])
                 or tuple(sorted(state.signature[6])) != tuple(sorted(baseline[6]))
-                or tuple(sorted(state.signature[7])) != tuple(sorted(baseline[7]))
+                or pickups_after != pickups_before
                 or state.displayed_fleet_index != admission.fleet_index
                 or state.signature[11:] != baseline[11:]
                 or (baseline[8] == admission.fleet_index and state.signature[10] != baseline[10])):

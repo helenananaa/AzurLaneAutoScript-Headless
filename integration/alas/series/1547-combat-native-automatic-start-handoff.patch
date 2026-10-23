@@ -1,0 +1,28 @@
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -341,8 +341,22 @@
+         Returns:
+             bool:
+         """
+-        if self.appear_then_click(BATTLE_PREPARATION, offset=(20, 20), interval=2):
+-            return True
++        from alas_headless import SemanticTargetMissing
++        try:
++            if self.appear_then_click(BATTLE_PREPARATION, offset=(20, 20), interval=2):
++                return True
++        except SemanticTargetMissing:
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if semantic_adapter is None:
++                raise
++            # Automatic start can remove the observed button before dispatch.
++            # No input was sent. Only a fresh typed battle/loading observation
++            # may hand control back to this original preparation loop.
++            self.device.screenshot()
++            oracle = semantic_adapter.open()._frame_or_live_observation_oracle()
++            if oracle.daily_combat_visible() or oracle.daily_battle_loading_visible():
++                return True
++            raise
+ 
+         return False
+ 

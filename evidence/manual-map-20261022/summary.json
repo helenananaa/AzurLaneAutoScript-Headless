@@ -1,0 +1,2162 @@
+{
+  "schema": "alas-headless.manual-map-comparison/v1",
+  "date_range": [
+    "2026-10-22",
+    "2026-10-23"
+  ],
+  "raw_workspace_root": "E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-redroid-x86_64",
+  "adapter_worktree": "E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-alas-adaptation",
+  "runtime_root": "E:\\Runtime\\ALAS\\redroid-live-20261022",
+  "scope": {
+    "platforms": [
+      "Windows AVD x86_64",
+      "Windows/WSL Redroid x86_64"
+    ],
+    "stage": "12-4",
+    "campaign": "original ALAS Main",
+    "manual_map": true,
+    "game_auto_combat": true,
+    "run_limit": 1,
+    "continuous_scheduler": false,
+    "same_runtime_tree": true,
+    "same_adapter": true,
+    "oil_limit": {
+      "redroid": 1000,
+      "avd": 1000
+    },
+    "game_version": "9.7.10",
+    "game_version_code": 9710,
+    "resource_version": "9.7.411",
+    "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44"
+  },
+  "observer": {
+    "apk_sha256": "67d7f10e51df39abe8caba4fa0733f28b1fcf8fe3558299c5e51cf3e09dd42eb",
+    "installed": [
+      {
+        "serial": "127.0.0.1:5558",
+        "apk_sha256": "67d7f10e51df39abe8caba4fa0733f28b1fcf8fe3558299c5e51cf3e09dd42eb",
+        "package": "org.chromium.angle"
+      },
+      {
+        "serial": "emulator-5560",
+        "apk_sha256": "67d7f10e51df39abe8caba4fa0733f28b1fcf8fe3558299c5e51cf3e09dd42eb",
+        "package": "org.chromium.angle"
+      }
+    ],
+    "redroid_after_host_restart": {
+      "checked_at": "2026-10-23T09:55:11.1084467+08:00",
+      "serial": "127.0.0.1:5558",
+      "container": "alas-redroid-wsl-gameplay",
+      "userdata": "existing persistent gameplay userdata",
+      "manager_log_sha256": "b9eef6435ef65042077775d635eb14c8509a3b4952f7b5f99696ffa8aa3b2f8d",
+      "boot_completed": "1",
+      "installed_apk_sha256": "67d7f10e51df39abe8caba4fa0733f28b1fcf8fe3558299c5e51cf3e09dd42eb",
+      "unity_launch_extra": "-force-gfx-st",
+      "health_receipt": "redroid-before-final-full.json"
+    },
+    "full_aosp_build": false
+  },
+  "patch_series": {
+    "byte_count": 934473,
+    "combined_sha256": "d5a08d1cdb880b29cd28e147bc221c4c9a3b45b1dfcb0eae28ac9e364effa6d3",
+    "generated_path": "integration/alas/0001-semantic-oracle-hooks.patch",
+    "member_count": 233,
+    "schema": "alas-headless.alas-patch-series-check/v1",
+    "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
+  },
+  "source_lf_sha256": {
+    "python/alas_headless/adapter/semantic/campaign_map.py": "cb6e9b3fc871eeb8151b15c84d672a6b8597c5fbd81425c36918b5f0ef284ee1",
+    "python/alas_headless/adapter/semantic/session_combat.py": "2fb08f3a53463832aaa907d92c146a357485a44a96cb216f0e900cf5eea75cce",
+    "python/alas_headless/adapter/semantic/session_dispatch.py": "d7e88b048e2890f1e4231ba93e3fb68bd26075129097a50def7b8b9e5cf6b933",
+    "python/alas_headless/adapter/semantic/mail.py": "e5ef7791b07505c506a8f7c4db8083abae91f2e3e9e83310789977630a6d84b0",
+    "python/alas_headless/alas_combat_admission.py": "c79632e65722e55e746804377b8f427422095af05943387d155a06f3d34c1b98",
+    "python/alas_headless/alas_camera_view.py": "524cb2bd79978bbc04d00ea213be1c08488b5da1a33504d904d1100f77f8bfc0",
+    "python/alas_headless/alas_combat_observer.py": "2c72fe5a83c611279541f9b8d073ebebcb06b56e8d5f602bd55fd2915efebb01",
+    "python/alas_headless/oracle/campaign_map.py": "a4a1b8aef849df9eb71b4bcf26247cd6eb8b7b8f9c1b0124a8097cbd0dc25b6c",
+    "python/alas_headless/oracle/combat.py": "8120df036baf70916c84ad4ea8ba5e7308e2f8c6c7eed3811ff7eef3ad6bd9fe",
+    "python/alas_headless/oracle/campaign_navigation.py": "e1d8e81a13740b51f41bc635616e24e78584f208929a5ab4b86bae238bee0ada",
+    "python/alas_headless/oracle/campaign_state.py": "08ceb50234e4021d0f16392a3d7b90db7d62b44022a13936ec3aa494f9c28229",
+    "python/alas_headless/oracle/rewards.py": "db8dd43bd997224213bdac9b92ff516db33da7c0c71ed2eb575ba6d1212bc2b1",
+    "overlays/angle-g3/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp": "3d4c5152e94d2cfd998998ac6e7fe9728e1a3cc0502a09221c2c8abdbbeb5c92"
+  },
+  "runtime_sha256": {
+    "module/combat/combat.py": "949bff4894a451a20a62138839a160e0f024dbd0c548d93fbc6ee5f06704ccd5",
+    "module/map/camera.py": "ba068ab11e388fd96657aa4f5a54f947510c56253dacc84d6c5417dc0f295042",
+    "module/map/map_operation.py": "d182e6f2bf51fff330be27af0cb6f8027bd8e6635b477dabc07cdaafbcdff521",
+    "module/map/fleet.py": "446496922f06e85313f21d2124442ece17b2f7c204e8b29e1d529655e9c08199",
+    "module/ui/ui.py": "e72ce8105ee0008667ff0bb151afbc5473ac882d66b7ee11807330a223fc39ad",
+    "module/campaign/campaign_base.py": "233ebc78755f45ecb1ceb06e468fa1deebfc5e91f311364fb36f141d12464873"
+  },
+  "redroid": {
+    "before": {
+      "path": "artifacts/manual-map-20261022/redroid-before-final-full-r5.json",
+      "sha256": "84810cb966d49b080b6935a1a055df3f596322b31067b8a37f215bbda59defdc",
+      "passed": true,
+      "resources": {
+        "oil": 1050,
+        "gold": 93682,
+        "gem": 3505
+      },
+      "main_visible": true,
+      "health": [
+        {
+          "generation": 459,
+          "ui_generation": 459,
+          "pid": 13911,
+          "age_ms": 291.0
+        },
+        {
+          "generation": 473,
+          "ui_generation": 473,
+          "pid": 13911,
+          "age_ms": 301.0
+        }
+      ],
+      "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+    },
+    "run": {
+      "path": "artifacts/manual-map-20261022/redroid-final-full-r5.json",
+      "sha256": "e7f9542c7d531aded9757e2c98e265beb2de9dce59996703319e94edbc5a2a12",
+      "native_log_sha256": "dd28c59103ef4dfa92d92da9aca2f88734c8311864fca02638c4fe91c3ab3fe1",
+      "typed_map_sha256": "48b8b35136f4e6beb3c60bcc3638cbe4ea3a0b9e8210528edb1cdeb49ac830d8",
+      "ammunition_gains": [
+        {
+          "generation": 5734,
+          "node": "F2",
+          "ammo_before": 2,
+          "ammo_after": 5
+        }
+      ],
+      "passed": true,
+      "serial": "127.0.0.1:5558",
+      "return": true,
+      "after": {
+        "pid": 13911,
+        "generation": 12168,
+        "main_visible": false,
+        "commission_back": false,
+        "campaign_stage_visible": true
+      },
+      "elapsed_seconds": 580.375,
+      "task_outcome": {
+        "task": "main",
+        "outcome": "returned"
+      },
+      "native_error": null,
+      "remaining_action_grants": {
+        "mission.claim": 0,
+        "mail.mutation": 0,
+        "tactical.reward": 0,
+        "awaken.execute": 0,
+        "minigame.play": 0,
+        "meta.assist": 0,
+        "operation_siren.coordinate_checkout": 0,
+        "operation_siren.action_point_use": 0,
+        "operation_siren.daemon_move": 0,
+        "operation_siren.port_repair": 0,
+        "tactical.assign": 0,
+        "commission.reward": 0,
+        "commission.start": 0,
+        "daily.execute": 0,
+        "exercise.execute": 0,
+        "exercise.refresh": 0,
+        "research.reward": 0,
+        "research.start": 0,
+        "dorm.collect": 0,
+        "dorm.feed": 0,
+        "enhancement.execute": 0,
+        "guild.claim": 0,
+        "guild.dispatch": 0,
+        "guild.exchange": 0,
+        "build.submit": 0,
+        "retirement.execute": 1,
+        "shop.purchase": 0,
+        "campaign.stage_entry": 3,
+        "campaign.fleet_mutation": 2,
+        "campaign.sortie": 0,
+        "campaign.grid_click": 21,
+        "campaign.viewport_swipe": 26
+      },
+      "temporary_config_removed": true,
+      "cleanup_errors": [],
+      "task_configuration": {
+        "Campaign": {
+          "Name": "12-4",
+          "Event": "campaign_main",
+          "Mode": "normal",
+          "UseClearMode": false,
+          "UseFleetLock": true,
+          "UseAutoSearch": false,
+          "Use2xBook": false,
+          "AmbushEvade": true
+        },
+        "Fleet": {
+          "Fleet1": 1,
+          "Fleet1Formation": "double_line",
+          "Fleet1Mode": "combat_auto",
+          "Fleet1Step": 3,
+          "Fleet2": 2,
+          "Fleet2Formation": "double_line",
+          "Fleet2Mode": "combat_auto",
+          "Fleet2Step": 2,
+          "FleetOrder": "fleet1_mob_fleet2_boss"
+        },
+        "StopCondition": {
+          "OilLimit": 1000,
+          "RunCount": 0,
+          "MapAchievement": "non_stop",
+          "StageIncrease": false,
+          "GetNewShip": true,
+          "ReachLevel": 120
+        }
+      },
+      "final_run_count": 0
+    },
+    "final_frame_audit": {
+      "path": "artifacts/manual-map-20261022/redroid-final-full-r5.map.camera.jsonl",
+      "sha256": "70c903250a716c7600f342c90531d12870a8b73e07653b9e3b6f4520a6121c25",
+      "scope": "successful projections only; refused frames are excluded",
+      "read_count": 50,
+      "frame_read_count": 50,
+      "mismatches": 0,
+      "live_fallback_count": 0
+    },
+    "after": {
+      "path": "artifacts/manual-map-20261022/redroid-after-final-full-r5.json",
+      "sha256": "eb603b36409a4041ef73245474a36e56a17c21c5e6c751f75a698d26c5474797",
+      "passed": true,
+      "resources": {
+        "oil": 516,
+        "gold": 95779,
+        "gem": 3505
+      },
+      "main_visible": true,
+      "health": [
+        {
+          "generation": 12808,
+          "ui_generation": 12808,
+          "pid": 13911,
+          "age_ms": 261.0
+        },
+        {
+          "generation": 12822,
+          "ui_generation": 12822,
+          "pid": 13911,
+          "age_ms": 302.0
+        }
+      ],
+      "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+    },
+    "earlier_pre_urgent_click_priority_pass": {
+      "path": "artifacts/manual-map-20261022/redroid-final-full-r4.json",
+      "sha256": "163e7aed4e0125a65533759175ac5da58e302869b610fc8d47d8b860926da11a",
+      "native_log_sha256": "7b14e17f92488e39c84ba40ead67db2e6a62e6f36e8afe0f564c2449f999bd7c",
+      "typed_map_sha256": "5bb749591d626ae93c30a883e2bc6e92bb87cc491fa794cbcc5b6ae7ee6a6447",
+      "ammunition_gains": [
+        {
+          "generation": 27380,
+          "node": "F2",
+          "ammo_before": 2,
+          "ammo_after": 5
+        }
+      ],
+      "passed": true,
+      "serial": "127.0.0.1:5558",
+      "return": true,
+      "after": {
+        "pid": 1652,
+        "generation": 34389,
+        "main_visible": false,
+        "commission_back": false,
+        "campaign_stage_visible": true
+      },
+      "elapsed_seconds": 617.672,
+      "task_outcome": {
+        "task": "main",
+        "outcome": "returned"
+      },
+      "native_error": null,
+      "remaining_action_grants": {
+        "mission.claim": 0,
+        "mail.mutation": 0,
+        "tactical.reward": 0,
+        "awaken.execute": 0,
+        "minigame.play": 0,
+        "meta.assist": 0,
+        "operation_siren.coordinate_checkout": 0,
+        "operation_siren.action_point_use": 0,
+        "operation_siren.daemon_move": 0,
+        "operation_siren.port_repair": 0,
+        "tactical.assign": 0,
+        "commission.reward": 0,
+        "commission.start": 0,
+        "daily.execute": 0,
+        "exercise.execute": 0,
+        "exercise.refresh": 0,
+        "research.reward": 0,
+        "research.start": 0,
+        "dorm.collect": 0,
+        "dorm.feed": 0,
+        "enhancement.execute": 0,
+        "guild.claim": 0,
+        "guild.dispatch": 0,
+        "guild.exchange": 0,
+        "build.submit": 0,
+        "retirement.execute": 1,
+        "shop.purchase": 0,
+        "campaign.stage_entry": 3,
+        "campaign.fleet_mutation": 2,
+        "campaign.sortie": 0,
+        "campaign.grid_click": 18,
+        "campaign.viewport_swipe": 20
+      },
+      "temporary_config_removed": true,
+      "cleanup_errors": [],
+      "task_configuration": {
+        "Campaign": {
+          "Name": "12-4",
+          "Event": "campaign_main",
+          "Mode": "normal",
+          "UseClearMode": false,
+          "UseFleetLock": true,
+          "UseAutoSearch": false,
+          "Use2xBook": false,
+          "AmbushEvade": true
+        },
+        "Fleet": {
+          "Fleet1": 1,
+          "Fleet1Formation": "double_line",
+          "Fleet1Mode": "combat_auto",
+          "Fleet1Step": 3,
+          "Fleet2": 2,
+          "Fleet2Formation": "double_line",
+          "Fleet2Mode": "combat_auto",
+          "Fleet2Step": 2,
+          "FleetOrder": "fleet1_mob_fleet2_boss"
+        },
+        "StopCondition": {
+          "OilLimit": 1000,
+          "RunCount": 0,
+          "MapAchievement": "non_stop",
+          "StageIncrease": false,
+          "GetNewShip": true,
+          "ReachLevel": 120
+        }
+      },
+      "final_run_count": 0
+    },
+    "earlier_full_run": {
+      "path": "artifacts/manual-map-20261022/redroid-full-r3.json",
+      "sha256": "2eaa769538cce720368559734fa491755bf1c5b00150c69bbcbd1f4ff64f57d6",
+      "native_log_sha256": "16d78a29a5c43a3dea72819d460949d842f486358d0c1701101a60f85a2593d2",
+      "typed_map_sha256": "e02e0f9611a9068a2397563079e1279e95badd37977f2578f13b7d0a2fe4c77d",
+      "ammunition_gains": [
+        {
+          "generation": 80838,
+          "node": "F2",
+          "ammo_before": 2,
+          "ammo_after": 5
+        }
+      ],
+      "passed": true,
+      "serial": "127.0.0.1:5558",
+      "return": true,
+      "after": {
+        "pid": 14631,
+        "generation": 86581,
+        "main_visible": false,
+        "commission_back": false,
+        "campaign_stage_visible": true
+      },
+      "elapsed_seconds": 704.046,
+      "task_outcome": {
+        "task": "main",
+        "outcome": "returned"
+      },
+      "native_error": null,
+      "remaining_action_grants": {
+        "mission.claim": 0,
+        "mail.mutation": 0,
+        "tactical.reward": 0,
+        "awaken.execute": 0,
+        "minigame.play": 0,
+        "meta.assist": 0,
+        "operation_siren.coordinate_checkout": 0,
+        "operation_siren.action_point_use": 0,
+        "operation_siren.daemon_move": 0,
+        "operation_siren.port_repair": 0,
+        "tactical.assign": 0,
+        "commission.reward": 0,
+        "commission.start": 0,
+        "daily.execute": 0,
+        "exercise.execute": 0,
+        "exercise.refresh": 0,
+        "research.reward": 0,
+        "research.start": 0,
+        "dorm.collect": 0,
+        "dorm.feed": 0,
+        "enhancement.execute": 0,
+        "guild.claim": 0,
+        "guild.dispatch": 0,
+        "guild.exchange": 0,
+        "build.submit": 0,
+        "retirement.execute": 1,
+        "shop.purchase": 0,
+        "campaign.stage_entry": 3,
+        "campaign.fleet_mutation": 2,
+        "campaign.sortie": 0,
+        "campaign.grid_click": 18,
+        "campaign.viewport_swipe": 21
+      },
+      "temporary_config_removed": true,
+      "cleanup_errors": [],
+      "task_configuration": {
+        "Campaign": {
+          "Name": "12-4",
+          "Event": "campaign_main",
+          "Mode": "normal",
+          "UseClearMode": false,
+          "UseFleetLock": true,
+          "UseAutoSearch": false,
+          "Use2xBook": false,
+          "AmbushEvade": true
+        },
+        "Fleet": {
+          "Fleet1": 1,
+          "Fleet1Formation": "double_line",
+          "Fleet1Mode": "combat_auto",
+          "Fleet1Step": 3,
+          "Fleet2": 2,
+          "Fleet2Formation": "double_line",
+          "Fleet2Mode": "combat_auto",
+          "Fleet2Step": 2,
+          "FleetOrder": "fleet1_mob_fleet2_boss"
+        },
+        "StopCondition": {
+          "OilLimit": 2500,
+          "RunCount": 0,
+          "MapAchievement": "non_stop",
+          "StageIncrease": false,
+          "GetNewShip": true,
+          "ReachLevel": 120
+        }
+      },
+      "final_run_count": 0
+    },
+    "earlier_run_source_identity": {
+      "scope": "Redroid complete Main r3 source identity before the later passive camera frame correction",
+      "camera_source_sha256": "a11026f809184914e693eda328ef973ee014b9cb2b4464b44894f30f0fcfc775",
+      "combined_patch_sha256": "4a9e60e2c12e392efc58b79f3ca220b924601872dfcdbfe96d44308238f13b2e",
+      "later_change": "campaign_camera_state reads the same ALAS frame as map presence; input proofs unchanged"
+    },
+    "resource_delta": {
+      "oil": -534,
+      "gold": 2097,
+      "gem": 0
+    }
+  },
+  "avd": {
+    "before": {
+      "path": "artifacts/manual-map-20261022/avd-before-final-refresh-r3.json",
+      "sha256": "8ac8a474dca10ac60a2491ca60388ef157a09fa8660bf91b54a5b003f9227376",
+      "passed": true,
+      "resources": {
+        "oil": 1584,
+        "gold": 91628,
+        "gem": 3505
+      },
+      "main_visible": true,
+      "health": [
+        {
+          "generation": 10850,
+          "ui_generation": 10850,
+          "pid": 1970,
+          "age_ms": 168.0
+        },
+        {
+          "generation": 10854,
+          "ui_generation": 10854,
+          "pid": 1970,
+          "age_ms": 165.0
+        }
+      ],
+      "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+    },
+    "run": {
+      "path": "artifacts/manual-map-20261022/avd-final-refresh-r2.json",
+      "sha256": "e31e3aca4dfa7c0411a47164d7a5112e0e428862ab67c649ad85425c1864810e",
+      "native_log_sha256": "fe12a1a9c47cccddb2ad5497ac41f324598d95b67853c78c0ea8e0703fbd685a",
+      "typed_map_sha256": "f142521a3cb06723cbea2ce7343aead5bc92d8b657ab2ca59e6f95d77e5245a6",
+      "ammunition_gains": [
+        {
+          "generation": 13933,
+          "node": "F2",
+          "ammo_before": 2,
+          "ammo_after": 5
+        }
+      ],
+      "passed": true,
+      "serial": "emulator-5560",
+      "return": true,
+      "after": {
+        "pid": 1970,
+        "generation": 18089,
+        "main_visible": false,
+        "commission_back": false,
+        "campaign_stage_visible": true
+      },
+      "elapsed_seconds": 674.766,
+      "task_outcome": {
+        "task": "main",
+        "outcome": "returned"
+      },
+      "native_error": null,
+      "remaining_action_grants": {
+        "mission.claim": 0,
+        "mail.mutation": 0,
+        "tactical.reward": 0,
+        "awaken.execute": 0,
+        "minigame.play": 0,
+        "meta.assist": 0,
+        "operation_siren.coordinate_checkout": 0,
+        "operation_siren.action_point_use": 0,
+        "operation_siren.daemon_move": 0,
+        "operation_siren.port_repair": 0,
+        "tactical.assign": 0,
+        "commission.reward": 0,
+        "commission.start": 0,
+        "daily.execute": 0,
+        "exercise.execute": 0,
+        "exercise.refresh": 0,
+        "research.reward": 0,
+        "research.start": 0,
+        "dorm.collect": 0,
+        "dorm.feed": 0,
+        "enhancement.execute": 0,
+        "guild.claim": 0,
+        "guild.dispatch": 0,
+        "guild.exchange": 0,
+        "build.submit": 0,
+        "retirement.execute": 1,
+        "shop.purchase": 0,
+        "campaign.stage_entry": 3,
+        "campaign.fleet_mutation": 2,
+        "campaign.sortie": 0,
+        "campaign.grid_click": 17,
+        "campaign.viewport_swipe": 25
+      },
+      "temporary_config_removed": true,
+      "cleanup_errors": [],
+      "task_configuration": {
+        "Campaign": {
+          "Name": "12-4",
+          "Event": "campaign_main",
+          "Mode": "normal",
+          "UseClearMode": false,
+          "UseFleetLock": true,
+          "UseAutoSearch": false,
+          "Use2xBook": false,
+          "AmbushEvade": true
+        },
+        "Fleet": {
+          "Fleet1": 1,
+          "Fleet1Formation": "double_line",
+          "Fleet1Mode": "combat_auto",
+          "Fleet1Step": 3,
+          "Fleet2": 2,
+          "Fleet2Formation": "double_line",
+          "Fleet2Mode": "combat_auto",
+          "Fleet2Step": 2,
+          "FleetOrder": "fleet1_mob_fleet2_boss"
+        },
+        "StopCondition": {
+          "OilLimit": 1000,
+          "RunCount": 0,
+          "MapAchievement": "non_stop",
+          "StageIncrease": false,
+          "GetNewShip": true,
+          "ReachLevel": 120
+        }
+      },
+      "final_run_count": 0
+    },
+    "network_qualification": {
+      "time": "2026-10-23T10:21:53.819067+08:00",
+      "serial": "emulator-5560",
+      "boot": {
+        "exit_code": 0,
+        "stdout": "1\n",
+        "stderr": ""
+      },
+      "avd": {
+        "exit_code": 0,
+        "stdout": "alas_game_api32_x64\n\nOK\n\n",
+        "stderr": ""
+      },
+      "dns_probe": {
+        "exit_code": 1,
+        "stdout": "PING a.w.bilicdn1.com (117.23.60.15) 56(84) bytes of data.\n\n--- a.w.bilicdn1.com ping statistics ---\n1 packets transmitted, 0 received, 100% packet loss, time 0ms\n\n",
+        "stderr": ""
+      },
+      "netpolicy": [
+        "NetworkPolicy{template=NetworkTemplate: matchRule=CARRIER, subscriberId=310260..., matchSubscriberIds=[310260...], subscriberIdMatchRule=EXACT_MATCH cycleRule=RecurrenceRule{start=2020-05-14T00:00Z end=null period=P1M} warningBytes=1800000000 limitBytes=-1 lastWarningSnooze=-1 lastLimitSnooze=-1 lastRapidSnooze=-1 metered=true inferred=false}"
+      ],
+      "connectivity": [
+        "NetworkAgentInfo{network{100}  handle{432902426637}  ni{MOBILE[HSPA] CONNECTED extra: epc.tmobile.com} Score(50 ; KeepConnected : 0 ; Policies : EVER_VALIDATED&IS_VALIDATED)  everValidated lastValidated  lp{{InterfaceName: eth0 LinkAddresses: [ 10.0.2.15/24 ] DnsAddresses: [ /10.0.2.3 ] Domains: null MTU: 1500 TcpBufferSizes: 40778,244668,734003,16777,100663,301990 Routes: [ 0.0.0.0/0 -> 10.0.2.2 eth0 mtu 1500,10.0.2.0/24 -> 0.0.0.0 eth0 mtu 0 ]}}  nc{[ Transports: CELLULAR Capabilities: MMS&SUPL&DUN&FOTA&IMS&CBS&INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN&VALIDATED&NOT_ROAMING&FOREGROUND&NOT_CONGESTED&NOT_SUSPENDED&NOT_VCN_MANAGED LinkUpBandwidth>=1800Kbps LinkDnBandwidth>=4300Kbps Specifier: <TelephonyNetworkSpecifier [mSubId = 1]> SubscriptionIds: {1}]}}",
+        "NetworkRequest [ LISTEN id=13, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&VALIDATED&NOT_VCN_MANAGED Uid: 1000 RequestorUid: 1000 RequestorPkg: android] ]",
+        "uid/pid:1000/571 activeRequest: null callbackRequest: 13 [NetworkRequest [ LISTEN id=13, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&VALIDATED&NOT_VCN_MANAGED Uid: 1000 RequestorUid: 1000 RequestorPkg: android] ]] callback flags: 0 priority: 2147483647",
+        "2026-10-23T02:21:23.221 - REGISTER uid/pid:1000/571 activeRequest: null callbackRequest: 13 [NetworkRequest [ LISTEN id=13, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&VALIDATED&NOT_VCN_MANAGED Uid: 1000 RequestorUid: 1000 RequestorPkg: android] ]] callback flags: 0 priority: 2147483647"
+      ],
+      "installed_apk": {
+        "exit_code": 0,
+        "stdout": "67d7f10e51df39abe8caba4fa0733f28b1fcf8fe3558299c5e51cf3e09dd42eb  /data/app/~~Fe7faD3wR1SgYx__zLgg7Q==/org.chromium.angle-AygPMRbF2yE8ytfPN8wu0Q==/base.apk\n",
+        "stderr": ""
+      },
+      "interpretation": "PING hostname resolving to IP with ICMP loss does not imply DNS or HTTPS failure."
+    },
+    "final_frame_audit": {
+      "path": "artifacts/manual-map-20261022/avd-final-refresh-r2.map.camera.jsonl",
+      "sha256": "f44e35b12a69a318de2ea0778988a885212bd742eea006e01498a63de5a8266a",
+      "scope": "successful projections only; refused frames are excluded",
+      "read_count": 109,
+      "frame_read_count": 109,
+      "mismatches": 0,
+      "live_fallback_count": 0
+    },
+    "after": {
+      "path": "artifacts/manual-map-20261022/avd-after-final-refresh-r2.json",
+      "sha256": "89e86b00643ed4135c799d88430a3b8c0adde3550976c5d725e621ee34423e75",
+      "passed": true,
+      "resources": {
+        "oil": 1050,
+        "gold": 93682,
+        "gem": 3505
+      },
+      "main_visible": true,
+      "health": [
+        {
+          "generation": 18683,
+          "ui_generation": 18683,
+          "pid": 1970,
+          "age_ms": 143.0
+        },
+        {
+          "generation": 18691,
+          "ui_generation": 18691,
+          "pid": 1970,
+          "age_ms": 186.0
+        }
+      ],
+      "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+    },
+    "earlier_success": {
+      "before": {
+        "path": "artifacts/manual-map-20261022/avd-before-full-r28.json",
+        "sha256": "581e3de768ec1e6047de20fc9bcbeb87ad21e014906895f0f10df03c6f2abff2",
+        "passed": true,
+        "resources": {
+          "oil": 2540,
+          "gold": 85061,
+          "gem": 3505
+        },
+        "main_visible": true,
+        "health": [
+          {
+            "generation": 7319,
+            "ui_generation": 7319,
+            "pid": 11781,
+            "age_ms": 97.0
+          },
+          {
+            "generation": 7326,
+            "ui_generation": 7326,
+            "pid": 11781,
+            "age_ms": 173.0
+          }
+        ],
+        "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+      },
+      "run": {
+        "path": "artifacts/manual-map-20261022/avd-full-r14.json",
+        "sha256": "2541acb96b1729d2e6b587d31cdd92cb9bb37f0b1e01f7f50557d68f57636e1c",
+        "native_log_sha256": "c5fbb1a352a8bc965e7a4778bbf2a4ee7a278d8a97b35e89515bf49f4d7f7b26",
+        "typed_map_sha256": "c0b9a263ed8a68009a0cc6011f39982247241ad70e1340a513ff3e87acd19422",
+        "ammunition_gains": [
+          {
+            "generation": 11902,
+            "node": "F2",
+            "ammo_before": 2,
+            "ammo_after": 5
+          }
+        ],
+        "passed": true,
+        "serial": "emulator-5560",
+        "return": true,
+        "after": {
+          "pid": 11781,
+          "generation": 15019,
+          "main_visible": false,
+          "commission_back": false,
+          "campaign_stage_visible": true
+        },
+        "elapsed_seconds": 460.984,
+        "task_outcome": {
+          "task": "main",
+          "outcome": "returned"
+        },
+        "native_error": null,
+        "remaining_action_grants": {
+          "mission.claim": 0,
+          "mail.mutation": 0,
+          "tactical.reward": 0,
+          "awaken.execute": 0,
+          "minigame.play": 0,
+          "meta.assist": 0,
+          "operation_siren.coordinate_checkout": 0,
+          "operation_siren.action_point_use": 0,
+          "operation_siren.daemon_move": 0,
+          "operation_siren.port_repair": 0,
+          "tactical.assign": 0,
+          "commission.reward": 0,
+          "commission.start": 0,
+          "daily.execute": 0,
+          "exercise.execute": 0,
+          "exercise.refresh": 0,
+          "research.reward": 0,
+          "research.start": 0,
+          "dorm.collect": 0,
+          "dorm.feed": 0,
+          "enhancement.execute": 0,
+          "guild.claim": 0,
+          "guild.dispatch": 0,
+          "guild.exchange": 0,
+          "build.submit": 0,
+          "retirement.execute": 1,
+          "shop.purchase": 0,
+          "campaign.stage_entry": 3,
+          "campaign.fleet_mutation": 2,
+          "campaign.sortie": 0,
+          "campaign.grid_click": 20,
+          "campaign.viewport_swipe": 36
+        },
+        "temporary_config_removed": true,
+        "cleanup_errors": [],
+        "task_configuration": {
+          "Campaign": {
+            "Name": "12-4",
+            "Event": "campaign_main",
+            "Mode": "normal",
+            "UseClearMode": false,
+            "UseFleetLock": true,
+            "UseAutoSearch": false,
+            "Use2xBook": false,
+            "AmbushEvade": true
+          },
+          "Fleet": {
+            "Fleet1": 1,
+            "Fleet1Formation": "double_line",
+            "Fleet1Mode": "combat_auto",
+            "Fleet1Step": 3,
+            "Fleet2": 2,
+            "Fleet2Formation": "double_line",
+            "Fleet2Mode": "combat_auto",
+            "Fleet2Step": 2,
+            "FleetOrder": "fleet1_mob_fleet2_boss"
+          },
+          "StopCondition": {
+            "OilLimit": 1500,
+            "RunCount": 0,
+            "MapAchievement": "non_stop",
+            "StageIncrease": false,
+            "GetNewShip": true,
+            "ReachLevel": 120
+          }
+        },
+        "final_run_count": 0
+      },
+      "frame_audit": {
+        "path": "artifacts/manual-map-20261022/avd-full-r14.map.camera.jsonl",
+        "sha256": "17d6826f4ba51c8de050c9df8794e70ed85802f8cc9c528f27066427dc3e5ef0",
+        "scope": "successful projections only; refused frames are excluded",
+        "read_count": 73,
+        "frame_read_count": 73,
+        "mismatches": 0,
+        "live_fallback_count": 0
+      },
+      "after": {
+        "path": "artifacts/manual-map-20261022/avd-after-full.json",
+        "sha256": "eb2c003e1258e2a414f35027f04b0d3a9cdaec94f79f745568c5b5b316f3001c",
+        "passed": true,
+        "resources": {
+          "oil": 2006,
+          "gold": 87220,
+          "gem": 3505
+        },
+        "main_visible": true,
+        "health": [
+          {
+            "generation": 17254,
+            "ui_generation": 17254,
+            "pid": 11781,
+            "age_ms": 85.0
+          },
+          {
+            "generation": 17263,
+            "ui_generation": 17263,
+            "pid": 11781,
+            "age_ms": 76.0
+          }
+        ],
+        "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+      }
+    },
+    "resource_delta": {
+      "oil": -534,
+      "gold": 2054,
+      "gem": 0
+    }
+  },
+  "diagnostics": {
+    "initial_resources": {
+      "oil": 5286,
+      "gold": 71586,
+      "gem": 3505
+    },
+    "retirement": {
+      "retired_count": 150,
+      "capacity_before": 1010,
+      "capacity_after": 860,
+      "capacity_total": 1010,
+      "settings": {
+        "generation": 3919,
+        "unique_ship_protection": true,
+        "priority": [
+          "R",
+          "SR",
+          "N"
+        ],
+        "full_star_policy": "keep_none",
+        "no_full_star_policy": "keep_needed"
+      },
+      "rewards": [
+        [
+          "物资",
+          2484
+        ],
+        [
+          "荣誉勋章",
+          65
+        ]
+      ],
+      "rarity_warning_confirmed": true,
+      "equipment_preserved": true
+    },
+    "attempts": [
+      {
+        "path": "artifacts/manual-map-20261022/avd-final-refresh.json",
+        "sha256": "dc25aeaa4c80be96f16dea23d00fc403aaa668dee148f8715d131d47a1d8b4d4",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "combat action control is not exact top-raycast actionable: OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone), raycast_top=False"
+        },
+        "elapsed_seconds": 725.297
+      },
+      {
+        "path": "artifacts/manual-map-20261022/avd-full-r1.json",
+        "sha256": "2d1d15f318ffbc23aa7346db852dc5a84eeadd28aab16f68b609fd3086c5205b",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "campaign map and blocking identities overlap"
+        },
+        "elapsed_seconds": 87.188
+      },
+      {
+        "path": "artifacts/manual-map-20261022/avd-full-r10.json",
+        "sha256": "5f6b4c5829898a6baff78f586890af21fea7ffb2371c6a758de138439171d27e",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "campaign page identity is not proven"
+        },
+        "elapsed_seconds": 12.625
+      },
+      {
+        "path": "artifacts/manual-map-20261022/avd-full-r11.json",
+        "sha256": "b497b47057306bb562e4b70b7083be67c48621ff5ab0f9e73358da35e7aabb16",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "ALAS camera observed swipe is outside limits"
+        },
+        "elapsed_seconds": 390.219
+      },
+      {
+        "path": "artifacts/manual-map-20261022/avd-full-r12.json",
+        "sha256": "8f7b7403026a36da13c29952d63162b35c4b66b489ea03e8d54baa691422c9fc",
+        "passed": false,
+        "native_error": {
+          "type": "GameStuckError",
+          "message": "Wait too long"
+        },
+        "elapsed_seconds": 593.765
+      },
+      {
+        "path": "artifacts/manual-map-20261022/avd-full-r13.json",
+        "sha256": "4432995122b049e689b4e15fd8d072412bc32be3d9aaeb478da592cb1c6341a6",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "campaign map-cell geometry or actionability changed"
+        },
+        "elapsed_seconds": 429.0
+      },
+      {
+        "path": "artifacts/manual-map-20261022/avd-full-r2.json",
+        "sha256": "2bc52798b6c7ed0efc4adc75075c2fe7806b9f0f3ec1551cea7a2187f302299a",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "campaign map model did not stabilize"
+        },
+        "elapsed_seconds": 34.515
+      },
+      {
+        "path": "artifacts/manual-map-20261022/avd-full-r3.json",
+        "sha256": "562cfd4d6d6162ba71e7884e6f379774906c149dda6532ea6c904894ebf163bc",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "campaign map and blocking identities overlap"
+        },
+        "elapsed_seconds": 55.891
+      },
+      {
+        "path": "artifacts/manual-map-20261022/avd-full-r4.json",
+        "sha256": "b817dc0ab77e2e39090ff9a43bc8c206196531fb2187fc8cda036e762d54da95",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "campaign map fleet world anchor is unmatched"
+        },
+        "elapsed_seconds": 57.828
+      },
+      {
+        "path": "artifacts/manual-map-20261022/avd-full-r5.json",
+        "sha256": "5fadf861f4672703b7b74fe0802229bc1b77ed550eedb3723634a8dd68b34645",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "campaign combat route dynamic state changed"
+        },
+        "elapsed_seconds": 67.203
+      },
+      {
+        "path": "artifacts/manual-map-20261022/avd-full-r6.json",
+        "sha256": "f61cfd1c2da0d0e654cad59b7eebf9a37b7a740815eb0a7b694e3b5777e50815",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "combat action control is not exact top-raycast actionable: OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone), raycast_top=False"
+        },
+        "elapsed_seconds": 139.203
+      },
+      {
+        "path": "artifacts/manual-map-20261022/avd-full-r7.json",
+        "sha256": "2a0f6680e8c5833b7a0ee164f69345e6b7f61b0ef681d3339a2d536d610d8410",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "campaign map grid topology is invalid"
+        },
+        "elapsed_seconds": 115.797
+      },
+      {
+        "path": "artifacts/manual-map-20261022/avd-full-r8.json",
+        "sha256": "38bfee2b16debad5d08f451506b68d29846de1fd1fb792d75b72fc458feaf28a",
+        "passed": false,
+        "native_error": {
+          "type": "MapDetectionError",
+          "message": "campaign map and blocking identities overlap"
+        },
+        "elapsed_seconds": 61.828
+      },
+      {
+        "path": "artifacts/manual-map-20261022/avd-full-r9.json",
+        "sha256": "965a6a2824a05f4cfedb596dd8e28ce8973d7bccb8d9caf1a2ede647af280be4",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "campaign urgent notice identity is not proven"
+        },
+        "elapsed_seconds": 535.562
+      },
+      {
+        "path": "artifacts/manual-map-20261022/redroid-final-full-r2.json",
+        "sha256": "a719a78a6aa8693a83d0b4f2c21eb9673e9a034fab98917e24b9e4e3a23d7a3c",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "campaign urgent notice generations are incoherent"
+        },
+        "elapsed_seconds": 49.875
+      },
+      {
+        "path": "artifacts/manual-map-20261022/redroid-final-full-r3.json",
+        "sha256": "43059fbb67075def002d067788d5ccc5f078bbf7ea8429763caa890592fe0412",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "campaign fleet index frame is incoherent"
+        },
+        "elapsed_seconds": 465.375
+      },
+      {
+        "path": "artifacts/manual-map-20261022/redroid-final-full.json",
+        "sha256": "fddfdc96ed0e0128d9195deabb8ca0b47b81a975f6d27ec6ec861ac207a1d87e",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "automation information frames are incoherent"
+        },
+        "elapsed_seconds": 61.25
+      },
+      {
+        "path": "artifacts/manual-map-20261022/redroid-full-r1.json",
+        "sha256": "0b10bbb170a6737350b75d75001bdc8e7324e1e72d2d0df9ce1bb3c83c61867c",
+        "passed": false,
+        "native_error": {
+          "type": "AlasSemanticUnmapped",
+          "message": "ALAS resource has no stable name"
+        },
+        "elapsed_seconds": 306.734
+      },
+      {
+        "path": "artifacts/manual-map-20261022/redroid-full-r2.json",
+        "sha256": "05561205d6b8b85f83d44e0ce903a81e7702e5cde91ee921e16ef6e330a54028",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "campaign map fleet status root is absent or ambiguous"
+        },
+        "elapsed_seconds": 774.875
+      },
+      {
+        "path": "artifacts/manual-map-20261022/redroid-main-10.json",
+        "sha256": "17c72f0e65bbdd29b86d12dae7ad57a52ce08c1e6762741d3b858120ec2166af",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "combat action resource is not visible"
+        },
+        "elapsed_seconds": 135.016
+      },
+      {
+        "path": "artifacts/manual-map-20261022/redroid-main-2.json",
+        "sha256": "490183fa8e343f38cd04d0801b2f72a7871d946357f0ae460aa89a954293cc59",
+        "passed": false,
+        "native_error": {
+          "type": "AlasSemanticActionDeferred",
+          "message": "enhancement.execute: task action grant is exhausted"
+        },
+        "elapsed_seconds": 243.078
+      },
+      {
+        "path": "artifacts/manual-map-20261022/redroid-main-3.json",
+        "sha256": "3056723d62bea56dff3e98e40a963e8a1e87d79daa3b5c43b3c0096527dc5946",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "Msgbox snapshots are not coherent"
+        },
+        "elapsed_seconds": 40.766
+      },
+      {
+        "path": "artifacts/manual-map-20261022/redroid-main-4.json",
+        "sha256": "37cc6d568300ed9bb744e201bb9ceda2e22db8d79cc6cf4e73a910d441875281",
+        "passed": false,
+        "native_error": {
+          "type": "GameStuckError",
+          "message": "Wait too long"
+        },
+        "elapsed_seconds": 80.11
+      },
+      {
+        "path": "artifacts/manual-map-20261022/redroid-main-5.json",
+        "sha256": "b72ec804738534ef79573f6e90634cd1bb734f206a91d17d098aed0579b3fea4",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "campaign map-preparation transition did not reach the fleet overlay"
+        },
+        "elapsed_seconds": 76.531
+      },
+      {
+        "path": "artifacts/manual-map-20261022/redroid-main-6.json",
+        "sha256": "f44be57ffe224b2155348cab4550d3b8a2ebece856b6f4b5b301c35ce3b8e67b",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "campaign startup surface is not reviewed"
+        },
+        "elapsed_seconds": 101.297
+      },
+      {
+        "path": "artifacts/manual-map-20261022/redroid-main-7.json",
+        "sha256": "3b9663d06c6d883fdd1b51f04702c64989867baeb90046f01419e0143df58553",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "combat fixture endpoint generations disagree"
+        },
+        "elapsed_seconds": 185.078
+      },
+      {
+        "path": "artifacts/manual-map-20261022/redroid-main-8.json",
+        "sha256": "3e4ce955d35c045914b30d04d583a43c45d9c1f81600dfe0aa23371256a46a5b",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "campaign combat target is not an enemy: kind=ammo, expected="
+        },
+        "elapsed_seconds": 296.485
+      },
+      {
+        "path": "artifacts/manual-map-20261022/redroid-main-9.json",
+        "sha256": "27d57288764fc5fcf7a6dff71fca264de599f2970890cb52b3145a716b454f83",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "campaign target recheck token changed"
+        },
+        "elapsed_seconds": 234.438
+      },
+      {
+        "path": "artifacts/manual-map-20261022/redroid-manual-complete.json",
+        "sha256": "585fef63c1fcf18b78a347fb4ac901d43d39dac4d1d9b368bfc1c8fc7e1a852b",
+        "passed": false,
+        "native_error": {
+          "type": "SemanticGateClosed",
+          "message": "orphan combat result did not return to a reviewed stable page"
+        },
+        "elapsed_seconds": 55.156
+      }
+    ],
+    "oil_production_claim": {
+      "before": {
+        "path": "artifacts/manual-map-20261022/avd-before-full-r22.json",
+        "sha256": "0b8faf2e86196d8c366000224e7cfe35cf02262fc16936a8c7ef6e4443cb4a16",
+        "passed": true,
+        "resources": {
+          "oil": 1618,
+          "gold": 84935,
+          "gem": 3505
+        },
+        "main_visible": true,
+        "health": [
+          {
+            "generation": 11119,
+            "ui_generation": 11119,
+            "pid": 30020,
+            "age_ms": 177.0
+          },
+          {
+            "generation": 11125,
+            "ui_generation": 11125,
+            "pid": 30020,
+            "age_ms": 156.0
+          }
+        ],
+        "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+      },
+      "after": {
+        "path": "artifacts/manual-map-20261022/avd-oil-production-claim.json",
+        "sha256": "0482e6e7e08d26fdca7fc30615b1fb9cd795ff58810efc1e3e677f1d50382d92",
+        "passed": true,
+        "resources": {
+          "oil": 2994,
+          "gold": 84935,
+          "gem": 3505
+        },
+        "main_visible": true,
+        "health": [
+          {
+            "generation": 11500,
+            "ui_generation": 11500,
+            "pid": 30020,
+            "age_ms": 174.0
+          },
+          {
+            "generation": 11504,
+            "ui_generation": 11504,
+            "pid": 30020,
+            "age_ms": 213.0
+          }
+        ],
+        "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+      },
+      "oil_collected": 1376,
+      "oil_receipt_count": 1,
+      "coin_exp_mission_weekly_enabled": false
+    },
+    "information_recovery": {
+      "before": {
+        "path": "artifacts/manual-map-20261022/redroid-before-final-full.json",
+        "sha256": "a9c5479e8e8991743aa3f023ac1f97bf42a78d3badd21b36c7587784a90df17b",
+        "passed": true,
+        "resources": {
+          "oil": 2006,
+          "gold": 87220,
+          "gem": 3505
+        },
+        "main_visible": true,
+        "health": [
+          {
+            "generation": 500,
+            "ui_generation": 500,
+            "pid": 1652,
+            "age_ms": 318.0
+          },
+          {
+            "generation": 515,
+            "ui_generation": 515,
+            "pid": 1652,
+            "age_ms": 267.0
+          }
+        ],
+        "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+      },
+      "after": {
+        "path": "artifacts/manual-map-20261022/redroid-before-final-full-r3.json",
+        "sha256": "38c6cbac358a8275ad27ce6a324293c456676791ffabb607a22705b8f5601f2f",
+        "passed": true,
+        "resources": {
+          "oil": 1986,
+          "gold": 87220,
+          "gem": 3505
+        },
+        "main_visible": true,
+        "health": [
+          {
+            "generation": 8349,
+            "ui_generation": 8349,
+            "pid": 1652,
+            "age_ms": 273.0
+          },
+          {
+            "generation": 8363,
+            "ui_generation": 8363,
+            "pid": 1652,
+            "age_ms": 251.0
+          }
+        ],
+        "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+      },
+      "oil_spent": 20,
+      "partial_recovery_path": "artifacts/manual-map-20261022/redroid-after-info-pair-recovery.json"
+    },
+    "boss_switch_failure": {
+      "before": {
+        "path": "artifacts/manual-map-20261022/redroid-before-final-full-r3.json",
+        "sha256": "38c6cbac358a8275ad27ce6a324293c456676791ffabb607a22705b8f5601f2f",
+        "passed": true,
+        "resources": {
+          "oil": 1986,
+          "gold": 87220,
+          "gem": 3505
+        },
+        "main_visible": true,
+        "health": [
+          {
+            "generation": 8349,
+            "ui_generation": 8349,
+            "pid": 1652,
+            "age_ms": 273.0
+          },
+          {
+            "generation": 8363,
+            "ui_generation": 8363,
+            "pid": 1652,
+            "age_ms": 251.0
+          }
+        ],
+        "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+      },
+      "after_resources": {
+        "oil": 1532,
+        "gold": 87347,
+        "gem": 3505
+      },
+      "oil_spent": 454
+    },
+    "avd_urgent_click_failure": {
+      "before": {
+        "path": "artifacts/manual-map-20261022/avd-before-final-refresh.json",
+        "sha256": "64a2c65cdc8ba0224e6d76f48ae53584b31d11d003c2f2cf332dd7b227f7ae28",
+        "passed": true,
+        "resources": {
+          "oil": 2118,
+          "gold": 89509,
+          "gem": 3505
+        },
+        "main_visible": true,
+        "health": [
+          {
+            "generation": 579,
+            "ui_generation": 579,
+            "pid": 1970,
+            "age_ms": 158.0
+          },
+          {
+            "generation": 583,
+            "ui_generation": 583,
+            "pid": 1970,
+            "age_ms": 166.0
+          }
+        ],
+        "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+      },
+      "after": {
+        "path": "artifacts/manual-map-20261022/avd-before-final-refresh-r3.json",
+        "sha256": "8ac8a474dca10ac60a2491ca60388ef157a09fa8660bf91b54a5b003f9227376",
+        "passed": true,
+        "resources": {
+          "oil": 1584,
+          "gold": 91628,
+          "gem": 3505
+        },
+        "main_visible": true,
+        "health": [
+          {
+            "generation": 10850,
+            "ui_generation": 10850,
+            "pid": 1970,
+            "age_ms": 168.0
+          },
+          {
+            "generation": 10854,
+            "ui_generation": 10854,
+            "pid": 1970,
+            "age_ms": 165.0
+          }
+        ],
+        "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+      },
+      "oil_spent": 534,
+      "native_urgent_handler_return": true,
+      "recovery_health_failed": true,
+      "recovery_error": "GOTO_MAIN has no reviewed page target"
+    },
+    "second_oil_production_claim": {
+      "after": {
+        "path": "artifacts/manual-map-20261022/redroid-oil-production-claim-r2.json",
+        "sha256": "fec501ebbcd0b9f8eaa5481d46f29f76241052d7b97c4f10774b0ea6147406b8",
+        "passed": true,
+        "resources": {
+          "oil": 2652,
+          "gold": 87347,
+          "gem": 3505
+        },
+        "main_visible": true,
+        "health": [
+          {
+            "generation": 22082,
+            "ui_generation": 22082,
+            "pid": 1652,
+            "age_ms": 271.0
+          },
+          {
+            "generation": 22097,
+            "ui_generation": 22097,
+            "pid": 1652,
+            "age_ms": 276.0
+          }
+        ],
+        "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+      },
+      "before_resources": {
+        "oil": 1532,
+        "gold": 87347,
+        "gem": 3505
+      },
+      "oil_collected": 1120,
+      "oil_receipt_count": 1,
+      "coin_exp_mission_weekly_enabled": false
+    },
+    "enhancement": "One attempted native enhancement had no observed result; no retry, remains unqualified."
+  },
+  "validation": {
+    "final_focused": {
+      "path": "artifacts/manual-map-20261022/final-regression-233-final-r5.xml",
+      "sha256": "9a748ab6da6d5229afe1ea087daf7c4366a4abcaa41fcf385edc43a2c75fc1bc",
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "1185",
+          "time": "57.969"
+        }
+      ]
+    },
+    "urgent_click_priority": {
+      "path": "artifacts/manual-map-20261022/urgent-click-priority-final.xml",
+      "sha256": "321f493b9e072ed039ffcfaf218db028f1c572143fc7b238afd2d887abda0a60",
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "88",
+          "time": "3.408"
+        }
+      ]
+    },
+    "fleet_index_pair": {
+      "path": "artifacts/manual-map-20261022/fleet-index-pair-final.xml",
+      "sha256": "b5b2a19be58deda2d2aa74e756401f9a43788b3f9e186fa4f5813e8ff09a6bc0",
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "59",
+          "time": "0.857"
+        }
+      ]
+    },
+    "reward_resource_pair": {
+      "path": "artifacts/manual-map-20261022/reward-pair-final.xml",
+      "sha256": "2af4bdf37153c30c0bd787e917328e49be35b6e520ef31ce960b89b7a6540340",
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "41",
+          "time": "0.883"
+        }
+      ]
+    },
+    "urgent_notice_pair": {
+      "path": "artifacts/manual-map-20261022/notice-pair-final.xml",
+      "sha256": "777f1e55561c8620003a706b17b897ca3d3b53870df4a2a6d0c099a487eaa7da",
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "102",
+          "time": "3.372"
+        }
+      ]
+    },
+    "precombat_pair": {
+      "path": "artifacts/manual-map-20261022/precombat-back-pair-focused-r2.xml",
+      "sha256": "2ee2059cc8a84c1ee6ffc3838065abda3b5a6df37996d0d8bf2f19f992fce671",
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "53",
+          "time": "1.019"
+        }
+      ]
+    },
+    "final_viewport_geometry": {
+      "path": "artifacts/manual-map-20261022/viewport-geometry-observation-focused-r2.xml",
+      "sha256": "565657347114c3f2b45ee7ffcd5714eabed75add80a51379c06968597a2dbbfc",
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "55",
+          "time": "0.907"
+        }
+      ]
+    },
+    "final_mail_presence": {
+      "path": "artifacts/manual-map-20261022/mail-presence-isolation-focused-r3.xml",
+      "sha256": "15984e03b579087b55750d01c626570b099287772b27094df6abd18cf6bac836",
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "72",
+          "time": "17.571"
+        }
+      ]
+    },
+    "final_camera_recenter": {
+      "path": "artifacts/manual-map-20261022/camera-recenter-focused-r3.xml",
+      "sha256": "935c848df38908297ec3fb2518db9e74270e22a934b5f0857bec23281112fd6c",
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "35",
+          "time": "1.137"
+        }
+      ]
+    },
+    "final_native_ui_navigation": {
+      "path": "artifacts/manual-map-20261022/orphan-ui-goto-behavior-r2.xml",
+      "sha256": "63cb5d3d1a4d41129cc68a17593aaa95de11f9d83e1e0607a350511f501077fe",
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "6",
+          "time": "0.220"
+        }
+      ]
+    },
+    "final_info_retest": {
+      "path": "artifacts/manual-map-20261022/info-regression-retest.xml",
+      "sha256": "c35d932906e73fba98f887ffdeb693592ea958eb1a3441d6439eace79e3ccb92",
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "35",
+          "time": "2.932"
+        }
+      ]
+    },
+    "final_info_real_replay": {
+      "chapter": true,
+      "information": true,
+      "identity": true,
+      "blockers": []
+    },
+    "final_grid_target": {
+      "path": "artifacts/manual-map-20261022/refreshed-grid-focused.xml",
+      "sha256": "63ff6ac6e24b3816a3df075c2ba24524855f01fdeb985db935274b22ffb0c73c",
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "76",
+          "time": "1.494"
+        }
+      ]
+    },
+    "final_native_return": {
+      "path": "artifacts/manual-map-20261022/native-boss-return-focused-r2.xml",
+      "sha256": "6938c65859990fe1050b37c9b8bc7da1a617de753d0b489a8492c1815bebc2ba",
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "53",
+          "time": "5.747"
+        }
+      ]
+    },
+    "intermediate_repository": {
+      "path": "artifacts/manual-map-20261022/final-repository.xml",
+      "sha256": "45de70ee7a26c036a152b565c405318cc3bef37ab56c43af2f30c06f9c0cad72",
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "13",
+          "skipped": "13",
+          "tests": "7954",
+          "time": "1000.300"
+        }
+      ]
+    },
+    "intermediate_failures_retested": {
+      "path": "artifacts/manual-map-20261022/remaining-regressions-fixed.xml",
+      "sha256": "7bde01c744879c34589661ff1962e244ee875b64e8dbc7aec698f92d54ee0774",
+      "suites": [
+        {
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "34",
+          "time": "2.312"
+        }
+      ]
+    },
+    "configuration_matrix": {
+      "android_input_injected": false,
+      "campaign_pairwise_case_count": 21,
+      "campaign_pairwise_sha256": "c198854c573fcaa3ab4b822445c93305d18c5dac75e1a16e16f975913edfcc78",
+      "invalid_case_count": 8,
+      "mutation_budget": 0,
+      "original_method_replays": {
+        "emotion": {
+          "case_count": 48,
+          "source_sha256": {
+            "args": "722bbac03fa73f7395e8a674d337180a6ccdb0bd561c5bb26241f968009b7037",
+            "emotion": "78564065ab11d0e44617d1b697fcaf062a9a19e47e314d5f93365c739557b7b6"
+          }
+        },
+        "event_general": {
+          "case_count": 30,
+          "source_sha256": {
+            "args": "722bbac03fa73f7395e8a674d337180a6ccdb0bd561c5bb26241f968009b7037",
+            "campaign_event": "073c542f4abf275383e49761195e9f9c51ca9dbb760898bad99c3c0812ac3cfa"
+          }
+        },
+        "fleet": {
+          "case_count": 74,
+          "source_sha256": {
+            "args": "722bbac03fa73f7395e8a674d337180a6ccdb0bd561c5bb26241f968009b7037",
+            "combat_auto": "d0c822d4942ff9d793d7e57c6782e39068f92899988bdd72f3771c4cb0034dfa",
+            "combat_manual": "7974450b7946745ba46a9855b19bba914b425b08f3a08851480d37b76903792e",
+            "config": "fdaba7e77c5ffdca9e71a2ded80095a9ce061335d44a30861df9f9cd1963b854",
+            "fleet": "72c129f47bb32fe2583eb3b513e9cadc2ebe6facf001ad8b7dbab3f6a188d799",
+            "strategy": "0541ce24c093dfd0e74cd2ebb53ec4f007b1b8e0628dfb086f4d4a935733564a"
+          }
+        },
+        "hp_control": {
+          "case_count": null,
+          "source_sha256": {
+            "args": "722bbac03fa73f7395e8a674d337180a6ccdb0bd561c5bb26241f968009b7037",
+            "combat": "b3134159309f99d347e1889f83412f70cd3f00fd84fae5b1a2dcc3a9193f76b8",
+            "hp_balancer": "ed35b6a567fc314e65ae680ec706fc04ebce5045176415ede72cc488494cc570"
+          }
+        },
+        "optimization": {
+          "case_count": 9,
+          "source_sha256": {
+            "alas": "2002c94791b139de3c001835f38f31b35ca18b264a4afbd27f74caebf49aaca3",
+            "args": "722bbac03fa73f7395e8a674d337180a6ccdb0bd561c5bb26241f968009b7037",
+            "screenshot": "fc092f5a6cbc4924c4c371e0b3efaea93c827797c3dc0d260f187482ae33d518"
+          }
+        },
+        "scheduler": {
+          "case_count": 24,
+          "source_sha256": {
+            "args": "722bbac03fa73f7395e8a674d337180a6ccdb0bd561c5bb26241f968009b7037",
+            "config": "fdaba7e77c5ffdca9e71a2ded80095a9ce061335d44a30861df9f9cd1963b854",
+            "deep": "1058902625fcdb02f14a0acab9c354c8983807d83742d8d0f6b99e09df95e87e",
+            "filter": "2879f33b23dbfe863ede4015cc8d5a96cbbd090fc0faf81cba6b1416acde3730",
+            "utils": "84594eda0c29f64893088fa6eb59a83f94f842d8c74572145960a5d8671274c2"
+          }
+        },
+        "submarine": {
+          "case_count": null,
+          "source_sha256": {
+            "args": "722bbac03fa73f7395e8a674d337180a6ccdb0bd561c5bb26241f968009b7037",
+            "call": "949bc37aa8ca37bc4604879d7e026f93c003c075182ee7ff118235e2070d82c0",
+            "fast": "bfcdc08141bae279ab7d86fdc2c1390f16f60c86a4bccbe76623da3f15c09852",
+            "fleet": "72c129f47bb32fe2583eb3b513e9cadc2ebe6facf001ad8b7dbab3f6a188d799"
+          }
+        }
+      },
+      "passed": true,
+      "pixel_fallback_used": false,
+      "scheduler_pairwise_case_count": 18,
+      "scheduler_pairwise_sha256": "bf0bec7312f768081ed5d3cce614c37c64acc64ae7cc19eff1c02512cfd61d86",
+      "schema": "alas-headless.configuration-attack-matrix/v1",
+      "seed": 2711994590,
+      "seeded_sequence_count": 32
+    },
+    "support_matrix": {
+      "configuration_source": {
+        "config_sha256": {
+          "config/template.json": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
+          "module/config/argument/args.json": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+          "module/config/argument/task.yaml": "19e6464aaa1e92913ba9f31de590096a09b101638969c41e14c70dd1a4eb6c5a"
+        },
+        "field_count": 278,
+        "panel_count": 60,
+        "panel_field_instance_count": 1217
+      },
+      "configuration_source_verified": true,
+      "counts": {
+        "field_count": 278,
+        "panel_count": 60,
+        "panel_field_instance_count": 1217
+      },
+      "field_classes": {
+        "complete": 55,
+        "declared_only": 0,
+        "live_partial": 147,
+        "offline_only": 61,
+        "unsupported": 15
+      },
+      "patch_series": {
+        "combined_sha256": "d5a08d1cdb880b29cd28e147bc221c4c9a3b45b1dfcb0eae28ac9e364effa6d3",
+        "manifest_sha256": "17964eda87333d234b7cb20cc6269c774f8291a21aac3c5b7360f1a92fb33eb8",
+        "member_count": 233
+      },
+      "schema": "alas-headless.support-matrix-verification/v1"
+    },
+    "patch_tree": {
+      "changed_files": [
+        "module/base/base.py",
+        "module/device/control.py",
+        "module/device/platform/platform_base.py",
+        "module/equipment/equipment_code.py",
+        "module/notify/notify.py",
+        "module/device/screenshot.py",
+        "module/ocr/ocr.py",
+        "module/device/device.py",
+        "module/handler/login.py",
+        "module/freebies/mail_white.py",
+        "module/raid/daily.py",
+        "module/reward/reward.py",
+        "module/commission/commission.py",
+        "module/commission/project.py",
+        "module/tactical/tactical_class.py",
+        "module/dorm/buy_furniture.py",
+        "module/dorm/dorm.py",
+        "module/gacha/gacha_reward.py",
+        "module/research/project.py",
+        "module/research/research.py",
+        "module/research/rqueue.py",
+        "module/research/selector.py",
+        "module/research/series.py",
+        "module/research/ui.py",
+        "module/campaign/campaign_ocr.py",
+        "module/campaign/campaign_status.py",
+        "module/handler/auto_search.py",
+        "module/map/map_fleet_preparation.py",
+        "module/ui/ui.py",
+        "module/campaign/campaign_event.py",
+        "module/event/campaign_abcd.py",
+        "module/campaign/campaign_base.py",
+        "module/campaign/run.py",
+        "module/combat/combat.py",
+        "module/combat/hp_balancer.py",
+        "module/exercise/exercise.py",
+        "module/exercise/combat.py",
+        "module/handler/info_handler.py",
+        "module/handler/strategy.py",
+        "module/map/camera.py",
+        "module/map/fleet.py",
+        "module/map/map_operation.py",
+        "module/combat/emotion.py",
+        "module/combat/combat_auto.py",
+        "module/shop/base.py",
+        "module/shop/clerk.py",
+        "module/shop/shop_medal.py",
+        "module/shop/ui.py",
+        "module/shop/shop_guild.py",
+        "module/shop/shop_general.py",
+        "module/shipyard/shipyard_reward.py",
+        "module/shipyard/ui.py",
+        "campaign/event_20260813_cn/a1.py",
+        "campaign/event_20260813_cn/a2.py",
+        "campaign/event_20260813_cn/a3.py",
+        "campaign/event_20260813_cn/b1.py",
+        "campaign/event_20260813_cn/b2.py",
+        "campaign/event_20260813_cn/b3.py",
+        "campaign/event_20260813_cn/c1.py",
+        "campaign/event_20260813_cn/c2.py",
+        "campaign/event_20260813_cn/c3.py",
+        "campaign/event_20260813_cn/d1.py",
+        "campaign/event_20260813_cn/d2.py",
+        "campaign/event_20260813_cn/d3.py",
+        "campaign/event_20260813_cn/sp.py",
+        "module/campaign/campaign_ui.py",
+        "module/daily/daily.py",
+        "module/eventstory/eventstory.py",
+        "module/freebies/freebies.py",
+        "module/freebies/supply_pack.py",
+        "module/handler/ambush.py",
+        "module/handler/enemy_searching.py",
+        "module/handler/mystery.py",
+        "module/hard/hard.py",
+        "module/minigame/minigame.py",
+        "module/minigame/new_year_challenge.py",
+        "module/os/fleet.py",
+        "module/os/globe_camera.py",
+        "module/os/globe_operation.py",
+        "module/os/map.py",
+        "module/os/tasks/daily.py",
+        "module/os/tasks/hazard_leveling.py",
+        "module/os/tasks/meowfficer_farming.py",
+        "module/os/tasks/month_boss.py",
+        "module/os/tasks/obscure.py",
+        "module/os/tasks/voucher.py",
+        "module/os_ash/ash.py",
+        "module/os_ash/meta.py",
+        "module/os_handler/enemy_searching.py",
+        "module/os_handler/map_event.py",
+        "module/os_handler/mission.py",
+        "module/os_handler/port.py",
+        "module/os_handler/action_point.py",
+        "module/os_handler/storage.py",
+        "module/os_shop/port_shop.py",
+        "module/os_shop/selector.py",
+        "module/os_shop/shop.py",
+        "module/shop/shop_voucher.py",
+        "module/ui/scroll.py",
+        "module/os/tasks/explore.py",
+        "module/os_handler/map_order.py",
+        "module/config/argument/args.json",
+        "module/daemon/benchmark.py",
+        "module/daemon/daemon.py",
+        "module/daemon/game_manager.py",
+        "module/daemon/os_daemon.py",
+        "module/daemon/uncensored.py",
+        "module/combat/level.py",
+        "module/handler/fast_forward.py",
+        "module/retire/retirement.py",
+        "module/retire/enhancement.py",
+        "module/config/config.py",
+        "alas.py",
+        "module/awaken/awaken.py",
+        "module/event_hospital/combat.py",
+        "module/event_hospital/hospital.py",
+        "module/raid/run.py",
+        "module/raid/raid.py",
+        "module/coalition/coalition.py",
+        "module/coalition/combat.py",
+        "module/private_quarters/private_quarters.py",
+        "module/private_quarters/shop.py",
+        "module/guild/guild_reward.py",
+        "module/guild/logistics.py",
+        "module/guild/operations.py",
+        "module/meowfficer/meowfficer.py",
+        "module/campaign/gems_farming.py",
+        "module/meowfficer/buy.py",
+        "module/meowfficer/collect.py",
+        "module/meowfficer/enhance.py",
+        "module/meowfficer/fort.py",
+        "module/meowfficer/train.py",
+        "module/guild/base.py",
+        "module/guild/lobby.py",
+        "module/exercise/hp_daemon.py",
+        "module/exercise/opponent.py",
+        "module/os/map_fleet_selector.py",
+        "module/os_combat/combat.py",
+        "module/os/tasks/stronghold.py",
+        "module/os/tasks/archive.py",
+        "module/os/map_operation.py",
+        "module/os_handler/strategic.py",
+        "module/shop/shop_core.py",
+        "module/shop/shop_merit.py",
+        "module/event/campaign_sp.py",
+        "module/map/map.py",
+        "module/freebies/battle_pass.py",
+        "module/freebies/data_key.py",
+        "campaign/campaign_war_archives/campaign_base.py",
+        "module/war_archives/war_archives.py",
+        "module/combat/submarine.py",
+        "module/private_quarters/status.py",
+        "module/private_quarters/interact.py",
+        "module/ui/page.py",
+        "module/meta_reward/meta_reward.py",
+        "module/config/config_updater.py",
+        "module/os/camera.py",
+        "module/ui/navbar.py",
+        "module/combat/auto_search_combat.py",
+        "module/storage/storage.py"
+      ],
+      "compiled_python_files": [
+        "module/base/base.py",
+        "module/device/control.py",
+        "module/device/platform/platform_base.py",
+        "module/equipment/equipment_code.py",
+        "module/notify/notify.py",
+        "module/device/screenshot.py",
+        "module/ocr/ocr.py",
+        "module/device/device.py",
+        "module/handler/login.py",
+        "module/freebies/mail_white.py",
+        "module/raid/daily.py",
+        "module/reward/reward.py",
+        "module/commission/commission.py",
+        "module/commission/project.py",
+        "module/tactical/tactical_class.py",
+        "module/dorm/buy_furniture.py",
+        "module/dorm/dorm.py",
+        "module/gacha/gacha_reward.py",
+        "module/research/project.py",
+        "module/research/research.py",
+        "module/research/rqueue.py",
+        "module/research/selector.py",
+        "module/research/series.py",
+        "module/research/ui.py",
+        "module/campaign/campaign_ocr.py",
+        "module/campaign/campaign_status.py",
+        "module/handler/auto_search.py",
+        "module/map/map_fleet_preparation.py",
+        "module/ui/ui.py",
+        "module/campaign/campaign_event.py",
+        "module/event/campaign_abcd.py",
+        "module/campaign/campaign_base.py",
+        "module/campaign/run.py",
+        "module/combat/combat.py",
+        "module/combat/hp_balancer.py",
+        "module/exercise/exercise.py",
+        "module/exercise/combat.py",
+        "module/handler/info_handler.py",
+        "module/handler/strategy.py",
+        "module/map/camera.py",
+        "module/map/fleet.py",
+        "module/map/map_operation.py",
+        "module/combat/emotion.py",
+        "module/combat/combat_auto.py",
+        "module/shop/base.py",
+        "module/shop/clerk.py",
+        "module/shop/shop_medal.py",
+        "module/shop/ui.py",
+        "module/shop/shop_guild.py",
+        "module/shop/shop_general.py",
+        "module/shipyard/shipyard_reward.py",
+        "module/shipyard/ui.py",
+        "campaign/event_20260813_cn/a1.py",
+        "campaign/event_20260813_cn/a2.py",
+        "campaign/event_20260813_cn/a3.py",
+        "campaign/event_20260813_cn/b1.py",
+        "campaign/event_20260813_cn/b2.py",
+        "campaign/event_20260813_cn/b3.py",
+        "campaign/event_20260813_cn/c1.py",
+        "campaign/event_20260813_cn/c2.py",
+        "campaign/event_20260813_cn/c3.py",
+        "campaign/event_20260813_cn/d1.py",
+        "campaign/event_20260813_cn/d2.py",
+        "campaign/event_20260813_cn/d3.py",
+        "campaign/event_20260813_cn/sp.py",
+        "module/campaign/campaign_ui.py",
+        "module/daily/daily.py",
+        "module/eventstory/eventstory.py",
+        "module/freebies/freebies.py",
+        "module/freebies/supply_pack.py",
+        "module/handler/ambush.py",
+        "module/handler/enemy_searching.py",
+        "module/handler/mystery.py",
+        "module/hard/hard.py",
+        "module/minigame/minigame.py",
+        "module/minigame/new_year_challenge.py",
+        "module/os/fleet.py",
+        "module/os/globe_camera.py",
+        "module/os/globe_operation.py",
+        "module/os/map.py",
+        "module/os/tasks/daily.py",
+        "module/os/tasks/hazard_leveling.py",
+        "module/os/tasks/meowfficer_farming.py",
+        "module/os/tasks/month_boss.py",
+        "module/os/tasks/obscure.py",
+        "module/os/tasks/voucher.py",
+        "module/os_ash/ash.py",
+        "module/os_ash/meta.py",
+        "module/os_handler/enemy_searching.py",
+        "module/os_handler/map_event.py",
+        "module/os_handler/mission.py",
+        "module/os_handler/port.py",
+        "module/os_handler/action_point.py",
+        "module/os_handler/storage.py",
+        "module/os_shop/port_shop.py",
+        "module/os_shop/selector.py",
+        "module/os_shop/shop.py",
+        "module/shop/shop_voucher.py",
+        "module/ui/scroll.py",
+        "module/os/tasks/explore.py",
+        "module/os_handler/map_order.py",
+        "module/daemon/benchmark.py",
+        "module/daemon/daemon.py",
+        "module/daemon/game_manager.py",
+        "module/daemon/os_daemon.py",
+        "module/daemon/uncensored.py",
+        "module/combat/level.py",
+        "module/handler/fast_forward.py",
+        "module/retire/retirement.py",
+        "module/retire/enhancement.py",
+        "module/config/config.py",
+        "alas.py",
+        "module/awaken/awaken.py",
+        "module/event_hospital/combat.py",
+        "module/event_hospital/hospital.py",
+        "module/raid/run.py",
+        "module/raid/raid.py",
+        "module/coalition/coalition.py",
+        "module/coalition/combat.py",
+        "module/private_quarters/private_quarters.py",
+        "module/private_quarters/shop.py",
+        "module/guild/guild_reward.py",
+        "module/guild/logistics.py",
+        "module/guild/operations.py",
+        "module/meowfficer/meowfficer.py",
+        "module/campaign/gems_farming.py",
+        "module/meowfficer/buy.py",
+        "module/meowfficer/collect.py",
+        "module/meowfficer/enhance.py",
+        "module/meowfficer/fort.py",
+        "module/meowfficer/train.py",
+        "module/guild/base.py",
+        "module/guild/lobby.py",
+        "module/exercise/hp_daemon.py",
+        "module/exercise/opponent.py",
+        "module/os/map_fleet_selector.py",
+        "module/os_combat/combat.py",
+        "module/os/tasks/stronghold.py",
+        "module/os/tasks/archive.py",
+        "module/os/map_operation.py",
+        "module/os_handler/strategic.py",
+        "module/shop/shop_core.py",
+        "module/shop/shop_merit.py",
+        "module/event/campaign_sp.py",
+        "module/map/map.py",
+        "module/freebies/battle_pass.py",
+        "module/freebies/data_key.py",
+        "campaign/campaign_war_archives/campaign_base.py",
+        "module/war_archives/war_archives.py",
+        "module/combat/submarine.py",
+        "module/private_quarters/status.py",
+        "module/private_quarters/interact.py",
+        "module/ui/page.py",
+        "module/meta_reward/meta_reward.py",
+        "module/config/config_updater.py",
+        "module/os/camera.py",
+        "module/ui/navbar.py",
+        "module/combat/auto_search_combat.py",
+        "module/storage/storage.py"
+      ],
+      "patch_applied": true,
+      "patch_sha256": "d5a08d1cdb880b29cd28e147bc221c4c9a3b45b1dfcb0eae28ac9e364effa6d3",
+      "plan_only": false,
+      "schema": "alas-headless.patch-tree-verification/v1",
+      "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
+    },
+    "runtime_patch_content": {
+      "schema": "alas-headless.runtime-patch-content/v1",
+      "passed": true,
+      "method": "unchanged native files match verified 232; reverse member 233 reconstructs its verified combat baseline",
+      "prior_content_receipt_sha256": "0c9c87f1b7d2f86043e55714f77223d873f17c39575bea48eab4b1e0d2243dfe",
+      "member_sha256": "4413c531168ee08341c3abff4c7643382aa8fd80e0c9ca367b117cc33728a095",
+      "combined_sha256": "d5a08d1cdb880b29cd28e147bc221c4c9a3b45b1dfcb0eae28ac9e364effa6d3",
+      "matches": {
+        "module/map/map_operation.py": {
+          "runtime_lf_sha256": "d182e6f2bf51fff330be27af0cb6f8027bd8e6635b477dabc07cdaafbcdff521",
+          "canonical_lf_sha256": "d182e6f2bf51fff330be27af0cb6f8027bd8e6635b477dabc07cdaafbcdff521"
+        },
+        "module/map/fleet.py": {
+          "runtime_lf_sha256": "446496922f06e85313f21d2124442ece17b2f7c204e8b29e1d529655e9c08199",
+          "canonical_lf_sha256": "446496922f06e85313f21d2124442ece17b2f7c204e8b29e1d529655e9c08199"
+        },
+        "module/map/camera.py": {
+          "runtime_lf_sha256": "ba068ab11e388fd96657aa4f5a54f947510c56253dacc84d6c5417dc0f295042",
+          "canonical_lf_sha256": "ba068ab11e388fd96657aa4f5a54f947510c56253dacc84d6c5417dc0f295042"
+        },
+        "module/ui/ui.py": {
+          "runtime_lf_sha256": "e72ce8105ee0008667ff0bb151afbc5473ac882d66b7ee11807330a223fc39ad",
+          "canonical_lf_sha256": "e72ce8105ee0008667ff0bb151afbc5473ac882d66b7ee11807330a223fc39ad"
+        },
+        "module/combat/combat.py": {
+          "runtime_lf_sha256": "949bff4894a451a20a62138839a160e0f024dbd0c548d93fbc6ee5f06704ccd5",
+          "canonical_lf_sha256": "949bff4894a451a20a62138839a160e0f024dbd0c548d93fbc6ee5f06704ccd5"
+        },
+        "module/campaign/campaign_base.py": {
+          "runtime_lf_sha256": "233ebc78755f45ecb1ceb06e468fa1deebfc5e91f311364fb36f141d12464873",
+          "canonical_lf_sha256": "233ebc78755f45ecb1ceb06e468fa1deebfc5e91f311364fb36f141d12464873"
+        },
+        "module/handler/fast_forward.py": {
+          "runtime_lf_sha256": "1a3d606a3e179414bcf3ae938cd0804b0c8d78715898ddc041b90bef1d8ed78d",
+          "canonical_lf_sha256": "1a3d606a3e179414bcf3ae938cd0804b0c8d78715898ddc041b90bef1d8ed78d"
+        }
+      }
+    }
+  },
+  "host": {
+    "sample_count": 3844,
+    "first": "2026-10-22T18:46:09.377662+08:00",
+    "last": "2026-10-23T11:04:50.075679+08:00",
+    "sampling_windows": [
+      {
+        "path": "artifacts/manual-map-20261022/host-samples.jsonl",
+        "sha256": "767e08214d2d78ff548d84525829f5340336bdadb7cff60e4a746a9ed336f42f",
+        "count": 496,
+        "first": "2026-10-22T18:46:09.377662+08:00",
+        "last": "2026-10-22T19:30:38.869176+08:00"
+      },
+      {
+        "path": "artifacts/manual-map-20261022/host-samples-2.jsonl",
+        "sha256": "ba934a0139115c82d5aeca177a9c62cc85f1b1f0dc55e8b95d37929f007a7182",
+        "count": 1385,
+        "first": "2026-10-22T19:31:03.336860+08:00",
+        "last": "2026-10-22T21:31:02.951079+08:00"
+      },
+      {
+        "path": "artifacts/manual-map-20261022/host-samples-3.jsonl",
+        "sha256": "577da40255d7304032f6e3e8a50c26d4a6282582a997fdea54898d28ec91d423",
+        "count": 410,
+        "first": "2026-10-22T21:32:05.980382+08:00",
+        "last": "2026-10-22T22:07:34.692475+08:00"
+      },
+      {
+        "path": "artifacts/manual-map-20261022/host-samples-4.jsonl",
+        "sha256": "3de65bb85085f5475473ecf81ba0794f7a9aada8f676a69aeab330eccc9709dc",
+        "count": 296,
+        "first": "2026-10-22T22:07:35.936667+08:00",
+        "last": "2026-10-22T22:33:00.648039+08:00"
+      },
+      {
+        "path": "artifacts/manual-map-20261022/host-samples-5.jsonl",
+        "sha256": "e0fcef4c2d1260a4ed36a6c1fd0f537314ee60fb5351e30d7799c5e1e280ac37",
+        "count": 307,
+        "first": "2026-10-22T22:33:04.800679+08:00",
+        "last": "2026-10-22T22:58:49.811503+08:00"
+      },
+      {
+        "path": "artifacts/manual-map-20261022/host-samples-6.jsonl",
+        "sha256": "d7ee839b7e4a9e211e31f7d8681e9a5ae697f6d25925f9fd9972bf2f48341a16",
+        "count": 380,
+        "first": "2026-10-23T09:45:08.042324+08:00",
+        "last": "2026-10-23T10:16:58.409378+08:00"
+      },
+      {
+        "path": "artifacts/manual-map-20261022/host-samples-7.jsonl",
+        "sha256": "34e4a52b172a1e3f014733163798031e83111f56f38f9817afab992eeaaf4bf7",
+        "count": 279,
+        "first": "2026-10-23T10:17:01.216303+08:00",
+        "last": "2026-10-23T10:40:23.376938+08:00"
+      },
+      {
+        "path": "artifacts/manual-map-20261022/host-samples-8.jsonl",
+        "sha256": "d16b8aa8b61fa7dfd187a19085fefced159c259c8808f66a93ec5a31186bbece",
+        "count": 291,
+        "first": "2026-10-23T10:40:27.904443+08:00",
+        "last": "2026-10-23T11:04:50.075679+08:00"
+      }
+    ],
+    "continuous_sampling": false,
+    "restart_and_sampling_gap": "Retained AVD pass was Oct 22; host rebooted Oct 23 at 09:27. Redroid restored with existing manager and persistent userdata, then both backends qualified anew. Overnight interval was not sampled.",
+    "resource_exhaustion_events": {
+      "checked_at": "2026-10-23T11:04:53.6307929+08:00",
+      "last_boot": "2026-10-23T09:27:08.5000000+08:00",
+      "start_time": "2026-10-22T18:42:00+08:00",
+      "events": []
+    },
+    "minimum_commit_headroom_gib": 17.896
+  },
+  "limitations": [
+    "Single account, normal 12-4, x86_64 only; functional comparison, not a paired performance benchmark.",
+    "No uninterrupted full-dock-in-the-middle qualification; retirement and interrupted recovery are separate receipts.",
+    "Enhancement result path remains unqualified.",
+    "No native-Linux, ARM64, broad task support, release qualification or support-matrix promotion."
+  ],
+  "total_resource_delta": {
+    "oil": -4770,
+    "gold": 24193,
+    "gem": 0
+  },
+  "between_backend_resource_delta": {
+    "oil": 0,
+    "gold": 0,
+    "gem": 0
+  },
+  "overnight_resource_delta": {
+    "oil": 0,
+    "gold": 0,
+    "gem": 0
+  },
+  "total_oil_spent_including_diagnostics": 7266
+}

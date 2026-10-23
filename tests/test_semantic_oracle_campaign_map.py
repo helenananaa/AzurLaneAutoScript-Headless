@@ -82,7 +82,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
             make_oracle(backend).click_campaign_precombat_back()
         self.assertEqual(backend.taps, [(58, 54)])
 
-    def test_campaign_map_cell_viewport_target_allows_bounded_easing_only(self):
+    def test_campaign_map_cell_viewport_target_observes_current_geometry_without_input(self):
         backend = make_campaign_map_backend()
         oracle = make_oracle(backend)
         state = oracle.campaign_map_state(
@@ -112,8 +112,9 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         self.assertEqual(observed.path, state.cells[0].button_path)
 
         target["adb_bounds"]["bottom"] += 4.2
-        with self.assertRaisesRegex(SemanticGateClosed, "geometry"):
-            oracle.campaign_map_cell_viewport_target(state, "A1")
+        observed = oracle.campaign_map_cell_viewport_target(state, "A1")
+        self.assertAlmostEqual(observed.bounds.bottom, target["adb_bounds"]["bottom"])
+        self.assertEqual(backend.taps, [])
 
     def test_campaign_map_viewport_swipe_proves_same_map_coherent_shift(self):
         backend = make_campaign_map_backend()

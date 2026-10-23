@@ -23,6 +23,15 @@ from .contracts import (
 from .errors import ObserverTransportError, SemanticGateClosed, SemanticOracleError
 
 
+def _selection_path(path: str) -> str:
+    """Compare the same selection panel through its additive layout wrapper.
+
+    Typed records and action receipts keep their actual, unmodified paths.
+    """
+    return path.replace('/blur_panel/select_panel_adapt/select_panel/',
+                        '/blur_panel/select_panel/')
+
+
 class RetirementOracle:
     """Retirement operations sharing the oracle frame and input boundary."""
 
@@ -38,9 +47,9 @@ class RetirementOracle:
         for attempt in range(8):
             try:
                 button_state = self.read_state()
+                raw = self._request("GET /v1/ui\n")
                 if self._foreground_component() != self.fingerprint.component:
                     raise SemanticGateClosed("game activity is not top-resumed")
-                raw = self._request("GET /v1/ui\n")
                 if not isinstance(raw, Mapping):
                     raise ObserverTransportError(
                         "UI observer response is not a mapping"
@@ -120,7 +129,7 @@ class RetirementOracle:
         return tuple(
             item
             for item in ui_state.texts
-            if item.path.endswith(path_suffix)
+            if _selection_path(item.path).endswith(path_suffix)
             and item.active_in_hierarchy
             and item.active_and_enabled
             and not item.truncated
@@ -135,7 +144,7 @@ class RetirementOracle:
         return tuple(
             item
             for item in state.buttons
-            if item.path.endswith(path_suffix)
+            if _selection_path(item.path).endswith(path_suffix)
             and item.active_in_hierarchy
             and item.active_and_enabled
             and item.interactable
@@ -236,7 +245,9 @@ class RetirementOracle:
     def click_dock_page_back(self) -> ActionReceipt:
         """Leave the ordinary dock, never an active selection dialog."""
         state, ui = self._retirement_records()
-        if any("/blur_panel/select_panel/" in item.path for item in state.buttons):
+        if any("/blur_panel/select_panel/" in _selection_path(item.path)
+               and item.active_in_hierarchy and item.active_and_enabled
+               for item in state.buttons):
             raise SemanticGateClosed("dock has an active selection page")
         return self._click_retirement_button(
             "dock/page/back", "/Overlay/UIMain/blur_panel/adapt/top/back",
@@ -246,7 +257,7 @@ class RetirementOracle:
 
     def retirement_selection_visible(self) -> bool:
         state = self.read_state()
-        if not any(b.path.endswith('/blur_panel/select_panel/quick_select')
+        if not any(_selection_path(b.path).endswith('/blur_panel/select_panel/quick_select')
                    and b.active_in_hierarchy for b in state.buttons):
             return False
         _, ui = self._retirement_records()

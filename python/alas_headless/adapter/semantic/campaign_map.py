@@ -250,13 +250,13 @@ class CampaignMapAdapterPorts:
     def campaign_movement_completed(self) -> bool:
         context = self._campaign_context
         return bool(context is not None and context.combat_admission is not None
-                    and context.combat_admission.target_kind == 'move'
+                    and context.combat_admission.target_kind in ('move', 'ammo')
                     and context.combat_proof is not None)
 
     def finish_campaign_movement(self, battle_count: int):
         """Check the original goto's arrival; ALAS owns all further decisions."""
         context = self._campaign_context
-        if context is None or context.combat_admission is None or context.combat_admission.target_kind != 'move':
+        if context is None or context.combat_admission is None or context.combat_admission.target_kind not in ('move', 'ammo'):
             return None
         return self.confirm_campaign_combat(battle_count)
 
@@ -644,7 +644,7 @@ class CampaignMapAdapterPorts:
         prove_alas_campaign_combat_transition(
             admission,
             state,
-            battle_count_after=admission.battle_count + (admission.target_kind != 'move'),
+            battle_count_after=admission.battle_count + (admission.target_kind == 'enemy'),
             input_path=context.combat_receipt.path,
         )
         fleets = tuple(
@@ -721,7 +721,11 @@ class CampaignMapAdapterPorts:
             or context.map_state is None
         ):
             raise SemanticGateClosed("campaign camera map topology is incomplete")
-        state = self.oracle.campaign_map_state(
+        # is_in_map() and Camera.update() belong to one ALAS screenshot scan.
+        # A second live read can cross into precombat or its automation prompt
+        # after the map-presence probe has already succeeded on that frame.
+        oracle = self._frame_or_live_observation_oracle()
+        state = oracle.campaign_map_observation(
             context.stage_code,
             columns=context.map_columns,
             rows=context.map_rows,
@@ -749,7 +753,7 @@ class CampaignMapAdapterPorts:
                     prove_alas_campaign_combat_transition(
                         admission,
                         state,
-                        battle_count_after=admission.battle_count + (admission.target_kind != 'move'),
+                        battle_count_after=admission.battle_count + (admission.target_kind == 'enemy'),
                         input_path=context.combat_receipt.path,
                     )
                     post_combat_state = True
@@ -769,10 +773,10 @@ class CampaignMapAdapterPorts:
                 raise SemanticGateClosed(
                     "campaign camera observation did not prove fleet switch"
                 )
-        elif state.signature != context.map_state.signature:
-            raise SemanticGateClosed(
-                "campaign camera observation changed logical map state"
-            )
+        # Camera.update observes game-owned changes, including the initial
+        # enemy spawn after map entry. Without an outstanding input plan there
+        # is no old signature to preserve. Admissions and input dispatch still
+        # validate the exact state on which a pending action depends.
         if (
             admission is not None
             and not deployment
@@ -924,7 +928,7 @@ class CampaignMapAdapterPorts:
             prove_alas_campaign_combat_transition(
                 admission,
                 state,
-                battle_count_after=admission.battle_count + (admission.target_kind != 'move'),
+                battle_count_after=admission.battle_count + (admission.target_kind == 'enemy'),
                 input_path=receipt.path,
             )
         except SemanticGateClosed:
@@ -1002,6 +1006,19 @@ class CampaignMapAdapterPorts:
             )
         )
         baseline_fleets = tuple(sorted(tuple(baseline[5])))
+        # Unity marks the selected enemy fighting as the fleet arrives, before
+        # PreCombatUI mounts. This is observation of our completed destination
+        # tap, never permission for another input or an unrelated enemy change.
+        arrived_enemy = (
+            admission.target_node
+            if (not for_next_input and admission.target_kind == 'enemy'
+                and route_index == len(admission.input_nodes)
+                and context.combat_receipt is not None
+                and fleets[0].node == admission.target_node)
+            else None
+        )
+        baseline_enemies = tuple(sorted(tuple(baseline[6])))
+        prior_fighting = {enemy[0]: enemy[6] for enemy in baseline_enemies}
         current_enemies = tuple(
             sorted(
                 (
@@ -1011,13 +1028,13 @@ class CampaignMapAdapterPorts:
                     enemy.scale,
                     enemy.genre,
                     enemy.level,
-                    enemy.fighting,
+                    prior_fighting[enemy.node]
+                    if enemy.node == arrived_enemy else enemy.fighting,
                     enemy.is_siren,
                 )
                 for enemy in state.enemies
             )
         )
-        baseline_enemies = tuple(sorted(tuple(baseline[6])))
         current_pickups = tuple(
             sorted(
                 (pickup.node, pickup.kind, pickup.sprite)
@@ -1137,7 +1154,7 @@ class CampaignMapAdapterPorts:
                 prove_alas_campaign_combat_transition(
                     admission,
                     post_state,
-                    battle_count_after=admission.battle_count + (admission.target_kind != 'move'),
+                    battle_count_after=admission.battle_count + (admission.target_kind == 'enemy'),
                     input_path=context.combat_receipt.path,
                 )
             except SemanticGateClosed as exc:
@@ -1218,6 +1235,13 @@ class CampaignMapAdapterPorts:
         if node == admission.target_node:
             context.combat_receipt = receipt
             context.passive_transition_until = time.monotonic() + 30.0
+            # The camera/recheck lease authorized this input and is consumed.
+            # Native goto may click the arrived cell again for confirmation;
+            # that uses the independent post-state acknowledgement below,
+            # never an obsolete pre-input camera token.
+            context.viewport_swipe_proof = None
+            context.target_recheck_proof = None
+            context.viewport_swipe_required = False
         else:
             # The intermediate tap has already started a passive fleet
             # transition, so the next cell cannot be re-read synchronously.

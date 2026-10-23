@@ -1,0 +1,65 @@
+diff --git a/module/ui/ui.py b/module/ui/ui.py
+--- a/module/ui/ui.py
++++ b/module/ui/ui.py
+@@ -155,6 +155,17 @@
+             from module.exception import GameBugError
+             raise GameBugError("Client version warning requires native Restart/update")
+ 
++    def _handle_semantic_orphan_result(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (semantic_adapter is not None
++                and semantic_adapter.orphan_combat_result_visible()):
++            # An exact result stack owns the foreground before any retained
++            # page underneath it. Reuse the existing recovery and postcondition.
++            logger.info("Recover exact ownerless combat result stack")
++            semantic_adapter.recover_orphan_combat_result()
++            return True
++        return False
++
+     def ui_get_current_page(self, skip_first_screenshot=True):
+         """
+         Args:
+@@ -191,6 +202,10 @@
+                 break
+ 
+             self._check_semantic_client_version()
++
++            if self._handle_semantic_orphan_result():
++                timeout.reset()
++                continue
+ 
+             # Known pages
+             semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+@@ -212,14 +227,6 @@
+ 
+             # Unknown page but able to handle
+             logger.info("Unknown ui page")
+-            if (
+-                    semantic_adapter is not None
+-                    and semantic_adapter.orphan_combat_result_visible()
+-            ):
+-                logger.info("Recover exact ownerless combat result stack")
+-                semantic_adapter.recover_orphan_combat_result()
+-                timeout.reset()
+-                continue
+             if self.appear_then_click(GOTO_MAIN, offset=(30, 30), interval=2):
+                 timeout.reset()
+                 continue
+@@ -272,6 +279,9 @@
+                 self.device.screenshot()
+ 
+             self._check_semantic_client_version()
++
++            if self._handle_semantic_orphan_result():
++                continue
+ 
+             # Destination page
+             if self.ui_page_appear(page=destination, offset=offset):
+@@ -352,6 +362,7 @@
+             bool: If UI switched.
+         """
+         logger.hr("UI ensure")
++        self._handle_semantic_orphan_result()
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None and self.ui_page_appear(
+                 page=destination, offset=(30, 30), interval=0
