@@ -547,10 +547,10 @@ class CoreOracle:
         return parsed
 
     def read_ui_snapshot(self, *, check_foreground: bool = True) -> Mapping[str, Any]:
-        """Capture the shared UI envelope without consuming any field family."""
+        """Capture UI before closing the foreground check, keeping endpoint pairs adjacent."""
+        snapshot = self._request("GET /v1/ui\n")
         if check_foreground and self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("game activity is not top-resumed")
-        snapshot = self._request("GET /v1/ui\n")
         if not isinstance(snapshot, Mapping):
             raise ObserverTransportError("UI observer response is not a mapping")
         self._validate_identity(snapshot, UI_SCHEMA)

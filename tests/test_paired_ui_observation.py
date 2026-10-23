@@ -15,6 +15,56 @@ def setup():
     return backend, make_oracle(backend)
 
 
+@pytest.mark.parametrize('drift', [False, True])
+@pytest.mark.parametrize('case', ['slow-query', 'handoff', 'generation-gap'])
+def test_default_ui_capture_keeps_reward_summary_endpoints_adjacent(drift, case):
+    page = 'root/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)'
+    backend = FakeBackend([make_button('CommissionInfoUI4Mellow(Clone)', page)])
+    backend.ui = make_ui([
+        make_text('3', page + '/frame/main/content/event/frame/counter/finished/Text'),
+        make_text('unrelated', page + '/optional/label')])
+    if drift:
+        backend.ui['optional_metadata'] = {'new_field': True}
+        backend.ui['texts'].reverse()
+    oracle = make_oracle(backend)
+    calls = []
+
+    def foreground():
+        calls.append(True)
+        if len(calls) > 1:
+            backend.ui['generation'] = 13
+            if case == 'handoff':
+                return 'other/app'
+        return oracle.fingerprint.component
+
+    oracle._foreground_component = foreground
+    if case == 'generation-gap':
+        backend.ui['generation'] = 13
+    if case == 'slow-query':
+        assert oracle._reward_summary_count_once('commission', 'finished') == 3
+        assert len(calls) == 2
+    else:
+        with pytest.raises(SemanticGateClosed):
+            oracle._reward_summary_count_once('commission', 'finished')
+    assert not backend.taps
+
+
+def test_default_ui_capture_rejects_activity_handoff_during_endpoint_request():
+    backend, oracle = setup()
+    request = oracle._request
+
+    def handoff(line):
+        packet = request(line)
+        if line == 'GET /v1/ui\n':
+            backend.foreground = 'other/app'
+        return packet
+
+    oracle._request = handoff
+    with pytest.raises(SemanticGateClosed, match='top-resumed'):
+        oracle.read_ui_state()
+    assert not backend.taps
+
+
 def test_shared_prompt_routing_does_not_split_pair_with_slow_foreground_read():
     backend, oracle = setup()
     calls = []
