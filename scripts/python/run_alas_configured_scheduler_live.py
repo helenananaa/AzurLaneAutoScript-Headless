@@ -109,6 +109,17 @@ def should_stop(returned, task_count, max_tasks, continue_after_failure=False):
             or (returned is False and not continue_after_failure))
 
 
+def run_native_loop(app):
+    """Recognize ALAS' normal stop exit while it is waiting for NextRun."""
+    try:
+        app.loop()
+    except SystemExit as exc:
+        if exc.code not in (None, 0) or not app.stop_event.is_set():
+            raise
+        return True
+    return False
+
+
 def request_startup_restart(app, requested):
     """Explicit recovery uses native Restart selection and LoginHandler."""
     if requested:
@@ -686,7 +697,7 @@ def main():
             resume_startup_login(app, True)
             result['startup_login_completed'] = True
         save()
-        app.loop()
+        result['native_stop_exit'] = run_native_loop(app)
         result['passed'] = bool(result['tasks']) and all(
             task['terminal'] and task['return'] is True for task in result['tasks'])
     except BaseException as exc:

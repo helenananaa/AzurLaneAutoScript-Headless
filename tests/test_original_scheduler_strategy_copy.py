@@ -13,6 +13,25 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 
+@pytest.mark.parametrize('code,requested', [(0, True), (None, True), (1, True), (0, False)])
+def test_native_loop_stop_exit_preserves_real_failure_codes(code, requested):
+    import threading
+    from types import SimpleNamespace
+    from unittest.mock import Mock
+
+    stop = threading.Event()
+    if requested:
+        stop.set()
+    app = SimpleNamespace(stop_event=stop, loop=Mock(side_effect=SystemExit(code)))
+    if requested and code in (None, 0):
+        assert module.run_native_loop(app) is True
+    else:
+        with pytest.raises(SystemExit) as caught:
+            module.run_native_loop(app)
+        assert caught.value.code == code
+    app.loop.assert_called_once_with()
+
+
 def test_session_and_live_click_record_authority_once_without_replaying_cached_input():
     from alas_headless.semantic_oracle import ActionReceipt, Point, Bounds
     receipt = ActionReceipt('tactical/course/confirm', 10, Point(20, 20),

@@ -1,5 +1,4 @@
-"""A cached queue capacity cannot authorize a claim through its reward popup."""
-import time
+"""A previous queue capacity cannot authorize a claim through its reward popup."""
 from types import SimpleNamespace
 from unittest.mock import Mock
 
@@ -7,7 +6,7 @@ import pytest
 
 from alas_headless import AlasSemanticAdapter, AlasSemanticSession
 from alas_headless.adapter.frame import _FrameBoundSemanticOracle
-from alas_headless.semantic_oracle import ActionReceipt
+from alas_headless.semantic_oracle import ActionReceipt, SemanticGateClosed
 from tests.test_game_tips_loading_presence import host
 from tests.semantic_support.observer_fixtures import (
     FakeBackend, make_button, make_image, make_text, make_ui, make_oracle,
@@ -15,14 +14,13 @@ from tests.semantic_support.observer_fixtures import (
 
 
 @pytest.mark.parametrize('drift', [False, True])
-def test_real_award_replaces_cached_claim_presence_without_breaking_navigation_cache(drift):
+def test_real_award_rejects_queue_reads_without_breaking_claim_absence(drift):
     backend, oracle, adapter = host(drift, fixture='research-award-after-claim-r143.json')
     adapter.begin_research()
     context = adapter._research_context
-    cached = SimpleNamespace(reward_claimable=True)
-    context.last_queue_state, context.last_queue_observed_at = cached, time.monotonic()
     context.reward_receipts = [ActionReceipt('research/queue/claim', 26463, None, None, 'accepted-claim')]
-    assert adapter.research_queue_state() is cached
+    with pytest.raises(SemanticGateClosed):
+        adapter.research_queue_state()
     assert adapter.appear('QUEUE_CLAIM_REWARD') is False
     session = AlasSemanticSession('replay', oracle.fingerprint.driver_revision)
     session.open = lambda: adapter
@@ -31,7 +29,6 @@ def test_real_award_replaces_cached_claim_presence_without_breaking_navigation_c
     session._frame_clock = SimpleNamespace(borrow=Mock(return_value=frame))
     session.refresh_frame = Mock(return_value=frame)
     assert session.click_if_present('QUEUE_CLAIM_REWARD') is None
-    assert context.last_queue_state is cached
     assert len(context.reward_receipts) == 1
     assert not backend.taps
 

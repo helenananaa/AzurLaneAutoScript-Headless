@@ -23,7 +23,6 @@ from ...semantic_oracle import (
     Point,
     ResearchProjectState,
     ResearchProjectStatus,
-    ResearchQueueState,
     SemanticGateClosed,
 )
 
@@ -261,8 +260,6 @@ class _ResearchFlowContext:
     popup_close_receipts: List[ActionReceipt] = field(default_factory=list)
     passive_transition_until: float = 0.0
     navigation_receipts: Dict[str, ActionReceipt] = field(default_factory=dict)
-    last_queue_state: Optional[ResearchQueueState] = None
-    last_queue_observed_at: float = 0.0
     last_projects: Optional[Tuple[ResearchProjectState, ...]] = None
     last_projects_observed_at: float = 0.0
     queue_add_receipt: Optional[ActionReceipt] = None
