@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import ast
 import copy
 import os
@@ -19,7 +20,7 @@ def test_actual_combat_information_uses_original_handler_once(drift):
     a._operation_siren_combat_active = True
     assert o.combat_automation_info_visible()
     assert s.appear('AUTOMATION_CONFIRM_CHECK')
-    path = Path(__file__).parents[1] / 'artifacts/continuity-20261004/alas-runtime/module/combat/combat.py'
+    path = patched_alas_root() / 'module/combat/combat.py'
     if not path.exists():
         pytest.skip('retained ALAS unavailable')
     method = next(v for v in ast.walk(ast.parse(path.read_text(encoding='utf8')))
@@ -63,7 +64,7 @@ def test_combat_information_input_keeps_typed_boundaries(case):
 
 def test_original_semantic_combat_checks_information_after_legacy_timer():
     path = Path(os.environ.get('ALAS_TEST_COMBAT_SOURCE',
-        str(Path(__file__).parents[1] / 'artifacts/continuity-20261004/alas-runtime/module/combat/combat.py')))
+        str(patched_alas_root() / 'module/combat/combat.py')))
     if not path.is_file():
         pytest.skip('retained ALAS unavailable')
     method = next(v for v in ast.walk(ast.parse(path.read_text(encoding='utf8')))

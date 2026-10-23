@@ -2,6 +2,13 @@
 
 Qualification baseline: upstream commit `81ccf63b4540f00241628c82a58c02c7a2bb11af`.
 
+Current integration (2026-10-23): 233 ordered members, shared by the Windows
+AVD and local WSL Redroid task paths. KVM and Mac/HVF lifecycle implementations
+are also integrated without extending their account/task qualification.
+Use the [mainline local entry](../../docs/local-runtime-entry.zh-CN.md) for the
+retained local instance and the [integration record](../../docs/main-integration-20261023.zh-CN.md)
+for final regression results. The capability ledger remains the support authority.
+
 ## Runtime compatibility and validation
 
 ALAS owns task selection, scheduling, recovery and task state machines. The

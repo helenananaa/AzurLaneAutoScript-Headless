@@ -1,4 +1,5 @@
 """Real battle branches must see the same RoadGrids aliases as their preview."""
+from tests.alas_test_source import patched_alas_root
 from types import SimpleNamespace
 from unittest.mock import Mock
 
@@ -54,7 +55,7 @@ def test_execution_preserves_alias_identity_and_restores_class_state(raises):
 def test_original_battle_prelude_refreshes_frame_after_projection(semantic):
     import ast
     from pathlib import Path
-    source = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/replay/module/campaign/campaign_base.py'
+    source = patched_alas_root() / 'module/campaign/campaign_base.py'
     if not source.is_file():
         pytest.skip('fixed upstream materialization unavailable')
     cls = next(n for n in ast.parse(source.read_text(encoding='utf-8')).body if isinstance(n,ast.ClassDef))

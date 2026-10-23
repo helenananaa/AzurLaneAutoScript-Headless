@@ -14,6 +14,7 @@ def test_native_goto_uses_existing_recovery_only_for_reviewed_semantic_home(sema
     adapter = SimpleNamespace(mail_reward_active=lambda: False) if semantic else None
     host = SimpleNamespace(device=SimpleNamespace(semantic_adapter=adapter, screenshot=Mock(), click=Mock()),
         interval_clear=Mock(), _check_semantic_client_version=Mock(),
+        _handle_semantic_orphan_result=Mock(return_value=False),
         ui_page_appear=Mock(side_effect=[False, True]), appear=Mock(return_value=reviewed_home),
         ui_get_current_page=Mock(), ui_additional=Mock(return_value=False))
     goto(host, object())

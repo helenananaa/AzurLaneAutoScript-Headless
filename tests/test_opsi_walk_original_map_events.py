@@ -1,4 +1,5 @@
 """Execute the actual patched ALAS walk owner with controlled semantic frames."""
+from tests.alas_test_source import patched_alas_root
 import ast
 from pathlib import Path
 from types import SimpleNamespace
@@ -24,7 +25,7 @@ class Timer:
 
 
 def walk_function():
-    source = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/upstream/module/os/fleet.py'
+    source = patched_alas_root() / 'module/os/fleet.py'
     tree = ast.parse(source.read_text(encoding='utf-8'))
     owner = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == 'OSFleet')
     function = next(node for node in owner.body if isinstance(node, ast.FunctionDef) and node.name == 'wait_until_walk_stable')

@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -58,7 +59,7 @@ def test_original_resources_observe_off_and_submit_once_to_on_postcondition():
 
 def test_original_recovery_refreshes_before_map_identity_and_resumes_paused_map():
     import ast
-    source=Path(__file__).resolve().parents[1]/'artifacts/campaign-preparation/upstream/module/campaign/campaign_base.py'
+    source=patched_alas_root() / 'module/campaign/campaign_base.py'
     if not source.exists():pytest.skip('patched original ALAS tree unavailable')
     tree=ast.parse(source.read_text(encoding='utf8'))
     method=next(x for c in tree.body if isinstance(c,ast.ClassDef) and c.name=='CampaignBase'

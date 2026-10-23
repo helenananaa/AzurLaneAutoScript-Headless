@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import ast
 from pathlib import Path
 from types import SimpleNamespace
@@ -9,7 +10,7 @@ from alas_headless.oracle.errors import SemanticGateClosed, SemanticTargetNotAct
 
 
 def original_feed_enter():
-    path=Path(__file__).resolve().parents[1]/'artifacts/campaign-preparation/upstream/module/dorm/dorm.py'
+    path=patched_alas_root() / 'module/dorm/dorm.py'
     tree=ast.parse(path.read_text(encoding='utf8'))
     method=next(node for node in ast.walk(tree) if isinstance(node,ast.FunctionDef) and node.name=='dorm_feed_enter')
     names=('DORM_CHECK','DORM_FEED_CHECK','DORM_FEED_ENTER','DORM_FEED_CANCEL',

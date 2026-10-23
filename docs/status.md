@@ -1,5 +1,24 @@
 # Validation status
 
+## 2026-10-23 — mainline integration
+
+The shared ALAS adapter, local Redroid and KVM work, and Mac/HVF backend are
+integrated together. The operator entry now derives its source from the main
+checkout while retaining the existing runtime, userdata and native scheduler
+configuration. The support ledger is unchanged: F=9, L=31, P=10, B=7, O=3.
+See the [integration and regression record](main-integration-20261023.zh-CN.md)
+and [local entry guide](local-runtime-entry.zh-CN.md).
+Final unified Windows regression: 7,948 passed, 246 skipped, zero failures;
+30 explicit-runtime cases also passed separately. Clean-environment focused
+validation passed 542 cases, and WSL lifecycle validation passed 104 cases.
+
+The latest retained live evidence additionally covers bounded native
+Commission/Research/Reward scheduling, persistent reentry, requested normal
+stop, one enhancement component, and container recovery with account/resource
+preservation. See [the 2026-10-23 continuity report](redroid-continuity-20261023.zh-CN.md).
+No new live run or support promotion is implied by integration. Entries below
+retain their original dates and qualification scope.
+
 2026-10-23: Shared runtime fixes backported from Redroid; original ALAS manual
 12-4 Main then completed on Windows AVD and Windows/WSL Redroid with the same
 adapter/runtime tree. Both returned true, RunCount=0; final focused regression

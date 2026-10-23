@@ -92,6 +92,8 @@ def test_orphan_result_accepts_exact_exercise_return_and_preserves_task_isolatio
             'main_page_visible', 'event_campaign_page_visible', 'exercise_page_visible'):
         getattr(oracle, name).return_value = False
     oracle.campaign_is_in_map.return_value = False
+    oracle.enabled.return_value = False
+    oracle.campaign_page_is_normal.return_value = False
     adapter = SimpleNamespace(_require_frame_observation_oracle=lambda: oracle,
         meta_beacon_active=lambda: False, _meta_assist_active=False)
     session = AlasSemanticSession.__new__(AlasSemanticSession)

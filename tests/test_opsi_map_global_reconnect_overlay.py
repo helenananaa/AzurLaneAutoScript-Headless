@@ -2,6 +2,7 @@
 
 This is an offline reconstructed combination, not a live network-failure claim.
 """
+from tests.alas_test_source import patched_alas_root
 import copy
 import ast
 import json
@@ -128,7 +129,7 @@ def test_refresh_cannot_redirect_an_owned_reconnect_to_another_popup_or_combat_i
 
 def test_original_info_handler_annotated_shared_asset_reaches_the_exact_global_owner():
     backend, oracle, adapter, session = reconnect_over_map('baseline')
-    path = Path(__file__).resolve().parents[1] / 'artifacts/continuity-20261004/alas-runtime/module/handler/info_handler.py'
+    path = patched_alas_root() / 'module/handler/info_handler.py'
     if not path.exists():
         pytest.skip('installed native InfoHandler unavailable; direct session cases still run')
     tree = ast.parse(path.read_text(encoding='utf-8'))

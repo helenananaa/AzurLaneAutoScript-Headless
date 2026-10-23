@@ -253,4 +253,3 @@ __all__ = [
     "runtime_lock_plain",
     "write_canonical_document",
 ]
-

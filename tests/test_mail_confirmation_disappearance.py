@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import ast
 from pathlib import Path
 from types import MethodType, SimpleNamespace
@@ -67,7 +68,7 @@ def test_original_direct_mail_popup_click_preserves_transition_and_wrong_kind(ki
 
 
 def test_retained_native_info_handler_continues_after_no_input_disappearance():
-    path = Path(__file__).parents[1] / 'artifacts/continuity-20261004/alas-runtime/module/handler/info_handler.py'
+    path = patched_alas_root() / 'module/handler/info_handler.py'
     if not path.exists():
         pytest.skip('retained native ALAS handler unavailable')
     tree = ast.parse(path.read_text(encoding='utf8'))

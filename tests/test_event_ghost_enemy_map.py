@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import json,re
 from pathlib import Path
 import pytest
@@ -13,7 +14,7 @@ def retained():
     r=json.loads(p.read_text(encoding='utf8'))['tasks'][-1]['failure_observation']
     b=FakeBackend(r['state']['buttons_snapshot']['buttons']);u=r['ui']['snapshot']
     b.ui=make_ui(u['texts'],images=u['images'],toggles=u['toggles'])
-    source=(root/'artifacts/campaign-preparation/upstream/campaign/event_20260908_cn/d3.py').read_text(encoding='utf8')
+    source=(patched_alas_root() / 'campaign/event_20260908_cn/d3.py').read_text(encoding='utf8')
     data=re.search(r'MAP.map_data = """(.*?)"""',source,re.S).group(1).strip()
     land=tuple((y,x) for y,line in enumerate(data.splitlines(),1)
                for x,tile in enumerate(line.split(),1) if tile=='++')

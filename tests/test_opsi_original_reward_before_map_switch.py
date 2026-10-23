@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import ast
 from pathlib import Path
 from types import SimpleNamespace
@@ -7,7 +8,7 @@ import pytest
 class CampaignEnd(Exception): pass
 
 def method():
-    source=Path(__file__).resolve().parents[1]/'artifacts/campaign-preparation/upstream/module/os_handler/map_event.py'
+    source=patched_alas_root() / 'module/os_handler/map_event.py'
     node=next(n for n in ast.walk(ast.parse(source.read_text(encoding='utf-8')))
               if isinstance(n,ast.FunctionDef) and n.name=='handle_os_auto_search_map_option')
     scope={'logger':Mock(),'CampaignEnd':CampaignEnd}

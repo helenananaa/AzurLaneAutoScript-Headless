@@ -1,4 +1,5 @@
 """Task-local popup shapes and the original UI withdrawal decision."""
+from tests.alas_test_source import patched_alas_root
 
 import ast
 from pathlib import Path
@@ -87,7 +88,7 @@ def test_dock_return_requires_unique_actionable_live_control(duplicate, obscured
 
 @pytest.mark.parametrize('semantic, owned, expected', [(True, True, True), (True, False, False), (False, False, False)])
 def test_original_ui_routes_only_semantic_owned_withdrawal(semantic, owned, expected):
-    source = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/upstream/module/ui/ui.py'
+    source = patched_alas_root() / 'module/ui/ui.py'
     if not source.exists():
         pytest.skip('materialized patched ALAS tree unavailable')
     tree = ast.parse(source.read_text(encoding='utf-8'))

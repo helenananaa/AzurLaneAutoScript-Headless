@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import ast
 from pathlib import Path
 from types import SimpleNamespace
@@ -14,7 +15,7 @@ import pytest
 ])
 def test_original_navbar_uses_original_gacha_reward_handler_only_in_semantic_mode(nav, session, reward, expected):
     root=Path(__file__).resolve().parents[1]
-    source=(root/'artifacts/campaign-preparation/upstream/module/ui/navbar.py').read_text(encoding='utf-8')
+    source=(patched_alas_root() / 'module/ui/navbar.py').read_text(encoding='utf-8')
     tree=ast.parse(source)
     cls=next(node for node in tree.body if isinstance(node,ast.ClassDef) and node.name=='Navbar')
     method=next(node for node in cls.body if isinstance(node,ast.FunctionDef) and node.name=='_shop_obstruct_handle')

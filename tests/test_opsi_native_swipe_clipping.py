@@ -1,4 +1,5 @@
 """Native ALAS endpoint clipping is compatible with the typed map drag port."""
+from tests.alas_test_source import patched_alas_root
 from types import SimpleNamespace
 from unittest.mock import Mock
 from pathlib import Path
@@ -245,7 +246,7 @@ def test_runtime_or_uncertain_input_failure_keeps_the_original_error(failure):
 
 def native_run():
     from module.config.config import TaskEnd
-    source = Path(__file__).resolve().parents[1] / 'artifacts/continuity-20261004/alas-runtime/alas.py'
+    source = patched_alas_root() / 'alas.py'
     if not source.exists():
         pytest.skip('installed native ALAS run method unavailable')
     tree = ast.parse(source.read_text(encoding='utf-8'))

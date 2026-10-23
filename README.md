@@ -22,6 +22,12 @@ Unity UI 状态，提供给锁定版本的 ALAS。这样不仅改变了自动化
 [最新验证状态](docs/status.md) ·
 [ALAS 集成说明](integration/alas/README.md)
 
+2026-10-23：主线已整合公共 ALAS 适配、Redroid、KVM 和 Mac/HVF 的已有成果。
+同一公共适配层在 Windows AVD 与本机 WSL Redroid 上完成原 ALAS 普通 12-4
+手动地图任务；Reward、Commission、Research 已有有界调度与配置重入证据。
+本机使用入口见[本地运行指南](docs/local-runtime-entry.zh-CN.md)，
+整合与回归结果见[主线整合记录](docs/main-integration-20261023.zh-CN.md)。
+
 ## 两条核心主线
 
 这个仓库主要解决两个互相依赖的问题。
@@ -63,11 +69,11 @@ Unity UI 状态，提供给锁定版本的 ALAS。这样不仅改变了自动化
 | 等级 | 面板数量 | 含义 |
 |---|---:|---|
 | 完整支持（`F`） | 9 / 60 | 在已验证环境中，必要配置值和异常分支均已闭环。 |
-| 实机主路径完成（`L`） | 26 / 60 | 至少一条真实设备主路径已闭环，但并非所有配置值都已验证。 |
-| 仅离线完成（`O`） | 6 / 60 | 已有契约、回放或桩验证，但还没有实机任务闭环。 |
+| 实机主路径完成（`L`） | 31 / 60 | 至少一条真实设备主路径已闭环，但并非所有配置值都已验证。 |
+| 仅离线完成（`O`） | 3 / 60 | 已有契约、回放或桩验证，但还没有实机任务闭环。 |
 | 部分完成（`P`） | 10 / 60 | 已实现或可以到达部分流程，仍有重要分支未完成。 |
-| 到达明确边界（`B`） | 8 / 60 | 已安全到达账号、资源、日期或观察能力边界。 |
-| 尚未完成（`M`） | 1 / 60 | 仍缺少任务级语义适配。 |
+| 到达明确边界（`B`） | 7 / 60 | 已安全到达账号、资源、日期或观察能力边界。 |
+| 尚未完成（`M`） | 0 / 60 | 没有整块面板归入此类；仍有未适配字段及分支。 |
 
 具有代表性的已验证工作包括：
 
@@ -75,7 +81,7 @@ Unity UI 状态，提供给锁定版本的 ALAS。这样不仅改变了自动化
 - 奖励、委托、重启、科研、后宅、战术学院和建造等有界实机任务路径；
 - 多条大型作战导航、刷取、商店、档案和 Boss 路径；
 - 类型化读取地图、舰队、敌人、资源、弹窗和战斗结果；
-- 默认关闭的动作预算、精确目标检查和后置条件证明；
+- 与原任务相称的动作预算、精确目标检查和后置条件证明；
 - 确定性回放、锁定补丁序列验证和失败路径测试。
 
 这些结果不代表所有任务、服务器、账号状态、地图布局或配置组合都已经支持。
@@ -135,11 +141,13 @@ Headless 模式有意采用 fail-closed 设计：
 
 ### 检查控制器和契约
 
-Python 控制器测试不需要安装游戏，也不需要准备 ALAS checkout：
+离线测试不需要启动游戏。完整回归需要相邻的锁定 ALAS 只读 checkout；
+原生方法测试会自动生成一次性补丁树，也可通过 `ALAS_TEST_ROOT` 复用已验证的运行树。
+准备方法见[本地运行指南](docs/local-runtime-entry.zh-CN.md)。
 
 ```powershell
 $env:PYTHONPATH = 'python'
-python -m unittest discover -s tests -p 'test_*.py'
+python -m pytest -q tests
 ```
 
 ### 构建 ANGLE NULL 运行时
@@ -203,7 +211,9 @@ Unity.exe -batchmode -quit `
 
 | 宿主与 Android 路径 | 当前状态 | 已验证范围 | 主要边界 |
 |---|---|---|---|
-| x86_64 Linux + KVM / Android Emulator | **主线可执行，当前最成熟** | API 32 x86_64、ANGLE NULL、Unity、observer、游戏与 Android recovery；当前 ALAS 任务有独立实机证据 | 仍需长期 soak、容量和多实例密度验证 |
+| Windows + AVD / WHPX | **当前本机任务路径已验证** | ANGLE NULL、typed observer、普通 12-4 完整手动地图、登录和返回主页 | 单账号、单关卡证据；长期无人值守仍未资格化 |
+| Windows/WSL + Redroid x86_64 | **当前本机任务路径已验证** | 共享 backend、完整 Main、日常有界调度、配置重入、容器恢复及持久化 | 不代表原生 Linux；真实版本迁移/回退、自然满仓连续恢复和长期运行待验证 |
+| x86_64 Linux + KVM / Android Emulator | **主线可执行** | 历史 API 32 的 ANGLE NULL、Unity、observer 与 recovery；本地 API 34 登录前、持久化与生命周期另有记录 | 本地当前账号任务、长期 soak、容量和多实例密度待验证 |
 | External ADB | **主线可执行** | 附着到精确指定设备，执行身份、生命周期和恢复合同 | 不负责设备 provisioning、root、升级或持久化 |
 | x86_64 Linux + Redroid | **真实探索；backend 待实机资格** | 无 `/dev/kvm` 云主机上的 Binder、容器、ANGLE NULL、observer、完整资源、重启持久化和登录界面 | backend 已实现但隔离实例 lifecycle、当前 OCI 回退和 ALAS 工作负载尚未闭环 |
 | ARM64 Linux + Redroid | **全新容器的真实游戏登录前路径已通过** | VA39、Android 14、新 userdata 首次协议、私有 ANGLE NULL、typed observer、28.1 GB 资源下载和一次有界冷重启后到达手机号登录 Activity；未输入账号 | 两项运行时修复尚未封入 OCI，私有 NULL 从首次启动起的协议转场仍需复验；ALAS workload、backend recovery/cleanup 和 soak 仍缺失 |

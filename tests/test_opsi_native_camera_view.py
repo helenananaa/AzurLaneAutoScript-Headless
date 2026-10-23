@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
@@ -8,7 +9,7 @@ from tests.test_semantic_oracle_opsi_map_geometry import setup_map
 
 @pytest.fixture
 def native(monkeypatch):
-    runtime=Path(__file__).resolve().parents[1]/'artifacts/campaign-preparation/upstream'
+    runtime=patched_alas_root()
     if not runtime.exists():pytest.skip('materialized ALAS unavailable')
     monkeypatch.syspath_prepend(str(runtime))
     from module.map_detection.os_grid import OSGridInfo
@@ -117,7 +118,7 @@ def test_install_does_not_apply_pending_original_alas_swipe_twice(native):
 def test_original_os_camera_accepts_zone_shape_notation(native,shape):
     import ast
     from module.map.map_base import location_ensure
-    source=Path(__file__).resolve().parents[1]/'artifacts/campaign-preparation/upstream/module/os/camera.py'
+    source=patched_alas_root() / 'module/os/camera.py'
     tree=ast.parse(source.read_text(encoding='utf-8'))
     method=next(n for n in ast.walk(tree) if isinstance(n,ast.FunctionDef) and n.name=='_load_semantic_os_view')
     calls=[]
@@ -136,7 +137,7 @@ def test_original_os_camera_accepts_zone_shape_notation(native,shape):
 @pytest.mark.parametrize('native_prediction,expected_camera',[(True,(1,4)),(False,(1,6))])
 def test_original_camera_uses_actual_semantic_swipe_delta_with_os_pixel_prediction_disabled(native,native_prediction,expected_camera):
     import ast,numpy as np
-    source=Path(__file__).resolve().parents[1]/'artifacts/campaign-preparation/upstream/module/map/camera.py'
+    source=patched_alas_root() / 'module/map/camera.py'
     tree=ast.parse(source.read_text(encoding='utf-8'))
     method=next(n for n in ast.walk(tree) if isinstance(n,ast.FunctionDef) and n.name=='_update_view_data')
     view=SimpleNamespace(semantic_swipe_prediction=native_prediction,left_edge=False,right_edge=False,upper_edge=False,lower_edge=False)

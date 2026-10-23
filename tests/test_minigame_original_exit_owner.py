@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import ast
 from types import SimpleNamespace
 import pytest
@@ -7,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 @pytest.mark.parametrize('owned,selected,expected', [(36, 1, 5), (3, 1, 3), (1, 1, 1), (36, 0, 0)])
 def test_native_coin_owner_selects_five_or_available_stock(owned, selected, expected):
-    tree = ast.parse((ROOT / 'artifacts/campaign-preparation/upstream/module/minigame/new_year_challenge.py').read_text(encoding='utf-8'))
+    tree = ast.parse((patched_alas_root() / 'module/minigame/new_year_challenge.py').read_text(encoding='utf-8'))
     methods = [n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name in ('use_coin', 'use_coin_new_year_challenge')]
     counter = [selected, owned]
     clicks = []
@@ -26,7 +27,7 @@ def test_native_coin_owner_selects_five_or_available_stock(owned, selected, expe
     assert len(clicks) == max(0, expected-selected)
 
 def test_original_exit_loop_owns_result_back_and_retries():
-    tree = ast.parse((ROOT / 'artifacts/campaign-preparation/upstream/module/minigame/new_year_challenge.py').read_text(encoding='utf-8'))
+    tree = ast.parse((patched_alas_root() / 'module/minigame/new_year_challenge.py').read_text(encoding='utf-8'))
     owner = next(n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name == 'exit_game')
     text = ast.unparse(owner)
     assert 'minigame_exit_new_year' not in text
@@ -38,7 +39,7 @@ def test_original_exit_loop_owns_result_back_and_retries():
     assert 'self.appear_then_click(BACK' in text
 
 def test_retained_result_recovery_uses_original_exit_before_page_navigation():
-    tree = ast.parse((ROOT / 'artifacts/campaign-preparation/upstream/module/minigame/minigame.py').read_text(encoding='utf-8'))
+    tree = ast.parse((patched_alas_root() / 'module/minigame/minigame.py').read_text(encoding='utf-8'))
     owner = next(n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name == '_run')
     text = ast.unparse(owner)
     assert 'semantic_adapter.minigame_result() is not None' in text

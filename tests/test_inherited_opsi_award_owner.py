@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import copy
 import ast
 import os
@@ -72,7 +73,7 @@ def test_native_result_probe_reclassifies_map_in_existing_single_refresh(drift):
 
 def test_original_ui_goto_handles_award_mount_between_page_and_click():
     path = Path(os.environ.get('ALAS_TEST_UI_SOURCE',
-        str(Path(__file__).parents[1] / 'artifacts/continuity-20261004/alas-runtime/module/ui/ui.py')))
+        str(patched_alas_root() / 'module/ui/ui.py')))
     if not path.exists():
         pytest.skip('retained native ALAS unavailable')
     method = next(v for v in ast.walk(ast.parse(path.read_text(encoding='utf8')))
@@ -98,6 +99,7 @@ def test_original_ui_goto_handles_award_mount_between_page_and_click():
         return True
     runner = SimpleNamespace(interval_clear=lambda _: None, ui_button_interval_reset=lambda _: None,
         _check_semantic_client_version=lambda: None,
+        _handle_semantic_orphan_result=lambda: False,
         ui_page_appear=lambda **_: stage['closed'],
         appear=lambda target, *args, **_: target == 'OS_CHECK' and not stage['covered'],
         ui_additional=additional, device=SimpleNamespace(semantic_adapter=SimpleNamespace(

@@ -55,6 +55,7 @@ def test_native_navigation_consumes_only_known_preinput_overlay_races(error):
             client_version_update_required=lambda: False),
             screenshot=lambda: events.append('screenshot'), click=click),
         interval_clear=Mock(), ui_button_interval_reset=Mock(),
+        _handle_semantic_orphan_result=Mock(return_value=False),
         ui_page_appear=lambda **kw: done,
         appear=lambda target, *a, **kw: target is page.check_button,
         ui_additional=additional)

@@ -1,4 +1,5 @@
 """Submarine-specific observations must not weaken non-submarine sorties."""
+from tests.alas_test_source import patched_alas_root
 from dataclasses import replace
 import pytest
 from alas_headless.oracle.contracts import CampaignFleetSelectionState
@@ -205,7 +206,7 @@ def test_call_receipt_is_one_shot_per_battle_and_ack_requires_own_input(mode):
     import ast
     from pathlib import Path
     from unittest.mock import Mock
-    source=Path(__file__).resolve().parents[1]/'artifacts/campaign-preparation/replay/module/combat/submarine.py'
+    source=patched_alas_root() / 'module/combat/submarine.py'
     tree=ast.parse(source.read_text(encoding='utf-8'))
     tree.body=[n for n in tree.body if isinstance(n,ast.ClassDef)]
     ns=dict(ModuleBase=object,Timer=lambda _:Mock(reached=lambda:False),logger=Mock())
@@ -240,7 +241,7 @@ def test_original_submarine_handler_owns_reset_and_noncampaign_is_unchanged(mode
     from pathlib import Path
     from types import SimpleNamespace
     from unittest.mock import Mock
-    source = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/replay/module/combat/submarine.py'
+    source = patched_alas_root() / 'module/combat/submarine.py'
     if not source.is_file():
         pytest.skip('materialized fixed upstream unavailable')
     tree = ast.parse(source.read_text(encoding='utf-8'))
@@ -513,7 +514,7 @@ def test_retained_live_map_separates_submarine_from_surface_fleets(ammo_surface)
     from tests.semantic_support.observer_fixtures import make_snapshot, make_buttons
     root = Path(__file__).resolve().parents[1]
     capture = root / 'integration/alas/submarine-strategy-live-20260907-r1.json'
-    source = root / 'artifacts/campaign-preparation/replay/campaign/campaign_main/campaign_12_4.py'
+    source = patched_alas_root() / 'campaign/campaign_main/campaign_12_4.py'
     if not capture.is_file() or not source.is_file():
         pytest.skip('retained typed map and pinned map definition unavailable')
     record = json.loads(capture.read_text(encoding='utf-8'))['strategy']
@@ -570,7 +571,7 @@ def test_deployment_map_decoder_is_opt_in_and_reuses_original_topology(phase):
     from pathlib import Path
     from tests.semantic_support.observer_fixtures import make_snapshot, make_buttons
     root = Path(__file__).resolve().parents[1]
-    source = root / 'artifacts/campaign-preparation/replay/campaign/campaign_main/campaign_10_2.py'
+    source = patched_alas_root() / 'campaign/campaign_main/campaign_10_2.py'
     capture = root / ('integration/alas/submarine-move-entry-live-20260908-r2.json' if phase == 'move'
                       else 'integration/alas/submarine-destination-live-20260908-r1.json')
     if not source.is_file() or not capture.is_file():
@@ -692,28 +693,8 @@ def test_chapter_probe_defers_only_proven_settlement(settlement):
             CampaignStateOracle.campaign_page_is_normal(h)
 
 
-def test_boss_stage_wait_handles_original_settlement_before_page_probe():
-    import ast
-    from pathlib import Path
-    from types import SimpleNamespace
-    from unittest.mock import Mock
-    source = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/replay/module/combat/combat.py'
-    tree = ast.parse(source.read_text(encoding='utf-8'))
-    branch = next(n for n in ast.walk(tree) if isinstance(n, ast.If)
-                  and isinstance(n.test, ast.Name) and n.test.id == 'semantic_campaign_stage_wait')
-    loop = ast.For(target=ast.Name(id='_', ctx=ast.Store()),
-                   iter=ast.List(elts=[ast.Constant(1)], ctx=ast.Load()),
-                   body=[branch], orelse=[])
-    code = compile(ast.fix_missing_locations(ast.Module(body=[loop], type_ignores=[])), str(source), 'exec')
-    for handled in (True, False):
-        oracle = SimpleNamespace(campaign_page_is_normal=Mock(return_value=True))
-        host = SimpleNamespace(handle_auto_search_exit=Mock(return_value=handled))
-        ns = dict(self=host, drop=None, semantic_campaign_stage_wait=True,
-                  semantic_campaign_map_stable=False, logger=Mock(),
-                  semantic_adapter=SimpleNamespace(open=lambda: SimpleNamespace(oracle=oracle)))
-        exec(code, ns)
-        host.handle_auto_search_exit.assert_called_once_with(drop=None)
-        assert oracle.campaign_page_is_normal.call_count == (0 if handled else 1)
+# Boss settlement is covered through the original complete result loop in
+# test_campaign_native_boss_return.py; the former stage-wait shortcut was removed.
 
 
 def test_submarine_move_postcondition_uses_new_complete_frame_without_polling():
@@ -793,7 +774,7 @@ def test_original_camera_reanchors_only_explicit_no_input_condition():
     from types import SimpleNamespace
     from unittest.mock import Mock
     from alas_headless.oracle.errors import SemanticViewportReanchorRequired
-    source=Path(__file__).resolve().parents[1]/'artifacts/campaign-preparation/replay/module/map/camera.py'
+    source=patched_alas_root() / 'module/map/camera.py'
     cls=next(n for n in ast.parse(source.read_text(encoding='utf-8')).body if isinstance(n,ast.ClassDef) and n.name=='Camera')
     fn=next(n for n in cls.body if isinstance(n,ast.FunctionDef) and n.name=='_map_swipe')
     ns={'np':np,'logger':Mock()}

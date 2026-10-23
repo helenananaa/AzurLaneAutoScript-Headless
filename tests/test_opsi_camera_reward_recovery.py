@@ -1,4 +1,5 @@
 """Known reward overlays return to ALAS recovery; no obscured swipe is sent."""
+from tests.alas_test_source import patched_alas_root
 import ast
 from pathlib import Path
 from types import SimpleNamespace
@@ -13,7 +14,7 @@ from tests.test_opsi_native_camera_view import native
 
 
 def loader():
-    source = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/upstream/module/os/camera.py'
+    source = patched_alas_root() / 'module/os/camera.py'
     node = next(n for n in ast.walk(ast.parse(source.read_text(encoding='utf-8')))
                 if isinstance(n, ast.FunctionDef) and n.name == '_load_semantic_os_view')
     from module.exception import MapDetectionError

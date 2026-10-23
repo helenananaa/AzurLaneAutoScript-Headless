@@ -1,4 +1,5 @@
 """A completed native tab switch needs observation, not a redundant input."""
+from tests.alas_test_source import patched_alas_root
 import ast
 import copy
 from pathlib import Path
@@ -32,7 +33,7 @@ def test_actual_selected_merit_tab_continues_without_input(drift):
 def test_native_switch_and_device_recheck_selected_tab_after_no_input():
     b, o = frozen_host()
     s, _ = session_for(o)
-    root = Path(__file__).parents[1] / 'artifacts/continuity-20261004/alas-runtime'
+    root = patched_alas_root()
     if not root.is_dir():
         pytest.skip('retained native ALAS unavailable')
     switch_source = root / 'module/ui/switch.py'

@@ -3,3 +3,15 @@ numpy==2.2.1
 psutil==7.1.0
 pytest==7.4.4
 PyYAML==6.0.1
+
+# Real ALAS grid/config classes used by native-method regression tests.
+# No OCR engines, device drivers or game execution are needed.
+setuptools==75.1.0
+opencv-python-headless==5.0.0.93
+Pillow==12.3.0
+scipy==1.15.3
+rich==14.1.0
+pywebio==1.6.2
+cached-property==1.5.2
+imageio==2.33.1
+inflection==0.5.1

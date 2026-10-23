@@ -90,8 +90,8 @@ def test_topmost_result_or_reconnect_hides_retained_combat_toggle(surface, enabl
 
 
 def native_auto_runner(session):
-    default = Path(__file__).resolve().parents[1] / (
-        "artifacts/continuity-20261004/alas-runtime/module/combat/combat_auto.py")
+    from tests.alas_test_source import patched_alas_root
+    default = patched_alas_root() / 'module/combat/combat_auto.py'
     source = Path(os.environ.get("ALAS_TEST_COMBAT_AUTO_SOURCE", str(default)))
     if not source.exists():
         pytest.skip("retained original ALAS CombatAuto source unavailable")

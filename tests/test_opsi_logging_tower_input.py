@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 from pathlib import Path
 from types import SimpleNamespace
 import pytest
@@ -11,7 +12,7 @@ from tests.semantic_support.adapter_cases import AlasSemanticAdapterTestsSupport
 
 @pytest.fixture
 def tower(monkeypatch, request):
-    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1]/'artifacts/campaign-preparation/upstream'))
+    monkeypatch.syspath_prepend(str(patched_alas_root()))
     backend, oracle = setup_map()
     backend.ui['images'].pop()
     scanning = getattr(request, 'param', 'tower') == 'scanning'
@@ -127,7 +128,7 @@ def test_retained_zone61_scanning_device_frame_fills_original_native_flag(monkey
     rows = max(r for r, _ in coordinates) + 1
     columns = max(c for _, c in coordinates) + 1
     title = next(t['text'] for t in backend.ui['texts'] if t['path'].endswith('/top_stage/title/name'))
-    monkeypatch.syspath_prepend(str(repo / 'artifacts/campaign-preparation/upstream'))
+    monkeypatch.syspath_prepend(str(patched_alas_root()))
     from alas_headless.semantic_oracle import SemanticOracle, OracleFingerprint
     oracle = SemanticOracle(backend.request, backend.foreground_component, backend.tap,
         OracleFingerprint(package=backend.snapshot['package'], component=backend.foreground,

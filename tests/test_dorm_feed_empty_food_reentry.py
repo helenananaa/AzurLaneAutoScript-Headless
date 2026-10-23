@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import ast
 from pathlib import Path
 from types import SimpleNamespace
@@ -46,7 +47,7 @@ def test_partially_consumed_batch_is_never_classified_for_replay():
 
 @pytest.mark.parametrize('case', ['known', 'unknown', 'stale', 'other-target', 'unclassified'])
 def test_original_food_click_uses_existing_entry_loop_only_for_safe_reentry(case):
-    source = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/upstream/module/dorm/dorm.py'
+    source = patched_alas_root() / 'module/dorm/dorm.py'
     tree = ast.parse(source.read_text(encoding='utf8'))
     method = next(n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name == '_dorm_feed_click')
     scope = {'SemanticTargetNotActionable': SemanticTargetNotActionable}

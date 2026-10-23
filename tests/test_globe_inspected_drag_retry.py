@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import ast
 from pathlib import Path
 from types import SimpleNamespace
@@ -9,7 +10,7 @@ from alas_headless.oracle.errors import SemanticGlobeDragPathUnavailable
 
 
 def run_camera(points, visible=True):
-    source = Path(__file__).resolve().parents[1]/'artifacts/campaign-preparation/upstream/module/os/globe_camera.py'
+    source = patched_alas_root() / 'module/os/globe_camera.py'
     node = next(n for n in ast.walk(ast.parse(source.read_text(encoding='utf-8')))
                 if isinstance(n, ast.FunctionDef) and n.name == 'globe_in_sight')
     ns = {'np':np, 'GameStuckError':RuntimeError, 'SemanticGateClosed':SemanticGateClosed,

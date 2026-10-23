@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import ast
 import copy
 from pathlib import Path
@@ -36,7 +37,7 @@ def test_actual_selected_page_yields_redundant_check_click_without_input(drift):
 def test_original_supply_pack_loop_rechecks_page_after_selection_transition():
     b, o, a = frozen_host()
     a.begin_supply_pack()
-    root = Path(__file__).parents[1] / 'artifacts/continuity-20261004/alas-runtime'
+    root = patched_alas_root()
     source = root / 'module/freebies/supply_pack.py'
     base = root / 'module/base/base.py'
     if not source.is_file():

@@ -1,4 +1,5 @@
 """Original scheduler must yield unavailable zero-interval tasks locally."""
+from tests.alas_test_source import patched_alas_root
 import ast
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -16,7 +17,7 @@ def methods():
     from module.config.config import AzurLaneConfig, TaskEnd
     from module.config.deep import deep_get, deep_set
     import module.exception as exceptions
-    source = Path(__file__).resolve().parents[1] / 'artifacts/continuity-20261004/alas-runtime/alas.py'
+    source = patched_alas_root() / 'alas.py'
     scope = dict(vars(exceptions), TaskEnd=TaskEnd, TaskCapabilityUnavailable=TaskCapabilityUnavailable,
                  AzurLaneConfig=AzurLaneConfig,
                  semantic_task_scope=semantic_task_scope, logger=Mock(), datetime=datetime,
@@ -38,7 +39,7 @@ def harness(future=False, interval=0):
     now = datetime.now().replace(microsecond=0)
     # Other fixtures import a retained baseline tree first. Compile the exact
     # installed queue methods, keeping original dependencies and config model.
-    source = Path(__file__).resolve().parents[1] / 'artifacts/continuity-20261004/alas-runtime/module/config/config.py'
+    source = patched_alas_root() / 'module/config/config.py'
     config_scope = dict(vars(native_config))
     nodes = [n for n in ast.walk(ast.parse(source.read_text(encoding='utf-8')))
              if isinstance(n, ast.FunctionDef) and n.name in ('get_next_task', 'get_next', 'task_switched')]

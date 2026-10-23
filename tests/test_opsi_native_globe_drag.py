@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
@@ -109,7 +110,7 @@ def test_unowned_plane_cannot_receive_globe_input(operation):
 
 @pytest.mark.parametrize('outcome',['resample','exhausted','unavailable'])
 def test_original_alas_sampler_rejects_unowned_candidates_before_input(outcome):
-    source=Path(__file__).resolve().parents[1]/'artifacts/campaign-preparation/upstream/module/device/control.py'
+    source=patched_alas_root() / 'module/device/control.py'
     node=next(n for n in ast.walk(ast.parse(source.read_text(encoding='utf-8'))) if isinstance(n,ast.FunctionDef) and n.name=='swipe_vector')
     samples=Mock(return_value=(START,END));token=object()
     owned=Mock(side_effect=[False,True] if outcome=='resample' else SemanticGateClosed('missing native proof') if outcome=='unavailable' else None,return_value=False)

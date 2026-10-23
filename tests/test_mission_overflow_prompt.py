@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 from types import SimpleNamespace
 import copy
 import pytest
@@ -79,7 +80,7 @@ def test_reordered_texts_additive_fields_and_equal_items_in_distinct_rows():
 def test_original_info_handler_pair_and_temporary_name():
     import ast
     from pathlib import Path
-    source = Path(__file__).resolve().parents[1]/'artifacts/campaign-preparation/upstream/module/handler/info_handler.py'
+    source = patched_alas_root() / 'module/handler/info_handler.py'
     node = next(n for n in ast.walk(ast.parse(source.read_text(encoding='utf-8')))
                 if isinstance(n,ast.FunctionDef) and n.name=='handle_popup_confirm')
     confirm=SimpleNamespace(name='POPUP_CONFIRM')

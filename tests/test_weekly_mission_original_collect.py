@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import ast
 from pathlib import Path
 from types import SimpleNamespace
@@ -8,7 +9,7 @@ import pytest
 @pytest.mark.parametrize('semantic', [False, True])
 @pytest.mark.parametrize('notice', [False, True])
 def test_weekly_notice_keeps_original_collect_owner(semantic, notice):
-    source = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/upstream/module/reward/reward.py'
+    source = patched_alas_root() / 'module/reward/reward.py'
     node = next(n for n in ast.walk(ast.parse(source.read_text(encoding='utf-8')))
                 if isinstance(n, ast.FunctionDef) and n.name == '_reward_mission_weekly')
     namespace = {'MISSION_WEEKLY_RED_DOT':object(), 'logger':Mock()}

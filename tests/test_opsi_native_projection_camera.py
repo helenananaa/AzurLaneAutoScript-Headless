@@ -1,4 +1,5 @@
 """Run the original ALAS camera decision for ports and ordinary areas."""
+from tests.alas_test_source import patched_alas_root
 
 import ast
 from pathlib import Path
@@ -15,7 +16,7 @@ from alas_headless.oracle.errors import SemanticGlobeDragPathUnavailable, Semant
 @pytest.mark.parametrize('zone_id', [2, 44])
 @pytest.mark.parametrize('start', [(-351,123),(336,623)])
 def test_original_camera_routes_port_and_native_area_without_other_reader(zone_id,start):
-    source = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/upstream/module/os/globe_camera.py'
+    source = patched_alas_root() / 'module/os/globe_camera.py'
     if not source.exists():
         pytest.skip('materialized patched ALAS tree unavailable')
     node = next(n for n in ast.walk(ast.parse(source.read_text(encoding='utf-8')))
@@ -39,7 +40,7 @@ def test_original_camera_routes_port_and_native_area_without_other_reader(zone_i
 
 @pytest.mark.parametrize('failure', [SemanticViewportReanchorRequired('moved before input'), SemanticGlobeSelectionMissed('fresh unselected after input'), SemanticGateClosed('different selected zone')])
 def test_original_focus_reanchors_only_a_classified_preinput_view_failure(failure):
-    source = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/upstream/module/os/globe_camera.py'
+    source = patched_alas_root() / 'module/os/globe_camera.py'
     node = next(n for n in ast.walk(ast.parse(source.read_text(encoding='utf-8')))
                 if isinstance(n, ast.FunctionDef) and n.name == 'globe_focus_to')
     ns = {'SemanticGateClosed': SemanticGateClosed, 'SemanticViewportReanchorRequired': SemanticViewportReanchorRequired, 'SemanticGlobeSelectionMissed': SemanticGlobeSelectionMissed,
@@ -62,7 +63,7 @@ def test_original_focus_reanchors_only_a_classified_preinput_view_failure(failur
 
 @pytest.mark.parametrize('zone_id', [2, 141])
 def test_already_selected_zone_refreshes_frame_and_native_unpin_projection(zone_id):
-    source = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/upstream/module/os/globe_camera.py'
+    source = patched_alas_root() / 'module/os/globe_camera.py'
     node = next(n for n in ast.walk(ast.parse(source.read_text(encoding='utf-8')))
                 if isinstance(n, ast.FunctionDef) and n.name == 'globe_focus_to')
     ns = {'SemanticGateClosed': SemanticGateClosed, 'SemanticViewportReanchorRequired': SemanticViewportReanchorRequired, 'SemanticGlobeSelectionMissed': SemanticGlobeSelectionMissed, 'logger': Mock()}
@@ -85,7 +86,7 @@ def test_already_selected_zone_refreshes_frame_and_native_unpin_projection(zone_
 
 @pytest.mark.parametrize('pinned_id',[2,82])
 def test_different_selected_zone_projects_existing_pin_before_unpin(pinned_id):
-    source=Path(__file__).resolve().parents[1]/'artifacts/campaign-preparation/upstream/module/os/globe_camera.py'
+    source=patched_alas_root() / 'module/os/globe_camera.py'
     node=next(n for n in ast.walk(ast.parse(source.read_text(encoding='utf-8'))) if isinstance(n,ast.FunctionDef) and n.name=='globe_focus_to')
     ns={'SemanticGateClosed':SemanticGateClosed,'SemanticViewportReanchorRequired':SemanticViewportReanchorRequired,'logger':Mock()}
     exec(compile(ast.fix_missing_locations(ast.Module(body=[node],type_ignores=[])),str(source),'exec'),ns)
@@ -104,7 +105,7 @@ def test_different_selected_zone_projects_existing_pin_before_unpin(pinned_id):
 
 @pytest.mark.parametrize('moving',[True,False])
 def test_camera_keeps_centering_beyond_six_swipes_but_stops_when_target_stalls(moving):
-    source=Path(__file__).resolve().parents[1]/'artifacts/campaign-preparation/upstream/module/os/globe_camera.py'
+    source=patched_alas_root() / 'module/os/globe_camera.py'
     node=next(n for n in ast.walk(ast.parse(source.read_text(encoding='utf-8'))) if isinstance(n,ast.FunctionDef) and n.name=='globe_in_sight')
     ns={'np':np,'GameStuckError':RuntimeError,'SemanticGateClosed':SemanticGateClosed,'logger':Mock(),'SemanticGlobeDragPathUnavailable':SemanticGlobeDragPathUnavailable,'point_in_area':lambda p,area,threshold=5:area[0]-threshold<p[0]<area[2]+threshold and area[1]-threshold<p[1]<area[3]+threshold}
     exec(compile(ast.fix_missing_locations(ast.Module(body=[node],type_ignores=[])),str(source),'exec'),ns)
@@ -125,7 +126,7 @@ def test_camera_keeps_centering_beyond_six_swipes_but_stops_when_target_stalls(m
 
 @pytest.mark.parametrize('rejection',[SemanticGlobeDragPathUnavailable('unowned candidates'),SemanticGateClosed('malformed proof')])
 def test_camera_shortens_only_classified_preinput_unowned_path(rejection):
-    source=Path(__file__).resolve().parents[1]/'artifacts/campaign-preparation/upstream/module/os/globe_camera.py'
+    source=patched_alas_root() / 'module/os/globe_camera.py'
     node=next(n for n in ast.walk(ast.parse(source.read_text(encoding='utf-8'))) if isinstance(n,ast.FunctionDef) and n.name=='globe_in_sight')
     ns={'np':np,'GameStuckError':RuntimeError,'SemanticGlobeDragPathUnavailable':SemanticGlobeDragPathUnavailable,'point_in_area':lambda p,area,threshold=5:area[0]<p[0]<area[2] and area[1]<p[1]<area[3]}
     exec(compile(ast.fix_missing_locations(ast.Module(body=[node],type_ignores=[])),str(source),'exec'),ns)

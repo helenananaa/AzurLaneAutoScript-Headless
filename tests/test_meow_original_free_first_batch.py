@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import ast
 from pathlib import Path
 from types import SimpleNamespace
@@ -12,7 +13,7 @@ import pytest
     (4, 0, True, 0), (15, 22500, True, 0),
     (0, 22500, False, 15), (0, 0, False, 1)])
 def test_original_count_preserves_policy_but_splits_native_free_panel(bought, coins, semantic, expected):
-    path = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/upstream/module/meowfficer/buy.py'
+    path = patched_alas_root() / 'module/meowfficer/buy.py'
     tree = ast.parse(path.read_text(encoding='utf8'))
     scope = dict(BUY_MAX=15, BUY_PRIZE=1500,
                  logger=SimpleNamespace(attr=Mock(), info=Mock(), warning=Mock()))

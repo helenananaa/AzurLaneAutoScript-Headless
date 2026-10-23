@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import ast
 import os
 from pathlib import Path
@@ -11,7 +12,7 @@ from alas_headless import SemanticGateClosed
 
 def native_method():
     path = Path(os.environ.get('ALAS_TEST_FLEET_SOURCE',
-        str(Path(__file__).parents[1] / 'artifacts/continuity-20261004/alas-runtime/module/os/map_fleet_selector.py')))
+        str(patched_alas_root() / 'module/os/map_fleet_selector.py')))
     if not path.exists():
         pytest.skip('retained native ALAS unavailable')
     method = next(v for v in ast.walk(ast.parse(path.read_text(encoding='utf8')))

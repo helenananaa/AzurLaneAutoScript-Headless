@@ -24,6 +24,13 @@ or unreviewed state fails closed instead of silently falling back to pixels.
 [Latest validation](docs/status.md) ·
 [ALAS integration](integration/alas/README.md)
 
+As of 2026-10-23, main integrates the shared ALAS adapter and the existing
+Redroid, KVM and Mac/HVF work. The same adapter completed original ALAS manual
+12-4 Main runs on Windows AVD and local WSL Redroid. Bounded Reward, Commission
+and Research scheduling and persistent configuration reentry also have live
+evidence. See the [local entry guide](docs/local-runtime-entry.zh-CN.md) and
+[integration and regression record](docs/main-integration-20261023.zh-CN.md).
+
 ## Two core goals
 
 This repository solves two connected problems.
@@ -71,11 +78,11 @@ single successful run.
 | Level | Panels | Meaning |
 |---|---:|---|
 | Fully qualified (`F`) | 9 / 60 | Required configuration values and necessary exception paths are closed for the qualified environment. |
-| Live main path (`L`) | 26 / 60 | At least one real-device main path is closed; not every configuration value is qualified. |
-| Offline only (`O`) | 6 / 60 | Contract, replay, or stub evidence exists without a live task closure. |
+| Live main path (`L`) | 31 / 60 | At least one real-device main path is closed; not every configuration value is qualified. |
+| Offline only (`O`) | 3 / 60 | Contract, replay, or stub evidence exists without a live task closure. |
 | Partial (`P`) | 10 / 60 | Some task behavior is implemented or reachable, but important branches remain open. |
-| At a known boundary (`B`) | 8 / 60 | Work safely reaches an account, resource, date, or observation boundary. |
-| Missing (`M`) | 1 / 60 | A task-level semantic adaptation is still missing. |
+| At a known boundary (`B`) | 7 / 60 | Work safely reaches an account, resource, date, or observation boundary. |
+| Missing (`M`) | 0 / 60 | No entire panel has this label; unsupported fields and branches remain. |
 
 Representative qualified work includes:
 
@@ -155,12 +162,14 @@ Choose the path that matches what you want to validate.
 
 ### Inspect the controller and contracts
 
-The Python controller tests do not require a game installation or an ALAS
-checkout:
+Offline tests do not start the game. The full suite needs the adjacent pinned
+ALAS checkout. Native-method tests create a disposable patched tree, or reuse
+a verified patched tree supplied through `ALAS_TEST_ROOT`.
+See the [local guide](docs/local-runtime-entry.zh-CN.md) for the retained paths:
 
 ```powershell
 $env:PYTHONPATH = 'python'
-python -m unittest discover -s tests -p 'test_*.py'
+python -m pytest -q tests
 ```
 
 ### Build the ANGLE NULL runtime
@@ -230,10 +239,12 @@ claims.
 
 | Host and Android path | Current status | Validated scope | Main boundary |
 |---|---|---|---|
-| x86_64 Linux + KVM / Android Emulator | **Mainline executable; most mature** | API 32 x86_64, ANGLE NULL, Unity, observer, game and Android recovery; current ALAS tasks have separate live evidence | Long soak, capacity, and multi-instance density remain open |
+| Windows + AVD / WHPX | **Local task paths validated** | ANGLE NULL, typed observer, complete manual 12-4 Main, login and home navigation | One account/stage; unattended soak remains unqualified |
+| Windows/WSL + Redroid x86_64 | **Local task paths validated** | Shared backend, complete Main, bounded daily scheduling, configuration reentry, container recovery and persistence | Does not qualify native Linux, release-version migration/rollback, natural full-dock recovery or unattended soak |
+| x86_64 Linux + KVM / Android Emulator | **Mainline executable** | Historical API 32 ANGLE NULL, Unity, observer and recovery; separate local API 34 pre-login, persistence and lifecycle evidence | Current local account tasks, long soak, capacity and multi-instance density remain open |
 | External ADB | **Mainline executable** | Attaches to an exact device and enforces identity, lifecycle, and recovery contracts | Does not own provisioning, root, upgrades, or persistence |
-| x86_64 Linux + Redroid | **Real-host exploration** | Binder, containers, ANGLE NULL, observer, complete resources, restart persistence, and the login screen without `/dev/kvm` | Mainline backend, current OCI rollback, and ALAS workload are not closed |
-| ARM64 Linux + Redroid | **Strong platform/update exploration** | Dual-ABI artifacts, G1/G2/G3, APK/resource updates, restart, persistence, and real OCI rollback | No real game or ALAS evidence; backend remains plan-only |
+| x86_64 Linux + Redroid | **Real-host exploration** | Binder, containers, ANGLE NULL, observer, complete resources, restart persistence, and the login screen without `/dev/kvm` | Native-Linux backend lifecycle qualification, current OCI rollback and ALAS workload remain open |
+| ARM64 Linux + Redroid | **Fresh-container game pre-login path passed** | VA39, Android 14, initial agreement, private ANGLE NULL, typed observer, resource download and bounded restart to the native phone-login activity; no account input | Two runtime fixes still need OCI integration; initial NULL-only transition, ALAS workload, backend recovery/cleanup and soak remain open |
 | x86_64 QEMU TCG | **Partial; fallback** | Q1/Q2/Q3, long Unity run, observer freshness, and game privacy boundary | WebView black screen and System UI ANR block deeper game qualification; slower than KVM |
 | Rooted ARM64 Android device | **Real tooling exploration** | Systemless ANGLE install, verify, remove, and rollback; G1 NULL-renderer contract | Current game, full observer, ALAS, thermal behavior, and long runs are unverified |
 | Unrooted ARM64 phone/tablet as QEMU host | **Experimental partial pass** | Hosts an ARM64 guest under ordinary app permissions; ANGLE NULL, Unity, and no-input pre-login game boundary | No acceleration and very slow; no observer, ALAS, or recovery closure |

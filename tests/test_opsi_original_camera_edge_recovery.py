@@ -1,4 +1,5 @@
 """Typed OS views enter the original ALAS camera recovery without pixels."""
+from tests.alas_test_source import patched_alas_root
 import ast
 from dataclasses import replace
 from pathlib import Path
@@ -14,7 +15,7 @@ from tests.test_opsi_native_camera_view import geometry, native
 
 def original_update(monkeypatch, native, *, screen_center, unknown=False):
     from module.exception import MapDetectionError
-    source = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/upstream/module/map/camera.py'
+    source = patched_alas_root() / 'module/map/camera.py'
     method = next(n for n in ast.walk(ast.parse(source.read_text(encoding='utf-8')))
                   if isinstance(n, ast.FunctionDef) and n.name == '_update_view')
     scope = {'logger': Mock(), 'MapDetectionError': MapDetectionError}
@@ -66,7 +67,7 @@ def test_unknown_attachment_cannot_enter_outside_map_recovery(monkeypatch, nativ
 def test_original_swipe_wait_without_previous_view_can_finish(native):
     import numpy as np
     from module.base.timer import Timer
-    source = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/upstream/module/map/camera.py'
+    source = patched_alas_root() / 'module/map/camera.py'
     method = next(n for n in ast.walk(ast.parse(source.read_text(encoding='utf-8')))
                   if isinstance(n, ast.FunctionDef) and n.name == 'update')
     scope = {'logger': Mock(), 'Timer': Timer, 'np': np}

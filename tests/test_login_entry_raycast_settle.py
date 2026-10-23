@@ -1,4 +1,5 @@
 """An entry raycast remount grants no input and leaves retries to ALAS."""
+from tests.alas_test_source import patched_alas_root
 import ast
 from pathlib import Path
 from types import SimpleNamespace
@@ -45,7 +46,7 @@ def test_login_input_classifies_preinput_readiness_without_dispatch(case):
 
 
 def login_function():
-    source = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/upstream/module/handler/login.py'
+    source = patched_alas_root() / 'module/handler/login.py'
     tree = ast.parse(source.read_text(encoding='utf-8'))
     owner = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == 'LoginHandler')
     function = next(node for node in owner.body if isinstance(node, ast.FunctionDef) and node.name == '_handle_app_login')

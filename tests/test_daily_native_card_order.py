@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import ast
 from pathlib import Path
 from types import SimpleNamespace
@@ -7,7 +8,7 @@ from alas_headless import SemanticGateClosed
 
 @pytest.mark.parametrize('semantic,expected', [(True,[4]), (False,[])])
 def test_original_daily_loop_keeps_pixel_placeholder_and_handles_reordered_typed_card(semantic,expected):
-    source = Path(__file__).resolve().parents[1]/'artifacts/campaign-preparation/upstream/module/daily/daily.py'
+    source = patched_alas_root() / 'module/daily/daily.py'
     node = next(n for n in ast.walk(ast.parse(source.read_text(encoding='utf-8'))) if isinstance(n,ast.FunctionDef) and n.name=='daily_run_one')
     env = {'logger':Mock(),'page_daily':'daily','page_campaign_menu':'campaign','ENTRANCE_EMERGENCY_MODULE_DEVELOPMENT':'emergency','SemanticGateClosed':SemanticGateClosed,'OCR_REMAIN':SimpleNamespace(ocr=lambda _:3)}
     exec(compile(ast.fix_missing_locations(ast.Module(body=[node],type_ignores=[])),str(source),'exec'),env)

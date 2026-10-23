@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import ast
 from pathlib import Path
 from types import SimpleNamespace
@@ -5,7 +6,7 @@ from unittest.mock import Mock
 
 
 def test_one_claim_waits_for_original_popup_transition_without_second_claim():
-    source = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/upstream/module/reward/reward.py'
+    source = patched_alas_root() / 'module/reward/reward.py'
     node = next(n for n in ast.walk(ast.parse(source.read_text(encoding='utf-8')))
                 if isinstance(n, ast.FunctionDef) and n.name == '_reward_mission_claim_click')
     interval = SimpleNamespace(reached=lambda:True, reset=Mock())

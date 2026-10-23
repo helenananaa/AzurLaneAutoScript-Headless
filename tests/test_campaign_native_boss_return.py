@@ -1,18 +1,16 @@
 """Original ALAS owns stage settling, late settlement and CampaignEnd."""
 import ast
-import os
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
+from tests.alas_test_source import patched_alas_root
 
 
 @pytest.mark.parametrize('final_page', ['stage', 'unknown'])
 def test_native_boss_result_keeps_grade_statistics_rewards_and_late_total_handlers(final_page):
-    root = os.environ.get('ALAS_TEST_ROOT')
-    if not root:
-        pytest.skip('set ALAS_TEST_ROOT to the verified patched ALAS tree')
+    root = patched_alas_root()
     status_tree = ast.parse(Path(root, 'module/combat/combat.py').read_text(encoding='utf-8'))
     status = next(n for n in ast.walk(status_tree) if isinstance(n, ast.FunctionDef)
         and n.name == 'combat_status')
@@ -68,9 +66,7 @@ def test_native_boss_result_keeps_grade_statistics_rewards_and_late_total_handle
 
 @pytest.mark.parametrize('automatic', [False, True])
 def test_native_campaign_end_keeps_original_exit_and_then_records_manual_completion(automatic):
-    root = os.environ.get('ALAS_TEST_ROOT')
-    if not root:
-        pytest.skip('set ALAS_TEST_ROOT to the verified patched ALAS tree')
+    root = patched_alas_root()
     tree = ast.parse(Path(root, 'module/campaign/campaign_base.py').read_text(encoding='utf-8'))
     handler = next(n for n in ast.walk(tree) if isinstance(n, ast.ExceptHandler)
         and isinstance(n.type, ast.Name) and n.type.id == 'CampaignEnd')

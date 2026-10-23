@@ -1,4 +1,5 @@
 """Execute the original patched ALAS preparation decisions in isolation."""
+from tests.alas_test_source import patched_alas_root
 
 import ast
 from pathlib import Path
@@ -9,7 +10,7 @@ import pytest
 
 
 def preparation_decisions():
-    source = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/upstream/module/map/map_operation.py'
+    source = patched_alas_root() / 'module/map/map_operation.py'
     if not source.exists():
         pytest.skip('materialized patched ALAS tree unavailable')
     tree = ast.parse(source.read_text(encoding='utf-8'))
@@ -57,7 +58,7 @@ def test_shared_d3_keeps_difficulty_and_progress_contract(percentage):
     (False, 'sp', 0, True),
 ])
 def test_original_run_delays_only_proven_exhausted_sp(one_time, name, remaining, delayed):
-    source = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/upstream/module/campaign/run.py'
+    source = patched_alas_root() / 'module/campaign/run.py'
     tree = ast.parse(source.read_text(encoding='utf-8'))
     branch = next(n for n in ast.walk(tree) if isinstance(n, ast.If)
                   and 'campaign_remaining_attempts' in ast.unparse(n.test))

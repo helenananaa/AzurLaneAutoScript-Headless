@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import pytest
 import json
 import ast
@@ -26,7 +27,7 @@ def test_midmap_retirement_requires_combat_on_both_sides_in_the_same_sortie():
     assert not live_runner._midmap_retirement_complete([item], [dict(battle, sortie_generation=60)])
 from scripts.python import verify_campaign_formations_live as formation_runner
 from alas_headless import SemanticGateClosed
-from alas_headless import AlasSemanticAdapter
+from alas_headless import AlasSemanticAdapter, AlasSemanticSession
 from tests.semantic_support.adapter_fixtures import FakeOracle, NamedButton
 
 
@@ -75,7 +76,7 @@ def test_original_loop_refreshes_completed_preparation_before_entry_admission():
 
 
 def test_materialized_original_run_executes_two_rounds_with_the_same_ledger():
-    source = Path(__file__).resolve().parents[1] / "artifacts/campaign-preparation/replay/module/campaign/run.py"
+    source = patched_alas_root() / 'module/campaign/run.py'
     if not source.is_file():
         pytest.skip("materialized pinned ALAS replay tree unavailable")
     module = ast.parse(source.read_text(encoding="utf-8"))
@@ -89,9 +90,13 @@ def test_materialized_original_run_executes_two_rounds_with_the_same_ledger():
     oracle.campaign_page_value = True
     adapter = AlasSemanticAdapter(oracle, noop, campaign_stage_entry_budget=2, campaign_sortie_budget=2)
     adapter.begin_campaign_pre_sortie("12-4")
-    device = SimpleNamespace(semantic_adapter=adapter, stuck_record_clear=noop,
+    oracle.campaign_precombat_visible = lambda: False
+    session = AlasSemanticSession.__new__(AlasSemanticSession)
+    session.adapter = adapter
+    session.open = lambda: adapter
+    device = SimpleNamespace(semantic_adapter=session, stuck_record_clear=noop,
                              click_record_clear=noop, has_cached_image=True, image=object())
-    config = SimpleNamespace(StopCondition_RunCount=2, Campaign_Mode="normal",
+    config = SimpleNamespace(StopCondition_RunCount=2, Campaign_Mode="normal", Campaign_Name="12-4",
                              MAP_IS_ONE_TIME_STAGE=False, override=noop, task_switched=lambda: False)
     rounds = []
     campaign = SimpleNamespace(device=device, config=config, map_fleet_checked=True,

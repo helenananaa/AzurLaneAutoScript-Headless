@@ -1,13 +1,26 @@
 # 运行时支持矩阵与探索状态
 
 本文记录 AzurLaneAutoScript Headless 在不同宿主架构、Android 运行方式和
-物理设备上的当前证据边界。服务器/物理设备基线快照日期为 **2026-08-26**；
-Apple Silicon Mac / HVF 登录页证据已补充至 **2026-08-23**，x86_64
-Redroid 后端只读预检证据已补充至 **2026-08-25**。
+物理设备上的证据边界。主线整理日期为 **2026-10-23**；各条记录保留实际验证日期，
+服务器/物理设备历史基线不因本机任务通过而自动提升。
 
 这里的“通过”只对表格中写明的范围有效。Android 能启动、ANGLE NULL 合同
 通过、游戏到达登录前，以及完整 ALAS 长期运行是四个不同结论。目前没有任一
 平台通过完整、无人值守、长期 ALAS 工作负载资格测试。
+
+## 2026-10-23 当前本机任务范围
+
+| 环境 | 已验证范围 | 未完成范围 |
+| --- | --- | --- |
+| Windows AVD / WHPX x86_64 | 当前 observer、原 LoginHandler、完整手动地图 Main 12-4、结果处理与回主页 | 全任务、自然满仓连续恢复、长期无人值守 |
+| Windows/WSL Redroid x86_64 | 与 AVD 共用适配层及 ALAS 运行树；完整 Main；Reward/Commission/Research 有界调度、持久配置重入；容器重启后账号、资源和 userdata 保留 | 自然下一轮调度、真实发布版本升级/回退、长期无人值守、原生 Linux 等价性 |
+| 本地 WSL KVM x86_64 | 9 月 7～8 日登录前生命周期、恢复、数据保留和启动优化候选 | 当前账号 ALAS 工作负载；候选的稳定性能收益 |
+| Apple Silicon Mac / HVF | 9 月 7 日独立 backend、owned AVD lifecycle、game/Android recovery 与 cleanup | 账号登录、主页及 ALAS 工作负载 |
+
+Windows AVD 与 WSL Redroid 的功能证据只覆盖一个 CN 账号、游戏 9.7.10 / 资源
+9.7.411、固定 ALAS 基线和指定任务。两端 Main 耗时不能当成配对性能结论。
+见[双端 Main](campaign-camera-refresh-20261022.zh-CN.md)、
+[日常与恢复](redroid-continuity-20261023.zh-CN.md)及[运行入口](local-runtime-entry.zh-CN.md)。
 
 ## 2026-09-07 本地 WSL KVM 补充
 
@@ -34,8 +47,8 @@ guest 关机路径出现 core-dump。账号登录后的 ALAS 工作负载仍未�
 
 2026-09-07 本地补充：Windows/WSL2 Docker Project 已接入共享 Redroid backend，
 通过登录前冷启动、游戏/容器重启恢复，并通过独立 overlay 上的受控镜像回滚演练。
-这不更新下面原生 Linux 服务器格的资格，也不表示历史 FBE 镜像可回退或 ALAS
-任务已通过。见[本地生命周期](redroid-wsl-runtime-20260907.zh-CN.md)和
+该次登录前验证不更新下面原生 Linux 服务器格的资格，也不表示历史 FBE 镜像可回退。
+后续本机 ALAS 任务见上方 10 月 23 日记录。见[本地生命周期](redroid-wsl-runtime-20260907.zh-CN.md)和
 [受控回滚报告](redroid-wsl-rollback-20260907.zh-CN.md)。
 
 | 标记 | 含义 |

@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import ast
 import os
 import time
@@ -37,7 +38,7 @@ def test_exact_later_precombat_with_controlled_loading_refuses_then_starts_once(
 
 def original_method():
     path = Path(os.environ.get('ALAS_TEST_COMBAT_SOURCE',
-        str(Path(__file__).parents[1] / 'artifacts/continuity-20261004/alas-runtime/module/combat/combat.py')))
+        str(patched_alas_root() / 'module/combat/combat.py')))
     if not path.exists():
         pytest.skip('retained native ALAS unavailable')
     method = next(v for v in ast.walk(ast.parse(path.read_text(encoding='utf8')))

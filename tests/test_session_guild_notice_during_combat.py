@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import copy
 import ast
 import json
@@ -94,7 +95,7 @@ def test_absent_global_notice_keeps_existing_combat_probe_and_action_contract():
 def test_original_map_event_guild_cancel_can_close_the_actual_notice(campaign_lease):
     b, a, s = retained_notice()
     a.campaign_combat_active = lambda: campaign_lease
-    path = Path(__file__).resolve().parents[1] / 'artifacts/continuity-20261004/alas-runtime/module/handler/info_handler.py'
+    path = patched_alas_root() / 'module/handler/info_handler.py'
     tree = ast.parse(path.read_text(encoding='utf-8'))
     method = next(x for x in ast.walk(tree) if isinstance(x, ast.FunctionDef) and x.name == 'handle_guild_popup_cancel')
     host = SimpleNamespace(device=SimpleNamespace(semantic_adapter=a, click=s.click),

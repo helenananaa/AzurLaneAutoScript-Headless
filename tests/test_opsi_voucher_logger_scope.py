@@ -1,4 +1,5 @@
 """A shop transaction budget must not suppress original storage observation."""
+from tests.alas_test_source import patched_alas_root
 import ast
 from pathlib import Path
 from types import SimpleNamespace
@@ -9,7 +10,7 @@ import pytest
 
 @pytest.mark.parametrize('semantic', [False, True])
 def test_native_voucher_keeps_storage_flow_without_shop_purchase_authority(semantic):
-    path = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/upstream/module/os/tasks/voucher.py'
+    path = patched_alas_root() / 'module/os/tasks/voucher.py'
     tree = ast.parse(path.read_text(encoding='utf-8'))
     cls = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == 'OpsiVoucher')
     method = next(node for node in cls.body if isinstance(node, ast.FunctionDef) and node.name == 'os_voucher')

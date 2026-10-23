@@ -1,3 +1,4 @@
+from tests.alas_test_source import patched_alas_root
 import ast
 from pathlib import Path
 from types import SimpleNamespace
@@ -8,7 +9,7 @@ import pytest
 
 @pytest.mark.parametrize('case', ['dismissed', 'covered', 'stale', 'unavailable'])
 def test_original_guild_award_helper_waits_for_fresh_dismissal_without_repeating_input(case):
-    path = Path(__file__).resolve().parents[1] / 'artifacts/campaign-preparation/upstream/module/guild/logistics.py'
+    path = patched_alas_root() / 'module/guild/logistics.py'
     tree = ast.parse(path.read_text(encoding='utf8'))
     method = next(n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name == 'close_awards')
     visible = Mock(side_effect=[True, False]) if case == 'dismissed' else Mock(return_value=case == 'covered')

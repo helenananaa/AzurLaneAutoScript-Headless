@@ -1,4 +1,5 @@
 """Inherited preparation recovery remains in original Campaign startup."""
+from tests.alas_test_source import patched_alas_root
 import ast
 from pathlib import Path
 from types import SimpleNamespace
@@ -7,7 +8,7 @@ from alas_headless import SemanticGateClosed
 from tests.semantic_support.observer_fixtures import make_oracle, make_button, FakeBackend
 
 def block():
-    p=Path('artifacts/campaign-preparation/upstream/module/campaign/run.py')
+    p=patched_alas_root() / 'module/campaign/run.py'
     tree=ast.parse(p.read_text(encoding='utf-8'))
     node=next(n for n in ast.walk(tree) if isinstance(n,ast.If) and 'campaign_precombat_visible' in ast.unparse(n.test))
     return compile(ast.fix_missing_locations(ast.Module(body=[node],type_ignores=[])),str(p),'exec')
