@@ -44,6 +44,32 @@ def host(drift=False):
 
 
 @pytest.mark.parametrize('drift', [False, True])
+def test_pending_reward_uses_native_screenshot_frame_without_split_live_reads(drift):
+    backend, session, adapter = host(drift=drift)
+    source = adapter._require_frame_observation_oracle()
+    expected = source.reward_summary_count('commission', 'finished')
+    adapter.oracle.exists = Mock(side_effect=AssertionError('split live presence'))
+    adapter.oracle.enabled = Mock(side_effect=AssertionError('split live actionability'))
+    adapter.oracle.reward_summary_count = Mock(side_effect=AssertionError('split live counter'))
+    assert session.commission_reward_pending()
+    assert adapter._commission_context.reward_detected_count == expected
+    assert session.action_ledger.remaining('commission.reward') == 2
+    assert not backend.taps
+
+
+def test_pending_reward_rejects_a_covered_target_in_the_native_frame():
+    backend, session, _ = host()
+    owner = next(b for b in backend.buttons['buttons']
+                 if b['path'].endswith('/event/frame/finish_btn'))
+    owner['raycast_top'] = False
+    session.refresh_frame()
+    with pytest.raises(SemanticGateClosed, match='reward finish input is blocked'):
+        session.commission_reward_pending()
+    assert session.action_ledger.remaining('commission.reward') == 2
+    assert not backend.taps
+
+
+@pytest.mark.parametrize('drift', [False, True])
 def test_actual_reward_frame_does_not_reopen_split_live_oil_reads(drift):
     backend, session, adapter = host(drift=drift)
     adapter.oracle.commission_reward_oil_maxed = Mock(

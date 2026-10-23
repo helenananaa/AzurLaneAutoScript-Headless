@@ -112,12 +112,16 @@ class CommissionAdapterPorts:
                 "commission reward state used outside commission flow"
             )
         self._package_gate()
-        if not self.oracle.exists("reward/commission/finish"):
+        # Native page arrival and this pending check share the screenshot
+        # frame. Split live reads can cross a sidebar transition; the actual
+        # claim still prepares and validates its own fresh input frame.
+        source = self._frame_or_live_observation_oracle()
+        if not source.exists("reward/commission/finish"):
             context.reward_detected_count = None
             return False
-        if not self.oracle.enabled("reward/commission/finish"):
+        if not source.enabled("reward/commission/finish"):
             raise SemanticGateClosed("commission reward finish input is blocked")
-        count = self.oracle.reward_summary_count("commission", "finished")
+        count = source.reward_summary_count("commission", "finished")
         if count <= 0:
             raise SemanticGateClosed(
                 "commission reward button contradicts the finished counter"
