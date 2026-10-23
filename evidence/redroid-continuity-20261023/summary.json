@@ -1,0 +1,149 @@
+{
+  "schema": "alas-headless.redroid-continuity-assessment/v1",
+  "date": "2026-10-23",
+  "scope": "one CN account; local Windows AVD and Windows/WSL Redroid; original ALAS",
+  "common_commits": [
+    "68f5e7c773b026d28b6c1c1b9f4fec6b0f1afe2c",
+    "f877924eda6fcf9120f852d565bf674ccb8a0047"
+  ],
+  "platform_code_commit": "59595d41e600299996b9d5e0b46768748a18971b",
+  "validation": {
+    "tests": 1114,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "enhancement": {
+    "passed": true,
+    "original_ALAS_estimated_return": 10,
+    "actual_level_1_normal_materials": 7,
+    "equipment_preserved": true,
+    "torpedo_before": 82,
+    "torpedo_after": 91,
+    "raw": "native-enhancement-1.json"
+  },
+  "natural_full_dock_recovery": {
+    "qualified": false,
+    "observed_capacity": [
+      "910/1010"
+    ],
+    "reason": "100 empty slots at entry; no deliberate filling; no continuous Main recovery attempted"
+  },
+  "scheduler": {
+    "original_loop": true,
+    "persistent_config": "semantic_daily_continuity_20261023",
+    "successful_commands": [
+      "commission",
+      "research",
+      "research",
+      "reward"
+    ],
+    "next_run": {
+      "Reward": "2026-10-23 14:47:08",
+      "Commission": "2026-10-23 12:53:15",
+      "Research": "2026-10-23 13:25:33"
+    },
+    "commission_finished_claims": 4,
+    "commission_dispatches": 4,
+    "research_claimed_projects": 6,
+    "research_started_projects": 4,
+    "final_queue_entries": 4,
+    "normal_stop_reentry_passed": true,
+    "normal_stop_reentry_raw": "daily-scheduler-3.json",
+    "retained_failed_assessment": "daily-scheduler-2.json",
+    "retained_failed_assessment_reason": "Original tasks returned true; prior harness misclassified requested native SystemExit(0). Receipt is unchanged.",
+    "natural_next_round_qualified": false
+  },
+  "research_current_state": {
+    "redroid": {
+      "passed": true,
+      "remaining_seconds": 5158,
+      "health": {
+        "generation": 73197,
+        "ui_generation": 73197,
+        "pid": 13911,
+        "age_ms": 316.0,
+        "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+        "resources": {}
+      },
+      "raw": "research-current-redroid.json"
+    },
+    "avd": {
+      "passed": true,
+      "remaining_seconds": 4788,
+      "health": {
+        "generation": 483,
+        "ui_generation": 483,
+        "pid": 1947,
+        "age_ms": 115.0,
+        "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+        "resources": {}
+      },
+      "raw": "research-current-avd-r2.json"
+    },
+    "scope": "Independent read-only original queue entry/end-time/exit, not clock equivalence or a repeated full Main",
+    "initial_avd_failure": "research-current-avd.json: launched before ADB boot readiness; no game input; retained"
+  },
+  "runtime_recovery": {
+    "passed": true,
+    "same_account": true,
+    "same_resources": true,
+    "pid_before": 13911,
+    "pid_after": 1637,
+    "userdata_marker_preserved": true,
+    "data_mode_before": "771:1000:1000",
+    "data_mode_after": "771:1000:1000",
+    "raw": "container-recovery-current.json"
+  },
+  "resources": {
+    "initial": {
+      "oil": 516,
+      "gold": 95779,
+      "gem": 3505
+    },
+    "final": {
+      "oil": 1290,
+      "gold": 102545,
+      "gem": 3505
+    },
+    "net_change": {
+      "oil": 774,
+      "gold": 6766,
+      "gem": 0
+    },
+    "scope": "Net includes ordinary claims and research starts; not per-project gross costs",
+    "materials_consumed": 7,
+    "premium_currency_spent": 0
+  },
+  "final_state": {
+    "redroid_home_healthy": true,
+    "health": [
+      {
+        "generation": 312,
+        "ui_generation": 312,
+        "pid": 2655,
+        "age_ms": 361.0
+      },
+      {
+        "generation": 322,
+        "ui_generation": 322,
+        "pid": 2655,
+        "age_ms": 294.0
+      }
+    ],
+    "avd_shutdown_requested": true,
+    "scheduled_runner_left_running": false,
+    "local_bundle": "E:/Runtime/ALAS/redroid-x86_64-local-20261023"
+  },
+  "unchanged_qualification_limits": [
+    "natural full-dock uninterrupted recovery",
+    "future natural scheduler wakeup",
+    "real release-version image upgrade/rollback on logged-in data",
+    "full AOSP clean build/reproducibility",
+    "ARM64",
+    "native Linux",
+    "long unattended soak"
+  ],
+  "support_matrix_promoted": false,
+  "raw_directory": "artifacts/continuity-20261023"
+}

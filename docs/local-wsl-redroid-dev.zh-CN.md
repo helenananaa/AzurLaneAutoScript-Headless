@@ -5,8 +5,12 @@ Binder/BinderFS 的自定义 Microsoft WSL 内核，启动 stock Redroid 或本�
 x86 Redroid 镜像，并从 Windows 通过 ADB 访问它。
 
 它适合日常开发和调试：Redroid 启动、ADB、应用安装、ANGLE NULL、observer、ALAS
-适配、容器重启和宿主目录 `/data` 持久化。它不能替代最终的兼容 Linux/AWS
-运行资格验证。
+适配、容器重启和宿主目录 `/data` 持久化。原生 Linux 行为仍未资格化；外部构建
+主机已退役，当前开发和镜像构建只使用本地 Windows/WSL。
+
+2026-10-23 的已登录 `gameplay` 实例、公共适配修复、原调度组合、AVD 参考和本机
+运行入口见[最新连续性记录](redroid-continuity-20261023.zh-CN.md)。下方登录前
+结果保留其历史日期与范围，不代替该记录的当前验证与未完成项。
 
 ## 1. 已验证结果
 
