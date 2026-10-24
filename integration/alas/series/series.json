@@ -1169,6 +1169,11 @@
       "order": 234,
       "path": "integration/alas/series/1554-campaign-installed-stage-name.patch",
       "sha256": "af483923aeb759bfb2448297cda323510d2b163bdaa03d06ea7fa6a2dced45ea"
+    },
+    {
+      "order": 235,
+      "path": "integration/alas/series/1555-campaign-startup-retirement-handoff.patch",
+      "sha256": "856cce3f0e6a5b6f446f885866433439c89100f8a6f0c7d9a8184423cb1a4433"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

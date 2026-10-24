@@ -66,6 +66,7 @@ from .oracle.contracts import EnhancementDockCandidate as EnhancementDockCandida
 from .oracle.contracts import EnhancementExecutionReceipt as EnhancementExecutionReceipt
 from .oracle.contracts import EnhancementMaterialState as EnhancementMaterialState
 from .oracle.contracts import EnhancementNoMaterialReceipt as EnhancementNoMaterialReceipt
+from .oracle.contracts import EnhancementRejectedReceipt as EnhancementRejectedReceipt
 from .oracle.contracts import EnhancementPreview as EnhancementPreview
 from .oracle.contracts import EnhancementTargetScope as EnhancementTargetScope
 from .oracle.contracts import GemsFarmingDockCandidate as GemsFarmingDockCandidate

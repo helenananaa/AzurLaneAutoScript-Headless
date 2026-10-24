@@ -1,0 +1,34 @@
+diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
+--- a/module/campaign/campaign_base.py
++++ b/module/campaign/campaign_base.py
+@@ -294,7 +294,7 @@
+         logger.warning('No boss data found in spawn_data')
+         return 0
+ 
+-    def _semantic_campaign_retirement_recovery(self):
++    def _semantic_campaign_retirement_recovery(self, resume_auto_search=True):
+         # The existing ALAS retirement handler owns configuration, retries,
+         # quit and continuation; the observer only detects the interruption.
+         self.device.screenshot()
+@@ -302,7 +302,7 @@
+         # Retirement navigation invalidates the old observation frame.
+         # The original map-option handler also owns a retained paused map.
+         self.device.screenshot()
+-        if self.is_in_map():
++        if resume_auto_search and self.is_in_map():
+             return self.handle_auto_search_map_option() or handled
+         return handled
+ 
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -517,7 +517,8 @@
+                 or semantic_adapter.campaign_retirement_visible()
+             ):
+                 for _ in self.campaign.loop(timeout=30):
+-                    if self.campaign._semantic_campaign_retirement_recovery():
++                    # Startup still needs the paused map to bind its native context.
++                    if self.campaign._semantic_campaign_retirement_recovery(resume_auto_search=False):
+                         break
+                 else:
+                     raise ScriptEnd('Inherited dock-full recovery did not complete')

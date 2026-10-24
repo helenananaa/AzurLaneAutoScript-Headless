@@ -9,6 +9,7 @@ from ...semantic_oracle import (
     AwakenExecutionReceipt,
     EnhancementExecutionReceipt,
     EnhancementNoMaterialReceipt,
+    EnhancementRejectedReceipt,
     RetirementExecutionReceipt,
     RetirementNoCandidateReceipt,
     SemanticGateClosed,
@@ -194,7 +195,10 @@ class DockAdapterPorts:
             self._enhancement_no_material_cards.add(
                 self._enhancement_candidate_key(candidate)
             )
-            ship_count -= 1
+            # Native ALAS skips a target in battle without consuming its
+            # candidate-check count. The rejected action still burns its grant.
+            if not isinstance(receipt, EnhancementRejectedReceipt):
+                ship_count -= 1
             self.oracle.return_to_enhancement_dock()
             self._enhancement_current_candidate = None
             if not self.enhancement_allowed():
@@ -220,7 +224,7 @@ class DockAdapterPorts:
 
     def enhancement_receipts(
         self,
-    ) -> Tuple[Union[EnhancementExecutionReceipt, EnhancementNoMaterialReceipt], ...]:
+    ) -> Tuple[Union[EnhancementExecutionReceipt, EnhancementNoMaterialReceipt, EnhancementRejectedReceipt], ...]:
         return tuple(self._enhancement_receipts)
 
     def retire_ships_one_click(self, keep_limit_break: bool) -> int:

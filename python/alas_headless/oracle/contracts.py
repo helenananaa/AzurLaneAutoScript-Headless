@@ -695,6 +695,7 @@ class EnhancementPreview:
     material_protection_proven: bool
     image_source_count: Optional[int] = None
     image_source_capacity: Optional[int] = None
+    rejection_text: Optional[str] = None
 
     @property
     def material_count(self) -> int:
@@ -719,6 +720,20 @@ class EnhancementNoMaterialReceipt:
             and re.fullmatch(r"[0-9a-f]{64}", self.policy_sha256) is None
         ):
             raise ValueError("enhancement receipt policy hash is malformed")
+
+
+@dataclass(frozen=True)
+class EnhancementRejectedReceipt:
+    """Client refused this order; unchanged preview proves no observed consumption."""
+
+    generation: int
+    target_name: str
+    confirmation: ActionReceipt
+    rejection_text: str
+    materials: Tuple[EnhancementMaterialState, ...]
+    attributes: Tuple[EnhancementAttributeState, ...]
+    policy_sha256: Optional[str] = None
+    capability_id: Optional[str] = None
 
 
 @dataclass(frozen=True)

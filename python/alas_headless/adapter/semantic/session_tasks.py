@@ -39,6 +39,7 @@ from ...semantic_oracle import (
     DormState,
     EnhancementExecutionReceipt,
     EnhancementNoMaterialReceipt,
+    EnhancementRejectedReceipt,
     GemsFarmingDockCandidate,
     GemsFarmingEquipmentLoadout,
     GeneralShopItemState,
@@ -328,7 +329,7 @@ class SessionTasksPorts:
 
     def enhancement_receipts(
         self,
-    ) -> Tuple[Union[EnhancementExecutionReceipt, EnhancementNoMaterialReceipt], ...]:
+    ) -> Tuple[Union[EnhancementExecutionReceipt, EnhancementNoMaterialReceipt, EnhancementRejectedReceipt], ...]:
         return self.open().enhancement_receipts()
 
     def retire_ships_one_click(self, keep_limit_break: bool) -> int:
@@ -928,7 +929,10 @@ class SessionTasksPorts:
         return self.open().ensure_campaign_submarine_auto_mode(desired)
 
     def campaign_retirement_visible(self) -> bool:
-        return self.open().oracle.retirement_selection_visible()
+        oracle = self.open().oracle
+        # The native campaign recovery handler owns both retirement selection
+        # and the enhance-first Dock inherited after an interrupted task.
+        return oracle.retirement_selection_visible() or oracle.enhancement_dock_visible()
 
     def last_campaign_auto_search_completion(
         self,

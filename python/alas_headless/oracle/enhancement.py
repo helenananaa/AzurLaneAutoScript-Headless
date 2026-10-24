@@ -12,6 +12,7 @@ from .contracts import (
     EnhancementExecutionReceipt,
     EnhancementMaterialState,
     EnhancementNoMaterialReceipt,
+    EnhancementRejectedReceipt,
     EnhancementPreview,
     ImageState,
     OracleState,
@@ -1156,6 +1157,16 @@ class EnhancementOracle:
             and ui_state.image_source_capacity is not None
             and ui_state.image_source_count <= ui_state.image_source_capacity
         )
+        tips = tuple(
+            item for item in ui_state.texts
+            if item.path == "OverlayCamera/Overlay/UIOverlay/TipPanel(Clone)/Grid/toolTip(Clone)/Text"
+            and item.active_in_hierarchy and item.active_and_enabled
+        )
+        rejection_text = (
+            tips[0].text if len(tips) == 1 and not tips[0].truncated
+            and tips[0].text in ("该角色正在作战中！", "<color=white>该角色正在作战中！</color>")
+            else None
+        )
         # A complete source enumeration plus a closed card-child whitelist
         # turns icon absence into positive evidence: any lock, favourite,
         # equipment, or other overlay adds an unexpected active child Image.
@@ -1170,6 +1181,7 @@ class EnhancementOracle:
             ),
             image_source_count=ui_state.image_source_count,
             image_source_capacity=ui_state.image_source_capacity,
+            rejection_text=rejection_text,
         )
 
     def _click_enhancement_control(
@@ -1276,7 +1288,7 @@ class EnhancementOracle:
 
     def enhance_with_official_recommendation(
         self, timeout_seconds: float = 5.0
-    ) -> Union[EnhancementExecutionReceipt, EnhancementNoMaterialReceipt]:
+    ) -> Union[EnhancementExecutionReceipt, EnhancementNoMaterialReceipt, EnhancementRejectedReceipt]:
         """Use the official recommendation and confirm one protected enhancement.
 
         No material is a successful skip. Any incomplete card, non-level-1 or
@@ -1345,6 +1357,8 @@ class EnhancementOracle:
                 raise SemanticGateClosed(
                     "official enhancement recommendation is not consumption-safe"
                 )
+        if selected.rejection_text is not None:
+            raise SemanticGateClosed("enhancement has an unexpired prior rejection")
         confirmation = self._click_enhancement_control(
             "enhancement/confirm", "ok_btn", "qianghua_butten"
         )
@@ -1388,6 +1402,20 @@ class EnhancementOracle:
                 preview = self.enhancement_preview()
             except SemanticGateClosed:
                 preview = None
+            if preview is not None and preview.rejection_text is not None:
+                if (preview.generation > confirmation.generation
+                        and preview.target_name == selected.target_name
+                        and preview.materials == selected.materials
+                        and preview.attributes == selected.attributes):
+                    return EnhancementRejectedReceipt(
+                        generation=preview.generation,
+                        target_name=preview.target_name,
+                        confirmation=confirmation,
+                        rejection_text=preview.rejection_text,
+                        materials=preview.materials,
+                        attributes=preview.attributes,
+                    )
+                raise SemanticGateClosed("enhancement rejection does not prove an unchanged order")
             # The live client clears its material slots one observer frame
             # before applying the corresponding attribute values.  Do not
             # mistake that transitional empty panel for the completed order.

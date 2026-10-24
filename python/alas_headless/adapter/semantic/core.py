@@ -29,6 +29,7 @@ from ...semantic_oracle import (
     AwakenExecutionReceipt,
     EnhancementExecutionReceipt,
     EnhancementNoMaterialReceipt,
+    EnhancementRejectedReceipt,
     RetirementExecutionReceipt,
     RetirementNoCandidateReceipt,
     SemanticGateClosed,
@@ -232,7 +233,7 @@ class CoreAdapterPorts:
         self._awaken_receipts: List[AwakenExecutionReceipt] = []
         self._awaken_cost_observations: List[AwakenCostState] = []
         self._enhancement_receipts: List[
-            Union[EnhancementExecutionReceipt, EnhancementNoMaterialReceipt]
+            Union[EnhancementExecutionReceipt, EnhancementNoMaterialReceipt, EnhancementRejectedReceipt]
         ] = []
         self._frame_observation_oracle = frame_observation_oracle
         self._frame_identity_provider = frame_identity_provider
@@ -446,6 +447,7 @@ class CoreAdapterPorts:
                 AwakenExecutionReceipt,
                 EnhancementExecutionReceipt,
                 EnhancementNoMaterialReceipt,
+                EnhancementRejectedReceipt,
                 RetirementExecutionReceipt,
                 RetirementNoCandidateReceipt,
             ),
