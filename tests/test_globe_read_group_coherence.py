@@ -4,6 +4,7 @@ import pytest
 from alas_headless import SemanticGateClosed
 from tests.test_semantic_oracle_opsi_native_projection import native_fixture
 from tests.test_globe_unpin_anchor import setup_unpin
+from tests.semantic_support.observer_fixtures import make_ui, make_text
 
 
 def test_projection_checks_foreground_at_each_end_of_the_read_group():
@@ -23,6 +24,53 @@ def test_projection_does_not_accept_foreground_changed_during_native_query():
     o._request=change
     with pytest.raises(SemanticGateClosed):o.operation_siren_globe_map_projection((268,421))
     assert not b.taps and not b.swipes
+
+
+@pytest.mark.parametrize('foreground_changed', [False, True])
+def test_zone_input_keeps_projection_and_blockers_adjacent_before_final_foreground_check(foreground_changed):
+    backend, oracle, _ = native_fixture()
+    oracle._sleep = lambda _: None
+    request = oracle._request
+    events = []
+    accepted = [False]
+
+    def observe(line):
+        value = request(line)
+        if line.startswith('GET /v1/globe-projection '):
+            accepted[0] = True
+            events.append('projection')
+        elif accepted[0] and line.startswith('GET /v1/state'):
+            events.append('state')
+        return value
+
+    def foreground():
+        if accepted[0]:
+            events.append('foreground')
+            # Reproduce a foreground ADB roundtrip spanning three exports.
+            backend.buttons['generation'] += 3
+            backend.ui['generation'] = backend.buttons['generation']
+            if foreground_changed:
+                return 'other/.Activity'
+        return backend.foreground
+
+    def select():
+        events.append('tap')
+        backend.ui = make_ui([make_text('zone-安全海域',
+            'root/SVFloatPanel(Clone)/point/line/bg/title/name/subText')],
+            generation=backend.ui['generation'] + 1)
+
+    oracle._request = observe
+    oracle._foreground_component = foreground
+    backend.on_tap = select
+    if foreground_changed:
+        with pytest.raises(SemanticGateClosed, match='foreground changed'):
+            oracle.click_operation_siren_globe_map_zone('zone', (268, 421))
+        assert not backend.taps
+    else:
+        assert oracle.click_operation_siren_globe_map_zone('zone', (268, 421)).semantic_id == 'os/globe/zone/select'
+        assert backend.taps == [(528, 289)]
+    assert events[:3] == ['projection', 'state', 'foreground']
+    assert events.count('projection') == 1
 
 
 def test_unpin_reuses_explicit_foreground_checks_for_adjacent_button_reads():

@@ -464,11 +464,12 @@ class OpsiGlobeOracle:
             raise SemanticGateClosed("operation siren port projection is unavailable")
         return Point(projection[0], projection[1])
 
-    def _operation_siren_globe_map_projection_record(self, area_pos):
+    def _operation_siren_globe_map_projection_record(self, area_pos, *, check_foreground_on_return=True):
         return self._retry_transition_read(
-            lambda: self._operation_siren_globe_map_projection_record_once(area_pos))
+            lambda: self._operation_siren_globe_map_projection_record_once(
+                area_pos, check_foreground_on_return=check_foreground_on_return))
 
-    def _operation_siren_globe_map_projection_record_once(self, area_pos):
+    def _operation_siren_globe_map_projection_record_once(self, area_pos, *, check_foreground_on_return=True):
         """Ask the game's PointerInfo to project the original ALAS area intent."""
         if (not isinstance(area_pos, (tuple, list)) or len(area_pos) != 2
                 or any(isinstance(v, bool) or not isinstance(v, (int, float))
@@ -513,7 +514,8 @@ class OpsiGlobeOracle:
             # The globe read proved foreground before this adjacent async
             # query group. Recheck once on its accepted frame instead of a
             # dumpsys roundtrip on every poll; input checks again at dispatch.
-            if self._foreground_component() != self.fingerprint.component:
+            if (check_foreground_on_return
+                    and self._foreground_component() != self.fingerprint.component):
                 raise SemanticGateClosed('foreground changed during native map projection')
             return ui, records[0]
         raise SemanticGateClosed('fresh native map projection is unavailable for this intent')
@@ -527,9 +529,12 @@ class OpsiGlobeOracle:
         if not expected_zone_name:
             raise SemanticGateClosed('operation siren zone intent is absent')
         for attempt in range(4):
-            ui, record = self._operation_siren_globe_map_projection_record(area_pos)
-            # Projection reads already check foreground; check it again at the
-            # input boundary below, avoiding a dumpsys delay between this pair.
+            ui, record = self._operation_siren_globe_map_projection_record(
+                area_pos, check_foreground_on_return=False)
+            # Keep the accepted projection and blocker snapshot adjacent.
+            # A foreground roundtrip here can advance three generations even
+            # on an idle globe. Identity is checked before the projection;
+            # the mandatory final foreground check remains below, before input.
             state = self.read_state(check_foreground=False)
             if ui.generation <= state.generation <= ui.generation + 2:
                 loading_root = 'OverlayCamera/Overlay/UIOverlay/Loading(Clone)'

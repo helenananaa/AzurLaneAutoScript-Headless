@@ -169,8 +169,8 @@ def test_zone_selection_recaptures_incoherent_pair_before_any_input(persistent):
     original_state = oracle.read_state
     pending = [False]
     pairs = [0]
-    def projection(area):
-        result = original_projection(area)
+    def projection(area, **kwargs):
+        result = original_projection(area, **kwargs)
         pairs[0] += 1
         pending[0] = True
         return result

@@ -57,7 +57,8 @@ def test_known_loading_projection_reuses_existing_bounded_read_window(clears):
     loading = dict(record, ui_clear=False, input_point=None,
                    ui_top_path='OverlayCamera/Overlay/UIOverlay/Loading(Clone)/bg')
     calls = []
-    def read(_):
+    def read(_, **kwargs):
+        assert kwargs == {'check_foreground_on_return': False}
         calls.append(True)
         waiting = len(calls) == 1 or not clears
         backend.buttons = make_buttons([make_button('Loading(Clone)',
