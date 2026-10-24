@@ -1184,6 +1184,11 @@
       "order": 237,
       "path": "integration/alas/series/1557-campaign-installed-stage-alias.patch",
       "sha256": "572fe43c1fa9471e9cfa1f8389fe615f7dbeffa07ca6b2b960abaec0591c12d3"
+    },
+    {
+      "order": 238,
+      "path": "integration/alas/series/1558-event-aside-exact-stage-presence.patch",
+      "sha256": "95a7e71382ddceae74cbf36df781266cc18578ab959c33aa4da687689361e007"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

@@ -1,0 +1,28 @@
+diff --git a/module/campaign/campaign_ui.py b/module/campaign/campaign_ui.py
+--- a/module/campaign/campaign_ui.py
++++ b/module/campaign/campaign_ui.py
+@@ -190,19 +190,11 @@
+             if preparation is not None:
+                 return
+             state = oracle.campaign_page_state()
+-            expected = {
+-                'part1': {'a', 'c', 't'},
+-                'part2': {'b', 'd'},
+-                'sp': {'ex_sp', 'sp'},
+-                'ex': {'ex_ex', 'ex'},
+-            }
+-            current = {
+-                semantic_adapter.open().oracle._campaign_stage_chapter(
+-                    stage.stage_code
+-                )
+-                for stage in state.stages
+-            }
+-            if chapter in expected and current & expected[chapter]:
++            # T stages can span both event tabs. A shared chapter prefix
++            # cannot prove that ALAS' requested stage is on the visible page.
++            # Skip the original tab switch only for that exact visible stage.
++            requested = self.config.Campaign_Name.lower()
++            if any(stage.stage_code.lower() == requested for stage in state.stages):
+                 return
+         if chapter in ['part1', 'a', 'c', 't']:
+             ASIDE_SWITCH_20241219.set('part1', main=self)
