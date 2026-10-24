@@ -150,6 +150,14 @@ class SessionDispatchPorts:
             return True
         if name == 'BACK_ARROW' and adapter._frame_or_live_observation_oracle().retirement_selection_visible():
             return adapter._frame_or_live_observation_oracle().retirement_page_back_available()
+        if name == 'BACK_ARROW':
+            oracle = adapter._frame_or_live_observation_oracle()
+            if getattr(oracle, 'enhancement_dock_back_control', lambda: None)() is not None:
+                # Native dock_quit follows enhancement inside a committed map.
+                # Its reviewed Dock return must precede the combat observer's
+                # negative BACK_ARROW alias. Input still uses the existing
+                # fresh control and new-generation departure postcondition.
+                return adapter.appear(button)
         if name in ('GAME_TIPS', 'GAME_TIPS3', 'GAME_TIPS4'):
             oracle = adapter._frame_or_live_observation_oracle()
             if oracle.retirement_selection_visible() and oracle.retirement_page_back_available():
@@ -583,6 +591,11 @@ class SessionDispatchPorts:
             receipt = self.open().oracle.click_retirement_page_back()
             self._retirement_return_receipt = receipt
             return receipt
+        if name == 'BACK_ARROW':
+            oracle = self.open()._frame_or_live_observation_oracle()
+            if getattr(oracle, 'enhancement_dock_back_control', lambda: None)() is not None:
+                self.refresh_frame()
+                return self.open().click(button)
         if name in ("MAP_AMBUSH_EVADE", "MAP_AMBUSH_ATTACK"):
             self.refresh_frame()
             return self.open().click(button)
