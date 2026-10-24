@@ -1,6 +1,6 @@
 # 本机运行入口
 
-更新于 2026-10-23。主仓库已经整合公共 ALAS 适配、Windows/WSL Redroid、
+更新于 2026-10-24。主仓库已经整合公共 ALAS 适配、Windows/WSL Redroid、
 本地 KVM 与 Mac/HVF 的已有实现。各平台的实机资格仍分别记录；本页操作对象是
 已验证的本机 Redroid `gameplay` 实例，不创建新 userdata，也不安装或重建镜像。
 
@@ -56,7 +56,8 @@ Set-Content -LiteralPath '<本轮 $stop 的完整路径>' -Value 'stop'
 持久配置 `semantic_daily_continuity_20261023` 继续原 NextRun，不重新复制 seed 覆盖它。
 2026-10-23 晚间实机扩展还启用了 Tactical、Dorm、Daily、Exercise、Freebies、Guild、
 PrivateQuarters、Meowfficer、Minigame、Gacha、Hard、Awaken，共十五项参与测试；Awaken
-完成一次资源事务后已关闭重复调度，目前继续运行十四项。启用不等于验证
+完成一次资源事务后已关闭重复调度。其余十四项在配置中仍启用，但本轮已因主机关机
+中断并收尾，没有运行中的 runner，后台巡检已删除。启用不等于验证
 通过，执行与局部失败见[真实调度记录](scheduler-live-20261023.zh-CN.md)。高油耗委托
 关闭，科研不使用魔方或部件。Main 和商店采购仍关闭。
 资源额度由运行包的 `scheduler_budgets` 转交已有运行器；持续模式按原任务轮次恢复额度。
@@ -67,8 +68,9 @@ JSON 收据默认留在运行包目录，可用 `-Output` 指定新路径。
 显式继续原生队列。该参数不会绕过传输错误、语义输入检查或原生致命退出。
 
 2026-10-23 已有这些任务的有界执行、配置重入、正常停止与容器恢复证据。
-自然下一轮唤醒、自然满仓后的不中断 Main 恢复、长期无人值守及已登录数据的
-真实版本升级/回退仍未资格化。详见[连续性记录](redroid-continuity-20261023.zh-CN.md)。
+委托已有自然下一轮及修复后连续两轮证据；奖励和科研的自然下一轮因主机关机未验证。
+自然满仓后的不中断 Main 恢复、长期无人值守及已登录数据的真实版本升级/回退仍未
+资格化。详见[连续性记录](redroid-continuity-20261023.zh-CN.md)及上述真实调度记录。
 
 ## 其他平台与开发验证
 
