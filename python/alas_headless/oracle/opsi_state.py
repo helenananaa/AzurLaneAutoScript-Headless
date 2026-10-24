@@ -705,6 +705,12 @@ class OpsiStateOracle:
         state = self.read_state()
 
         def actionable(semantic_id: str) -> bool:
+            # A reward can mount after ALAS' preceding reward probe while the
+            # map switch remains in the hierarchy. Defer to the original next
+            # screenshot/reward branch instead of reporting the covered OFF
+            # control as a new enable attempt or a completed empty search.
+            if self._blocking_rules(state, semantic_id):
+                return False
             matches = tuple(
                 target
                 for target in self._matches(state, semantic_id)
