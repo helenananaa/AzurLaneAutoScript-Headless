@@ -1179,6 +1179,11 @@
       "order": 236,
       "path": "integration/alas/series/1556-combat-native-low-emotion-deferral.patch",
       "sha256": "c8394078700dd45ce68903f977676e25d5c0b983a3cc6b9f7365793c1399aeb9"
+    },
+    {
+      "order": 237,
+      "path": "integration/alas/series/1557-campaign-installed-stage-alias.patch",
+      "sha256": "572fe43c1fa9471e9cfa1f8389fe615f7dbeffa07ca6b2b960abaec0591c12d3"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

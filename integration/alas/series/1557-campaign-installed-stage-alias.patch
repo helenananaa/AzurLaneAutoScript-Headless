@@ -1,0 +1,18 @@
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -250,6 +250,14 @@
+             'd2': 'ht5',
+             'd3': 'ht6',
+         }
++        if (getattr(self.device, 'semantic_adapter', None) is not None
++                and name in convert
++                and not os.path.isfile(f'./campaign/{folder}/{name}.py')
++                and os.path.isfile(f'./campaign/{folder}/{convert[name]}.py')):
++            # Reuse ALAS' known alias pairs for an installed newer event map.
++            # An existing original spelling takes priority over this fallback;
++            # absent T/HT maps do not acquire fabricated stage support.
++            name = convert[name]
+         if (getattr(self.device, 'semantic_adapter', None) is not None
+                 and name in convert.values()
+                 and os.path.isfile(f'./campaign/{folder}/{name}.py')):
