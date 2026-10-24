@@ -215,6 +215,32 @@ def record_action_receipt(current, receipt, seen):
     current['actions'].append(encoded)
 
 
+def recorded_retirement(call, receipt_reader, current_record):
+    """Retain each native dock transaction without attributing cached history."""
+    def invoke(*values, **options):
+        before = None
+        baseline_known = False
+        try:
+            before = receipt_reader()
+            baseline_known = True
+        except Exception as exc:
+            record = current_record()
+            if record is not None:
+                record.setdefault('retirement_recording_errors', []).append(str(exc))
+        try:
+            return call(*values, **options)
+        finally:
+            record = current_record()
+            if record is not None:
+                try:
+                    after = receipt_reader()
+                    if baseline_known and after is not None and after is not before:
+                        record.setdefault('retirement_receipts', []).append(encode_receipt_value(after))
+                except Exception as exc:
+                    record.setdefault('retirement_recording_errors', []).append(str(exc))
+    return invoke
+
+
 def recorded_click(call, current_record, seen, *, session=None):
     """Observe the session click boundary, including frame-bound operations."""
     def click(*values, **options):
@@ -413,6 +439,11 @@ def main():
             if not any(existing is session for existing in instrumented_sessions):
                 instrumented_sessions.append(session)
                 session.click = recorded_click(session.click, lambda: current, action_receipts_seen, session=session)
+                retirement = getattr(session, 'retire_ships_one_click', None)
+                receipt_reader = getattr(session, 'retirement_receipt', None)
+                if callable(retirement) and callable(receipt_reader):
+                    session.retire_ships_one_click = recorded_retirement(
+                        retirement, receipt_reader, lambda: current)
                 port_repair = getattr(session, 'click_operation_siren_port_repair', None)
                 if callable(port_repair):
                     session.click_operation_siren_port_repair = recorded_click(
