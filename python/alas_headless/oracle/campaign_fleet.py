@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import re
 from typing import Optional, Tuple
 from .contracts import (
@@ -13,6 +14,7 @@ from .contracts import (
     CampaignHardRequirementState,
     CampaignPreparationState,
     OracleState,
+    Point,
     UNCAPPED_CAMPAIGN_SORTIE_OIL_RESERVE,
     UiState,
 )
@@ -1047,21 +1049,29 @@ class CampaignFleetOracle:
         if any(rule.blocker_id != "campaign-menu" for rule in
                self._blocking_rules(state, "campaign/stage/" + stage_code)):
             raise SemanticGateClosed("campaign stage input is blocked")
-        if not (
-            target.bounds.contains(target.point)
-            and target.bounds.left <= round(target.point.x) <= target.bounds.right
-            and target.bounds.top <= round(target.point.y) <= target.bounds.bottom
-        ):
+        if not target.bounds.contains(target.point):
             raise SemanticGateClosed("campaign stage point is outside its button")
         if not (
             0 <= target.point.x < self.fingerprint.width
             and 0 <= target.point.y < self.fingerprint.height
         ):
             raise SemanticGateClosed("campaign stage point is outside the screen")
+        # Use the same nearest in-bounds integer projection as ordinary typed
+        # Button input. A fractional edge pivot may otherwise round outside its
+        # own rectangle; an invalid original point is still rejected above.
+        minimum_x = max(0, math.ceil(target.bounds.left))
+        maximum_x = min(self.fingerprint.width - 1, math.floor(target.bounds.right))
+        minimum_y = max(0, math.ceil(target.bounds.top))
+        maximum_y = min(self.fingerprint.height - 1, math.floor(target.bounds.bottom))
+        if minimum_x > maximum_x or minimum_y > maximum_y:
+            raise SemanticGateClosed("campaign stage has no in-bounds integer input point")
+        point = Point(
+            min(max(int(round(target.point.x)), minimum_x), maximum_x),
+            min(max(int(round(target.point.y)), minimum_y), maximum_y),
+        )
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed immediately before input")
-        point = target.point
-        self._tap(int(round(point.x)), int(round(point.y)))
+        self._tap(int(point.x), int(point.y))
         return ActionReceipt(
             semantic_id="campaign/stage/" + stage_code,
             generation=state.generation,
