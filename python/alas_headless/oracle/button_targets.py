@@ -1315,6 +1315,16 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
     ),
     SemanticTarget(
+        "combat/low-emotion/cancel",
+        "custom_button_2(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
+    ),
+    SemanticTarget(
+        "combat/low-emotion/confirm",
+        "custom_button_1(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+    ),
+    SemanticTarget(
         "overlay/network-reconnect/confirm",
         "custom_button_1(Clone)",
         "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",

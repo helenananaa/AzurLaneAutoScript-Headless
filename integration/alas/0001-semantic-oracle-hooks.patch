@@ -20518,3 +20518,45 @@ diff --git a/module/campaign/run.py b/module/campaign/run.py
                          break
                  else:
                      raise ScriptEnd('Inherited dock-full recovery did not complete')
+diff --git a/module/handler/info_handler.py b/module/handler/info_handler.py
+--- a/module/handler/info_handler.py
++++ b/module/handler/info_handler.py
+@@ -195,24 +195,38 @@
+             # Use template match without color match due to maintenance popup
+             if self.appear(LOGIN_CHECK, offset=(30, 30)):
+                 logger.error('Account logged out, '
+                              'probably because account kicked by server maintenance or another log in')
+                 # Kill game, because game patches after maintenance can only be downloaded at game startup
+                 self.device.app_stop()
+                 raise GameNotRunningError
+             self._hot_fix_check_wait.clear()
+ 
+         return appear
+ 
+     def handle_combat_low_emotion(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            if not semantic_adapter.appear('COMBAT_LOW_EMOTION'):
++                return False
++            if self.emotion.is_ignore:
++                semantic_adapter.click('COMBAT_LOW_EMOTION_CONFIRM')
++                self.interval_reset(AUTO_SEARCH_MAP_OPTION_OFF)
++                return True
++            # The game warning contradicts the local estimate. Preserve the
++            # records, cancel once, and let the native scheduler defer this task.
++            semantic_adapter.click('COMBAT_LOW_EMOTION_CANCEL')
++            logger.warning('Game reported low emotion; defer with configured failure interval')
++            self.config.task_delay(success=False)
++            self.config.task_stop()
+         if not self.emotion.is_ignore:
+             return False
+ 
+         result = self.handle_popup_confirm('IGNORE_LOW_EMOTION')
+         if result:
+             # Avoid clicking AUTO_SEARCH_MAP_OPTION_OFF
+             self.interval_reset(AUTO_SEARCH_MAP_OPTION_OFF)
+         return result
+ 
+     def handle_use_data_key(self):
+         if not self.config.USE_DATA_KEY:
+             return False

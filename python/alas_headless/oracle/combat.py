@@ -38,6 +38,35 @@ class SubmarineCallState:
 class CombatOracle:
     """Combat operations sharing the oracle frame and input boundary."""
 
+    def _combat_low_emotion_prompt_matches(self, state) -> bool:
+        if not self._matches(state, 'combat/low-emotion/cancel'):
+            return False
+        parts = self._msgbox_prompt_parts(state)
+        if parts is None:
+            return False
+        content, cancel, confirm = parts
+        return bool(cancel == '取消' and confirm == '确定' and re.fullmatch(
+            r'第[一二三四五六七八九十0-9]+舰队中(?:「[^「」\r\n]+」)+'
+            r'处于低心情状态，强制出击将降低好感且获得经验减半', content))
+
+    def combat_low_emotion_prompt_visible(self) -> bool:
+        return self._combat_low_emotion_prompt_matches(self.read_state())
+
+    def click_combat_low_emotion(self, *, confirm: bool) -> ActionReceipt:
+        # ALAS owns the ignore/cancel policy. Generic popup handlers never
+        # resolve these controls, even though the prefab is shared.
+        target = 'combat/low-emotion/' + ('confirm' if confirm else 'cancel')
+        receipt = self.click(target)
+        deadline = self._monotonic() + 5.0
+        while self._monotonic() < deadline:
+            current = self.read_state()
+            if (current.generation > receipt.generation and not any(
+                    b.active_in_hierarchy and b.active_and_enabled
+                    and '/Msgbox(Clone)/' in b.path for b in current.buttons)):
+                return receipt
+            self._sleep(0.1)
+        raise SemanticGateClosed('low-emotion prompt did not close after one input')
+
     def campaign_submarine_call_state(self) -> Optional[SubmarineCallState]:
         state = self.read_state()
         root = 'UICamera/Canvas/UIMain/CombatUIStandard(Clone)'

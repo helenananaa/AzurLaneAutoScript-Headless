@@ -785,6 +785,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "tactical-continue",
         "/Msgbox(Clone)/",
         (
+            "combat/low-emotion/cancel",
+            "combat/low-emotion/confirm",
             "exercise/combat/quit-confirm",
             "os/adaptability/info/confirm",
             "reward/item-info/close",

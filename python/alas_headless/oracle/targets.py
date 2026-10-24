@@ -668,6 +668,8 @@ class TargetsOracle:
     def _exists_once(self, semantic_id: str) -> bool:
         state = self.read_state()
         matches = self._matches(state, semantic_id)
+        if semantic_id in ('combat/low-emotion/cancel', 'combat/low-emotion/confirm'):
+            return bool(matches and self._combat_low_emotion_prompt_matches(state))
         if semantic_id == "tactical/continue/cancel":
             return bool(matches and self._tactical_continue_prompt_matches(state))
         if semantic_id == "tactical/completion/ack":
@@ -707,6 +709,9 @@ class TargetsOracle:
 
     def _enabled_once(self, semantic_id: str) -> bool:
         state = self.read_state()
+        if (semantic_id in ('combat/low-emotion/cancel', 'combat/low-emotion/confirm')
+                and not self._combat_low_emotion_prompt_matches(state)):
+            return False
         if semantic_id == 'archive/activity-list/home':
             return self._activity_archive_home_proven(state)
         if semantic_id == 'player/profile/back':

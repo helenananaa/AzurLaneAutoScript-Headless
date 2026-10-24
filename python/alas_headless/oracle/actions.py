@@ -137,6 +137,9 @@ class ActionsOracle:
         delegated_academy_game_room = bool(
             semantic_id == "academy/game-room" and self.academy_page_visible()
         )
+        if semantic_id in ('combat/low-emotion/cancel', 'combat/low-emotion/confirm'):
+            if not self._combat_low_emotion_prompt_matches(state):
+                raise SemanticGateClosed('low-emotion prompt identity is not proven')
         if semantic_id in (
             "overlay/network-reconnect/cancel",
             "overlay/network-reconnect/confirm",

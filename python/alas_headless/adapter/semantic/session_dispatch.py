@@ -78,6 +78,8 @@ class SessionDispatchPorts:
                 # boundary before the page sweep instead of polling live state
                 # separately for every candidate. Valid frames remain frozen.
                 self.refresh_frame()
+        if name == 'COMBAT_LOW_EMOTION':
+            return adapter._frame_or_live_observation_oracle().combat_low_emotion_prompt_visible()
         if name in ('GUILD_POPUP_CONFIRM', 'GUILD_POPUP_CANCEL'):
             oracle = adapter._frame_or_live_observation_oracle()
             if oracle.observation_target_present('overlay/guild-message/close'):
@@ -544,6 +546,10 @@ class SessionDispatchPorts:
                 return self.open().click_campaign_submarine_grid(button)
             return self.open().click_campaign_combat_grid(button)
         name = AlasSemanticAdapter._button_name(button)
+        if name in ('COMBAT_LOW_EMOTION_CANCEL', 'COMBAT_LOW_EMOTION_CONFIRM'):
+            self.refresh_frame()
+            return self.open().oracle.click_combat_low_emotion(
+                confirm=name == 'COMBAT_LOW_EMOTION_CONFIRM')
         if name == 'GET_MISSION' and self.open()._campaign_context is not None:
             self.refresh_frame()
             # The exact commission notice owns this alias on both sides of
