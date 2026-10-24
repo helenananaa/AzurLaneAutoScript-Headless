@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from typing import Any, Optional, Tuple, Union
 from .contracts import AlasSemanticActionDeferred
 from ...semantic_oracle import (
@@ -19,6 +20,13 @@ from ...semantic_oracle import (
 
 class DockAdapterPorts:
     """Dock ports on the shared adapter context."""
+
+    @staticmethod
+    def _dock_equipment_options():
+        policy = os.environ.get('ALAS_SEMANTIC_DOCK_EQUIPMENT_POLICY', 'preserve')
+        if policy not in ('preserve', 'disassemble'):
+            raise SemanticGateClosed('unknown dock equipment policy')
+        return {} if policy == 'preserve' else {'preserve_equipment': False}
 
     def retirement_allowed(self) -> bool:
         return self._action_ledger.allowed("retirement.execute")
@@ -187,7 +195,8 @@ class DockAdapterPorts:
                 return False, ship_count
             receipt = self._dispatch_mutation(
                 "enhancement.execute",
-                self.oracle.enhance_with_official_recommendation,
+                lambda: self.oracle.enhance_with_official_recommendation(
+                    **self._dock_equipment_options()),
             )
             self._enhancement_receipts.append(receipt)
             if isinstance(receipt, EnhancementExecutionReceipt):
@@ -236,7 +245,8 @@ class DockAdapterPorts:
         self._package_gate()
         receipt = self._dispatch_mutation(
             "retirement.execute",
-            lambda: self.oracle.retire_ships_one_click(keep_limit_break),
+            lambda: self.oracle.retire_ships_one_click(
+                keep_limit_break, **self._dock_equipment_options()),
         )
         self._last_retirement_receipt = receipt
         if isinstance(receipt, RetirementNoCandidateReceipt):

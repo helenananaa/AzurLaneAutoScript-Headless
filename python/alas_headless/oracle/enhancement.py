@@ -1287,7 +1287,7 @@ class EnhancementOracle:
         raise SemanticGateClosed("enhancement materials did not clear")
 
     def enhance_with_official_recommendation(
-        self, timeout_seconds: float = 5.0
+        self, timeout_seconds: float = 5.0, *, preserve_equipment: bool = True
     ) -> Union[EnhancementExecutionReceipt, EnhancementNoMaterialReceipt, EnhancementRejectedReceipt]:
         """Use the official recommendation and confirm one protected enhancement.
 
@@ -1298,6 +1298,8 @@ class EnhancementOracle:
 
         if timeout_seconds <= 0:
             raise ValueError("enhancement timeout must be positive")
+        if type(preserve_equipment) is not bool:
+            raise TypeError('enhancement equipment policy must be boolean')
         initial = self.enhancement_preview()
         if initial.materials:
             raise SemanticGateClosed("official enhancement requires empty slots")
@@ -1397,6 +1399,19 @@ class EnhancementOracle:
         equipment_result: Optional[
             Tuple[Tuple[Tuple[int, int], ...], Tuple[ActionReceipt, ...]]
         ] = None
+        equipment_disassembled = False
+        equipment_rewards = ()
+
+        def finish_equipment():
+            nonlocal equipment_disassembled, equipment_rewards
+            if preserve_equipment:
+                return self._finish_enhancement_equipment_preservation(
+                    timeout_seconds=max(timeout_seconds, 30.0))
+            quantities, actions, equipment_rewards = self._finish_dock_equipment_disassembly(
+                owner='enhancement', timeout_seconds=max(timeout_seconds, 30.0))
+            equipment_disassembled = bool(quantities)
+            return quantities, actions
+
         while time.monotonic() < deadline:
             try:
                 preview = self.enhancement_preview()
@@ -1456,9 +1471,7 @@ class EnhancementOracle:
                 # It is an already-confirmed order at this point, so wait for
                 # its normal preservation exit rather than misclassifying the
                 # completed enhancement as retryable.
-                equipment_result = self._finish_enhancement_equipment_preservation(
-                    timeout_seconds=max(timeout_seconds, 30.0)
-                )
+                equipment_result = finish_equipment()
                 completed = self.enhancement_preview()
                 if completed.materials:
                     raise SemanticGateClosed(
@@ -1476,9 +1489,7 @@ class EnhancementOracle:
                 "enhancement attribute result does not match the preview"
             )
         if equipment_result is None:
-            equipment_result = self._finish_enhancement_equipment_preservation(
-                timeout_seconds=max(timeout_seconds, 30.0)
-            )
+            equipment_result = finish_equipment()
         equipment_quantities, equipment_actions = equipment_result
         return EnhancementExecutionReceipt(
             target_name=completed.target_name,
@@ -1488,7 +1499,10 @@ class EnhancementOracle:
             confirmation=confirmation,
             equipment_quantities=equipment_quantities,
             equipment_actions=equipment_actions,
-            equipment_preserved=True,
+            equipment_preserved=preserve_equipment,
+            equipment_policy='preserve' if preserve_equipment else 'disassemble',
+            equipment_disassembled=equipment_disassembled,
+            equipment_rewards=equipment_rewards,
             generation_after=completed.generation,
         )
 

@@ -157,8 +157,11 @@ class RetirementOracle:
         *,
         identity_text_suffix: str,
         identity_text: str,
+        validate_records=None,
     ) -> ActionReceipt:
         state, ui_state = self._retirement_records()
+        if validate_records is not None:
+            validate_records(state, ui_state)
         buttons = self._active_retirement_buttons(state, path_suffix)
         identity = self._active_retirement_texts(
             ui_state, identity_text_suffix, identity_text
@@ -682,8 +685,8 @@ class RetirementOracle:
             rewards=tuple(sorted(zip(names, (int(value) for value in counts)))),
         )
 
-    def _retirement_equipment_state(self) -> RetirementEquipmentState:
-        state, ui_state = self._retirement_records()
+    def _retirement_equipment_state(self, records=None) -> RetirementEquipmentState:
+        state, ui_state = records if records is not None else self._retirement_records()
         cancel = self._active_retirement_buttons(
             state, "ResolveEquipmentUI(Clone)/main/cancel_btn"
         )
@@ -710,7 +713,7 @@ class RetirementOracle:
                 and item.active_in_hierarchy
                 and item.active_and_enabled
             ):
-                if re.fullmatch(r"[1-9][0-9]*", item.text.strip()) is None:
+                if item.truncated or re.fullmatch(r"[1-9][0-9]*", item.text.strip()) is None:
                     raise SemanticGateClosed("equipment quantity is malformed")
                 quantities.append((int(match.group(1)), int(item.text.strip())))
         selected = sorted(
@@ -762,13 +765,124 @@ class RetirementOracle:
             self._sleep(0.2)
         raise SemanticGateClosed('equipment selection did not clear')
 
+    def _finish_dock_equipment_disassembly(self, *, owner, timeout_seconds):
+        """Adapt ALAS' two equipment confirmations, then prove their reward/return.
+
+        This only handles equipment attached to the current ship transaction;
+        it never opens the equipment depot or repeats an unresolved confirmation.
+        """
+        if owner not in ('enhancement', 'retirement'):
+            raise ValueError('unknown equipment transaction owner')
+        deadline = self._monotonic() + timeout_seconds
+        actions, rewards = [], []
+        quantities = None
+        selection = destruction = None
+        toggle = None
+        clean_samples = 0
+        prefix = owner + '/equipment/'
+        panel = 'ResolveEquipmentUI(Clone)/'
+
+        def validate_selected(state, ui):
+            current = self._retirement_equipment_state((state, ui))
+            if (current.item_quantities != quantities or not current.all_checked
+                    or set(current.selected_slots) != {slot for slot, _ in quantities}):
+                raise SemanticGateClosed('equipment disassembly selection changed before input')
+
+        def validate_confirmation(state, ui):
+            if selection is None or state.generation <= selection.generation:
+                raise SemanticGateClosed('equipment disassembly has no fresh owned selection')
+            for suffix, label in (('got/title', '将获得以下材料:'),
+                                  ('actions/destroy_button/Image', '确 定'),
+                                  ('actions/cancel_button/Image', '取 消')):
+                values = self._active_retirement_texts(ui, panel + 'destroy_confirm/' + suffix)
+                if len(values) != 1 or values[0].text.replace(' ', '') != label.replace(' ', ''):
+                    raise SemanticGateClosed('equipment disassembly confirmation is not reviewed')
+
+        while self._monotonic() < deadline:
+            state, ui = self._retirement_records()
+            paths = [b.path for b in state.buttons if b.active_in_hierarchy and b.active_and_enabled]
+            if any('Msgbox(Clone)' in path for path in paths):
+                raise SemanticGateClosed('unexpected dialog in equipment disassembly')
+            if any(path.endswith(panel + 'destroy_confirm/actions/destroy_button') for path in paths):
+                if destruction is None:
+                    destruction = self._click_retirement_button(
+                        prefix + 'disassemble/confirm', panel + 'destroy_confirm/actions/destroy_button',
+                        identity_text_suffix=panel + 'destroy_confirm/got/title',
+                        identity_text='将获得以下材料:', validate_records=validate_confirmation)
+                    actions.append(destruction)
+                self._sleep(.2)
+                continue
+            if any(path.endswith('AwardInfoUI(Clone)/items/close') for path in paths):
+                if destruction is None or state.generation <= destruction.generation:
+                    raise SemanticGateClosed('equipment reward has no owned disassembly')
+                reward = self._retirement_reward_state()
+                rewards.extend(reward.rewards)
+                actions.append(self._click_retirement_button(
+                    prefix + 'reward/close', 'AwardInfoUI(Clone)/items/close',
+                    identity_text_suffix='AwardInfoUI(Clone)/items/items_scroll/content/item_tpl(Clone)/bg/name_mask/name',
+                    identity_text=reward.rewards[0][0]))
+                self._sleep(.2)
+                continue
+            if any(path.endswith(panel + 'main/cancel_btn') for path in paths):
+                if selection is not None:
+                    self._sleep(.2)
+                    continue
+                equipment = self._retirement_equipment_state((state, ui))
+                if quantities is None:
+                    quantities = equipment.item_quantities
+                elif equipment.item_quantities != quantities:
+                    raise SemanticGateClosed('equipment inventory changed before disassembly')
+                selected_all = equipment.all_checked and set(equipment.selected_slots) == {slot for slot, _ in quantities}
+                if not selected_all:
+                    if toggle is None:
+                        if equipment.all_checked:
+                            raise SemanticGateClosed('equipment all-selection is inconsistent')
+                        toggle = self._click_retirement_button(
+                            prefix + 'select-all', panel + 'main/options/ALL',
+                            identity_text_suffix=panel + 'main/options/ALL/Label', identity_text='全部')
+                        actions.append(toggle)
+                    self._sleep(.2)
+                    continue
+                if toggle is not None and equipment.generation <= toggle.generation:
+                    self._sleep(.2)
+                    continue
+                selection = self._click_retirement_button(
+                    prefix + 'confirm-selection', panel + 'main/ok_btn',
+                    identity_text_suffix=panel + 'main/ok_btn/Image', identity_text='确 定',
+                    validate_records=validate_selected)
+                actions.append(selection)
+                self._sleep(.2)
+                continue
+            settled = False
+            try:
+                if owner == 'enhancement':
+                    returned = self.enhancement_preview()
+                    settled = not returned.materials
+                else:
+                    returned = self.retirement_selection_state()
+                    settled = returned.selected_count == 0
+                if destruction is not None:
+                    settled = settled and returned.generation > destruction.generation and bool(rewards)
+                elif quantities is not None:
+                    settled = False
+            except SemanticOracleError:
+                pass
+            clean_samples = clean_samples + 1 if settled else 0
+            if clean_samples >= 3:
+                return quantities or (), tuple(actions), tuple(rewards)
+            self._sleep(.2)
+        raise SemanticGateClosed('equipment disassembly did not settle; do not retry')
+
     def retire_ships_one_click(
         self,
         keep_limit_break: bool,
         timeout_seconds: float = 60.0,
+        *, preserve_equipment: bool = True,
     ) -> Union[RetirementExecutionReceipt, RetirementNoCandidateReceipt]:
         """Execute one official one-click retirement transaction fail closed."""
 
+        if type(preserve_equipment) is not bool:
+            raise TypeError('retirement equipment policy must be boolean')
         if not isinstance(keep_limit_break, bool):
             raise TypeError("retirement limit-break policy must be boolean")
         if timeout_seconds <= 0:
@@ -870,13 +984,18 @@ class RetirementOracle:
             )
         )
 
-        return self._finish_retirement_transaction(before, selected_count, settings, actions, timeout_seconds)
+        return self._finish_retirement_transaction(before, selected_count, settings, actions, timeout_seconds,
+                                                   preserve_equipment=preserve_equipment)
 
-    def _finish_retirement_transaction(self, before, selected_count, settings, actions, timeout_seconds):
+    def _finish_retirement_transaction(self, before, selected_count, settings, actions, timeout_seconds,
+                                       *, preserve_equipment=True):
         """Finish reward/equipment dialogs; never select or submit ships."""
         rewards: Tuple[Tuple[str, int], ...] = ()
         warning_confirmed = False
         equipment_preserved = False
+        equipment_disassembled = False
+        equipment_quantities = ()
+        equipment_rewards = ()
         equipment_seen = False
         idle_since = None
         completion_deadline = self._monotonic() + timeout_seconds
@@ -932,6 +1051,12 @@ class RetirementOracle:
                 continue
             if kind == "equipment":
                 equipment_seen = True
+                if not preserve_equipment:
+                    equipment_quantities, equipment_actions, equipment_rewards = self._finish_dock_equipment_disassembly(
+                        owner='retirement', timeout_seconds=max(1.0, completion_deadline - self._monotonic()))
+                    actions.extend(equipment_actions)
+                    equipment_disassembled = bool(equipment_quantities)
+                    continue
                 equipment = self._retirement_equipment_state()
                 if equipment.selected_slots:
                     if not equipment.all_checked or set(equipment.selected_slots) != {
@@ -966,6 +1091,8 @@ class RetirementOracle:
                 self._sleep(0.2)
                 continue
             if kind == "equipment-preserve-confirm":
+                if not preserve_equipment:
+                    raise SemanticGateClosed('preservation dialog conflicts with disassembly policy')
                 actions.append(
                     self._click_retirement_button(
                         "retirement/equipment/preserve/confirm",
@@ -983,7 +1110,7 @@ class RetirementOracle:
             if kind == "selection":
                 # Unity briefly exposes the dock after the server removes
                 # ships but before mounting awards. That is not completion.
-                if not rewards or (equipment_seen and not equipment_preserved):
+                if not rewards or (equipment_seen and not (equipment_preserved or equipment_disassembled)):
                     self._sleep(0.2)
                     continue
                 state, _ = self._retirement_records()
@@ -1016,6 +1143,10 @@ class RetirementOracle:
                     rewards=rewards,
                     rarity_warning_confirmed=warning_confirmed,
                     equipment_preserved=equipment_preserved,
+                    equipment_policy='preserve' if preserve_equipment else 'disassemble',
+                    equipment_disassembled=equipment_disassembled,
+                    equipment_quantities=equipment_quantities,
+                    equipment_rewards=equipment_rewards,
                     actions=tuple(actions),
                 )
         raise SemanticGateClosed("official retirement transaction did not close")

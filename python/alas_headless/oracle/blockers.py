@@ -30,7 +30,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
     BlockerRule(
         "award-info",
         "/AwardInfoUI(Clone)/",
-        ("reward/award-info/close", "retirement/reward/close", "reward/item-info/close"),
+        ("reward/award-info/close", "retirement/reward/close", "reward/item-info/close",
+         "enhancement/equipment/reward/close", "retirement/equipment/reward/close"),
     ),
     BlockerRule(
         "award-info1",

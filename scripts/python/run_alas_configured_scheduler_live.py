@@ -358,6 +358,8 @@ def parse_args(argv=None):
     recovery.add_argument('--resume-task',
                          help='Prioritize one enabled native popup owner for startup recovery only')
     parser.add_argument('--budget', action='append', default=[])
+    parser.add_argument('--dock-equipment-policy', choices=('preserve', 'disassemble'),
+                        default='preserve', help='Equipment handling after enhancement or retirement')
     parser.add_argument('--stop-file', type=Path,
                         help='Request native cooperative stop when this file exists; never deletes the file')
     parser.add_argument('--output', required=True, type=Path)
@@ -388,7 +390,8 @@ def main():
     except ValueError as exc:
         parser.error(str(exc))
     os.environ.update(ALAS_SEMANTIC_MODE='1', ALAS_SEMANTIC_DRIVER_REVISION=args.driver_revision,
-                      ALAS_SEMANTIC_ADB='adb', **budgets)
+                      ALAS_SEMANTIC_ADB='adb',
+                      ALAS_SEMANTIC_DOCK_EQUIPMENT_POLICY=args.dock_equipment_policy, **budgets)
     sys.path[:0] = [str(ROOT / 'python'), str(alas_root)]
     os.chdir(alas_root)
     result = {'schema': 'alas-headless.original-scheduler-live/v1',
@@ -397,6 +400,7 @@ def main():
               'serial': config['Alas']['Emulator']['Serial'], 'budgets': args.budget,
               'campaign_run_overrides': overrides, 'max_tasks': args.max_tasks,
               'continuous': args.continuous,
+              'dock_equipment_policy': args.dock_equipment_policy,
               'stop_file': str(stop_file) if stop_file is not None else None,
               'startup_restart_requested': args.restart_before_loop,
               'startup_login_requested': args.login_before_loop,

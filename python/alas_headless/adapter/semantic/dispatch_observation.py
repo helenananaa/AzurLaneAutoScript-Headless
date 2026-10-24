@@ -1348,6 +1348,17 @@ class DispatchObservationPorts:
             or name in UI_PAGE_CHECK_RESOURCES
             else self.oracle
         )
+        if (not self._login_flow.active and self._campaign_context is None
+                and name in ('MAP_PREPARATION', 'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION',
+                             'AUTO_SEARCH_MENU_EXIT', 'AUTO_SEARCH_REWARD', 'WITHDRAW',
+                             'CAMPAIGN_WITHDRAW_CONFIRM')
+                and observation_oracle.observation_target_present('research/page/back')
+                and not observation_oracle.observation_target_present('campaign/map-preparation/proceed')):
+            blockers = observation_oracle._blocking_rules(observation_oracle.read_state(), 'ui/absence-probe')
+            if {rule.blocker_id for rule in blockers} == {'loading', 'research-page'}:
+                # Research can hand off while its reviewed Loading still covers
+                # Back. This passive probe yields to ALAS' next screenshot.
+                return False
         if (not self._login_flow.active and self._campaign_context is None and name in (
                 'MAP_PREPARATION', 'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION',
                 'AUTO_SEARCH_MENU_EXIT', 'AUTO_SEARCH_REWARD', 'WITHDRAW',
@@ -1358,11 +1369,13 @@ class DispatchObservationPorts:
                      or getattr(observation_oracle, 'private_quarters_page_visible', lambda: False)()
                      or observation_oracle.campaign_menu_is_entry()
                      or observation_oracle.campaign_page_is_normal()
+                     or (observation_oracle.observation_target_present('research/page/back')
+                         and observation_oracle.enabled('research/page/back'))
                      or (observation_oracle.observation_target_present('research-menu/page/back')
                          and observation_oracle.enabled('research-menu/page/back')))):
             state = observation_oracle.read_state()
             blockers = observation_oracle._blocking_rules(state, 'ui/absence-probe')
-            if not any(rule.blocker_id not in ('campaign-menu', 'research-menu') for rule in blockers):
+            if not any(rule.blocker_id not in ('campaign-menu', 'research-menu', 'research-page') for rule in blockers):
                 # UI.ui_additional scans these Campaign resources without a
                 # Campaign task. An unobscured navigation page proves their
                 # absence; ignore only that navigation page's own blocker,

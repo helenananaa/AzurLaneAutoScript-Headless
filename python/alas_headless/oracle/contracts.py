@@ -615,8 +615,16 @@ class RetirementExecutionReceipt:
     actions: Tuple[ActionReceipt, ...]
     policy_sha256: Optional[str] = None
     capability_id: Optional[str] = None
+    equipment_policy: str = 'preserve'
+    equipment_disassembled: bool = False
+    equipment_quantities: Tuple[Tuple[int, int], ...] = ()
+    equipment_rewards: Tuple[Tuple[str, int], ...] = ()
 
     def __post_init__(self) -> None:
+        if self.equipment_policy not in ('preserve', 'disassemble'):
+            raise ValueError('retirement equipment policy is invalid')
+        if self.equipment_disassembled and (self.equipment_preserved or self.equipment_policy != 'disassemble'):
+            raise ValueError('retirement equipment outcome conflicts with policy')
         if self.retired_count <= 0:
             raise ValueError("retirement receipt count must be positive")
         if self.capacity_before - self.capacity_after != self.retired_count:
@@ -751,12 +759,21 @@ class EnhancementExecutionReceipt:
     generation_after: int
     policy_sha256: Optional[str] = None
     capability_id: Optional[str] = None
+    equipment_policy: str = 'preserve'
+    equipment_disassembled: bool = False
+    equipment_rewards: Tuple[Tuple[str, int], ...] = ()
 
     def __post_init__(self) -> None:
         if not self.materials:
             raise ValueError("enhancement receipt requires consumed materials")
-        if not self.equipment_preserved:
+        if self.equipment_policy not in ('preserve', 'disassemble'):
+            raise ValueError('enhancement equipment policy is invalid')
+        if self.equipment_policy == 'preserve' and not self.equipment_preserved:
             raise ValueError("enhancement receipt must preserve equipment")
+        if self.equipment_disassembled and (self.equipment_preserved or self.equipment_policy != 'disassemble'):
+            raise ValueError('enhancement equipment outcome conflicts with policy')
+        if self.equipment_policy == 'disassemble' and self.equipment_quantities and not self.equipment_disassembled:
+            raise ValueError('enhancement equipment disassembly is unproven')
         if (self.policy_sha256 is None) != (self.capability_id is None):
             raise ValueError("enhancement receipt authority metadata is incomplete")
         if (
