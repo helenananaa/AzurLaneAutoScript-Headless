@@ -11,6 +11,21 @@ F 9、L 31、P 10、B 7、O 3；这是保留证据的分类，不是当前版本
 完整逐项缺口见[适配任务表](alas-adaptation-task-board.zh-CN.md)，支持权威仍为
 `integration/alas/support-matrix-ledger.json`，本轮不因一次成功提升全功能等级。
 
+另外已核对当前安装的原 ALAS `alas.py` 与 `module/config/argument/task.yaml`：
+60 个面板与台账逐项一致，其中 56 个有原任务入口，Alas、EventGeneral、General、
+OpsiGeneral 是共享配置。源码还保留 SOS、海上护航及 3 个旧刷图入口，虽然没有注册为
+当前面板，也纳入检查范围。入口存在只说明有代码，不代表当前活动开放或实机通过。
+
+| 原入口 | 当前源码情况 | 本轮证据边界 |
+|---|---|---|
+| `sos` | 调用原 SOS 任务；仍含历史图像观察路径 | 尚未执行；需当前求救信号及相应 typed 入口，不能复用黑屏像素 |
+| `maritime_escort` | 调用原海上护航；原设计包含入场后撤退 | 尚未发现本轮可用活动入口；不能猜坐标或套用旧活动 |
+| `c72_mystery_farming` | 调用原 CampaignRun | 未单独执行，不把普通 Main 成功扩展为该配置通过 |
+| `c122_medium_leveling` | 调用原 CampaignRun | 未单独执行；保留实际舰队、心情和资源约束 |
+| `c124_large_leveling` | 调用原 CampaignRun | 未单独执行；不因共享引擎重复授予前轮已消耗次数 |
+
+该源码范围核对保存在私有 `native-entrypoint-audit.json`，没有修改支持等级。
+
 本轮私有证据目录为 `artifacts/full-feature-live-20261024/`，其中
 `feature-inventory.json` 为全部 60 面板的本轮工作索引，`handoff.md` 保存恢复状态。
 账号配置、原始语义帧和完整日志保留本机，不纳入公共文档。
