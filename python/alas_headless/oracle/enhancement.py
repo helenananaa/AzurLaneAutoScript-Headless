@@ -1206,6 +1206,13 @@ class EnhancementOracle:
         assert button.point is not None and button.bounds is not None
         if not images[0].bounds.contains(button.point):
             raise SemanticGateClosed("enhancement control layers disagree")
+        # These controls may omit optional raycast metadata on the qualified
+        # client. An explicit negative result or a known overlay still closes
+        # this action boundary; the underlying panel can remain mounted.
+        if button.raycast_top is False or images[0].raycast_top is False:
+            raise SemanticGateClosed("enhancement control is obscured")
+        if self._blocking_rules(state, semantic_id):
+            raise SemanticGateClosed("enhancement control is blocked")
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("game activity changed before enhancement input")
         self._tap(int(round(button.point.x)), int(round(button.point.y)))

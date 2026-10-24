@@ -68,6 +68,43 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
 
 
 class EnhancementSemanticOracleTests(unittest.TestCase):
+    def test_enhancement_controls_reject_known_overlays_before_input(self):
+        for name, sprite in (("select_btn", "recommand"),
+                             ("cancel_btn", "qingkong_butten"),
+                             ("ok_btn", "qianghua_butten")):
+            for path in ("OverlayCamera/Overlay/UIOverlay/Loading(Clone)",
+                         "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/confirm"):
+                with self.subTest(name=name, path=path):
+                    backend = FakeBackend([])
+                    set_enhancement_page(backend, 20)
+                    backend.buttons = make_buttons(
+                        backend.buttons["buttons"] + [make_button("overlay", path)],
+                        generation=20,
+                    )
+                    with self.assertRaisesRegex(SemanticGateClosed, "blocked"):
+                        make_oracle(backend)._click_enhancement_control(
+                            "enhancement/confirm", name, sprite
+                        )
+                    self.assertEqual(backend.taps, [])
+
+    def test_enhancement_control_rejects_explicit_occlusion_but_accepts_unknown_metadata(self):
+        for layer in ("buttons", "images"):
+            for raycast_top in (False, None, True):
+                with self.subTest(layer=layer, raycast_top=raycast_top):
+                    backend = FakeBackend([])
+                    set_enhancement_page(backend, 20)
+                    records = backend.buttons["buttons"] if layer == "buttons" else backend.ui["images"]
+                    target = next(item for item in records if item["path"].endswith("/ok_btn"))
+                    target["raycast_top"] = raycast_top
+                    oracle = make_oracle(backend)
+                    if raycast_top is False:
+                        with self.assertRaisesRegex(SemanticGateClosed, "obscured"):
+                            oracle._click_enhancement_control("enhancement/confirm", "ok_btn", "qianghua_butten")
+                        self.assertEqual(backend.taps, [])
+                    else:
+                        oracle._click_enhancement_control("enhancement/confirm", "ok_btn", "qianghua_butten")
+                        self.assertEqual(backend.taps, [(1191, 626)])
+
     def test_dock_favourite_uses_on_layer_as_positive_state_discriminator(self):
         root = (
             "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/switch/toggles/"
