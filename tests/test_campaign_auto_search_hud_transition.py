@@ -110,13 +110,17 @@ def test_non_map_absence_does_not_admit_unowned_or_obscured_hud_input(change):
     handle, oracle, _clock, adapter = retained_runtime(change, owned=change is not None)
     assert (oracle.campaign_auto_search_map_transition_visible() is True) == (change is None)
     for name in ('CAMPAIGN_CHECK', 'EVENT_CHECK', 'SP_CHECK', 'GET_MISSION', 'WITHDRAW'):
-        if change is None and name in ('SP_CHECK', 'GET_MISSION', 'WITHDRAW'):
+        # SP_CHECK now shares EVENT_CHECK's strict passive selector port.
+        # An owned HUD is not a selector; neither marker authorizes input.
+        if change is None and name in ('GET_MISSION', 'WITHDRAW'):
             with pytest.raises(SemanticGateClosed):
                 adapter._appear_once(name)
         else:
             assert adapter._appear_once(name) is False
     with pytest.raises(SemanticGateClosed):
         adapter.click('WITHDRAW')
+    with pytest.raises(SemanticGateClosed):
+        adapter.click('SP_CHECK')
     assert handle.taps == []
 
 

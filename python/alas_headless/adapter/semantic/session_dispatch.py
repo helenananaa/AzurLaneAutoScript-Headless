@@ -246,7 +246,7 @@ class SessionDispatchPorts:
             # exact top raycast above coherent ship-name/type/dialogue text.
             return adapter.oracle.new_ship_reward_visible()
         if (
-            name in ("CAMPAIGN_CHECK", "AUTO_SEARCH_MENU_EXIT")
+            name in ("CAMPAIGN_CHECK", "EVENT_CHECK", "SP_CHECK", "AUTO_SEARCH_MENU_EXIT")
             and adapter._campaign_context is not None
             and adapter.campaign_combat_committed()
         ):
@@ -254,11 +254,10 @@ class SessionDispatchPorts:
                 # The preceding exit may still be visible in the closing
                 # animation frame. Wait for the chapter, never submit it twice.
                 return False
-            # Both markers are part of the broad defensive combat query set,
-            # but after the boss result it must be decided by the strict
-            # chapter-page identity in the campaign adapter.  Otherwise the
-            # combat observer's empty visible-resource set masks the restored
-            # stage page forever.
+            # Native is_in_stage_page probes all three chapter/event markers.
+            # Their strict page ports must own the return after a boss result;
+            # the broad combat observer's empty set would otherwise mask the
+            # restored event selector forever. Covered pages remain absent.
             return adapter.appear(button)
         result_receipt = getattr(self, '_combat_last_result_receipt', None)
         if (result_receipt is not None
