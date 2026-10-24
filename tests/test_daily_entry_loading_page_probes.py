@@ -1,9 +1,31 @@
 """A captured Daily-entry transition yields page discovery to native ALAS."""
 import pytest
 
-from alas_headless import SemanticGateClosed, AlasSemanticUnmapped
+from alas_headless import AlasSemanticAdapter, SemanticGateClosed, AlasSemanticUnmapped
 from tests.test_game_tips_loading_presence import host
-from tests.semantic_support.observer_fixtures import make_button
+from tests.semantic_support.observer_fixtures import FakeBackend, make_button, make_oracle
+
+
+@pytest.mark.parametrize('resource', ['MONTHLY_PASS_NOTICE', 'BATTLE_PASS_NOTICE', 'BATTLE_PASS_NEW_SEASON'])
+@pytest.mark.parametrize('drift', [False, True])
+def test_event_entry_loading_with_only_departing_menu_controls_yields_notices(resource, drift):
+    # The 2026-10-24 captured entry had only the departing LevelMainScene
+    # controls and Loading, before any event selector nodes were mounted.
+    buttons = [
+        make_button('back_button', 'UICamera/Canvas/UIMain/LevelMainScene(Clone)/top/top_chapter/back_button'),
+        make_button('Loading(Clone)', 'OverlayCamera/Overlay/UIOverlay/Loading(Clone)'),
+    ]
+    if drift:
+        buttons.reverse()
+        buttons[0]['optional_metadata'] = 'newer observer'
+    backend = FakeBackend(buttons)
+    oracle = make_oracle(backend)
+    adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    assert {r.blocker_id for r in oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe')} == {'loading', 'campaign-menu'}
+    assert adapter.appear(resource) is False
+    with pytest.raises((SemanticGateClosed, AlasSemanticUnmapped)):
+        adapter.click(resource)
+    assert not backend.taps
 
 
 @pytest.mark.parametrize('resource', ['MAP_PREPARATION', 'FLEET_PREPARATION',
@@ -33,7 +55,8 @@ def test_actual_daily_entry_and_loading_do_not_offer_campaign_preparation(drift,
 
 
 @pytest.mark.parametrize('resource', ['GAME_ROOM_CHECK', 'DAILY_CHECK', 'STORAGE_CHECK',
-                                     'WITHDRAW', 'CAMPAIGN_WITHDRAW_CONFIRM', 'MAP_PREPARATION'])
+                                     'WITHDRAW', 'CAMPAIGN_WITHDRAW_CONFIRM', 'MAP_PREPARATION',
+                                     'MONTHLY_PASS_NOTICE', 'BATTLE_PASS_NOTICE', 'BATTLE_PASS_NEW_SEASON'])
 @pytest.mark.parametrize('drift', [False, True])
 def test_known_menu_under_loading_yields_unrelated_page_probes(resource, drift):
     backend, oracle, adapter = host(drift, 'campaign-menu-loading-r17.json')

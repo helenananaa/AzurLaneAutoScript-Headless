@@ -2,7 +2,7 @@
 
 Qualification baseline: upstream commit `81ccf63b4540f00241628c82a58c02c7a2bb11af`.
 
-Current integration (2026-10-23): 233 ordered members, shared by the Windows
+Current integration (2026-10-24): 234 ordered members, shared by the Windows
 AVD and local WSL Redroid task paths. KVM and Mac/HVF lifecycle implementations
 are also integrated without extending their account/task qualification.
 Use the [mainline local entry](../../docs/local-runtime-entry.zh-CN.md) for the

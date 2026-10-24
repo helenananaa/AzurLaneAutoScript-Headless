@@ -350,12 +350,13 @@ class DispatchObservationPorts:
             if (any(rule.blocker_id == 'loading' for rule in blockers)
                     and all(rule.blocker_id in (
                         'loading', 'commission-page', 'tactical-page', 'dorm-page', 'academy-page',
-                        'reward-page', 'research-page', 'research-menu')
+                        'reward-page', 'research-page', 'research-menu', 'campaign-menu')
                             for rule in blockers)):
                 # A known loading layer covers these page, reward and tutorial
                 # probes, including ui_additional's unowned withdrawal probe.
-                # ALAS owns waiting and the next screenshot boundary; an active
-                # Campaign and foreign modals retain their dedicated handling.
+                # This includes a departing chapter menu before the event
+                # selector mounts. ALAS owns waiting and the next screenshot;
+                # active Campaign preparation and foreign modals stay separate.
                 return False
         if not self._login_flow.active:
             oracle = self._frame_or_live_observation_oracle()
