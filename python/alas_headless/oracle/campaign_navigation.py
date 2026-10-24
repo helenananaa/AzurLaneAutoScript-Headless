@@ -88,16 +88,24 @@ class CampaignNavigationOracle:
         roots = (
             'OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)',
             'LevelCamera/Canvas/LevelOrigin/top/LevelStageView(Clone)',
+            # Event completion reparents the same HUD beneath its selector
+            # while animating it away, before the total-reward panel mounts.
+            'UICamera/Canvas/UIMain/LevelMainScene(Clone)/top/LevelStageView(Clone)',
         )
         mounted = tuple(root for root in roots if all(
             sum(b.path == root + suffix for b in active_buttons) == 1
             for suffix in ('/top_stage/back_button', '/bottom_stage/Normal/retreat_button')))
         if len(mounted) != 1:
             return False
-        if (self._matches(state, 'campaign-menu/page/back')
+        page_back = self._matches(state, 'campaign-menu/page/back')
+        if (page_back
+                and (not self._event_campaign_page_visible_in_state(state)
+                     or (len(page_back) == 1 and page_back[0].actionable))
                 and self.campaign_page_is_normal()):
             # A complete chapter restored by ALAS outranks retained HUD
             # descendants. Do not keep a finished run waiting on their removal.
+            # Event stage geometry also exists under its animating HUD; the
+            # event return port additionally needs its unoccluded Back.
             return False
         return True
 

@@ -82,3 +82,64 @@ def test_retained_r9_timeout_structure_returns_to_event_page():
     assert session.appear('EVENT_CHECK')
     assert session.appear('SP_CHECK')
     assert not backend.taps
+
+
+@pytest.mark.parametrize('damage', [None, 'missing-retreat', 'duplicate-back', 'foreign-modal'])
+def test_event_reparented_hud_keeps_covered_selector_absent(damage):
+    backend, adapter, session = host()
+    root = 'UICamera/Canvas/UIMain/LevelMainScene(Clone)/top/LevelStageView(Clone)'
+    back = make_button('back_button', root + '/top_stage/back_button')
+    retreat = make_button('retreat_button', root + '/bottom_stage/Normal/retreat_button')
+    for button in backend.buttons['buttons']:
+        if button['path'].endswith('/top/top_chapter/back_button'):
+            button['raycast_top'] = False
+    backend.buttons['buttons'].append(back)
+    if damage != 'missing-retreat':
+        backend.buttons['buttons'].append(retreat)
+    if damage == 'duplicate-back':
+        backend.buttons['buttons'].append(dict(back))
+    elif damage == 'foreign-modal':
+        backend.buttons['buttons'].append(make_button('popup',
+            'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/popup'))
+    backend.buttons['button_count'] = len(backend.buttons['buttons'])
+    assert adapter.oracle.campaign_auto_search_map_transition_visible() is (damage is None)
+    for marker in ('EVENT_CHECK', 'SP_CHECK'):
+        if damage in (None, 'foreign-modal'):
+            assert not session.appear(marker)
+        else:
+            with pytest.raises(SemanticGateClosed):
+                session.appear(marker)
+    with pytest.raises(SemanticGateClosed):
+        session.click('SP_CHECK')
+    assert not backend.taps
+
+
+def test_retained_r10_pre_reward_frame_is_a_passive_hud_transition():
+    source = Path(__file__).resolve().parents[1] / 'artifacts/full-feature-live-20261024/native-r10.json'
+    if not source.exists():
+        pytest.skip('private r10 transition receipt unavailable')
+    task = json.loads(source.read_text(encoding='utf-8'))['tasks'][-1]
+    frame = task['failed_presence']['retained_screenshot_before_diagnostic_reads']['frame']['projections']
+    backend = FakeBackend(frame['buttons']['buttons'])
+    ui = frame['ui']
+    backend.ui = make_ui(ui['texts'], images=ui['images'], toggles=ui['toggles'])
+    _, adapter, session = host(backend)
+    assert adapter.oracle.campaign_auto_search_map_transition_visible()
+    assert not session.appear('EVENT_CHECK')
+    assert not session.appear('SP_CHECK')
+    assert not adapter.campaign_auto_search_result_visible()
+    assert not backend.taps
+
+
+def test_uncovered_event_page_wins_over_retained_hud():
+    backend, adapter, session = host()
+    root = 'UICamera/Canvas/UIMain/LevelMainScene(Clone)/top/LevelStageView(Clone)'
+    backend.buttons['buttons'].extend([
+        make_button('back_button', root + '/top_stage/back_button'),
+        make_button('retreat_button', root + '/bottom_stage/Normal/retreat_button'),
+    ])
+    backend.buttons['button_count'] = len(backend.buttons['buttons'])
+    assert not adapter.oracle.campaign_auto_search_map_transition_visible()
+    assert session.appear('EVENT_CHECK')
+    assert session.appear('SP_CHECK')
+    assert not backend.taps
