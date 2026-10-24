@@ -378,6 +378,21 @@ class DispatchObservationPorts:
                     # Do not fall through to the unoccluded page identity
                     # below when another modal owns the foreground.
                     return False
+        if (name in ('MONTHLY_PASS_NOTICE', 'BATTLE_PASS_NOTICE', 'BATTLE_PASS_NEW_SEASON',
+                     'POPUP_SINGLE_WHITE', 'PLAYER_CHECK', 'GAME_TIPS', 'DORM_TROPHY_CONFIRM',
+                     'MEOWFFICER_INFO', 'MEOWFFICER_BUY', 'MAINTENANCE_ANNOUNCE',
+                     'MAP_PREPARATION', 'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION', 'WITHDRAW')
+                and self._campaign_context is None and not self._login_flow.active):
+            oracle = self._frame_or_live_observation_oracle()
+            # Native ui_additional scans unrelated popups and preparation
+            # pages on META's retained source after Back. Prove that complete
+            # uncovered owner; a later live destination is not its evidence.
+            # This observation-only branch admits no dismissal or navigation.
+            if getattr(oracle, 'meta_character_menu_visible', lambda: False)():
+                return False
+            if getattr(oracle, 'meta_character_sync_page_visible', lambda: False)():
+                oracle.meta_character_sync_rewards()
+                return False
         if name in ('POPUP_SINGLE_WHITE', 'PLAYER_CHECK', 'GAME_TIPS', 'DORM_TROPHY_CONFIRM') and not self._login_flow.active:
             oracle = self._frame_or_live_observation_oracle()
             if name != 'GAME_TIPS' and self._reward_sidebar_ready(oracle):
@@ -416,12 +431,6 @@ class DispatchObservationPorts:
                 # Its complete unobscured detail proves only notice absence;
                 # the original navigation graph still owns leaving this page.
                 oracle.meta_current_detail_state()
-                return False
-            if (getattr(oracle, 'meta_character_menu_visible', lambda: False)()
-                    and oracle.enabled('meta/character/back')):
-                # Native idle return may inherit this reviewed full-screen
-                # menu after META ends. Its uncovered owner proves these
-                # main-page notices absent; no popup input is admitted.
                 return False
             if self._reward_sidebar_ready(oracle):
                 return False
