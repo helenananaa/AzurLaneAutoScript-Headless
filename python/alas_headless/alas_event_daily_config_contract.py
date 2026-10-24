@@ -53,7 +53,14 @@ def validate_alas_event_daily_last_stage(
     if type(last_stage) is not str:
         raise SemanticGateClosed("EventDaily.LastStage must be 0 or a stage name")
     normalized = last_stage.strip().lower()
-    if normalized not in {f"{prefix}{number}" for number in range(1, 4)}:
+    allowed = {f"{prefix}{number}" for number in range(1, 4)}
+    # CampaignABCD persists the physical name returned by native convert_stages,
+    # not necessarily the user's A/B/C/D filter spelling. Keep that cursor so
+    # native rotation can skip the completed stage on the next invocation.
+    numbers = range(1, 4) if prefix in ('a', 'c') else range(4, 7)
+    aliases = ('t',) if prefix in ('a', 'b') else ('ht', 'th')
+    allowed.update(f'{alias}{number}' for alias in aliases for number in numbers)
+    if normalized not in allowed:
         raise SemanticGateClosed(
             "EventDaily.LastStage does not belong to the current panel"
         )

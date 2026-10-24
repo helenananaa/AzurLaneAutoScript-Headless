@@ -80,6 +80,29 @@ class AlasEventDailyConfigTests(unittest.TestCase):
                         value, task_command="EventA"
                     )
 
+    def test_native_alias_cursors_are_retained_in_their_own_panel(self):
+        for command, stages in (
+            ('EventA', ('t1', 't2', 't3')),
+            ('EventB', ('t4', 't5', 't6')),
+            ('EventC', ('ht1', 'ht2', 'ht3', 'th1', 'th2', 'th3')),
+            ('EventD', ('ht4', 'ht5', 'ht6', 'th4', 'th5', 'th6')),
+        ):
+            for stage in stages:
+                with self.subTest(command=command, stage=stage):
+                    self.assertEqual(validate_alas_event_daily_last_stage(
+                        ' ' + stage.upper() + ' ', task_command=command), stage)
+                    for other in ('EventA', 'EventB', 'EventC', 'EventD'):
+                        if other != command:
+                            with self.assertRaises(SemanticGateClosed):
+                                validate_alas_event_daily_last_stage(stage, task_command=other)
+
+    def test_alias_cursor_does_not_expand_user_filter_or_accept_partial_names(self):
+        for stage in ('t0', 't7', 't1junk', 'ht0', 'th7', '../t1', 'sp'):
+            with self.subTest(stage=stage), self.assertRaises(SemanticGateClosed):
+                validate_alas_event_daily_last_stage(stage, task_command='EventA')
+        with self.assertRaises(SemanticGateClosed):
+            validate_alas_event_daily_stage_filter('T1 > T2', task_command='EventA')
+
     def test_patch_preserves_original_run_and_gates_both_fields(self):
         patch = ROOT.joinpath(
             "integration/alas/series/0040-campaign-flow-ports.patch"
