@@ -672,11 +672,12 @@ class DispatchObservationPorts:
                 # The generic page graph owns recovery from this exact game;
                 # unrelated page markers must reach its GOTO_MAIN edge.
                 return False
-            if (name != 'EVENT_CHECK'
+            if (name not in ('EVENT_CHECK', 'SP_CHECK')
                     and time.monotonic() <= self._campaign_event_entry_transition_until
                     and not any(rule.blocker_id != 'loading' for rule in blockers)):
                 # Unrelated pages cannot own this bounded event-entry edge.
-                # EVENT_CHECK retains its full selector contract below.
+                # Both original event page markers retain the full selector
+                # contract below; current T stages use SP_CHECK.
                 return False
             if (blockers and all(rule.blocker_id == 'campaign-total-reward' for rule in blockers)
                     and oracle.observation_target_present('reward/campaign-total/exit')

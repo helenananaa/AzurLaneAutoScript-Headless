@@ -17,7 +17,7 @@ class EventPorts:
                 return False
             return self.oracle.enabled("campaign-menu/event")
         if semantic_id == "event/mode/story":
-            if name == "EVENT_CHECK":
+            if name in ("EVENT_CHECK", "SP_CHECK"):
                 context = self._campaign_context
                 if context is not None:
                     # `enter_map_cancel()` first asks whether it is already
@@ -39,8 +39,8 @@ class EventPorts:
                         # deciding proof for this shadow case, so keep even
                         # those exact errors fail-closed at this boundary.
                         raise SemanticGateClosed(
-                            "EVENT_CHECK campaign preparation proof failed: {0}".format(
-                                exc
+                            "{0} campaign preparation proof failed: {1}".format(
+                                name, exc
                             )
                         ) from exc
                     if preparation is not None:
@@ -72,6 +72,11 @@ class EventPorts:
         return UNHANDLED
 
     def _appear_event_selector(self, name, semantic_id):
+        if self.oracle.observation_target_present('reward/campaign-total/exit'):
+            # The official result panel retains LevelSelectSPFullUI underneath.
+            # Its native exit handler must reach its own actionable-target and
+            # blocker checks, not an absence inferred from the covered selector.
+            return UNHANDLED
         event_campaign_selector_visible = self.oracle.event_campaign_page_visible()
         if event_campaign_selector_visible and self._campaign_context is not None:
             try:

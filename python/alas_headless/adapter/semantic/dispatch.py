@@ -48,9 +48,10 @@ class DispatchAdapterPorts:
         semantic_id = self._meowfficer_contextual_target(name)
         if semantic_id is None:
             semantic_id = self._mappings.get(name)
-        if semantic_id is None and name == "EVENT_CHECK":
-            # EVENT_CHECK is an observation-only page marker. It must never
-            # enter the generic click mapping used by legacy callers.
+        if semantic_id is None and name in ("EVENT_CHECK", "SP_CHECK"):
+            # Original event families request either page marker for the
+            # LevelSelectSPFullUI selector. Both keep the complete typed proof;
+            # neither enters the generic input mapping.
             semantic_id = "event/mode/story"
         if (
             not self._login_flow.active

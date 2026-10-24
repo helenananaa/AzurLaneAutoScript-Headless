@@ -4,6 +4,10 @@
 本地 KVM 与 Mac/HVF 的已有实现。各平台的实机资格仍分别记录；本页操作对象是
 已验证的本机 Redroid `gameplay` 实例，不创建新 userdata，也不安装或重建镜像。
 
+2026-10-24 20:15 起另有本聊天全功能验证 runner 使用
+`semantic_full_feature_live_20261024`，见[本轮运行与停止信息](alas-full-feature-live-20261024.zh-CN.md)。
+运行以下示例前必须检查该实例是否已有输入 runner；不能与验证进程同时启动。
+
 ## 现有实例
 
 在主仓库目录打开 PowerShell：

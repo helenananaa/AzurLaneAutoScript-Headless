@@ -415,7 +415,7 @@ class CampaignPreparationOracle:
         records: Mapping[str, Sequence[Any]],
         view_root: str,
     ) -> None:
-        """Require one exact reviewed LevelInfoSPUI live profile."""
+        """Require a structurally reviewed LevelInfoSPUI live profile."""
 
         if view_root not in (
             _CAMPAIGN_LIVE_MAP_VIEW_ROOT,
@@ -442,6 +442,7 @@ class CampaignPreparationOracle:
                 "campaign live map-preparation stage identity is incomplete"
             )
         stage_identity = texts[title_path][0].text.strip().lower()
+        linear_event = re.fullmatch(r"t[1-9][0-9]*", stage_identity) is not None
         if stage_identity == "sp":
             button_specs = dict(_CAMPAIGN_LIVE_MAP_BUTTON_SPECS)
             text_counts = dict(_CAMPAIGN_LIVE_MAP_TEXT_COUNTS)
@@ -569,6 +570,37 @@ class CampaignPreparationOracle:
                 ),
                 "panel/head/Image": ((profile["head"],), True),
             }
+        elif linear_event:
+            # Linear T events reuse the normal detail layout without the
+            # normal/hard selector. Stage identity is bound to the selected
+            # underlay below; level, reward art and row count are event data.
+            button_specs = {
+                **_CAMPAIGN_LIVE_MAP_BUTTON_SPECS,
+                "panel/passState/Image": ("Image", 1),
+            }
+            text_counts = {
+                **_CAMPAIGN_LIVE_MAP_TEXT_COUNTS,
+                **_CAMPAIGN_LIVE_D1_MAP_TEXT_ADDITIONS,
+            }
+            image_specs = {
+                **{path: value for path, value in _CAMPAIGN_LIVE_MAP_IMAGE_SPECS.items()
+                   if path not in ("panel/Level/Hard", "panel/title/Hard")},
+                **{path: value for path, value in _CAMPAIGN_LIVE_D1_MAP_IMAGE_ADDITIONS.items()
+                   if not path.startswith("panel/Difficulty/")},
+                "panel/Level/Normal": (("bg_lv_normal",), False),
+                "panel/title/Normal": (("bg_title_normal",), False),
+            }
+            cost_limit = "panel/BottomExtra/LoopGroup/view/container/CostLimit"
+            if cost_limit not in images:
+                image_specs.pop(cost_limit)
+            drop_count = len(buttons.get("panel/drops/frame/list/item(Clone)", ()))
+            if drop_count < 1:
+                raise SemanticGateClosed("campaign event reward rows are incomplete")
+            button_specs["panel/drops/frame/list/item(Clone)"] = ("item(Clone)", drop_count)
+            text_counts["panel/drops/frame/list/item(Clone)/icon_bg/count"] = drop_count
+            for path, (sprites, raycast) in tuple(image_specs.items()):
+                if path.startswith("panel/drops/frame/list/item(Clone)/"):
+                    image_specs[path] = ((sprites[0],) * drop_count, raycast)
         else:
             raise SemanticGateClosed(
                 "campaign live map-preparation stage profile is not reviewed"
@@ -667,6 +699,15 @@ class CampaignPreparationOracle:
                 "panel/progress/Text/value": "100%",
                 "panel/title_form/title_en": "",
             }
+        elif linear_event:
+            exact_text = {"panel/title_form/title_en": ""}
+            for path, pattern in (
+                ("panel/Level/Text", r"LV [1-9][0-9]*"),
+                ("panel/cost/text", r"[1-9][0-9]*"),
+                ("panel/progress/Text/value", r"(?:100|[0-9]{1,2})%"),
+            ):
+                if re.fullmatch(pattern, texts[path][0].text.strip()) is None:
+                    raise SemanticGateClosed("campaign event detail value is malformed: " + path)
         else:
             level, points = {
                 "a2": ("LV 30", "40"),
@@ -693,10 +734,10 @@ class CampaignPreparationOracle:
                 "campaign live map-preparation stage identity changed"
             )
         clone_counts = texts["panel/drops/frame/list/item(Clone)/icon_bg/count"]
-        if (stage_identity == "sp" and any(
+        if ((stage_identity == "sp" or linear_event) and any(
                 item.text.strip() and re.fullmatch(r"[0-9]+", item.text.strip()) is None
                 for item in (*clone_counts, *texts["panel/drops/frame/list/item/icon_bg/count"])
-        )) or (stage_identity != "sp" and any(item.text != "" for item in clone_counts)):
+        )) or (stage_identity != "sp" and not linear_event and any(item.text != "" for item in clone_counts)):
             raise SemanticGateClosed(
                 "campaign live map-preparation clone count changed"
             )
@@ -715,7 +756,7 @@ class CampaignPreparationOracle:
                     "panel/achieves/achieve(Clone)/desc",
                     "panel/progress/Text",
                 )
-                if stage_identity
+                if linear_event or stage_identity
                 in (
                     "c1",
                     "c2",
@@ -1096,7 +1137,7 @@ class CampaignPreparationOracle:
 
         supported_stage = stage_code in (
             "sp", "a2", "a3", "c1", "c2", "c3", "d1", "d2", "d3", "b2", "b3"
-        )
+        ) or re.fullmatch(r"t[1-9][0-9]*", stage_code) is not None
         if (
             not supported_stage
             or re.fullmatch(
@@ -1144,7 +1185,7 @@ class CampaignPreparationOracle:
         # Ordinary event stages have no daily attempt counter.  Their exact
         # stage node, title, overlay profile, and actionable controls have
         # already been bound above; the remaining checks are SP-only evidence.
-        if stage_code in (
+        if re.fullmatch(r"t[1-9][0-9]*", stage_code) is not None or stage_code in (
             "a2",
             "a3",
             "c1",
