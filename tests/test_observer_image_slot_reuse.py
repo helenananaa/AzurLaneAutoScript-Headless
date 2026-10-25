@@ -76,6 +76,10 @@ int main() {
   // The serializer also handles an older producer's stale slot safely.
   CopyBoundedString("legacy-residue", &result.images[0].spriteName);
   emit();
+  // Optional inactive diagnostics retain the actual game-owned activity bits.
+  currentSprite = "shadow"; geometry.flags = 0; activeAndEnabled = false;
+  write(); emit();
+  geometry.flags = 1; write(); emit();
 }
 '''
     source_path = tmp_path / "image_slot.cpp"
@@ -87,8 +91,10 @@ int main() {
     ], check=True, capture_output=True, text=True)
     result = subprocess.run([str(binary)], check=True, capture_output=True, text=True)
     records = [json.loads(line) for line in result.stdout.splitlines()]
-    assert [record["sprite"] for record in records] == ["first", "", "second", "", ""]
-    assert [bool(record["flags"] & 0x8) for record in records] == [True, False, True, False, False]
+    assert [record["sprite"] for record in records] == ["first", "", "second", "", "", "shadow", "shadow"]
+    assert [bool(record["flags"] & 0x8) for record in records] == [True, False, True, False, False, True, True]
     assert [record["slot_sprite"] for record in records] == [
-        "first", "", "second", "", "legacy-residue",
+        "first", "", "second", "", "legacy-residue", "shadow", "shadow",
     ]
+    assert records[-2]["flags"] & 0x3 == 0
+    assert records[-1]["flags"] & 0x3 == 1

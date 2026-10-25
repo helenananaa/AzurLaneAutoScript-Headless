@@ -1082,6 +1082,20 @@ bool IsArchivesRewardMarker(std::string_view path) {
          EndsWith(path, "WorldBossUI(Clone)/pages/ArchivesWorldBossListUI(Clone)/main/award/get_all");
 }
 
+bool IsOperationSirenFleetShadow(std::string_view path) {
+  constexpr std::string_view prefix =
+      "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/fleet_";
+  constexpr std::string_view suffix = "/shadow";
+  if (path.rfind(prefix, 0) != 0 || !EndsWith(path, suffix) ||
+      path.size() <= prefix.size() + suffix.size()) {
+    return false;
+  }
+  const auto id = path.substr(prefix.size(),
+                              path.size() - prefix.size() - suffix.size());
+  return id.front() != '0' &&
+         id.find_first_not_of("0123456789") == std::string_view::npos;
+}
+
 bool ShouldEvaluateImageTopRaycast(std::string_view name,
                                    std::string_view path) {
   if ((name == "left" || name == "right") && path ==
@@ -2472,16 +2486,23 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
       size_t mapGridImageCount = 0;
       std::array<void *, kReservedTrailingImages> trailingImages = {};
       size_t trailingImageCount = 0;
+      std::array<void *, kReservedFleetImages> inactiveFleetShadows = {};
+      size_t inactiveFleetShadowCount = 0;
 
-      auto appendImageRecord = [&](void *image, bool allowInactive = false) {
+      auto appendImageRecord = [&](void *image, bool allowInactive = false,
+                                   bool optionalDiagnostic = false) {
         if (result.imageRecordCount >= result.images.size()) {
           result.imageRecordTruncated = 1;
           return;
         }
         ObserverButtonRecord geometry;
         if (!populateControlRecord(image, false, &geometry, allowInactive)) {
-          ++result.uiRecordErrors;
-          ++result.imageRecordErrors;
+          if (optionalDiagnostic) {
+            ++result.uiRecordSkipped;
+          } else {
+            ++result.uiRecordErrors;
+            ++result.imageRecordErrors;
+          }
           return;
         }
         bool raycastTarget = false;
@@ -2494,8 +2515,12 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
                          sizeof(color)) ||
             !invokeValue(getImageFillAmount, image, nullptr, &fillAmount,
                          sizeof(fillAmount))) {
-          ++result.uiRecordErrors;
-          ++result.imageRecordErrors;
+          if (optionalDiagnostic) {
+            ++result.uiRecordSkipped;
+          } else {
+            ++result.uiRecordErrors;
+            ++result.imageRecordErrors;
+          }
           return;
         }
 
@@ -2607,18 +2632,26 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
           continue;
         }
         if (!active) {
-          // Game-computed archive reward eligibility uses SetActive(false).
-          // Export only these reviewed markers under an active owner; absence
-          // of an arbitrary inactive Image is never negative reward evidence.
+          // Archive eligibility and fleet visibility have game-owned inactive
+          // markers. Fleet shadows are presence-only diagnostics: never make
+          // a disabled component active or use its absence as position proof.
           void *object = invokeObject(getGameObject, image);
           const std::string name = object != nullptr ? invokeString(object) : std::string();
-          if (name != "tip" && name != "get_all") {
+          if (name != "tip" && name != "get_all" && name != "shadow") {
             continue;
           }
           void *transform = invokeObject(getTransform, object);
           void *parent = transform != nullptr && getParent != nullptr
                              ? invokeObject(getParent, transform) : nullptr;
-          void *owner = parent != nullptr ? invokeObject(getGameObject, parent) : nullptr;
+          if (name == "shadow" &&
+              (parent == nullptr || invokeString(parent).rfind("fleet_", 0) != 0)) {
+            continue;
+          }
+          // cells remains active when one fleet or its shadow is disabled.
+          // An inactive retained map must not impersonate the current owner.
+          void *ownerTransform = name == "shadow" && parent != nullptr && getParent != nullptr
+                                     ? invokeObject(getParent, parent) : parent;
+          void *owner = ownerTransform != nullptr ? invokeObject(getGameObject, ownerTransform) : nullptr;
           bool ownerActive = false;
           if (owner == nullptr || !invokeBoolean(getActiveInHierarchy, owner, &ownerActive) ||
               !ownerActive) {
@@ -2633,6 +2666,12 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
           }
           if (IsArchivesRewardMarker(path)) {
             appendImageRecord(image, true);
+          } else if (IsOperationSirenFleetShadow(path)) {
+            if (inactiveFleetShadowCount < inactiveFleetShadows.size()) {
+              inactiveFleetShadows[inactiveFleetShadowCount++] = image;
+            } else {
+              ++result.uiRecordSkipped;
+            }
           }
           continue;
         }
@@ -2705,6 +2744,15 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
                       fleetImages.begin() + fleetImageCount,
                       image) == fleetImages.begin() + fleetImageCount) {
           appendImageRecord(image);
+        }
+      }
+      // Do not displace active UI records or close their accessor family if
+      // this optional diagnostic cannot be retained/extracted.
+      for (size_t index = 0; index < inactiveFleetShadowCount; ++index) {
+        if (result.imageRecordCount < result.images.size()) {
+          appendImageRecord(inactiveFleetShadows[index], true, true);
+        } else {
+          ++result.uiRecordSkipped;
         }
       }
     }
