@@ -7,6 +7,13 @@ from pathlib import Path
 import sys
 
 
+def complete_pending_retirement(adapter, before, stored, settings, actions):
+    """Finish the submitted transaction using the same dock equipment policy."""
+    return adapter.oracle._finish_retirement_transaction(
+        before, stored['retired_count'], settings, actions, 60,
+        **adapter._dock_equipment_options())
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--alas-root', type=Path, required=True)
@@ -63,7 +70,7 @@ def main():
             actions = [ActionReceipt(**dict(item, point=Point(**item['point']), bounds=Bounds(**item['bounds']))) for item in stored['actions']]
             settings = RetirementSettingsState(**dict(stored['settings'], priority=tuple(stored['settings']['priority'])))
             before = RetirementSelectionState(**prior['before'])
-            receipt = adapter.oracle._finish_retirement_transaction(before, stored['retired_count'], settings, actions, 60)
+            receipt = complete_pending_retirement(adapter, before, stored, settings, actions)
             result['transaction_budget'] = 0
             result['resumed_completion_from'] = str(args.resume_completion)
             result['new_ship_retirement_submitted'] = False
