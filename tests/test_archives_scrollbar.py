@@ -147,3 +147,24 @@ def test_retained_settlement_does_not_impersonate_archive_chapter():
     assert oracle.exists("reward/campaign-total/exit")
     assert not oracle.war_archives_campaign_page_visible()
     assert not backend.taps and not backend.swipes
+
+
+@pytest.mark.parametrize("probe", ["DOCK_CHECK", "WITHDRAW", "CAMPAIGN_WITHDRAW_CONFIRM",
+                                      "GAME_ROOM_CHECK", "HOSIPITAL_CHECK", "TACTICAL_CHECK"])
+def test_inherited_archive_chapter_owns_passive_probes_without_task_context(probe):
+    import json
+    from pathlib import Path
+    from alas_headless import AlasSemanticAdapter
+    path = Path(__file__).resolve().parents[1] / "artifacts/full-feature-live-20261025/war-archives-r3.json"
+    if not path.exists():
+        pytest.skip("private archive chapter evidence unavailable")
+    raw = json.loads(path.read_text(encoding="utf-8"))["failure_observation"]
+    backend = FakeBackend([row["raw"] for row in raw["state"]["buttons"]])
+    ui = raw["ui"]["snapshot"]
+    backend.ui = make_ui(ui["texts"], images=ui["images"], toggles=ui["toggles"])
+    adapter = AlasSemanticAdapter(make_oracle(backend), lambda: None)
+    assert adapter._campaign_context is None
+    assert not adapter.appear(probe)
+    with pytest.raises(SemanticGateClosed):
+        adapter.click(probe)
+    assert not backend.taps and not backend.swipes

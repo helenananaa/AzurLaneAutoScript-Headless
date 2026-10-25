@@ -1,6 +1,7 @@
 """Task-local compatibility outcomes at the original ALAS run boundary."""
 
 from contextlib import contextmanager
+from contextvars import ContextVar
 import traceback
 
 from .errors import UnknownObservationError, UnsupportedPixelRead
@@ -13,6 +14,14 @@ from ..oracle.errors import (SemanticCommissionRowIncomplete, SemanticSnapshotSt
                              SemanticNavigationPending,
                              SemanticGlobeSelectionMissed, SemanticGlobeDragPathUnavailable,
                              SemanticStrongholdEntryLocked, SemanticGuildFormationUnavailable)
+
+
+_current_task = ContextVar('alas_semantic_task', default=None)
+
+
+def current_semantic_task():
+    """Identify the native caller for task-local observation classification."""
+    return _current_task.get()
 
 
 class TaskCapabilityUnavailable(RuntimeError):
@@ -39,6 +48,7 @@ def semantic_task_scope(session, task):
         return
     outcome = "returned"
     failure = None
+    task_token = _current_task.set(task)
     try:
         yield
     except SemanticSnapshotStale as exc:
@@ -138,6 +148,7 @@ def semantic_task_scope(session, task):
         failure = exc
         raise
     finally:
+        _current_task.reset(task_token)
         session.discard_task_state()
         session.last_task_outcome = {"task": task, "outcome": outcome}
         session.last_task_error = (

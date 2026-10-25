@@ -157,6 +157,18 @@ class DispatchObservationPorts:
         return equipment
 
     def _appear_priority(self, name):
+        if name == 'HOSIPITAL_CHECK':
+            from ..task_lifecycle import current_semantic_task
+            if current_semantic_task() == 'hospital':
+                oracle = self._frame_or_live_observation_oracle()
+                if (oracle.event_campaign_page_visible()
+                        and not oracle.war_archives_campaign_page_visible()):
+                    page = oracle.event_campaign_page_state()
+                    raise AlasSemanticUnmapped(
+                        'Hospital navigation reached an ordinary event battle selector '
+                        f'({page.chapter_name}); the generic event entrance did not '
+                        'reach the Hospital activity. Re-entry requires a typed Hospital '
+                        'page or a separately identified Hospital entrance')
         if (name in UI_PAGE_CHECK_RESOURCES.union((
                 'GOTO_MAIN', 'GOTO_MAIN_WHITE', 'RPG_HOME', 'POPUP_CONFIRM', 'POPUP_CANCEL'))
                 and (self._commission_context is None
@@ -584,6 +596,13 @@ class DispatchObservationPorts:
                     return False
         if name in ('WITHDRAW','CAMPAIGN_WITHDRAW_CONFIRM','DOCK_CHECK') and not self._login_flow.active:
             oracle = self._frame_or_live_observation_oracle()
+            if (self._campaign_context is None
+                    and name != 'DOCK_CHECK'
+                    and oracle.war_archives_campaign_page_visible()):
+                # Other native tasks can inherit an archive chapter with no
+                # campaign context. Its strict page proof owns these passive
+                # absences; navigation/input still use their reviewed ports.
+                return False
             if (oracle.observation_target_present('task/page/back')
                     and not any(rule.blocker_id != 'task-page' for rule in
                                 oracle._blocking_rules(oracle.read_state(), 'ui/absence-probe'))):
@@ -1433,6 +1452,13 @@ class DispatchObservationPorts:
                     ObservationSurface.STORY,
                 )
             ):
+                return False
+            if (self._campaign_context is None
+                    and observation_oracle.war_archives_campaign_page_visible()):
+                # This chapter has no native Page entry. Unrelated tasks must
+                # finish page enumeration, then let ALAS use its existing
+                # unknown-page Back recovery, rather than require a Campaign
+                # flow merely to observe that other pages are absent.
                 return False
             if getattr(observation_oracle, 'shipyard_page_visible', lambda: False)():
                 return name == 'SHIPYARD_CHECK'

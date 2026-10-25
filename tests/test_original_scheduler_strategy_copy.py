@@ -345,3 +345,41 @@ def test_native_owner_recovery_cannot_enable_disabled_task():
         module.request_startup_task(app, 'Tactical')
     assert app.run is original
     config.override.assert_not_called()
+
+
+def test_operator_deadline_requests_existing_stop_without_stop_file(monkeypatch):
+    import threading
+    from datetime import datetime, timezone
+    from unittest.mock import Mock
+    stop = threading.Event()
+    clock = [1000.0]
+    def wait(_interval):
+        assert not stop.is_set()
+        clock[0] = 1001.0
+    finished = Mock(is_set=Mock(return_value=False), wait=wait)
+    monkeypatch.setattr(module.time, "time", lambda: clock[0])
+    record = {}
+    module.watch_stop_file(None, stop, finished, datetime.fromtimestamp(1001, timezone.utc), record)
+    assert stop.is_set() and record == dict(reason="deadline", requested_at=1001)
+
+
+def test_finished_run_does_not_acquire_a_later_deadline_stop():
+    import threading
+    from datetime import datetime, timezone
+    stop, finished = threading.Event(), threading.Event()
+    finished.set()
+    record = {}
+    module.watch_stop_file(None, stop, finished, datetime.fromtimestamp(1, timezone.utc), record)
+    assert not stop.is_set() and record == {}
+
+
+@pytest.mark.parametrize("value", ["2026-10-25T15:45:00+08:00", "2026-10-25T07:45:00Z"])
+def test_operator_deadline_has_explicit_timezone(value):
+    assert module.parse_stop_at(value).timestamp() == 1792914300
+
+
+@pytest.mark.parametrize("value", ["2026-10-25T15:45:00", "not-a-timestamp"])
+def test_ambiguous_or_malformed_operator_deadline_is_rejected(value):
+    import argparse
+    with pytest.raises(argparse.ArgumentTypeError):
+        module.parse_stop_at(value)

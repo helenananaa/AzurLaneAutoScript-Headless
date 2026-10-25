@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import copy
 import dataclasses
+from datetime import datetime
 import hashlib
 import json
 import os
@@ -120,13 +121,31 @@ def run_native_loop(app):
     return False
 
 
-def watch_stop_file(path, stop_event, finished):
+def watch_stop_file(path, stop_event, finished, stop_at=None, request_record=None):
     """Translate an operator request into ALAS' existing cooperative stop."""
     while not finished.is_set() and not stop_event.is_set():
-        if path.is_file():
+        reason = None
+        if path is not None and path.is_file():
+            reason = 'stop-file'
+        elif stop_at is not None and time.time() >= stop_at.timestamp():
+            reason = 'deadline'
+        if reason is not None:
+            if request_record is not None:
+                request_record.update(reason=reason, requested_at=time.time())
             stop_event.set()
             return
         finished.wait(0.5)
+
+
+def parse_stop_at(value):
+    """Require an explicit timezone for the operator's wall-clock deadline."""
+    try:
+        parsed = datetime.fromisoformat(value.replace('Z', '+00:00'))
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError('stop-at requires an ISO timestamp') from exc
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        raise argparse.ArgumentTypeError('stop-at requires an explicit timezone')
+    return parsed
 
 
 def request_startup_restart(app, requested):
@@ -362,6 +381,8 @@ def parse_args(argv=None):
                         default='preserve', help='Equipment handling after enhancement or retirement')
     parser.add_argument('--stop-file', type=Path,
                         help='Request native cooperative stop when this file exists; never deletes the file')
+    parser.add_argument('--stop-at', type=parse_stop_at,
+                        help='Request native cooperative stop at this timezone-qualified ISO timestamp')
     parser.add_argument('--output', required=True, type=Path)
     args = parser.parse_args(argv)
     args.continue_after_failure = args.continuous or args.continue_after_failure
@@ -402,6 +423,8 @@ def main():
               'continuous': args.continuous,
               'dock_equipment_policy': args.dock_equipment_policy,
               'stop_file': str(stop_file) if stop_file is not None else None,
+              'stop_at': args.stop_at.isoformat() if args.stop_at is not None else None,
+              'cooperative_stop_request': {},
               'startup_restart_requested': args.restart_before_loop,
               'startup_login_requested': args.login_before_loop,
               'startup_resume_task': args.resume_task,
@@ -422,10 +445,11 @@ def main():
         from alas import inflection
         app = AzurLaneAutoScript(name)
         app.stop_event = threading.Event()
-        if stop_file is not None:
+        if stop_file is not None or args.stop_at is not None:
             stop_watcher = threading.Thread(
                 target=watch_stop_file,
-                args=(stop_file, app.stop_event, stop_watcher_finished),
+                args=(stop_file, app.stop_event, stop_watcher_finished,
+                      args.stop_at, result['cooperative_stop_request']),
                 name='alas-operator-stop', daemon=True,
             )
             stop_watcher.start()

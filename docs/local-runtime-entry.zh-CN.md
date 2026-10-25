@@ -55,6 +55,13 @@ $stop = Join-Path $bundle ('stop-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.re
 Set-Content -LiteralPath '<本轮 $stop 的完整路径>' -Value 'stop'
 ```
 
+开发用 Python 入口 `scripts/python/run_alas_configured_scheduler_live.py` 还接受可选
+`--stop-at`，值为带明确时区的 ISO 时间戳，可与 `--stop-file` 共用。它在指定时间
+请求同一个原生停止事件，允许当前任务完成，不强杀游戏或改写 NextRun。PowerShell
+中可用 `(Get-Date).AddHours(2).ToString('yyyy-MM-ddTHH:mm:sszzz')` 生成字符串；通过
+JSON 读取参数后应保留其字符串类型，避免日期对象被转换成本地化命令行格式。
+默认不设置截止时间，原有运行方式保持有效。
+
 `MaxTasks` 计数的是原调度命令，不保证恰好执行三种不同日常任务。默认是有界模式；
 脚本只转发参数，任务选择、重试、计时、NextRun 和成功判断仍归原 ALAS。
 持久配置 `semantic_daily_continuity_20261023` 继续原 NextRun，不重新复制 seed 覆盖它。
