@@ -222,7 +222,11 @@ def test_scrolling_card_observation_does_not_require_button_alignment_but_click_
         toggles=[make_toggle(root + "/toggles/EX", checked=True),
                  make_toggle(root + "/toggles/SP", checked=False)],
         images=[make_image(path, "temp_hongran", bounds),
-                make_image(root + "/list/scroll_bar/Handle/Image", "scroll_bar")])
+                make_image(root + "/list/scroll_bar/Handle/Image", "scroll_bar",
+                           dict(left=1248, top=320, right=1264, bottom=409)),
+                dict(make_image(root + "/list/scroll_bar", "white_dot",
+                                dict(left=1255, top=132, right=1258, bottom=693)),
+                     raycast_target=True)])
     oracle = make_oracle(backend)
     event = "war_archives_20190321_en"
     assert oracle.war_archives_campaign_card_position(event) == position
@@ -252,8 +256,12 @@ def archive_adapter_context(click):
         click_war_archives_campaign=click,
         war_archives_campaign_page_visible=lambda: True,
         campaign_page_state=lambda: SimpleNamespace(generation=11))
+    refresh = Mock()
+    def fresh():
+        refresh()
+        return oracle
     return SimpleNamespace(_package_gate=lambda: None, oracle=oracle,
-                           _input_frame_refresher=Mock())
+                           _input_frame_refresher=refresh, _fresh_input_oracle=fresh)
 
 
 def test_archive_card_settling_rereads_without_repeated_dispatch():

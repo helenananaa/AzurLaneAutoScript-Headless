@@ -83,9 +83,7 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         if not self.oracle.war_archives_page_visible():
             raise SemanticGateClosed("war archives campaign search requires landing page")
         if self.oracle.war_archives_category() != category:
-            if self._input_frame_refresher is not None:
-                self._input_frame_refresher()
-            receipt = self.oracle.click_war_archives_category(category)
+            receipt = self._fresh_input_oracle().click_war_archives_category(category)
             deadline = time.monotonic() + 20.0
             while True:
                 try:
@@ -106,10 +104,8 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
             if position == "visible":
                 settle_deadline = time.monotonic() + 10.0
                 while True:
-                    if self._input_frame_refresher is not None:
-                        self._input_frame_refresher()
                     try:
-                        receipt = self.oracle.click_war_archives_campaign(event)
+                        receipt = self._fresh_input_oracle().click_war_archives_campaign(event)
                         break
                     except SemanticGateClosed as exc:
                         # Scrolling publishes button/image geometry across
@@ -142,9 +138,7 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
             before_generation, before_bounds = (
                 self.oracle.war_archives_campaign_card_geometry(event)
             )
-            if self._input_frame_refresher is not None:
-                self._input_frame_refresher()
-            swipe = self.oracle.swipe_war_archives_campaign_toward(event)
+            swipe = self._fresh_input_oracle().swipe_war_archives_campaign_toward(event)
             deadline = time.monotonic() + 10.0
             while True:
                 generation, bounds = self.oracle.war_archives_campaign_card_geometry(
@@ -325,12 +319,13 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         context = self._require_campaign_context()
         if context.sortie_receipt is None:
             return None
-        cost = self._frame_or_live_observation_oracle().war_archives_entry_confirmation_cost()
+        oracle = self._fresh_input_oracle()
+        cost = oracle.war_archives_entry_confirmation_cost()
         if cost is None:
             return None
         if context.archive_entry_confirm_receipt is not None:
             raise SemanticGateClosed("war archives entry confirmation is single-use")
-        receipt = self.oracle.confirm_war_archives_entry()
+        receipt = oracle.confirm_war_archives_entry()
         if receipt.generation <= context.sortie_receipt.generation:
             raise SemanticGateClosed("war archives entry prompt did not advance")
         context.archive_entry_confirm_receipt = receipt

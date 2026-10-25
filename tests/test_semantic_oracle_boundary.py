@@ -164,6 +164,9 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
             ],
             images=[
                 make_image(card, "temp_zhuiluo", card_bounds),
+                dict(make_image(root + "/list/scroll_bar", "white_dot",
+                               {"left": 1255, "top": 126, "right": 1258, "bottom": 693}),
+                     raycast_target=True),
                 make_image(
                     root + "/list/scroll_bar/Handle/Image",
                     "scroll_bar",
@@ -180,7 +183,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
             receipt.semantic_id,
             "archive/campaign/search/war_archives_20181026_en",
         )
-        self.assertEqual(backend.swipes, [(640, 620, 640, 250, 350)])
+        self.assertEqual(backend.swipes, [(1256, 170, 1256, 214, 350)])
         self.assertEqual(backend.taps, [])
 
     def test_war_archives_category_click_requires_exact_unselected_toggle(self):

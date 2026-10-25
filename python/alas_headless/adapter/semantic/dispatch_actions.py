@@ -1061,6 +1061,10 @@ class DispatchActionsPorts:
                 target == 'campaign-menu/page/back'
                 and source_oracle.event_campaign_page_visible()
             )
+            from_archives = (
+                target == 'campaign-menu/page/back'
+                and source_oracle.war_archives_campaign_page_visible()
+            )
             receipt = self._record_mission_transition(source_oracle.click(target))
             if target == 'academy/page/back':
                 # Return one reviewed page edge; the original ALAS page graph
@@ -1078,6 +1082,13 @@ class DispatchActionsPorts:
                 deadline = time.monotonic() + 12.0
                 while time.monotonic() < deadline:
                     if self.oracle.read_state().generation > receipt.generation:
+                        if (from_archives
+                                and not self.oracle.war_archives_campaign_page_visible()
+                                and not self.oracle.event_campaign_page_visible()
+                                and self.oracle.campaign_page_is_normal()):
+                            # Native archive Back restores the retained main
+                            # chapter; ALAS owns the next navigation edge.
+                            return receipt
                         if (from_event
                                 and not self.oracle.event_campaign_page_visible()
                                 and self.oracle.campaign_page_is_normal()):

@@ -253,26 +253,47 @@ class ArchivesOracle:
         )
         if len(handles) != 1:
             raise SemanticGateClosed("war archives scroll identity is ambiguous")
+        track_path = handle_path.removesuffix("/Handle/Image")
+        tracks = tuple(
+            image for image in ui_state.images
+            if image.path == track_path and image.name == "scroll_bar"
+            and image.sprite == "white_dot" and image.active_in_hierarchy
+            and image.active_and_enabled and image.raycast_target
+            and image.raycast_top is not False and not image.truncated
+            and image.bounds is not None
+        )
+        if len(tracks) != 1:
+            raise SemanticGateClosed("war archives scroll control is absent or ambiguous")
+        if not button_state.generation <= ui_state.generation <= button_state.generation + 2:
+            raise SemanticGateClosed("war archives scroll snapshots are incoherent")
+        handle, track = handles[0], tracks[0]
+        assert handle.bounds is not None and track.bounds is not None
+        hb, tb = handle.bounds, track.bounds
+        # Drag the native Scrollbar at its current thumb. Half a thumb moves
+        # half a viewport, avoiding content inertia skipping the target card.
+        start = Point(round((tb.left + tb.right) / 2),
+                      round((hb.top + hb.bottom) / 2))
+        step = (hb.bottom - hb.top) / 2
+        if step <= 0 or not hb.contains(start) or not tb.contains(start):
+            raise SemanticGateClosed("war archives scroll geometry is invalid")
+        end = Point(start.x, round(max(tb.top + 1, min(tb.bottom - 1,
+                    start.y + (step if position == "below" else -step)))))
+        if not tb.contains(end) or abs(end.y - start.y) < 1:
+            raise SemanticGateClosed("war archives scroll has no movement toward card")
         semantic_id = "archive/campaign/search/" + event
         if self._blocking_rules(button_state, semantic_id):
             raise SemanticGateClosed("war archives campaign search is blocked")
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed before archive list swipe")
-        if position == "below":
-            start, end = Point(640.0, 620.0), Point(640.0, 250.0)
-        else:
-            start, end = Point(640.0, 220.0), Point(640.0, 590.0)
         self._swipe(
             int(start.x), int(start.y), int(end.x), int(end.y), 350
         )
-        handle = handles[0]
-        assert handle.bounds is not None
         return ActionReceipt(
             semantic_id=semantic_id,
-            generation=button_state.generation,
+            generation=ui_state.generation,
             point=start,
-            bounds=handle.bounds,
-            path=handle.path,
+            bounds=track.bounds,
+            path=track.path,
         )
 
     def click_war_archives_campaign(self, event: str) -> ActionReceipt:
@@ -640,6 +661,10 @@ class ArchivesOracle:
     def war_archives_campaign_page_visible(self) -> bool:
         """Return whether the exact archive campaign stage page is mounted."""
 
+        if self.exists("reward/campaign-total/exit"):
+            # Keys remain mounted behind the native settlement menu. It is
+            # not the chapter page; ALAS must close its result before re-entry.
+            return False
         ui_state = self.read_ui_state()
         if not self._war_archives_campaign_counter_records(ui_state):
             return False

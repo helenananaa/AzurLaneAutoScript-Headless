@@ -2430,6 +2430,11 @@ class DispatchObservationPorts:
         if semantic_id is None and name == "CAMPAIGN_MENU_NO_EVENT":
             return not self.oracle.campaign_event_entrance_available()
         if semantic_id is None and name == "CAMPAIGN_CHECK":
+            if self.oracle.war_archives_campaign_page_visible():
+                # Archives share the chapter shell, but native page_campaign
+                # denotes the main campaign. Treating archives as that page
+                # incorrectly invokes the main hard-mode daily quota reader.
+                return False
             if self._campaign_context is not None:
                 # A completed combat returns directly to the normal chapter
                 # page.  Prove that strict identity first: probing a stale
