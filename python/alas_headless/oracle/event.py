@@ -540,7 +540,11 @@ class EventOracle:
     def event_story_page_state(self) -> Tuple[int, int, Optional[int]]:
         """Return completed, total, and first visible story-node id."""
 
-        state = self.read_state()
+        return self._event_story_page_state(self.read_state())
+
+    def _event_story_page_state(
+        self, state: OracleState, ui: Optional[UiState] = None
+    ) -> Tuple[int, int, Optional[int]]:
         story_root = "LevelSelectSPFullUI(Clone)/Story/Nodes/Viewport/Content/"
         nodes = tuple(
             button
@@ -554,7 +558,8 @@ class EventOracle:
         )
         if not nodes:
             raise SemanticGateClosed("event story nodes are absent")
-        ui = self.read_ui_state()
+        if ui is None:
+            ui = self.read_ui_state()
         progress = tuple(
             text.text.strip()
             for text in ui.texts
@@ -580,6 +585,54 @@ class EventOracle:
             and 0 <= button.bounds.top < button.bounds.bottom <= self.fingerprint.height
         )
         return completed, total, min(visible) if visible else None
+
+    def event_story_selector_visible(self) -> bool:
+        """Prove the story tab for navigation without admitting battle stages."""
+        state = self.read_state()
+        marker = '/LevelSelectSPFullUI(Clone)'
+        active = tuple(button for button in state.buttons
+                       if button.active_in_hierarchy and button.active_and_enabled)
+        if not any(marker + '/Story/' in button.path for button in active):
+            return False
+        roots = {button.path.split(marker)[0] + marker
+                 for button in active if marker in button.path}
+        if (len(roots) != 1
+                or any(button.path.count(marker) != 1
+                       for button in active if marker in button.path)):
+            raise SemanticGateClosed('event story selector root is ambiguous')
+        root = next(iter(roots))
+        if not root.endswith('/LevelMainScene(Clone)/LevelSelectSPFullUI(Clone)'):
+            raise SemanticGateClosed('event story selector root is unsupported')
+        switches = tuple(button for button in self._matches(state, 'event/mode/battle')
+                         if button.active_in_hierarchy and button.active_and_enabled)
+        if (len(switches) != 1 or switches[0].path != root + '/Story/Battle/Switch'
+                or not switches[0].interactable or switches[0].bounds is None
+                or any('/Battle/' in button.path and marker in button.path
+                       and '/Story/Battle/' not in button.path for button in active)):
+            raise SemanticGateClosed('event story selector mode is absent or ambiguous')
+        back = tuple(button for button in self._matches(state, 'campaign-menu/page/back')
+                     if button.active_in_hierarchy and button.active_and_enabled)
+        page = root[:-len(marker)]
+        if (len(back) != 1 or back[0].path != page + '/top/top_chapter/back_button'
+                or not back[0].actionable
+                or self._blocking_rules(state, 'campaign-menu/page/back')):
+            raise SemanticGateClosed('event story selector back is not available')
+        if any(any(part in button.path for part in (
+                'ActivityMainUI(Clone)/', '/LevelMainScene(Clone)/float/levels/items/Chapter_',
+                '/LevelStageInfoView(Clone)/', '/LevelInfoSPUI(Clone)/',
+                '/LevelFleetSelectView(Clone)/')) for button in active):
+            raise SemanticGateClosed('event story selector overlaps another page')
+        node_prefix = root + '/Story/Nodes/Viewport/Content/'
+        nodes = tuple(button.path for button in active
+                      if button.path.startswith(node_prefix)
+                      and button.path[len(node_prefix):].isdigit())
+        if len(nodes) != len(set(nodes)):
+            raise SemanticGateClosed('event story selector nodes are ambiguous')
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('event story selector snapshots are not coherent')
+        self._event_story_page_state(state, ui)
+        return True
 
     def event_story_surface_absent(self) -> bool:
         """Prove the idle story boundary without entering legacy pixel probes."""

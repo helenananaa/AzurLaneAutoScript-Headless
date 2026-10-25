@@ -51,7 +51,14 @@ class EventPorts:
                             "campaign preparation overlay kind is invalid"
                         )
                 try:
-                    self.oracle.event_campaign_page_state()
+                    # Story and combat share ALAS' event-page navigation edge.
+                    # Keep the battle-stage reader strict; a complete story
+                    # selector proves only the page needed by the native UI.
+                    story_visible = getattr(
+                        self.oracle, 'event_story_selector_visible', lambda: False
+                    )()
+                    if not story_visible:
+                        self.oracle.event_campaign_page_state()
                 except SemanticTargetMissing:
                     return False
                 if (

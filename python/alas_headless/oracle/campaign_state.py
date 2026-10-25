@@ -1726,6 +1726,10 @@ class CampaignStateOracle(CampaignHealthOracle):
     def campaign_page_is_normal(self) -> bool:
         if self.campaign_menu_is_entry() or self.exists("reward/campaign-total/exit"):
             return False
+        if self.event_story_selector_visible():
+            # The shared event shell is a valid navigation page, but its
+            # story tab has no battle stages for the chapter reader.
+            return False
         try:
             self.campaign_page_state()
         except SemanticTargetMissing:
