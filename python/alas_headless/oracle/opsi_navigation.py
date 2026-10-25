@@ -169,8 +169,9 @@ class OpsiNavigationOracle:
 
         Original ``Radar.nearest_object()`` considers enemies, resources,
         meowfficers, exclamation marks, questions, and archives.  Current
-        semantic evidence has exact Unity sprite identities only for enemies,
-        exclamation marks, and questions.  Any other direct radar-object
+        semantic evidence has exact Unity sprite identities for enemies,
+        resource boxes, exclamation marks, and questions. Any other direct
+        radar-object
         sprite therefore closes the gate instead of being guessed.  Targets
         farther than the original three-step radius also close the gate until
         the EMP one-step condition has a typed observation.
@@ -188,6 +189,7 @@ class OpsiNavigationOracle:
             "boss": "enemy",
             "task": "event",
             "guidepost": "question",
+            "exp": "resource",
         }
         objects = []
         ports = set()
@@ -217,13 +219,19 @@ class OpsiNavigationOracle:
                     "operation siren daemon radar target is not grid-aligned"
                 )
             position = (grid_x, grid_y)
+            # RadarGrid.predict() skips is_fleet before classifying pixels.
+            # Unity can retain the consumed event's icon beneath the fleet;
+            # it is not a zero-distance target for the original daemon.
+            if position == (0, 0):
+                continue
             if item.sprite == "port":
                 ports.add(position)
                 continue
             kind = reviewed.get(item.sprite)
             if kind is None:
                 raise SemanticGateClosed(
-                    "operation siren daemon radar target kind is not reviewed"
+                    "operation siren daemon radar target kind is not reviewed: "
+                    + item.sprite
                 )
             objects.append((position, kind))
 
@@ -298,8 +306,10 @@ class OpsiNavigationOracle:
             raise SemanticGateClosed(
                 "operation siren daemon target changed before input"
             )
+        # Match native convert_radar_to_local(), including an off-center
+        # camera. A missing fleet origin cannot authorize a camera fallback.
         return self.click_operation_siren_relative_grid(
-            expected.relative_position
+            expected.relative_position, fleet_relative=True
         )
 
     def operation_siren_obscure_exit_passage_position(

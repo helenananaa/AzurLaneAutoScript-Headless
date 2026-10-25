@@ -623,7 +623,7 @@ class OpsiAdapterPorts:
         self._package_gate()
         return self._dispatch_mutation(
             "operation_siren.daemon_move",
-            lambda: self.oracle.click_operation_siren_daemon_target(expected),
+            lambda: self._fresh_input_oracle().click_operation_siren_daemon_target(expected),
         )
 
     def click_operation_siren_fleet_bar(self) -> ActionReceipt:
