@@ -1,0 +1,15 @@
+diff --git a/module/handler/enemy_searching.py b/module/handler/enemy_searching.py
+--- a/module/handler/enemy_searching.py
++++ b/module/handler/enemy_searching.py
+@@ -49,6 +49,11 @@
+             return False
+ 
+     def is_in_stage_page(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        archives_visible = getattr(semantic_adapter, 'war_archives_campaign_visible', None)
++        if callable(archives_visible) and archives_visible():
++            # Archives are a stage destination without being the main Campaign Page.
++            return True
+         for check in [CAMPAIGN_CHECK, EVENT_CHECK, SP_CHECK]:
+             if self.appear(check, offset=(20, 20)):
+                 return True

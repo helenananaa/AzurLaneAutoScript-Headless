@@ -1,0 +1,130 @@
+{
+  "schema": "alas-headless.build-entry-counter-transition/v1",
+  "at": "2026-10-27T15:53:37.292510+08:00",
+  "applied": true,
+  "scope": "One existing accepted-entry transition classification. A real prior Main->Build receipt must still be recent and a fresh actionable Build destination must arrive within the existing wait. Only reuse that receipt;no second tap,synthetic coins,construction spend or new navigation loop. First-entry malformed coins,missing/old destination and expired receipt still fail closed.",
+  "source": {
+    "path": "python/alas_headless/adapter/semantic/dispatch_actions.py",
+    "sha256": "ddf3999e764f78553d765dcf657230365e745025a9b2f08a6a0daa70a34546f9"
+  },
+  "before_source": {
+    "path": "artifacts/full-feature-live-20261025/build-entry-counter-before-r1/dispatch_actions.py",
+    "sha256": "507cce6e072584ffaf268e3231193e555ab0d649ea9982eafd6f417a54874a5e"
+  },
+  "before": {
+    "failed": 1,
+    "passed": 4,
+    "log": {
+      "path": "artifacts/full-feature-live-20261025/build-entry-counter-before-r1.log",
+      "sha256": "5360ef531d7a22d8bb6a58ee6f8d3aaf2e053f6ed0943266d512cbb7e21263d0"
+    }
+  },
+  "after": {
+    "passed": 69,
+    "log": {
+      "path": "artifacts/full-feature-live-20261025/build-entry-counter-after-r1.log",
+      "sha256": "9aa3e90a47b7ed4a9e07a2e3408adcf58174c047659b82bd7d1a1195a0b2411a"
+    },
+    "scope": "accepted-entry counter transition,missing-entry/real destination,first-entry rejection,build wallet/spend/ledger and semantic oracle baseline"
+  },
+  "source_failure": {
+    "raw": {
+      "path": "artifacts/full-feature-live-20261025/cv-protected-handler-complete-20261027-r2.json",
+      "sha256": "2ec3862e87c511ed36971c12b339f946832c7eff89fe1fc15297d1919e85349c"
+    },
+    "process": {
+      "path": "artifacts/full-feature-live-20261025/cv-protected-handler-complete-20261027-r2-process.json",
+      "sha256": "06cdd4afd94a319592b5013cff4c0d8d8527f381995bb352704585dd7e3f8173"
+    },
+    "error": "SemanticGateClosed('main coin counter is absent or malformed')",
+    "whole_native_handler_entered": false,
+    "ordinary_resource_transactions": 0,
+    "initial_Main_toBuild_navigation_accepted": true,
+    "original_native_UI_call_attempts": [
+      {
+        "name": "ui_ensure_build",
+        "started_at": 1793086659.5988405,
+        "complete": false
+      }
+    ],
+    "unused_retirement_grants_sealed": 2,
+    "unused_native_UI_calls_sealed": 4,
+    "original_deadline": "2026-10-27T15:42:33.115187+08:00",
+    "closeout": {
+      "path": "artifacts/full-feature-live-20261025/cv-protected-handler-r2-navigation-closeout-r1.json",
+      "sha256": "30a78f3215522fc2f89a4f7567b2f07981454649fd9ed566c3ff8168219c363c"
+    },
+    "scope": "Failed original ui_ensure after accepted Main/build receipt;no ship selection or retired transaction. Original raw remainsFALSE,not a protected-handler success."
+  },
+  "harness_review": {
+    "scope": "Qualification-only artifact recorder;no production SDK change from capture helper",
+    "tests_passed": 9,
+    "log": {
+      "path": "artifacts/full-feature-live-20261025/protected-handler-capture-r2-verified.log",
+      "sha256": "2636f7810efdb7547bf17340a01c74b4a13243903eb7b79c322f2b0f3c995f08"
+    },
+    "module": {
+      "path": "artifacts/full-feature-live-20261025/protected_handler_capture_r2.py",
+      "sha256": "8b04c1c192b1d29c42883eba83333dea71d1e118aad6aedad75d51c255c5441d"
+    },
+    "checks": [
+      "units forwarded unchanged",
+      "physical completed receipt deduplicated",
+      "unknown payload/writer failure does not alter native return",
+      "native backend exception propagates without replay",
+      "pre-dispatch marker recorded before original call,not proof of input"
+    ]
+  },
+  "post_case_inspection": {
+    "raw": {
+      "path": "artifacts/full-feature-live-20261025/protected-handler-final-dock-r1.json",
+      "sha256": "cddbc3b2f05cad31314bb38500da21abb217a68404ca1bc87b1d8bf4f08307fa"
+    },
+    "process": {
+      "path": "artifacts/full-feature-live-20261025/protected-handler-final-dock-r1-process.json",
+      "sha256": "f484ced26e02f110c009fe50dee3adcb127c18b995fd5e5dceb61d584bff78a4"
+    },
+    "passed": true,
+    "elapsed_seconds": 11.839,
+    "resource_grants": 0,
+    "original_UI_calls": [
+      "goto_main",
+      "ui_ensure_build",
+      "retirement_quit",
+      "goto_main"
+    ],
+    "dock": {
+      "generation": 58180,
+      "capacity_used": 864,
+      "capacity_total": 1010,
+      "selected_count": 0
+    },
+    "final": {
+      "pid": 29604,
+      "generation": 58284,
+      "ui_generation": 58284,
+      "main": true,
+      "resources": {
+        "oil": 10010,
+        "gold": 101558,
+        "gem": 3505
+      },
+      "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+    },
+    "source_and_persistent_profiles_unchanged_during_inspection": true,
+    "persistent_semantics_match_closed_strategic_case_final": true,
+    "ordinary_Main_Build_Dock_Main_path_live": true,
+    "exact_missing_counter_transition_branch_live_repeated": false,
+    "observed_main_gold_errors": [],
+    "scope": "Independent requested post-case resource/dock inspection,not newretirement case or quota continuation. Normal current-build navigation passed;no captured missing-counter error in this repeat means the new transition remains specifically offline tested."
+  },
+  "protected_whole_handler_live_verified": false,
+  "old_level_warning_live_verified": false,
+  "natural_full_dock_retire_continuation_verified": false,
+  "native_members": 247,
+  "combined_sha256": "bee9db8c63e6f2a4cd271cca28cad57edd0158d878337295ebc3b35927935e53",
+  "CXX_APK_native_changes": false,
+  "current_full_regression": false,
+  "support_promotion": false,
+  "delivery": "LOCALONLY/noautomaticcommitpush"
+}

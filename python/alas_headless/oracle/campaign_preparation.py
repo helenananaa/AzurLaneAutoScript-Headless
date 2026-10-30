@@ -686,8 +686,11 @@ class CampaignPreparationOracle:
                     "campaign live map-preparation text identity is malformed"
                 )
         if stage_identity == "sp":
+            # Enemy level changes between events.  Bind SP through the
+            # reviewed detail/underlay identity, not an old display value.
+            if re.fullmatch(r"LV [1-9][0-9]*", texts["panel/Level/Text"][0].text.strip()) is None:
+                raise SemanticGateClosed("campaign SP enemy level value is malformed")
             exact_text = {
-                "panel/Level/Text": "LV 110",
                 "panel/cost/text": "10",
                 "panel/title_form/title_en": "",
             }

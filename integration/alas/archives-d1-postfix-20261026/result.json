@@ -1,0 +1,191 @@
+{
+  "schema": "alas-headless.archive-postfix-full-task-assessment/v1",
+  "at": "2026-10-26T09:50:37.808059+08:00",
+  "passed": true,
+  "scope": "Current CN war_archives_20210325_cn/D1/F1mobF2boss, ONE original task six battles/totalreward/nativeexit/RunCount1to0/disabled/originalgoto_main SAMEPROCESS. Postresource inspection separate zero-input, clearly labeled.",
+  "native": {
+    "passed": true,
+    "returned": true,
+    "elapsed_seconds": 217.891,
+    "main_return": {
+      "returned": true,
+      "before": {
+        "pid": 1615,
+        "generation": 85041,
+        "main_visible": false
+      }
+    },
+    "after": {
+      "pid": 1615,
+      "generation": 85191,
+      "main_visible": true,
+      "commission_back": false
+    },
+    "scheduled_next_run": "2020-01-01 00:00:00",
+    "final_task_config": {
+      "Scheduler": {
+        "Enable": false,
+        "NextRun": "2020-01-01 00:00:00",
+        "Command": "WarArchives",
+        "SuccessInterval": 30,
+        "FailureInterval": 30,
+        "ServerUpdate": "00:00"
+      },
+      "Campaign": {
+        "Name": "D1",
+        "Event": "war_archives_20210325_cn",
+        "Mode": "normal",
+        "UseClearMode": true,
+        "UseFleetLock": true,
+        "UseAutoSearch": true,
+        "Use2xBook": false,
+        "AmbushEvade": true
+      },
+      "StopCondition": {
+        "OilLimit": 1000,
+        "RunCount": 0,
+        "MapAchievement": "non_stop",
+        "StageIncrease": true,
+        "GetNewShip": true,
+        "ReachLevel": 0
+      },
+      "Fleet": {
+        "Fleet1": 1,
+        "Fleet1Formation": "double_line",
+        "Fleet1Mode": "combat_auto",
+        "Fleet1Step": 3,
+        "Fleet2": 2,
+        "Fleet2Formation": "double_line",
+        "Fleet2Mode": "combat_auto",
+        "Fleet2Step": 2,
+        "FleetOrder": "fleet1_mob_fleet2_boss"
+      },
+      "Submarine": {
+        "Fleet": 0,
+        "Mode": "do_not_use",
+        "AutoSearchMode": "sub_standby",
+        "DistanceToBoss": "2_grid_to_boss"
+      },
+      "Emotion": {
+        "Mode": "calculate",
+        "Fleet1Value": 85,
+        "Fleet1Record": "2026-10-26 09:48:41",
+        "Fleet1Control": "prevent_yellow_face",
+        "Fleet1Recover": "not_in_dormitory",
+        "Fleet1Oath": false,
+        "Fleet2Value": 117,
+        "Fleet2Record": "2026-10-26 09:48:41",
+        "Fleet2Control": "prevent_yellow_face",
+        "Fleet2Recover": "not_in_dormitory",
+        "Fleet2Oath": false
+      },
+      "HpControl": {
+        "UseHpBalance": false,
+        "UseEmergencyRepair": false,
+        "UseLowHpRetreat": false,
+        "HpBalanceThreshold": 0.2,
+        "HpBalanceWeight": "1000, 1000, 1000",
+        "RepairUseSingleThreshold": 0.3,
+        "RepairUseMultiThreshold": 0.6,
+        "LowHpRetreatThreshold": 0.3
+      },
+      "EnemyPriority": {
+        "EnemyScaleBalanceWeight": "default_mode"
+      },
+      "Storage": {
+        "Storage": {}
+      }
+    },
+    "remaining_action_grants": {
+      "mission.claim": 0,
+      "mail.mutation": 0,
+      "tactical.reward": 0,
+      "awaken.execute": 0,
+      "minigame.play": 0,
+      "meta.assist": 0,
+      "operation_siren.coordinate_checkout": 0,
+      "operation_siren.action_point_use": 0,
+      "operation_siren.daemon_move": 0,
+      "operation_siren.port_repair": 0,
+      "tactical.assign": 0,
+      "commission.reward": 0,
+      "commission.start": 0,
+      "daily.execute": 0,
+      "exercise.execute": 0,
+      "exercise.refresh": 0,
+      "research.reward": 0,
+      "research.start": 0,
+      "dorm.collect": 0,
+      "dorm.feed": 0,
+      "enhancement.execute": 2,
+      "guild.claim": 0,
+      "guild.dispatch": 0,
+      "guild.exchange": 0,
+      "build.submit": 0,
+      "retirement.execute": 1,
+      "shop.purchase": 0,
+      "campaign.stage_entry": 0,
+      "campaign.fleet_mutation": 11,
+      "campaign.sortie": 0,
+      "campaign.grid_click": 30,
+      "campaign.viewport_swipe": 24
+    }
+  },
+  "battles": {
+    "indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "ordinary_combat_end_markers": 5,
+    "boss": "BATTLE_5 fleet2 executes then CAMPAIGN END total settlement; not a fabricated sixth Combat end marker"
+  },
+  "resources": {
+    "before": {
+      "oil": 2483,
+      "gold": 105296,
+      "gem": 3505
+    },
+    "before_source": "archive-exit-zero-sortie-recovery-r2.json/recoveredMain1615gen74358; separatezero-input untilcase departure",
+    "after": {
+      "pid": 1615,
+      "generation": 85524,
+      "ui_generation": 85524,
+      "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+      "main": true,
+      "resources": {
+        "oil": 2289,
+        "gold": 106100,
+        "gem": 3505
+      }
+    },
+    "delta": {
+      "oil": -194,
+      "gold": 804,
+      "gem": 0
+    },
+    "keys": "Original reviewed entry confirms 5-key gate at81803; no fresh post-task keycounter sampled, do not claim a measured postcounter"
+  },
+  "equipment": "disassemble; noenhancementorretirementtriggeredhere; naturalmidmapretirechainstillunqualified",
+  "repair": {
+    "native": "241st1561 existingArchivevisible hook in originalis_in_stage_page; globalCAMPAIGN_CHECKfalse",
+    "adapter": "existingfreshimmutableframe for Archives cardposition/scrollgeometry anddestinationproof;2genunchanged",
+    "focused": "104nativeexit+89cardfocused/241patchtree+compile/supportPASS",
+    "full": "r6full8386pass1fixturefail253skip; onlytesthostcorrected/66focusedPASS; productionunchanged. RawfullFAILretained, no singlefullgreenclaim."
+  },
+  "evidence": {
+    "raw_receipt": "artifacts\\full-feature-live-20261025\\war-archives-postfix-20261026-r2.json",
+    "raw_sha256": "77c9432cfd1e712e0d79d5c096fe7d60b9498592bd4080ed2cbda681ba339ea7",
+    "raw_stdout_sha256": "af9769b988ef9e9f268acc478c4d42431299da6470475e50bc56c6af3d8c3164",
+    "post_resource": "archive-postfix-final-resource-r1.json",
+    "previous_failed_receipts": [
+      "war-archives-complete-20261026-r2.json",
+      "war-archives-postfix-20261026-r1.json"
+    ],
+    "separate_zero_sortie_recovery": "archive-exit-zero-sortie-recovery-r2.json"
+  },
+  "support_boundary": "This D1 configurationonly; noall45archives/fullfield/overnight/allfeaturepromotion. Rawpreviousactualmapfailure remainsfalse; newpostfixr1presortiefailure andr2samebudgetdeadline recoveryseparatehistory. LatestuserLOCALONLY overridesoldpushgoal."
+}

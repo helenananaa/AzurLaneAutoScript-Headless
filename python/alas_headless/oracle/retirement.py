@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import replace
 from collections.abc import Mapping
 from typing import Dict, List, Optional, Tuple, Union
 from .contracts import (
@@ -21,6 +22,8 @@ from .contracts import (
     UiState,
 )
 from .errors import ObserverTransportError, SemanticGateClosed, SemanticOracleError
+from .retirement_scroll import RetirementScrollOracle
+from .retirement_cv import RetirementCvOracle, RetirementCvDeselectionReceipt
 
 
 def _selection_path(path: str) -> str:
@@ -32,7 +35,7 @@ def _selection_path(path: str) -> str:
                         '/blur_panel/select_panel/')
 
 
-class RetirementOracle:
+class RetirementOracle(RetirementScrollOracle, RetirementCvOracle):
     """Retirement operations sharing the oracle frame and input boundary."""
 
     def _retirement_records(self) -> Tuple[OracleState, UiState]:
@@ -195,8 +198,8 @@ class RetirementOracle:
             path=button.path,
         )
 
-    def retirement_selection_state(self) -> RetirementSelectionState:
-        state, ui_state = self._retirement_records()
+    def retirement_selection_state(self, records=None) -> RetirementSelectionState:
+        state, ui_state = records if records is not None else self._retirement_records()
         tip_suffix = "/blur_panel/select_panel/tip"
         tip = self._active_retirement_texts(
             ui_state,
@@ -216,8 +219,7 @@ class RetirementOracle:
             "/blur_panel/select_panel/cancel_button",
         )
         if (
-            len(tip) != 1
-            or len(capacity) != 1
+            len(capacity) != 1
             or len(count) != 1
             or any(
                 len(self._active_retirement_buttons(state, path)) != 1
@@ -231,6 +233,12 @@ class RetirementOracle:
         count_match = re.fullmatch(r"[0-9]+", count[0].text.strip())
         if capacity_match is None or count_match is None:
             raise SemanticGateClosed("retirement counters are malformed")
+        # Manual selection replaces the empty-page instruction with the
+        # selected-count/reward headers. One-click jumps straight to its next
+        # dialog, so its earlier tests did not exercise this original UI phase.
+        selected_phase = len(tip) == 0 and self._retirement_selected_headers_visible(ui_state)
+        if len(tip) != 1 and not selected_phase:
+            raise SemanticGateClosed("retirement selection page is incomplete")
         used, total = (int(value) for value in capacity_match.groups())
         selected = int(count_match.group(0))
         # A reward can overflow the dock before the game raises its full
@@ -264,8 +272,9 @@ class RetirementOracle:
                    and b.active_in_hierarchy for b in state.buttons):
             return False
         _, ui = self._retirement_records()
-        if not self._active_retirement_texts(ui, '/blur_panel/select_panel/tip',
-                '请选择用于<color=#92fc63>退役</color>的角色：'):
+        if (not self._active_retirement_texts(ui, '/blur_panel/select_panel/tip',
+                '请选择用于<color=#92fc63>退役</color>的角色：')
+                and not self._retirement_selected_headers_visible(ui)):
             return False
         # Presence must survive controls mounting/unmounting. Input and the
         # retirement transaction independently require the complete selection.
@@ -532,8 +541,8 @@ class RetirementOracle:
             identity_text="退役设置",
         )
 
-    def _retirement_preconfirm(self) -> Optional[Tuple[int, int]]:
-        state, ui_state = self._retirement_records()
+    def _retirement_preconfirm(self, records=None) -> Optional[Tuple[int, int]]:
+        state, ui_state = records if records is not None else self._retirement_records()
         confirm = self._active_retirement_buttons(
             state, "DestoryInfoUI(Clone)/frame/confirm_button"
         )
@@ -552,6 +561,22 @@ class RetirementOracle:
         if re.fullmatch(r"[1-9][0-9]*", count[0].text.strip()) is None:
             raise SemanticGateClosed("retirement selected count is malformed")
         return int(count[0].text.strip()), ui_state.generation
+
+    def _retirement_selected_headers_visible(self, ui_state: UiState) -> bool:
+        headers = (
+            ("/blur_panel/select_panel/bottom_info/bg_input/selected", "已选中:"),
+            ("/blur_panel/select_panel/bottom_info/bg_input/Tselected", "SELECTED"),
+            ("/blur_panel/select_panel/bottom_info/bg_award/label", "可获得:"),
+        )
+        count = self._active_retirement_texts(
+            ui_state, "/blur_panel/select_panel/bottom_info/bg_input/count")
+        return (
+            not self._active_retirement_texts(ui_state, "/blur_panel/select_panel/tip")
+            and len(count) == 1
+            and re.fullmatch(r"[1-9][0-9]*", count[0].text.strip()) is not None
+            and all(len(self._active_retirement_texts(ui_state, suffix, label)) == 1
+                    for suffix, label in headers)
+        )
 
     def _retirement_screen_kind(self) -> str:
         state, ui_state = self._retirement_records()
@@ -587,6 +612,9 @@ class RetirementOracle:
             "/blur_panel/select_panel/tip",
             "请选择用于<color=#92fc63>退役</color>的角色：",
         ):
+            return "selection"
+        if self._retirement_selected_headers_visible(ui_state):
+            self.retirement_selection_state()
             return "selection"
         return "transition"
 
@@ -878,11 +906,14 @@ class RetirementOracle:
         keep_limit_break: bool,
         timeout_seconds: float = 60.0,
         *, preserve_equipment: bool = True,
+        before_ship_confirmation=None,
     ) -> Union[RetirementExecutionReceipt, RetirementNoCandidateReceipt]:
         """Execute one official one-click retirement transaction fail closed."""
 
         if type(preserve_equipment) is not bool:
             raise TypeError('retirement equipment policy must be boolean')
+        if before_ship_confirmation is not None and not callable(before_ship_confirmation):
+            raise TypeError('native retirement preservation callback must be callable')
         if not isinstance(keep_limit_break, bool):
             raise TypeError("retirement limit-break policy must be boolean")
         if timeout_seconds <= 0:
@@ -975,17 +1006,52 @@ class RetirementOracle:
             raise SemanticGateClosed("official one-click selection did not settle")
         if selected_count > before.capacity_used:
             raise SemanticGateClosed("official retirement count exceeds dock usage")
+        cv_preservation = ()
+        validate_preserved = None
+        if before_ship_confirmation is not None:
+            original_selected = selected_count
+            proof = before_ship_confirmation()
+            state, ui = self._retirement_records()
+            selection = self.retirement_selection_state((state, ui))
+            if (selection.capacity_used, selection.capacity_total) != (before.capacity_used, before.capacity_total):
+                raise SemanticGateClosed('dock capacity changed during common-CV preservation')
+            if proof is None:
+                if selection.selected_count != original_selected:
+                    raise SemanticGateClosed('native preservation changed selection without typed evidence')
+            elif (not isinstance(proof, RetirementCvDeselectionReceipt)
+                    or proof.pid != state.snapshot['pid']
+                    or (proof.capacity_used, proof.capacity_total) != (before.capacity_used, before.capacity_total)
+                    or proof.selected_before != original_selected
+                    or proof.selected_after != original_selected - 1
+                    or selection.selected_count != proof.selected_after
+                    or ui.generation < proof.observed_generation):
+                raise SemanticGateClosed('common-CV preservation proof does not match final selection')
+            else:
+                cv_preservation = (proof,)
+                actions.append(proof.action)
+            selected_count = selection.selected_count
+            if selected_count == 0:
+                raise SemanticGateClosed('common-CV preservation left no ships to submit; no ship submission')
+            owner_pid = state.snapshot['pid']
+            def validate_preserved(current, current_ui):
+                selected = self.retirement_selection_state((current, current_ui))
+                if (current.snapshot['pid'] != owner_pid
+                        or (selected.capacity_used, selected.capacity_total, selected.selected_count)
+                        != (before.capacity_used, before.capacity_total, selected_count)):
+                    raise SemanticGateClosed('protected retirement batch changed before ship submission')
         actions.append(
             self._click_retirement_button(
                 "retirement/ships/confirm",
                 "DestoryInfoUI(Clone)/frame/confirm_button",
                 identity_text_suffix=("DestoryInfoUI(Clone)/frame/confirm_button/pic"),
                 identity_text="确 定",
+                **({'validate_records': validate_preserved} if validate_preserved is not None else {}),
             )
         )
 
-        return self._finish_retirement_transaction(before, selected_count, settings, actions, timeout_seconds,
-                                                   preserve_equipment=preserve_equipment)
+        receipt = self._finish_retirement_transaction(before, selected_count, settings, actions, timeout_seconds,
+                                                       preserve_equipment=preserve_equipment)
+        return replace(receipt, common_cv_preservation=cv_preservation) if cv_preservation else receipt
 
     def _finish_retirement_transaction(self, before, selected_count, settings, actions, timeout_seconds,
                                        *, preserve_equipment=True):

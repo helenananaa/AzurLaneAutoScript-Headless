@@ -87,6 +87,7 @@ def test_real_uncertainty_remains_closed_even_with_another_bar_missing(case):
 def test_orphan_result_accepts_exact_exercise_return_and_preserves_task_isolation(page, monkeypatch):
     oracle = Mock()
     for name in ('daily_battle_result_visible', 'campaign_battle_reward_visible',
+            'campaign_battle_fail_tip_visible',
             'operation_siren_page_visible', 'daily_page_visible',
             'meta_page_visible',
             'main_page_visible', 'event_campaign_page_visible', 'exercise_page_visible'):
@@ -114,5 +115,6 @@ def test_orphan_result_accepts_exact_exercise_return_and_preserves_task_isolatio
             session.recover_orphan_combat_result(timeout_seconds=.1)
     else:
         assert session.recover_orphan_combat_result() == ()
+    oracle.close_campaign_battle_fail_tip_if_present.assert_not_called()
     oracle.click_daily_battle_result.assert_not_called()
     oracle.click.assert_not_called()

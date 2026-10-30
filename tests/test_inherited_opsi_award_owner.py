@@ -71,7 +71,14 @@ def test_native_result_probe_reclassifies_map_in_existing_single_refresh(drift):
     assert len(refreshes) == 1 and not b.taps and not later.taps
 
 
-def test_original_ui_goto_handles_award_mount_between_page_and_click():
+@pytest.mark.parametrize('semantic_id, blockers, accepted', [
+    ('os/page/back', ('award-info',), True),
+    ('os/page/back', ('loading',), True),
+    ('os/page/back', ('loading', 'foreign-modal'), False),
+    ('os/page/back', ('foreign-modal',), False),
+    ('daily/precombat/back', ('loading',), False),
+])
+def test_original_ui_goto_handles_award_mount_between_page_and_click(semantic_id, blockers, accepted):
     path = Path(os.environ.get('ALAS_TEST_UI_SOURCE',
         str(patched_alas_root() / 'module/ui/ui.py')))
     if not path.exists():
@@ -92,7 +99,7 @@ def test_original_ui_goto_handles_award_mount_between_page_and_click():
     stage = {'covered': False, 'closed': False}
     def click(_):
         stage['covered'] = True
-        raise SemanticInputBlocked('os/page/back', 9465, ('award-info',))
+        raise SemanticInputBlocked(semantic_id, 9465, blockers)
     def additional(**_):
         assert stage['covered']
         stage['closed'] = True
@@ -104,8 +111,15 @@ def test_original_ui_goto_handles_award_mount_between_page_and_click():
         appear=lambda target, *args, **_: target == 'OS_CHECK' and not stage['covered'],
         ui_additional=additional, device=SimpleNamespace(semantic_adapter=SimpleNamespace(
             mail_reward_active=lambda: False), click=click, screenshot=lambda: None))
-    names['ui_goto'](runner, destination)
-    assert stage['closed']
+    if accepted:
+        names['ui_goto'](runner, destination)
+        assert stage['closed']
+    else:
+        with pytest.raises(SemanticInputBlocked) as rejected:
+            names['ui_goto'](runner, destination)
+        assert rejected.value.semantic_id == semantic_id
+        assert rejected.value.blockers == blockers
+        assert not stage['closed']
 
 
 @pytest.mark.parametrize('case', ['foreign-package', 'truncated', 'ambiguous-close', 'covered-close'])

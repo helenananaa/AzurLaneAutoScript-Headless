@@ -1,0 +1,160 @@
+{
+  "schema": "alas-headless.campaign-zero-grant-deferral/v1",
+  "at": "2026-10-27T14:30:08.931377+08:00",
+  "applied": true,
+  "scope": "Existing semantic zero entry grant classification only. Original map-resume exception and ordinary ScriptEnd remain. Original semantic_task_scope/ALAS failure interval owns delay and NextRun;no new scheduling or budget gate. Not a coalition prerequisite or inferred ordinary ALAS loop fix.",
+  "before": {
+    "failed": 2,
+    "passed": 4,
+    "log": {
+      "path": "artifacts/full-feature-live-20261025/campaign-zero-budget-deferral-before-r1.log",
+      "sha256": "c260fa663d08ba363ba48d8a78e6b82266f68096b25050d1e7e5e35b9e1dadbf"
+    }
+  },
+  "after": {
+    "related_passed": 52,
+    "related_log": {
+      "path": "artifacts/full-feature-live-20261025/campaign-zero-budget-deferral-after-r1.log",
+      "sha256": "d876de94bdcc62e4125568558b8c027abdd45843068c8fe39da2ef2bedef40b7"
+    },
+    "canonical_series_and_matrix_tests_passed": 18,
+    "series_log": {
+      "path": "artifacts/full-feature-live-20261025/campaign-budget-series-tests-247-r1.log",
+      "sha256": "fc92184ed800ad52cbcfd6ceef9980fa43c255421937b40ff682ea45ecdae136"
+    },
+    "counts_overlap_not_additive": true
+  },
+  "native_patch": {
+    "at": "2026-10-27T14:24:39.469222+08:00",
+    "owner_identity_exited": true,
+    "native_before_sha256": "7f3ec6b6b2a9f2cd259946a8764c42ac53209a8258022d47dc81de64e3ddff45",
+    "native_after_sha256": "7df445ca2e567989bf0ecb251e4b4de48d3db98088f2c0c67001a94c30b62b32",
+    "member": "integration/alas/series/1567-campaign-exhausted-entry-grant-defer.patch",
+    "member_sha256": "fe16c38c2fa481a2cfb1263613843d5f95fda9b004a992c82f4e0864350e3a7c",
+    "combined_sha256": "bee9db8c63e6f2a4cd271cca28cad57edd0158d878337295ebc3b35927935e53",
+    "members": 247,
+    "scope": "Classify only the existing exhausted entry-grant refusal through existing task-local defer/native failure interval. Keep original map resume and ordinary ScriptEnd. No new scheduling, budget gate or retries. No profile/config mutation; R14 stays historical immutable native246 milestone."
+  },
+  "patch_tree": {
+    "path": "artifacts/full-feature-live-20261025/campaign-budget-patchtree-247-r1/result.json",
+    "sha256": "e8db6bc97194d4e2595a65c8a45ba942325d5294b423e384fc574af36f5338a9"
+  },
+  "actual_research_configuration": {
+    "path": "artifacts/full-feature-live-20261025/campaign-budget-research-config-247-r1.json",
+    "sha256": "563d8ce03388579c3561b9207ad63971f0e3d11f03a223c11b4e6d876c7e1d4a"
+  },
+  "support_matrix_verification_log": {
+    "path": "artifacts/full-feature-live-20261025/campaign-budget-support-247-r1.log",
+    "sha256": "64029927c1299d95668c86fb586020e0f7dbc22c6a3b06e32d4e8f058069b1b2"
+  },
+  "failed_source": {
+    "raw": {
+      "path": "artifacts/full-feature-live-20261025/post-warehouse-native-watch-20261027-r1.json",
+      "sha256": "209f2ed4104468ea6a590606315757d17d2b86d4ee6d3ee1600742333927f7a3"
+    },
+    "process": {
+      "path": "artifacts/full-feature-live-20261025/post-warehouse-native-watch-20261027-r1-process.json",
+      "sha256": "c14103907292c729efa4a4130526853010985b963da80f9f8d8739486bbd6ca7"
+    },
+    "terminal": true,
+    "passed": false,
+    "exit_code": 1,
+    "forced_stop": false,
+    "cooperative_stop": {
+      "reason": "stop-file",
+      "requested_at": 1793082034.2398562
+    },
+    "calls_used": 13,
+    "eventsp_calls": 8,
+    "eventsp_sorties": 0,
+    "unknown_accepted_resource_input_replayed": false
+  },
+  "continuation": {
+    "metadata": "artifacts\\full-feature-live-20261025\\post-warehouse-native-watch-20261027-r2-process.json",
+    "child_pid": 38256,
+    "child_create_time": 1793082482.193811,
+    "guard_pid": 41788,
+    "guard_create_time": 1793082479.1036513,
+    "remaining_call_cap": 11,
+    "whole_case_cap": 24,
+    "started_at": "2026-10-27T14:28:01.742594+08:00",
+    "early_stop_at": "2026-10-27T16:59:11.265675+08:00",
+    "deadline": "2026-10-27T17:14:11.265675+08:00",
+    "remaining_grants": {
+      "mission.claim": 7,
+      "mail.mutation": 0,
+      "tactical.reward": 0,
+      "awaken.execute": 0,
+      "minigame.play": 0,
+      "meta.assist": 0,
+      "operation_siren.coordinate_checkout": 1,
+      "operation_siren.action_point_use": 2,
+      "operation_siren.daemon_move": 16,
+      "operation_siren.port_repair": 1,
+      "tactical.assign": 3,
+      "commission.reward": 11,
+      "commission.start": 8,
+      "daily.execute": 0,
+      "exercise.execute": 0,
+      "exercise.refresh": 0,
+      "research.reward": 4,
+      "research.start": 0,
+      "dorm.collect": 2,
+      "dorm.feed": 16,
+      "enhancement.execute": 0,
+      "guild.claim": 0,
+      "guild.dispatch": 0,
+      "guild.exchange": 0,
+      "build.submit": 0,
+      "retirement.execute": 0,
+      "shop.purchase": 0,
+      "storage.disassemble": 350,
+      "campaign.stage_entry": 0,
+      "campaign.fleet_mutation": 0,
+      "campaign.sortie": 0,
+      "campaign.grid_click": 0,
+      "campaign.viewport_swipe": 0
+    },
+    "configuration_changes_before_start": 0
+  },
+  "r14": {
+    "receipt": "integration/alas/current-batch-full-regression-warehouse-20261027/result.json",
+    "scope": "Historical coherent native246 milestone before this native247 fix. Current full not rerun;focused patch/config/support gates only."
+  },
+  "support_promotion": false,
+  "delivery": "LOCALONLY/noautomaticcommitpush",
+  "live_native_deferral": {
+    "at": "2026-10-27T14:36:05.708784+08:00",
+    "passed": true,
+    "scope": "Native EventSp zero stage-entry grant action-deferred and original failure interval scheduling,not successful sortie or normal campaign support promotion",
+    "task": "EventSp",
+    "elapsed_seconds": 11.812,
+    "return": null,
+    "error": {
+      "type": "AlasSemanticActionDeferred",
+      "message": "campaign.stage_entry: task action grant is exhausted"
+    },
+    "outcome": {
+      "task": "event_sp",
+      "outcome": "action-deferred"
+    },
+    "next_run": "2026-10-27 15:04:24",
+    "grants_unchanged": true,
+    "snapshot": "artifacts\\full-feature-live-20261025\\campaign-zero-grant-native-live-r1-frozen.json",
+    "snapshot_sha256": "9de97d2e318c95e08d5d9e836010eacd95d3933ffe34a8f33aafcc8af3ac2a36",
+    "following_original_task": "OpsiHazard1Leveling"
+  },
+  "r2_startup_failure_closeout": "artifacts/full-feature-live-20261025/post-warehouse-r2-startup-failure-closeout-r1.json",
+  "current_continuation": {
+    "pid": 24024,
+    "child_create_time": 1793082849.1220365,
+    "guard_pid": 17564,
+    "guard_create_time": 1793082846.1003716,
+    "started_at": "2026-10-27T14:34:08.700418+08:00",
+    "max_tasks": 11,
+    "prior_calls_used": 13,
+    "early_stop_at": "2026-10-27T16:59:11.265675+08:00",
+    "deadline": "2026-10-27T17:14:11.265675+08:00",
+    "stop_file": "E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless\\artifacts\\full-feature-live-20261025\\post-warehouse-native-watch-20261027-r3.stop"
+  }
+}

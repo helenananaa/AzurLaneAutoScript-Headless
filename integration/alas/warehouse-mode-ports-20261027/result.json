@@ -1,0 +1,68 @@
+{
+  "schema": "alas-headless.warehouse-mode-ports/v1",
+  "at": "2026-10-27T10:23:00.537022+08:00",
+  "local_only": true,
+  "support_promoted": false,
+  "current_full_regression": false,
+  "focused": {
+    "passed": 87,
+    "seconds": 6.94,
+    "log": "warehouse-mode-controls-after-r5.log",
+    "selector_before_failed": 1,
+    "harness_correction": "r3 after log had a misplaced assertion NameError; corrected test placement before current PASS. Original logs retained."
+  },
+  "partial_live": {
+    "r5": {
+      "raw": "warehouse-native-storage-entry-r5.json",
+      "passed": true,
+      "seconds": 6.628,
+      "original_native_subcall_returned": true,
+      "selected_count": 0,
+      "no_resource_grants_consumed": true
+    },
+    "r6": {
+      "raw": "warehouse-native-storage-filter-entry-r6.json",
+      "passed": false,
+      "seconds": 7.637,
+      "disassemble_mode_reached": true,
+      "filter_open_input_accepted": true,
+      "exact_failure": "storage equipment control identity is ambiguous",
+      "failure_generation": 942,
+      "inventory_selected_or_disassembled": false
+    }
+  },
+  "counter_limit": "native_input_count is retained-oracle only, not aggregate fresh-oracle/all-case inputs",
+  "case": {
+    "cap": 24,
+    "charged_calls": 9,
+    "remaining": 0,
+    "early_stop": "2026-10-27T10:31:31.598631+08:00",
+    "hard_deadline": "2026-10-27T10:46:31.598631+08:00",
+    "remaining_resources_unchanged": true,
+    "closed": true,
+    "unused_calls_sealed": 15
+  },
+  "current": {
+    "input_owner": null,
+    "game_pid": 10980,
+    "page": "CustomIndexUI equipment filter",
+    "observer_apk_sha256": "1507e8f28ac3a4accd93cad549db26b3fdaa3982edb3ae1453a2281eba480974"
+  },
+  "native_source_hashes": {
+    "module/ui/ui.py": "d2ce107bed0ddeb2306400683fec4e865f3c617b4a67eea092510fa8a5533f0d",
+    "module/os/map.py": "ea5db98859c1e6424ceb1d80d18ab5b03791fc9252dd826d9ef6b37b516007b7",
+    "module/retire/retirement.py": "f6e6833a6b9b13ee2039823f0d2c4f6c3636d307e6046405072497e030282bff",
+    "module/retire/scanner.py": "3555467a0a080e03a7be83a2107b2cfbbd365b2d6594472ebad5f8a8351fcfe4",
+    "module/ui/scroll.py": "7fb7805e8faded76e40351f9e67b58e811b95a3739f3eba66534b847639b64a9"
+  },
+  "native_5_files_unchanged": true,
+  "verifiers": {
+    "support_matrix": "PASS",
+    "actual_native_research_configuration": "PASS"
+  },
+  "whole_warehouse_recovery_verified": false,
+  "next": "Typed rarity state, original Setting boundaries, ItemGrid, selected amounts and final confirmation remain unqualified. Preserve original native flow.",
+  "full_baseline_note": "R13 8527PASS254SKIP predates Warehouse changes",
+  "closeout": "warehouse-post-r13-case-closeout-r1.json",
+  "final_resource_dock_verified": false
+}

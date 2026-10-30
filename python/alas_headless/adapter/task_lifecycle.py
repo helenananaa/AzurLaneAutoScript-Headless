@@ -2,6 +2,8 @@
 
 from contextlib import contextmanager
 from contextvars import ContextVar
+from collections.abc import Mapping
+from dataclasses import fields, is_dataclass
 import traceback
 
 from .errors import UnknownObservationError, UnsupportedPixelRead
@@ -38,6 +40,20 @@ class TaskCapabilityUnavailable(RuntimeError):
                   else 'game prerequisite pending' if isinstance(cause, SemanticStrongholdEntryLocked)
                   else 'semantic capability unavailable')
         super().__init__(f"{reason} for {task}: {cause}")
+
+
+def _input_failure_observation_value(value):
+    """Encode existing immutable evidence, without reading a runtime."""
+    if is_dataclass(value):
+        return {field.name: _input_failure_observation_value(getattr(value, field.name))
+                for field in fields(value)}
+    if isinstance(value, Mapping):
+        return {key: _input_failure_observation_value(child) for key, child in value.items()}
+    if isinstance(value, (tuple, list)):
+        return [_input_failure_observation_value(child) for child in value]
+    if value is None or isinstance(value, (str, bool, int, float)):
+        return value
+    raise TypeError('unsupported input-failure evidence type: ' + type(value).__name__)
 
 
 @contextmanager
@@ -169,6 +185,18 @@ def semantic_task_scope(session, task):
                                            generation=failure.generation)
             if isinstance(failure, SemanticInputBlocked):
                 session.last_task_error['blockers'] = list(failure.blockers)
+                observed = getattr(failure, 'observed_state', None)
+                if observed is not None:
+                    try:
+                        session.last_task_error['input_admission_observation'] = {
+                            'scope': 'exact existing state used for this input refusal; no additional read',
+                            'state': _input_failure_observation_value(observed)}
+                    except Exception as recording_error:
+                        # Diagnostics must not replace the original classified
+                        # refusal or trigger an input/retry to reconstruct it.
+                        session.last_task_error['input_admission_recording_error'] = {
+                            'type': type(recording_error).__name__,
+                            'message': str(recording_error)}
         if (isinstance(failure, SemanticNavigationPending)
                 and isinstance(failure.receipt, dict)):
             # Preserve the already collected source/destination/gesture facts;

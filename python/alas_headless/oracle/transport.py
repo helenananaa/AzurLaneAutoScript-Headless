@@ -135,7 +135,7 @@ class TcpObserverTransport:
 
     def _request_once(self, request_line: str) -> Mapping[str, Any]:
         number = r'[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?'
-        projection = re.fullmatch(r'GET /v1/(?:globe-projection|storage-scrollbar-input) (' + number + r') (' + number + r')\n', request_line)
+        projection = re.fullmatch(r'GET /v1/(?:globe-projection|(?:storage|retirement)-scrollbar-input) (' + number + r') (' + number + r')\n', request_line)
         projection_request = projection is not None and all(math.isfinite(float(v)) for v in projection.groups())
         drag = re.fullmatch(r'GET /v1/(?:os-map-drag|globe-map-drag) ' + ' '.join(['(' + number + ')'] * 4) + r'\n', request_line)
         drag_request = drag is not None and all(math.isfinite(float(v)) for v in drag.groups())
@@ -552,7 +552,15 @@ class AdbObserverBridge:
         ):
             # A still-listed or reassigned listener is a different failure.
             return False
-        if self._run(("shell", "pidof", self.package)) != str(self.pid):
+        reconnected = False
+        try:
+            current_pid = self._run(("shell", "pidof", self.package))
+        except ObserverTransportError as exc:
+            if not self._reconnect_proven_missing_tcp_device(exc):
+                raise
+            reconnected = True
+            current_pid = self._run(("shell", "pidof", self.package))
+        if current_pid != str(self.pid):
             raise ObserverTransportError("game PID changed while restoring observer forward")
         port_text = self._run((
             "forward", "tcp:0", "localabstract:alas.g3.{0}".format(self.pid),
@@ -568,7 +576,41 @@ class AdbObserverBridge:
             trace=self.trace,
         )
         if self.trace is not None:
+            if reconnected:
+                self.trace.emit("adb.tcp-device-reconnected", fields={
+                    "serial": self.serial, "pid": self.pid,
+                })
             self.trace.emit("adb.observer-forward-restored", fields={"pid": self.pid})
+        return True
+
+    def _reconnect_proven_missing_tcp_device(self, error: ObserverTransportError) -> bool:
+        """Reconnect only a missing configured TCP peer before a read retry."""
+        address = re.fullmatch(r"(?:[^\s:/]+|\[[0-9a-fA-F:]+\]):([0-9]+)", self.serial)
+        if address is None or not 1 <= int(address[1]) <= 65535:
+            return False
+        cause = error.__cause__
+        if not isinstance(cause, subprocess.CalledProcessError):
+            return False
+        stderr = cause.stderr or ""
+        if isinstance(stderr, bytes):
+            stderr = stderr.decode("utf-8", errors="replace")
+        if re.search(r"\bdevice\s+['\"]?" + re.escape(self.serial)
+                     + r"['\"]?\s+not found\b", stderr) is None:
+            return False
+        lines = self._run(("devices", "-l")).splitlines()
+        headers = [i for i, line in enumerate(lines)
+                   if line.strip() == "List of devices attached"]
+        if len(headers) != 1:
+            return False
+        if any(parts and parts[0] == self.serial
+               for parts in (line.split() for line in lines[headers[0] + 1:])):
+            # Offline/unauthorized/unknown states still identify a listed
+            # device. They do not authorize a network reconnection.
+            return False
+        self._run(("connect", self.serial))
+        # The caller must still prove the old exact game PID, restore only its
+        # missing forward, and validate the fresh observer response. No server
+        # restart, device discovery/rebinding or game input is repeated here.
         return True
 
     def foreground_component(self) -> str:

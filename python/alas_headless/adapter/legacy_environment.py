@@ -59,7 +59,9 @@ LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES = frozenset(
         "ALAS_SEMANTIC_REQUIRED_PRIMARY_ABI",
         "ALAS_SEMANTIC_RETIREMENT_BUDGET",
         "ALAS_SEMANTIC_SHOP_PURCHASE_BUDGET",
+        "ALAS_SEMANTIC_STORAGE_DISASSEMBLE_BUDGET",
         "ALAS_SEMANTIC_TACTICAL_ASSIGN_BUDGET",
+        "ALAS_SEMANTIC_TACTICAL_REWARD_BUDGET",
     }
 )
 
@@ -109,6 +111,10 @@ LEGACY_BUDGET_GRANTS: Mapping[str, tuple[str, str]] = MappingProxyType(
         "ALAS_SEMANTIC_TACTICAL_ASSIGN_BUDGET": (
             "tactical.assign",
             "tactical assign",
+        ),
+        "ALAS_SEMANTIC_TACTICAL_REWARD_BUDGET": (
+            "tactical.reward",
+            "tactical reward",
         ),
         "ALAS_SEMANTIC_COMMISSION_REWARD_BUDGET": (
             "commission.reward",
@@ -162,6 +168,8 @@ LEGACY_BUDGET_GRANTS: Mapping[str, tuple[str, str]] = MappingProxyType(
             "retirement",
         ),
         "ALAS_SEMANTIC_SHOP_PURCHASE_BUDGET": ("shop.purchase", "shop purchase"),
+        # Equipment units, not clicks or transactions: native ALAS selects whole stacks.
+        "ALAS_SEMANTIC_STORAGE_DISASSEMBLE_BUDGET": ("storage.disassemble", "storage equipment disassembly"),
         "ALAS_SEMANTIC_CAMPAIGN_STAGE_ENTRY_BUDGET": (
             "campaign.stage_entry",
             "campaign stage entry",

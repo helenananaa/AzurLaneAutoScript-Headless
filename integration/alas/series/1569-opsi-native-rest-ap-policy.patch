@@ -1,0 +1,19 @@
+diff --git a/module/os_handler/action_point.py b/module/os_handler/action_point.py
+--- a/module/os_handler/action_point.py
++++ b/module/os_handler/action_point.py
+@@ -381,6 +381,15 @@
+                     count * value
+                     for count, value in zip(current_state.item_counts, values)
+                 )
++
++            if check_rest_ap:
++                diff = get_server_next_update('00:00') - datetime.now()
++                today_rest = int(diff.total_seconds() // 600)
++                if state.current + today_rest >= 200:
++                    logger.info('The sum of the current action points and the rest action points'
++                                ' that can be obtained today exceeds 200, skip AP check')
++                    logger.info(f'Current={state.current}  Rest={today_rest}')
++                    keep_current_ap = False
+ 
+             if keep_current_ap and total_points(state) <= self.config.OS_ACTION_POINT_PRESERVE:
+                 logger.info(

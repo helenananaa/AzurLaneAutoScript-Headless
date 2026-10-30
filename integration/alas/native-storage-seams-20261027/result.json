@@ -1,0 +1,130 @@
+{
+  "schema": "alas-headless.native-storage-observation-ports/v1",
+  "at": "2026-10-27T12:15:29.927171+08:00",
+  "local_only": true,
+  "support_promoted": false,
+  "current_full_regression": false,
+  "native": {
+    "members": 246,
+    "member": "integration/alas/series/1566-storage-native-observation-ports.patch",
+    "member_sha256": "a88ace3270783034f2440e4fbc624c595e4dd36c0ae2c8339571bedcaac4303b",
+    "combined_sha256": "996e0cf000f7fe69a61cb385abc6d2cf5198cc75c98ed830abae39b989884964",
+    "runtime_application": "native-storage-seams-246-application-r1.json",
+    "files": {
+      "module/base/base.py": "203944744aa5f3a2e3f59e6ee3fa9febab5a241f08d50d6de9735014e03ce856",
+      "module/storage/storage.py": "a3b6be84f1a8c4aca0f92a1b681114e16a8b865411e66e72ddfd9c0d80a485dc"
+    },
+    "old245_backup": "native-storage-seams-245-before-r1",
+    "changes": "Only original wait observation/sample and native equipment ItemGrid boundary; original timers, screenshots, cumsum/choice and confirmation loops retained"
+  },
+  "sdk": {
+    "candidate": "StorageEquipmentCandidate amount protocol; no pixels and no selection authority",
+    "material_and_equipment_sample": true,
+    "no_wait_loop_added": true
+  },
+  "validation": {
+    "before": {
+      "failed": 7,
+      "passed": 2,
+      "log": "native-storage-seams-before-r1.log"
+    },
+    "related": {
+      "passed": 146,
+      "seconds": 21.05,
+      "log": "native-storage-seams-related-r1.log"
+    },
+    "latest_source_boundary": {
+      "passed": 77,
+      "seconds": 6.17,
+      "log": "native-storage-seams-after-r2.log",
+      "overlap": true
+    },
+    "patch_series": "native-storage-series-246-check-r1.json PASS",
+    "patch_tree": "native-storage-patchtree-246-r2/result.json PASS; original r1 import-path startup failure retained, no worktree created then",
+    "research_config": "native-storage-seams-246-research-config-r1.json PASS",
+    "support_matrix": "native-storage-seams-246-support-r1.json PASS; classifications unchanged"
+  },
+  "observer": {
+    "cpp_sha256": "01ebeb2f8f9b7e9262406528bb74c27864528dcb496afad98b596e71b0412ccc",
+    "apk_sha256": "94e51df4af4c9eef3e426ec83453a36fd33e1a9b31030c535072f1c9eef4bd89",
+    "build_seconds": 6.36,
+    "steps": 15,
+    "remote_actions": 0,
+    "static_analysis_idle": true,
+    "build_domain": "ALAS-Android-Build / alas-redroid-build / retained x64 warm only",
+    "redroid_uuid": "fd5ab68a-32b8-4fd7-987c-3b1c0575a12f",
+    "kvm_uuid": "7febc493-864e-4e35-a01c-3090515de95e",
+    "locks_inventory_sync_receipts_verified": true,
+    "full_aosp_qualified": false,
+    "deployment": "warehouse-native-observer-deployment-r5.json",
+    "deployment_passed": true,
+    "original_login_seconds": 44.011,
+    "cold_launch": "shared -force-gfx-st",
+    "game_pid": 13203
+  },
+  "live_unit": {
+    "raw": "warehouse-native-filter-unit-r1.json",
+    "passed": true,
+    "seconds": 20.581,
+    "scope": "Separate zero-resource original common filter, restore all, material/Main; no scheduler/research run or box/item selection",
+    "native_ui_calls": 6,
+    "filter_before_confirm": [
+      {
+        "request": "common",
+        "generation": 5246,
+        "selected": [
+          1
+        ]
+      },
+      {
+        "request": "all",
+        "generation": 5323,
+        "selected": [
+          0
+        ]
+      }
+    ],
+    "visible_items": 21,
+    "actionable_cell_exports": 21,
+    "selected_count": 0,
+    "resources_before": {
+      "oil": 7443,
+      "gold": 105685,
+      "gem": 3505
+    },
+    "resources_after": {
+      "oil": 7443,
+      "gold": 105685,
+      "gem": 3505
+    },
+    "resource_delta": {
+      "oil": 0,
+      "gold": 0,
+      "gem": 0
+    },
+    "all_grants_zero": true,
+    "profiles_unchanged": true,
+    "final": {
+      "pid": 13203,
+      "generation": 5436,
+      "ui_generation": 5436,
+      "main": true
+    }
+  },
+  "case": {
+    "old_post_r13_closed": true,
+    "old_charged_calls": 9,
+    "old_unused15_and_resource_balances_sealed": true,
+    "independent_unit_resource_budget": 0,
+    "independent_unit_max_ui_calls": 6,
+    "independent_unit_completed_calls": 6,
+    "no_input_owner": true
+  },
+  "limits": [
+    "Material stability sampler replay-tested; not a live material box transaction",
+    "No inventory slot click or final disassembly authority",
+    "No complete warehouse recovery/Research continuation or uninterrupted soak",
+    "Old failed raws and login-expired record unchanged; independent original LoginHandler recovery now succeeded",
+    "R13 8527PASS254SKIP is historical pre-Warehouse/native246 snapshot"
+  ]
+}

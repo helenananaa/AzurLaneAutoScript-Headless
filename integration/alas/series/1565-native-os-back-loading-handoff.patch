@@ -1,0 +1,40 @@
+diff --git a/module/ui/ui.py b/module/ui/ui.py
+--- a/module/ui/ui.py
++++ b/module/ui/ui.py
+@@ -321,11 +321,11 @@
+                         except SemanticInputBlocked as exc:
+                             if not (exc.blockers == ('bulletin',) or
+                                     (exc.semantic_id == 'os/page/back'
+-                                     and exc.blockers in (('opsi-exit',), ('award-info',),
++                                     and exc.blockers in (('loading',), ('opsi-exit',), ('award-info',),
+                                                           ('award-info1',), ('ship-exp',)))):
+                                 raise
+-                            # No navigation input was sent. A reviewed overlay
+-                            # may mount after the native screenshot. Refresh
++                            # No navigation input was sent. Loading or a
++                            # reviewed overlay can mount after the screenshot. Refresh
+                             # this loop; ui_additional owns its handling.
+                             logger.info(f'Navigation covered by {exc.blockers[0]}; refresh native UI loop')
+                             self.device.screenshot()
+diff --git a/module/os/map.py b/module/os/map.py
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -813,7 +813,17 @@
+                 in_main_timer.reset()
+                 continue
+ 
+-            if self.appear_then_click(GOTO_MAIN, offset=(20, 20), interval=3):
++            from alas_headless.oracle.errors import SemanticInputBlocked
++            try:
++                go_main = self.appear_then_click(GOTO_MAIN, offset=(20, 20), interval=3)
++            except SemanticInputBlocked as exc:
++                if (semantic_session is None or exc.semantic_id != 'os/page/back'
++                        or exc.blockers != ('loading',)):
++                    raise
++                # No Back was submitted. Loading can mount between screenshot
++                # and input; this original interrupt loop owns the next frame.
++                continue
++            if go_main:
+                 in_main_timer.reset()
+                 continue
+             if self.ui_additional():

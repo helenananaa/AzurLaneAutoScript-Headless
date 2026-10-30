@@ -1,0 +1,36 @@
+{
+  "schema": "alas-headless.strategic-owner-full-regression/v1",
+  "at": "2026-10-26T21:04:21.365719+08:00",
+  "passed": true,
+  "offline_only": true,
+  "exit_code": 0,
+  "tests": {
+    "passed": 8481,
+    "skipped": 254,
+    "warnings": 138
+  },
+  "pytest_elapsed_seconds": 975.11,
+  "reported_execution_and_end_verification_seconds": 1050.485,
+  "timing_scope": "Pytest timing from its summary; reported wrapper window begins after initial source-snapshot preparation and includes end verification. Not full process-start latency or a product performance comparison.",
+  "repository_snapshot_files": 2954,
+  "native_snapshot_files": 5,
+  "all_snapshots_unchanged_at_end": true,
+  "integration_members": 245,
+  "combined_sha256": "6136d92e2067a2ef33f11cc7021084ee0b8ff3079b93027f365259412b306d9e",
+  "fix": "integration/alas/strategic-search-combat-owner-20261026/result.json",
+  "scope": "One coherent full Python milestone after3SDKfile accepted strategic ownership repair, including8new ownership/native-result cases. No source changes during the full run. Exact live natural interruption repeat remains pending.",
+  "host_exit_cleanup_permission_error_retained": true,
+  "host_global_temp_or_permissions_changed": false,
+  "raw": {
+    "path": "artifacts/full-feature-live-20261025/full-regression-strategic-owner-r12.json",
+    "sha256": "e94237b6f5b4c1cbbf77e99bf2505b44e041b93aec11c0044e59ef82d4c23fe9"
+  },
+  "log": {
+    "path": "artifacts/full-feature-live-20261025/full-regression-strategic-owner-r12.log",
+    "sha256": "480620cdbda17e957098a5d8df27bc603af793cb6de10546eca26f8766aed068"
+  },
+  "historical_failed_cases_unchanged": true,
+  "old_level_warning_candidate": "Private only, not part of production/fullR12.",
+  "support_promotion": false,
+  "delivery": "LOCALONLY/noautomaticcommitpush"
+}

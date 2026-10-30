@@ -57,6 +57,7 @@ from ...semantic_oracle import (
     ResearchDetailState,
     ResearchProjectState,
     ResearchQueueState,
+    OldRetirementExecutionReceipt,
     RetirementExecutionReceipt,
     RetirementNoCandidateReceipt,
     SemanticGateClosed,
@@ -337,7 +338,7 @@ class SessionTasksPorts:
 
     def retirement_receipt(
         self,
-    ) -> Optional[Union[RetirementExecutionReceipt, RetirementNoCandidateReceipt]]:
+    ) -> Optional[Union[RetirementExecutionReceipt, RetirementNoCandidateReceipt, OldRetirementExecutionReceipt]]:
         return self.open().retirement_receipt()
 
     def purchase_shop_item_once(
@@ -1059,20 +1060,140 @@ class SessionTasksPorts:
         self.open().research_detail_stable()
 
     def storage_material_scroll_state(self):
+        # Keep the original ALAS Scroll call site and name. StorageUI also
+        # uses this resource for its equipment list.
         adapter = self.open()
         adapter._package_gate()
         oracle = adapter._frame_or_live_observation_oracle()
-        if not oracle.storage_material_visible():
-            state = oracle.read_state()
-            blockers = tuple(rule.blocker_id for rule in oracle._blocking_rules(state, 'storage/page/back'))
-            raise SemanticGateClosed('storage material page is absent; generation={}; blockers={}; active_overlays={}'.format(
-                state.generation, blockers, tuple(b.path for b in state.buttons
-                    if b.active_in_hierarchy and any(owner in b.path for owner in
-                        ('/ItemInfoUI(Clone)/', '/ResolveEquipmentUI(Clone)/', '/UIOverlay/')))))
-        return oracle.storage_scrollbar_state()
+        return oracle.storage_native_scrollbar_state()
 
     def storage_material_item(self, slot):
         return self.open()._frame_or_live_observation_oracle().storage_material_item(slot)
+
+    def storage_equipment_inventory(self):
+        return self.open()._frame_or_live_observation_oracle().storage_equipment_inventory()
+
+    def storage_equipment_selected_count(self):
+        return self.open()._frame_or_live_observation_oracle().storage_equipment_selected_count()
+
+    def storage_equipment_selection_result(self):
+        """Observe the pending input on the original caller's screenshot boundary.
+
+        No screenshot, wait, or retry is introduced here. A following input
+        must first prove this cell's marker and the full stack count delta.
+        """
+        receipt = getattr(self, '_storage_equipment_selection_pending', None)
+        if receipt is None:
+            raise SemanticGateClosed('equipment selection has no submitted input')
+        return self.open()._frame_or_live_observation_oracle().storage_equipment_selection_postcondition(receipt)
+
+    def _storage_equipment_record_selection(self, oracle):
+        pending = getattr(self, '_storage_equipment_selection_pending', None)
+        if pending is not None:
+            if not oracle.storage_equipment_selection_postcondition(pending):
+                raise SemanticGateClosed('equipment selection already submitted; no input replay')
+            proven = list(getattr(self, '_storage_equipment_selections_proven', ()))
+            if pending not in proven:
+                proven.append(pending)
+            self._storage_equipment_selections_proven = tuple(proven)
+        return getattr(self, '_storage_equipment_selections_proven', ())
+
+    def _storage_equipment_owned_summary(self, oracle):
+        opened = getattr(self, '_storage_equipment_summary_open_receipt', None)
+        if opened is None:
+            return None
+        summary = oracle.storage_equipment_summary()
+        if summary is not None and summary.generation <= opened.generation:
+            raise SemanticGateClosed('equipment summary is older than its entry input')
+        return summary
+
+    def _storage_equipment_observe_cancellation(self, oracle):
+        if getattr(self, '_storage_equipment_destroy_pending', None) is not None:
+            return False  # Cancellation cannot erase an unknown destructive input.
+        cancelled = (getattr(self, '_storage_equipment_cancel_receipt', None)
+                     or getattr(self, '_storage_equipment_summary_cancel_receipt', None))
+        if cancelled is None:
+            return False
+        if oracle.storage_equipment_summary() is not None:
+            return False
+        mode = oracle.storage_equipment_mode()
+        if mode is None or mode[0].generation <= cancelled.generation:
+            return False
+        if mode[1] != 'equipment' and not (
+                mode[1] == 'selection' and oracle.storage_equipment_selected_count() == 0):
+            return False
+        self._storage_equipment_last_cancelled = dict(
+            action=cancelled, generation=mode[0].generation,
+            selections=getattr(self, '_storage_equipment_selections_proven', ()),
+            pending=getattr(self, '_storage_equipment_selection_pending', None))
+        self._storage_equipment_selection_pending = None
+        self._storage_equipment_selections_proven = ()
+        self._storage_equipment_summary_open_receipt = None
+        self._storage_equipment_summary_cancel_receipt = None
+        self._storage_equipment_cancel_receipt = None
+        self._storage_equipment_destroy_intent = None
+        return True
+
+    def _storage_equipment_observe_destruction(self, oracle):
+        request = getattr(self, '_storage_equipment_destroy_pending', None)
+        if request is None:
+            return False
+        def observed(value):
+            self._storage_equipment_destroy_last_observation = value
+        result = oracle.storage_equipment_destroy_postcondition(request, observe=observed)
+        if result is None:
+            return False
+        self._storage_equipment_destroy_receipts = (
+            *getattr(self, '_storage_equipment_destroy_receipts', ()), result)
+        self._storage_equipment_selection_pending = None
+        self._storage_equipment_selections_proven = ()
+        self._storage_equipment_summary_open_receipt = None
+        self._storage_equipment_summary_cancel_receipt = None
+        self._storage_equipment_cancel_receipt = None
+        self._storage_equipment_destroy_intent = None
+        self._storage_equipment_destroy_pending = None
+        if result.reward_overlay:
+            self._storage_equipment_award_request = request
+        return True
+
+    def _storage_equipment_observe_reward_close(self, oracle):
+        request = getattr(self, '_storage_equipment_award_request', None)
+        if request is None or oracle.storage_equipment_disassembly_award(request) is not None:
+            return False
+        state, ui = oracle._storage_equipment_records()
+        closed = getattr(self, '_storage_equipment_award_close_receipt', None)
+        if (state.snapshot['pid'] != request.intent.pid
+                or state.generation <= (closed.generation if closed else request.action.generation)
+                or oracle._storage_equipment_capacity(ui) != (request.intent.capacity_used-request.intent.quantity, request.intent.capacity_total)
+                or oracle._storage_equipment_count(ui) != 0):
+            raise SemanticGateClosed('equipment reward departure result is unproven')
+        self._storage_equipment_last_award_closed = closed
+        self._storage_equipment_award_request = None
+        self._storage_equipment_award_close_receipt = None
+        return True
+
+    def storage_equipment_disassembly_receipts(self):
+        return getattr(self, '_storage_equipment_destroy_receipts', ())
+
+    def storage_equipment_disassembly_pending(self):
+        return getattr(self, '_storage_equipment_destroy_pending', None)
+
+    def storage_equipment_stability_sample(self):
+        return self.open()._frame_or_live_observation_oracle().storage_equipment_stability_sample()
+
+    def storage_stability_sample(self):
+        return self.open()._frame_or_live_observation_oracle().storage_stability_sample()
+
+    def storage_equipment_items(self):
+        from .contracts import StorageEquipmentCandidate
+        observed = self.storage_equipment_inventory()
+        pending_filter = getattr(self, '_storage_equipment_filter_pending', None)
+        if (pending_filter is not None and observed.selected_count == 0
+                and observed.generation > pending_filter['action'].generation
+                and all(item.pid == pending_filter['pid'] for item in observed.items)):
+            self._storage_equipment_filter_applied = pending_filter
+            self._storage_equipment_filter_pending = None
+        return tuple(StorageEquipmentCandidate(item) for item in observed.items)
 
     def storage_box_candidate(self, rarity):
         """Replace only native ALAS' box-template observation boundary."""
@@ -1145,12 +1266,17 @@ class SessionTasksPorts:
     def storage_material_scroll_drag_toward(self, position):
         # Pointer-down routing is an asynchronous native observation. The live
         # oracle owns its fresh query and single drag; ALAS owns retries/target.
-        self.refresh_frame()
+        # Each query/progress poll needs a new coherent immutable frame, not
+        # a split live state/UI pair. Reuse the existing frame acquisition and
+        # preserve the final live routing, foreground and progress checks.
+        def observe():
+            self.refresh_frame()
+            return self.open()._require_frame_observation_oracle()
+
         adapter = self.open()
         adapter._package_gate()
-        if not adapter._require_frame_observation_oracle().storage_material_visible():
-            raise SemanticGateClosed('storage material page is absent before drag')
-        return adapter._live_oracle.drag_storage_material_scroll_toward(position)
+        return adapter._live_oracle.drag_storage_native_scroll_toward(
+            position, observation_oracle=observe)
 
     def research_page_stable(self) -> None:
         self.open().research_page_stable()

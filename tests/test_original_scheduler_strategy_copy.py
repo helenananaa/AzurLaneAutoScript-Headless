@@ -49,6 +49,24 @@ def test_operator_stop_file_requests_native_stop_and_preserves_request(tmp_path)
     assert not watcher.is_alive()
 
 
+@pytest.mark.parametrize('requested', [False, True])
+def test_native_loop_normal_return_reports_actual_stop_request(requested):
+    import threading
+    from types import SimpleNamespace
+    from unittest.mock import Mock
+    stop = threading.Event()
+    if requested:
+        stop.set()
+    app = SimpleNamespace(stop_event=stop, loop=Mock(return_value=None))
+    assert module.run_native_loop(app) is requested
+    app.loop.assert_called_once_with()
+
+
+def test_native_loop_return_without_optional_stop_event_is_not_stop_evidence():
+    from types import SimpleNamespace
+    assert module.run_native_loop(SimpleNamespace(loop=lambda: None)) is False
+
+
 def test_stop_file_watcher_finishes_without_requesting_stop(tmp_path):
     import threading
     stop, finished = threading.Event(), threading.Event()

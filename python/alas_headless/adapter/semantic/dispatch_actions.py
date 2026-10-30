@@ -118,6 +118,11 @@ class DispatchActionsPorts:
             raise
 
     def _click_priority(self, name):
+        if name in ('GOTO_MAIN', 'GOTO_MAIN_WHITE', 'RPG_HOME'):
+            oracle = self._frame_or_live_observation_oracle()
+            if getattr(oracle, 'gems_farming_formation_visible', lambda: False)():
+                self._package_gate()
+                return self._fresh_input_oracle().click_gems_farming_formation_back()
         if (name in ('POPUP_CONFIRM', 'POPUP_CANCEL')
                 and (self._commission_context is None
                      or self._commission_context.flow_kind != 'tactical')):
@@ -157,6 +162,17 @@ class DispatchActionsPorts:
                 self._frame_or_live_observation_oracle(), 'operation_siren_order_panel_visible', lambda: False)():
             return self._fresh_input_oracle().click_operation_siren_order_back()
         if getattr(self, '_storage_box_use_receipt', None) is not None:
+            if (name == 'MATERIAL_ENTER' and
+                    self._frame_or_live_observation_oracle().storage_equipment_full_prompt() is not None):
+                proof = self._storage_box_use_receipt
+                if getattr(proof, 'semantic_id', None) != 'storage/box/amount/confirm':
+                    raise SemanticGateClosed('equipment-full close has no owned box confirmation')
+                receipt = self._fresh_input_oracle().click_storage_equipment_full_close(
+                    confirmation_generation=proof.generation)
+                # Input invalidates its immutable frame. The independent
+                # live postcondition must never read that expired lease.
+                self.oracle.verify_storage_equipment_full_closed(receipt)
+                return receipt
             if name == 'MATERIAL_ENTER' and self._frame_or_live_observation_oracle().enabled('reward/award-info/close'):
                 return self._fresh_input_oracle().click('reward/award-info/close')
             if name == 'EQUIP_CONFIRM':
@@ -199,6 +215,19 @@ class DispatchActionsPorts:
         if name == 'MATERIAL_ENTER' and getattr(self._frame_or_live_observation_oracle(), 'storage_page_visible', lambda: False)():
             self._package_gate()
             return self._fresh_input_oracle().click_storage_material_tab()
+        if name == 'EQUIPMENT_ENTER' and self._frame_or_live_observation_oracle().storage_page_visible():
+            self._package_gate()
+            return self._fresh_input_oracle().click_storage_equipment_tab()
+        if name.startswith('FILTER_RARITY_'):
+            self._package_gate()
+            parts = name.split('_')
+            if len(parts) != 4 or parts[-1] != '0' or parts[-2] not in ('0','1','2','3','4','5'):
+                raise SemanticGateClosed('equipment rarity alias is not reviewed')
+            return self._fresh_input_oracle().click_storage_equipment_filter_option(int(parts[-2]))
+        if name in ('DISASSEMBLE','DISASSEMBLE_CANCEL','EQUIPMENT_FILTER',
+                    'EQUIPMENT_FILTER_CONFIRM','EQUIPMENT_FILTER_CANCEL'):
+            self._package_gate()
+            return self._fresh_input_oracle().click_storage_equipment_control(name)
         if (name in ('POPUP_CONFIRM_WHITE', 'POPUP_CONFIRM_WHITE_UI_ADDITIONAL')
                 and getattr(self.oracle, 'campaign_timeout_prompt_visible', lambda: False)()):
             self._package_gate()
@@ -366,9 +395,14 @@ class DispatchActionsPorts:
             setattr(self, receipt_field, receipt)
             # Input invalidates its leased frame. Observe the postcondition
             # from fresh live state, never borrow the submitted input frame.
-            oracle = self.oracle
             deadline = time.monotonic() + 12.0
             while time.monotonic() < deadline:
+                if (self._input_frame_refresher is not None
+                        and self._frame_observation_oracle is not None):
+                    self._input_frame_refresher()
+                    oracle = self._require_frame_observation_oracle()
+                else:
+                    oracle = self.oracle
                 post = oracle.read_state()
                 if post.generation > receipt.generation:
                     if confirm:
@@ -525,7 +559,11 @@ class DispatchActionsPorts:
             receipt = self.oracle.click_operation_siren_reset_ticket()
             self.begin_operation_siren_page_remount(20.0)
             return receipt
-        if name == "POPUP_CONFIRM" and self.oracle.observation_surface_present(ObservationSurface.RESET_SHOP):
+        if (name == "POPUP_CONFIRM"
+                and self._frame_or_live_observation_oracle().observation_surface_present(ObservationSurface.RESET_SHOP)):
+            # This only classifies a shared popup; its chosen input below
+            # still validates the actual current message and button label.
+            # A split live pair here must not interrupt another popup owner.
             self._package_gate()
             receipt = self.oracle.click_operation_siren_reset_shop()
             self.begin_operation_siren_page_remount(20.0)
@@ -893,6 +931,15 @@ class DispatchActionsPorts:
                 self._inherited_home_return_until = time.monotonic() + 12.0
                 return receipt
             if target is None:
+                if ((self._commission_context is None
+                     or self._commission_context.flow_kind != 'tactical')
+                        and self.oracle.observation_target_present('tactical/page/back')
+                        and self._fresh_input_oracle().tactical_continue_prompt_text() is not None):
+                    # A completed lesson can queue its modal after native page
+                    # classification. Submit no stale Home edge or new receipt;
+                    # the next native screenshot and existing InfoHandler own
+                    # its reviewed cancellation before navigation continues.
+                    return None
                 previous = self._inherited_home_return_receipt
                 if (previous is not None and previous.semantic_id == 'meta/character/back'
                         and time.monotonic() <= self._inherited_home_return_until):
@@ -1032,8 +1079,8 @@ class DispatchActionsPorts:
             source_oracle = (self._fresh_input_oracle()
                              if target == 'campaign-menu/page/back' else self.oracle)
             # Keep chapter identity and the admitted Back target in the same
-            # prepared input frame. Destination checks below stay live after
-            # that input invalidates its source lease.
+            # prepared input frame. Native page navigation checks arrival on
+            # its next screenshot after this input invalidates the lease.
             if target == 'campaign-menu/page/back':
                 handoff = self._operation_siren_exit_handoff
                 if (handoff is not None and handoff[0].semantic_id == 'os/exit/confirm'
@@ -1053,18 +1100,6 @@ class DispatchActionsPorts:
                         # Back's raycast is still mounting. No input is allowed;
                         # native ui_goto owns the next screenshot and retry.
                         return None
-            from_chapter = (
-                target == 'campaign-menu/page/back'
-                and source_oracle.campaign_page_is_normal()
-            )
-            from_event = (
-                target == 'campaign-menu/page/back'
-                and source_oracle.event_campaign_page_visible()
-            )
-            from_archives = (
-                target == 'campaign-menu/page/back'
-                and source_oracle.war_archives_campaign_page_visible()
-            )
             receipt = self._record_mission_transition(source_oracle.click(target))
             if target == 'academy/page/back':
                 # Return one reviewed page edge; the original ALAS page graph
@@ -1078,34 +1113,9 @@ class DispatchActionsPorts:
                 self._build_return_transition_until = time.monotonic() + 12.0
             if target == 'commission/page/back':
                 self._commission_return_transition_until = time.monotonic() + 12.0
-            if target == 'campaign-menu/page/back':
-                deadline = time.monotonic() + 12.0
-                while time.monotonic() < deadline:
-                    if self.oracle.read_state().generation > receipt.generation:
-                        if (from_archives
-                                and not self.oracle.war_archives_campaign_page_visible()
-                                and not self.oracle.event_campaign_page_visible()
-                                and self.oracle.campaign_page_is_normal()):
-                            # Native archive Back restores the retained main
-                            # chapter; ALAS owns the next navigation edge.
-                            return receipt
-                        if (from_event
-                                and not self.oracle.event_campaign_page_visible()
-                                and self.oracle.campaign_page_is_normal()):
-                            # The event selector can return to its retained
-                            # normal chapter before the campaign entrance.
-                            # ALAS' page graph owns the next back edge.
-                            return receipt
-                        if from_chapter:
-                            if (self.oracle.campaign_menu_is_entry()
-                                    and not self.oracle.campaign_page_is_normal()):
-                                return receipt
-                        elif (self.oracle.main_page_visible()
-                              and not self.oracle.observation_target_present(target)):
-                            return receipt
-                    time.sleep(0.2)
-                raise SemanticGateClosed(
-                    'Campaign back did not reach its exact next page')
+            # The receipt acknowledges this one reviewed page edge. Native
+            # ui_goto owns its next screenshot, retry interval and exact
+            # destination check, as for the shared Exercise Back port.
             context = self._battle_pass_context
             if context is not None:
                 context.home_receipt = receipt
@@ -1135,7 +1145,8 @@ class DispatchActionsPorts:
                 if name == "POPUP_CONFIRM":
                     context.start_confirm_receipt = receipt
                 return receipt
-            prompt_kind = self.oracle.observation_prompt_kind()
+            prompt_reader = self._frame_or_live_observation_oracle()
+            prompt_kind = prompt_reader.observation_prompt_kind()
             prior_entry = self._operation_siren_abyssal_entry_receipt
             if (name == "POPUP_CONFIRM" and prompt_kind is None
                     and prior_entry is not None
@@ -1172,7 +1183,7 @@ class DispatchActionsPorts:
                     self._operation_siren_exit_receipt = None
                     return prior_exit
             if (prompt_kind == "opsi-exit"
-                    and self.oracle.operation_siren_exit_prompt_visible()):
+                    and prompt_reader.operation_siren_exit_prompt_visible()):
                 receipt = self._fresh_input_oracle().click_operation_siren_exit(
                     confirm=name == "POPUP_CONFIRM"
                 )
@@ -1574,6 +1585,11 @@ class DispatchActionsPorts:
                 except SemanticGateClosed as exc:
                     entry_unavailable = (
                         str(exc) == "main build entry identity is not proven"
+                        # During the same accepted transition the source button
+                        # can outlive its coin text. This permits only the
+                        # existing destination wait/receipt reuse, never a tap
+                        # or an unproved construction spend.
+                        or str(exc) == "main coin counter is absent or malformed"
                         or (isinstance(exc, SemanticTargetMissing)
                             and str(exc) == "semantic target is absent: main/build"))
                     if (not entry_unavailable

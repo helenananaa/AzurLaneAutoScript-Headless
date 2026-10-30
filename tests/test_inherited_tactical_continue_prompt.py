@@ -21,7 +21,7 @@ def test_orphan_prompt_precedes_unrelated_page_probes_and_cancels_through_native
     backend, oracle, adapter = prompt_host(flow)
     assert oracle.tactical_continue_prompt_text() is not None
     cancel = oracle._unique(oracle.read_state(), 'tactical/continue/cancel')
-    for name in ('GOTO_MAIN_WHITE', 'GUILD_CHECK', 'EXERCISE_CHECK'):
+    for name in ('GOTO_MAIN_WHITE', 'GUILD_CHECK', 'EXERCISE_CHECK', 'CAMPAIGN_WITHDRAW_CONFIRM'):
         assert adapter.appear(name) is False
     assert adapter.appear('POPUP_CANCEL') is True
     assert adapter.appear('POPUP_CONFIRM') is True

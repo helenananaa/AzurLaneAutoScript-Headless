@@ -1,0 +1,24 @@
+{
+  "schema": "alas-headless.network-alias-isolation-fix/v1",
+  "at": "2026-10-27T07:58:48.495611+08:00",
+  "applied": true,
+  "path": "python/alas_headless/oracle/targets.py",
+  "before_sha256": "092b975ce4983c7f3a42805bb0cad1c9752e3ec7d400feef712aa6a823977973",
+  "after_sha256": "43c44ab634608f47917db28b80f27bda6c2393a277821faeff18c4342b977311",
+  "repair": "Classify exact network prompt identity before candidate multiplicity for passive enabled(). Unrelated multi-choice Msgbox is absent from network alias, while actual network ambiguity and all input checks remain closed. Existing identity check moved, not duplicated; no native state-machine change.",
+  "before_new11": "2FAIL9PASS5.94s",
+  "after_related": "152PASS7.97s",
+  "live_read": {
+    "passed": true,
+    "fixture": "artifacts/full-feature-live-20261025/research-network-alias-live-read-r1.json",
+    "game_inputs": 0,
+    "pid": 1650
+  },
+  "warehouse_full_original_branch_verified": false,
+  "warehouse_full_boundary": "Exact native EQUIPMENT_FULL branch exists. Actual popup close btnBack raycast_top=None, general full-warehouse disassembly typed ports not yet qualified; do not guess close point/expand/organize or claim workflow fixed.",
+  "full_current_source": false,
+  "previous_full": "integration/alas/current-batch-full-regression-20261027/result.json",
+  "native_observer_changed": false,
+  "support_promotion": false,
+  "delivery": "LOCALONLY"
+}

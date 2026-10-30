@@ -78,6 +78,48 @@ class SessionDispatchPorts:
                 # boundary before the page sweep instead of polling live state
                 # separately for every candidate. Valid frames remain frozen.
                 self.refresh_frame()
+        if (getattr(self, '_storage_equipment_destroy_pending', None) is not None
+                and name in ('DISASSEMBLE_CANCEL', 'DISASSEMBLE_CONFIRM', 'DISASSEMBLE_POPUP_CONFIRM')):
+            settled = self._storage_equipment_observe_destruction(adapter._frame_or_live_observation_oracle())
+            if not settled and name == 'DISASSEMBLE_CANCEL':
+                return False
+        if (getattr(self, '_storage_equipment_award_request', None) is not None
+                and name in ('DISASSEMBLE_CANCEL', 'DISASSEMBLE_CONFIRM', 'DISASSEMBLE_POPUP_CONFIRM',
+                             'POPUP_CANCEL', 'POPUP_CONFIRM', 'POPUP_CONFIRM_WHITE', 'POPUP_CANCEL_WHITE')):
+            oracle = adapter._frame_or_live_observation_oracle()
+            if not self._storage_equipment_observe_reward_close(oracle):
+                return False  # Exact accepted reward belongs to the original GET_ITEMS handler.
+        if (getattr(self, '_storage_equipment_cancel_receipt', None) is not None
+                or getattr(self, '_storage_equipment_summary_cancel_receipt', None) is not None):
+            self._storage_equipment_observe_cancellation(adapter._frame_or_live_observation_oracle())
+        equipment_owned = (getattr(self, '_storage_equipment_selection_pending', None) is not None
+                           or bool(getattr(self, '_storage_equipment_selections_proven', ())))
+        if equipment_owned and name in ('DISASSEMBLE_CONFIRM', 'DISASSEMBLE_POPUP_CONFIRM',
+                                       'POPUP_CONFIRM', 'POPUP_CANCEL', 'POPUP_CANCEL_WHITE',
+                                       'DISASSEMBLE', 'DISASSEMBLE_CANCEL', 'STORAGE_CHECK', 'MATERIAL_CHECK'):
+            oracle = adapter._frame_or_live_observation_oracle()
+            opened = getattr(self, '_storage_equipment_summary_open_receipt', None)
+            if opened is not None:
+                summary = self._storage_equipment_owned_summary(oracle)
+                if summary is not None:
+                    return name in ('DISASSEMBLE_POPUP_CONFIRM', 'POPUP_CONFIRM', 'POPUP_CANCEL')
+                blockers = oracle._blocking_rules(oracle.read_state(), 'storage/equipment/summary/wait')
+                if any(rule.blocker_id != 'loading' for rule in blockers):
+                    raise SemanticGateClosed('equipment summary transition has a blocking overlay')
+                if not blockers:
+                    mode = oracle.storage_equipment_mode()
+                    if mode is None or mode[1] not in ('selection', 'equipment'):
+                        raise SemanticGateClosed('equipment summary transition reached an unsupported surface')
+                    if name in ('DISASSEMBLE', 'DISASSEMBLE_CANCEL', 'STORAGE_CHECK', 'MATERIAL_CHECK'):
+                        return adapter.appear(button)
+                return False  # The original screenshot loop owns this accepted entry's transition.
+            if name == 'DISASSEMBLE_CONFIRM':
+                selections = self._storage_equipment_record_selection(oracle)
+                return oracle.storage_equipment_summary_control(selections)[2].actionable
+        if (getattr(self, '_old_retirement_batch', None) is not None
+                and self._old_retirement_alias(button) is not None
+                and self.old_retirement_confirmation_pending()):
+            return self._old_retirement_appear(button)
         if name == 'COMBAT_LOW_EMOTION':
             return adapter._frame_or_live_observation_oracle().combat_low_emotion_prompt_visible()
         if name in ('GUILD_POPUP_CONFIRM', 'GUILD_POPUP_CANCEL'):
@@ -204,7 +246,8 @@ class SessionDispatchPorts:
                 adapter._meta_assist_active or adapter.meta_beacon_active()
                 or adapter.daily_execution_active()
                 or adapter.operation_siren_combat_committed()
-                or adapter.campaign_combat_committed()):
+                or adapter.campaign_combat_committed()
+                or getattr(observation_oracle, 'inherited_daily_automation_info_visible', lambda: False)()):
             return observation_oracle.combat_automation_info_visible()
         if name == 'IN_MAP' and adapter._campaign_context is not None:
             # A retained grid underneath precombat/information is not a map
@@ -365,6 +408,19 @@ class SessionDispatchPorts:
             # Combat preparation/status loops probe many optional pixel-only
             # popups. The exact live CombatUI root proves those are absent.
             return False
+        if (name == 'IN_MAP' and adapter._campaign_context is None
+                and not adapter._meta_beacon_active and not adapter._meta_assist_active
+                and adapter.operation_siren_combat_committed()
+                and observation_oracle.operation_siren_local_map_visible()
+                and not observation_oracle._blocking_rules(
+                    observation_oracle.read_state(), 'os/page/back')):
+            # Strategic ownership survives local search OFF/AP-popup cycles.
+            # The reviewed page edge excludes its own map layer while keeping
+            # AP panels, foreign modals and other blockers closed.
+            # The exact returned OS map belongs to the existing adapter page
+            # probe; an empty combat-resource union must not hide it forever.
+            # Keep the owner for the next battle and leave polling to ALAS.
+            return adapter.appear(button)
         if (
             name in ALAS_COMBAT_DEFENSIVE_RESOURCE_NAMES
             and self.adapter is not None
@@ -441,6 +497,17 @@ class SessionDispatchPorts:
             # sentinel remains the only positive probe.
             self.refresh_frame()
             oracle = self.open()._frame_or_live_observation_oracle()
+            if (name in ('GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3')
+                    and adapter.daily_execution_active()
+                    and oracle.daily_precombat_visible()
+                    and all(rule.blocker_id in ('daily-page', 'daily-precombat')
+                            for rule in oracle._blocking_rules(
+                                oracle.read_state(), 'ui/absence-probe'))):
+                # Normal Daily entry can finish mounting PreCombatUI during
+                # this existing refresh. Reclassify that immutable screenshot
+                # instead of rethrowing the preceding transition's error.
+                # This is a passive probe; no sortie or reward input is added.
+                return adapter.appear(button)
             if self.open()._reward_sidebar_ready(
                     self.open()._frame_or_live_observation_oracle()):
                 # Commission can finish returning to the Reward sidebar on
@@ -513,6 +580,10 @@ class SessionDispatchPorts:
             raise
 
     def match_template_color(self, button: Any) -> bool:
+        if (getattr(self, '_old_retirement_batch', None) is not None
+                and self._old_retirement_alias(button) is not None
+                and self.old_retirement_confirmation_pending()):
+            return self.appear(button)
         return self.open().match_template_color(button)
 
     def image_color_count(
@@ -525,7 +596,28 @@ class SessionDispatchPorts:
         return self.open().image_color_count(button, color, threshold, count)
 
     def click(self, button: Any, *, require_present: bool = False) -> Optional[Union[ActionReceipt, PrivateQuartersPhysicsReceipt]]:
-        from .contracts import StorageBoxCandidate
+        if (getattr(self, '_old_retirement_batch', None) is not None
+                and self._old_retirement_alias(button) is not None
+                and self.old_retirement_confirmation_pending()):
+            if require_present and not self.appear(button):
+                return None
+            return self._old_retirement_click(button)
+        from .contracts import StorageBoxCandidate, StorageEquipmentCandidate
+        if isinstance(button, StorageEquipmentCandidate):
+            adapter = self.open()
+            adapter._package_gate()
+            oracle = adapter._fresh_input_oracle()
+            pending = getattr(self, '_storage_equipment_selection_pending', None)
+            if pending is not None:
+                self._storage_equipment_record_selection(oracle)
+                self._storage_equipment_selection_pending = None
+            def submitted(receipt):
+                # Record before entering the backend: an exception does not
+                # prove the game rejected this reversible selection.
+                self._storage_equipment_selection_pending = receipt
+            receipt = oracle.click_storage_equipment_item(
+                button.item, before_input=submitted)
+            return receipt.action
         if isinstance(button, StorageBoxCandidate):
             receipt = self.inspect_storage_material_item(button.slot,
                 expected_label=button.display_label, expected_icon=button.icon_sprite)
@@ -545,6 +637,88 @@ class SessionDispatchPorts:
                 return self.open().click_campaign_submarine_grid(button)
             return self.open().click_campaign_combat_grid(button)
         name = AlasSemanticAdapter._button_name(button)
+        if (name in ('DISASSEMBLE_CONFIRM', 'GET_ITEMS_1', 'GET_ITEMS_2')
+                and getattr(self, '_storage_equipment_award_request', None) is not None):
+            adapter = self.open(); adapter._package_gate()
+            if getattr(self, '_storage_equipment_award_close_receipt', None) is not None:
+                raise SemanticGateClosed('equipment reward close already submitted; no input replay')
+            def submitted_award(action):
+                self._storage_equipment_award_close_receipt = action
+            return adapter._fresh_input_oracle().click_storage_equipment_disassembly_reward(
+                self._storage_equipment_award_request, before_input=submitted_award)
+        if name in ('EQUIPMENT_FILTER', 'EQUIPMENT_FILTER_CONFIRM'):
+            adapter = self.open(); adapter._package_gate()
+            oracle = adapter._fresh_input_oracle()
+            filtered = oracle.storage_equipment_filter() if name == 'EQUIPMENT_FILTER_CONFIRM' else None
+            def submitted_filter(receipt):
+                self._storage_equipment_filter_applied = None
+                self._storage_equipment_filter_pending = (dict(
+                    action=receipt, pid=filtered[0].snapshot['pid'],
+                    rarities=tuple(index for index, option in filtered[1].items()
+                                   if option[1].sprite in ('btn_index_yellow', 'btn_index_blue')))
+                    if filtered is not None else None)
+            return oracle.click_storage_equipment_control(name, before_input=submitted_filter)
+        pending = getattr(self, '_storage_equipment_selection_pending', None)
+        proven = getattr(self, '_storage_equipment_selections_proven', ())
+        if pending is not None or proven:
+            adapter = self.open()
+            if name == 'DISASSEMBLE_CONFIRM':
+                adapter._package_gate()
+                if getattr(self, '_storage_equipment_summary_open_receipt', None) is not None:
+                    raise SemanticGateClosed('equipment summary entry already submitted; no input replay')
+                oracle = adapter._fresh_input_oracle()
+                selections = self._storage_equipment_record_selection(oracle)
+                source_state, inventory, _ = oracle.storage_equipment_summary_control(selections)
+                used, total = oracle.storage_equipment_capacity()
+                filtered = getattr(self, '_storage_equipment_filter_applied', None)
+                def opened(receipt):
+                    from ...oracle.storage import StorageEquipmentDestroyIntent
+                    self._storage_equipment_summary_open_receipt = receipt
+                    self._storage_equipment_destroy_intent = StorageEquipmentDestroyIntent(
+                        source_state.snapshot['pid'], inventory.selected_count, used, total,
+                        tuple(item for item in inventory.items if item.selected),
+                        filtered['rarities'] if filtered is not None and filtered['pid'] == source_state.snapshot['pid'] else (),
+                        receipt)
+                return oracle.click_storage_equipment_summary(selections, before_input=opened)
+            if name in ('DISASSEMBLE_POPUP_CONFIRM', 'POPUP_CONFIRM_DISASSEMBLE', 'POPUP_CONFIRM_WHITE_DISASSEMBLE'):
+                adapter._package_gate()
+                if getattr(self, '_storage_equipment_destroy_pending', None) is not None:
+                    raise SemanticGateClosed('equipment destruction already submitted; no input replay')
+                intent = getattr(self, '_storage_equipment_destroy_intent', None)
+                if intent is None:
+                    raise AlasSemanticUnmapped('equipment destruction has no owned summary intent')
+                def destroy():
+                    def submitted(request):
+                        self._storage_equipment_destroy_pending = request
+                    request = adapter._fresh_input_oracle().click_storage_equipment_destroy(
+                        intent, before_input=submitted)
+                    return request.action
+                action = adapter._dispatch_mutation('storage.disassemble', destroy, units=intent.quantity)
+                self._storage_equipment_destroy_pending = replace(
+                    self._storage_equipment_destroy_pending, action=action)
+                return action
+            if (name in ('POPUP_CANCEL', 'POPUP_CANCEL_DISASSEMBLE')
+                    and getattr(self, '_storage_equipment_summary_open_receipt', None) is not None):
+                adapter._package_gate()
+                if getattr(self, '_storage_equipment_summary_cancel_receipt', None) is not None:
+                    raise SemanticGateClosed('equipment summary cancellation already submitted; no input replay')
+                oracle = adapter._fresh_input_oracle()
+                if self._storage_equipment_owned_summary(oracle) is None:
+                    raise SemanticGateClosed('equipment summary cancellation has no owned dialog')
+                def cancelled(receipt):
+                    self._storage_equipment_summary_cancel_receipt = receipt
+                return oracle.click_storage_equipment_summary_cancel(before_input=cancelled)
+            if name == 'DISASSEMBLE_CANCEL':
+                adapter._package_gate()
+                if getattr(self, '_storage_equipment_cancel_receipt', None) is not None:
+                    raise SemanticGateClosed('equipment selection cancellation already submitted; no input replay')
+                def cancelled_selection(receipt):
+                    self._storage_equipment_cancel_receipt = receipt
+                return adapter._fresh_input_oracle().click_storage_equipment_control(
+                    name, before_input=cancelled_selection)
+            if (getattr(self, '_storage_equipment_summary_open_receipt', None) is not None
+                    and (name == 'DISASSEMBLE_POPUP_CONFIRM' or name.startswith('POPUP_CONFIRM'))):
+                raise AlasSemanticUnmapped('equipment final destruction is not qualified')
         if name in ('COMBAT_LOW_EMOTION_CANCEL', 'COMBAT_LOW_EMOTION_CONFIRM'):
             self.refresh_frame()
             return self.open().oracle.click_combat_low_emotion(
@@ -565,13 +739,24 @@ class SessionDispatchPorts:
                 # Oracle.click rechecks the prompt after refresh and cannot
                 # fall through to another task's colliding Msgbox control.
                 return self.open().click_network_reconnect(name == 'POPUP_CONFIRM')
-        if name == 'AUTOMATION_CONFIRM' and (
-                self.open()._meta_assist_active or self.open().meta_beacon_active()
-                or self.open().daily_execution_active()
-                or self.open().operation_siren_combat_committed()
-                or self.open().campaign_combat_committed()):
-            self.refresh_frame()
-            return self.open().oracle.click_combat_automation_info()
+        if name == 'AUTOMATION_CONFIRM':
+            adapter = self.open()
+            active_owner = (adapter._meta_assist_active or adapter.meta_beacon_active()
+                            or adapter.daily_execution_active()
+                            or adapter.operation_siren_combat_committed()
+                            or adapter.campaign_combat_committed())
+            inherited_daily = (not active_owner and getattr(
+                adapter._frame_or_live_observation_oracle(),
+                'inherited_daily_automation_info_visible', lambda: False)())
+            if active_owner or inherited_daily:
+                self.refresh_frame()
+                adapter = self.open()
+                if inherited_daily and not getattr(
+                        adapter._require_frame_observation_oracle(),
+                        'inherited_daily_automation_info_visible', lambda: False)():
+                    raise SemanticGateClosed('inherited Daily information owner changed before input')
+                return adapter.oracle.click_combat_automation_info(
+                    input_frame=adapter._require_frame_observation_oracle)
         if (name == 'GUILD_POPUP_CANCEL'
                 and self.open()._frame_or_live_observation_oracle().observation_target_present(
                     'overlay/guild-message/close')):
@@ -943,6 +1128,13 @@ class SessionDispatchPorts:
                      and getattr(self.adapter, '_storage_box_candidate', None) is not None
                      and name in ('BOX_USE', 'BOX_AMOUNT_CONFIRM', 'AMOUNT_MINUS', 'AMOUNT_PLUS',
                                   'MATERIAL_ENTER', 'EQUIP_CONFIRM', 'EQUIP_CONFIRM_2'))
+            and not (self.adapter is not None and name in ('MATERIAL_ENTER', 'EQUIPMENT_ENTER')
+                     and self.adapter._frame_or_live_observation_oracle().storage_page_visible())
+            and not (self.adapter is not None and name in ('DISASSEMBLE','DISASSEMBLE_CANCEL','EQUIPMENT_FILTER',
+                                                         'EQUIPMENT_FILTER_CONFIRM','EQUIPMENT_FILTER_CANCEL')
+                     and self.adapter._frame_or_live_observation_oracle().storage_equipment_mode() is not None)
+            and not (self.adapter is not None and re.fullmatch(r'FILTER_RARITY_[0-5]_0', name)
+                     and self.adapter._frame_or_live_observation_oracle().storage_equipment_filter() is not None)
             and not (self.adapter is not None and name == 'GUILD_DISPATCH_CLOSE')
             and not (self.adapter is not None
                      and re.fullmatch(r'GUILD_FORMATION_FLEET_([1-9][0-9]*|add)', name))

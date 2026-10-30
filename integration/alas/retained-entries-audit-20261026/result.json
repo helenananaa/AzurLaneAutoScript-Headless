@@ -1,0 +1,163 @@
+{
+  "schema": "alas-headless.retained-entry-native-audit/v1",
+  "at": "2026-10-26T18:20:48.193538+08:00",
+  "scope": "Read-only source and executable original-method delegation/server-guard checks. No game input, native import, task scheduling, config write, scene navigation or support promotion.",
+  "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af",
+  "current_argument_panels": 60,
+  "source_hashes": {
+    "alas.py": "2fcdfca0dfc3034bed4fd263af7aeb41426851282a049a5585412c8d238afd30",
+    "module\\sos\\sos.py": "3f923d5a3267d28f28030ac81f971128da8915e463897b40f0fd7aa57297d9ca",
+    "module\\config\\config_generated.py": "e0788531f22a64fdcd041b8d116c61b52b71e631236f2e40ad9176452287d423",
+    "module\\config\\argument\\args.json": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+    "module\\event\\maritime_escort.py": "8a1f68759c9308a8655645b8635b3a8ce96e3fda9ee341634800a8f92709bf50"
+  },
+  "alias_delegation_checks": [
+    {
+      "method": "main",
+      "kwargs": {
+        "name": "12-4",
+        "folder": "campaign_main",
+        "mode": "normal"
+      },
+      "same_config_and_device": true,
+      "offline_dependency_recording": true
+    },
+    {
+      "method": "main",
+      "kwargs": {
+        "name": "controlled-future-name",
+        "folder": "controlled-upstream-folder",
+        "mode": "hard"
+      },
+      "same_config_and_device": true,
+      "offline_dependency_recording": true
+    },
+    {
+      "method": "c72_mystery_farming",
+      "kwargs": {
+        "name": "12-4",
+        "folder": "campaign_main",
+        "mode": "normal"
+      },
+      "same_config_and_device": true,
+      "offline_dependency_recording": true
+    },
+    {
+      "method": "c72_mystery_farming",
+      "kwargs": {
+        "name": "controlled-future-name",
+        "folder": "controlled-upstream-folder",
+        "mode": "hard"
+      },
+      "same_config_and_device": true,
+      "offline_dependency_recording": true
+    },
+    {
+      "method": "c122_medium_leveling",
+      "kwargs": {
+        "name": "12-4",
+        "folder": "campaign_main",
+        "mode": "normal"
+      },
+      "same_config_and_device": true,
+      "offline_dependency_recording": true
+    },
+    {
+      "method": "c122_medium_leveling",
+      "kwargs": {
+        "name": "controlled-future-name",
+        "folder": "controlled-upstream-folder",
+        "mode": "hard"
+      },
+      "same_config_and_device": true,
+      "offline_dependency_recording": true
+    },
+    {
+      "method": "c124_large_leveling",
+      "kwargs": {
+        "name": "12-4",
+        "folder": "campaign_main",
+        "mode": "normal"
+      },
+      "same_config_and_device": true,
+      "offline_dependency_recording": true
+    },
+    {
+      "method": "c124_large_leveling",
+      "kwargs": {
+        "name": "controlled-future-name",
+        "folder": "controlled-upstream-folder",
+        "mode": "hard"
+      },
+      "same_config_and_device": true,
+      "offline_dependency_recording": true
+    }
+  ],
+  "legacy_explicit_field_references": [
+    "E:\\Runtime\\ALAS\\redroid-live-20261022\\module\\config\\config_generated.py:140:    C72MysteryFarming_StepOnA3 = True",
+    "E:\\Runtime\\ALAS\\redroid-live-20261022\\module\\config\\config_generated.py:143:    C122MediumLeveling_LargeEnemyTolerance = 1  # 0, 1, 2, 10",
+    "E:\\Runtime\\ALAS\\redroid-live-20261022\\module\\config\\config_generated.py:146:    C124LargeLeveling_NonLargeEnterTolerance = 1  # 0, 1, 2",
+    "E:\\Runtime\\ALAS\\redroid-live-20261022\\module\\config\\config_generated.py:147:    C124LargeLeveling_NonLargeRetreatTolerance = 1  # 0, 1, 2, 10",
+    "E:\\Runtime\\ALAS\\redroid-live-20261022\\module\\config\\config_generated.py:148:    C124LargeLeveling_PickupAmmo = 3  # 3, 4, 5"
+  ],
+  "aliases": {
+    "methods": [
+      "c72_mystery_farming",
+      "c122_medium_leveling",
+      "c124_large_leveling"
+    ],
+    "body_ast_identical_to_main": true,
+    "configured_stage_forwarded": true,
+    "standalone_current_panels_present": false,
+    "named_maps_live_qualified": false,
+    "interpretation": "These retained wrappers do not force their numeric stage or implement separate farming policies. Their five generated legacy options have no explicit Python consumer outside definitions in current module/campaign trees. Shared Main live evidence is not recounted as three new map qualifications."
+  },
+  "sos": {
+    "source_ast_identical_to_pinned_upstream": true,
+    "server_checks": [
+      {
+        "server": "cn",
+        "native_disabled": true,
+        "navigation_reached": false
+      },
+      {
+        "server": "en",
+        "native_disabled": true,
+        "navigation_reached": false
+      },
+      {
+        "server": "jp",
+        "native_disabled": true,
+        "navigation_reached": false
+      },
+      {
+        "server": "tw",
+        "native_disabled": false,
+        "navigation_reached": true,
+        "ui_sentinel_only": true
+      }
+    ],
+    "current_server": "cn",
+    "current_native_branch": "disabled-before-navigation",
+    "live_executed": false,
+    "interpretation": "CN/EN/JP removal is original source behavior, not a missing typed SOS port to recreate. TW code remains retained and unqualified; no current argument-panel registration."
+  },
+  "maritime_escort": {
+    "current_argument_panel_present": false,
+    "retained_native_method": true,
+    "source_time_guard": true,
+    "prior_main_frame_escort_sos_signal_anchors": [],
+    "frame_observed_at": "separate17:41sample",
+    "current_activity_availability_proven": false,
+    "live_executed": false,
+    "interpretation": "Source and absent anchors in an older typed sample do not prove the game feature is unavailable now. Need genuine currently open escort entrance and task configuration; do not repurpose ordinary event or Coalition navigation."
+  },
+  "passed": true,
+  "live_qualification": false,
+  "support_promoted": false,
+  "delivery": "LOCALONLY",
+  "evidence": {
+    "path": "artifacts/full-feature-live-20261025/remaining-entry-native-audit-r2.json",
+    "sha256": "fa896fc6ee1a9e905006522846a46d14c93896d3890b442a4c07ddfaec79bac1"
+  }
+}

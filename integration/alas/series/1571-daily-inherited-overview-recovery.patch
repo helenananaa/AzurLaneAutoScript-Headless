@@ -1,0 +1,13 @@
+diff --git a/module/daily/daily.py b/module/daily/daily.py
+--- a/module/daily/daily.py
++++ b/module/daily/daily.py
+@@ -366,8 +366,7 @@
+             semantic_adapter is not None
+             and semantic_adapter.daily_detail_visible()
+         ):
+-            semantic_adapter.click_daily_back()
+-            self.device.sleep((1, 1.2))
++            self.ui_click(BACK_ARROW, check_button=DAILY_CHECK)
+         self.ui_ensure(page_daily)
+         self.device.sleep(0.2)
+         self.device.screenshot()

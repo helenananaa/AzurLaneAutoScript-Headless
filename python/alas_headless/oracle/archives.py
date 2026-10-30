@@ -665,6 +665,20 @@ class ArchivesOracle:
             # Keys remain mounted behind the native settlement menu. It is
             # not the chapter page; ALAS must close its result before re-entry.
             return False
+        # A valid archive chapter needs a stage control in one of the same
+        # two layouts validated below.  Do not require the optional UI
+        # endpoint while unrelated main/page controls are being discovered.
+        marker = re.compile(
+            r"/LevelMainScene\(Clone\)/"
+            r"(?:float/levels/items|LevelSelectSPFullUI\(Clone\)/Battle/Nodes)"
+            r"/Chapter_[1-9][0-9]*/main$"
+        )
+        if not any(
+            button.name == "main" and button.active_in_hierarchy
+            and button.active_and_enabled and marker.search(button.path)
+            for button in self.read_state().buttons
+        ):
+            return False
         ui_state = self.read_ui_state()
         if not self._war_archives_campaign_counter_records(ui_state):
             return False

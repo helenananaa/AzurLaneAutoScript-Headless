@@ -1,0 +1,116 @@
+{
+  "schema": "alas-headless.daily-classic-postfix-qualification/v1",
+  "updated_at": "2026-10-27T19:48:55.617299+08:00",
+  "source_changes": {
+    "oracle/combat.py": "ordinary nonMETA PreCombat START ignores only exact DailyLevelUI underlay after typed PreCombat owner;stable geometry/unique delegated target/fleet/package/PID/foreground/otherblockers preserved;previous back port retained.",
+    "session_dispatch.py": "previous existing-refresh reclassification retained;exact GET_ITEMS branch not isolated in this livecase."
+  },
+  "sdk_source_hashes": {
+    "python/alas_headless/oracle/combat.py": "3f56356e584bf664733affefa006a1f54361fa4e0f4d27b88b2390e2f774760c",
+    "python/alas_headless/adapter/semantic/session_dispatch.py": "a7ee6ee205abd6fa38a070ab4600f9b0547b47f6a0447e4a5b365909c606beda"
+  },
+  "focused_before": {
+    "passed": 7,
+    "failed": 2,
+    "log": "daily-precombat-start-before-r2.log"
+  },
+  "focused_after": {
+    "passed": 69,
+    "warnings": 7,
+    "seconds": 17.41,
+    "log": "daily-precombat-start-after-r1.log"
+  },
+  "previous_focused_overlaps_not_summed": true,
+  "actual_native_config_verifier": "daily-classic-postfix-native-config-r1.json",
+  "support_matrix_verifier": "daily-classic-postfix-native-matrix-r1.log",
+  "controlled_live": {
+    "schema": "alas-headless.daily-classic-postfix-closeout/v1",
+    "recorded_at": "2026-10-27T19:48:55.617299+08:00",
+    "case_closed": true,
+    "passed": true,
+    "raw": "daily-classic-postfix-native-20261027-r1.json",
+    "raw_sha256": "f8334c1ac629b3fc02099f51e85c45fd024e1f23bed290af21b5056052c5d988",
+    "elapsed_seconds": 387.321,
+    "native_calls": 2,
+    "all_native_calls_completed": true,
+    "normal_combat_invocations": 3,
+    "all_original_combat_calls_returned": true,
+    "category": {
+      "args": [],
+      "kwargs": {
+        "remain": 3,
+        "stage": 1,
+        "fleet": 1
+      },
+      "kind": "advance_mission",
+      "remain_before": 3,
+      "complete": true,
+      "returned": true,
+      "remain_after": 0
+    },
+    "ordinary_grants_spent": {
+      "daily.execute": 3
+    },
+    "ordinary_grants_remaining": 0,
+    "all_other_grants": 0,
+    "source_profiles_byte_unchanged": true,
+    "resource_delta": {
+      "oil": -222,
+      "gold": 3688,
+      "gem": 0
+    },
+    "final": {
+      "pid": 35557,
+      "generation": 229063,
+      "ui_generation": 229063,
+      "resources": {
+        "oil": 10743,
+        "gold": 102354,
+        "gem": 3505
+      },
+      "main": true,
+      "historical_last_evidence": true
+    },
+    "identities_exited": true,
+    "process": {
+      "terminal": true,
+      "guard_pid": 39044,
+      "guard_create_time": 1793101037.1550348,
+      "started_at": "2026-10-27T19:37:17.391797+08:00",
+      "deadline": "2026-10-27T19:52:17.391797+08:00",
+      "stop_file": "E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless\\artifacts\\full-feature-live-20261025\\daily-classic-postfix-native-20261027-r1.stop",
+      "purpose": "Independent qualification after actual SDK refresh/ordinaryunderlay start fixes,new3dailygrants not old balance. Private classic Daily mode(UseDailySkipFalse),original first eligible uncleared category/max3normalchallenge starts thenMain;sourceprofile keepsdisabled/skipTrue/originaltimers;no oldgrant reuse or second engine.",
+      "action_grants": {
+        "daily.execute": 3
+      },
+      "other_resource_grants": 0,
+      "native_call_cap": 2,
+      "max_categories": 1,
+      "max_physical_challenges": 3,
+      "pid": 46192,
+      "child_create_time": 1793101037.395704,
+      "exit_code": 0,
+      "forced_stop": false,
+      "finished_at": "2026-10-27T19:43:53.669930+08:00"
+    },
+    "original_full_daily_run_verified": false,
+    "natural_scheduler_wake": false,
+    "uninterrupted_long_soak": false,
+    "same_session_recovered_probe_count": 12,
+    "exact_GET_ITEMS_refresh_branch_isolated_live": false,
+    "no_old_failure_promoted": true,
+    "local_only": true
+  },
+  "native_members": 247,
+  "native_changed": false,
+  "observer_changed": false,
+  "current_full": false,
+  "support_promoted": false,
+  "limitations": [
+    "Only one advance_mission category,first stage/fleet1,UseDailySkipFalse.",
+    "Three original combat returns/count3to0;individual grades or item drops not independently audited.",
+    "Resource numbers are net deltas,not perbattle item/drop attribution.",
+    "Full Daily.run,otherDaily categories,naturalwake and overnight stability not proved.",
+    "Earlier original raw failures remain false;all previous balances sealed."
+  ]
+}

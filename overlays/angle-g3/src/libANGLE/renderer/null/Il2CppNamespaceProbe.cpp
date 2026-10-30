@@ -45,8 +45,11 @@ bool gMapDragRequested = false;
 uint32_t gMapDragScope = 1;
 std::array<float, 4> gMapDragEndpoints = {};
 std::mutex gStorageInputMutex;
-bool gStorageInputRequested = false;
-float gStorageInputX = 0, gStorageInputY = 0;
+struct LinkedScrollbarInputRequest {
+  bool requested = false;
+  float x = 0, y = 0;
+};
+std::array<LinkedScrollbarInputRequest, 2> gLinkedScrollbarInputs = {};
 constexpr std::array<std::string_view, kIl2CppAllowlistSize>
     kAllowlistedSymbols = {
         "il2cpp_domain_get",
@@ -337,8 +340,10 @@ struct UiProbeResult {
   NativeLuaGlobeDiagnostic luaGlobe = {};
   NativeLuaShipyardState shipyard = {};
   NativeLuaActivityIdentity activityIdentity = {};
+  NativeLuaWorldMapState worldMap = {};
   ObserverMapDragProof mapDrag = {};
   ObserverStorageScroll storageScroll = {};
+  ObserverStorageScroll retirementScroll = {};
   uint32_t privatePhysicsStatus = 0;
   uint32_t colliderCount = 0;
   uint32_t colliderTruncated = 0;
@@ -397,6 +402,24 @@ bool IsRetirementControl(std::string_view path) {
     if (EndsWith(path, suffix)) return true;
   }
   return false;
+}
+
+// PRIVATE incremental observer draft; not compiled into/deployed to runtime.
+// Real card identity still requires the fresh instance/bounds and typed fields.
+inline bool IsRetirementPreconfirmationControl(std::string_view name,
+                                                       std::string_view path) {
+  constexpr std::string_view root =
+      "OverlayCamera/Overlay/UIMain/DestoryInfoUI(Clone)/frame/";
+  if (path.substr(0, root.size()) != root) return false;
+  const auto relative = path.substr(root.size());
+  if (relative == "cancel_button") return name == "cancel_button";
+  if (relative == "top/btnBack") return name == "btnBack";
+  constexpr std::string_view content = "sliders/content/";
+  if (relative.substr(0, content.size()) != content) return false;
+  const auto templateId = relative.substr(content.size());
+  if (templateId.empty() || templateId != name) return false;
+  for (char ch : templateId) if (ch < '0' || ch > '9') return false;
+  return true;
 }
 
 bool IsCampaignPreparationSwitch(std::string_view name, std::string_view path) {
@@ -479,7 +502,75 @@ bool IsStorageMaterialItemControl(std::string_view name, std::string_view path) 
          path == std::string(root) + "item_scrollview/item_grid/" + std::string(name);
 }
 
+bool IsStorageEquipmentFilterControl(std::string_view name, std::string_view path) {
+  return name == "index_button" && path ==
+      "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/buttons/index_button";
+}
+
+bool IsStorageEquipmentSummaryControl(std::string_view name, std::string_view path) {
+  constexpr std::string_view root =
+      "OverlayCamera/Overlay/UIMain/StoreHouseDestroyConfirmView(Clone)/frame/";
+  return ((name == "confirm_btn" || name == "cancel_btn") &&
+          path == std::string(root) + "actions/" + std::string(name)) ||
+         (name == "btnBack" && path == std::string(root) + "top/btnBack");
+}
+
+bool IsStorageEquipmentCellControl(std::string_view name, std::string_view path) {
+  if (name.empty() || !std::all_of(name.begin(), name.end(), [](char c) { return c >= '0' && c <= '9'; })) {
+    return false;
+  }
+  const std::string root = "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/";
+  return path == root + "adapt/equipment_scrollview/equipment_grid/" + std::string(name) ||
+         path == root + "equipment_scrollview/equipment_grid/" + std::string(name);
+}
+
+bool IsStoreHouseScrollRoot(std::string_view path) {
+  return path == "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/adapt/item_scrollview" ||
+         path == "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/item_scrollview" ||
+         path == "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/adapt/equipment_scrollview" ||
+         path == "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/equipment_scrollview";
+}
+
+bool IsStoreHouseScrollbarPath(std::string_view path) {
+  constexpr std::string_view suffix = "/Scrollbar";
+  return path.size() > suffix.size() && path.substr(path.size() - suffix.size()) == suffix &&
+         IsStoreHouseScrollRoot(path.substr(0, path.size() - suffix.size()));
+}
+
+bool StorageScrollbarMatchesActiveList(std::string_view path, bool listActive,
+                                      size_t rootMatches, std::string_view root) {
+  constexpr std::string_view suffix = "/Scrollbar";
+  if (rootMatches > 1) return false;
+  if (rootMatches == 1) {
+    return IsStoreHouseScrollRoot(root) && path.size() == root.size() + suffix.size() &&
+           path.substr(0, root.size()) == root && path.substr(root.size()) == suffix;
+  }
+  // A custom ScrollRect may not be enumerated. The active parent list still
+  // proves the owner when its auto-hidden bar itself is inactive.
+  return listActive && IsStoreHouseScrollbarPath(path);
+}
+
+bool IsEquipmentRarityFilterControl(std::string_view name, std::string_view path) {
+  const std::string root =
+      "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/layout/";
+  if ((name == "ok" || name == "cancel") && path == root + "btns/" + std::string(name)) {
+    return true;
+  }
+  return (name == "tpl" || name == "1" || name == "2" || name == "3" ||
+          name == "4" || name == "5") &&
+         path == root + "container/indexsort_rarity/bg/" + std::string(name);
+}
+
 bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
+  if (IsStorageEquipmentCellControl(name, path) || IsStorageEquipmentSummaryControl(name, path)) return true;
+  if (IsEquipmentRarityFilterControl(name, path)) return true;
+  if ((name == "dispos" && path ==
+       "OverlayCamera/Overlay/UIMain/topItems/adapt/bottom_back/dispos") ||
+      IsStorageEquipmentFilterControl(name, path)) return true;
+  if ((name == "confirm_button" || name == "cancel_button") && path ==
+      "OverlayCamera/Overlay/UIMain/topItems/adapt/select_panel/" + std::string(name)) return true;
+  if (name == "btnBack" && path ==
+      "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/top/btnBack") return true;
   if (name == "back" && path ==
       "OverlayCamera/Overlay/UIMain/SVOrderPanel(Clone)/adapt/back") return true;
   if (IsStorageMaterialItemControl(name, path)) return true;
@@ -499,7 +590,7 @@ bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
   if (name == "mouseChild" && IsCampaignScoutControl(path)) {
     return true;
   }
-  if (IsRetirementControl(path) || IsSubmarineCallControl(path) ||
+  if (IsRetirementControl(path) || IsRetirementPreconfirmationControl(name, path) || IsSubmarineCallControl(path) ||
       IsCampaignStrategyDetailsControl(path) || IsCampaignDeploymentControl(path)) return true;
   if ((name == "dodge_button" || name == "fight_button") &&
       EndsWith(path, "LevelAmbushView(Clone)/window/" + std::string(name))) {
@@ -1014,6 +1105,8 @@ bool IsShipyardShipToggle(std::string_view name, std::string_view path) {
 
 bool ShouldEvaluateToggleTopRaycast(std::string_view name,
                                     std::string_view path) {
+  if ((name == "material" || name == "weapon" || name == "design") && path ==
+      "OverlayCamera/Overlay/UIMain/topItems/adapt/bottom_back/types/" + std::string(name)) return true;
   if (IsShipyardShipToggle(name, path)) return true;
   if (path.find("DockyardQuickSelectSettingUI(Clone)/window/notifications/options/notify_tpl_") != std::string_view::npos) return true;
   if (name == "AutoFight" &&
@@ -1218,7 +1311,9 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
   result.luaGlobe = {};
   result.shipyard = {};
   result.activityIdentity = {};
+  result.worldMap = {};
   result.storageScroll = {};
+  result.retirementScroll = {};
   result.colliderCount = 0;
   result.colliderTruncated = 0;
   result.colliderErrors = 0;
@@ -2125,10 +2220,14 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
       if ((objectName == "extend" &&
            EndsWith(path, "NewMainMellowTheme(Clone)/frame/left/extend")) ||
           IsCampaignPreparationSwitch(objectName, path) ||
+          IsStorageEquipmentFilterControl(objectName, path) ||
+          IsStorageEquipmentCellControl(objectName, path) ||
+          IsStorageEquipmentSummaryControl(objectName, path) ||
+          IsEquipmentRarityFilterControl(objectName, path) ||
           (objectName == "back" && path ==
            "OverlayCamera/Overlay/UIMain/SVOrderPanel(Clone)/adapt/back") ||
           IsMeowfficerPurchaseControl(objectName, path) ||
-          IsRetirementControl(path) || IsSubmarineCallControl(path) ||
+          IsRetirementControl(path) || IsRetirementPreconfirmationControl(objectName, path) || IsSubmarineCallControl(path) ||
           IsCampaignStrategyDetailsControl(path) || IsCampaignDeploymentControl(path) ||
           IsCampaignScoutControl(path) || IsShipyardSeriesControl(objectName, path) ||
           IsShipyardStrengthenControl(objectName, path) || IsArchiveCardControl(objectName, path) ||
@@ -2152,7 +2251,10 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
           record.adbY = static_cast<float>(screenHeight) - record.screenY;
         }
       }
-      if (IsShipyardSeriesControl(objectName, path) ||
+      if (IsStorageEquipmentFilterControl(objectName, path) || IsStorageEquipmentCellControl(objectName, path) ||
+          IsStorageEquipmentSummaryControl(objectName, path) ||
+          IsEquipmentRarityFilterControl(objectName, path) ||
+          IsShipyardSeriesControl(objectName, path) ||
           IsShipyardStrengthenControl(objectName, path) || IsArchiveCardControl(objectName, path) ||
           (EndsWith(path, "Dorm3dMainUI(Clone)/UI/base/btn_back") ||
           EndsWith(path, "Dorm3dMainUI(Clone)/UI/watch/btn_back") ||
@@ -2216,6 +2318,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
         }
       }
       const bool needsReviewedPointSearch =
+          IsRetirementPreconfirmationControl(objectName, path) ||
           IsCampaignScoutControl(path) ||
           path.find("CourtYardUI(Clone)/main/") != std::string_view::npos ||
           path.find("BackYardFeedUI(Clone)/") != std::string_view::npos ||
@@ -2602,6 +2705,32 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
         const std::string_view imagePath(
             record.path.data(),
             ANGLE_UNSAFE_TODO(strnlen(record.path.data(), record.path.size())));
+        // Observe the actual parent Transform independently from the shadow's
+        // visibility. An inactive root remains diagnostic, never active proof.
+        if ((record.flags & 0x10u) == 0 && IsOperationSirenFleetShadow(imagePath)) {
+          void *fleetTransform = imageTransform != nullptr && getParent != nullptr
+                                     ? invokeObject(getParent, imageTransform) : nullptr;
+          ObserverButtonRecord rootGeometry;
+          if (fleetTransform != nullptr &&
+              populateControlRecord(fleetTransform, false, &rootGeometry, true)) {
+            const std::string_view rootPath(rootGeometry.path.data(),
+                ANGLE_UNSAFE_TODO(strnlen(rootGeometry.path.data(), rootGeometry.path.size())));
+            if ((rootGeometry.flags & 0x200u) == 0 &&
+                (rootGeometry.flags & 0x120u) == 0x120u &&
+                rootPath == imagePath.substr(0, imagePath.size() - 7) &&
+                std::isfinite(rootGeometry.worldX) && std::isfinite(rootGeometry.worldY) &&
+                std::isfinite(rootGeometry.worldZ) && std::isfinite(rootGeometry.adbX) &&
+                std::isfinite(rootGeometry.adbY)) {
+              record.anchorWorldX = rootGeometry.worldX;
+              record.anchorWorldY = rootGeometry.worldY;
+              record.anchorWorldZ = rootGeometry.worldZ;
+              record.fleetRootAdbX = rootGeometry.adbX;
+              record.fleetRootAdbY = rootGeometry.adbY;
+              record.flags |= 0x4000u;
+              if ((rootGeometry.flags & 0x1u) != 0) record.flags |= 0x8000u;
+            }
+          }
+        }
         if (activeAndEnabled && ShouldEvaluateImageTopRaycast(imageName, imagePath) &&
             (geometry.flags & 0x100u) != 0 && (geometry.flags & 0x400u) != 0) {
           if (EndsWith(imagePath, "DockyardQuickSelectSettingUI(Clone)/window/notifications/options/notify_tpl_0/on/Image2")) {
@@ -2760,13 +2889,16 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
 
   // Optional StoreHouse scroll telemetry. Read the actual Unity components;
   // no callbacks, value setters, scroll actions or task decisions run here.
-  bool storageVisible = false;
+  bool storageVisible = false, retirementVisible = false;
   for (size_t i = 0; i < result.recordCount; ++i) {
     storageVisible |= std::string_view(result.records[i].path.data()).find(
         "/StoreHouseUI(Clone)/") != std::string_view::npos;
+    retirementVisible |= std::string_view(result.records[i].path.data()).find(
+        "OverlayCamera/Overlay/UIMain/DestoryInfoUI(Clone)/frame/") == 0;
   }
-  if (storageVisible) {
-    auto &scroll = result.storageScroll;
+  for (size_t family = 0; family < 2; ++family) {
+    if (!(family == 0 ? storageVisible : retirementVisible)) continue;
+    auto &scroll = family == 0 ? result.storageScroll : result.retirementScroll;
     scroll.status = 2;
     void *scrollClass = classFromName(uiImage, "UnityEngine.UI", "ScrollRect");
     void *barClass = classFromName(uiImage, "UnityEngine.UI", "Scrollbar");
@@ -2778,8 +2910,10 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
         ObserverButtonRecord record;
         if (!populateControlRecord(storageScrollCollector.objects[i], false, &record)) continue;
         const std::string_view path(record.path.data());
-        if (path != "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/adapt/item_scrollview" &&
-            path != "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/item_scrollview") continue;
+        const bool matchesOwner = family == 0
+            ? IsStoreHouseScrollRoot(path)
+            : path == "OverlayCamera/Overlay/UIMain/DestoryInfoUI(Clone)/frame/sliders";
+        if (!matchesOwner) continue;
         ++scroll.matches;
         selected = storageScrollCollector.objects[i];
         scroll.controls[0] = record;
@@ -2833,8 +2967,9 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
     }
   }
 
-  if (storageVisible) {
-    auto &scroll = result.storageScroll;
+  for (size_t family = 0; family < 2; ++family) {
+    if (!(family == 0 ? storageVisible : retirementVisible)) continue;
+    auto &scroll = family == 0 ? result.storageScroll : result.retirementScroll;
     scroll.scrollbarStatus = 2;
     void *barClass = classFromName(uiImage, "UnityEngine.UI", "Scrollbar");
     scroll.scrollbarClassFound = barClass ? 1u : 0u;
@@ -2847,11 +2982,30 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
         ObserverButtonRecord record;
         if (!populateControlRecord(storageBarCollector.objects[i], false, &record, true)) continue;
         const std::string_view path(record.path.data());
-        if (path != "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/adapt/item_scrollview/Scrollbar" &&
-            path != "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/item_scrollview/Scrollbar") continue;
+        bool listActive = (record.flags & 0x1u) != 0;
+        if (family == 0 && scroll.matches == 0 && !listActive && IsStoreHouseScrollbarPath(path)) {
+          void *go = invokeObject(getGameObject, storageBarCollector.objects[i]);
+          void *transform = go ? invokeObject(getTransform, go) : nullptr;
+          void *parent = transform && getParent ? invokeObject(getParent, transform) : nullptr;
+          ObserverButtonRecord listRecord;
+          if (parent && populateControlRecord(parent, false, &listRecord, true)) {
+            const std::string_view parentPath(listRecord.path.data());
+            listActive = (listRecord.flags & 0x1u) != 0 && IsStoreHouseScrollRoot(parentPath) &&
+                         path.size() == parentPath.size() + std::string_view("/Scrollbar").size() &&
+                         path.substr(0, parentPath.size()) == parentPath;
+          }
+        }
+        const bool matchesOwner = family == 0
+            ? StorageScrollbarMatchesActiveList(path, listActive,
+                                                scroll.matches, scroll.controls[0].path.data())
+            : path == "OverlayCamera/Overlay/UIMain/DestoryInfoUI(Clone)/frame/sliders/scroll_bar";
+        if (!matchesOwner) continue;
         ++scroll.scrollbarMatches;
         selected = storageBarCollector.objects[i];
       }
+      // Only a complete typed enumeration proves a missing retirement bar.
+      // Keep unavailable extraction distinct; never convert it to absence.
+      if (family == 1 && scroll.scrollbarMatches == 0) scroll.scrollbarStatus = 3;
       if (scroll.scrollbarMatches == 1) {
         const void *getHandle = findMethodInHierarchy(barClass, "get_handleRect", 0);
         void *handle = getHandle ? invokeObject(getHandle, selected) : nullptr;
@@ -2879,9 +3033,9 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
         bool inputRequested = false;
         {
           std::lock_guard<std::mutex> lock(gStorageInputMutex);
-          inputRequested = gStorageInputRequested;
-          scroll.inputX = gStorageInputX;
-          scroll.inputY = gStorageInputY;
+          inputRequested = gLinkedScrollbarInputs[family].requested;
+          scroll.inputX = gLinkedScrollbarInputs[family].x;
+          scroll.inputY = gLinkedScrollbarInputs[family].y;
         }
         if (inputRequested) {
           scroll.inputStatus = 2;
@@ -3107,6 +3261,16 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
   if (shipyardVisible) {
     NativeLuaShipyardReader(LoadedLuaReadApi(), readNativeLuaState(), result.shipyard).read();
     if (!nativeState) result.shipyard.stage = luaStateStage;
+  }
+  bool worldMapVisible = false;
+  for (size_t i = 0; i < result.imageRecordCount; ++i) {
+    worldMapVisible |= (result.images[i].flags & 1u) &&
+        EndsWith(std::string(result.images[i].path.data()),
+                 "top/adapt/left_stage/other/fleet_bar/text_selected/x");
+  }
+  if (worldMapVisible) {
+    NativeLuaWorldMapReader(LoadedLuaReadApi(), readNativeLuaState(), result.worldMap).read();
+    if (!nativeState) result.worldMap.stage = luaStateStage;
   }
   // Activity configuration is read-only and each catalog reports its own
   // availability. It neither changes UI error counts nor blocks other tasks.
@@ -4045,6 +4209,7 @@ int32_t ObserverMainThreadTick(uint64_t requestGeneration,
     uiSnapshot.images = ui.images;
     uiSnapshot.mapDrag = ui.mapDrag;
     uiSnapshot.storageScroll = ui.storageScroll;
+    uiSnapshot.retirementScroll = ui.retirementScroll;
     uiSnapshot.privatePhysicsStatus = ui.privatePhysicsStatus;
     uiSnapshot.globeObjectStatus = ui.globeObjectStatus;
     uiSnapshot.globeObjectCount = ui.globeObjectCount;
@@ -4055,6 +4220,7 @@ int32_t ObserverMainThreadTick(uint64_t requestGeneration,
     uiSnapshot.luaGlobe = ui.luaGlobe;
     uiSnapshot.shipyard = ui.shipyard;
     uiSnapshot.activityIdentity = ui.activityIdentity;
+    uiSnapshot.worldMap = ui.worldMap;
     uiSnapshot.colliderCount = ui.colliderCount;
     uiSnapshot.colliderTruncated = ui.colliderTruncated;
     uiSnapshot.colliderErrors = ui.colliderErrors;
@@ -4207,17 +4373,26 @@ bool GetLatestObserverUiSnapshot(ObserverUiSnapshot *snapshot) {
   return true;
 }
 
-bool RequestStorageScrollbarInput(float x, float y) {
+namespace {
+bool RequestLinkedScrollbarInput(float x, float y, size_t family) {
 #if defined(ANGLE_PLATFORM_ANDROID)
-  if (!std::isfinite(x) || !std::isfinite(y)) return false;
+  if (family >= gLinkedScrollbarInputs.size() || !std::isfinite(x) || !std::isfinite(y)) return false;
   std::lock_guard<std::mutex> lock(gStorageInputMutex);
-  gStorageInputX = x;
-  gStorageInputY = y;
-  gStorageInputRequested = true;
+  auto &request = gLinkedScrollbarInputs[family];
+  request.x = x; request.y = y; request.requested = true;
   return true;
 #else
   return false;
 #endif
+}
+}
+
+bool RequestStorageScrollbarInput(float x, float y) {
+  return RequestLinkedScrollbarInput(x, y, 0);
+}
+
+bool RequestRetirementScrollbarInput(float x, float y) {
+  return RequestLinkedScrollbarInput(x, y, 1);
 }
 
 bool RequestOperationSirenMapDrag(float x1, float y1, float x2, float y2, bool globe) {

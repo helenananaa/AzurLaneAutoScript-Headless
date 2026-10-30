@@ -1,0 +1,81 @@
+{
+  "schema": "alas-headless.warehouse-tabs-partial/v1",
+  "at": "2026-10-27T08:45:34.764952+08:00",
+  "applied": true,
+  "observer_apk_sha256": "20ff24742f90737f224292a5604b4cd8ac0367308bdc71864b18a6c6e85f4104",
+  "observer_deployment_passed": true,
+  "current_game_pid": 8451,
+  "observer_deploy": "artifacts/full-feature-live-20261025/warehouse-tabs-observer-deployment-r2.json",
+  "warm_build": "artifacts/full-feature-live-20261025/warehouse-tabs-warm-build-r2.json",
+  "frame_failure_fix": {
+    "before": "1FAIL",
+    "after": "153PASS9.17s",
+    "physical_close_later_read": "artifacts/full-feature-live-20261025/warehouse-full-r2-post-close-read-r1.json",
+    "scope": "Actual close accepted but old postcondition used invalidated immutable frame; live postcondition split, failed r2 remains false"
+  },
+  "tab_focus": "34PASS5.14s including compiled actual selector and baseline/drift storage cases",
+  "session_admission": {
+    "before": "1FAIL",
+    "after": "75PASS5.01s",
+    "scope": "Actual session gate now admits only material/equipment tab aliases on proven Storage page; fresh final target still required"
+  },
+  "partial_native_calls": [
+    {
+      "raw": "artifacts/full-feature-live-20261025/warehouse-native-storage-entry-r3.json",
+      "passed": false,
+      "error": "TaskCapabilityUnavailable('semantic capability unavailable for research: ALAS resource is not semantically mapped for input: EQUIPMENT_ENTER')",
+      "resource_grants": 0,
+      "inputs": 2
+    },
+    {
+      "raw": "artifacts/full-feature-live-20261025/warehouse-native-storage-entry-r4.json",
+      "passed": false,
+      "error": "GameTooManyClickError('Too many click for a button: EQUIPMENT_ENTER')",
+      "resource_grants": 0,
+      "inputs": 11
+    }
+  ],
+  "current_boundary": "Equipment tab truly checked, observed capacity703/375, normal batch-disassemble button dispos has exact text but raycast_top=None. Missing mode observation returned false and caused native repeated equipment-tab clicks; native click-history guard stopped. Next implement mode/dispos port, reject already-checked equipment-tab repeats, and observe actual filter branch with original zero-resource UI subcall.",
+  "case_calls_used": 6,
+  "case_calls_remaining": 18,
+  "remaining_resource_grants": {
+    "mission.claim": 12,
+    "mail.mutation": 0,
+    "tactical.reward": 0,
+    "awaken.execute": 0,
+    "minigame.play": 0,
+    "meta.assist": 0,
+    "operation_siren.coordinate_checkout": 1,
+    "operation_siren.action_point_use": 2,
+    "operation_siren.daemon_move": 16,
+    "operation_siren.port_repair": 1,
+    "tactical.assign": 3,
+    "commission.reward": 11,
+    "commission.start": 8,
+    "daily.execute": 0,
+    "exercise.execute": 0,
+    "exercise.refresh": 0,
+    "research.reward": 5,
+    "research.start": 2,
+    "dorm.collect": 3,
+    "dorm.feed": 20,
+    "enhancement.execute": 0,
+    "guild.claim": 0,
+    "guild.dispatch": 0,
+    "guild.exchange": 0,
+    "build.submit": 0,
+    "retirement.execute": 0,
+    "shop.purchase": 0,
+    "campaign.stage_entry": 0,
+    "campaign.fleet_mutation": 0,
+    "campaign.sortie": 0,
+    "campaign.grid_click": 0,
+    "campaign.viewport_swipe": 0
+  },
+  "original_early_stop": "2026-10-27T10:31:31.598631+08:00",
+  "original_hard_deadline": "2026-10-27T10:46:31.598631+08:00",
+  "warehouse_workflow_live_verified": false,
+  "full_current_source": false,
+  "support_promotion": false,
+  "delivery": "LOCALONLY"
+}

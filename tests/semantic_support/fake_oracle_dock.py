@@ -18,6 +18,11 @@ class FakeDockOracle:
     def retirement_selection_visible(self):
         return False
 
+    def enhancement_dock_visible(self):
+        # This default fixture has no inherited Dock page. Positive retained
+        # Dock recovery uses the structured UI fixtures and the real reader.
+        return False
+
     def retire_ships_one_click(self, keep_limit_break):
         self.retirement_keep_limit_break = keep_limit_break
         return self.retirement_receipt_value

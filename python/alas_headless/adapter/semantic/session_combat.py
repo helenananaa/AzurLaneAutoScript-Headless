@@ -125,25 +125,28 @@ class SessionCombatPorts:
             adapter = self.open()
             result_path = ('OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/'
                            'NewBattleResultStatisticsPage(Clone)/bottom/confirmBtn')
-            if (adapter.meta_beacon_active() and str(exc) ==
+            if ((adapter.meta_beacon_active()
+                 or adapter.operation_siren_combat_committed()) and str(exc) ==
                     'combat action control is not exact top-raycast actionable: '
                     + result_path + ', raycast_top=False'):
-                state = adapter.oracle.read_state()
+                state = oracle.read_state()
                 results = [b for b in state.buttons if b.path == result_path]
                 if (len(results) == 1 and results[0].active_in_hierarchy
                         and results[0].active_and_enabled
                         and results[0].raycast_top is False
                         and results[0].point is not None and results[0].bounds is not None
                         and results[0].bounds.contains(results[0].point)):
-                    # A covered/mounting statistics control is absent for this
-                    # passive poll. The original loop waits; input still needs
-                    # the independent actionable result proof.
+                    # META and strategic/manual OS battles share this result
+                    # stack. A covered control is absent for this passive poll
+                    # on the same screenshot; ALAS owns its next screenshot.
+                    # Input still needs the independent actionable result proof.
                     return ()
                 if len(results) == 1 and results[0].actionable:
                     return alas_combat_visible_resource_names(
                         self._live_combat_snapshot(), self._live_combat_manifest()
                     )
-                if not results and adapter.oracle.meta_page_visible():
+                if (not results and adapter.meta_beacon_active()
+                        and oracle.meta_page_visible()):
                     return ()
             raise
 
@@ -628,7 +631,8 @@ class SessionCombatPorts:
             return False
         oracle = self._combat_result_action_oracle(adapter)
         return bool(
-            oracle.daily_battle_result_visible()
+            getattr(oracle, 'campaign_battle_fail_tip_visible', lambda: False)()
+            or oracle.daily_battle_result_visible()
             or oracle.campaign_battle_reward_visible()
             or oracle.enabled("reward/campaign-total/exit")
         )
@@ -652,6 +656,12 @@ class SessionCombatPorts:
             self.refresh_frame()
             adapter = self.open()
             oracle = adapter._require_frame_observation_oracle()
+            if getattr(oracle, 'campaign_battle_fail_tip_visible', lambda: False)():
+                # The session just refreshed input authority. Reuse the live
+                # reviewed close so its disappearance poll reads later frames.
+                if adapter.oracle.close_campaign_battle_fail_tip_if_present():
+                    time.sleep(0.25)
+                    continue
             if oracle.enabled("reward/campaign-total/exit"):
                 receipts.append(oracle.click("reward/campaign-total/exit"))
                 time.sleep(0.75)

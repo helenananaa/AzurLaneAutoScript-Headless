@@ -595,6 +595,23 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
       response.replace(position, marker.size(), value,
                        static_cast<size_t>(count));
     }
+    response.insert(response.size() - 1, ",\"fleet_root_pose\":");
+    if ((record.flags & 0x4000u) != 0) {
+      std::string pose = "{\"path\":";
+      const auto imagePath = BoundedStringView(record.path);
+      AppendJsonString(&pose, imagePath.substr(0, imagePath.rfind('/')));
+      char values[320];
+      const int count = ANGLE_UNSAFE_TODO(std::snprintf(
+          values, sizeof(values),
+          ",\"active_in_hierarchy\":%s,\"world_position\":{\"x\":%.3f,\"y\":%.3f,\"z\":%.3f},"
+          "\"adb_point\":{\"x\":%.3f,\"y\":%.3f}}",
+          (record.flags & 0x8000u) != 0 ? "true" : "false",
+          record.anchorWorldX, record.anchorWorldY, record.anchorWorldZ,
+          record.fleetRootAdbX, record.fleetRootAdbY));
+      if (count <= 0 || static_cast<size_t>(count) >= sizeof(values)) return {};
+      pose.append(values, static_cast<size_t>(count));
+      response.insert(response.size() - 1, pose);
+    } else response.insert(response.size() - 1, "null");
   }
   response.append("],\"globe_geometry\":{");
   char globeFields[256];
@@ -709,6 +726,19 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
       shipyard.paidGems, shipyard.freeGems, shipyard.level, shipyard.fateLevel, shipyard.exp));
   if (shipyardCount <= 0 || static_cast<size_t>(shipyardCount) >= sizeof(shipyardFields)) return {};
   response.append(shipyardFields, static_cast<size_t>(shipyardCount));
+  response.append("},\"operation_siren_map_state\":{");
+  const auto &world = snapshot.worldMap;
+  char worldFields[640];
+  const int worldCount = ANGLE_UNSAFE_TODO(std::snprintf(worldFields, sizeof(worldFields),
+      "\"schema_version\":1,\"status\":%u,\"stage\":%u,\"truncated\":%s,\"stack_balanced\":%s,\"map_id\":%u,\"active\":%s,\"valid\":%s,\"fleet_index\":%u,\"fleet_id\":%u,\"row\":%d,\"column\":%d,\"damage_known\":%s,\"damage_level\":%u,\"moving_known\":%s,\"moving\":%s",
+      world.status, world.stage, world.truncated ? "true" : "false",
+      world.stackBalanced ? "true" : "false", world.mapId,
+      world.active ? "true" : "false", world.valid ? "true" : "false",
+      world.fleetIndex, world.fleetId, world.row, world.column,
+      world.damageKnown ? "true" : "false", world.damageLevel,
+      world.movingKnown ? "true" : "false", world.moving ? "true" : "false"));
+  if (worldCount <= 0 || static_cast<size_t>(worldCount) >= sizeof(worldFields)) return {};
+  response.append(worldFields, static_cast<size_t>(worldCount));
   response.append("},\"activity_identity\":{");
   const auto &activity = snapshot.activityIdentity;
   response.append("\"status\":"); response.append(std::to_string(activity.status));
@@ -767,8 +797,12 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
       response.push_back('}');
     }
   }
-  response.append("]},\"storage_scroll\":{\"schema\":\"alas-headless.storage-scroll/v1\",\"status\":");
-  const auto &storage = snapshot.storageScroll;
+  response.append("]}");
+  for (size_t family = 0; family < 2; ++family) {
+  const auto &storage = family == 0 ? snapshot.storageScroll : snapshot.retirementScroll;
+  response.append(family == 0
+      ? ",\"storage_scroll\":{\"schema\":\"alas-headless.storage-scroll/v1\",\"status\":"
+      : ",\"retirement_preconfirm_scroll\":{\"schema\":\"alas-headless.retirement-scroll/v1\",\"status\":");
   response.append(std::to_string(storage.status));
   response.append(",\"matches\":"); response.append(std::to_string(storage.matches));
   char storageFields[512];
@@ -796,7 +830,9 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
       response.append(storageFields, static_cast<size_t>(count));
     }
   }
-    response.append("],\"scrollbar\":{\"schema\":\"alas-headless.storage-scrollbar/v1\",\"status\":");
+    response.append(family == 0
+        ? "],\"scrollbar\":{\"schema\":\"alas-headless.storage-scrollbar/v1\",\"status\":"
+        : "],\"scrollbar\":{\"schema\":\"alas-headless.retirement-scrollbar/v1\",\"status\":");
     response.append(std::to_string(storage.scrollbarStatus));
     response.append(",\"matches\":"); response.append(std::to_string(storage.scrollbarMatches));
     response.append(",\"class_found\":"); response.append(storage.scrollbarClassFound ? "true" : "false");
@@ -824,7 +860,9 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
         response.append(storageFields, static_cast<size_t>(count));
       }
     }
-    response.append("],\"input\":{\"schema\":\"alas-headless.storage-scrollbar-input/v1\",\"status\":");
+    response.append(family == 0
+        ? "],\"input\":{\"schema\":\"alas-headless.storage-scrollbar-input/v1\",\"status\":"
+        : "],\"input\":{\"schema\":\"alas-headless.retirement-scrollbar-input/v1\",\"status\":");
     response.append(std::to_string(storage.inputStatus));
     if (storage.inputStatus != 0) {
       const int count = ANGLE_UNSAFE_TODO(std::snprintf(storageFields, sizeof(storageFields),
@@ -836,7 +874,9 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
       response.append(storageFields, static_cast<size_t>(count));
       AppendJsonString(&response, BoundedStringView(storage.inputTopPath));
     }
-    response.append("}}},\"private_quarters_physics\":{");
+    response.append("}}}");
+  }
+  response.append(",\"private_quarters_physics\":{");
   char physicsFields[256];
   const int physicsCount = ANGLE_UNSAFE_TODO(std::snprintf(
       physicsFields, sizeof(physicsFields),
@@ -1018,6 +1058,11 @@ void ServeObserver() {
     const bool storageInputRequest =
         ANGLE_UNSAFE_BUFFERS(sscanf(requestBuffer, "GET /v1/storage-scrollbar-input %f %f%n", &storageX, &storageY, &storageEnd)) == 2 &&
         (request.substr(storageEnd) == "\n" || request.substr(storageEnd) == "\r\n");
+    float retirementX = 0, retirementY = 0;
+    int retirementEnd = 0;
+    const bool retirementInputRequest =
+        ANGLE_UNSAFE_BUFFERS(sscanf(requestBuffer, "GET /v1/retirement-scrollbar-input %f %f%n", &retirementX, &retirementY, &retirementEnd)) == 2 &&
+        (request.substr(retirementEnd) == "\n" || request.substr(retirementEnd) == "\r\n");
     float mapX = 0, mapY = 0;
     int projectionEnd = 0;
     const bool projectionRequest =
@@ -1036,6 +1081,9 @@ void ServeObserver() {
     } else if (storageInputRequest && RequestStorageScrollbarInput(storageX, storageY)) {
       SendAll(client, "{\"protocol_schema\":\"alas-headless.observer/v1\","
                       "\"status\":\"ok\",\"scope\":\"read-only-storage-scrollbar-input\"}\n");
+    } else if (retirementInputRequest && RequestRetirementScrollbarInput(retirementX, retirementY)) {
+      SendAll(client, "{\"protocol_schema\":\"alas-headless.observer/v1\","
+                      "\"status\":\"ok\",\"scope\":\"read-only-retirement-scrollbar-input\"}\n");
     } else if (projectionRequest && RequestGlobeMapProjection(mapX, mapY)) {
       SendAll(client, "{\"protocol_schema\":\"alas-headless.observer/v1\","
                       "\"status\":\"ok\",\"scope\":\"read-only-map-projection\"}\n");

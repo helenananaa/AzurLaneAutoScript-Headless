@@ -1,0 +1,40 @@
+{
+  "at": "2026-10-27T22:19:54.402263+08:00",
+  "applied": true,
+  "production_changed_files": [
+    "python\\alas_headless\\adapter\\semantic\\session_dispatch.py"
+  ],
+  "before_sha256": "a7ee6ee205abd6fa38a070ab4600f9b0547b47f6a0447e4a5b365909c606beda",
+  "after_sha256": "99eb8c41ba5080d86140c2be73509b74a441847e9ecd1014390e5baf53d44d04",
+  "scope": "Session IN_MAP only: exact unobstructed OpSi map delegates to existing adapter before broad combat union when native strategic owner persists. META/campaign and AP/foreign overlays retained. No ownership clear/input/poll loop/task changes.",
+  "source_failure": "opsi-core-handoff-native-r1-failure-frozen.json",
+  "source_failed_raw_preserved": true,
+  "exact_timeout_causal_frame_not_retained": true,
+  "fixture_scope": "Exact later observation raw state368348/UI368350, neither generation changed; frozen oracle used in controlled owner tests, not synthetic causal proof.",
+  "before": "3FAIL7PASS2.14s after correcting test to actual frozen observation semantics",
+  "after": "107PASS2SKIP7warnings19.76s",
+  "intermediate": "r1 replay used live oracle and backwards repeated reads; corrected to immutable oracle without altering raw fixture. after-r1 106PASS1FAIL was missing actual AP panel in negative payload. after-r2 104PASS3FAIL used arbitrary probe target blocked by map itself; current uses existing reviewed os/page/back owner while keeping all foreign blockers.",
+  "passive_live": "opsi-ap-return-postfix-passive-live-r1.json",
+  "passive_live_passed": true,
+  "passive_live_input": 0,
+  "passive_live_pid": 35557,
+  "passive_live_generations": [
+    384441,
+    384453
+  ],
+  "full_current": false,
+  "R16_is_prior_snapshot": true,
+  "native_members": 247,
+  "native_changed": false,
+  "observer_changed": false,
+  "APK_changed": false,
+  "support_promoted": false,
+  "local_only": true,
+  "native_opsi_config_verifier": "opsi-ap-return-config-verifier-r1.json",
+  "support_matrix_verifier": "opsi-ap-return-support-verifier-r2.log",
+  "verifier_cli_r1_error_preserved": "support verifier initially supplied alas.py instead of source root; corrected root in r2, no source relaxation.",
+  "resume_guard_sha256": "d742451e2d55cae02767668ff0dcbc160e5727bee92a8a363b668b201e361ab9",
+  "same_case_resume_max_calls": 11,
+  "same_case_resume_AP_grant": 0,
+  "original_deadline_unchanged": "2026-10-27T23:49:15.281299+08:00"
+}

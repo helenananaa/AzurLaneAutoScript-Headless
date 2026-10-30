@@ -75,6 +75,26 @@ def test_absent_optional_page_does_not_require_ui_endpoint(reader):
     assert backend.taps == []
 
 
+def test_absent_archive_chapter_does_not_require_optional_ui():
+    backend = FakeBackend([make_button("formation", "root/frame/right/1/formation")])
+    backend.ui = {"status": "unsupported"}
+    oracle = make_oracle(backend)
+    assert not oracle.war_archives_campaign_page_visible()
+    assert "GET /v1/ui\n" not in backend.requests
+    assert AlasSemanticAdapter(oracle, lambda: None).appear("MAIN_GOTO_FLEET")
+    assert not backend.taps
+
+
+@pytest.mark.parametrize("layout", ["float/levels/items", "LevelSelectSPFullUI(Clone)/Battle/Nodes"])
+def test_present_archive_stage_still_requires_complete_ui(layout):
+    backend = FakeBackend([make_button("main", "UICamera/Canvas/UIMain/LevelMainScene(Clone)/"
+                                       + layout + "/Chapter_101/main")])
+    backend.ui = {"status": "unsupported"}
+    with pytest.raises(SemanticGateClosed):
+        make_oracle(backend).war_archives_campaign_page_visible()
+    assert not backend.taps
+
+
 @pytest.mark.parametrize("reader", PAGE_READERS)
 def test_present_optional_page_still_rejects_unavailable_ui(reader):
     backend = page_backend(reader)

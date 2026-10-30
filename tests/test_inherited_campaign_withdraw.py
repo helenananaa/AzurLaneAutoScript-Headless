@@ -258,6 +258,29 @@ def test_withdraw_postcondition_never_borrows_invalidated_input_frame():
     assert a._click_priority('CAMPAIGN_WITHDRAW_CONFIRM') is r
     leased.read_state.assert_not_called()
 
+
+@pytest.mark.parametrize('confirm', [False, True])
+def test_withdraw_postcondition_uses_a_new_coherent_observation_frame(confirm):
+    live=FakeOracle();submitted=FakeOracle();observed=FakeOracle()
+    receipt=SimpleNamespace(generation=10)
+    submitted.inherited_campaign_withdraw_control=Mock(return_value=(object(),10))
+    submitted.click_campaign_withdraw=Mock(return_value=receipt)
+    submitted.read_state=Mock(side_effect=AssertionError('submitted frame invalid'))
+    live.read_state=Mock(side_effect=AssertionError('split live postcondition read'))
+    live.campaign_withdraw_control=Mock(side_effect=AssertionError('split live UI read'))
+    observed.read_state=Mock(return_value=SimpleNamespace(generation=11,buttons=()))
+    observed.campaign_withdraw_control=Mock(return_value=None if confirm else object())
+    refresh=Mock()
+    adapter=AlasSemanticAdapter(live,package_gate=lambda:None,
+        input_frame_refresher=refresh,frame_observation_oracle=lambda:observed)
+    adapter._fresh_input_oracle=lambda:submitted
+    name='CAMPAIGN_WITHDRAW_CONFIRM' if confirm else 'WITHDRAW'
+    assert adapter._click_priority(name) is receipt
+    refresh.assert_called_once_with()
+    observed.campaign_withdraw_control.assert_called_once_with(confirm=True)
+    submitted.click_campaign_withdraw.assert_called_once_with(confirm=confirm)
+    live.read_state.assert_not_called()
+
 def test_confirm_disappearance_without_map_unload_is_not_success(monkeypatch):
     from alas_headless.adapter.semantic import dispatch_actions
     ticks=iter((0,1,100))

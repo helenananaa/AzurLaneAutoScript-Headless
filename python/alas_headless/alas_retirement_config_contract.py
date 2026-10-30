@@ -18,14 +18,14 @@ class AlasRetirementConfigSnapshot:
     def semantic_admitted(self) -> bool:
         """Whether Headless has a reviewed task transaction for this mode."""
 
-        return self.mode != "old_retire"
+        return self.mode in RETIREMENT_MODES
 
     def require_semantic_entry(self) -> None:
-        """Refuse the legacy pixel/coordinate retirement flow before input."""
+        """Require a recognized mode; each typed action still checks its own capability."""
 
         if not self.semantic_admitted:
             raise SemanticGateClosed(
-                "Retirement.RetireMode=old_retire has no reviewed semantic transaction"
+                "Retirement.RetireMode has no implemented semantic entry"
             )
 
 

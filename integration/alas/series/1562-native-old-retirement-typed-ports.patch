@@ -1,0 +1,132 @@
+diff --git a/module/retire/retirement.py b/module/retire/retirement.py
+--- a/module/retire/retirement.py
++++ b/module/retire/retirement.py
+@@ -48,29 +48,38 @@
+         Returns:
+             int: Amount of cards have retired.
+         """
+-        cards = []
+-        rarity = []
+-        for x, y, button in CARD_RARITY_GRIDS.generate():
+-            card_color = get_color(image=self.device.image, area=button.area)
+-            f = False
+-            for r, rarity_color in CARD_RARITY_COLORS.items():
+-
+-                if color_similar(card_color, rarity_color, threshold=15):
+-                    cards.append([x, y])
+-                    rarity.append(r)
+-                    f = True
+-
+-            if not f:
+-                logger.warning(
+-                    f'Unknown rarity color. Grid: ({x}, {y}). Color: {card_color}')
+-
+-        logger.info(' '.join([r.rjust(3) for r in rarity[:7]]))
+-        logger.info(' '.join([r.rjust(3) for r in rarity[7:]]))
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            cards, rarity = semantic_session.old_retirement_card_vectors(
++                target_rarity=target_rarity,
++                card_limit=int(CARD_RARITY_GRIDS.grid_shape[0]) * int(CARD_RARITY_GRIDS.grid_shape[1]))
++        else:
++            cards = []
++            rarity = []
++            for x, y, button in CARD_RARITY_GRIDS.generate():
++                card_color = get_color(image=self.device.image, area=button.area)
++                f = False
++                for r, rarity_color in CARD_RARITY_COLORS.items():
++
++                    if color_similar(card_color, rarity_color, threshold=15):
++                        cards.append([x, y])
++                        rarity.append(r)
++                        f = True
++
++                if not f:
++                    logger.warning(
++                        f'Unknown rarity color. Grid: ({x}, {y}). Color: {card_color}')
++
++            logger.info(' '.join([r.rjust(3) for r in rarity[:7]]))
++            logger.info(' '.join([r.rjust(3) for r in rarity[7:]]))
+ 
+         selected = 0
+         for card, r in zip(cards, rarity):
+             if r in target_rarity:
+-                self.device.click(CARD_GRIDS[card])
++                if semantic_session is not None:
++                    semantic_session.old_retirement_select_card(card)
++                else:
++                    self.device.click(CARD_GRIDS[card])
+                 self.device.sleep((0.1, 0.15))
+                 selected += 1
+             if selected >= amount:
+@@ -85,6 +94,11 @@
+                 SHIP_CONFIRM if using old_retire
+             out: IN_RETIREMENT_CHECK
+         """
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        semantic_old_retire = (semantic_session is not None and
++            getattr(semantic_session, 'old_retirement_confirmation_pending', lambda: False)())
++        if semantic_old_retire:
++            semantic_session.begin_old_retirement_confirmation()
+         logger.info('Retirement confirm')
+         executed = False
+         for button in [SHIP_CONFIRM, SHIP_CONFIRM_2, EQUIP_CONFIRM, EQUIP_CONFIRM_2, GET_ITEMS_1, SR_SSR_CONFIRM]:
+@@ -156,6 +170,8 @@
+                 # equipment confirms are the next to appear
+                 self.interval_clear([EQUIP_CONFIRM, EQUIP_CONFIRM_2])
+                 continue
++        if semantic_old_retire:
++            semantic_session.finish_old_retirement_confirmation()
+ 
+     def retirement_appear(self):
+         return self.appear(RETIRE_APPEAR_1, offset=30) \
+@@ -302,10 +318,18 @@
+             'SSR': 'super_rare'
+         }
+         _rarity = [correspond_name[i] for i in rarity]
+-        self.dock_sort_method_dsc_set(False, wait_loading=False)
+-        self.dock_favourite_set(False, wait_loading=False)
+-        self.dock_filter_set(
+-            sort='level', index='all', faction='all', rarity=_rarity, extra='no_limit')
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            semantic_session.require_old_retirement_policy(keep_common_cv=self.retire_keep_common_cv)
++            semantic_session.old_retirement_set_sort(False)
++            semantic_session.old_retirement_set_favourite(False)
++            semantic_session.old_retirement_set_filter(
++                sort='level', index='all', faction='all', rarity=_rarity, extra='no_limit')
++        else:
++            self.dock_sort_method_dsc_set(False, wait_loading=False)
++            self.dock_favourite_set(False, wait_loading=False)
++            self.dock_filter_set(
++                sort='level', index='all', faction='all', rarity=_rarity, extra='no_limit')
+ 
+         total = 0
+ 
+@@ -332,8 +356,12 @@
+             self.handle_dock_cards_loading()
+             continue
+ 
+-        self.dock_sort_method_dsc_set(True, wait_loading=False)
+-        self.dock_filter_set()
++        if semantic_session is not None:
++            semantic_session.old_retirement_set_sort(True)
++            semantic_session.old_retirement_set_filter()
++        else:
++            self.dock_sort_method_dsc_set(True, wait_loading=False)
++            self.dock_filter_set()
+         logger.info(f'Total retired: {total}')
+         return total
+ 
+@@ -412,9 +440,8 @@
+             mode=self.config.Retirement_RetireMode
+         )
+         if current_semantic_session() is not None:
+-            # The legacy old-retire path still owns framebuffer matching and
+-            # coordinate input.  Refuse it before page detection or mutation;
+-            # the two reviewed semantic transactions remain ALAS-owned below.
++            # Mode declaration is shared; optional typed branches enforce
++            # their own observation/input capability before mutation.
+             retirement_config.require_semantic_entry()
+ 
+         # 2025.05.29 game tips that infos skin feature when you enter dock

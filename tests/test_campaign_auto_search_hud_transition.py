@@ -251,6 +251,14 @@ def test_original_combat_execute_waits_through_hud_then_returns_to_strict_runnin
 @pytest.mark.parametrize('kind', ['hud_transition', 'hud_loading_transition'])
 def test_original_status_checks_all_stage_aliases_then_waits_for_next_map_frame(kind):
     handle, _oracle, clock, adapter = retained_runtime(kind=kind)
+    # Native Device exposes the session facade, not the adapter itself.
+    # Exercise the new defeat probe through that real facade and frame clock.
+    from alas_headless import AlasSemanticSession
+    session = AlasSemanticSession.__new__(AlasSemanticSession)
+    session.adapter = adapter
+    session._frame_clock = clock
+    session.open = lambda: adapter
+    session.refresh_frame = lambda: clock.acquire(include_ui=True)
     next_generation = clock.borrow().generation + 1
     payload = capture('map_running')
     calls = []
@@ -274,7 +282,7 @@ def test_original_status_checks_all_stage_aliases_then_waits_for_next_map_frame(
         raise AssertionError('native status failed to return to running map')
 
     host = SimpleNamespace(
-        device=SimpleNamespace(semantic_adapter=adapter, stuck_record_clear=Mock(), click_record_clear=Mock()),
+        device=SimpleNamespace(semantic_adapter=session, stuck_record_clear=Mock(), click_record_clear=Mock()),
         loop=loop, appear=appear, _auto_search_status_confirm=True,
         _auto_search_in_stage_timer=timer, _auto_search_offset=(0, 0),
         handle_get_ship=lambda: adapter._appear_once('GET_SHIP'),

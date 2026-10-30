@@ -1,0 +1,128 @@
+{
+  "schema": "alas-headless.four-task-timer-continuity/v1",
+  "updated_at": "2026-10-27T21:39:32.822275+08:00",
+  "passed": true,
+  "controlled_live": {
+    "schema": "alas-headless.four-task-watch-case-closeout/v1",
+    "recorded_at": "2026-10-27T21:39:32.822275+08:00",
+    "case_closed": true,
+    "original_raw_passed": true,
+    "exit_code": 0,
+    "forced_stop": false,
+    "native_stop_exit": true,
+    "real_stop_file_requested": true,
+    "elapsed_seconds": 1561.063,
+    "calls_completed": 10,
+    "call_cap": 18,
+    "unused_calls_sealed": 8,
+    "command_counts": {
+      "commission": 2,
+      "tactical": 2,
+      "reward": 1,
+      "goto_main": 4,
+      "research": 1
+    },
+    "all_ten_original_calls_return_true": true,
+    "capability_spent": {
+      "commission.reward": 2,
+      "commission.start": 3,
+      "research.reward": 1,
+      "research.start": 2,
+      "tactical.reward": 1,
+      "tactical.assign": 1
+    },
+    "unused_grants_sealed": {
+      "mission.claim": 12,
+      "commission.reward": 6,
+      "commission.start": 9,
+      "research.reward": 5,
+      "research.start": 4,
+      "storage.disassemble": 350
+    },
+    "unused_grants_not_reused": true,
+    "initial_overdue_wave": "post-r16-four-task-initial-wave-r1.json",
+    "true_future_waves": [
+      "post-r16-tactical-natural-r1.json",
+      "post-r16-research-natural-r1.json",
+      "post-r16-commission-natural-r1.json"
+    ],
+    "original_next_runs": {
+      "Commission": "2026-10-27 22:31:35",
+      "Research": "2026-10-27 23:46:54",
+      "Reward": "2026-10-27 23:37:24",
+      "Tactical": "2026-10-28 00:13:41"
+    },
+    "case_source_profiles_unchanged": {
+      "source_profile_bytes_unchanged": true,
+      "source_full_bytes_unchanged": true,
+      "source_original_profile_bytes_unchanged": true
+    },
+    "independent_resource0_dock_inspection": {
+      "raw": "post-r16-four-task-final-dock-r1.json",
+      "passed": true,
+      "seconds": 11.264,
+      "native_ui_calls": [
+        "goto_main",
+        "ui_ensure_build",
+        "retirement_quit",
+        "goto_main"
+      ],
+      "all_grants": 0,
+      "dock": {
+        "generation": 334071,
+        "capacity_used": 863,
+        "capacity_total": 1010,
+        "selected_count": 0
+      },
+      "final": {
+        "pid": 35557,
+        "generation": 334173,
+        "ui_generation": 334173,
+        "main": true,
+        "resources": {
+          "oil": 11231,
+          "gold": 100779,
+          "gem": 3505
+        },
+        "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+      },
+      "source_profiles_bytes_unchanged": true
+    },
+    "initial_resources": {
+      "oil": 10743,
+      "gold": 104459,
+      "gem": 3505
+    },
+    "final_resources": {
+      "oil": 11231,
+      "gold": 100779,
+      "gem": 3505
+    },
+    "net_resource_delta": {
+      "oil": 488,
+      "gold": -3680,
+      "gem": 0
+    },
+    "case_start_dock_not_observed": true,
+    "do_not_invent_dock_delta": true,
+    "same_start_and_final_game_pid": true,
+    "all_exact_owner_and_postcheck_identities_exited": true,
+    "stop_decision": "post-r16-four-task-cooperative-stop-decision-r1.json",
+    "not_full60_original_profile_or_overnight_soak": true,
+    "old_cases_not_stitched": true,
+    "local_only": true
+  },
+  "offline_full_authority": "integration/alas/current-batch-full-regression-daily-tactical-20261027/result.json",
+  "production_full_snapshot_current": true,
+  "scope": "One independent original configured scheduler,privatefour-business task enablement and originalfixedRestart policy,26min/10calls alltrue;initialoverdue and3truefuturewaves distinguished. Not alloriginal60tasks or overnightclaim.",
+  "ordinary_storage_recovery_verified": false,
+  "storage350_used": 0,
+  "reward_future_wave_within_thiscase": false,
+  "reward_next_beyond_original_harddeadline": true,
+  "current_live_support_promoted": false,
+  "native_members": 247,
+  "combined_sha256": "bee9db8c63e6f2a4cd271cca28cad57edd0158d878337295ebc3b35927935e53",
+  "sdk_native_observer_changed_this_batch": false,
+  "raw_sha256": "ce9e75e193ed1386d52b7055aaefa6b8744c62013ee98a73a03f27ad1b598b06",
+  "final_inspection_sha256": "2ea68a15e244afa8d13d4e105fbf2cc63f183bfa3f0b3fa5282d9d1d2b845f12"
+}

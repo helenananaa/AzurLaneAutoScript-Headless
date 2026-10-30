@@ -25,7 +25,7 @@ class AlasRetirementConfigTests(unittest.TestCase):
         self.assertEqual(result["invalid_case_count"], 7)
         self.assertEqual(
             result["semantic_admission"],
-            {"one_click_retire": True, "enhance": True, "old_retire": False},
+            {"one_click_retire": True, "enhance": True, "old_retire": True},
         )
         self.assertEqual(result["mutation_budget"], 0)
         self.assertFalse(result["real_retirement_performed"])
@@ -39,9 +39,8 @@ class AlasRetirementConfigTests(unittest.TestCase):
         }
         self.assertTrue(snapshots["one_click_retire"].semantic_admitted)
         self.assertTrue(snapshots["enhance"].semantic_admitted)
-        self.assertFalse(snapshots["old_retire"].semantic_admitted)
-        with self.assertRaises(SemanticGateClosed):
-            snapshots["old_retire"].require_semantic_entry()
+        self.assertTrue(snapshots["old_retire"].semantic_admitted)
+        snapshots["old_retire"].require_semantic_entry()
 
     def test_invalid_modes_fail_closed(self):
         for value in (None, True, 1, "", "unknown", [], {}):

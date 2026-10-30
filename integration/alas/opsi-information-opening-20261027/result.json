@@ -1,0 +1,141 @@
+{
+  "schema": "alas-headless.opsi-information-opening/v1",
+  "at": "2026-10-27T14:57:31.808427+08:00",
+  "applied": true,
+  "source": {
+    "path": "python/alas_headless/oracle/combat.py",
+    "sha256": "ee2ff15da1bc93cedc0667a18085c1d5b1f8d8bd13020449f64d13a5e7b28d10"
+  },
+  "before_source": {
+    "path": "artifacts/full-feature-live-20261025/opsi-info-opening-before-r1/combat.py",
+    "sha256": "700ea93717b8af13221cbd55a7f238b8ea09b56ed36e5841a6dda66045b0dcfc"
+  },
+  "before_source_matches_R14_snapshot": true,
+  "diagnosis": "The retained immutable screenshot has the exact automation-information text and actionable unique button with CombatUIStandard weapon controls/timer and opening SkillPainting controls,but no PauseBtn Button. Existing local information owner returnsNone because it uses the shared Button-based combat predicate. The active PauseBtn Image is not an actionable Button receipt and is not promoted to input authority.",
+  "scope": "Only information-popup opening ownership and its post-close combat-owner sample. Generic daily/combat/Pause input remains unchanged. Exact popup text,choice uniqueness,foreground/PID,coherent typed pair,raycast and postcondition retained;no native task/timer/combat loops changed. Single SDK file, no C++/APK/native patch change.",
+  "failure": {
+    "path": "artifacts/full-feature-live-20261025/post-warehouse-opsi-automation-info-failure-r1.json",
+    "sha256": "dee971c7cc217b9b214fa5ededb55c337d40ea7b8dc432e32762547242b37209"
+  },
+  "immutable_fixture": {
+    "path": "tests/fixtures/opsi-automation-info-opening-20261027.json",
+    "sha256": "b343d18905118de1f79dae7bb182352c2fdd1b130550ad85597fdad0ea97d2f6"
+  },
+  "before": {
+    "failed": 3,
+    "passed": 11,
+    "log": {
+      "path": "artifacts/full-feature-live-20261025/opsi-info-opening-before-r1.log",
+      "sha256": "11d460918091be322790a093443b744076df72afb3118f7c97e8b684dd95d904"
+    }
+  },
+  "after": {
+    "passed": 66,
+    "warnings": 7,
+    "log": {
+      "path": "artifacts/full-feature-live-20261025/opsi-info-opening-after-r1.log",
+      "sha256": "cd0d1a72a2cd43ae857f5d4320718e4dced167935f62fc9956f13657b1896c5b"
+    },
+    "scope": "Original native handler AST on real immutable pair plus drift and negative identity/owner/input/postcondition;existing OpSi/META/campaign information and passive statistics."
+  },
+  "live_information_positive_repeat": true,
+  "postfix_independent_read": {
+    "path": "artifacts/full-feature-live-20261025/opsi-opening-info-postfix-read-r1.json",
+    "sha256": "1f23b56646c9be817ccbfbea12826893b91230c71c38f65873939ba3f57e889a"
+  },
+  "postfix_independent_read_scope": "Later fresh zero-input read shows no Msgbox and no SkillPainting;positive information assertion did not pass. It is not the original failed dispatch frame and does not establish why the popup disappeared. No missing Button is replaced with an actionable Image.",
+  "recovery": {
+    "raw": {
+      "path": "artifacts/full-feature-live-20261025/opsi-opening-game-recovery-r1.json",
+      "sha256": "cd5b5a7580b5da7b5e2760c8d79776506eecdf96747c8d9bc1c6fa507a72fbc0"
+    },
+    "process": {
+      "path": "artifacts/full-feature-live-20261025/opsi-opening-game-recovery-r1-process.json",
+      "sha256": "18f989b663ba7711cf0562fdf414b5d4a457e2967e77668c6c7c15a88d342b63"
+    },
+    "passed": true,
+    "elapsed_seconds": 36.409,
+    "original_native_calls_counted": 1,
+    "ordinary_grants": 0,
+    "shared_cold_launch": "AdbObserverBridge.restart_game -force-gfx-st",
+    "original_handler": "LoginHandler.handle_app_login",
+    "source_and_persistent_profile_unchanged": true,
+    "after": {
+      "pid": 28000,
+      "generation": 377,
+      "ui_generation": 377,
+      "main": true,
+      "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+      "resources": {
+        "oil": 10010,
+        "gold": 101558,
+        "gem": 3505
+      }
+    },
+    "independent_two_advancing_Main_frames": {
+      "path": "artifacts/full-feature-live-20261025/opsi-opening-recovery-main-read-r1.json",
+      "sha256": "f65b087eda30ed49c8f0c8dfa485059fcef2ab6ceba4357d4168d2b70bb5d09c"
+    }
+  },
+  "case_accounting": {
+    "original_cap": 24,
+    "r1": 13,
+    "r2": 0,
+    "r3": 5,
+    "recovery_LoginHandler": 1,
+    "r4_max": 5,
+    "resource_grants_from": "r3 terminal last task remaining_action_grants,not r1 initial grants",
+    "remaining_grants": {
+      "mission.claim": 7,
+      "mail.mutation": 0,
+      "tactical.reward": 0,
+      "awaken.execute": 0,
+      "minigame.play": 0,
+      "meta.assist": 0,
+      "operation_siren.coordinate_checkout": 1,
+      "operation_siren.action_point_use": 2,
+      "operation_siren.daemon_move": 16,
+      "operation_siren.port_repair": 1,
+      "tactical.assign": 3,
+      "commission.reward": 11,
+      "commission.start": 8,
+      "daily.execute": 0,
+      "exercise.execute": 0,
+      "exercise.refresh": 0,
+      "research.reward": 4,
+      "research.start": 0,
+      "dorm.collect": 2,
+      "dorm.feed": 16,
+      "enhancement.execute": 0,
+      "guild.claim": 0,
+      "guild.dispatch": 0,
+      "guild.exchange": 0,
+      "build.submit": 0,
+      "retirement.execute": 0,
+      "shop.purchase": 0,
+      "storage.disassemble": 350,
+      "campaign.stage_entry": 0,
+      "campaign.fleet_mutation": 0,
+      "campaign.sortie": 0,
+      "campaign.grid_click": 0,
+      "campaign.viewport_swipe": 0
+    },
+    "early_stop_at": "2026-10-27T16:59:11.265675+08:00",
+    "deadline": "2026-10-27T17:14:11.265675+08:00"
+  },
+  "native_members": 247,
+  "combined_sha256": "bee9db8c63e6f2a4cd271cca28cad57edd0158d878337295ebc3b35927935e53",
+  "current_full_regression": false,
+  "latest_full": "integration/alas/current-batch-full-regression-warehouse-20261027/result.json",
+  "latest_full_scope": "R14 native246/before native247 zero grant change and this SDK change;not current full",
+  "support_promotion": false,
+  "delivery": "LOCALONLY/noautomaticcommitpush",
+  "live_opening_without_pause_branch_repeat": false,
+  "live_repeat_scope": {
+    "original_handler_positive_confirmation": true,
+    "receipt_generation": 1634,
+    "exact_new_opening_without_PauseBtn_branch_independently_captured": false,
+    "note": "The successful action receipt proves the updated original information-handler path returned through its postcondition. Its pre-input Button/UI pair was not retained,so it cannot isolate the new no-Pause opening branch. Original immutable failure branch is offline tested only."
+  },
+  "live_native_case_closeout": "integration/alas/post-warehouse-native-watch-20261027/result.json"
+}

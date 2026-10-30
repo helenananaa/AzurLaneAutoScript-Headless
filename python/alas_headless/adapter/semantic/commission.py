@@ -80,17 +80,21 @@ class CommissionAdapterPorts:
     def commission_rows(self) -> Tuple[CommissionRowState, ...]:
         self._package_gate()
         self._require_commission_context()
-        return self.oracle.commission_rows()
+        return self._frame_or_live_observation_oracle().commission_rows()
 
     def commission_is_empty(self) -> bool:
         self._package_gate()
         self._require_commission_context()
-        return self.oracle.commission_is_empty()
+        return self._frame_or_live_observation_oracle().commission_is_empty()
 
     def commission_scroll_state(self) -> CommissionScrollState:
         self._package_gate()
         self._require_commission_context()
-        return self.oracle.commission_scroll_state()
+        # Native ALAS inspects the scrollbar after detecting this screenshot's
+        # rows. Reuse its immutable projection instead of splitting a new live
+        # Button/UI pair. The actual swipe still acquires a fresh input frame
+        # and proves movement against live postconditions below.
+        return self._frame_or_live_observation_oracle().commission_scroll_state()
 
     def commission_scroll_next(self) -> Optional[CommissionScrollProof]:
         self._package_gate()
@@ -399,7 +403,7 @@ class CommissionAdapterPorts:
         ):
             tab_target = COMMISSION_TAB_TARGETS.get(name)
             if tab_target is not None:
-                receipt = self.oracle.click_image(tab_target)
+                receipt = self._fresh_input_oracle().click_image(tab_target)
                 self._commission_context.passive_transition_until = time.monotonic() + 12.0
                 return receipt
             if name in ("COMMISSION_ADVICE", "COMMISSION_START"):
@@ -407,13 +411,14 @@ class CommissionAdapterPorts:
                 if context.selected_signature is None:
                     raise SemanticGateClosed("commission row selection is not proven")
                 if name == "COMMISSION_ADVICE":
-                    return self.oracle.click_commission_recommend(
+                    return self._fresh_input_oracle().click_commission_recommend(
                         context.selected_signature
                     )
                 if context.start_receipt is not None:
                     return context.start_receipt
                 self._require_action_grant("commission.start")
-                detail = self.oracle.commission_detail_state()
+                input_oracle = self._fresh_input_oracle()
+                detail = input_oracle.commission_detail_state()
                 expected = context.selected_signature
                 if detail.signature != (expected[1], expected[2], expected[3]):
                     raise SemanticGateClosed(
@@ -426,7 +431,7 @@ class CommissionAdapterPorts:
                 context.selected_oil_cost = detail.oil_cost
                 receipt = self._dispatch_mutation(
                     "commission.start",
-                    lambda: self.oracle.click_commission_start(
+                    lambda: input_oracle.click_commission_start(
                         context.selected_signature
                     ),
                 )
@@ -438,6 +443,7 @@ class CommissionAdapterPorts:
                 targets = tuple(
                     semantic_id
                     for semantic_id in (
+                        "tactical/book/cancel",
                         "tactical/page/back",
                         "commission/page/back",
                     )
@@ -575,7 +581,7 @@ class CommissionAdapterPorts:
             signature = getattr(button, "semantic_commission_signature", None)
             if not isinstance(signature, tuple) or len(signature) != 6:
                 raise SemanticGateClosed("ALAS commission row identity is malformed")
-            receipt = self.oracle.click_commission_row(signature)
+            receipt = self._fresh_input_oracle().click_commission_row(signature)
             context = self._commission_context
             context.selected_signature = signature
             context.selected_at = time.monotonic()

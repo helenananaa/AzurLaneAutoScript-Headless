@@ -110,17 +110,22 @@ class AutoSearchCombat:
             self._auto_search_in_stage_timer.reset()
         return False
 
+
     def auto_search_combat_status(self):
         """
-            Pages:
-                in: any
-                out: is_auto_search_running()
-            """
+        Pages:
+            in: any
+            out: is_auto_search_running()
+        """
         logger.info('Auto Search combat status')
         self.device.stuck_record_clear()
         self.device.click_record_clear()
         exp_info = False
         for _ in self.loop():
+            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+            if semantic_adapter is not None and semantic_adapter.close_campaign_battle_fail_tip_if_present():
+                self._auto_search_status_confirm = True
+                continue
             if self.is_auto_search_running():
                 self._auto_search_status_confirm = False
                 break
@@ -240,6 +245,11 @@ class AutoSearchCombat:
 class EnemySearchingHandler:
 
     def is_in_stage_page(self):
+        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+        archives_visible = getattr(semantic_adapter, 'war_archives_campaign_visible', None)
+        if callable(archives_visible) and archives_visible():
+            # Archives are a stage destination without being the main Campaign Page.
+            return True
         for check in [CAMPAIGN_CHECK, EVENT_CHECK, SP_CHECK]:
             if self.appear(check, offset=(20, 20)):
                 return True

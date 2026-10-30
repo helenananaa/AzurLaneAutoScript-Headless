@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-29T09:18:18.037750+08:00",
+  "native_applied": true,
+  "native_series": 252,
+  "source": "E:\\Runtime\\ALAS\\redroid-live-20261022\\module\\daily\\daily.py",
+  "native_sha256": "7cc44be2a70a33dad58e86917ba7811ba7391e004aba86b4c1f7fe74c7fb4e6a",
+  "member_sha256": "c9f94e88918a704808bf0ac97a5526cccb2b98c7770500c36e7a3af41106ddf4",
+  "focused": "160PASS1skip;original first-index recovery via page navigation,Loading-only unsubmitted entry,defeat and task isolation",
+  "support_promotion": false,
+  "live_recovery_qualified": false,
+  "current_full": false
+}

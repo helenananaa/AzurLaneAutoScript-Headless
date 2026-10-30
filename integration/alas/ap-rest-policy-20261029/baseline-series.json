@@ -1,0 +1,1246 @@
+{
+  "members": [
+    {
+      "order": 1,
+      "path": "integration/alas/series/0001-core-ports.patch",
+      "sha256": "f621d1bc028b0290f871136aabc6612a2176ae41d85d8cfd350403c47e8ebdf6"
+    },
+    {
+      "order": 2,
+      "path": "integration/alas/series/0002-session-lifecycle.patch",
+      "sha256": "6ed6fd2b206da34b5fc50d69169a0876e5edcdb10d36bba0944a55881f7716a9"
+    },
+    {
+      "order": 3,
+      "path": "integration/alas/series/0010-mission-mail-flow-ports.patch",
+      "sha256": "276bf9093974e32d3c8f3f350ef0c8d0087044b037f23f5d0b973d28ee05cdfd"
+    },
+    {
+      "order": 4,
+      "path": "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+      "sha256": "d5e17f6732f5d9f074d41308de9265924fcc80ece46a6175005c395beed20a88"
+    },
+    {
+      "order": 5,
+      "path": "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+      "sha256": "38abd287e47ef9844d689ae5d65c702237a1ad1c88f72269898a833dc03a06c5"
+    },
+    {
+      "order": 6,
+      "path": "integration/alas/series/0040-campaign-flow-ports.patch",
+      "sha256": "2172c5a5adee01571ec6365f740d5d1769f619c87b1d29c34000ee5f61664ff4"
+    },
+    {
+      "order": 7,
+      "path": "integration/alas/series/0050-combat-flow-ports.patch",
+      "sha256": "bb389024423e85ef8a5df5cdef0f7f9804954c0fc7dd2875aa1027127a50d06d"
+    },
+    {
+      "order": 8,
+      "path": "integration/alas/series/0060-shop-flow-ports.patch",
+      "sha256": "27589d11dfc43444923d983caff6a9f7bb0e241700173f9d83ade0137e818951"
+    },
+    {
+      "order": 9,
+      "path": "integration/alas/series/0070-shipyard-flow-ports.patch",
+      "sha256": "a6b5cb961d9bf7a86aa9f07152e3a99cabd32f87ce4cc0cef1b10cd8794596a7"
+    },
+    {
+      "order": 10,
+      "path": "integration/alas/series/0080-current-task-flow-ports.patch",
+      "sha256": "dee485f8ce5f4fdb45efba82d74dd96e5aa7796c5da588ae7f297a84b318e839"
+    },
+    {
+      "order": 11,
+      "path": "integration/alas/series/0090-operation-siren-flow-ports.patch",
+      "sha256": "8e19e4265c8460026c7915bafba6d6e6af8eb0963c504f40a3984152936e9617"
+    },
+    {
+      "order": 12,
+      "path": "integration/alas/series/0100-tool-flow-ports.patch",
+      "sha256": "42a2c2b02b7a422315c2de832ea2f825962978b2a3e1bb3e2e1825adc64ac138"
+    },
+    {
+      "order": 13,
+      "path": "integration/alas/series/0110-stop-condition-ports.patch",
+      "sha256": "1f16201222daa3e35ee3b0c19a1326621effd4d7d86411250a32fc7911723aa9"
+    },
+    {
+      "order": 14,
+      "path": "integration/alas/series/0120-retirement-flow-ports.patch",
+      "sha256": "be2c7f57ca3ce3b6edf5e8468b0e675708138a3ca99bf1cc33ab4d3e7b7bc3a6"
+    },
+    {
+      "order": 15,
+      "path": "integration/alas/series/0130-enhancement-flow-ports.patch",
+      "sha256": "6b06ac8e54d6684ff357c39664b78b534bc3a3a72942929dad4158a09af5c112"
+    },
+    {
+      "order": 16,
+      "path": "integration/alas/series/0140-scheduler-contract.patch",
+      "sha256": "e97550cacdc0aa556135357f8e2d0c50e71548a7d28867c5a26a3492200a99b7"
+    },
+    {
+      "order": 17,
+      "path": "integration/alas/series/0150-runtime-optimization-contract.patch",
+      "sha256": "de7cac06cbaf47a5addf38b3488274a18834cb6088628023696e6ac7f3356015"
+    },
+    {
+      "order": 18,
+      "path": "integration/alas/series/0160-awaken-config-contract.patch",
+      "sha256": "9b466b8c40119e19ec4aa6c89ac395fd797f39deb4cc9b690a0c92e9eecab3e7"
+    },
+    {
+      "order": 19,
+      "path": "integration/alas/series/0165-hospital-config-contract.patch",
+      "sha256": "d611eba4901a3a5474359e7c07fdda4e59a090bc748df0af2e8a4fbbd4d5ddfb"
+    },
+    {
+      "order": 20,
+      "path": "integration/alas/series/0170-raid-config-contract.patch",
+      "sha256": "0d4d3903f0ef0d23453b821ba375ee926f32206d358f8df8a1a17f3fd44a5d95"
+    },
+    {
+      "order": 21,
+      "path": "integration/alas/series/0175-coalition-config-contract.patch",
+      "sha256": "94e7c98adf1e254c4524821e025b66d21e57c1b7552e73c88124bc6b94a3a07a"
+    },
+    {
+      "order": 22,
+      "path": "integration/alas/series/0180-private-quarters-config-contract.patch",
+      "sha256": "8d2c706cac6fb7b40264ffa72255433ee20c1eeb4d302e1c24fadbe7488e8b99"
+    },
+    {
+      "order": 23,
+      "path": "integration/alas/series/0185-guild-config-contract.patch",
+      "sha256": "36a0bdb71d04ee0f4e356061103dd9d05eeccbf79a77c8994b305e6f11a6b810"
+    },
+    {
+      "order": 24,
+      "path": "integration/alas/series/0190-meowfficer-config-contract.patch",
+      "sha256": "1840f4c706483e0049a9161f6ea59dd0e1dba37b98c6d23b900f2e31a71327ce"
+    },
+    {
+      "order": 25,
+      "path": "integration/alas/series/0195-gems-farming-config-contract.patch",
+      "sha256": "059a4d2d1c8d853eb5497c2e09dc061c51c0c9e6ceb3dea2c4c59bf146511206"
+    },
+    {
+      "order": 26,
+      "path": "integration/alas/series/0210-restart-scheduler-flow-port.patch",
+      "sha256": "4c70a2c5d136d3b8bfe228ef6a2e2a77e577079bca9cd23bb00d0299dd48bb46"
+    },
+    {
+      "order": 27,
+      "path": "integration/alas/series/0220-gacha-multi-order-flow-port.patch",
+      "sha256": "48640210ed613c8082c4f5de1ab07f9ea2dc1462e4933773976e3ea6b11443d4"
+    },
+    {
+      "order": 28,
+      "path": "integration/alas/series/0230-gacha-queue-finish-flow-port.patch",
+      "sha256": "1f0d68d31c40072594c80d08216eb43cc9b2a1627d02916051c42c2a30eb865a"
+    },
+    {
+      "order": 29,
+      "path": "integration/alas/series/0240-gacha-result-wait-port.patch",
+      "sha256": "ce0d6c37d16acd0309fd34db634abef94716d16414f5347267e3d39e5160bd9f"
+    },
+    {
+      "order": 30,
+      "path": "integration/alas/series/0250-benchmark-return-main-flow-port.patch",
+      "sha256": "d1ac316501d89ac94ea54c1dd53e1a58d73e6f3e99c360badb02fcdf4b638544"
+    },
+    {
+      "order": 31,
+      "path": "integration/alas/series/0260-minigame-budget-exhaustion-flow-port.patch",
+      "sha256": "50279457231ca66b443f4b4f2eed813dbeb23e7fa6c0f64429a665d9d578dc05"
+    },
+    {
+      "order": 32,
+      "path": "integration/alas/series/0270-dorm-current-furniture-flow-port.patch",
+      "sha256": "37eaa7e2aa1b5beefa1f7052e22f4b7113e1fc3c30bf1ed7834af5ff48a7e847"
+    },
+    {
+      "order": 33,
+      "path": "integration/alas/series/0275-reward-claim-budget-exhaustion-flow-port.patch",
+      "sha256": "a6727879655e913e15defaf52dcc2da61af096e6c648c909b04926089c472107"
+    },
+    {
+      "order": 34,
+      "path": "integration/alas/series/0280-weekly-mission-progress-flow-port.patch",
+      "sha256": "f5c2969d0aec7d797b49490500818cf245a2e0ab8fc75b476ca08af861452546"
+    },
+    {
+      "order": 35,
+      "path": "integration/alas/series/0290-dorm-collect-empty-food-flow-port.patch",
+      "sha256": "34a2156a5512d382c94653ed70992c5022e94ac3bf85e95bb0e7b6e69cd35714"
+    },
+    {
+      "order": 36,
+      "path": "integration/alas/series/0300-research-selected-detail-entry-port.patch",
+      "sha256": "d66d2aa8165116430725e69786fd18029996926ddb99db429a7c584a431dff67"
+    },
+    {
+      "order": 37,
+      "path": "integration/alas/series/0310-research-queue-entry-port.patch",
+      "sha256": "07d638c1865d4ee16e416943a2b0bddac2667c9e82ac1056fa6b57c0afb582c4"
+    },
+    {
+      "order": 38,
+      "path": "integration/alas/series/0320-research-code-selection-port.patch",
+      "sha256": "68ad36a70e22223d11a1dc40724f35e296b66c671aa7f4fb62f22ac735cf9a40"
+    },
+    {
+      "order": 39,
+      "path": "integration/alas/series/0330-research-atomic-start-port.patch",
+      "sha256": "10ab75d9c2e42c13d6339e7bb5655daccb277bb1bd18e7e150ec6b53db074925"
+    },
+    {
+      "order": 40,
+      "path": "integration/alas/series/0340-campaign-auto-search-port.patch",
+      "sha256": "db75b4fe1c6fe3e0d11add075485dfcadd11c6c1311a94e8cbd0998256e1b722"
+    },
+    {
+      "order": 41,
+      "path": "integration/alas/series/0350-meowfficer-dock-training-port.patch",
+      "sha256": "c6ed23c28de00a3b367fb1dfb3b813d87830dcca04e2096bb2fe758ff8065c99"
+    },
+    {
+      "order": 42,
+      "path": "integration/alas/series/0360-guild-flow-port.patch",
+      "sha256": "8a559a95f3e047442a5a9d83654b628c32da546896ff9c829ea2c5547a9dde57"
+    },
+    {
+      "order": 43,
+      "path": "integration/alas/series/0370-hard-11-4-semantic-clear-port.patch",
+      "sha256": "4a37053a0eb8482a8d29c128826583efab019daa1ea868b1b424b9b93f5d9d19"
+    },
+    {
+      "order": 44,
+      "path": "integration/alas/series/0380-exercise-full-flow-port.patch",
+      "sha256": "8e4ed513090d98f579030c2d66d3d6ca4280c45e7816e793fe3251fdd36af6be"
+    },
+    {
+      "order": 45,
+      "path": "integration/alas/series/0095-operation-siren-typed-navigation.patch",
+      "sha256": "457d432b8211f4bab728bcc54b988dc6223aeccd48b4f7770aac22e082c6ce8e"
+    },
+    {
+      "order": 46,
+      "path": "integration/alas/series/0096-operation-siren-boss-resolve.patch",
+      "sha256": "29037819a940ab9e4948faf0da4e9fb60eb1a3b3148f00439311fcdee58e45e9"
+    },
+    {
+      "order": 47,
+      "path": "integration/alas/series/0097-operation-siren-special-zone-recovery.patch",
+      "sha256": "a6660b51a7734ff03f51260d1107bd42cd33f84a2018bdc15628215172b2fcc1"
+    },
+    {
+      "order": 48,
+      "path": "integration/alas/series/0098-operation-siren-stronghold-runtime.patch",
+      "sha256": "833a6244eaaeed8b94abc44c35e343b7b7aeda8625887a041ca8e7a4140680ec"
+    },
+    {
+      "order": 49,
+      "path": "integration/alas/series/0099-operation-siren-meta-beacon-runtime.patch",
+      "sha256": "ca911aa780b68f438720dacb27235bb7384f1bb62951b57291617d80799383c3"
+    },
+    {
+      "order": 50,
+      "path": "integration/alas/series/0100-operation-siren-abyssal-runtime.patch",
+      "sha256": "f9a683b2254e12405dfcebdb1ffc61ca54c3d49a1b44fa8d61d9f92e81912efb"
+    },
+    {
+      "order": 51,
+      "path": "integration/alas/series/0102-operation-siren-shop-runtime.patch",
+      "sha256": "ac1c628db22b3be10f5facc886a3b5948d06fb9748d232321b16d75fe0d4dc1a"
+    },
+    {
+      "order": 52,
+      "path": "integration/alas/series/0103-operation-siren-voucher-runtime.patch",
+      "sha256": "b6e5179bd141cb1ed9f21e56f9ce5b52feaf5d066b75d8968eeb6ce57c7b8670"
+    },
+    {
+      "order": 53,
+      "path": "integration/alas/series/0104-operation-siren-archive-runtime.patch",
+      "sha256": "8ab2e0127eb77dfcf1774f164132405366c81b5a2cb19f11f7bed2fb53ae1067"
+    },
+    {
+      "order": 54,
+      "path": "integration/alas/series/0105-operation-siren-auto-search-transition-recovery.patch",
+      "sha256": "f24ee9313068e3a74561206fd742f28a2c61e98c325d3d3e22d806fbd51df01f"
+    },
+    {
+      "order": 55,
+      "path": "integration/alas/series/0106-operation-siren-explore-globe-recovery.patch",
+      "sha256": "54f3e18cf6451fda1aa232065b23124442c27235cceb5835a30f44faa4c1df34"
+    },
+    {
+      "order": 56,
+      "path": "integration/alas/series/0107-operation-siren-explore-inventory-and-anchor-recover.patch",
+      "sha256": "759151fa243c290270824b9b42ed809c0b89b1cf877eee2b552e8798c35b990a"
+    },
+    {
+      "order": 57,
+      "path": "integration/alas/series/0108-operation-siren-obscure-special-zone-rescan.patch",
+      "sha256": "585a3567c5a59706a4b76213d07d4c0753604b865e03cc5be2cbafe7f388b7ec"
+    },
+    {
+      "order": 58,
+      "path": "integration/alas/series/0109-operation-siren-coordinate-checkout-recovery.patch",
+      "sha256": "ef0c0d17aa4e803c847e087f1749073de5f1157b1a11a70c398ae350846df8d4"
+    },
+    {
+      "order": 59,
+      "path": "integration/alas/series/0110-operation-siren-special-zone-exit-transition.patch",
+      "sha256": "a2c38079675da63d9323f3cc3b8ad6e6c10be8ac786ccec6ebd1d09939f06428"
+    },
+    {
+      "order": 60,
+      "path": "integration/alas/series/0111-operation-siren-guidepost-direct-target.patch",
+      "sha256": "3f6e1c432979faa222b2fd2c63c57191da58cc54173b9ec83c494c2055b223b8"
+    },
+    {
+      "order": 61,
+      "path": "integration/alas/series/0112-operation-siren-exact-map-exit-confirm.patch",
+      "sha256": "2b5d6d22f7c6dcd5c112da6517fe11c5e47621b53ca2bf3ca77120c0cc17db18"
+    },
+    {
+      "order": 62,
+      "path": "integration/alas/series/0113-operation-siren-coordinate-pin-transition.patch",
+      "sha256": "a857815d54beebe98b9684c6a8931ef380d1ab63f9d5287394556da2611c179b"
+    },
+    {
+      "order": 63,
+      "path": "integration/alas/series/0114-operation-siren-guidepost-retry.patch",
+      "sha256": "c5a68b722883a075effcd7cd7ea602240b785d33e417eb5de775be5ac038def1"
+    },
+    {
+      "order": 64,
+      "path": "integration/alas/series/0116-operation-siren-guidepost-delayed-story.patch",
+      "sha256": "e9f1f776007b2fbf06f89689ce5c96c3900b87c46c290cec7b9027591cc55c8b"
+    },
+    {
+      "order": 65,
+      "path": "integration/alas/series/0118-operation-siren-page-remount.patch",
+      "sha256": "d109e0a7ea25c0435d3e0ef51c9ac4fce8c9b0a75e76758f75b0fed6d1da5079"
+    },
+    {
+      "order": 66,
+      "path": "integration/alas/series/0119-operation-siren-coordinate-confirm-proof.patch",
+      "sha256": "aa45d840ef363e83ef1a7592b64266f1e8d691bce00947980c336c413098f255"
+    },
+    {
+      "order": 67,
+      "path": "integration/alas/series/0120-operation-siren-page-remount-owner.patch",
+      "sha256": "6a99c2fc790dc4244c21a4ce179c0d8dd0ca98b64d83b8ff6503dfb931448a1e"
+    },
+    {
+      "order": 68,
+      "path": "integration/alas/series/0121-operation-siren-coordinate-card-retry.patch",
+      "sha256": "ea113ba1f1663ae199b181bc0f9c0e5f71cd383e1af32ea37179170d2f5f347c"
+    },
+    {
+      "order": 69,
+      "path": "integration/alas/series/0122-operation-siren-direct-coordinate-pin.patch",
+      "sha256": "fc63a30b30bb3135037b25839d0e0aa2d928b46172941a096a40a3822b936648"
+    },
+    {
+      "order": 70,
+      "path": "integration/alas/series/0123-operation-siren-special-pin-ap-recovery.patch",
+      "sha256": "3347947cb7b430dd9f42ece9716916884c8dab3359fbe21d9ed08a7c2c26aecc"
+    },
+    {
+      "order": 71,
+      "path": "integration/alas/series/0124-operation-siren-month-boss-recovery.patch",
+      "sha256": "2e8777110212afe9580fdca822eca609d0ad4e6e7f1b81bdb73bf9b5adba824a"
+    },
+    {
+      "order": 72,
+      "path": "integration/alas/series/0125-operation-siren-farming-search-completion.patch",
+      "sha256": "55966e7d6a6df346fe159c317ec0fb7e8e6740e852f4a2266040d6bda589ba11"
+    },
+    {
+      "order": 73,
+      "path": "integration/alas/series/0126-operation-siren-init-offscreen-fleet.patch",
+      "sha256": "ebf8058d4b731c62a731d53af99ba0f127022425c9c882317f37b487533b5298"
+    },
+    {
+      "order": 74,
+      "path": "integration/alas/series/0127-operation-siren-combat-interrupt.patch",
+      "sha256": "2892aaf39bb3bdf2461de20debf92aa9120ba39228489ff5a4b3a1e3deea4f2c"
+    },
+    {
+      "order": 75,
+      "path": "integration/alas/series/0128-orphan-combat-result-recovery.patch",
+      "sha256": "e01e363c856043e87cbff245943a70dd637dea28bbaa6a88c0f1b7dafea38f3b"
+    },
+    {
+      "order": 76,
+      "path": "integration/alas/series/0129-operation-siren-month-boss-room-mode.patch",
+      "sha256": "d29ddfa685912ee48bb25efd4d2e361077fb0a7fc8981e0900403d53e5217c5f"
+    },
+    {
+      "order": 77,
+      "path": "integration/alas/series/0130-operation-siren-room-transition-remount.patch",
+      "sha256": "0ecf2fef1041a13b39e4ce9a4a80e90b1123cf4d5e7c114759f5fcc07378674b"
+    },
+    {
+      "order": 78,
+      "path": "integration/alas/series/0131-operation-siren-relative-move-watchdog.patch",
+      "sha256": "5b4c278fb77b9ddafce0846da32208dbb0993cd5f76a0730b0364ac6425c3734"
+    },
+    {
+      "order": 79,
+      "path": "integration/alas/series/0132-operation-siren-month-boss-route-events.patch",
+      "sha256": "4f5c8d97194ef7456e071852115084b907028eb64cd6da00f9edef029c949657"
+    },
+    {
+      "order": 80,
+      "path": "integration/alas/series/0133-operation-siren-month-boss-fleet-restore.patch",
+      "sha256": "b5567b5894bbbef20142555a497c39e61b79c8a2d0fe552d57ffdcfa04195264"
+    },
+    {
+      "order": 81,
+      "path": "integration/alas/series/0134-operation-siren-month-boss-result.patch",
+      "sha256": "843a93a986f58e25cd8a9e566d6ad1c84b0b4d20217000d8b34027312bc54f2b"
+    },
+    {
+      "order": 82,
+      "path": "integration/alas/series/0390-meta-assist-tier-runtime.patch",
+      "sha256": "f98cfd30c407c7d7d1b93141c09f938a468b927e05b0095c8fb30d2db42328c7"
+    },
+    {
+      "order": 83,
+      "path": "integration/alas/series/0400-opsi-general-daemon-runtime.patch",
+      "sha256": "304544dcccd358e0868884ab59917b90010f63fe48522ba7159dafe43fd2ab42"
+    },
+    {
+      "order": 84,
+      "path": "integration/alas/series/0401-shop-transactions-runtime.patch",
+      "sha256": "ffadbe02125fa071090c7b0cd4c13c99a787f7214097250e92f6af4589418c7b"
+    },
+    {
+      "order": 85,
+      "path": "integration/alas/series/0402-research-six-field-runtime.patch",
+      "sha256": "11d7d45b9407aa319c764341c2b0c38fd2359d741bc80a47f996a545fd4dc7c2"
+    },
+    {
+      "order": 86,
+      "path": "integration/alas/series/0410-main-shared-config-runtime.patch",
+      "sha256": "860e06840728d1e211b5b10a9904b7ef57c74b721132026f8d2825946e220fe4"
+    },
+    {
+      "order": 87,
+      "path": "integration/alas/series/0420-event-shared-entry-runtime.patch",
+      "sha256": "19aaaabd083de10a36a08988346b970479f91adfb0967d4995a5486af6768770"
+    },
+    {
+      "order": 88,
+      "path": "integration/alas/series/0430-event-boss-stage-return-runtime.patch",
+      "sha256": "5339fc32acfe9ece492c12a94cbbb2bafce3e93138f784f5019318528b008ed0"
+    },
+    {
+      "order": 89,
+      "path": "integration/alas/series/0440-gems-farming-hard-remain-port.patch",
+      "sha256": "a993e0d214d5d058b2b55e620b1f44e0f37a8901bb4dcc9657c5271f5b12a7af"
+    },
+    {
+      "order": 90,
+      "path": "integration/alas/series/0450-raid-daily-remain-port.patch",
+      "sha256": "7dab72a4aab24e51f888ab2db3f137991b7f30e07b036765e26d63250351dc88"
+    },
+    {
+      "order": 91,
+      "path": "integration/alas/series/0460-freebies-battle-pass-port.patch",
+      "sha256": "9dba8b93295478891b8fc993f6e7ca8fa4532d1769f1bd3de891727210cc40e2"
+    },
+    {
+      "order": 92,
+      "path": "integration/alas/series/0470-war-archives-runtime.patch",
+      "sha256": "06d30edb8d7f6327a296461dd77fa7d4a34c2138b4ed7f91ac598dc5d3b2a55a"
+    },
+    {
+      "order": 93,
+      "path": "integration/alas/series/0480-current-raid-runtime.patch",
+      "sha256": "01e1cc6005ab3417e24db059b34c324ae5b7ca5fdbd686bcd1c87c4ac84b2bc8"
+    },
+    {
+      "order": 94,
+      "path": "integration/alas/series/0490-operation-siren-mission-entry-first.patch",
+      "sha256": "7e5c98a90f589341a8a75666da1386a99174ec1f2f858f09eda7e0f8b3cb05f4"
+    },
+    {
+      "order": 95,
+      "path": "integration/alas/series/0500-operation-siren-monthstart.patch",
+      "sha256": "ddff6d4819ed5646921d2a15b64b74adfe6b3d3b0b4ecc7f0f0fd1ab0d0473ce"
+    },
+    {
+      "order": 96,
+      "path": "integration/alas/series/0510-semantic-task-isolation.patch",
+      "sha256": "196011b89c8154481645827a199e4aa2b641e2f4d4485e5c6f013012d74dc705"
+    },
+    {
+      "order": 97,
+      "path": "integration/alas/series/0520-campaign-preparation-decisions.patch",
+      "sha256": "9847666552d56b97cf6b5b6ef5a04612781641c5c111bc69bb24be218dfaf366"
+    },
+    {
+      "order": 98,
+      "path": "integration/alas/series/0530-campaign-ambush-flow.patch",
+      "sha256": "18a7eb6709578087fac212c432f0e4f748142bd383f46a65d4f32234d6b359ef"
+    },
+    {
+      "order": 99,
+      "path": "integration/alas/series/0540-campaign-repeat-preparation.patch",
+      "sha256": "85924f2c16f5c044b86b8e692a462c8aa5b7c810062b6c428c32e423d88d8ddc"
+    },
+    {
+      "order": 100,
+      "path": "integration/alas/series/0550-campaign-reentry-retirement.patch",
+      "sha256": "cc3e88950e7a6f400c3e78cc2218df84e0d25e38e7cbd8af6768750d4c658b38"
+    },
+    {
+      "order": 101,
+      "path": "integration/alas/series/0560-campaign-submarine-auto.patch",
+      "sha256": "b1e42a338c07bc7c58579d5fc876a645bd0b7b202e62da6208b87ef4d0d2d696"
+    },
+    {
+      "order": 102,
+      "path": "integration/alas/series/0570-campaign-submarine-call.patch",
+      "sha256": "b6e9b0a0ba0b5f9fcdea0f2e5c46d4be6d2cb4991f009e667d77100b59265f7b"
+    },
+    {
+      "order": 103,
+      "path": "integration/alas/series/0580-campaign-submarine-movement.patch",
+      "sha256": "1d8ff7f98d696caf68005db2d8241cff9b8b3b84f19137444558a00aae7213c3"
+    },
+    {
+      "order": 104,
+      "path": "integration/alas/series/0590-campaign-execution-map-aliases.patch",
+      "sha256": "434df938b9e9cae2d350f35ab017f0ca0a77445d8fb9cfdff2086258b77c6992"
+    },
+    {
+      "order": 105,
+      "path": "integration/alas/series/0600-campaign-camera-reanchor.patch",
+      "sha256": "95a0dcabe79ce54dcd872a428929e9385960ec320e97b96760945bbf47f368e1"
+    },
+    {
+      "order": 106,
+      "path": "integration/alas/series/0601-campaign-boss-settlement.patch",
+      "sha256": "c84dd43bd1941718361ac3cee15853e901d7be888e57aa84894643093aa84292"
+    },
+    {
+      "order": 107,
+      "path": "integration/alas/series/0602-submarine-deployment-camera.patch",
+      "sha256": "92c0cf1fe3b879179993f25441976237988c1868e3ecb6380ee4bf40e6f7f00f"
+    },
+    {
+      "order": 108,
+      "path": "integration/alas/series/0610-campaign-hp-control.patch",
+      "sha256": "072b07ad4d2e2018aee45001b6ca58f85ae460e5e87bf41b6226fbdc81f104ca"
+    },
+    {
+      "order": 109,
+      "path": "integration/alas/series/0620-campaign-scout-exchange.patch",
+      "sha256": "5009fe9eb3dd89d7834b523a34cc1f0b0e0c81e954a293792cf1f61eb4c5898b"
+    },
+    {
+      "order": 110,
+      "path": "integration/alas/series/0630-campaign-inherited-dock-full.patch",
+      "sha256": "909a37f0cee43d321311dda259e0763f682dd9e7b8b5821c5c3ed9aa51822c83"
+    },
+    {
+      "order": 111,
+      "path": "integration/alas/series/0640-campaign-empty-movement.patch",
+      "sha256": "6ffcbe96f374fc4750825533f69ccc7f83bea916bc7eb520aa4ec297f0332538"
+    },
+    {
+      "order": 112,
+      "path": "integration/alas/series/0650-meta-assist-task-owner.patch",
+      "sha256": "bd69fe25ef0d7f5561356346e5c2f7decca8500fe582b52403a6997e0ad80083"
+    },
+    {
+      "order": 113,
+      "path": "integration/alas/series/0660-private-quarters-overview.patch",
+      "sha256": "1e0eb70169612ed19a8258d55d0dd4db342b598f37c80b19f686f3528b240944"
+    },
+    {
+      "order": 114,
+      "path": "integration/alas/series/0670-campaign-inherited-retirement-selection.patch",
+      "sha256": "aa97feda73a67d7d5418dd434423342a8c16ae1df0b89f15ac09786ad4559ec8"
+    },
+    {
+      "order": 115,
+      "path": "integration/alas/series/0680-private-quarters-entry-destination.patch",
+      "sha256": "2a5fe2242cc8f6bd2c70115e5b1889a086a889f13c2ef7ff292155acfb836237"
+    },
+    {
+      "order": 116,
+      "path": "integration/alas/series/0690-private-quarters-control-identity.patch",
+      "sha256": "6c46e79fb83400572a1534a2c3cfc8f804f191ff3905211afe1238aa7f46bdbf"
+    },
+    {
+      "order": 117,
+      "path": "integration/alas/series/0700-daily-quick-completion.patch",
+      "sha256": "248404bbad94c354ce204300d5a72a7bd6d2c8b008580cefab4934393771066c"
+    },
+    {
+      "order": 118,
+      "path": "integration/alas/series/0710-navigation-frame-reuse.patch",
+      "sha256": "8a2ae5bd4a349f3365ec82164609d36e98f3c1a47951a9a2c66e30512a075ae2"
+    },
+    {
+      "order": 119,
+      "path": "integration/alas/series/0720-hard-repeat-preparation.patch",
+      "sha256": "58c77e322ec70e34d540cb4cdf40774497a929c625c7b7ffe2f6626236225854"
+    },
+    {
+      "order": 120,
+      "path": "integration/alas/series/0730-meta-menu-navigation.patch",
+      "sha256": "2470720d0569ac8b1fe25edeb6653b34d806f039849e46db94a766eb85fdf406"
+    },
+    {
+      "order": 121,
+      "path": "integration/alas/series/0740-campaign-sortie-passive-wait.patch",
+      "sha256": "3239a3a55f9dcf0735177cd24673546868dc8a52825d60ffbcd324087ee7a160"
+    },
+    {
+      "order": 122,
+      "path": "integration/alas/series/0750-meta-reward-menu-entry.patch",
+      "sha256": "f1a5eb8f2df59b6609ccd09df88718f57210fdc4dc1cf14823958068afce573d"
+    },
+    {
+      "order": 123,
+      "path": "integration/alas/series/0760-opsi-storage-logger-empty.patch",
+      "sha256": "c55716e27dd4a59e799b4b415ce6df6a44e2ab6efec488e6fb727a5d5f292738"
+    },
+    {
+      "order": 124,
+      "path": "integration/alas/series/0770-login-sign-reward-continuation.patch",
+      "sha256": "8b4178063f97d9fb38d1d49e6fb8b3c038ea2c85d2e27df123ceca833198c32a"
+    },
+    {
+      "order": 125,
+      "path": "integration/alas/series/0780-opsi-exact-port-geometry.patch",
+      "sha256": "1e49bfdc30e028a6773f0065f15cade9771aa7b92c52c954baa98a1285baa0b8"
+    },
+    {
+      "order": 126,
+      "path": "integration/alas/series/0790-story-semantic-idle-boundary.patch",
+      "sha256": "781c8ede0f18b2bb9a2b00a472d4f5a143abc305b5ac369663cca5e883b74bdc"
+    },
+    {
+      "order": 127,
+      "path": "integration/alas/series/0800-semantic-campaign-policy-identity.patch",
+      "sha256": "f05ed764017f6d54d48306c5c0aa17f624501e8d0f43ad562b5e3f1e8f41efb9"
+    },
+    {
+      "order": 128,
+      "path": "integration/alas/series/0810-sp-preparation-native-decisions.patch",
+      "sha256": "3ee449b8bf1b1f33d1aed52da198dbbf524f04214e6bc259e2f3070ac03d5c78"
+    },
+    {
+      "order": 129,
+      "path": "integration/alas/series/0820-ui-campaign-withdraw-confirmation.patch",
+      "sha256": "0c78f0a1fa64dc953a2c8079ac43f96ccaa5f7e61033404c309590d94a16bc91"
+    },
+    {
+      "order": 130,
+      "path": "integration/alas/series/0830-opsi-native-area-projection.patch",
+      "sha256": "611f1889497c24d8da8f5725b0b585254fa443eb406c5a5486ad006e34e280f0"
+    },
+    {
+      "order": 131,
+      "path": "integration/alas/series/0840-opsi-native-camera-reanchor.patch",
+      "sha256": "9c5b90771216783ff99603d2bfd327722d7fa04e6cfaa4c49392729a6050c89a"
+    },
+    {
+      "order": 132,
+      "path": "integration/alas/series/0850-opsi-explore-preserve-map-rescan.patch",
+      "sha256": "12d3b3d2c674da22bc772b2ac9241f4f4d81e2c512702baa928ea0f93209be3b"
+    },
+    {
+      "order": 133,
+      "path": "integration/alas/series/0860-opsi-native-camera-view.patch",
+      "sha256": "5472efa8a06d3ad88f291128357a99c6badfc3f82b223caae829f70c1fd0b1c6"
+    },
+    {
+      "order": 134,
+      "path": "integration/alas/series/0865-opsi-reviewed-map-swipe.patch",
+      "sha256": "156e5c01a5375d3fe3b7d6698d3146e4c28a4c21aaa198d4b504a1637d16052e"
+    },
+    {
+      "order": 135,
+      "path": "integration/alas/series/0870-opsi-native-swipe-observation.patch",
+      "sha256": "047b6e7a10ef6827c8ddf3f2ae2bd20dd121d233d1c0efbdc0c102689ff5199a"
+    },
+    {
+      "order": 136,
+      "path": "integration/alas/series/0880-operation-siren-pin-frame-refresh.patch",
+      "sha256": "f2f9eb78888e75ffe49869ffadc2d94cf95901858d8531d0eed1219fc84bd021"
+    },
+    {
+      "order": 137,
+      "path": "integration/alas/series/0890-opsi-native-sight-boundary.patch",
+      "sha256": "6d2dab4782ebca4ef1937d74de36177ccfec5362b026616f45d13ae9e6c13107"
+    },
+    {
+      "order": 138,
+      "path": "integration/alas/series/0900-opsi-existing-pin-projection.patch",
+      "sha256": "5077f0b44f5e9179c8061f1091aa7918a59c570756b31f101e373eb2bb35a2e1"
+    },
+    {
+      "order": 139,
+      "path": "integration/alas/series/0910-opsi-native-globe-drag-selection.patch",
+      "sha256": "cf495f8eeade9ef7a662ca6bc8d63e5a5cb5152281dbec7ceb3ef0f257c15574"
+    },
+    {
+      "order": 140,
+      "path": "integration/alas/series/0920-opsi-globe-centering-progress.patch",
+      "sha256": "3aa148ec2fd00086bb01f763b56f3b2b91355e72dcaac194d9d106f49b26a8df"
+    },
+    {
+      "order": 141,
+      "path": "integration/alas/series/0930-opsi-globe-shorter-owned-drag.patch",
+      "sha256": "47486fde401f4c39627cddd0db3e5f5bf9ce701beef5f5412b7ac32a4ae7cdc6"
+    },
+    {
+      "order": 142,
+      "path": "integration/alas/series/0940-meta-empty-dossier-point-port.patch",
+      "sha256": "beee61f79a2ce91c45bbcfa021a3d0b39ca483bd367944abf9f0a667ae8a8fb0"
+    },
+    {
+      "order": 143,
+      "path": "integration/alas/series/0950-opsi-globe-selection-frame-refresh.patch",
+      "sha256": "2eaed98733d5da4a0facf6a091228174778e90d56f26204a1d57d176350ca608"
+    },
+    {
+      "order": 144,
+      "path": "integration/alas/series/0960-opsi-globe-inspected-drag-retry.patch",
+      "sha256": "ba9338dd356e82dd91a9b13f4726f916be78058e485497f5841ae6ee62e68b9f"
+    },
+    {
+      "order": 145,
+      "path": "integration/alas/series/0970-weekly-mission-original-collect.patch",
+      "sha256": "217508f93158633aee543aaf3552d1230b59ff9b707ac18cea66e233bebb9ac8"
+    },
+    {
+      "order": 146,
+      "path": "integration/alas/series/0980-mission-claim-original-popup-wait.patch",
+      "sha256": "847dfda84c90e3bd7535162106d26ae7ca200e03d58d72e7de78cd5867a3110c"
+    },
+    {
+      "order": 147,
+      "path": "integration/alas/series/0990-opsi-original-missed-selection-retry.patch",
+      "sha256": "bcfca9af132ffccd71e5c2c849ef75e4dde459b6fd68772d1e17b38e8494e2a8"
+    },
+    {
+      "order": 148,
+      "path": "integration/alas/series/1000-gacha-original-navbar-award-handler.patch",
+      "sha256": "1427edf6c85660b7a3f0f53074ce7e4e99ccf836d9fe5bf5257e8bf95fd7fbde"
+    },
+    {
+      "order": 149,
+      "path": "integration/alas/series/1010-opsi-right-side-shorter-drag.patch",
+      "sha256": "0b99494a1d5c08e6d6604b38fd9dba5440fc8877405b2e9652a37625b225eeef"
+    },
+    {
+      "order": 150,
+      "path": "integration/alas/series/1020-sp-original-exhausted-attempt-delay.patch",
+      "sha256": "67b9b55e3a6e054c683e772f5c3d58fc22e23fbfca40a7b5707b332dc9752b1f"
+    },
+    {
+      "order": 151,
+      "path": "integration/alas/series/1030-campaign-original-map-option-recovery.patch",
+      "sha256": "d3f8f444b5b2b9290c5e8769daaee7dc097da7e0a3b852f68406bc68b7a2f84f"
+    },
+    {
+      "order": 152,
+      "path": "integration/alas/series/1040-opsi-original-camera-edge-recovery.patch",
+      "sha256": "8fad7e4bf721f85ce9a31aefcd4d5d95f15bc61bccc890826c63a05e88186097"
+    },
+    {
+      "order": 153,
+      "path": "integration/alas/series/1050-opsi-logger-native-scope.patch",
+      "sha256": "0330956e9f20761b8bf4b1b66c9a3f69e1880cf3a83540fdf3014c639f984e0e"
+    },
+    {
+      "order": 154,
+      "path": "integration/alas/series/1060-minigame-original-exit-owner.patch",
+      "sha256": "60b076c490735832387dfedbf66ca60496dcb202e63fda2d461cb6f7e7823899"
+    },
+    {
+      "order": 155,
+      "path": "integration/alas/series/1070-minigame-retained-native-result-recovery.patch",
+      "sha256": "1f0f107c8a40ccc4c2160f84109513ae2a411782536ed9cec78832d92781ac49"
+    },
+    {
+      "order": 156,
+      "path": "integration/alas/series/1080-minigame-source-five-ticket-selection.patch",
+      "sha256": "35e341e1916bb617985b7896155865adf116bb10b48d1949337af863b727b0b0"
+    },
+    {
+      "order": 157,
+      "path": "integration/alas/series/1090-daily-semantic-card-order.patch",
+      "sha256": "f1d7c71baddee632a06bcdd5ded9ae37a7ab223475539d619dc7482dd1f4cb44"
+    },
+    {
+      "order": 158,
+      "path": "integration/alas/series/1100-dorm-feed-statistics-race.patch",
+      "sha256": "0ce747f11f3a93209a355166be2c13a981bf71e6cfb1df02c63eafe851149a91"
+    },
+    {
+      "order": 159,
+      "path": "integration/alas/series/1110-dorm-feed-empty-food-reentry.patch",
+      "sha256": "72d850f9893f7f260cfcba42ecdcd6a2b0864dd92f1f4d1a093a6e9c0cd37b4c"
+    },
+    {
+      "order": 160,
+      "path": "integration/alas/series/1120-guild-award-close-postcondition.patch",
+      "sha256": "1a711b0bd9cd25afc8940073a7c8776b552b0f8104d2aa2d7f548e63f8e4f118"
+    },
+    {
+      "order": 161,
+      "path": "integration/alas/series/1130-meowfficer-free-first-original-batch.patch",
+      "sha256": "3523ad1ae5371db04045d5e57c6e6f54b67b1e65b646385894bc80411884f7f3"
+    },
+    {
+      "order": 162,
+      "path": "integration/alas/series/1140-opsi-map-confirmation-observation.patch",
+      "sha256": "dbf6087288f9e9379ce14c9802388b1025588c97a0a7576e7af04b389440e7df"
+    },
+    {
+      "order": 163,
+      "path": "integration/alas/series/1150-stronghold-locked-task-isolation.patch",
+      "sha256": "74ea3b830154bcd5b6b1a62d38fadd952f55630203d7a01b5bf47d6b02cd0313"
+    },
+    {
+      "order": 164,
+      "path": "integration/alas/series/1160-opsi-walk-original-map-events.patch",
+      "sha256": "78bd6b4ab3068efcc967b5e00ab25c937539d3ee016cd8759fbfb7c161237a37"
+    },
+    {
+      "order": 165,
+      "path": "integration/alas/series/1170-login-entry-raycast-settle.patch",
+      "sha256": "e5a3274f5fe464d54528e7227bce419d765836211993a1ab09e20916d423b13b"
+    },
+    {
+      "order": 166,
+      "path": "integration/alas/series/1180-opsi-camera-original-reward-recovery.patch",
+      "sha256": "85288625e975d309e7de7223673cecff3b40dd50a076e9da69090191f5d6add7"
+    },
+    {
+      "order": 167,
+      "path": "integration/alas/series/1190-opsi-original-reward-before-map-switch.patch",
+      "sha256": "6a5387693a419d576fd841adc00d01bda60e493b37c0b381f95c1049596e014d"
+    },
+    {
+      "order": 168,
+      "path": "integration/alas/series/1200-opsi-second-shorter-owned-globe-leg.patch",
+      "sha256": "4764aa9e9a91aa829063108e51fec4ff17dc85c1b991c827015352605aeaa131"
+    },
+    {
+      "order": 169,
+      "path": "integration/alas/series/1210-opsi-original-port-intent-retry.patch",
+      "sha256": "b1f9e9d57fdec5abea6d07e85787e456f95388bf5acf887d267c0347b19df94c"
+    },
+    {
+      "order": 170,
+      "path": "integration/alas/series/1220-opsi-native-port-input-identity.patch",
+      "sha256": "4adf753b84285fcb71e474ef50929c88b236a0ea2a855f4945596102311a4848"
+    },
+    {
+      "order": 171,
+      "path": "integration/alas/series/1230-meta-assist-original-result-reentry.patch",
+      "sha256": "d5e0098bd96c736da42087189316d3048188e03e5c7eb7f7eca9e991df0cd5db"
+    },
+    {
+      "order": 172,
+      "path": "integration/alas/series/1240-meta-original-automation-information-handler.patch",
+      "sha256": "260f803f5ded648113fcc59cb8d84ed979bdb987980c683ea1c738f072a6f60c"
+    },
+    {
+      "order": 173,
+      "path": "integration/alas/series/1250-device-semantic-cold-start-contract.patch",
+      "sha256": "68397492ff0fa12ece0691e94d5d19900340fc83484a9190b5919b0fc94dbaca"
+    },
+    {
+      "order": 174,
+      "path": "integration/alas/series/1260-guild-return-frame-refresh.patch",
+      "sha256": "3f7c6beb7def20293e6d3c89f163edea1dc3ef9a59fc8595f62e875ae598ace8"
+    },
+    {
+      "order": 175,
+      "path": "integration/alas/series/1270-opsi-typed-zone-title.patch",
+      "sha256": "0baa25a3462fdbb7d627aed3b2179d7dbb69117d8c84971b87727af98b23c997"
+    },
+    {
+      "order": 176,
+      "path": "integration/alas/series/1280-opsi-action-point-deferred-close.patch",
+      "sha256": "0d61c388e0dfb5491b56f0af4236cc1bfe268bccaed667c2062ef00824201d75"
+    },
+    {
+      "order": 177,
+      "path": "integration/alas/series/1290-story-option-zero-input-disappearance.patch",
+      "sha256": "83a6fbd219cc99f01be219cf8b88cac1ac88da7c7b2eb5e151f6ca4f49a41ee9"
+    },
+    {
+      "order": 178,
+      "path": "integration/alas/series/1300-globe-entry-original-event-handlers.patch",
+      "sha256": "923a7c5e46a47e1848f113e0130df59e27346222eea31e40dadc48cdfe1d8128"
+    },
+    {
+      "order": 179,
+      "path": "integration/alas/series/1310-globe-entry-passive-observation-owner.patch",
+      "sha256": "dd218f0c214176c2d7a00bd713bce68d3965f7b3a508614742c8b40862201e24"
+    },
+    {
+      "order": 180,
+      "path": "integration/alas/series/1320-guild-distinct-operation-candidates.patch",
+      "sha256": "410e75788ec69b3622cb041ab6f0a76a1831871c09a5d5c9a5db98a7c674c9ee"
+    },
+    {
+      "order": 181,
+      "path": "integration/alas/series/1330-ui-navigation-bulletin-reentry.patch",
+      "sha256": "c8533499700b94b34c3536c34ae4e7fe8fea337e197369d93d41e202b2b0d8b2"
+    },
+    {
+      "order": 182,
+      "path": "integration/alas/series/1340-guild-logistics-local-observation-error.patch",
+      "sha256": "534edaacd83252342bc27bbed471d29b20a21ed42db9d879f6af857072f0355e"
+    },
+    {
+      "order": 183,
+      "path": "integration/alas/series/1350-opsi-native-akashi-zero-purchase.patch",
+      "sha256": "0fe328960cf12da14db105589c058ed58062bffdff802b62dd6bbade93c8b89e"
+    },
+    {
+      "order": 184,
+      "path": "integration/alas/series/1360-campaign-missing-map-task-local.patch",
+      "sha256": "8158850c1726ba8265f82b6234df5d30b7e71fda420467d7ae3c2f41e4e2a3ef"
+    },
+    {
+      "order": 185,
+      "path": "integration/alas/series/1370-guild-notice-native-cancel.patch",
+      "sha256": "45d01030717f3467edafd7157d2c8a64a76e798a097f74d44095d33d8af1e36b"
+    },
+    {
+      "order": 186,
+      "path": "integration/alas/series/1380-semantic-deferral-native-cooldown.patch",
+      "sha256": "70d2a3f4f24f02b17382df33382421b24e92faf5d4ab51b5c52218d81d438e8a"
+    },
+    {
+      "order": 187,
+      "path": "integration/alas/series/1390-semantic-zero-interval-native-admission.patch",
+      "sha256": "389a91505c9761820db6da2c5d0da8c04609bb3507ac87e89f67177a770a0c4e"
+    },
+    {
+      "order": 188,
+      "path": "integration/alas/series/1400-guild-native-fleet-selection.patch",
+      "sha256": "29cf70bd680f974f7d1da295e8e13f10ed75a6453d2be3b6ea572ec0680a0c1c"
+    },
+    {
+      "order": 189,
+      "path": "integration/alas/series/1410-ui-opsi-exit-prompt-reentry.patch",
+      "sha256": "8deccd7121972526ce12cb99b34dd888f4da1acef7b41fac27bfb392cc8fe514"
+    },
+    {
+      "order": 190,
+      "path": "integration/alas/series/1420-meowfficer-paid-purchase-branch.patch",
+      "sha256": "7d266c91df60f32d5ca14ed2caba5d33dad4d18f0805b925443389eb8bed0dbc"
+    },
+    {
+      "order": 191,
+      "path": "integration/alas/series/1430-opsi-mission-pinned-zone-identity.patch",
+      "sha256": "6d10fbaa64b4e8c9a3bbe51a4296d47be45da8f5d4e620f1a7a67271de1f9660"
+    },
+    {
+      "order": 192,
+      "path": "integration/alas/series/1440-opsi-question-fleet-relative-origin.patch",
+      "sha256": "aa2c1864bdde7d3c9a21ba6bbf631f537fbfd3094fd57b396adfcdd03634ef4d"
+    },
+    {
+      "order": 193,
+      "path": "integration/alas/series/1450-opsi-retained-room-identity.patch",
+      "sha256": "03f432226202d59be7ec13c6c590290279e0d3d6b835c75fab4d2932359f007f"
+    },
+    {
+      "order": 194,
+      "path": "integration/alas/series/1460-opsi-map-confirm-presence-input.patch",
+      "sha256": "aedcf3e250ec748b89bb6c4b49ae3d167e880a3a011e6194b50c037125b896d6"
+    },
+    {
+      "order": 195,
+      "path": "integration/alas/series/1470-semantic-no-input-click-result.patch",
+      "sha256": "122a23c56515e548663e9ccb22954cd182bac59fcfce483584c0ce1902d52659"
+    },
+    {
+      "order": 196,
+      "path": "integration/alas/series/1480-opsi-requested-fleet-arrival.patch",
+      "sha256": "cf8e5a5b7823a4938921f3f39ad4d0fbb3e851277481402ba80e075157566c14"
+    },
+    {
+      "order": 197,
+      "path": "integration/alas/series/1490-semantic-combat-information-reentry.patch",
+      "sha256": "8cc9bf9116de425c7f73eb972d92e09c9b2ab2238266d3f7de1b2c59f99a45ff"
+    },
+    {
+      "order": 198,
+      "path": "integration/alas/series/1500-ui-navigation-reward-mount.patch",
+      "sha256": "0603016acad577aabd481d3595e0e1074aa31791a2fac5b3ec182608d4181e0e"
+    },
+    {
+      "order": 199,
+      "path": "integration/alas/series/1510-semantic-precombat-loading-retry.patch",
+      "sha256": "720bcd08be17ad810c7aebd2bcba833d58e3cc4d73dde4ce2d3f89986414663e"
+    },
+    {
+      "order": 200,
+      "path": "integration/alas/series/1520-tactical-native-prompt-reentry.patch",
+      "sha256": "f5cea8642227dbb550c96c000d3c844efc851da9605aff69037d6a7e505d53ef"
+    },
+    {
+      "order": 201,
+      "path": "integration/alas/series/1521-ui-client-version-native-restart.patch",
+      "sha256": "7d5557709545559b08e1b9f0f4f55c1ed2dd0156c385edecad03bd6f88612392"
+    },
+    {
+      "order": 202,
+      "path": "integration/alas/series/1522-opsi-exit-restored-map-reentry.patch",
+      "sha256": "508cc8df89e331bd33adcb4bba2977cbd5ca5c573256a823e897d642768e6fb2"
+    },
+    {
+      "order": 203,
+      "path": "integration/alas/series/1523-opsi-port-confirmation-and-return.patch",
+      "sha256": "562b0138d98e3c5fa601c9d34072f9e43a35b052c33dbc3053d51c74571d6ad2"
+    },
+    {
+      "order": 204,
+      "path": "integration/alas/series/1524-ui-goto-native-unknown-page-recovery.patch",
+      "sha256": "9e4685066ad14083d0055727dd24cb2bca327fbb146e6324b4290526495f971b"
+    },
+    {
+      "order": 205,
+      "path": "integration/alas/series/1525-opsi-abyssal-unavailable-fleet-return.patch",
+      "sha256": "bdd71068426265fa8bf69a7345729d27af09cc965582cc3f347aa6e7f4968f94"
+    },
+    {
+      "order": 206,
+      "path": "integration/alas/series/1526-opsi-retained-low-resolve-before-navigation.patch",
+      "sha256": "6a90690cf42690218ec5f1f2c861353bdbade00bfb8b73f0f8eb80abc9af8583"
+    },
+    {
+      "order": 207,
+      "path": "integration/alas/series/1527-commission-dorm-native-recovery-context.patch",
+      "sha256": "6efce84cca7f2636224901bdeeadbaec01958256283f662a183d696a5765848a"
+    },
+    {
+      "order": 208,
+      "path": "integration/alas/series/1528-exercise-finished-before-pause.patch",
+      "sha256": "0ee797519e0ac2e200f46e682789a20948ee634cbd119bd3535c60e7d95037b8"
+    },
+    {
+      "order": 209,
+      "path": "integration/alas/series/1529-guild-native-viewport-scroll.patch",
+      "sha256": "8084e1b8a8ae0855f45b2b59ddc82518c2e6517e6fafa0db3e28b6261f49407a"
+    },
+    {
+      "order": 210,
+      "path": "integration/alas/series/1530-guild-dispatch-returned-detail-progress.patch",
+      "sha256": "9958e670171e30f47ad73baeb5464a1004974cd84fadd249a478904249952183"
+    },
+    {
+      "order": 211,
+      "path": "integration/alas/series/1531-commission-selected-input-native-intervals.patch",
+      "sha256": "9272742bc3317d0fe800f72d8eb61671ebb6cdc32ad15a373f4df4f944ddda0f"
+    },
+    {
+      "order": 212,
+      "path": "integration/alas/series/1532-commission-selected-native-recommend-recovery.patch",
+      "sha256": "f9ddedf14de52fb1ffc3bdf5424d6fae61e1d9d43d0f279b0ed921e97114d150"
+    },
+    {
+      "order": 213,
+      "path": "integration/alas/series/1533-native-campaign-auto-search-loop.patch",
+      "sha256": "6fd76c16506b70058fac31e561dcbdee298757cbc7adff3aac069c30226ab665"
+    },
+    {
+      "order": 214,
+      "path": "integration/alas/series/1534-main-native-stage-aliases.patch",
+      "sha256": "84524a3b7ddcefa4ba56b6581b8677c0059e5bc2c9f53543812a2edc6f2f34ad"
+    },
+    {
+      "order": 215,
+      "path": "integration/alas/series/1535-storage-native-scroll-ports.patch",
+      "sha256": "358df0799ca7407eda34a3c80e58418fd3eaf11557535fdb00e233bc60664e7f"
+    },
+    {
+      "order": 216,
+      "path": "integration/alas/series/1536-globe-entry-stale-observation-wait.patch",
+      "sha256": "170ff84e039585c7fbab324323130abc70012fc612d892845d0c0e332ea145fe"
+    },
+    {
+      "order": 217,
+      "path": "integration/alas/series/1537-storage-endpoint-and-pixel-boundary.patch",
+      "sha256": "68acfb7c4d0ef198b7752f556e72a71d9b054d231e4dcac879680c118d06c341"
+    },
+    {
+      "order": 218,
+      "path": "integration/alas/series/1538-storage-typed-box-boundaries.patch",
+      "sha256": "e850a9be295b00a014d2d573eb2e4c597d1b6d43c9c54f7f92a2046ce44597a4"
+    },
+    {
+      "order": 219,
+      "path": "integration/alas/series/1539-storage-confirmed-box-count.patch",
+      "sha256": "5ee186b578ebf5202afb4dd38927aa91b44061ccb0fa68147bc0971f9915d141"
+    },
+    {
+      "order": 220,
+      "path": "integration/alas/series/1540-story-screenshot-observation.patch",
+      "sha256": "ce759b173fa20320af26c6af0e09eb975c35c3ce2a7747640e49ea3cc225b6e3"
+    },
+    {
+      "order": 221,
+      "path": "integration/alas/series/1541-opsi-interrupt-typed-boundary.patch",
+      "sha256": "da869bc9cb5a16de29e1414f3582f8cd80776bd9de7249d108ed51d1a7057aef"
+    },
+    {
+      "order": 222,
+      "path": "integration/alas/series/1542-combat-preparation-screenshot-observation.patch",
+      "sha256": "8a61645303462406d516c49a1b3d55fb1a9bb51fcbd7e5f771b248a2651e9b32"
+    },
+    {
+      "order": 223,
+      "path": "integration/alas/series/1543-commission-incomplete-row-isolation.patch",
+      "sha256": "b52178e927d03dbac9f01c6a412554e86f0eff4ab5e88f6e1adecf9101f6fbfb"
+    },
+    {
+      "order": 224,
+      "path": "integration/alas/series/1544-globe-owned-edge-candidate.patch",
+      "sha256": "307ba94f4f463fa3f5296dedf2834c59967548b27f2b6ecc5963609e551b55ce"
+    },
+    {
+      "order": 225,
+      "path": "integration/alas/series/1545-campaign-progress-native-animation.patch",
+      "sha256": "2d6c77b7f75edc8f51d1a89e9c7fb4bee231946c85113854170a87a7548436b3"
+    },
+    {
+      "order": 226,
+      "path": "integration/alas/series/1546-campaign-native-retirement-reentry.patch",
+      "sha256": "a2ebe4c2b2b04d9a62a22946c162b10e9a180cd02083968846da61efa91d148d"
+    },
+    {
+      "order": 227,
+      "path": "integration/alas/series/1547-combat-native-automatic-start-handoff.patch",
+      "sha256": "b291ebe3d1e8c9bfaa9614ea0cd8e9d12a244c03a5ed83016c688992f789342a"
+    },
+    {
+      "order": 228,
+      "path": "integration/alas/series/1548-campaign-refreshed-grid-target.patch",
+      "sha256": "d7717d7ad60161099fc21c64a01c8627211187798650a58bb4f5562eccaf2dc7"
+    },
+    {
+      "order": 229,
+      "path": "integration/alas/series/1549-combat-native-boss-stage-return.patch",
+      "sha256": "e3972be40c97fb7648fc8549c3bc7829ec470168721771ea74595717d8cc8aab"
+    },
+    {
+      "order": 230,
+      "path": "integration/alas/series/1550-campaign-native-map-observation-refresh.patch",
+      "sha256": "4d887eb3ae86a99beadccdbb547ae916b36ac3137fb9c9903be7fee8d7e32b60"
+    },
+    {
+      "order": 231,
+      "path": "integration/alas/series/1551-campaign-native-map-to-combat-handoff.patch",
+      "sha256": "29050bd39f7494c1e85702ace297a1f0574cce5a686ede301e795a18cf52a6b4"
+    },
+    {
+      "order": 232,
+      "path": "integration/alas/series/1552-ui-native-orphan-result-priority.patch",
+      "sha256": "c6f87d89227b1fbb05dac2aa975276d44b9f345038ee0ad1a5c01d4f8710d924"
+    },
+    {
+      "order": 233,
+      "path": "integration/alas/series/1553-combat-native-stage-result-loop.patch",
+      "sha256": "4413c531168ee08341c3abff4c7643382aa8fd80e0c9ca367b117cc33728a095"
+    },
+    {
+      "order": 234,
+      "path": "integration/alas/series/1554-campaign-installed-stage-name.patch",
+      "sha256": "af483923aeb759bfb2448297cda323510d2b163bdaa03d06ea7fa6a2dced45ea"
+    },
+    {
+      "order": 235,
+      "path": "integration/alas/series/1555-campaign-startup-retirement-handoff.patch",
+      "sha256": "856cce3f0e6a5b6f446f885866433439c89100f8a6f0c7d9a8184423cb1a4433"
+    },
+    {
+      "order": 236,
+      "path": "integration/alas/series/1556-combat-native-low-emotion-deferral.patch",
+      "sha256": "c8394078700dd45ce68903f977676e25d5c0b983a3cc6b9f7365793c1399aeb9"
+    },
+    {
+      "order": 237,
+      "path": "integration/alas/series/1557-campaign-installed-stage-alias.patch",
+      "sha256": "572fe43c1fa9471e9cfa1f8389fe615f7dbeffa07ca6b2b960abaec0591c12d3"
+    },
+    {
+      "order": 238,
+      "path": "integration/alas/series/1558-event-aside-exact-stage-presence.patch",
+      "sha256": "95a7e71382ddceae74cbf36df781266cc18578ab959c33aa4da687689361e007"
+    },
+    {
+      "order": 239,
+      "path": "integration/alas/series/1559-opsi-fleet-selector-native-timeout.patch",
+      "sha256": "b075243550b97ae7985d2b85a258d809bf26f1ee6f0011b9b6b125a5fc2b7512"
+    },
+    {
+      "order": 240,
+      "path": "integration/alas/series/1560-auto-search-defeat-result-recovery.patch",
+      "sha256": "f69808ef8fb902c413e736276af7c4263652ed1e556947fe07330cad40810de2"
+    },
+    {
+      "order": 241,
+      "path": "integration/alas/series/1561-archives-native-stage-exit-probe.patch",
+      "sha256": "4f31038739ac227a29bbf58103e18efb9e93e1562425d717e6433fac2689f175"
+    },
+    {
+      "order": 242,
+      "path": "integration/alas/series/1562-native-old-retirement-typed-ports.patch",
+      "sha256": "b19d897a52ab198ad27367399d872cbdd883ed6fd1dcb02edc2211392a8dad7f"
+    },
+    {
+      "order": 243,
+      "path": "integration/alas/series/1563-retirement-common-cv-policy-boundary.patch",
+      "sha256": "7fe318ce5454eed312fd738aad39a0821dd0d930c730e8fdeaa6289bfbb0ddc8"
+    },
+    {
+      "order": 244,
+      "path": "integration/alas/series/1564-native-common-cv-preservation-ports.patch",
+      "sha256": "313f9909ffe47135f51581cb49ae8f0edd9641763e57325dae09e020afeb03b0"
+    },
+    {
+      "order": 245,
+      "path": "integration/alas/series/1565-native-os-back-loading-handoff.patch",
+      "sha256": "601a9bf4e5da6143880096883b0aae13df9c75585c2cd6f127fff7b6abccadc7"
+    },
+    {
+      "order": 246,
+      "path": "integration/alas/series/1566-storage-native-observation-ports.patch",
+      "sha256": "a88ace3270783034f2440e4fbc624c595e4dd36c0ae2c8339571bedcaac4303b"
+    },
+    {
+      "order": 247,
+      "path": "integration/alas/series/1567-campaign-exhausted-entry-grant-defer.patch",
+      "sha256": "fe16c38c2fa481a2cfb1263613843d5f95fda9b004a992c82f4e0864350e3a7c"
+    },
+    {
+      "order": 248,
+      "path": "integration/alas/series/1568-research-inherited-queue-cancel.patch",
+      "sha256": "095bcaa662768b79c4effe8e9d022d92d0699f2eaafdb34a7c8db8d3c9cd34c5"
+    }
+  ],
+  "schema": "alas-headless.alas-patch-series/v1",
+  "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
+}

@@ -20606,3 +20606,690 @@ diff --git a/module/campaign/campaign_ui.py b/module/campaign/campaign_ui.py
                  return
          if chapter in ['part1', 'a', 'c', 't']:
              ASIDE_SWITCH_20241219.set('part1', main=self)
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -591,14 +591,33 @@
+         if semantic_session is not None:
+             current_fleet = semantic_session.operation_siren_current_fleet()
+             if not semantic_session.operation_siren_fleet_selector_open():
+-                semantic_session.click_operation_siren_fleet_bar()
+-                for _ in self.loop():
++                receipt = semantic_session.click_operation_siren_fleet_bar()
++                for _ in self.loop(skip_first=False, timeout=30):
+                     if semantic_session.operation_siren_fleet_selector_open():
+                         break
+-            semantic_session.click_operation_siren_fleet_selector(current_fleet)
+-            for _ in self.loop():
++                else:
++                    oracle = semantic_session.open().oracle
++                    if oracle.operation_siren_local_map_visible():
++                        from alas_headless.oracle.errors import SemanticNavigationPending
++                        raise SemanticNavigationPending(
++                            receipt.semantic_id, receipt, oracle.read_state().generation,
++                            'Fleet selector did not open; current local map remains healthy',
++                        )
++                    from alas_headless import SemanticGateClosed
++                    raise SemanticGateClosed('Fleet selector did not open; owning map is unavailable')
++            receipt = semantic_session.click_operation_siren_fleet_selector(current_fleet)
++            for _ in self.loop(skip_first=False, timeout=30):
+                 if not semantic_session.operation_siren_fleet_selector_open():
+                     break
++            else:
++                oracle = semantic_session.open().oracle
++                # The last loop observation proves the complete selector is
++                # still mounted. Do not replay its accepted selection input.
++                from alas_headless.oracle.errors import SemanticNavigationPending
++                raise SemanticNavigationPending(
++                    receipt.semantic_id, receipt, oracle.read_state().generation,
++                    'Fleet selector did not close after selection',
++                )
+             return True
+         current_fleet = self.fleet_selector.get()
+         if not current_fleet:
+diff --git a/module/combat/auto_search_combat.py b/module/combat/auto_search_combat.py
+--- a/module/combat/auto_search_combat.py
++++ b/module/combat/auto_search_combat.py
+@@ -323,6 +323,13 @@
+         exp_info = False  # This is for the white screen bug in game
+ 
+         for _ in self.loop():
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if (semantic_adapter is not None
++                    and semantic_adapter.close_campaign_battle_fail_tip_if_present()):
++                # The game pauses official search on defeat. Reuse the native
++                # manual result/statistics handlers after its exact tip closes.
++                self._auto_search_status_confirm = True
++                continue
+ 
+             # End
+             if self.is_auto_search_running():
+diff --git a/module/handler/enemy_searching.py b/module/handler/enemy_searching.py
+--- a/module/handler/enemy_searching.py
++++ b/module/handler/enemy_searching.py
+@@ -49,6 +49,11 @@
+             return False
+ 
+     def is_in_stage_page(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        archives_visible = getattr(semantic_adapter, 'war_archives_campaign_visible', None)
++        if callable(archives_visible) and archives_visible():
++            # Archives are a stage destination without being the main Campaign Page.
++            return True
+         for check in [CAMPAIGN_CHECK, EVENT_CHECK, SP_CHECK]:
+             if self.appear(check, offset=(20, 20)):
+                 return True
+diff --git a/module/retire/retirement.py b/module/retire/retirement.py
+--- a/module/retire/retirement.py
++++ b/module/retire/retirement.py
+@@ -48,29 +48,38 @@
+         Returns:
+             int: Amount of cards have retired.
+         """
+-        cards = []
+-        rarity = []
+-        for x, y, button in CARD_RARITY_GRIDS.generate():
+-            card_color = get_color(image=self.device.image, area=button.area)
+-            f = False
+-            for r, rarity_color in CARD_RARITY_COLORS.items():
+-
+-                if color_similar(card_color, rarity_color, threshold=15):
+-                    cards.append([x, y])
+-                    rarity.append(r)
+-                    f = True
+-
+-            if not f:
+-                logger.warning(
+-                    f'Unknown rarity color. Grid: ({x}, {y}). Color: {card_color}')
+-
+-        logger.info(' '.join([r.rjust(3) for r in rarity[:7]]))
+-        logger.info(' '.join([r.rjust(3) for r in rarity[7:]]))
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            cards, rarity = semantic_session.old_retirement_card_vectors(
++                target_rarity=target_rarity,
++                card_limit=int(CARD_RARITY_GRIDS.grid_shape[0]) * int(CARD_RARITY_GRIDS.grid_shape[1]))
++        else:
++            cards = []
++            rarity = []
++            for x, y, button in CARD_RARITY_GRIDS.generate():
++                card_color = get_color(image=self.device.image, area=button.area)
++                f = False
++                for r, rarity_color in CARD_RARITY_COLORS.items():
++
++                    if color_similar(card_color, rarity_color, threshold=15):
++                        cards.append([x, y])
++                        rarity.append(r)
++                        f = True
++
++                if not f:
++                    logger.warning(
++                        f'Unknown rarity color. Grid: ({x}, {y}). Color: {card_color}')
++
++            logger.info(' '.join([r.rjust(3) for r in rarity[:7]]))
++            logger.info(' '.join([r.rjust(3) for r in rarity[7:]]))
+ 
+         selected = 0
+         for card, r in zip(cards, rarity):
+             if r in target_rarity:
+-                self.device.click(CARD_GRIDS[card])
++                if semantic_session is not None:
++                    semantic_session.old_retirement_select_card(card)
++                else:
++                    self.device.click(CARD_GRIDS[card])
+                 self.device.sleep((0.1, 0.15))
+                 selected += 1
+             if selected >= amount:
+@@ -85,6 +94,11 @@
+                 SHIP_CONFIRM if using old_retire
+             out: IN_RETIREMENT_CHECK
+         """
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        semantic_old_retire = (semantic_session is not None and
++            getattr(semantic_session, 'old_retirement_confirmation_pending', lambda: False)())
++        if semantic_old_retire:
++            semantic_session.begin_old_retirement_confirmation()
+         logger.info('Retirement confirm')
+         executed = False
+         for button in [SHIP_CONFIRM, SHIP_CONFIRM_2, EQUIP_CONFIRM, EQUIP_CONFIRM_2, GET_ITEMS_1, SR_SSR_CONFIRM]:
+@@ -156,6 +170,8 @@
+                 # equipment confirms are the next to appear
+                 self.interval_clear([EQUIP_CONFIRM, EQUIP_CONFIRM_2])
+                 continue
++        if semantic_old_retire:
++            semantic_session.finish_old_retirement_confirmation()
+ 
+     def retirement_appear(self):
+         return self.appear(RETIRE_APPEAR_1, offset=30) \
+@@ -302,10 +318,18 @@
+             'SSR': 'super_rare'
+         }
+         _rarity = [correspond_name[i] for i in rarity]
+-        self.dock_sort_method_dsc_set(False, wait_loading=False)
+-        self.dock_favourite_set(False, wait_loading=False)
+-        self.dock_filter_set(
+-            sort='level', index='all', faction='all', rarity=_rarity, extra='no_limit')
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            semantic_session.require_old_retirement_policy(keep_common_cv=self.retire_keep_common_cv)
++            semantic_session.old_retirement_set_sort(False)
++            semantic_session.old_retirement_set_favourite(False)
++            semantic_session.old_retirement_set_filter(
++                sort='level', index='all', faction='all', rarity=_rarity, extra='no_limit')
++        else:
++            self.dock_sort_method_dsc_set(False, wait_loading=False)
++            self.dock_favourite_set(False, wait_loading=False)
++            self.dock_filter_set(
++                sort='level', index='all', faction='all', rarity=_rarity, extra='no_limit')
+ 
+         total = 0
+ 
+@@ -332,8 +356,12 @@
+             self.handle_dock_cards_loading()
+             continue
+ 
+-        self.dock_sort_method_dsc_set(True, wait_loading=False)
+-        self.dock_filter_set()
++        if semantic_session is not None:
++            semantic_session.old_retirement_set_sort(True)
++            semantic_session.old_retirement_set_filter()
++        else:
++            self.dock_sort_method_dsc_set(True, wait_loading=False)
++            self.dock_filter_set()
+         logger.info(f'Total retired: {total}')
+         return total
+ 
+@@ -412,9 +440,8 @@
+             mode=self.config.Retirement_RetireMode
+         )
+         if current_semantic_session() is not None:
+-            # The legacy old-retire path still owns framebuffer matching and
+-            # coordinate input.  Refuse it before page detection or mutation;
+-            # the two reviewed semantic transactions remain ALAS-owned below.
++            # Mode declaration is shared; optional typed branches enforce
++            # their own observation/input capability before mutation.
+             retirement_config.require_semantic_entry()
+ 
+         # 2025.05.29 game tips that infos skin feature when you enter dock
+diff --git a/module/retire/retirement.py b/module/retire/retirement.py
+--- a/module/retire/retirement.py
++++ b/module/retire/retirement.py
+@@ -220,9 +220,14 @@
+                 return True
+ 
+     def retire_ships_one_click(self):
+-        from alas_headless import current_semantic_session
++        from alas_headless import current_semantic_session, SemanticGateClosed
+         semantic_session = current_semantic_session()
+         if semantic_session is not None:
++            if self.retire_keep_common_cv:
++                cv_policy = getattr(semantic_session, 'require_common_cv_retirement_protection', None)
++                if not callable(cv_policy):
++                    raise SemanticGateClosed('retirement common-CV preservation port is unavailable')
++                cv_policy()
+             # ALAS still owns retirement timing and retry policy.  The semantic
+             # port owns the official one-click transaction so its real selected
+             # count, protection settings, confirmations, and equipment outcome
+diff --git a/module/retire/retirement.py b/module/retire/retirement.py
+--- a/module/retire/retirement.py
++++ b/module/retire/retirement.py
+@@ -224,10 +224,13 @@
+         semantic_session = current_semantic_session()
+         if semantic_session is not None:
+             if self.retire_keep_common_cv:
+-                cv_policy = getattr(semantic_session, 'require_common_cv_retirement_protection', None)
++                cv_policy = getattr(semantic_session, 'retire_ships_with_common_cv_policy', None)
+                 if not callable(cv_policy):
+                     raise SemanticGateClosed('retirement common-CV preservation port is unavailable')
+-                cv_policy()
++                self._have_kept_cv = False
++                return cv_policy(
++                    keep_limit_break=(self.config.OneClickRetire_KeepLimitBreak == 'keep_limit_break'),
++                    native_keep=self.keep_one_common_cv)
+             # ALAS still owns retirement timing and retry policy.  The semantic
+             # port owns the official one-click transaction so its real selected
+             # count, protection settings, confirmations, and equipment outcome
+@@ -325,7 +328,14 @@
+         _rarity = [correspond_name[i] for i in rarity]
+         semantic_session = getattr(self.device, 'semantic_adapter', None)
+         if semantic_session is not None:
+-            semantic_session.require_old_retirement_policy(keep_common_cv=self.retire_keep_common_cv)
++            if self.retire_keep_common_cv:
++                from alas_headless import SemanticGateClosed
++                cv_policy = getattr(semantic_session, 'require_old_retirement_with_cv_policy', None)
++                if not callable(cv_policy):
++                    raise SemanticGateClosed('old retirement common-CV preservation port is unavailable')
++                cv_policy()
++            else:
++                semantic_session.require_old_retirement_policy(keep_common_cv=False)
+             semantic_session.old_retirement_set_sort(False)
+             semantic_session.old_retirement_set_favourite(False)
+             semantic_session.old_retirement_set_filter(
+@@ -383,9 +393,15 @@
+             logger.info('Not in GemsFarming, skip')
+             return 0
+ 
+-        self.dock_favourite_set(wait_loading=False)
+-        self.dock_sort_method_dsc_set(wait_loading=False)
+-        self.dock_filter_set(index='cv', rarity='common', extra='not_level_max', sort='level')
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            semantic_session.old_retirement_set_favourite(False)
++            semantic_session.old_retirement_set_sort(False)
++            semantic_session.retirement_set_abandoned_carrier_filter()
++        else:
++            self.dock_favourite_set(wait_loading=False)
++            self.dock_sort_method_dsc_set(wait_loading=False)
++            self.dock_filter_set(index='cv', rarity='common', extra='not_level_max', sort='level')
+ 
+         scanner = ShipScanner(
+             rarity='common', fleet=0, status='free', level=(2, 100))
+@@ -403,7 +419,10 @@
+                 self.device.screenshot()
+ 
+             self.handle_info_bar()
+-            ships = scanner.scan(self.device.image)
++            if semantic_session is not None:
++                ships = semantic_session.retirement_scan_abandoned_carriers(scanner)
++            else:
++                ships = scanner.scan(self.device.image)
+             if not ships:
+                 # exit if nothing can be retired
+                 break
+@@ -416,7 +435,10 @@
+                     ships = ships[:-1]
+ 
+             for ship in ships:
+-                self.device.click(ship.button)
++                if semantic_session is not None:
++                    semantic_session.old_retirement_select_card(ship.button)
++                else:
++                    self.device.click(ship.button)
+                 self.device.sleep((0.1, 0.15))
+                 total += 1
+ 
+@@ -428,7 +450,10 @@
+ 
+         self._have_kept_cv = _
+         # No need to wait, retire finished, just about to exit
+-        self.dock_filter_set(wait_loading=False)
++        if semantic_session is not None:
++            semantic_session.old_retirement_set_filter()
++        else:
++            self.dock_filter_set(wait_loading=False)
+ 
+         return total
+ 
+@@ -574,6 +599,10 @@
+             button (Button): Ship button to select
+             skip_first_screenshot:
+         """
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            semantic_session.retirement_deselect_common_cv(button)
++            return True
+         count = 0
+         RETIRE_COIN.load_color(self.device.image)
+         RETIRE_COIN._match_init = True
+@@ -599,32 +628,30 @@
+ 
+     def retirement_get_common_rarity_cv_in_page(self):
+         """
+-        Returns:
+-            Button:
+-        """
++            Returns:
++                Button:
++            """
+         if self.config.GemsFarming_CommonCV == 'any':
+             for common_cv_name in ['BOGUE', 'HERMES', 'LANGLEY', 'RANGER']:
++                semantic_session = getattr(self.device, 'semantic_adapter', None)
++                if semantic_session is not None:
++                    button = semantic_session.retirement_match_common_cv(common_cv_name)
++                    if button is not None:
++                        return button
++                    continue
+                 template = globals()[f'TEMPLATE_{common_cv_name}']
+-                sim, button = template.match_result(
+-                    resize(self.device.image, size=(1189, 669)))
+-
++                sim, button = template.match_result(resize(self.device.image, size=(1189, 669)))
+                 if sim > self.config.COMMON_CV_THRESHOLD:
+-                    return Button(button=tuple(_ * 155 // 144 for _ in button.button), area=button.area,
+-                                  color=button.color,
+-                                  name=f'TEMPLATE_{common_cv_name}_RETIRE')
+-
++                    return Button(button=tuple((_ * 155 // 144 for _ in button.button)), area=button.area, color=button.color, name=f'TEMPLATE_{common_cv_name}_RETIRE')
+             return None
+         else:
+-
+-            template = globals()[
+-                f'TEMPLATE_{self.config.GemsFarming_CommonCV.upper()}']
+-            sim, button = template.match_result(
+-                resize(self.device.image, size=(1189, 669)))
+-
++            semantic_session = getattr(self.device, 'semantic_adapter', None)
++            if semantic_session is not None:
++                return semantic_session.retirement_match_common_cv(self.config.GemsFarming_CommonCV.upper())
++            template = globals()[f'TEMPLATE_{self.config.GemsFarming_CommonCV.upper()}']
++            sim, button = template.match_result(resize(self.device.image, size=(1189, 669)))
+             if sim > self.config.COMMON_CV_THRESHOLD:
+-                return Button(button=tuple(_ * 155 // 144 for _ in button.button), area=button.area, color=button.color,
+-                              name=f'TEMPLATE_{self.config.GemsFarming_CommonCV.upper()}_RETIRE')
+-
++                return Button(button=tuple((_ * 155 // 144 for _ in button.button)), area=button.area, color=button.color, name=f'TEMPLATE_{self.config.GemsFarming_CommonCV.upper()}_RETIRE')
+             return None
+ 
+     def retirement_get_common_rarity_cv(self, skip_first_screenshot=False):
+@@ -683,9 +710,14 @@
+         Returns:
+ 
+         """
+-        logger.info('Keep one common CV')
+-        button = self.retirement_get_common_rarity_cv()
+-        if button is not None:
+-            self._retire_select_one(button)
+-            self._have_kept_cv = True
+-        logger.info('Keep one common CV end')
++        from contextlib import nullcontext
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        scope = (semantic_session.retirement_preconfirm_scope(RETIRE_CONFIRM_SCROLL)
++                 if semantic_session is not None else nullcontext())
++        with scope:
++            logger.info('Keep one common CV')
++            button = self.retirement_get_common_rarity_cv()
++            if button is not None:
++                self._retire_select_one(button)
++                self._have_kept_cv = True
++            logger.info('Keep one common CV end')
+diff --git a/module/retire/scanner.py b/module/retire/scanner.py
+--- a/module/retire/scanner.py
++++ b/module/retire/scanner.py
+@@ -340,6 +340,10 @@
+             level=level, emotion=emotion, rarity=rarity, fleet=fleet, status=status)
+ 
+     def _scan(self, image) -> List:
++        semantic_session = getattr(self, '_semantic_retirement_session', None)
++        if semantic_session is not None:
++            return [Ship(**record) for record in
++                    semantic_session.retirement_ship_scanner_records(self)]
+         for scanner in self.sub_scanners.values():
+             scanner.scan(image, cached=True)
+ 
+diff --git a/module/ui/scroll.py b/module/ui/scroll.py
+--- a/module/ui/scroll.py
++++ b/module/ui/scroll.py
+@@ -62,6 +62,11 @@
+             float: 0 to 1.
+         """
+         semantic_adapter = getattr(main.device, 'semantic_adapter', None)
++        retirement_scope = getattr(semantic_adapter, 'retirement_preconfirm_scroll_active', lambda _: False)(self)
++        if retirement_scope:
++            state = semantic_adapter.retirement_preconfirm_scroll_state()
++            self.length = self.total * state.size
++            return semantic_adapter.retirement_preconfirm_scroll_position(state)
+         if semantic_adapter is not None and self.name == 'METERIAL_SCROLL':
+             state = semantic_adapter.storage_material_scroll_state()
+             self.length = self.total * state.size
+@@ -117,6 +122,9 @@
+             bool
+         """
+         semantic_adapter = getattr(main.device, 'semantic_adapter', None)
++        retirement_scope = getattr(semantic_adapter, 'retirement_preconfirm_scroll_active', lambda _: False)(self)
++        if retirement_scope:
++            return semantic_adapter.retirement_preconfirm_scroll_visible()
+         if semantic_adapter is not None and self.name == 'METERIAL_SCROLL':
+             state = semantic_adapter.storage_material_scroll_state()
+             return state.size < 1 and all(c.active_in_hierarchy for c in state.controls)
+@@ -145,6 +153,7 @@
+             bool: If dragged.
+         """
+         semantic_adapter = getattr(main.device, 'semantic_adapter', None)
++        retirement_scope = getattr(semantic_adapter, 'retirement_preconfirm_scroll_active', lambda _: False)(self)
+         if semantic_adapter is not None and self.name == 'MINIGAME_SCROLL_AREA':
+             return int(semantic_adapter.minigame_scroll_set(float(position)))
+         logger.info(f'{self.name} set to {position}')
+@@ -177,7 +186,9 @@
+                     continue
+ 
+             if self.drag_interval.reached():
+-                if semantic_adapter is not None and self.name == 'METERIAL_SCROLL':
++                if retirement_scope:
++                    semantic_adapter.retirement_preconfirm_scroll_drag_toward(float(position))
++                elif semantic_adapter is not None and self.name == 'METERIAL_SCROLL':
+                     semantic_adapter.storage_material_scroll_drag_toward(float(position))
+                 else:
+                     p1 = random_rectangle_point(self.position_to_screen(current), n=1)
+diff --git a/module/ui/ui.py b/module/ui/ui.py
+--- a/module/ui/ui.py
++++ b/module/ui/ui.py
+@@ -321,11 +321,11 @@
+                         except SemanticInputBlocked as exc:
+                             if not (exc.blockers == ('bulletin',) or
+                                     (exc.semantic_id == 'os/page/back'
+-                                     and exc.blockers in (('opsi-exit',), ('award-info',),
++                                     and exc.blockers in (('loading',), ('opsi-exit',), ('award-info',),
+                                                           ('award-info1',), ('ship-exp',)))):
+                                 raise
+-                            # No navigation input was sent. A reviewed overlay
+-                            # may mount after the native screenshot. Refresh
++                            # No navigation input was sent. Loading or a
++                            # reviewed overlay can mount after the screenshot. Refresh
+                             # this loop; ui_additional owns its handling.
+                             logger.info(f'Navigation covered by {exc.blockers[0]}; refresh native UI loop')
+                             self.device.screenshot()
+diff --git a/module/os/map.py b/module/os/map.py
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -813,7 +813,17 @@
+                 in_main_timer.reset()
+                 continue
+ 
+-            if self.appear_then_click(GOTO_MAIN, offset=(20, 20), interval=3):
++            from alas_headless.oracle.errors import SemanticInputBlocked
++            try:
++                go_main = self.appear_then_click(GOTO_MAIN, offset=(20, 20), interval=3)
++            except SemanticInputBlocked as exc:
++                if (semantic_session is None or exc.semantic_id != 'os/page/back'
++                        or exc.blockers != ('loading',)):
++                    raise
++                # No Back was submitted. Loading can mount between screenshot
++                # and input; this original interrupt loop owns the next frame.
++                continue
++            if go_main:
+                 in_main_timer.reset()
+                 continue
+             if self.ui_additional():
+diff --git a/module/base/base.py b/module/base/base.py
+--- a/module/base/base.py
++++ b/module/base/base.py
+@@ -339,6 +339,13 @@
+ 
+     def wait_until_stable(self, button, timer=Timer(0.3, count=1), timeout=Timer(5, count=10), skip_first_screenshot=True):
+         button._match_init = False
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        semantic_sampler = None
++        previous_sample = None
++        if semantic_adapter is not None and button.name == 'MATERIAL_STABLE_CHECK':
++            semantic_sampler = getattr(semantic_adapter, 'storage_stability_sample', None)
++            if not callable(semantic_sampler):
++                semantic_adapter.reject_raw_input('storage stability sampler is unavailable')
+         timeout.reset()
+         while 1:
+             if skip_first_screenshot:
+@@ -347,14 +354,23 @@
+                 self.device.screenshot()
+ 
+             if button._match_init:
+-                if button.match(self.device.image, offset=(0, 0)):
++                current_sample = semantic_sampler() if semantic_sampler is not None else None
++                stable = (current_sample == previous_sample if semantic_sampler is not None
++                          else button.match(self.device.image, offset=(0, 0)))
++                if stable:
+                     if timer.reached():
+                         break
+                 else:
++                    if semantic_sampler is not None:
++                        previous_sample = current_sample
++                    else:
++                        button.load_color(self.device.image)
++                    timer.reset()
++            else:
++                if semantic_sampler is not None:
++                    previous_sample = semantic_sampler()
++                else:
+                     button.load_color(self.device.image)
+-                    timer.reset()
+-            else:
+-                button.load_color(self.device.image)
+                 button._match_init = True
+ 
+             if timeout.reached():
+diff --git a/module/storage/storage.py b/module/storage/storage.py
+--- a/module/storage/storage.py
++++ b/module/storage/storage.py
+@@ -334,7 +334,13 @@
+         ])
+         self.wait_until_stable(MATERIAL_STABLE_CHECK)
+ 
+-        items = EQUIPMENT_ITEMS.predict(self.device.image, name=False, amount=True)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            # Replace only ItemGrid observation. Native counting, cell choice,
++            # screenshots and confirmation decisions below remain unchanged.
++            items = semantic_adapter.storage_equipment_items()
++        else:
++            items = EQUIPMENT_ITEMS.predict(self.device.image, name=False, amount=True)
+         if not len(items):
+             logger.warning('No items in storage to disassemble')
+             return 0
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -606,8 +606,9 @@
+                     and not semantic_adapter.campaign_stage_entry_allowed()
+                     and not semantic_map_resume
+                 ):
+-                    raise ScriptEnd(
+-                        'Semantic campaign stage-entry budget is zero')
++                    from alas_headless.adapter.semantic.contracts import AlasSemanticActionDeferred
++                    raise AlasSemanticActionDeferred(
++                        'campaign.stage_entry: task action grant is exhausted')
+                 self.campaign.run()
+             except ScriptEnd as e:
+                 logger.hr('Script end')
+diff --git a/module/research/research.py b/module/research/research.py
+--- a/module/research/research.py
++++ b/module/research/research.py
+@@ -639,6 +639,12 @@
+         if semantic_adapter is not None:
+             semantic_adapter.begin_research()
+         try:
++            # A new task has no selection authority for an inherited queue
++            # confirmation. Cancel that unsubmitted dialog, then let the
++            # existing detail-quit and Research state machine recover.
++            if semantic_adapter is not None and semantic_adapter.appear('RESEARCH_INHERITED_QUEUE_CANCEL'):
++                semantic_adapter.click('RESEARCH_INHERITED_QUEUE_CANCEL')
++                self.device.screenshot()
+             if semantic_adapter is not None and self.appear(RESEARCH_DETAIL_QUIT):
+                 self.research_detail_quit()
+             # Recover a normal Research command that starts on its own queue
+diff --git a/module/os_handler/action_point.py b/module/os_handler/action_point.py
+--- a/module/os_handler/action_point.py
++++ b/module/os_handler/action_point.py
+@@ -381,6 +381,15 @@
+                     count * value
+                     for count, value in zip(current_state.item_counts, values)
+                 )
++
++            if check_rest_ap:
++                diff = get_server_next_update('00:00') - datetime.now()
++                today_rest = int(diff.total_seconds() // 600)
++                if state.current + today_rest >= 200:
++                    logger.info('The sum of the current action points and the rest action points'
++                                ' that can be obtained today exceeds 200, skip AP check')
++                    logger.info(f'Current={state.current}  Rest={today_rest}')
++                    keep_current_ap = False
+ 
+             if keep_current_ap and total_points(state) <= self.config.OS_ACTION_POINT_PRESERVE:
+                 logger.info(
+diff --git a/module/daily/daily.py b/module/daily/daily.py
+--- a/module/daily/daily.py
++++ b/module/daily/daily.py
+@@ -358,6 +358,8 @@
+             semantic_adapter is not None
+             and semantic_adapter.daily_precombat_visible()
+         ):
++            if self.handle_combat_automation_confirm():
++                self.device.screenshot()
+             semantic_adapter.click_daily_precombat_back()
+             self.device.sleep((1, 1.2))
+         if (
+diff --git a/module/daily/daily.py b/module/daily/daily.py
+--- a/module/daily/daily.py
++++ b/module/daily/daily.py
+@@ -366,8 +366,7 @@
+             semantic_adapter is not None
+             and semantic_adapter.daily_detail_visible()
+         ):
+-            semantic_adapter.click_daily_back()
+-            self.device.sleep((1, 1.2))
++            self.ui_click(BACK_ARROW, check_button=DAILY_CHECK)
+         self.ui_ensure(page_daily)
+         self.device.sleep(0.2)
+         self.device.screenshot()
+diff --git a/module/daily/daily.py b/module/daily/daily.py
+--- a/module/daily/daily.py
++++ b/module/daily/daily.py
+@@ -368,6 +368,12 @@
+         ):
+             self.ui_click(BACK_ARROW, check_button=DAILY_CHECK)
+         self.ui_ensure(page_daily)
++        if semantic_adapter is not None and self.daily_checked == [0]:
++            # A recovered carousel may still center a later card. Native
++            # checked indices start at one, so reuse native page navigation
++            # to restore the initial position before assigning that index.
++            self.ui_goto(page_campaign_menu)
++            self.ui_ensure(page_daily)
+         self.device.sleep(0.2)
+         self.device.screenshot()
+         self.daily_current = 1
+diff --git a/module/tactical/tactical_class.py b/module/tactical/tactical_class.py
+--- a/module/tactical/tactical_class.py
++++ b/module/tactical/tactical_class.py
+@@ -549,12 +549,18 @@
+                 self.interval_clear([POPUP_CONFIRM, POPUP_CANCEL, GET_MISSION])
+                 if book_empty:
+                     if self._return_from_tactical_page():
+-                        return True
++                        # The input receipt is not page arrival. Keep the
++                        # native screenshot loop responsible for the return.
++                        received = True
++                        continue
+                     self.interval_reset(TACTICAL_CHECK)
+                     continue
+                 if self._tactical_get_finish():
+                     if self._return_from_tactical_page():
+-                        return True
++                        # The input receipt is not page arrival. Keep the
++                        # native screenshot loop responsible for the return.
++                        received = True
++                        continue
+                     self.interval_reset(TACTICAL_CHECK)
+                     empty_confirm.reset()
+                     received = True
+@@ -566,10 +572,12 @@
+                     semantic_session = current_semantic_session()
+                     if semantic_session is not None:
+                         if study_finished and self._return_from_tactical_page():
+-                            return True
++                            received = True
++                            continue
+                     if empty_confirm.reached():
+                         if self._return_from_tactical_page():
+-                            return True
++                            received = True
++                            continue
+                         empty_confirm.reset()
+                         received = True
+                         continue

@@ -134,15 +134,23 @@ class CombatOracle:
             and not self._daily_precombat_visible(state)
         )
 
-    def daily_entry_visible(self) -> bool:
-        """Prove arrival without treating a UI observation as new input authority."""
+    def daily_navigation_visible(self) -> bool:
+        """Prove the Daily destination, including its stage-detail subpage."""
         state = self.read_state()
+        return self._daily_navigation_visible(state)
+
+    def _daily_navigation_visible(self, state: OracleState) -> bool:
         targets = self._matches(state, 'daily/page/back')
         return bool(len(targets) == 1 and targets[0].active_in_hierarchy
                     and targets[0].active_and_enabled and targets[0].interactable
                     and targets[0].raycast_top is not False
                     and not self._daily_precombat_visible(state)
                     and not self._blocking_rules(state, 'daily/page/back'))
+
+    def daily_entry_visible(self) -> bool:
+        """Only the overview satisfies native DAILY_CHECK and offers arrows."""
+        state = self.read_state()
+        return self._daily_navigation_visible(state) and not self._daily_detail_visible(state)
 
     def daily_detail_visible(self) -> bool:
         state = self.read_state()
@@ -511,6 +519,13 @@ class CombatOracle:
                 if not self._daily_precombat_visible(state):
                     raise SemanticGateClosed('META assist precombat changed during observation')
             blockers = self._blocking_rules(state, 'daily/precombat/back')
+            if not owned_meta_assist:
+                # Ordinary Daily retains its selector below PreCombatUI.
+                # Returning spends no challenge; only this proven underlay
+                # may yield to the unique reviewed precombat back control.
+                blockers = tuple(rule for rule in blockers
+                    if not (rule.blocker_id == 'daily-page'
+                        and rule.path_fragment == '/DailyLevelUI(Clone)/'))
             if owned_meta_assist:
                 blockers = tuple(rule for rule in blockers
                     if not (rule.blocker_id == 'meta-assist' and rule.path_fragment ==
@@ -552,11 +567,43 @@ class CombatOracle:
     def combat_automation_info_visible(self, *, require_actionable: bool = True) -> bool:
         return self._combat_automation_info_state(require_actionable=require_actionable) is not None
 
+    def inherited_daily_automation_info_visible(self) -> bool:
+        """Identify the ordinary Daily owner before a new task has its kind."""
+        state = self._combat_automation_info_state()
+        if state is None or not self._daily_precombat_visible(state):
+            return False
+        # The common PreCombatUI alone may belong to META or another task.
+        # The common header is reparented out of Daily while PreCombatUI is
+        # mounted. Its active selector rows still identify the ordinary Daily
+        # underlay. Accept additive row IDs, but not duplicate identities.
+        # No obscured selector control receives input through this predicate.
+        prefix = 'UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/'
+        rows = [b for b in state.buttons
+                if b.path.startswith(prefix) and b.path[len(prefix):].isascii()
+                and b.path[len(prefix):].isdecimal() and b.name == b.path[len(prefix):]
+                and b.active_in_hierarchy and b.active_and_enabled]
+        return bool(rows) and len({b.path for b in rows}) == len(rows)
+
+    def _combat_automation_opening_visible(self, state: OracleState, ui: UiState) -> bool:
+        # The opening skill animation can hide PauseBtn while this exact
+        # information window is mounted. Keep that ownership local to the
+        # information handler; it does not qualify generic combat or controls.
+        active = [b for b in state.buttons if b.active_in_hierarchy and b.active_and_enabled]
+        if not any(b.path.startswith('UICamera/Canvas/UIMain/SkillPainting(Clone)') for b in active):
+            return False
+        root = 'UICamera/Canvas/UIMain/CombatUIStandard(Clone)'
+        if not any(re.fullmatch(re.escape(root) + r'/Weapon_button_container/Skill_[123]/ActCtl',
+                                b.path) for b in active):
+            return False
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('automation opening frames are incoherent')
+        timers = [t for t in ui.texts if t.path == root + '/Timer/Text'
+                  and t.active_in_hierarchy and t.active_and_enabled
+                  and not t.truncated and t.bounds is not None]
+        return bool(len(timers) == 1 and re.fullmatch(r'\d{1,3}:[0-5]\d', timers[0].text))
+
     def _combat_automation_info_state(self, *, require_actionable: bool = True):
         state = self.read_state()
-        if not (self._daily_precombat_visible(state) or self._daily_combat_visible(state)
-                or self.campaign_precombat_visible(state)):
-            return None
         targets = [b for b in self._matches(state, 'os/precombat/info/confirm')
                    if b.active_in_hierarchy and b.active_and_enabled]
         if not targets:
@@ -573,26 +620,38 @@ class CombatOracle:
             return None
         if texts('button_container/custom_button_1(Clone)/pic') != ['知道了']:
             return None
+        if not (self._daily_precombat_visible(state) or self._daily_combat_visible(state)
+                or self.campaign_precombat_visible(state)
+                or self._combat_automation_opening_visible(state, ui)):
+            return None
         if any(b.active_in_hierarchy and b.active_and_enabled
                and '/Msgbox(Clone)/window/button_container/' in b.path
                and b.path != targets[0].path for b in state.buttons):
             raise SemanticGateClosed('automation information choices are ambiguous')
         return state if len(targets) == 1 and (not require_actionable or targets[0].actionable) else None
 
-    def click_combat_automation_info(self) -> ActionReceipt:
+    def click_combat_automation_info(self, *, input_frame=None) -> ActionReceipt:
         # Retry only a complete read before dispatch, never the tap. Use that
         # same Button/UI pair for identity and the actionable target.
-        state = self._retry_transition_read(self._combat_automation_info_state)
+        reader = self if input_frame is None else input_frame()
+        state = reader._retry_transition_read(reader._combat_automation_info_state)
         if state is None:
             raise SemanticGateClosed('automation information identity is not proven')
-        precombat = self._daily_precombat_visible(state)
-        campaign_precombat = self.campaign_precombat_visible(state)
-        target = self._unique(state, 'os/precombat/info/confirm')
-        blockers = [rule for rule in self._blocking_rules(state, 'os/precombat/info/confirm')
+        precombat = reader._daily_precombat_visible(state)
+        campaign_precombat = reader.campaign_precombat_visible(state)
+        target = reader._unique(state, 'os/precombat/info/confirm')
+        blockers = [rule for rule in reader._blocking_rules(state, 'os/precombat/info/confirm')
                     if (rule.blocker_id, rule.path_fragment) not in (
                         ('daily-precombat', '/PreCombatUI(Clone)/'),
                         ('meta-current-detail', '/WorldBossUI(Clone)/pages/CurrentWorldBossDetailUI(Clone)/'),
                         ('meta-assist', '/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/'))]
+        if precombat:
+            # Ordinary Daily keeps its selector below PreCombatUI, just as
+            # its reviewed start/back ports already observe. Only this proven
+            # underlay may yield to the exact one-choice information modal.
+            blockers = [rule for rule in blockers
+                        if not (rule.blocker_id == 'daily-page'
+                                and rule.path_fragment == '/DailyLevelUI(Clone)/')]
         if (not target.actionable or target.point is None or target.bounds is None
                 or not target.bounds.contains(target.point) or blockers
                 or self._foreground_component() != self.fingerprint.component):
@@ -607,6 +666,13 @@ class CombatOracle:
                 restored = (self.campaign_precombat_visible(after) if campaign_precombat
                             else self._daily_precombat_visible(after) if precombat
                             else self._daily_combat_visible(after))
+                if not restored and not precombat and not campaign_precombat:
+                    # Pair a new post-input owner sample after the absence
+                    # probe; never combine its later UI with the earlier state.
+                    current = self.read_state()
+                    restored = (self._daily_combat_visible(current)
+                                or self._combat_automation_opening_visible(
+                                    current, self._paired_ui_after_state()))
                 if not restored:
                     raise SemanticGateClosed('automation information did not restore its combat page')
                 return receipt
@@ -635,6 +701,13 @@ class CombatOracle:
                 if not reader._daily_precombat_visible(state):
                     raise SemanticGateClosed('META assist precombat changed during observation')
             blockers = reader._blocking_rules(state, 'daily/precombat/start')
+            if not owned_meta_assist:
+                # Original Daily keeps its selector mounted beneath its
+                # preparation panel. The proven PreCombat owner may start
+                # through that underlay; foreign overlays remain blockers.
+                blockers = tuple(rule for rule in blockers
+                    if not (rule.blocker_id == 'daily-page'
+                        and rule.path_fragment == '/DailyLevelUI(Clone)/'))
             if owned_meta_assist:
                 blockers = tuple(rule for rule in blockers
                     if not (rule.blocker_id == 'meta-assist' and rule.path_fragment ==

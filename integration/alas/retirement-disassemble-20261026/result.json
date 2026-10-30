@@ -1,0 +1,359 @@
+{
+  "schema": "alas-headless.controlled-retirement-disassemble/v1",
+  "recorded_at": "2026-10-26T09:13:35.077741+08:00",
+  "raw_receipt": "artifacts/full-feature-live-20261025/retirement-standalone-r1.json",
+  "raw_receipt_sha256": "e633fcee28fe12d9cd8528c25e5f2cb40d618c63150d1ef096d52c3de1effd58",
+  "scope": "Independent original ALAS one-click transaction and original exit/Main; NOT a natural midmap retirement chain or full-baseline promotion. Currentdo_not_keep/disassemble branch.",
+  "runtime": {
+    "package": "com.bilibili.azurlane",
+    "pid": 1615,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "protocol_schema": "alas-headless.observer/v1",
+    "semantic_schema": null,
+    "width": 1280,
+    "height": 720
+  },
+  "configuration": {
+    "mode": "enhance",
+    "keep_limit_break": "do_not_keep"
+  },
+  "equipment_policy": "disassemble",
+  "passed": true,
+  "elapsed_seconds": 28.689,
+  "retired_count": 99,
+  "equipment_disassembled_count": 184,
+  "receipt": {
+    "retired_count": 99,
+    "capacity_before": 957,
+    "capacity_after": 858,
+    "capacity_total": 1010,
+    "settings": {
+      "generation": 40641,
+      "unique_ship_protection": true,
+      "priority": [
+        "R",
+        "SR",
+        "N"
+      ],
+      "full_star_policy": "keep_none",
+      "no_full_star_policy": "keep_none"
+    },
+    "rewards": [
+      [
+        "物资",
+        1640
+      ],
+      [
+        "荣誉勋章",
+        115
+      ]
+    ],
+    "rarity_warning_confirmed": true,
+    "equipment_preserved": false,
+    "actions": [
+      {
+        "semantic_id": "retirement/settings/open",
+        "generation": 40597,
+        "point": {
+          "x": 35.53,
+          "y": 519.948
+        },
+        "bounds": {
+          "left": 7.872,
+          "top": 488.958,
+          "right": 63.188,
+          "bottom": 550.938
+        },
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/setting",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/settings/5/keep_none",
+        "generation": 40631,
+        "point": {
+          "x": 983.222,
+          "y": 581.138
+        },
+        "bounds": {
+          "left": 949.899,
+          "top": 547.816,
+          "right": 1016.544,
+          "bottom": 614.461
+        },
+        "path": "OverlayCamera/Overlay/UIMain/DockyardQuickSelectSettingUI(Clone)/window/notifications/options/notify_tpl_5/keep_none",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/settings/close",
+        "generation": 40648,
+        "point": {
+          "x": 1001.277,
+          "y": 110.867
+        },
+        "bounds": {
+          "left": 964.554,
+          "top": 85.2,
+          "right": 1038.0,
+          "bottom": 136.533
+        },
+        "path": "OverlayCamera/Overlay/UIMain/DockyardQuickSelectSettingUI(Clone)/window/top/btnBack",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/one-click",
+        "generation": 40670,
+        "point": {
+          "x": 725.0,
+          "y": 673.333
+        },
+        "bounds": {
+          "left": 634.03,
+          "top": 639.678,
+          "right": 815.97,
+          "bottom": 706.989
+        },
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/quick_select",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/ships/confirm",
+        "generation": 40685,
+        "point": {
+          "x": 1014.0,
+          "y": 649.067
+        },
+        "bounds": {
+          "left": 923.0,
+          "top": 615.4,
+          "right": 1105.0,
+          "bottom": 682.733
+        },
+        "path": "OverlayCamera/Overlay/UIMain/DestoryInfoUI(Clone)/frame/confirm_button",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/rarity-warning/confirm",
+        "generation": 40697,
+        "point": {
+          "x": 793.333,
+          "y": 549.933
+        },
+        "bounds": {
+          "left": 702.333,
+          "top": 516.267,
+          "right": 884.333,
+          "bottom": 583.6
+        },
+        "path": "OverlayCamera/Overlay/UIMain/DestoryConfirmWindow(Clone)/window/confirm_btn",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/reward/close",
+        "generation": 40716,
+        "point": {
+          "x": 640.0,
+          "y": 482.067
+        },
+        "bounds": {
+          "left": 564.667,
+          "top": 465.4,
+          "right": 715.333,
+          "bottom": 498.733
+        },
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/equipment/confirm-selection",
+        "generation": 40731,
+        "point": {
+          "x": 1047.533,
+          "y": 605.867
+        },
+        "bounds": {
+          "left": 956.533,
+          "top": 572.2,
+          "right": 1138.533,
+          "bottom": 639.533
+        },
+        "path": "OverlayCamera/Overlay/UIMain/ResolveEquipmentUI(Clone)/main/ok_btn",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/equipment/disassemble/confirm",
+        "generation": 40740,
+        "point": {
+          "x": 806.667,
+          "y": 573.333
+        },
+        "bounds": {
+          "left": 715.667,
+          "top": 539.667,
+          "right": 897.667,
+          "bottom": 607.0
+        },
+        "path": "OverlayCamera/Overlay/UIMain/ResolveEquipmentUI(Clone)/destroy_confirm/actions/destroy_button",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/equipment/reward/close",
+        "generation": 40756,
+        "point": {
+          "x": 640.0,
+          "y": 482.067
+        },
+        "bounds": {
+          "left": 564.667,
+          "top": 465.4,
+          "right": 715.333,
+          "bottom": 498.733
+        },
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close",
+        "policy_sha256": null,
+        "capability_id": null
+      }
+    ],
+    "policy_sha256": "b7f5797c46477d435880012aaefde4a16ab2a8ebc1dd6d17d3e4e5db998ff6b3",
+    "capability_id": "retirement.execute",
+    "equipment_policy": "disassemble",
+    "equipment_disassembled": true,
+    "equipment_quantities": [
+      [
+        0,
+        2
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        2,
+        7
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        4,
+        7
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        6,
+        5
+      ],
+      [
+        7,
+        4
+      ],
+      [
+        8,
+        1
+      ],
+      [
+        9,
+        4
+      ],
+      [
+        10,
+        32
+      ],
+      [
+        11,
+        30
+      ],
+      [
+        12,
+        1
+      ],
+      [
+        13,
+        12
+      ],
+      [
+        14,
+        2
+      ],
+      [
+        15,
+        3
+      ],
+      [
+        16,
+        1
+      ],
+      [
+        17,
+        6
+      ],
+      [
+        18,
+        6
+      ],
+      [
+        19,
+        19
+      ],
+      [
+        20,
+        20
+      ],
+      [
+        21,
+        2
+      ],
+      [
+        22,
+        8
+      ]
+    ],
+    "equipment_rewards": [
+      [
+        "物资",
+        575
+      ],
+      [
+        "防空炮部件T1",
+        8
+      ]
+    ]
+  },
+  "after": {
+    "pid": 1615,
+    "generation": 40951,
+    "ui_generation": 40951,
+    "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "main_visible": true,
+    "resources": {
+      "oil": 2677,
+      "gold": 104443,
+      "gem": 3505
+    }
+  },
+  "persistent_sha256_unchanged": "56a2b0d79ece5b63b029543a223a3d1231b5b835ca0028a1254f1a35551f4337",
+  "source_sha256_unchanged": "c440cb2d21a2ae0d3c8b3c8a1ed75d12576fc116951e1caeaa5ef5cd86c6834e",
+  "grants": {
+    "retirement_initial": 1,
+    "retirement_remaining": 0,
+    "allocation": "One of previouslyunused2 retirement grants; no retry/new campaign"
+  },
+  "qualifications": {
+    "controlled_actual_transaction": true,
+    "natural_midmap_retirement_chain": false,
+    "overnight_stability": false,
+    "field_live_dimension": "partial retained"
+  }
+}

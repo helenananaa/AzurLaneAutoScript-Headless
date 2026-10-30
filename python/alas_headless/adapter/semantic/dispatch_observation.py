@@ -93,6 +93,8 @@ class DispatchObservationPorts:
 
     def _storage_box_resource_present(self, name):
         oracle = self._frame_or_live_observation_oracle()
+        if oracle.storage_equipment_full_prompt() is not None:
+            return name == 'EQUIPMENT_FULL'
         state = oracle.read_state()
         blockers = oracle._blocking_rules(state, 'storage/box/passive')
         if (getattr(self, '_storage_box_candidate', None) is not None and blockers
@@ -157,6 +159,10 @@ class DispatchObservationPorts:
         return equipment
 
     def _appear_priority(self, name):
+        if name in UI_PAGE_CHECK_RESOURCES.union(('GOTO_MAIN', 'GOTO_MAIN_WHITE', 'RPG_HOME')):
+            oracle = self._frame_or_live_observation_oracle()
+            if getattr(oracle, 'gems_farming_formation_visible', lambda: False)():
+                return name in ('FLEET_CHECK', 'GOTO_MAIN', 'GOTO_MAIN_WHITE', 'RPG_HOME')
         if name == 'HOSIPITAL_CHECK':
             from ..task_lifecycle import current_semantic_task
             if current_semantic_task() == 'hospital':
@@ -170,7 +176,8 @@ class DispatchObservationPorts:
                         'reach the Hospital activity. Re-entry requires a typed Hospital '
                         'page or a separately identified Hospital entrance')
         if (name in UI_PAGE_CHECK_RESOURCES.union((
-                'GOTO_MAIN', 'GOTO_MAIN_WHITE', 'RPG_HOME', 'POPUP_CONFIRM', 'POPUP_CANCEL'))
+                'GOTO_MAIN', 'GOTO_MAIN_WHITE', 'RPG_HOME', 'POPUP_CONFIRM', 'POPUP_CANCEL',
+                'CAMPAIGN_WITHDRAW_CONFIRM'))
                 and (self._commission_context is None
                      or self._commission_context.flow_kind != 'tactical')):
             oracle = self._frame_or_live_observation_oracle()
@@ -223,6 +230,12 @@ class DispatchObservationPorts:
             if getattr(storage_oracle, 'storage_page_visible', lambda: False)():
                 return (name == 'STORAGE_CHECK' or
                         (name == 'MATERIAL_CHECK' and storage_oracle.storage_material_visible()))
+        if not self._login_flow.active and name in ('DISASSEMBLE', 'DISASSEMBLE_CANCEL', 'EQUIPMENT_FILTER_CONFIRM', 'EQUIPMENT_FILTER_CANCEL'):
+            observed=self._frame_or_live_observation_oracle().storage_equipment_mode()
+            if observed is not None:
+                return ((name=='DISASSEMBLE' and observed[1]=='equipment') or
+                        (name=='DISASSEMBLE_CANCEL' and observed[1]=='selection') or
+                        (name in ('EQUIPMENT_FILTER_CONFIRM','EQUIPMENT_FILTER_CANCEL') and observed[1]=='filter'))
         if (name in ('WITHDRAW', 'CAMPAIGN_WITHDRAW_CONFIRM')
                 and self._campaign_context is None
                 and not self._login_flow.active):
@@ -558,7 +571,7 @@ class DispatchObservationPorts:
                     'FLEET_PREPARATION', 'RAID_FLEET_PREPARATION',
                     'AUTO_SEARCH_MENU_EXIT', 'AUTO_SEARCH_REWARD') and not self._login_flow.active:
             oracle = self._frame_or_live_observation_oracle()
-            if getattr(oracle, 'daily_entry_visible', lambda: False)():
+            if getattr(oracle, 'daily_navigation_visible', lambda: False)():
                 # DailyLevelUI is already a reviewed unobscured destination.
                 # Its mounting/return frames must reach native page discovery
                 # without acquiring an unrelated campaign preparation owner.
@@ -907,7 +920,7 @@ class DispatchObservationPorts:
                 and not self._login_flow.active):
             oracle = self._frame_or_live_observation_oracle()
             if (name == 'CAMPAIGN_WITHDRAW_CONFIRM'
-                    and getattr(oracle, 'daily_entry_visible', lambda: False)()):
+                    and getattr(oracle, 'daily_navigation_visible', lambda: False)()):
                 return False
             if (name == 'CAMPAIGN_WITHDRAW_CONFIRM'
                     and getattr(oracle, 'meta_character_menu_visible', lambda: False)()):
@@ -1336,6 +1349,12 @@ class DispatchObservationPorts:
                     return False
             except SemanticGateClosed:
                 pass
+            # A retained map underneath the reviewed dock-full modal is not
+            # ALAS's unobscured IN_MAP state. Fleet._goto already owns the
+            # retirement/map_offensive recovery when this observation is false.
+            # Check it only after excluding the independently owned OpSi map.
+            if self.campaign_dock_full_visible():
+                return False
         if name == 'POPUP_CANCEL_WHITE' and self.oracle.private_quarters_download_prompt_absent():
             return False
         if name == 'PRIVATE_QUARTERS_LOADING_CHECK':

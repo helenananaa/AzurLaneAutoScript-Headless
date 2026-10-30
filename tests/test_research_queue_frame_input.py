@@ -139,3 +139,73 @@ def test_queue_add_uses_common_integer_bounds_without_changing_typed_receipt():
     assert backend.taps == [(1279, 583)]
     assert receipt.point.x == 1279.75
     assert receipt.bounds.right == 1280
+
+
+@pytest.mark.parametrize('drift', [False, True])
+def test_queue_add_does_not_repeat_split_identity_before_its_fresh_proof(drift):
+    backend, _, session, adapter = research_queue_session()
+    if drift:
+        backend.buttons['optional_metadata'] = {'additive': True}
+    adapter.oracle.research_detail_identity = mock.Mock(
+        side_effect=SemanticGateClosed('split live selected identity'))
+    receipt = session.click('RESEARCH_QUEUE_ADD')
+    assert receipt.semantic_id == 'research/detail/queue'
+    assert len(backend.taps) == 1
+
+
+def queue_confirm_session(*, confirmed_start=False, drift=False):
+    backend, bridge, session, adapter = research_queue_session(confirmed_start=confirmed_start)
+    popup = 'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/'
+    backend.buttons['buttons'].extend([
+        make_button('custom_button_1(Clone)', popup+'button_container/custom_button_1(Clone)'),
+        make_button('custom_button_2(Clone)', popup+'button_container/custom_button_2(Clone)'),
+    ])
+    backend.buttons['button_count'] = len(backend.buttons['buttons'])
+    backend.ui['texts'].extend([
+        make_text('确定将该科研项目加入研究队列吗，加入队列的研究项目将顺序完成，不可取消',popup+'msg_panel/content'),
+        make_text('确定',popup+'button_container/custom_button_1(Clone)/pic'),
+        make_text('取消',popup+'button_container/custom_button_2(Clone)/pic'),
+    ])
+    backend.ui['text_count'] = len(backend.ui['texts'])
+    if drift:
+        backend.buttons['optional_metadata'] = {'additive': True}
+    context = adapter._research_context
+    context.queue_add_receipt = object()
+    context.queue_add_requires_start_grant = not confirmed_start
+    def advance_after_input(*_):
+        for projection in (backend.snapshot, backend.buttons, backend.ui):
+            projection['generation'] += 1
+    backend.on_tap = advance_after_input
+    adapter.oracle.research_detail_identity = mock.Mock(
+        side_effect=SemanticGateClosed('split live selected identity'))
+    return backend, bridge, session, adapter
+
+
+@pytest.mark.parametrize('drift',[False,True])
+@pytest.mark.parametrize('confirmed_start',[False,True])
+def test_queue_confirm_keeps_identity_and_prompt_on_its_final_input_frame(confirmed_start,drift):
+    backend, _, session, adapter = queue_confirm_session(confirmed_start=confirmed_start,drift=drift)
+    receipt = session.click('POPUP_CONFIRM')
+    assert receipt.semantic_id == 'research/queue/confirm'
+    assert len(backend.taps) == 1
+    assert adapter._action_ledger.remaining('research.start') == 0
+    assert session.click('POPUP_CONFIRM') is receipt
+    assert len(backend.taps) == 1
+
+
+@pytest.mark.parametrize('damage',['code','series','prompt','blocked'])
+def test_queue_confirm_current_identity_or_prompt_damage_cannot_consume_grant(damage):
+    backend, _, session, adapter = queue_confirm_session()
+    if damage == 'code':
+        backend.ui['texts'][0]['text'] = 'D-347-MI'
+    elif damage == 'series':
+        backend.ui['images'][0]['sprite'] = 'version_10'
+    elif damage == 'prompt':
+        backend.ui['texts'][1]['text'] = '是否花费钻石购买物品？'
+    else:
+        backend.buttons['buttons'][-2]['raycast_top'] = False
+    with pytest.raises(SemanticGateClosed):
+        session.click('POPUP_CONFIRM')
+    assert not backend.taps
+    assert adapter._research_context.queue_confirm_receipt is None
+    assert adapter._action_ledger.remaining('research.start') == 1

@@ -38,9 +38,9 @@ class AlasSupportMatrixTests(unittest.TestCase):
             result["field_classes"],
             {
                 "complete": 55,
-                "live_partial": 147,
-                "offline_only": 61,
-                "unsupported": 15,
+                "live_partial": 149,
+                "offline_only": 64,
+                "unsupported": 10,
                 "declared_only": 0,
             },
         )

@@ -274,6 +274,9 @@ def _verify_entry(module: Any, guard_present: bool) -> dict[str, Any]:
     one_click = _entry_case(module, "one_click_retire", semantic=True)
     enhance = _entry_case(module, "enhance", semantic=True)
     old_legacy = _entry_case(module, "old_retire", semantic=False)
+    old_semantic = _entry_case(module, "old_retire", semantic=True)
+    if old_semantic != old_legacy:
+        raise AssertionError("typed old retirement changed original entry dispatch")
     if [event for event in one_click if isinstance(event, list)] != [["retire", None]]:
         raise AssertionError("one-click entry dispatch drifted")
     if "enhance" not in enhance or any(
@@ -285,7 +288,6 @@ def _verify_entry(module: Any, guard_present: bool) -> dict[str, Any]:
 
     refused: dict[str, list[Any]] = {}
     for name, value, semantic in (
-        ("old_retire_semantic", "old_retire", True),
         ("unknown", "unknown", False),
         ("wrong_type", 1, False),
     ):
@@ -299,6 +301,7 @@ def _verify_entry(module: Any, guard_present: bool) -> dict[str, Any]:
         "one_click_retire": one_click,
         "enhance": enhance,
         "old_retire_legacy": old_legacy,
+        "old_retire_semantic": old_semantic,
         "refused_before_events": refused,
     }
 

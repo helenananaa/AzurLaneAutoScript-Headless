@@ -1,0 +1,152 @@
+{
+  "schema": "alas-headless.storage-equipment-selection/v1",
+  "at": "2026-10-27T12:34:30.001576+08:00",
+  "local_only": true,
+  "support_promoted": false,
+  "current_full_regression": false,
+  "changes": [
+    "Typed candidates include actual PID and selected marker, compare fresh slot instance/icon/quantity/upgrade/label and fully visible viewport before input",
+    "Reversible item input only; no confirm/disassembly aliases enabled",
+    "Record receipt before backend; unresolved input cannot be replayed",
+    "Single-frame marker/count postcondition; original native screenshot/count loop retained, no new waits",
+    "A subsequent different native cell can proceed only after previous selected marker and whole-stack count proof; repeat selected cell rejected"
+  ],
+  "validation": {
+    "before": {
+      "failed": 14,
+      "passed": 0,
+      "log": "warehouse-slot-selection-before-r1.log"
+    },
+    "first_live_source_related": {
+      "passed": 133,
+      "seconds": 9.87,
+      "log": "warehouse-slot-selection-after-r4.log"
+    },
+    "latest_related": {
+      "passed": 139,
+      "seconds": 10.32,
+      "log": "warehouse-slot-selection-after-r6.log"
+    },
+    "groups_overlap": true,
+    "retained_test_harness_failures": [
+      "r2: backend replacement after session open did not inject the captured backend",
+      "r3: wrong focused test filename, exit4 before collection",
+      "r5: controlled second input frame generation not advanced; fixed payload, no production frame weakening"
+    ]
+  },
+  "live_units": [
+    {
+      "raw": "warehouse-native-slot-unit-r1.json",
+      "process": {
+        "terminal": true,
+        "guard_pid": 38736,
+        "started_at": "2026-10-27T12:26:28.378671+08:00",
+        "deadline": "2026-10-27T12:29:28.378671+08:00",
+        "resource_grants": 0,
+        "scope": "Independent bounded original first-stack reversible selection/cancel unit;9 UIcalls,all resources0,no old case balance",
+        "pid": 16456,
+        "child_create_time": 1793075188.380738,
+        "guard_create_time": 1793075188.22595,
+        "exit_code": 0,
+        "forced_stop": false,
+        "finished_at": "2026-10-27T12:26:54.637373+08:00"
+      },
+      "seconds": 21.962,
+      "ui_calls": 9,
+      "selected_count": 23,
+      "selected_generation": 26416,
+      "zero_after_cancel_generation": 26486,
+      "native_execute_once_complete": false,
+      "no_final_confirmation_input": true,
+      "resources_before": {
+        "oil": 7443,
+        "gold": 105685,
+        "gem": 3505
+      },
+      "resources_after": {
+        "oil": 7443,
+        "gold": 105685,
+        "gem": 3505
+      },
+      "delta": {
+        "oil": 0,
+        "gold": 0,
+        "gem": 0
+      },
+      "profile_unchanged": true,
+      "all_grants_zero": true,
+      "final": {
+        "pid": 13203,
+        "generation": 26652,
+        "ui_generation": 26652,
+        "main": true
+      }
+    },
+    {
+      "raw": "warehouse-native-slot-unit-r2.json",
+      "process": {
+        "terminal": true,
+        "guard_pid": 28920,
+        "started_at": "2026-10-27T12:31:21.763180+08:00",
+        "deadline": "2026-10-27T12:34:21.763180+08:00",
+        "resource_grants": 0,
+        "scope": "Independent bounded original first-stack reversible selection/cancel unit;9 UIcalls,all resources0,no old case balance",
+        "pid": 35084,
+        "child_create_time": 1793075481.7643063,
+        "guard_create_time": 1793075481.6123493,
+        "exit_code": 0,
+        "forced_stop": false,
+        "finished_at": "2026-10-27T12:31:48.341453+08:00"
+      },
+      "seconds": 22.298,
+      "ui_calls": 9,
+      "selected_count": 23,
+      "selected_generation": 32269,
+      "zero_after_cancel_generation": 32340,
+      "native_execute_once_complete": false,
+      "no_final_confirmation_input": true,
+      "resources_before": {
+        "oil": 7443,
+        "gold": 105685,
+        "gem": 3505
+      },
+      "resources_after": {
+        "oil": 7443,
+        "gold": 105685,
+        "gem": 3505
+      },
+      "delta": {
+        "oil": 0,
+        "gold": 0,
+        "gem": 0
+      },
+      "profile_unchanged": true,
+      "all_grants_zero": true,
+      "final": {
+        "pid": 13203,
+        "generation": 32509,
+        "ui_generation": 32509,
+        "main": true
+      }
+    }
+  ],
+  "native_patch": {
+    "members": 246,
+    "combined_sha256": "996e0cf000f7fe69a61cb385abc6d2cf5198cc75c98ed830abae39b989884964",
+    "changed_this_batch": false
+  },
+  "observer": {
+    "apk": "warehouse-native-observer-candidate-r5.apk",
+    "changed_this_batch": false,
+    "rebuild_needed": false
+  },
+  "limits": [
+    "Only original native selection/count prefix stopped by unit harness before any disassembly confirmation; not a completed StorageHandler transaction",
+    "Multiple-cell sequence allowed and checked offline, not a multi-cell live qualification",
+    "DISASSEMBLE_CONFIRM/DISASSEMBLE_POPUP_CONFIRM/POPUP_CONFIRM disassembly branch still closed; actual summary popup not observed",
+    "Pending selection lifecycle across final completion or a new original task still needs corresponding cancellation/final-result proof",
+    "No complete equipment warehouse recovery/Research continuation, no resource consumption or uninterrupted soak claim",
+    "Old closed9of24case and sealed15/resources unchanged; new zero-resource units completed9 calls each, no appended actions",
+    "R13 full8527PASS254SKIP remains pre-Warehouse/native246 historical baseline"
+  ]
+}

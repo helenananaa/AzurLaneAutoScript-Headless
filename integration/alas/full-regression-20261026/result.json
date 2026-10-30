@@ -1,0 +1,33 @@
+{
+  "schema": "alas-headless.full-regression-closeout/v1",
+  "at": "2026-10-26T13:14:22.679645+08:00",
+  "passed": true,
+  "scope": "One complete current production Python test invocation, explicit PYTHONPATH=python and pytest-q-tests; no live opt-in or Android/game input. Skipped tests are not passes/live qualification.",
+  "passed_count": 8417,
+  "skipped_count": 253,
+  "warnings": 138,
+  "exit_code": 0,
+  "pytest_seconds": 574.38,
+  "wrapper_seconds": 580.375,
+  "command": [
+    "D:\\anaconda\\python.exe",
+    "-m",
+    "pytest",
+    "-q",
+    "tests"
+  ],
+  "source_snapshot_files": 2915,
+  "source_snapshot_unchanged_at_full_end": true,
+  "raw": {
+    "path": "artifacts/full-feature-live-20261025/full-regression-final-dispatch-r8.json",
+    "sha256": "ff11555fff3275938025000bdc3526aa121b7e9778695693f35866bd64c02dcf"
+  },
+  "log": "artifacts/full-feature-live-20261025/full-regression-final-dispatch-r8.log",
+  "prior_raw_failures_retained": [
+    "full-regression-after-archive-r6.json",
+    "full-regression-after-old-retire-r7.json"
+  ],
+  "focus": "147passed1skipped existing dispatch/daily/presence/campaign/old-owned/nativeflow/matrix closure before this full run",
+  "limitations": "Not all game features, rare branches, unlimited tasks, a rendered screenshot path, nativeLinux portability, or overnight live stability.",
+  "delivery": "LOCALONLY/noautomaticcommitpush"
+}

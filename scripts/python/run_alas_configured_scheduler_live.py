@@ -16,7 +16,7 @@ import time
 import traceback
 import uuid
 
-from run_alas_configured_task_live import parse_action_budgets, encode_receipt_value
+from run_alas_configured_task_live import parse_action_budgets, encode_receipt_value, storage_disassembly_evidence
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -111,14 +111,17 @@ def should_stop(returned, task_count, max_tasks, continue_after_failure=False):
 
 
 def run_native_loop(app):
-    """Recognize ALAS' normal stop exit while it is waiting for NextRun."""
+    """Recognize native stop from either an idle wait or a task boundary."""
     try:
         app.loop()
     except SystemExit as exc:
         if exc.code not in (None, 0) or not app.stop_event.is_set():
             raise
         return True
-    return False
+    # Native loop() normally breaks and returns after a running task yields.
+    # Idle waits instead use SystemExit above. Neither changes ALAS decisions.
+    stop_event = getattr(app, 'stop_event', None)
+    return stop_event is not None and stop_event.is_set()
 
 
 def watch_stop_file(path, stop_event, finished, stop_at=None, request_record=None):
@@ -258,6 +261,17 @@ def recorded_retirement(call, receipt_reader, current_record):
                 except Exception as exc:
                     record.setdefault('retirement_recording_errors', []).append(str(exc))
     return invoke
+
+
+def record_session_retirements(session, current_record):
+    """Observe each finished transaction, including native legacy batches."""
+    reader = getattr(session, 'retirement_receipt', None)
+    if not callable(reader):
+        return
+    for name in ('retire_ships_one_click', 'finish_old_retirement_confirmation'):
+        port = getattr(session, name, None)
+        if callable(port):
+            setattr(session, name, recorded_retirement(port, reader, current_record))
 
 
 def recorded_click(call, current_record, seen, *, session=None):
@@ -467,11 +481,7 @@ def main():
             if not any(existing is session for existing in instrumented_sessions):
                 instrumented_sessions.append(session)
                 session.click = recorded_click(session.click, lambda: current, action_receipts_seen, session=session)
-                retirement = getattr(session, 'retire_ships_one_click', None)
-                receipt_reader = getattr(session, 'retirement_receipt', None)
-                if callable(retirement) and callable(receipt_reader):
-                    session.retire_ships_one_click = recorded_retirement(
-                        retirement, receipt_reader, lambda: current)
+                record_session_retirements(session, lambda: current)
                 port_repair = getattr(session, 'click_operation_siren_port_repair', None)
                 if callable(port_repair):
                     session.click_operation_siren_port_repair = recorded_click(
@@ -710,7 +720,8 @@ def main():
                         current['starting_action_grants'] = {
                             key: ledger.remaining(key) for key in ledger.initial_grants}
                     for key in ('awaken_receipts', 'awaken_cost_observations',
-                                'enhancement_receipts', 'daily_execution_receipts'):
+                                'enhancement_receipts', 'daily_execution_receipts',
+                                'storage_equipment_disassembly_receipts'):
                         reader = getattr(session, key, None)
                         if callable(reader):
                             receipt_offsets[key] = len(reader())
@@ -746,6 +757,11 @@ def main():
                         current[key] = encode_receipt_value(getattr(session, key)()[offset:])
                 except Exception as exc:
                     current['resource_recording_error'] = str(exc)
+                try:
+                    current.update(storage_disassembly_evidence(
+                        session, receipt_offsets.get('storage_equipment_disassembly_receipts')))
+                except Exception as exc:
+                    current['storage_equipment_disassembly_recording_error'] = str(exc)
                 saved = json.loads(temporary.read_text(encoding='utf-8'))
                 current['final_task_config'] = saved.get(scheduled)
                 if current['return'] is not True:

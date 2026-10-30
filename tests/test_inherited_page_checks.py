@@ -256,13 +256,11 @@ def test_event_back_accepts_proven_retained_chapter_without_second_input():
     assert clicked == ['campaign-menu/page/back']
 
 
-def test_event_back_still_rejects_unchanged_selector(monkeypatch):
-    import itertools
-    from alas_headless.semantic_oracle import SemanticGateClosed
+def test_event_back_acknowledges_one_edge_without_claiming_arrival(monkeypatch):
     from alas_headless.adapter.semantic import dispatch_actions
-    clock = itertools.count(0, 3)
-    monkeypatch.setattr(dispatch_actions.time, 'monotonic', lambda: next(clock))
-    monkeypatch.setattr(dispatch_actions.time, 'sleep', lambda _: None)
+    def unexpected_wait(_):
+        raise AssertionError('Native UI owns destination waiting after this edge')
+    monkeypatch.setattr(dispatch_actions.time, 'sleep', unexpected_wait)
     oracle = FakeOracle()
     oracle.read_state = lambda: SimpleNamespace(generation=8)
     oracle.campaign_page_is_normal = lambda: False
@@ -270,9 +268,59 @@ def test_event_back_still_rejects_unchanged_selector(monkeypatch):
     oracle.campaign_menu_is_entry = lambda: False
     host = AlasSemanticAdapter(oracle, package_gate=lambda: None)
     host._goto_main_target = lambda: 'campaign-menu/page/back'
-    with pytest.raises(SemanticGateClosed, match='exact next page'):
-        host._click_main('GOTO_MAIN', None)
+    receipt = host._click_main('GOTO_MAIN', None)
+    assert receipt.semantic_id == 'campaign-menu/page/back'
     assert oracle.click_calls == ['campaign-menu/page/back']
+    assert oracle.event_campaign_page_visible()
+    assert not oracle.campaign_page_is_normal()
+    assert not oracle.campaign_menu_is_entry()
+    assert not oracle.main_page_visible()
+
+
+def test_original_native_ui_rechecks_event_chapter_and_entry_before_main():
+    from unittest.mock import Mock
+    from tests.test_alas_config_branch_compatibility import method
+
+    oracle = FakeOracle()
+    frames = iter(('event', 'event', 'chapter', 'entry', 'main'))
+    current, checks, submitted = ['event'], [], []
+    def screenshot():
+        current[0] = next(frames)
+        oracle.state_generation += 1
+    oracle.event_campaign_page_visible = lambda: current[0] == 'event'
+    oracle.campaign_page_is_normal = lambda: current[0] == 'chapter'
+    oracle.campaign_menu_is_entry = lambda: current[0] == 'entry'
+    oracle.main_page_visible = lambda: current[0] == 'main'
+    host = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    host._goto_main_target = lambda: 'campaign-menu/page/back'
+    home = SimpleNamespace(name='GOTO_MAIN', clear_offset=Mock())
+    destination = object()
+    pages = [SimpleNamespace(parent=destination, check_button=name,
+                             links={destination: home})
+             for name in ('event', 'chapter', 'entry')]
+    def reached(**_):
+        result = oracle.main_page_visible()
+        checks.append(result)
+        return result
+    def click(button):
+        assert not oracle.main_page_visible()
+        submitted.append((current[0], oracle.state_generation))
+        return host._click_main(button.name, None)
+    runner = SimpleNamespace(
+        device=SimpleNamespace(semantic_adapter=host, screenshot=screenshot, click=click),
+        interval_clear=Mock(), ui_button_interval_reset=Mock(),
+        _check_semantic_client_version=Mock(), _handle_semantic_orphan_result=lambda: False,
+        ui_page_appear=reached, appear=lambda button, **_: current[0] == button,
+        ui_additional=Mock(return_value=False))
+    native = method('module/ui/ui.py', 'UI', 'ui_goto', GOTO_MAIN=home, logger=Mock(),
+                    Page=SimpleNamespace(init_connection=Mock(), iter_check_buttons=lambda: [],
+                                         iter_pages=lambda: pages, clear_connection=Mock()))
+    native(runner, destination, skip_first_screenshot=False)
+    assert checks == [False, False, False, False, True]
+    assert [name for name, _ in submitted] == ['event', 'event', 'chapter', 'entry']
+    assert all(b[1] > a[1] for a, b in zip(submitted, submitted[1:]))
+    assert oracle.click_calls == ['campaign-menu/page/back'] * 4
+    assert oracle.main_page_visible()
 
 
 def test_event_notice_probe_uses_existing_selector_identity():

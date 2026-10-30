@@ -433,7 +433,9 @@ class ObservationAdapterPorts:
             and len(bounds) == 1
             and bounds[0] == Bounds(771.0, 191.0, 951.0, 209.0)
         ):
-            value = self.oracle.tactical_book_skill_progress()
+            # SKILL_EXP reads ALAS' current image. Its semantic replacement
+            # must use the same immutable frame as the native book scan.
+            value = self._frame_or_live_observation_oracle().tactical_book_skill_progress()
             if alphabet is not None and any(character not in alphabet for character in value):
                 raise SemanticGateClosed(
                     "typed text violates the ALAS OCR alphabet contract"
@@ -614,14 +616,11 @@ class ObservationAdapterPorts:
         # ``random_rectangle_vector_opted`` treats whitelist areas as preferred
         # candidates, not as a mandatory final constraint: if no clipped area
         # produces a blacklist-safe point it deliberately falls back to the
-        # padded box.  Validate that exact ALAS fallback domain here, then keep
-        # the original segment-wise blacklist check below.
+        # padded box (or its single sampled endpoint on an inverted axis).
+        # Validate that exact ALAS fallback domain here, then keep the original
+        # segment-wise blacklist check below.
         endpoint_area = self._campaign_swipe_endpoint_area(intent)
-        if (
-            endpoint_area[0] > endpoint_area[2]
-            or endpoint_area[1] > endpoint_area[3]
-            or not self._campaign_point_in_area(end, endpoint_area)
-        ):
+        if not self._campaign_point_in_area(end, endpoint_area):
             raise SemanticGateClosed(
                 "campaign map viewport endpoint left ALAS selection domain"
             )
@@ -827,6 +826,10 @@ class ObservationAdapterPorts:
         del threshold, count
         name = self._button_name(button)
         self._package_gate()
+        equipment_rarity = re.fullmatch(r'FILTER_RARITY_([0-5])_0', name)
+        if equipment_rarity is not None:
+            return self._frame_or_live_observation_oracle().storage_equipment_filter_color(
+                int(equipment_rarity.group(1)), color)
         if name in ("MISSION_NOTICE_WHITE", "MISSION_WEEKLY_RED_DOT"):
             return self._mission_resource_appears(name)
 

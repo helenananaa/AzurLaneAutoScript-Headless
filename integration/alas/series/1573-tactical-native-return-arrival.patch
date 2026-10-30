@@ -1,0 +1,39 @@
+diff --git a/module/tactical/tactical_class.py b/module/tactical/tactical_class.py
+--- a/module/tactical/tactical_class.py
++++ b/module/tactical/tactical_class.py
+@@ -549,12 +549,18 @@
+                 self.interval_clear([POPUP_CONFIRM, POPUP_CANCEL, GET_MISSION])
+                 if book_empty:
+                     if self._return_from_tactical_page():
+-                        return True
++                        # The input receipt is not page arrival. Keep the
++                        # native screenshot loop responsible for the return.
++                        received = True
++                        continue
+                     self.interval_reset(TACTICAL_CHECK)
+                     continue
+                 if self._tactical_get_finish():
+                     if self._return_from_tactical_page():
+-                        return True
++                        # The input receipt is not page arrival. Keep the
++                        # native screenshot loop responsible for the return.
++                        received = True
++                        continue
+                     self.interval_reset(TACTICAL_CHECK)
+                     empty_confirm.reset()
+                     received = True
+@@ -566,10 +572,12 @@
+                     semantic_session = current_semantic_session()
+                     if semantic_session is not None:
+                         if study_finished and self._return_from_tactical_page():
+-                            return True
++                            received = True
++                            continue
+                     if empty_confirm.reached():
+                         if self._return_from_tactical_page():
+-                            return True
++                            received = True
++                            continue
+                         empty_confirm.reset()
+                         received = True
+                         continue

@@ -1189,6 +1189,81 @@
       "order": 238,
       "path": "integration/alas/series/1558-event-aside-exact-stage-presence.patch",
       "sha256": "95a7e71382ddceae74cbf36df781266cc18578ab959c33aa4da687689361e007"
+    },
+    {
+      "order": 239,
+      "path": "integration/alas/series/1559-opsi-fleet-selector-native-timeout.patch",
+      "sha256": "b075243550b97ae7985d2b85a258d809bf26f1ee6f0011b9b6b125a5fc2b7512"
+    },
+    {
+      "order": 240,
+      "path": "integration/alas/series/1560-auto-search-defeat-result-recovery.patch",
+      "sha256": "f69808ef8fb902c413e736276af7c4263652ed1e556947fe07330cad40810de2"
+    },
+    {
+      "order": 241,
+      "path": "integration/alas/series/1561-archives-native-stage-exit-probe.patch",
+      "sha256": "4f31038739ac227a29bbf58103e18efb9e93e1562425d717e6433fac2689f175"
+    },
+    {
+      "order": 242,
+      "path": "integration/alas/series/1562-native-old-retirement-typed-ports.patch",
+      "sha256": "b19d897a52ab198ad27367399d872cbdd883ed6fd1dcb02edc2211392a8dad7f"
+    },
+    {
+      "order": 243,
+      "path": "integration/alas/series/1563-retirement-common-cv-policy-boundary.patch",
+      "sha256": "7fe318ce5454eed312fd738aad39a0821dd0d930c730e8fdeaa6289bfbb0ddc8"
+    },
+    {
+      "order": 244,
+      "path": "integration/alas/series/1564-native-common-cv-preservation-ports.patch",
+      "sha256": "313f9909ffe47135f51581cb49ae8f0edd9641763e57325dae09e020afeb03b0"
+    },
+    {
+      "order": 245,
+      "path": "integration/alas/series/1565-native-os-back-loading-handoff.patch",
+      "sha256": "601a9bf4e5da6143880096883b0aae13df9c75585c2cd6f127fff7b6abccadc7"
+    },
+    {
+      "order": 246,
+      "path": "integration/alas/series/1566-storage-native-observation-ports.patch",
+      "sha256": "a88ace3270783034f2440e4fbc624c595e4dd36c0ae2c8339571bedcaac4303b"
+    },
+    {
+      "order": 247,
+      "path": "integration/alas/series/1567-campaign-exhausted-entry-grant-defer.patch",
+      "sha256": "fe16c38c2fa481a2cfb1263613843d5f95fda9b004a992c82f4e0864350e3a7c"
+    },
+    {
+      "order": 248,
+      "path": "integration/alas/series/1568-research-inherited-queue-cancel.patch",
+      "sha256": "095bcaa662768b79c4effe8e9d022d92d0699f2eaafdb34a7c8db8d3c9cd34c5"
+    },
+    {
+      "order": 249,
+      "path": "integration/alas/series/1569-opsi-native-rest-ap-policy.patch",
+      "sha256": "8f97b4fa5f8510fd54a2aa9cd5b9fa0c618e532915b9699349e6f2f9277bc9c2"
+    },
+    {
+      "order": 250,
+      "path": "integration/alas/series/1570-daily-inherited-automation-info.patch",
+      "sha256": "44c50348ff9da7e7632159aad78d82935bbce223e87d4aa2050010212ae7ea7c"
+    },
+    {
+      "order": 251,
+      "path": "integration/alas/series/1571-daily-inherited-overview-recovery.patch",
+      "sha256": "2be37c561d7e5276ea82919cda605bb38b8648abdaa2da3150dace371083659b"
+    },
+    {
+      "order": 252,
+      "path": "integration/alas/series/1572-daily-inherited-carousel-origin.patch",
+      "sha256": "c9f94e88918a704808bf0ac97a5526cccb2b98c7770500c36e7a3af41106ddf4"
+    },
+    {
+      "order": 253,
+      "path": "integration/alas/series/1573-tactical-native-return-arrival.patch",
+      "sha256": "39d6de218868a8b1411cf595ea8d08fe5da365cab0dd4092fad7228c24aff88f"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

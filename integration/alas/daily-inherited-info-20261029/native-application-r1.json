@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-29T08:12:55.129246+08:00",
+  "native_applied": true,
+  "native_series": 250,
+  "source": "E:\\Runtime\\ALAS\\redroid-live-20261022\\module\\daily\\daily.py",
+  "native_sha256": "7bd27beb699410d58eba4031907ef6f3fcd5db6be1fe4f0cc734a13f5ce2f6be",
+  "member_sha256": "44c50348ff9da7e7632159aad78d82935bbce223e87d4aa2050010212ae7ea7c",
+  "focused": "100PASS;native existing handler→screenshot→original Back ordering and exact inherited owner checks",
+  "support_promotion": false,
+  "live_recovery_qualified": false,
+  "current_full": false
+}

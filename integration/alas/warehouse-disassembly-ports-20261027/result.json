@@ -1,0 +1,177 @@
+{
+  "schema": "alas-headless.storage-equipment-disassembly/v1",
+  "at": "2026-10-27T13:54:45.571148+08:00",
+  "local_only": true,
+  "support_promoted": false,
+  "current_full_regression": false,
+  "input_budget": {
+    "capability": "storage.disassemble",
+    "environment": "ALAS_SEMANTIC_STORAGE_DISASSEMBLE_BUDGET",
+    "unit": "individual equipment units;whole native stacks preserved",
+    "default": 0,
+    "quantity_reserved_before_backend": true,
+    "no_unknown_refund_or_replay": true,
+    "other_capabilities_default_dispatch_units": 1
+  },
+  "implementation": [
+    "Original native common filter confirmation and newer zero-selection inventory bind source eligibility; common unupgraded bg1 typed batch only",
+    "Native cumsum/slot choice/screenshots/timers/result loop unchanged; final summary count/PID/capacity/source receipts/actionability proven before input",
+    "Stock delta and selected0 postcondition runs once per original screenshot predicate, not a new wait engine",
+    "Owned AwardInfo actual material rewards plus visible UIOrigin capacity/count prove physical result; original GET_ITEMS handler owns reward close",
+    "Record accepted request before backend; final/pending/stock-reward/reward-close receipts retained without replay; unrelated old SDK tasks remain isolated",
+    "Both existing --budget runner entries recognize new canonical environment budget; per-task completed offsets, pending requests and captured observations retained with mapping-proxy-safe encoding"
+  ],
+  "validation": {
+    "quantity_before": {
+      "failed": 4,
+      "passed": 17,
+      "log": "warehouse-destroy-quantity-before-r1.log",
+      "note": "includes13imported baseline unittest cases;collection later normalized"
+    },
+    "quantity_focused_after": 8,
+    "quantity_log": "warehouse-destroy-quantity-after-r2.log",
+    "current_related_passed": 296,
+    "current_related_seconds": 29.34,
+    "current_related_log": "warehouse-destroy-related-r2.log",
+    "previous_related_passed": 307,
+    "previous_note": "before award fix, includes13duplicated imported baseline cases;not additive",
+    "award_and_boundary_passed": 107,
+    "award_log": "warehouse-destroy-after-r2.log",
+    "runner_entry_related_passed": 53,
+    "runner_entry_current_helpers_passed": 5,
+    "runner_entry_logs": [
+      "warehouse-destroy-runner-entry-r1.log",
+      "warehouse-destroy-runner-entry-r2.log"
+    ],
+    "all_groups_overlap": true
+  },
+  "first_live_failure": {
+    "raw": "warehouse-native-disassemble-unit-r1.json",
+    "passed": false,
+    "elapsed_seconds": 13.834,
+    "error": "SemanticGateClosed('equipment destruction result has a blocking overlay')",
+    "gear_budget23_spent": true,
+    "final_input_generation": 31433,
+    "failure_frame": null,
+    "closeout": "warehouse-disassemble-r1-input-closeout.json",
+    "later_read": "warehouse-destroy-postinput-read-r1.json",
+    "later_generation": 33957,
+    "later_physical_stock": 680,
+    "later_selected0": true,
+    "later_reward": [
+      "物资",
+      23
+    ],
+    "cause": "Early result check blocked native AwardInfo handling, not a failed final request. Original native function did not return; raw remains false;remaining3sourcecalls sealed after original13:27deadline"
+  },
+  "settlement": {
+    "raw": "warehouse-native-disassemble-settlement-r1.json",
+    "passed": true,
+    "seconds": 13.518,
+    "scope": "Independent4UIcall zero-resource accepted-result proof and native reward close;not resumption or success of original failed execute_once",
+    "new_destruction_inputs": 0,
+    "all_grants_zero": true,
+    "source23gear_consumption_proven": true,
+    "source_gold_delta23_proven": true,
+    "final": {
+      "pid": 16185,
+      "generation": 46586,
+      "ui_generation": 46586,
+      "main": true
+    },
+    "source_grant_not_refunded": true
+  },
+  "current_full_native_unit": {
+    "raw": "warehouse-native-disassemble-multicell-r1.json",
+    "process": {
+      "terminal": true,
+      "guard_pid": 17960,
+      "started_at": "2026-10-27T13:39:46.241479+08:00",
+      "deadline": "2026-10-27T13:42:46.241479+08:00",
+      "resource_grants": 17,
+      "scope": "Independent bounded original full original two-stack disassembly unit; ordinary gear cap17units,final input cap1;7 UIcalls,other resources0,no old case balance",
+      "pid": 39064,
+      "child_create_time": 1793079586.2433324,
+      "guard_create_time": 1793079586.000994,
+      "exit_code": 0,
+      "forced_stop": false,
+      "finished_at": "2026-10-27T13:40:21.443825+08:00"
+    },
+    "passed": true,
+    "seconds": 27.346,
+    "native_ui_calls": 7,
+    "native_execute_once_complete": true,
+    "native_return": 17,
+    "source_items": [
+      {
+        "icon": "13000",
+        "quantity": 4,
+        "level": 0
+      },
+      {
+        "icon": "14100",
+        "quantity": 13,
+        "level": 0
+      }
+    ],
+    "capacity_before": [
+      680,
+      375
+    ],
+    "capacity_after": [
+      663,
+      375
+    ],
+    "resources_before": {
+      "oil": 7443,
+      "gold": 105708,
+      "gem": 3505
+    },
+    "resources_after": {
+      "oil": 7443,
+      "gold": 105725,
+      "gem": 3505
+    },
+    "delta": {
+      "oil": 0,
+      "gold": 17,
+      "gem": 0
+    },
+    "remaining_storage_units": 0,
+    "pending": null,
+    "profile_bytes_unchanged": true,
+    "final": {
+      "pid": 16185,
+      "generation": 50111,
+      "ui_generation": 50111,
+      "main": true
+    }
+  },
+  "aggregate_actual_resource_changes": {
+    "equipment_disassembled": 40,
+    "capacity_before": 703,
+    "capacity_after": 663,
+    "gold_increase": 40,
+    "oil_change": 0,
+    "gem_change": 0,
+    "note": "Physical totals across separate transactions,not a combined native success or uninterrupted soak"
+  },
+  "next_milestone": "One meaningful current full regression after accumulated Warehouse/native246/shared quantity ledger changes, then new bounded original scheduler watch with finite run-wide storage budget and original timers. Old unused grants never resumed.",
+  "native": {
+    "members": 246,
+    "combined_sha256": "996e0cf000f7fe69a61cb385abc6d2cf5198cc75c98ed830abae39b989884964",
+    "changed_this_batch": false
+  },
+  "observer": {
+    "apk": "warehouse-summary-observer-candidate-r6.apk",
+    "apk_sha256": "9df76cd542e95ed98043283af89af3f3551db3c5216361ea1f869a3799bf8ae0",
+    "changed_this_batch": false
+  },
+  "limits": [
+    "Warehouse663/375 still over capacity;original full Research dependency/recovery and scheduler continuation not yet qualified",
+    "Only common/unupgraded gear final transaction;rare/upgraded final branch explicitly local unavailable",
+    "No source failed raw rewritten to pass and no original failed method return fabricated",
+    "R13 full8527PASS254SKIP predates Warehouse/native246;latest full remains false until actual new batch terminal",
+    "No natural shipdock retirement/statistics battle-to-daily/oldlevel live qualification promotion;Goal incomplete"
+  ]
+}

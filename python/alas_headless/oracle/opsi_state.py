@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from typing import Optional, Sequence, Tuple
 from .contracts import ActionReceipt, ButtonState, OperationSirenState, Point, UiState
 from .errors import SemanticGateClosed, SemanticInputBlocked
@@ -591,6 +592,26 @@ class OpsiStateOracle:
             self.read_ui_state()
         )
 
+    def _operation_siren_selected_fleet_model(self, state: UiState):
+        """Read the current native map model; never infer it from hidden poses."""
+        value = state.snapshot.get('operation_siren_map_state')
+        if value is None:
+            return None  # Older observers retain their existing positive ports.
+        if not isinstance(value, Mapping):
+            raise SemanticGateClosed('operation siren fleet model is malformed')
+        fleet = self._operation_siren_current_fleet_from_ui_state(state)
+        if (type(value.get('schema_version')) is not int or value['schema_version'] != 1
+                or type(value.get('status')) is not int or value['status'] != 1
+                or value.get('stack_balanced') is not True
+                or value.get('truncated') is not False
+                or value.get('active') is not True or value.get('valid') is not True
+                or any(type(value.get(key)) is not int or value[key] < minimum
+                       for key, minimum in (('map_id', 1), ('fleet_index', 1),
+                                            ('fleet_id', 1), ('row', 0), ('column', 0)))
+                or value['fleet_index'] != fleet):
+            raise SemanticGateClosed('operation siren selected fleet model is unavailable or inconsistent')
+        return value
+
     def operation_siren_current_fleet_defeated(self) -> bool:
         """Return whether the selected fleet already lost its Month Boss attempt.
 
@@ -644,6 +665,13 @@ class OpsiStateOracle:
                 "operation siren selected-fleet map anchor is ambiguous"
             )
         if not anchors:
+            model = self._operation_siren_selected_fleet_model(state)
+            if (model is not None and model.get('damage_known') is True
+                    and type(model.get('damage_level')) is int
+                    and model['damage_level'] == 0):
+                # The game's damageLevel owns the damage marker, while its
+                # render root can independently be hidden by fog or an enemy.
+                return False
             # Retain the native initialization's existing offscreen recovery
             # wording only for absence; duplicates must not take that branch.
             raise SemanticGateClosed(
@@ -1110,7 +1138,8 @@ class OpsiStateOracle:
             # Its native UI loop can refresh and run the owning popup handler;
             # classify the no-input refusal without weakening admission.
             raise SemanticInputBlocked('os/page/back', state.generation,
-                                       tuple(rule.blocker_id for rule in blockers))
+                                       tuple(rule.blocker_id for rule in blockers),
+                                       observed_state=state)
         if not (
             target.active_in_hierarchy
             and target.active_and_enabled

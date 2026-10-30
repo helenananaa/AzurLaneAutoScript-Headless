@@ -1,0 +1,63 @@
+diff --git a/module/base/base.py b/module/base/base.py
+--- a/module/base/base.py
++++ b/module/base/base.py
+@@ -339,6 +339,13 @@
+ 
+     def wait_until_stable(self, button, timer=Timer(0.3, count=1), timeout=Timer(5, count=10), skip_first_screenshot=True):
+         button._match_init = False
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        semantic_sampler = None
++        previous_sample = None
++        if semantic_adapter is not None and button.name == 'MATERIAL_STABLE_CHECK':
++            semantic_sampler = getattr(semantic_adapter, 'storage_stability_sample', None)
++            if not callable(semantic_sampler):
++                semantic_adapter.reject_raw_input('storage stability sampler is unavailable')
+         timeout.reset()
+         while 1:
+             if skip_first_screenshot:
+@@ -347,14 +354,23 @@
+                 self.device.screenshot()
+ 
+             if button._match_init:
+-                if button.match(self.device.image, offset=(0, 0)):
++                current_sample = semantic_sampler() if semantic_sampler is not None else None
++                stable = (current_sample == previous_sample if semantic_sampler is not None
++                          else button.match(self.device.image, offset=(0, 0)))
++                if stable:
+                     if timer.reached():
+                         break
+                 else:
++                    if semantic_sampler is not None:
++                        previous_sample = current_sample
++                    else:
++                        button.load_color(self.device.image)
++                    timer.reset()
++            else:
++                if semantic_sampler is not None:
++                    previous_sample = semantic_sampler()
++                else:
+                     button.load_color(self.device.image)
+-                    timer.reset()
+-            else:
+-                button.load_color(self.device.image)
+                 button._match_init = True
+ 
+             if timeout.reached():
+diff --git a/module/storage/storage.py b/module/storage/storage.py
+--- a/module/storage/storage.py
++++ b/module/storage/storage.py
+@@ -334,7 +334,13 @@
+         ])
+         self.wait_until_stable(MATERIAL_STABLE_CHECK)
+ 
+-        items = EQUIPMENT_ITEMS.predict(self.device.image, name=False, amount=True)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            # Replace only ItemGrid observation. Native counting, cell choice,
++            # screenshots and confirmation decisions below remain unchanged.
++            items = semantic_adapter.storage_equipment_items()
++        else:
++            items = EQUIPMENT_ITEMS.predict(self.device.image, name=False, amount=True)
+         if not len(items):
+             logger.warning('No items in storage to disassemble')
+             return 0

@@ -278,7 +278,7 @@ def test_archive_card_settling_rereads_without_repeated_dispatch():
     with patch("alas_headless.adapter.semantic.campaign.time.sleep"):
         assert CampaignAdapterPorts.open_war_archives_campaign(ctx, "new", "sp") is receipt
     assert len(attempts) == 2 and dispatched == ["new"]
-    assert ctx._input_frame_refresher.call_count == 2
+    assert ctx._input_frame_refresher.call_count == 4
 
 
 def test_archive_real_ambiguity_is_not_retried():

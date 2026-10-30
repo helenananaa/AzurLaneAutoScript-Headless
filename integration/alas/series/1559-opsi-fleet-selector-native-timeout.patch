@@ -1,0 +1,41 @@
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -591,14 +591,33 @@
+         if semantic_session is not None:
+             current_fleet = semantic_session.operation_siren_current_fleet()
+             if not semantic_session.operation_siren_fleet_selector_open():
+-                semantic_session.click_operation_siren_fleet_bar()
+-                for _ in self.loop():
++                receipt = semantic_session.click_operation_siren_fleet_bar()
++                for _ in self.loop(skip_first=False, timeout=30):
+                     if semantic_session.operation_siren_fleet_selector_open():
+                         break
+-            semantic_session.click_operation_siren_fleet_selector(current_fleet)
+-            for _ in self.loop():
++                else:
++                    oracle = semantic_session.open().oracle
++                    if oracle.operation_siren_local_map_visible():
++                        from alas_headless.oracle.errors import SemanticNavigationPending
++                        raise SemanticNavigationPending(
++                            receipt.semantic_id, receipt, oracle.read_state().generation,
++                            'Fleet selector did not open; current local map remains healthy',
++                        )
++                    from alas_headless import SemanticGateClosed
++                    raise SemanticGateClosed('Fleet selector did not open; owning map is unavailable')
++            receipt = semantic_session.click_operation_siren_fleet_selector(current_fleet)
++            for _ in self.loop(skip_first=False, timeout=30):
+                 if not semantic_session.operation_siren_fleet_selector_open():
+                     break
++            else:
++                oracle = semantic_session.open().oracle
++                # The last loop observation proves the complete selector is
++                # still mounted. Do not replay its accepted selection input.
++                from alas_headless.oracle.errors import SemanticNavigationPending
++                raise SemanticNavigationPending(
++                    receipt.semantic_id, receipt, oracle.read_state().generation,
++                    'Fleet selector did not close after selection',
++                )
+             return True
+         current_fleet = self.fleet_selector.get()
+         if not current_fleet:

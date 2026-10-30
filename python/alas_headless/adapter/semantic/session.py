@@ -49,9 +49,10 @@ from .session_combat import SessionCombatPorts
 from .session_dispatch import SessionDispatchPorts
 from .session_opsi import SessionOpsiPorts
 from .session_tasks import SessionTasksPorts
+from .session_retirement import SessionRetirementPorts
 
 
-class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatchPorts, SessionOpsiPorts):
+class AlasSemanticSession(SessionRetirementPorts, SessionTasksPorts, SessionCombatPorts, SessionDispatchPorts, SessionOpsiPorts):
     """Own the runtime handle and refresh the immutable semantic frame."""
 
     _REVISION_PATTERN = re.compile(r"^[0-9a-f]{40}$")
@@ -370,9 +371,11 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
         self._combat_reward_close_pending: Optional[ActionReceipt] = None
         self._login_update_restart_performed = False
         self._game_manager_restart_pending = False
+        self._init_old_retirement_state()
 
     def discard_task_state(self) -> None:
         """Release observations and intents while retaining runtime and grants."""
+        self.discard_old_retirement_task_state()
         if self.adapter is not None:
             self.adapter.reset_task_state()
         if self._frame_clock is not None:
@@ -603,6 +606,7 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
             raise
 
     def close(self) -> None:
+        self.discard_old_retirement_task_state()
         self._retirement_return_receipt = None
         self.adapter = None
         self.action_ledger.close()

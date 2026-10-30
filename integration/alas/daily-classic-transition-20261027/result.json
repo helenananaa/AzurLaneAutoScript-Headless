@@ -1,0 +1,64 @@
+{
+  "schema": "alas-headless.daily-classic-transition-qualification/v1",
+  "updated_at": "2026-10-27T19:24:01.984153+08:00",
+  "original_live_case": {
+    "schema": "alas-headless.daily-classic-closeout/v1",
+    "recorded_at": "2026-10-27T19:24:01.984153+08:00",
+    "case_closed": true,
+    "raw": "artifacts/full-feature-live-20261025/daily-classic-native-one-20261027-r1.json",
+    "raw_sha256": "2de38c9ff80867a11d8f7eff19fc0c61f5c07466519c3c0ccf2dc0d4ee0def48",
+    "original_passed": false,
+    "exit_code": 1,
+    "forced_stop": false,
+    "original_deadline": "2026-10-27T19:18:55.604108+08:00",
+    "calls_attempted": 1,
+    "calls_completed": 0,
+    "unused_call_sealed": 1,
+    "unused_daily_execute_sealed": 3,
+    "normal_choice_accepted_generation": 185550,
+    "combat_invocations": 0,
+    "execution_grants_consumed": 0,
+    "identities_exited": {
+      "child_pid": 17444,
+      "child_create_time": 1793099035.6073668,
+      "guard_pid": 39772,
+      "guard_create_time": 1793099035.2846344
+    },
+    "failure": "GET_ITEMS_1 classified outside mission while native Daily.daily_enter probes rewards before accepting combat preparation.",
+    "evidence_correction": "The raw key exact_failure_frame_before_scope_cleanup is a historical label. SessionDispatch.appear caught AlasSemanticUnmapped and refreshed once before reraising. Retained185566 is the refreshed screenshot,NOT the first-error causative frame. First-error frame is unavailable;do not manufacture it.",
+    "last_runtime_observation": {
+      "pid": 35557,
+      "generation": 185566,
+      "page": "PreCombatUI",
+      "historical": true,
+      "fresh_runtime_read_after_failure": false
+    },
+    "resource_delta": null,
+    "next": "Offline repaired reclassification of existing refreshed proven Daily precombat;no same-case retry or old grants. A fresh bounded postfix qualification must explicitly declare its distinct purpose and budgets.",
+    "local_only": true
+  },
+  "source_change": "SessionDispatch.appear: on existing AlasSemanticUnmapped refresh,reclassify GET_ITEMS1..3 only with active Daily intent,known PreCombatUI,and only daily page/precombat blockers. No new refresh/wait/input loop or mutation authorization.",
+  "before": {
+    "passed": 3,
+    "failed": 6,
+    "log": "artifacts\\full-feature-live-20261025\\daily-classic-passive-before-r2.log"
+  },
+  "focused": {
+    "passed": 131,
+    "skipped": 2,
+    "warnings": 7,
+    "seconds": 15.34,
+    "log": "artifacts\\full-feature-live-20261025\\daily-classic-passive-after-r2.log",
+    "model_limit": "Original first-error frame absent;controlled injected first error followed by real immutable refreshed185566. Not exact initial transition replay."
+  },
+  "earlier_test_harness_mismatch_log": "artifacts\\full-feature-live-20261025\\daily-classic-passive-before-r1.log",
+  "config_verifier": "artifacts\\full-feature-live-20261025\\daily-classic-postfix-config-verifier-r1.json",
+  "support_matrix_verifier": "artifacts\\full-feature-live-20261025\\daily-classic-postfix-matrix-verifier-r1.log",
+  "production_sdk_sha256": "a7ee6ee205abd6fa38a070ab4600f9b0547b47f6a0447e4a5b365909c606beda",
+  "native_changed": false,
+  "observer_changed": false,
+  "current_full": false,
+  "postfix_positive_live": false,
+  "normal_combat_completed": false,
+  "support_promoted": false
+}

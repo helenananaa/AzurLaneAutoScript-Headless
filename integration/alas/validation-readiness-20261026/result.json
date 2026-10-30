@@ -1,0 +1,66 @@
+{
+  "schema": "alas-headless.current-regression-readiness-assessment/v1",
+  "at": "2026-10-26T18:52:38.340639+08:00",
+  "native_members": 245,
+  "full_raw_passed": false,
+  "full": {
+    "failed": 1,
+    "passed": 8464,
+    "skipped": 254,
+    "warnings": 138,
+    "pytest_seconds": 743.59,
+    "wrapper_seconds": 753.953,
+    "exit_code": 1,
+    "source_files": 2948,
+    "source_unchanged_at_end": true,
+    "native_five_files_unchanged_at_end": true
+  },
+  "failure": "Windows Job Ctrl-Break test advertised ready outside its try/finally; raw child trace shows interruption inside first ready-file write on line1 before protected block.",
+  "deterministic_original_sdk_comparison": {
+    "outside_try_finally_marker": false,
+    "inside_try_finally_marker": true,
+    "production_supervisor_changed": false
+  },
+  "fix": "Only move the existing test readiness write inside try. Parent still sends real Ctrl-Break, requires closed marker and empty Job. No new runtime gate, timeout extension, supervisor/library/game change or weakened assertion.",
+  "focused_after_fixture_fix": {
+    "passed": 44,
+    "skipped": 1,
+    "seconds": 2.55
+  },
+  "single_current_full_green": false,
+  "scopes": "R10 remains a failed whole invocation. Focused result is not stitched into a whole green run. Previous R9 full8457/254 remains separate244 baseline. Next final full milestone should batch actual changes, not repeat unchanged expensive suites after every documentation edit.",
+  "causal_frame_evidence_correction": [
+    {
+      "command": "opsi_hazard1_leveling",
+      "error_generation": 7606,
+      "cached_post_error_generation": 7620,
+      "later_read_generation": 7623
+    },
+    {
+      "command": "dorm",
+      "error_generation": 7996,
+      "cached_post_error_generation": 8010,
+      "later_read_generation": 8013
+    }
+  ],
+  "causal_frame_limit": "native_error generation/blocker metadata is exact; stored failure_leased_frame and failure_observation here are later states, not exact input-admission frames. Private diagnostic candidate pending, old raw data unmodified.",
+  "delivery": "LOCALONLY/noautomaticcommitpush",
+  "evidence": {
+    "full-regression-os-loading-r10.json": {
+      "path": "artifacts/full-feature-live-20261025/full-regression-os-loading-r10.json",
+      "sha256": "c629ffa9516bf502de9bb1351aa9c92acd708281e4ef61fe0e18739457179d8b"
+    },
+    "full-regression-os-loading-r10.log": {
+      "path": "artifacts/full-feature-live-20261025/full-regression-os-loading-r10.log",
+      "sha256": "e552439072d20ba0ab0f49b5f6595ef2d781587a62482078c74e668715cc00bc"
+    },
+    "supervisor-ready-position-repro-r1.json": {
+      "path": "artifacts/full-feature-live-20261025/supervisor-ready-position-repro-r1.json",
+      "sha256": "7cad531dc573f41b651690a21e73b71823c3a33ba96119f31551310dfe1d1437"
+    },
+    "runner-supervision-ready-fix-focused-r1.log": {
+      "path": "artifacts/full-feature-live-20261025/runner-supervision-ready-fix-focused-r1.log",
+      "sha256": "9b6d82f1f142b6ab0064a513404c45577214466bb405820949685359d75cac76"
+    }
+  }
+}

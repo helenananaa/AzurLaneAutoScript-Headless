@@ -1,0 +1,49 @@
+{
+  "schema": "alas-headless.current-diagnostic-full-regression/v1",
+  "at": "2026-10-26T19:30:45.616317+08:00",
+  "passed": true,
+  "offline_only": true,
+  "exit_code": 0,
+  "test_counts": {
+    "passed": 8473,
+    "skipped": 254,
+    "warnings": 138
+  },
+  "pytest_elapsed_seconds": 754.61,
+  "wrapper_elapsed_seconds": 764.891,
+  "integration_members": 245,
+  "combined_sha256": "6136d92e2067a2ef33f11cc7021084ee0b8ff3079b93027f365259412b306d9e",
+  "source_snapshot_files": 2950,
+  "native_source_snapshot_files": 5,
+  "source_snapshot_unchanged_at_end": true,
+  "native_source_unchanged_at_end": true,
+  "qualification": "One coherent full Python regression of245 native loading catches + diagnostic-only existing OSback input-state retention + test-only WindowsJob readiness correction. Skips remain unqualified; no whole-device/task/overnight claim.",
+  "prior_failed_r10_retained": true,
+  "focused_results_not_spliced_into_full": true,
+  "exit_cleanup_observation": {
+    "kind": "pytest atexit global temporary-directory cleanup PermissionError",
+    "path": "E:/CacheVault/Temp/pytest-of-MECHREVO/pytest-current",
+    "test_result_effect": "After completed test summary; pytest process exit0 and wrapper passed. It remains a host cleanup limitation, not an erased test failure.",
+    "global_temp_or_permissions_changed": false,
+    "extra_full_rerun": false
+  },
+  "raw": {
+    "path": "artifacts/full-feature-live-20261025/full-regression-diagnostic-r11.json",
+    "sha256": "3245321e8b4e5e4b49558047ed9cbee50ad57c489de6a1dd3b7be542aea30b8f"
+  },
+  "log": {
+    "path": "artifacts/full-feature-live-20261025/full-regression-diagnostic-r11.log",
+    "sha256": "03c0090b7493c28c952a7a99ff41e401c7c1cca53f90f0a7da70821ed75cb5d6"
+  },
+  "source_references": [
+    "python/alas_headless/oracle/errors.py",
+    "python/alas_headless/oracle/opsi_state.py",
+    "python/alas_headless/adapter/task_lifecycle.py",
+    "tests/test_blocked_input_failure_evidence.py",
+    "tests/test_runner_supervision.py"
+  ],
+  "live_diagnostic_field_qualification": false,
+  "rare_loading_handoff_repeat_qualification": false,
+  "support_promotion": false,
+  "delivery": "LOCALONLY/noautomaticcommitpush"
+}

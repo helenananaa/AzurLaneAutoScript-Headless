@@ -132,6 +132,7 @@ class SessionOpsiPorts:
             state = oracle.operation_siren_strategic_search_state()
             if state == "on":
                 adapter = self.open()
+                adapter._operation_siren_strategic_search_owned = True
                 adapter._operation_siren_auto_search_transition_until = (
                     time.monotonic() + 30.0
                 )
@@ -224,6 +225,7 @@ class SessionOpsiPorts:
                     self.open().oracle.operation_siren_strategic_search_state()
                     == "on"
                 ):
+                    adapter._operation_siren_strategic_search_owned = True
                     return tuple(receipts)
             except SemanticGateClosed:
                 continue

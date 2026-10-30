@@ -335,6 +335,24 @@ int main() {
     auto p = observe(item.first, item.second);
     assert(p.calls == 0 && p.record.adbX == 100.2f && p.record.adbY == 269.1f);
   }
+  const std::string modal_back =
+      "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/top/btnBack";
+  assert(ShouldEvaluateTopRaycast("btnBack", modal_back));
+  Record modal_control;
+  modal_control.screenX = modal_control.adbX = 125.5f;
+  modal_control.screenY = 425.5f;
+  modal_control.adbY = 294.5f;
+  auto modal = observe("btnBack", modal_back, modal_control);
+  assert(modal.calls == 1 && (modal.record.flags & 0x1800u) == 0x1800u);
+  assert(modal.record.adbX == 125.5f && modal.record.adbY == 294.5f);
+  assert(modal.point.x == modal.record.screenX && modal.point.y == modal.record.screenY);
+  assert(!ShouldEvaluateTopRaycast("wrong", modal_back));
+  assert(!ShouldEvaluateTopRaycast("btnBack", modal_back + "/child"));
+  assert(!ShouldEvaluateTopRaycast("btnBack", "OtherUI/Msgbox(Clone)/window/top/btnBack"));
+  auto covered_modal = observe("btnBack", modal_back, {}, false);
+  assert(covered_modal.calls == 1 && (covered_modal.record.flags & 0x1800u) == 0x800u);
+  auto unknown_modal = observe("btnBack", modal_back, {}, false, false);
+  assert(unknown_modal.calls == 1 && (unknown_modal.record.flags & 0x1800u) == 0);
   auto blocked = observe("icon", archive + "item/bg/icon", {}, false);
   assert(blocked.calls == 1 && (blocked.record.flags & 0x1800u) == 0x800u);
   auto unknown = observe("icon", archive + "item/bg/icon", {}, false, false);

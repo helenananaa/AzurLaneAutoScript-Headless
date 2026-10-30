@@ -54,7 +54,7 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         """Expose the exact archive stage-page identity to original ALAS."""
 
         self._package_gate()
-        return self.oracle.war_archives_campaign_page_visible()
+        return self._frame_or_live_observation_oracle().war_archives_campaign_page_visible()
 
     def _campaign_page_back_visible(self) -> bool:
         if self.oracle.war_archives_campaign_page_visible():
@@ -100,7 +100,7 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                 raise SemanticGateClosed("war archives category receipt changed")
 
         for _ in range(32):
-            position = self.oracle.war_archives_campaign_card_position(event)
+            position = self._fresh_input_oracle().war_archives_campaign_card_position(event)
             if position == "visible":
                 settle_deadline = time.monotonic() + 10.0
                 while True:
@@ -122,8 +122,9 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                         time.sleep(0.2)
                 deadline = time.monotonic() + 30.0
                 while True:
-                    if self.oracle.war_archives_campaign_page_visible():
-                        state = self.oracle.campaign_page_state()
+                    observation = self._fresh_input_oracle()
+                    if observation.war_archives_campaign_page_visible():
+                        state = observation.campaign_page_state()
                         if state.generation <= receipt.generation:
                             raise SemanticGateClosed(
                                 "war archives campaign postcondition predates input"
@@ -136,13 +137,13 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                     time.sleep(0.25)
 
             before_generation, before_bounds = (
-                self.oracle.war_archives_campaign_card_geometry(event)
+                self._fresh_input_oracle().war_archives_campaign_card_geometry(event)
             )
             swipe = self._fresh_input_oracle().swipe_war_archives_campaign_toward(event)
             deadline = time.monotonic() + 10.0
             while True:
-                generation, bounds = self.oracle.war_archives_campaign_card_geometry(
-                    event
+                generation, bounds = (
+                    self._fresh_input_oracle().war_archives_campaign_card_geometry(event)
                 )
                 if generation > max(before_generation, swipe.generation) and bounds != before_bounds:
                     break
@@ -289,10 +290,13 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         if not self.dock_full_recovery_owned():
             raise SemanticGateClosed("dock-full recovery has no owned task surface")
         context = self._campaign_context
-        return self.oracle.click_campaign_dock_full_choice(
+        receipt = self.oracle.click_campaign_dock_full_choice(
             (context.resolved_stage_code or context.stage_code) if context else "",
             choice,
         )
+        if context is not None:
+            context.dock_full_recovery_receipt = receipt
+        return receipt
 
     def arm_daemon_campaign_map_preparation(self) -> bool:
         """Record the exact inherited ALAS setting before Daemon advances it."""
@@ -1032,6 +1036,7 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
         context.initial_fleet_state = context.prepared_fleet_state
         context.fleet_mutation_receipts = []
         context.sortie_receipt = receipt
+        context.dock_full_recovery_receipt = None
         context.sortie_proof = None
         context.map_entry_state = None
         context.auto_search_completion = None
@@ -1067,6 +1072,7 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
 
         receipt = self._dispatch_mutation("campaign.sortie", click_reentry)
         context.sortie_receipt = receipt
+        context.dock_full_recovery_receipt = None
         context.sortie_proof = None
         context.map_entry_state = None
         context.auto_search_completion = None
@@ -1912,6 +1918,7 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                     "campaign sortie target predates prepared fleet state"
                 )
             context.sortie_receipt = receipt
+            context.dock_full_recovery_receipt = None
             # ANGLE NULL can spend more than a minute in the exact read-only
             # CombatLoadUI while assets stream.  The sortie budget is already
             # consumed, so this longer passive window admits no further input.
@@ -2105,11 +2112,14 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                 raise SemanticGateClosed(
                     "campaign auto-search toggle is only valid before map preparation"
                 )
-            if self._campaign_preparation_kind() != "map":
+            reader = self._fresh_input_oracle()
+            preparation, _stage_code = self._campaign_preparation_state_with_stage(
+                reader=reader
+            )
+            if preparation is None or preparation.kind != "map":
                 raise SemanticGateClosed(
                     "campaign auto-search toggle requires the map-preparation layer"
                 )
-            reader = self._fresh_input_oracle()
             selected = reader.toggle_selected(
                 "campaign/map-preparation/auto-search"
             )
@@ -2146,20 +2156,15 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                 raise SemanticGateClosed(
                     "campaign map-preparation transition is single-use"
                 )
-            preparation_kind = self._campaign_preparation_kind()
-            if preparation_kind not in (None, "map"):
+            input_oracle = self._fresh_input_oracle()
+            observed_preparation, stage_code = (
+                self._campaign_preparation_state_with_stage(reader=input_oracle)
+            )
+            if (observed_preparation is not None
+                    and observed_preparation.kind != "map"):
                 raise SemanticGateClosed(
                     "campaign map preparation is not the active layer"
                 )
-            # `appear(MAP_PREPARATION)` and this input call are separate ALAS
-            # operations.  During the bounded post-entry transition the
-            # adapter may get one incoherent read here and report no kind.
-            # The oracle action below performs a fresh, exact page/stage/
-            # raycast proof immediately before input, so let that final proof
-            # decide rather than failing on the advisory pre-read.
-            observed_preparation, stage_code = (
-                self._campaign_preparation_state_with_stage()
-            )
             if (
                 observed_preparation is not None
                 and observed_preparation.kind == "map"
@@ -2167,7 +2172,7 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                 context.map_preparation_oil_cost = getattr(
                     observed_preparation, "oil_cost", None
                 )
-            receipt = self.oracle.click_campaign_map_preparation(stage_code)
+            receipt = input_oracle.click_campaign_map_preparation(stage_code)
             context.resolved_stage_code = stage_code
             context.map_preparation_receipt = receipt
             context.passive_transition_until = time.monotonic() + 60.0
@@ -2193,17 +2198,15 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                 raise SemanticGateClosed(
                     "inherited campaign preparation cancel is single-use"
                 )
-            if context.entry_receipt is None:
-                preparation, resolved_stage_code = (
-                    self._campaign_preparation_state_with_stage()
+            input_oracle = self._fresh_input_oracle()
+            preparation, resolved_stage_code = (
+                self._campaign_preparation_state_with_stage(reader=input_oracle)
+            )
+            kind = getattr(preparation, "kind", None)
+            if preparation is not None and kind not in ("map", "fleet"):
+                raise SemanticGateClosed(
+                    "campaign preparation kind is invalid"
                 )
-                kind = getattr(preparation, "kind", None)
-                if preparation is not None and kind not in ("map", "fleet"):
-                    raise SemanticGateClosed(
-                        "inherited campaign preparation kind is invalid"
-                    )
-            else:
-                kind, resolved_stage_code = self._campaign_preparation_kind_with_stage()
             if kind in ("map", "fleet") and context.entry_receipt is None:
                 # ALAS deliberately closes an already-open stage detail while
                 # discovering the current page.  A new process has no local
@@ -2213,11 +2216,11 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                 # the normal pre-sortie proof must still perform its own
                 # entry -> preparation -> cancel sequence.
                 if kind == "fleet":
-                    receipt = self.oracle.cancel_campaign_fleet_preparation(
+                    receipt = input_oracle.cancel_campaign_fleet_preparation(
                         resolved_stage_code
                     )
                 else:
-                    receipt = self.oracle.cancel_campaign_map_preparation(
+                    receipt = input_oracle.cancel_campaign_map_preparation(
                         resolved_stage_code
                     )
                 context.inherited_cancel_receipt = receipt
@@ -2234,11 +2237,11 @@ class CampaignAdapterPorts(CampaignHealthAdapterPorts):
                     raise SemanticGateClosed(
                         "campaign fleet cancel requires proven map transition"
                     )
-                receipt = self.oracle.cancel_campaign_fleet_preparation(
+                receipt = input_oracle.cancel_campaign_fleet_preparation(
                     resolved_stage_code
                 )
             elif kind == "map":
-                receipt = self.oracle.cancel_campaign_map_preparation(
+                receipt = input_oracle.cancel_campaign_map_preparation(
                     resolved_stage_code
                 )
             else:

@@ -1,0 +1,17 @@
+diff --git a/module/combat/auto_search_combat.py b/module/combat/auto_search_combat.py
+--- a/module/combat/auto_search_combat.py
++++ b/module/combat/auto_search_combat.py
+@@ -323,6 +323,13 @@
+         exp_info = False  # This is for the white screen bug in game
+ 
+         for _ in self.loop():
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if (semantic_adapter is not None
++                    and semantic_adapter.close_campaign_battle_fail_tip_if_present()):
++                # The game pauses official search on defeat. Reuse the native
++                # manual result/statistics handlers after its exact tip closes.
++                self._auto_search_status_confirm = True
++                continue
+ 
+             # End
+             if self.is_auto_search_running():

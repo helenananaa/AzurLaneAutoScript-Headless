@@ -1,0 +1,104 @@
+{
+  "schema": "alas-headless.warehouse-inventory-observation/v1",
+  "at": "2026-10-27T11:11:05.510796+08:00",
+  "local_only": true,
+  "support_promoted": false,
+  "current_full_regression": false,
+  "scope": "Read-only cell/count/upgrade/viewport observations plus one-frame stability sample. No original native ItemGrid or stable-loop hook applied, no selection/disassembly input.",
+  "source_sha256": {
+    "python/alas_headless/oracle/storage.py": "4edbd487707e12e7955e6df794b51c4776e91808579d97cbc2a10e2f0d8dd75c",
+    "python/alas_headless/adapter/semantic/session_tasks.py": "c036bf8da0b679647221f34b60b836c56bf8d45f6366b836058c908c3fef77ee"
+  },
+  "offline": {
+    "actual_fixture": "tests/fixtures/storage-equipment-selection-20261027.json",
+    "visible_cells": 21,
+    "clipped_slots": [
+      "21",
+      "22",
+      "23",
+      "24",
+      "25",
+      "26",
+      "27"
+    ],
+    "first_stack_quantity": 23,
+    "loaded_slot26_upgrade": 7,
+    "selected_count": 0,
+    "native_prefix_fixture": "tests\\fixtures\\storage-native-disassemble-once-20261027.py",
+    "native_prefix_sha256": "f0f905e6c36a85cd7ffc142414e106f5bea01467199eb33767c512100b457b2f",
+    "original_native_function_matches": true,
+    "original_native_choice_model": "Requested15; retained original ALAS prefix selects whole first stack23. Controlled observation seam only; original ItemGrid pixel implementation not executed."
+  },
+  "validation": {
+    "before": {
+      "failed": 12,
+      "log": "warehouse-inventory-before-r1.log"
+    },
+    "intermediate": {
+      "passed": 11,
+      "failed": 1,
+      "cause": "Controlled test removed text records without updating text_count; corrected test payload cardinality, production parser not weakened"
+    },
+    "latest_related": {
+      "passed": 132,
+      "seconds": 7.67,
+      "log": "warehouse-inventory-related-final-r1.log"
+    },
+    "latest_focused": {
+      "passed": 16,
+      "seconds": 1.12,
+      "log": "warehouse-inventory-focused-final-r2.log",
+      "overlaps_related": true
+    },
+    "screenshots": "Real Session replay holds selected count0 until explicit refresh_frame, then23; no hidden refresh or pixel buffer",
+    "stability": "One typed data sample, generation excluded, actual quantity changes detected; no adapter wait loop"
+  },
+  "passive_live": {
+    "schema": "alas-headless.passive-runtime-surface-change/v1",
+    "at": "2026-10-27T11:11:05.510796+08:00",
+    "source": "warehouse-filter-passive-postfix-live-r1.json",
+    "original_raw_passed": false,
+    "actual_surface": "LoginUI2 with Msgbox",
+    "message": "登录数据失效",
+    "pid": 10980,
+    "generation": 123585,
+    "ui_generation": 123585,
+    "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "boot_completed": true,
+    "adb_pid_discovered_before_session": true,
+    "game_inputs": 0,
+    "ordinary_grants_consumed": 0,
+    "login_recovery_attempted": false,
+    "cause": "unknown; do not infer a network, adapter or concurrent-account cause",
+    "filter_positive_live_not_verified": true,
+    "closed_case_not_resumed": true,
+    "profiles_unchanged": true
+  },
+  "observer": {
+    "cpp_sha256": "5e64b2b52a341b31b6f77141196692adb3134c1a9eda6e9a3a84e72fc5813d10",
+    "still_pending_eight_filter_raycast_exports": true,
+    "build_run": false,
+    "deploy_run": false
+  },
+  "native": {
+    "member_count": 245,
+    "five_r13_sources_unchanged": true,
+    "storage_source_sha256": "231d42e4fa13e3e30a5b3bea233948dd4a8410ded9fc1e702dd764a144b63f7e",
+    "no_native_state_machine_or_patch_changed": true
+  },
+  "case": {
+    "closed": true,
+    "charged_calls": 9,
+    "cap": 24,
+    "unused_calls_sealed": 15,
+    "ordinary_balances_not_reissued": true,
+    "game_inputs_this_batch": 0
+  },
+  "remaining": [
+    "Native wait_until_stable/Button.load_color and ItemGrid.predict still need narrow semantic observation hooks",
+    "Shared native METERIAL_SCROLL still routes to material-only state; actual equipment fixture exports inactive material bar and no equipment ScrollRect",
+    "Equipment cell raycasts/selection identity and postconditions not implemented",
+    "No final inventory disassembly confirmation port or live full-warehouse recovery",
+    "Reentry requires a separate bounded original LoginHandler recovery when live qualification is ready; do not replay stale filter clicks or request credentials"
+  ]
+}

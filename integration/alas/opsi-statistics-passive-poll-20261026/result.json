@@ -1,0 +1,34 @@
+{
+  "schema": "alas-headless.opsi-statistics-passive-poll-fix/v1",
+  "at": "2026-10-26T21:26:10.897721+08:00",
+  "applied": true,
+  "changed_sdk_files": 1,
+  "path": "python/alas_headless/adapter/semantic/session_combat.py",
+  "before_sha256": "2fb08f3a53463832aaa907d92c146a357485a44a96cb216f0e900cf5eea75cce",
+  "after_sha256": "0dd1113fb510d5ca70f6506a947b276fbe266b52b9856a891bf5d23a5bef7e06",
+  "failure": "Original combat_is_executing read-only predicate aborted on an exact covered statistics confirm while discovering visible resource aliases; no confirm input attempted. r1 terminalFALSE/exit1 retained, original owner+guard exited before change.",
+  "scope": "Extend existing META-only statistics passive mount handling to committed original Operation Siren battles; reuse the same screenshot oracle for the exact negative observation. No global selector weakening. Original ALAS polling, timers, result decisions and typed input gates unchanged.",
+  "negative_semantics": "One exact active covered stats confirm with valid geometry yields no passive resources for this frame; duplicate, unknown-top, incomplete state and unowned access still reject. Ready baseline and representative additive-field/reordering drift remain discoverable. Direct covered-result click still rejects.",
+  "evidence": [
+    "artifacts/full-feature-live-20261025/strategic-owner-watch-r1-failure-closeout.json",
+    "tests/fixtures/opsi-statistics-passive-mount-20261026.json",
+    "artifacts/full-feature-live-20261025/statistics-passive-poll-before-r1.log",
+    "artifacts/full-feature-live-20261025/statistics-passive-poll-after-r3.log"
+  ],
+  "tests": {
+    "before_existing_7_cases": "2FAIL5PASS3.14s",
+    "after_related_including_9_new_cases": "97PASS1SKIP4.04s",
+    "intermediate_helper_failure": "after-r2 retains96PASS1FAIL1SKIP: test attempted assignment to readonly oracle property before behavior; corrected helper to _live_oracle. No production change for that helper error."
+  },
+  "native_actual_5_hashes_unchanged": true,
+  "native_members": 245,
+  "combined_sha256": "6136d92e2067a2ef33f11cc7021084ee0b8ff3079b93027f365259412b306d9e",
+  "native_changes": false,
+  "observer_changes": false,
+  "config_changes": false,
+  "full_current_source": false,
+  "full_scope": "R12 qualifies the prior source snapshot; focused current boundary passed. Avoid repeating unchanged full suite for each ordinary edit; later coherent milestone remains separate.",
+  "live_repeat_verified": false,
+  "support_promotion": false,
+  "delivery": "LOCALONLY/noautomaticcommitpush"
+}

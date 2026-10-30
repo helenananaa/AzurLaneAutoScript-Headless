@@ -1,0 +1,84 @@
+{
+  "baseline_commit": "3e462883bbceaa3110fee75293740d9336b5276f",
+  "checksums": {
+    "contract-verification.json": "57a4deec2a152ddb2bb118021b6df87e2b9cd4e223ad2c52265d9ac4c01231a8",
+    "focused-pytest-output.txt": "27e108158534d6404cd8211b3210761bf0813753071667f20f3b269a21092dea",
+    "full-pytest-output.txt": "971058f6cfcb6ddee49d1dc3745fe8f7f03eeac1f709b4ce3eae354ea2b041ea",
+    "metadata-pytest-output.txt": "ecde254f69682cd65832cea01eee6eaab141a2f274e66473be1ba502c7f06d48",
+    "newlines-pytest-output.txt": "d11a2f3e979c440cdc4e49093801064645b6504c79bf39b8e12033ace7be9379"
+  },
+  "combined_patch_sha256": "75eb6911b0d01328192b28a307ee326dd0820319ebb5638d5af7720d5af620b5",
+  "compiled_patched_python_files": 160,
+  "configuration_verifiers": [
+    "retirement",
+    "daily",
+    "gems_farming",
+    "research",
+    "commission",
+    "tactical",
+    "opsi_task"
+  ],
+  "focused": {
+    "exit_code": 0,
+    "passed": 1221,
+    "seconds": 198.73,
+    "skipped": 15,
+    "warnings": 9
+  },
+  "focused_modules": 98,
+  "full": {
+    "exit_code": 0,
+    "passed": 8944,
+    "seconds": 1122.93,
+    "skipped": 254,
+    "warnings": 138
+  },
+  "game_inputs": 0,
+  "historical_evidence_notes": [
+    "Earlier source hashes in build-entry-counter-transition-20261027/result.json and opsi-information-opening-20261027/result.json describe their historical snapshots, not current source bytes; originals retained.",
+    "Captured native fixture oneclick-retirement-native-methods-cv-20261026.py retains six upstream trailing-whitespace lines.",
+    "Captured fixture common-cv-native-methods-244-20261026.py retains its original extra EOF blank line. Staged whitespace checks exclude only these two capture fixtures; production/test modules are clean."
+  ],
+  "image_builds": 0,
+  "metadata_after_documentation_fix": {
+    "exit_code": 0,
+    "passed": 8,
+    "seconds": 41.44,
+    "skipped": 0,
+    "warnings": 7
+  },
+  "patch_series_member_count": 253,
+  "post_full_format_only_cleanup": {
+    "focused": {
+      "exit_code": 0,
+      "passed": 83,
+      "seconds": 21.46,
+      "skipped": 0,
+      "warnings": 7
+    },
+    "paths": {
+      "python/alas_headless/oracle/old_retirement.py": "8a1896374cc23be03824cc44cae9981b3685a2d8d9d649e221486ac59b3055e3",
+      "tests/test_campaign_dock_recovery_transaction.py": "dd5ae502bc7a29af4aeab34e733816255a289e3f5d2b24388a5439325c87915f",
+      "tests/test_daily_precombat_start_underlay.py": "db1406210f180cd1d79d0947ed938040d970f87782f513051e4ff22252d7467f",
+      "tests/test_daily_precombat_underlay_return.py": "d76cbcb6244b61c3bf64751eca53531ce16e1fedbcf003df777b906d9d5f167b"
+    },
+    "production_ast_unchanged": true
+  },
+  "recorded_at": "2026-10-30T11:43:01.676111+08:00",
+  "review_corrections": [
+    "README patch inventory corrected from252 to253.",
+    "Retirement common-CV notes now include member1564 and scoped live receipt; support dimensions/classifications unchanged.",
+    "Normalized CRCRLF to LF in old_retirement.py without changing its AST; removed extra EOF blank lines in three test modules; 83 affected tests passed afterward."
+  ],
+  "schema": "alas-headless.prepush-review/v1",
+  "scope": "Review of pending main changes and offline validation; no new live-device or Android image-build qualification.",
+  "source_snapshot": {
+    "captured_at": "2026-10-30T11:25:31.379447+08:00",
+    "captured_during_full_run": true,
+    "file_count": 1864,
+    "scope": "Git-visible python, overlays, scripts, tests, ordered patch series and combined patch; documentation and support ledger excluded.",
+    "unchanged_from_capture_to_completion": true
+  },
+  "support_matrix_configuration_source_verified": true,
+  "support_promoted": false
+}

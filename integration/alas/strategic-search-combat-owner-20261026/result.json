@@ -1,0 +1,82 @@
+{
+  "schema": "alas-headless.strategic-search-combat-ownership-fix/v1",
+  "at": "2026-10-26T20:41:15.394469+08:00",
+  "applied": true,
+  "changed_sdk_files": 3,
+  "native_changes": false,
+  "observer_changes": false,
+  "changes": [
+    {
+      "path": "python/alas_headless/adapter/semantic/core.py",
+      "before_sha256": "18e9e3e1b12d7cc7b397b9a32c63d36887f62d6979f0cee880f7da210b62531c",
+      "after_sha256": "3edf6b075da8f7b1529553c39cf9cf9ea1ba3c1bc65d76091bc9045c589e285d"
+    },
+    {
+      "path": "python/alas_headless/adapter/semantic/opsi.py",
+      "before_sha256": "c41b1a69b80669d1b0902db10721587f1c296060e8f02ec4f46b7c7442882aa9",
+      "after_sha256": "668e6421b36986f4008ad94f0864954c09abe415f1803d9bf8553ffc058bedb1"
+    },
+    {
+      "path": "python/alas_headless/adapter/semantic/session_opsi.py",
+      "before_sha256": "c29c1089c978105653fb140d14ef8a223d190013245840fd6f62cf9babfe0869",
+      "after_sha256": "a263e25ed5d1ddc8a9b2b5ab1559768719f6fbde933977f4273072e3a8c0ca3a"
+    }
+  ],
+  "failure": "Native CL1 interruption reached exact VICTORY/click-continue grade while retained CombatUI had no Pause; GameStuck then original cold Restart. Failed case raw unchanged/closed12calls, no forced stop. Original Reward completed only after restart.",
+  "source_defect": "The accepted strategic search set the local auto-search-active flag but operation_siren_combat_committed returned only manual-combat state. Local OFF also clears that local flag. Original native pause/result paths can therefore lose their accepted strategic owner during handoff. Hidden historical flags were not observed/reconstructed.",
+  "fix": "Keep task-local accepted strategic ownership only after exact original ON adoption/ON postcondition; native combat-committed includes it. Local OFF does not erase this proof. Existing original ALAS interruption/result handlers and typed input ports stay in charge; task cleanup clears ownership. Unknown/unaccepted confirmation establishes no new proof. No extra observer read, loop, scheduling, input target, input dispatch or resource policy.",
+  "tests": {
+    "corrected_frozen_relevant_sdk_before": "4FAIL4PASS2.47s, all3relevantbaseline hashes byte-identical R11",
+    "focused_after": "8PASS2.48s including exact retained grade + canonical original native handler reaches existing typed port",
+    "related_after": "117PASS2SKIP14.56s; this earlier group contains6of8 new tests; do not sum as a single run"
+  },
+  "qualified_scope": "Offline ownership, native handler reachability, unknown input and cleanup/task-isolation behavior. Separate zero-resource original navigation/dock check passed45.814s on same recovered gamePID25797; does NOT exercise repeated strategic interruption.",
+  "current_full_scope": "R118473/254 is the pre-fix coherent snapshot. New3SDKfile getter affects shared combat consumers; one new coherent full milestone is warranted before final current-source qualification. Do not relabel R11 as current.",
+  "native_members_unchanged": 245,
+  "combined_sha256_unchanged": "6136d92e2067a2ef33f11cc7021084ee0b8ff3079b93027f365259412b306d9e",
+  "latest_game": {
+    "pid": 25797,
+    "generation": 28915,
+    "ui_generation": 28915,
+    "main": true,
+    "resources": {
+      "oil": 6709,
+      "gold": 104695,
+      "gem": 3505
+    },
+    "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+  },
+  "latest_dock": {
+    "generation": 28881,
+    "capacity_used": 864,
+    "capacity_total": 1010,
+    "selected_count": 0
+  },
+  "net_failed_case_resources": {
+    "oil": 1053,
+    "gold": -744,
+    "gem": 0
+  },
+  "resource_scope": "Net inventory samples through separate post-case observation, not per-task expenditure attribution.",
+  "helper_errors_preserved": [
+    "Initial focused driver placeholder was invalid before code execution, then corrected.",
+    "First replay used live oracle on repeated immutable generations; frame-bound R2 corrected it.",
+    "Native test helper lacked the Combat fixture; corrected to canonical patched native method.",
+    "Pre-apply backup helper selfmatched its own inline command; recovered original3file bytes from earlier frozen SDK copy, verified exactly against R11. No input runner was alive; source provenance is explicit, not a claimed immediate pre-edit read.",
+    "Stop attempt found runner already exited; case stopped by12-call cap, stop-file absent. OldPID was later reused by unrelated updater and never touched."
+  ],
+  "old_level_warning_candidate": "Remains PRIVATE/not applied; genuine strategic handoff repair takes priority.",
+  "live_repeated_interruption_verified": false,
+  "support_promotion": false,
+  "delivery": "LOCALONLY/noautomaticcommitpush",
+  "full_followup": {
+    "at": "2026-10-26T21:04:21.365719+08:00",
+    "receipt": "integration/alas/strategic-owner-full-regression-20261026/result.json",
+    "passed": 8481,
+    "skipped": 254,
+    "warnings": 138,
+    "exit_code": 0,
+    "all_snapshots_unchanged_at_end": true,
+    "live_repeat_still_pending": true
+  }
+}

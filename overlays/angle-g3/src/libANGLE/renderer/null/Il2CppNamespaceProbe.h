@@ -11,6 +11,7 @@
 #include "libANGLE/renderer/null/NativeLuaGlobeProbe.h"
 #include "libANGLE/renderer/null/NativeLuaShipyardProbe.h"
 #include "libANGLE/renderer/null/NativeLuaActivityIdentity.h"
+#include "libANGLE/renderer/null/NativeLuaWorldMapProbe.h"
 
 namespace rx::alas {
 
@@ -163,6 +164,10 @@ struct ObserverImageRecord {
   float anchorWorldZ = 0.0f;
   float adbX = 0.0f;
   float adbY = 0.0f;
+  // 0x4000: separately observed fleet root pose; 0x8000: root active.
+  // Its world position uses anchorWorld*, never the hidden Image's position.
+  float fleetRootAdbX = 0.0f;
+  float fleetRootAdbY = 0.0f;
 };
 
 struct ObserverColliderRecord {
@@ -263,8 +268,10 @@ struct ObserverUiSnapshot {
   NativeLuaGlobeDiagnostic luaGlobe = {};
   NativeLuaShipyardState shipyard = {};
   NativeLuaActivityIdentity activityIdentity = {};
+  NativeLuaWorldMapState worldMap = {};
   ObserverMapDragProof mapDrag = {};
   ObserverStorageScroll storageScroll = {};
+  ObserverStorageScroll retirementScroll = {};
   uint32_t privatePhysicsStatus = 0; // 0: outside room, 1: observed, 2: unavailable
   uint32_t colliderCount = 0;
   uint32_t colliderTruncated = 0;
@@ -295,6 +302,7 @@ bool RequestGlobePortInput(uint32_t entrance);
 // Observe the reviewed OS drag handler and EventSystem path; never dispatch input.
 bool RequestOperationSirenMapDrag(float x1, float y1, float x2, float y2, bool globe = false);
 bool RequestStorageScrollbarInput(float x, float y);
+bool RequestRetirementScrollbarInput(float x, float y);
 
 } // namespace rx::alas
 

@@ -1,0 +1,219 @@
+{
+  "schema": "alas-headless.tactical-complete-native-qualification/v1",
+  "updated_at": "2026-10-27T20:29:58.467502+08:00",
+  "closed_case": {
+    "schema": "alas-headless.tactical-complete-case-closeout/v1",
+    "recorded_at": "2026-10-27T20:29:58.467502+08:00",
+    "case_closed": true,
+    "original_native_Tactical_run_verified": true,
+    "all_attempts_passed": false,
+    "r1_original_false_preserved": true,
+    "r1_error": "Local observe_native_delay encoded target datetimes before forwarding to original task_delay;TypeError interrupted native run final scheduling. No SDK/native defect.",
+    "r1_seconds": 21.274,
+    "r1_original_run_did_not_return": true,
+    "r1_course_confirm_receipt": [
+      {
+        "kind": "tactical.assign",
+        "units": 1,
+        "result": {
+          "semantic_id": "tactical/course/confirm",
+          "generation": 262826,
+          "point": {
+            "x": 790.0,
+            "y": 515.0
+          },
+          "bounds": {
+            "left": 699.0,
+            "top": 481.333,
+            "right": 881.0,
+            "bottom": 548.667
+          },
+          "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+          "policy_sha256": "370782de530c289944fd7928ff0f4180aa1ed716ba1bcf87760d5f8dbf45a070",
+          "capability_id": "tactical.assign"
+        }
+      }
+    ],
+    "r1_before_assignment": {
+      "running_slots": 3,
+      "empty_slot": true
+    },
+    "r1_four_running_seconds": [
+      32006,
+      17621,
+      3235,
+      14399
+    ],
+    "chosen_native_book": "Red_T2_Exp per original stdout;final bookinventory not independently audited",
+    "r2_original_full_run_returned": true,
+    "r2_seconds": 4.378,
+    "r2_accepted_resource_actions": 0,
+    "r2_four_running_seconds": [
+      31669,
+      17284,
+      2898,
+      14062
+    ],
+    "r2_native_finish_times": [
+      "2026-10-28T05:07:06",
+      "2026-10-28T01:07:21",
+      "2026-10-27T21:07:35",
+      "2026-10-28T00:13:39"
+    ],
+    "r2_private_next_run": "2026-10-27T21:07:35",
+    "r2_native_task_delay": [
+      {
+        "args": [],
+        "kwargs": {
+          "target": [
+            "2026-10-28T05:07:06",
+            "2026-10-28T01:07:21",
+            "2026-10-27T21:07:35",
+            "2026-10-28T00:13:39"
+          ]
+        },
+        "returned": true,
+        "next_run": "2026-10-27 21:07:35"
+      }
+    ],
+    "same_original_deadline": "2026-10-27T20:23:11.192595+08:00",
+    "deadline_extended": false,
+    "total_original_calls_attempted": 2,
+    "original_call_cap": 2,
+    "grant_initial": {
+      "tactical.reward": 1,
+      "tactical.assign": 1
+    },
+    "grant_spent": {
+      "tactical.reward": 0,
+      "tactical.assign": 1
+    },
+    "unused_reward_sealed": 1,
+    "assign_remaining": 0,
+    "no_refund_or_replay": true,
+    "source_profiles_unchanged_in_r2": true,
+    "final_separate_inspection": {
+      "raw": "tactical-complete-final-main-20261027-r1.json",
+      "passed": true,
+      "seconds": 3.893,
+      "native_calls": [
+        "goto_main"
+      ],
+      "all_grants": 0,
+      "resource_delta": {
+        "oil": 0,
+        "gold": 0,
+        "gem": 0
+      },
+      "source_profiles_bytes_unchanged": true,
+      "final": {
+        "pid": 35557,
+        "generation": 269986,
+        "ui_generation": 269986,
+        "main": true,
+        "precombat": false,
+        "resources": {
+          "oil": 10743,
+          "gold": 104459,
+          "gem": 3505
+        }
+      }
+    },
+    "case_net_resource_delta": {
+      "oil": 0,
+      "gold": 0,
+      "gem": 0
+    },
+    "processes": {
+      "r1": {
+        "terminal": true,
+        "guard_pid": 45612,
+        "guard_create_time": 1793103190.9577425,
+        "started_at": "2026-10-27T20:13:11.192595+08:00",
+        "deadline": "2026-10-27T20:23:11.192595+08:00",
+        "stop_file": "E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless\\artifacts\\full-feature-live-20261025\\tactical-complete-native-20261027-r1.stop",
+        "purpose": "One independent original Tactical task after ready-sidebar preflight;newreward1/assign1 normal limits/current slots after20:10passivepreflight,not old17:13casecontinuation,original filters/books/slot decisions thenMain;no persistent scheduling mutation or old grants carried.",
+        "action_grants": {
+          "tactical.reward": 1,
+          "tactical.assign": 1
+        },
+        "other_resource_grants": 0,
+        "native_call_cap": 2,
+        "pid": 39608,
+        "child_create_time": 1793103191.195802,
+        "exit_code": 1,
+        "forced_stop": false,
+        "finished_at": "2026-10-27T20:13:42.264093+08:00"
+      },
+      "r2": {
+        "terminal": true,
+        "guard_pid": 39056,
+        "guard_create_time": 1793103544.0370271,
+        "started_at": "2026-10-27T20:19:04.269388+08:00",
+        "deadline": "2026-10-27T20:23:11.192595+08:00",
+        "stop_file": "E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless\\artifacts\\full-feature-live-20261025\\tactical-complete-native-20261027-r2.stop",
+        "purpose": "SAME20:13case remainder,max1originalTactical.run/remainingreward1 assign0/SAME20:23deadline,no newbook/inputreplay.Only localdatetime-recordinghook repaired;originalSDK/native/config unchanged.NoMain appended",
+        "action_grants": {
+          "tactical.reward": 1,
+          "tactical.assign": 0
+        },
+        "other_resource_grants": 0,
+        "native_call_cap": 1,
+        "pid": 47916,
+        "child_create_time": 1793103544.273906,
+        "exit_code": 0,
+        "forced_stop": false,
+        "finished_at": "2026-10-27T20:19:19.589208+08:00"
+      },
+      "post_main": {
+        "terminal": true,
+        "guard_pid": 42512,
+        "started_at": "2026-10-27T20:20:23.132416+08:00",
+        "deadline": "2026-10-27T20:23:23.132416+08:00",
+        "resource_grants": 0,
+        "scope": "Independent post-Tactical-complete original goto_main,max1original goto_main call,allgrants0,no sortie or oldcase continuation",
+        "pid": 33228,
+        "child_create_time": 1793103623.1342735,
+        "guard_create_time": 1793103622.8905425,
+        "exit_code": 0,
+        "forced_stop": false,
+        "finished_at": "2026-10-27T20:20:33.069869+08:00"
+      }
+    },
+    "all_exact_identities_exited": true,
+    "not_uninterrupted_soak": true,
+    "not_single_run_assign_and_delay_success": true,
+    "local_only": true
+  },
+  "local_recording_fix": {
+    "source": "artifacts/full-feature-live-20261025/qualify_tactical_complete_native_r2.py#delay_evidence_value,observe_native_delay",
+    "native_original_arguments_forwarded_unchanged": true,
+    "datetime_only_metadata_isoformat": true,
+    "recording_errors_do_not_prevent_or_repeat_native_delay": true,
+    "global_sdk_encoder_changed": false,
+    "before_failed": 2,
+    "after_passed": 2,
+    "after_seconds": 0.15,
+    "tests": "tests/test_tactical_qualification_delay_recording.py",
+    "before_log": "tactical-delay-recording-before-r1.log",
+    "after_log": "tactical-delay-recording-after-r1.log"
+  },
+  "source_sdk_changed": false,
+  "actual_native_changed": false,
+  "observer_changed": false,
+  "current_full": false,
+  "support_promoted": false,
+  "raws": {
+    "tactical-complete-native-20261027-r1.json": "d01888480cd072593450fc916a703c2118460c0ce726e3fed9f85c6785ac1a24",
+    "tactical-complete-native-20261027-r2.json": "e953df5804ed136f7011cf972e8d798e2a509a01707d954ef9482bae2434fa2e",
+    "tactical-complete-final-main-20261027-r1.json": "d8b6e183bee39ae6b63ec357ecfabee00a513063b7c8625572aef3ef67819219"
+  },
+  "limits": [
+    "Original r1 remainsfalse;courseconfirm consumedassign1 andisnotreplayed.",
+    "r2 fulloriginaltask returned on four-running state;not onecallperforming bothnewcourseandscheduling.",
+    "No actual coursefinished or experienceclaim in this newcase;rewardgrantunusedsealed.",
+    "Naturalfuture tacticalwake/finish/claim/book/refill-to-nexttimernotyetproved.",
+    "SourcepersistentTacticalNextRun17:30:45 remainsunchanged;onlytemporarynativeNextRun21:07:35 changed.",
+    "Old17:13threecourses plus thisone not claimedoneuninterruptedfourcourseflow;bookendinventoryunverified."
+  ]
+}

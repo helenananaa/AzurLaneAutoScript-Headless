@@ -1,0 +1,408 @@
+{
+  "schema": "alas-headless.post-warehouse-native-watch-closeout/v1",
+  "at": "2026-10-27T15:24:20.340389+08:00",
+  "status": "CLOSED_BOUNDED_PARTIAL_NOT_SOAK_PASS",
+  "case_closed": true,
+  "reason": "Original native runner max-task cap reached;all original identities exited naturally, no synthetic stop request or forced kill.",
+  "original_case_call_cap": 24,
+  "case_calls": [
+    {
+      "case": "post-warehouse-native-watch-20261027-r1",
+      "calls": 13,
+      "raw": {
+        "path": "artifacts/full-feature-live-20261025/post-warehouse-native-watch-20261027-r1.json",
+        "sha256": "209f2ed4104468ea6a590606315757d17d2b86d4ee6d3ee1600742333927f7a3"
+      },
+      "process": {
+        "path": "artifacts/full-feature-live-20261025/post-warehouse-native-watch-20261027-r1-process.json",
+        "sha256": "c14103907292c729efa4a4130526853010985b963da80f9f8d8739486bbd6ca7"
+      },
+      "raw_passed": false,
+      "exit_code": 1,
+      "forced_stop": false,
+      "finished_at": "2026-10-27T14:20:39.013739+08:00"
+    },
+    {
+      "case": "post-warehouse-native-watch-20261027-r2",
+      "calls": 0,
+      "raw": {
+        "path": "artifacts/full-feature-live-20261025/post-warehouse-native-watch-20261027-r2.json",
+        "sha256": "574a6db10f01c23a8302df126e528bb00c3e611dc34a618bfa9e3500ebc0382b"
+      },
+      "process": {
+        "path": "artifacts/full-feature-live-20261025/post-warehouse-native-watch-20261027-r2-process.json",
+        "sha256": "7ba862ddda0c2fb5498f7310d9677dd636803c7c70a0ebb262c8f8f757da2afd"
+      },
+      "raw_passed": false,
+      "exit_code": 1,
+      "forced_stop": false,
+      "finished_at": "2026-10-27T14:31:09.299095+08:00"
+    },
+    {
+      "case": "post-warehouse-native-watch-20261027-r3",
+      "calls": 5,
+      "raw": {
+        "path": "artifacts/full-feature-live-20261025/post-warehouse-native-watch-20261027-r3.json",
+        "sha256": "712febfe67a7183e8bc0d525d85c4f59d718e10c68b1a124672a32059206b705"
+      },
+      "process": {
+        "path": "artifacts/full-feature-live-20261025/post-warehouse-native-watch-20261027-r3-process.json",
+        "sha256": "1379d3a9fd7c01e4cf6f77cabcbe2c90ac35c1215f6dbf454b17d55a82671f5b"
+      },
+      "raw_passed": false,
+      "exit_code": 1,
+      "forced_stop": false,
+      "finished_at": "2026-10-27T14:36:33.204212+08:00"
+    },
+    {
+      "case": "post-warehouse-native-watch-20261027-r4",
+      "calls": 5,
+      "raw": {
+        "path": "artifacts/full-feature-live-20261025/post-warehouse-native-watch-20261027-r4.json",
+        "sha256": "9b0195c8386ad0b9dbc0b901abf9e8a75240c30188b1dd86c83182c464005c7b"
+      },
+      "process": {
+        "path": "artifacts/full-feature-live-20261025/post-warehouse-native-watch-20261027-r4-process.json",
+        "sha256": "1fb1546acf24341c71d29bbe5011931e5f70a36156aafe5df4f26a3620da0234"
+      },
+      "raw_passed": false,
+      "exit_code": 1,
+      "forced_stop": false,
+      "finished_at": "2026-10-27T15:05:17.882942+08:00"
+    }
+  ],
+  "same_case_recovery_native_LoginHandler_calls": 1,
+  "accounted_case_calls": 24,
+  "unused_case_calls": 0,
+  "unused_grants_sealed": {
+    "mission.claim": 7,
+    "mail.mutation": 0,
+    "tactical.reward": 0,
+    "awaken.execute": 0,
+    "minigame.play": 0,
+    "meta.assist": 0,
+    "operation_siren.coordinate_checkout": 1,
+    "operation_siren.action_point_use": 1,
+    "operation_siren.daemon_move": 16,
+    "operation_siren.port_repair": 1,
+    "tactical.assign": 3,
+    "commission.reward": 11,
+    "commission.start": 8,
+    "daily.execute": 0,
+    "exercise.execute": 0,
+    "exercise.refresh": 0,
+    "research.reward": 4,
+    "research.start": 0,
+    "dorm.collect": 2,
+    "dorm.feed": 16,
+    "enhancement.execute": 0,
+    "guild.claim": 0,
+    "guild.dispatch": 0,
+    "guild.exchange": 0,
+    "build.submit": 0,
+    "retirement.execute": 0,
+    "shop.purchase": 0,
+    "storage.disassemble": 350,
+    "campaign.stage_entry": 0,
+    "campaign.fleet_mutation": 0,
+    "campaign.sortie": 0,
+    "campaign.grid_click": 0,
+    "campaign.viewport_swipe": 0
+  },
+  "initial_grants": {
+    "mission.claim": 12,
+    "mail.mutation": 0,
+    "tactical.reward": 0,
+    "awaken.execute": 0,
+    "minigame.play": 0,
+    "meta.assist": 0,
+    "operation_siren.coordinate_checkout": 1,
+    "operation_siren.action_point_use": 2,
+    "operation_siren.daemon_move": 16,
+    "operation_siren.port_repair": 1,
+    "tactical.assign": 3,
+    "commission.reward": 12,
+    "commission.start": 12,
+    "daily.execute": 0,
+    "exercise.execute": 0,
+    "exercise.refresh": 0,
+    "research.reward": 6,
+    "research.start": 6,
+    "dorm.collect": 3,
+    "dorm.feed": 20,
+    "enhancement.execute": 0,
+    "guild.claim": 0,
+    "guild.dispatch": 0,
+    "guild.exchange": 0,
+    "build.submit": 0,
+    "retirement.execute": 0,
+    "shop.purchase": 0,
+    "storage.disassemble": 350,
+    "campaign.stage_entry": 0,
+    "campaign.fleet_mutation": 0,
+    "campaign.sortie": 0,
+    "campaign.grid_click": 0,
+    "campaign.viewport_swipe": 0
+  },
+  "grant_usage": {
+    "mission.claim": 5,
+    "mail.mutation": 0,
+    "tactical.reward": 0,
+    "awaken.execute": 0,
+    "minigame.play": 0,
+    "meta.assist": 0,
+    "operation_siren.coordinate_checkout": 0,
+    "operation_siren.action_point_use": 1,
+    "operation_siren.daemon_move": 0,
+    "operation_siren.port_repair": 0,
+    "tactical.assign": 0,
+    "commission.reward": 1,
+    "commission.start": 4,
+    "daily.execute": 0,
+    "exercise.execute": 0,
+    "exercise.refresh": 0,
+    "research.reward": 2,
+    "research.start": 6,
+    "dorm.collect": 1,
+    "dorm.feed": 4,
+    "enhancement.execute": 0,
+    "guild.claim": 0,
+    "guild.dispatch": 0,
+    "guild.exchange": 0,
+    "build.submit": 0,
+    "retirement.execute": 0,
+    "shop.purchase": 0,
+    "storage.disassemble": 0,
+    "campaign.stage_entry": 0,
+    "campaign.fleet_mutation": 0,
+    "campaign.sortie": 0,
+    "campaign.grid_click": 0,
+    "campaign.viewport_swipe": 0
+  },
+  "grant_usage_scope": "Ledger capability units, not blanket transaction success or exact item counts. Research.start6 does not prove6projects queued;action_point_use1 is1capability unit,physical AP item count not independently recorded in this receipt. No unused grant refund/refill/continuous/new watch.",
+  "native_cap_exit": {
+    "terminal": true,
+    "raw_passed": false,
+    "exit_code": 1,
+    "forced_stop": false,
+    "native_stop_exit": true,
+    "stop_file_requested": false,
+    "cooperative_stop_request": {},
+    "finished_at": "2026-10-27T15:05:17.882942+08:00",
+    "original_early_stop_at": "2026-10-27T16:59:11.265675+08:00",
+    "original_deadline": "2026-10-27T17:14:11.265675+08:00"
+  },
+  "strategic_recovery_and_handoff": {
+    "first_r4_attempt": {
+      "return": false,
+      "native_error": {
+        "type": "GameStuckError",
+        "message": "Wait too long"
+      },
+      "elapsed_seconds": 73.922
+    },
+    "original_RecoveryRestart_seconds": 32.281,
+    "source": "post-warehouse-r4-native-recovery-wave-r1.json",
+    "resumed_native_task_elapsed_seconds": 501.968,
+    "return": true,
+    "native_TaskEnd": true,
+    "native_battle_count_logged": 19,
+    "individual_victories_not_independently_counted": true,
+    "information_confirmation": {
+      "semantic_id": "os/precombat/info/confirm",
+      "generation": 1634,
+      "point": {
+        "x": 640.0,
+        "y": 548.333
+      },
+      "bounds": {
+        "left": 549.0,
+        "top": 514.667,
+        "right": 731.0,
+        "bottom": 582.0
+      },
+      "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    "official_reward_close_and_native_exit_receipts": [
+      {
+        "semantic_id": "os/auto-search/reward/close",
+        "generation": 9643,
+        "point": {
+          "x": 647.987,
+          "y": 654.3
+        },
+        "bounds": {
+          "left": 569.99,
+          "top": 597.287,
+          "right": 725.983,
+          "bottom": 654.3
+        },
+        "path": "OverlayCamera/Overlay/UIMain/WorldAutoFightRewardUI(Clone)/Window/Fixed/ButtonExit",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "os/page/back",
+        "generation": 9665,
+        "point": {
+          "x": 59.333,
+          "y": 52.667
+        },
+        "bounds": {
+          "left": 2.315,
+          "top": -4.352,
+          "right": 116.352,
+          "bottom": 109.685
+        },
+        "path": "OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "combat/resource/GET_MISSION",
+        "generation": 9757,
+        "point": {
+          "x": 790.0,
+          "y": 515.0
+        },
+        "bounds": {
+          "left": 699.0,
+          "top": 481.333,
+          "right": 881.0,
+          "bottom": 548.667
+        },
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "campaign-menu/page/back",
+        "generation": 9779,
+        "point": {
+          "x": 57.667,
+          "y": 54.0
+        },
+        "bounds": {
+          "left": 0.648,
+          "top": -3.019,
+          "right": 114.685,
+          "bottom": 111.019
+        },
+        "path": "UICamera/Canvas/UIMain/LevelMainScene(Clone)/top/top_chapter/back_button",
+        "policy_sha256": null,
+        "capability_id": null
+      }
+    ],
+    "following_due_tasks": [
+      {
+        "task": "EventSp",
+        "started_at": "2026-10-27T15:05:00.220091+08:00",
+        "elapsed_seconds": 6.407,
+        "return": null,
+        "outcome": {
+          "task": "event_sp",
+          "outcome": "action-deferred"
+        },
+        "NextRun": "2026-10-27 15:35:06"
+      },
+      {
+        "task": "EventB",
+        "started_at": "2026-10-27T15:05:07.185739+08:00",
+        "elapsed_seconds": 9.219,
+        "return": null,
+        "outcome": {
+          "task": "event_b",
+          "outcome": "action-deferred"
+        },
+        "NextRun": "2026-10-27 15:35:16"
+      }
+    ],
+    "scope": "Original task_call Restart recovery and subsequent501.968s strategic segment -> due EventSp/EventB grant defer. Not uninterrupted soak or successful campaign sorties."
+  },
+  "information_fix_live_scope": {
+    "original_handler_positive_confirmation": true,
+    "receipt_generation": 1634,
+    "exact_new_opening_without_PauseBtn_branch_independently_captured": false,
+    "note": "The successful action receipt proves the updated original information-handler path returned through its postcondition. Its pre-input Button/UI pair was not retained,so it cannot isolate the new no-Pause opening branch. Original immutable failure branch is offline tested only."
+  },
+  "post_case_inspection": {
+    "scope": "Separate explicitly requested closeout inspection,4original UI navigation calls,0all resource grants,no scheduler or gameplay;does not reopen24call case or sealed grants.",
+    "raw": {
+      "path": "artifacts/full-feature-live-20261025/post-warehouse-final-dock-r1.json",
+      "sha256": "09301f3850c4a2c44c767984e7574dbe17f9bfccfad3f0bde0fd58539ebea4e0"
+    },
+    "process": {
+      "path": "artifacts/full-feature-live-20261025/post-warehouse-final-dock-r1-process.json",
+      "sha256": "5116cfc0b1bcbc7239d489f360c0da8fc58826da3fd3dc1c7a2a930bbb37f9f7"
+    },
+    "passed": true,
+    "elapsed_seconds": 16.365,
+    "native_ui_calls": [
+      "goto_main",
+      "ui_ensure_build",
+      "retirement_quit",
+      "goto_main"
+    ],
+    "dock": {
+      "generation": 19055,
+      "capacity_used": 864,
+      "capacity_total": 1010,
+      "selected_count": 0
+    },
+    "final": {
+      "pid": 29604,
+      "generation": 19154,
+      "ui_generation": 19154,
+      "main": true,
+      "resources": {
+        "oil": 10010,
+        "gold": 101558,
+        "gem": 3505
+      },
+      "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+    },
+    "source_and_persistent_profiles_unchanged": true,
+    "resource_delta_during_inspection": {
+      "oil": 0,
+      "gold": 0,
+      "gem": 0
+    }
+  },
+  "resource_reference": {
+    "initial": "warehouse-native-disassemble-multicell-r1.json final_resources before R14/case",
+    "before": {
+      "oil": 7443,
+      "gold": 105725,
+      "gem": 3505
+    },
+    "final": {
+      "oil": 10010,
+      "gold": 101558,
+      "gem": 3505
+    },
+    "net_change_from_reference": {
+      "oil": 2567,
+      "gold": -4167,
+      "gem": 0
+    },
+    "scope": "Net wallet changes include original rewards,costs and passive changes since that preceding independent snapshot. Not exact single-task spend attribution. Premium balance unchanged."
+  },
+  "unverified": [
+    "Commission natural next wave15:15:51;case ended15:05before due",
+    "Research natural next wave15:47:01;case ended before due",
+    "Equipment warehouse full recovery/Research storage continuation;storage350budget wholly unused and sealed",
+    "Final equipment warehouse capacity;post-case ship dock864/1010 is a different inventory",
+    "Positive no-Pause opening branch frame at actual input",
+    "Natural ship-dock full retirement/continuation chain",
+    "Exact old-level warning live branch",
+    "Uninterrupted long-run stability/all60+5support"
+  ],
+  "native_members": 247,
+  "combined_sha256": "bee9db8c63e6f2a4cd271cca28cad57edd0158d878337295ebc3b35927935e53",
+  "current_full_regression": false,
+  "latest_full_scope": "R14 native246 before native247 and current combat SDK edit;all historical receipts preserved",
+  "support_promotion": false,
+  "delivery": "LOCALONLY/noautomaticcommitpush"
+}

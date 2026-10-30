@@ -1,0 +1,282 @@
+{
+  "schema": "alas-headless.core-timer-continuity-qualification/v1",
+  "at": "2026-10-27T18:57:04.760940+08:00",
+  "terminal": true,
+  "passed": true,
+  "local_only": true,
+  "scope": "One same-process isolated original ALAS Commission/Research/Reward timer case with native Restart policy preserved. Initial overdue Commission/Research separated from subsequent true future timer waves. Not full60 original-profile or overnight/all-task stability.",
+  "case": {
+    "prefix": "post-r15-core-timer-20261027-r1",
+    "started_at": "2026-10-27T17:28:39.341789+08:00",
+    "finished_at": "2026-10-27T18:50:41.077046+08:00",
+    "original_runtime_seconds": 4919.0,
+    "native_calls": 9,
+    "native_call_cap": 18,
+    "unused_calls_sealed": 9,
+    "native_business_calls": 5,
+    "goto_main_calls": 4,
+    "exit_code": 0,
+    "forced_stop": false,
+    "native_stop_exit": true,
+    "stop_file_requested": true,
+    "cooperative_stop_request": {
+      "reason": "stop-file",
+      "requested_at": 1793098234.3614428
+    },
+    "stop_reason": "All3coretruefuturetimerwavescomplete,noextensionorbudgetrefill",
+    "original_early_stop_at": "2026-10-27T19:13:39.341789+08:00",
+    "original_hard_deadline": "2026-10-27T19:28:39.341789+08:00",
+    "same_runner_pid": 34188,
+    "same_runner_create_time": 1793093319.3447812,
+    "same_game_pid_initial_and_final": 35557,
+    "original_runner_and_guard_exited": true
+  },
+  "results": [
+    {
+      "command": "commission",
+      "started_at": 1793093323.1341684,
+      "return_value": true,
+      "elapsed_seconds": 120.906,
+      "native_error": null
+    },
+    {
+      "command": "research",
+      "started_at": 1793093444.181319,
+      "return_value": true,
+      "elapsed_seconds": 50.5,
+      "native_error": null
+    },
+    {
+      "command": "goto_main",
+      "started_at": 1793093494.796825,
+      "return_value": true,
+      "elapsed_seconds": 5.704,
+      "native_error": null
+    },
+    {
+      "command": "reward",
+      "started_at": 1793094240.7435243,
+      "return_value": true,
+      "elapsed_seconds": 15.797,
+      "native_error": null
+    },
+    {
+      "command": "goto_main",
+      "started_at": 1793094256.7904906,
+      "return_value": true,
+      "elapsed_seconds": 2.265,
+      "native_error": null
+    },
+    {
+      "command": "commission",
+      "started_at": 1793097044.6925623,
+      "return_value": true,
+      "elapsed_seconds": 72.516,
+      "native_error": null
+    },
+    {
+      "command": "goto_main",
+      "started_at": 1793097117.3529477,
+      "return_value": true,
+      "elapsed_seconds": 4.25,
+      "native_error": null
+    },
+    {
+      "command": "research",
+      "started_at": 1793098016.8825676,
+      "return_value": true,
+      "elapsed_seconds": 34.828,
+      "native_error": null
+    },
+    {
+      "command": "goto_main",
+      "started_at": 1793098051.964139,
+      "return_value": true,
+      "elapsed_seconds": 6.859,
+      "native_error": null
+    }
+  ],
+  "natural_waves": {
+    "Reward": {
+      "native_due": "2026-10-27T17:43:57+08:00",
+      "native_start": "2026-10-27T17:44:00.743524+08:00",
+      "due": null,
+      "start": null,
+      "elapsed_seconds": 15.797,
+      "lateness_seconds": 3.743524,
+      "native_return": true,
+      "return": null,
+      "capability_units_consumed": {
+        "mission.claim": 1
+      }
+    },
+    "Commission": {
+      "native_due": "2026-10-27T18:30:40+08:00",
+      "native_start": "2026-10-27T18:30:44.692562+08:00",
+      "due": null,
+      "start": null,
+      "elapsed_seconds": 72.516,
+      "lateness_seconds": 4.692562,
+      "native_return": true,
+      "return": null,
+      "capability_units_consumed": {
+        "commission.reward": 1,
+        "commission.start": 2
+      }
+    },
+    "Research": {
+      "native_due": null,
+      "native_start": null,
+      "due": "2026-10-27T18:46:53+08:00",
+      "start": "2026-10-27T18:46:56.882568+08:00",
+      "elapsed_seconds": 34.828,
+      "lateness_seconds": 3.882568,
+      "native_return": null,
+      "return": true,
+      "capability_units_consumed": {
+        "research.reward": 1,
+        "research.start": 2
+      }
+    }
+  },
+  "all_three_future_timer_waves_verified": true,
+  "initial_overdue_calls_not_natural_wakes": true,
+  "source_profile": "semantic_midnight_continuity_20261025",
+  "private_case_profile": "semantic_core_timer_qualification_20261027",
+  "source_profiles_byte_unchanged": true,
+  "private_timers_preserved": true,
+  "native_restart_fixed_state_policy_retained": true,
+  "forced_task_or_restart_or_login_before_loop": false,
+  "finite_grants_initial": {
+    "commission.reward": 8,
+    "commission.start": 12,
+    "research.reward": 6,
+    "research.start": 6,
+    "mission.claim": 12,
+    "storage.disassemble": 350
+  },
+  "capability_units_consumed": {
+    "mission.claim": 1,
+    "commission.reward": 2,
+    "commission.start": 6,
+    "research.reward": 2,
+    "research.start": 5
+  },
+  "unused_grants_sealed": {
+    "mission.claim": 11,
+    "commission.reward": 6,
+    "commission.start": 6,
+    "research.reward": 4,
+    "research.start": 1,
+    "storage.disassemble": 350
+  },
+  "grant_counts_are_not_item_experience_or_concurrent_project_counts": true,
+  "storage_disassembly_triggered": false,
+  "resources": {
+    "initial_main": {
+      "oil": 10010,
+      "gold": 102645,
+      "gem": 3505
+    },
+    "final_after_separate_inspection": {
+      "oil": 10965,
+      "gold": 98666,
+      "gem": 3505
+    },
+    "observed_interval_net_delta": {
+      "oil": 955,
+      "gold": -3979,
+      "gem": 0
+    },
+    "note": "Net includes native ordinary project costs/rewards and passive regeneration;not attributed entirely to any one task. Diamond0difference."
+  },
+  "separate_final_inspection": {
+    "passed": true,
+    "native_ui_calls": 4,
+    "all_resource_grants": 0,
+    "elapsed_seconds": 12.161,
+    "original_task_scope": true,
+    "game_pid": 35557,
+    "final_generation": 173153,
+    "final_ui_generation": 173153,
+    "final_main": true,
+    "dock": {
+      "generation": 173064,
+      "capacity_used": 863,
+      "capacity_total": 1010,
+      "selected_count": 0
+    },
+    "dock_capacity_at_case_start_not_measured": true,
+    "container_not_stopped": true
+  },
+  "validation": {
+    "current_R15_full": true,
+    "passed": 8720,
+    "skipped": 254,
+    "native247_and_source_hashes_still_unchanged": true,
+    "no_unchanged_full_or_build_repeated": true
+  },
+  "support_promoted": false,
+  "global_goal_completed": false,
+  "unverified": [
+    "Equipment warehouse full cleanup/Research continuation:budget350unused",
+    "Natural shipdockfull retirement/resume",
+    "Full original profile/all60+5 or overnight soak",
+    "Old level-warning exact live branch",
+    "Strategic battle-statistics to naturallydue corehandoff"
+  ],
+  "evidence": [
+    {
+      "path": "artifacts/full-feature-live-20261025/post-r15-core-timer-20261027-r1.json",
+      "sha256": "3594779b2e47f0222c8725c867fd5ada66914f4f1e1f4a221637afed3de8e1fd"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/post-r15-core-timer-20261027-r1-process.json",
+      "sha256": "aaf68e89392e997abe56bb8a6c98002efa1317880e4d0663d24c4627a71c8e2c"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/post-r15-core-timer-20261027-r1.stdout.log",
+      "sha256": "e9c845db0a10c50f2123d8d5923b5ad197551c7745051ae7727026363b0ca089"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/post-r15-core-timer-20261027-r1.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/post-r15-core-native-stop-request-r1.json",
+      "sha256": "93e74fa4899d69ffb349af75a67113b5b530fde95f4e748dd8b82e0b24e583aa"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/post-r15-core-initial-wave-r1.json",
+      "sha256": "c6dec927b41f05bb21a9c4e8a758c7a979fc12d3bad96ae6addec885ad3cadaf"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/post-r15-core-reward-natural-r1.json",
+      "sha256": "80392d7d76d54b33fac621742d9b895f2eb72e3a85dfb77895f2950464568589"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/post-r15-core-commission-natural-r1.json",
+      "sha256": "c6cb02cafaf4291ecd2e9487875f5fbab10a12c35910a11c490ee9046591a62c"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/post-r15-core-research-natural-r1.json",
+      "sha256": "5d7b7e850730afae72de6f0395e4e4bb1395a62e7537954ce033b28e0c738b13"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/post-r15-core-final-dock-r1.json",
+      "sha256": "73f047acb7f01f00f22e22d435b318614c29c450e68f9effb824749b974dc98b"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/post-r15-core-final-dock-r1-process.json",
+      "sha256": "352038db92d94463234a863be84d4dca9539e3a9b2bb11c868d48d228f315ec1"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/post-r15-core-timer-20261027-r1-initial-main-read.json",
+      "sha256": "7e48db675a6d8c7bcb8c587d8a73520789a01dbbfb7b554a0c58fa86fa0b52c9"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/post-r15-core-native-restart-policy-r1.json",
+      "sha256": "1e9fb92649a58400b65188b70bb50bd969410d2b0b37c6c8c1e33bb18da3a40f"
+    }
+  ]
+}

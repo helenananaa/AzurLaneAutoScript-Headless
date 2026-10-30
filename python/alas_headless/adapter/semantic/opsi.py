@@ -25,6 +25,7 @@ from .dispatch_result import UNHANDLED
 from ...oracle.opsi_map import OperationSirenMapSwipeIntent
 from ...oracle.opsi_map import reviewed_logging_tower, reviewed_scanning_device
 from ...oracle.contracts import Point
+from ...oracle.errors import SemanticInputBlocked
 
 
 class OpsiAdapterPorts:
@@ -166,7 +167,7 @@ class OpsiAdapterPorts:
         if self._operation_siren_auto_search_active:
             return True
         if (now <= self._operation_siren_entry_transition_until
-                and getattr(self.oracle, 'daily_entry_visible', lambda: False)()):
+                and getattr(self.oracle, 'daily_navigation_visible', lambda: False)()):
             # An exact unobscured Daily page ends the old OpSi entry/exit
             # observation lease. Otherwise its blanket passive misses hide
             # Daily's own detail check and repeat an already completed entry.
@@ -401,7 +402,11 @@ class OpsiAdapterPorts:
         return receipt
 
     def operation_siren_combat_committed(self) -> bool:
-        return self._operation_siren_combat_active
+        # Strategic search spans local auto-search ON/OFF cycles. Its accepted
+        # task still owns the final battle/result and native interrupt after a
+        # local OFF observation; this is ownership, not an executing assertion.
+        return bool(self._operation_siren_combat_active or getattr(
+            self, '_operation_siren_strategic_search_owned', False))
 
     def operation_siren_battle_result_visible(self) -> bool:
         self._package_gate()
@@ -628,7 +633,7 @@ class OpsiAdapterPorts:
 
     def click_operation_siren_fleet_bar(self) -> ActionReceipt:
         self._package_gate()
-        return self.oracle.click_operation_siren_fleet_bar()
+        return self._fresh_input_oracle().click_operation_siren_fleet_bar()
 
     def operation_siren_fleet_selector_open(self) -> bool:
         self._package_gate()
@@ -638,12 +643,27 @@ class OpsiAdapterPorts:
         self, fleet_index: int
     ) -> ActionReceipt:
         self._package_gate()
-        return self.oracle.click_operation_siren_fleet_selector(fleet_index)
+        return self._fresh_input_oracle().click_operation_siren_fleet_selector(fleet_index)
 
     def click_operation_siren_globe_zone_enter(self, expected_zone_name=None) -> ActionReceipt:
         """Keep passive map-event probes owned after the exact zone input."""
         self._package_gate()
-        receipt = self.oracle.click_operation_siren_globe_zone_enter(expected_zone_name)
+        for attempt in range(4):
+            before_input = getattr(self.oracle, 'input_dispatch_count', None)
+            try:
+                receipt = self._fresh_input_oracle().click_operation_siren_globe_zone_enter(expected_zone_name)
+                break
+            except SemanticInputBlocked as exc:
+                if (exc.semantic_id not in ('os/globe/zone-enter', 'os/globe/zone-return', 'os/globe/zone-back')
+                        or tuple(exc.blockers) != ('loading',)
+                        or before_input is None
+                        or self.oracle.input_dispatch_count != before_input
+                        or attempt == 3):
+                    raise
+                # Selecting SAFE can briefly mount Loading over the pin.
+                # Nothing was submitted: reacquire and re-prove the same
+                # named zone. Never replay an accepted entrance.
+                time.sleep(0.25)
         self._operation_siren_entry_receipt = receipt
         self._operation_siren_entry_transition_until = time.monotonic() + 30.0
         return receipt

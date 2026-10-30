@@ -122,9 +122,11 @@ def test_inherited_opsi_is_not_resumed_as_campaign_sortie(sortie):
     host._campaign_context = SimpleNamespace(sortie_receipt=sortie)
     host._operation_siren_allows_passive_probe = Mock(return_value=True)
     oracle.operation_siren_local_map_visible = Mock(return_value=True)
+    host.campaign_dock_full_visible = Mock(side_effect=AssertionError('unrelated campaign capability'))
     # A retained campaign receipt cannot make the current OpSi map a
     # campaign map. The fresh typed owner determines this observation.
     assert host._appear_priority('IN_MAP') is False
+    host.campaign_dock_full_visible.assert_not_called()
 
 
 @pytest.mark.parametrize('change', [None, 'metadata', 'ambiguous', 'unknown'])

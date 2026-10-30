@@ -875,7 +875,11 @@ class TargetsOracle:
         if semantic_id in (
             "overlay/network-reconnect/cancel",
             "overlay/network-reconnect/confirm",
-        ) and self._dock_full_prompt_matches(state):
+        ) and not self._network_reconnect_prompt_matches(state):
+            # Full-warehouse and other multi-choice Msgboxes reuse confirm
+            # prefab paths. Classify this alias before checking multiplicity;
+            # an unrelated prompt is absent, while an actual NetworkDown
+            # prompt still requires one unique actionable control below.
             return False
         if (
             semantic_id == "overlay/login-data-expired/confirm"
@@ -1028,11 +1032,6 @@ class TargetsOracle:
             return False
         if (semantic_id == "tactical/completion/ack"
                 and not self._tactical_completion_prompt_matches(state)):
-            return False
-        if semantic_id in (
-            "overlay/network-reconnect/cancel",
-            "overlay/network-reconnect/confirm",
-        ) and not self._network_reconnect_prompt_matches(state):
             return False
         if semantic_id in (
             "build/warning/cancel",

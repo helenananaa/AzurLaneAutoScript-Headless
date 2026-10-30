@@ -1,0 +1,35 @@
+{
+  "schema": "alas-headless.tcp-read-recovery-fix/v1",
+  "at": "2026-10-26T22:51:41.062913+08:00",
+  "applied": true,
+  "sdk_files": 1,
+  "path": "python/alas_headless/oracle/transport.py",
+  "before_sha256": "85ca5b67b0aee9a3e61d1116a5576fb47456e39ffb1803aba3fcdf883732991a",
+  "after_sha256": "11892193f5c065b17ffaf070e6d897ba9a79a200cb5c4b738d34168c0bb9a562",
+  "source_failure": "r3 lost its observer forward and configured TCP device after the shared ADB process changed; package-pid read reported exactdevice notfound before task inputs. Server change correlation does not identify who or why. Original rawFALSE retained.",
+  "repair": "Only one of the4 existing read-only endpoints may recover a refused connection before request send. On exact target-notfound error and a real device table proving this configured TCP peer absent, reconnect it once, recheck the SAME gamePID and restore only its missing forward. No server restart, input replay, unrelated-device reconnect or schedule ownership change. Listed offline/unauthorized/unknown targets, USB/emulator/invalid endpoints, unknown/malformed responses and changedPID stay rejected.",
+  "tests": {
+    "before_new15_cases": "5FAIL10PASS1.19s",
+    "after_related": "56PASS2.42s/exit0",
+    "ignored_host_cleanup_permission_error": true,
+    "global_temp_permissions_changed": false
+  },
+  "controlled_live": {
+    "passed": true,
+    "fixture": "artifacts/full-feature-live-20261025/tcp-read-recovery-controlled-r1.json",
+    "own_disconnect_only": true,
+    "SDK_connect_count": 1,
+    "same_game_pid": 30809,
+    "same_shared_server_pid": 28712,
+    "other_connections_preserved": true,
+    "game_input": 0,
+    "game_restart": 0
+  },
+  "original_failure_recovery": "artifacts/full-feature-live-20261025/strategic-owner-r3-adb-local-recovery-r1.json",
+  "native_actual5_unchanged": true,
+  "native_members": 245,
+  "observer_changed": false,
+  "full_current_source": false,
+  "live_soak": false,
+  "delivery": "LOCALONLY"
+}

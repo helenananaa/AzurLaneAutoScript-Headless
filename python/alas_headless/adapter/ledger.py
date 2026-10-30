@@ -121,7 +121,7 @@ class ActionLedger:
         with self._lock:
             return not self._closed and self._remaining.get(capability, 0) > 0
 
-    def require_available(self, capability: str) -> None:
+    def require_available(self, capability: str, *, units: int = 1) -> None:
         """Classify a no-input budget refusal without reserving a grant.
 
         Compatibility profiles omit explicitly zero grants from required
@@ -129,13 +129,15 @@ class ActionLedger:
         missing capability, or incomplete preflight remains a contract error.
         Dispatch keeps its atomic reservation and authority checks.
         """
+        if type(units) is not int or units <= 0:
+            raise ValueError('action grant units must be a positive integer')
         self.require_preflight()
         with self._lock:
             if self._closed:
                 raise ActionLeaseError()
             if (capability in self._initial
                     and capability in self.inventory.actions
-                    and self._remaining.get(capability, 0) <= 0):
+                    and self._remaining.get(capability, 0) < units):
                 raise ActionGrantExhausted()
             if capability not in self.profile.required_grants:
                 raise ActionLeaseError()
@@ -144,22 +146,26 @@ class ActionLedger:
         self,
         capability: str,
         operation: Callable[[], T],
+        *,
+        units: int = 1,
     ) -> ActionGrantDispatch[T]:
         if not callable(operation):
             raise TypeError("action ledger operation is not callable")
+        if type(units) is not int or units <= 0:
+            raise ValueError('action grant units must be a positive integer')
         self.require_preflight()
         if capability not in self.profile.required_grants:
             raise ActionLeaseError()
         with self._lock:
-            if self._closed or self._remaining.get(capability, 0) <= 0:
+            if self._closed or self._remaining.get(capability, 0) < units:
                 raise ActionLeaseError()
-            self._remaining[capability] -= 1
+            self._remaining[capability] -= units
             remaining = self._remaining[capability]
         try:
             value = operation()
         except ActionNotDispatched as marker:
             with self._lock:
-                self._remaining[capability] += 1
+                self._remaining[capability] += units
             raise marker.cause.with_traceback(marker.cause.__traceback__) from None
         return ActionGrantDispatch(
             capability=capability,

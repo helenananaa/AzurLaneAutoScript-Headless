@@ -1083,6 +1083,55 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertEqual(len(oracle.campaign_map_swipe_calls), 1)
         adapter.end_campaign_pre_sortie()
 
+    def test_campaign_viewport_swipe_accepts_native_collapsed_padded_axis(self):
+        # The first vector/endpoints are the actual 2026-10-28 MAP_SWIPE_2_3
+        # failure. Native random_normal_distribution_int(a, b) returns b for
+        # the inverted Y interval [174, 165], then point_limit clamps the box.
+        for vector, name, start, end in (
+            ((-296, -448), "MAP_SWIPE_2_3", (467, 613), (171, 165)),
+            ((-296.4, -449.4), "MAP_SWIPE_2_3", (467, 614), (171, 165)),
+            ((296, 448), "MAP_SWIPE_-2_-3", (467, 165), (763, 613)),
+            ((-1036, 0), "MAP_SWIPE_4_0", (1160, 400), (124, 400)),
+            ((1036, 0), "MAP_SWIPE_-4_0", (124, 400), (1160, 400)),
+        ):
+            with self.subTest(vector=vector):
+                oracle = FakeOracle()
+                oracle.campaign_map_state_value = make_campaign_combat_state()
+                adapter = AlasSemanticAdapter(
+                    oracle, lambda: None,
+                    campaign_combat_budget=1, campaign_viewport_swipe_budget=1,
+                )
+                adapter.begin_campaign_pre_sortie("12-4")
+                state = adapter.campaign_map_state(
+                    columns=11, rows=8, land_cells=((0, 0),), expected_fleet_count=1,
+                )
+                adapter.authorize_campaign_combat(make_campaign_combat_decision(), state)
+                intent = adapter.begin_campaign_map_swipe_vector(
+                    vector, box=(123, 159, 1175, 628), random_range=(0, 0, 0, 0),
+                    padding=15, duration=(0.1, 0.2), whitelist_area=None,
+                    blacklist_area=None, name=name, distance_check=True,
+                )
+                # Even on a collapsed axis the adjacent, non-native endpoint
+                # is rejected with the same delta and both endpoints in-box.
+                axis = 1 if vector[1] else 0
+                offset = 1 if vector[axis] < 0 else -1
+                wrong_start, wrong_end = list(start), list(end)
+                wrong_start[axis] += offset
+                wrong_end[axis] += offset
+                with self.assertRaisesRegex(SemanticGateClosed, "selection domain"):
+                    adapter.swipe(
+                        wrong_start, wrong_end, duration=0.3375,
+                        name=name, distance_check=True,
+                    )
+                self.assertEqual(oracle.campaign_map_swipe_calls, [])
+                proof = adapter.swipe(
+                    start, end, duration=0.3375, name=name, distance_check=True,
+                )
+                self.assertEqual(proof.end, end)
+                self.assertEqual(len(oracle.campaign_map_swipe_calls), 1)
+                adapter.end_campaign_map_swipe_vector(intent)
+                adapter.end_campaign_pre_sortie()
+
     def test_campaign_viewport_swipe_rejects_endpoint_outside_alas_padded_domain(self):
         oracle = FakeOracle()
         oracle.campaign_map_state_value = make_campaign_combat_state()

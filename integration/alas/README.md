@@ -2,14 +2,33 @@
 
 Qualification baseline: upstream commit `81ccf63b4540f00241628c82a58c02c7a2bb11af`.
 
-Current integration (2026-10-24): 234 ordered members, shared by the Windows
+Current patch series (2026-10-30): 253 ordered members, shared by the Windows
 AVD and local WSL Redroid task paths. KVM and Mac/HVF lifecycle implementations
 are also integrated without extending their account/task qualification.
 Use the [mainline local entry](../../docs/local-runtime-entry.zh-CN.md) for the
 retained local instance and the [integration record](../../docs/main-integration-20261023.zh-CN.md)
-for final regression results. The capability ledger remains the support authority.
+for the earlier integration regression results. The latest local
+[Daily/CL1 evidence](../../artifacts/goal-live-20261029/daily-to-cl1-live-milestone-r1.json)
+records successful native Daily return, defeat recovery, and the restored native
+AP recovery rule separately from incomplete game quotas and overall soak status.
+The [2026-10-30 pre-push review](prepush-review-20261030/result.json)
+passed the current full offline regression: 8944 passed, 254 skipped, exit0.
+All 253 patch members applied to the clean pinned source and 160 patched
+Python files compiled; task/configuration and support-matrix checks passed.
+The retained R7/R8 failures and subsequent focused fixes remain separate;
+see the [R8 assessment](../../artifacts/goal-live-20261029/current-full-regression-assessment-r5.json).
+An AST-preserving newline cleanup after the full run passed 83 affected tests.
+This offline result does not extend live-device or unattended qualification.
+The capability ledger remains the
+support authority.
 
 ## Runtime compatibility and validation
+
+For bounded long-running qualification, the optional
+`ALAS_SEMANTIC_TACTICAL_REWARD_BUDGET` sets the initial tactical reward count.
+The existing Boolean opt-in still grants one; using both takes the larger
+initial count rather than adding them. Counts are consumed by the existing
+shared ledger and are not renewed per task. Closed-run balances remain sealed.
 
 ALAS owns task selection, scheduling, recovery and task state machines. The
 adapter replaces observation and reviewed input boundaries. The baseline
@@ -52,6 +71,22 @@ version checks.
 
 ## Historical qualification notes
 
+Member `1569-opsi-native-rest-ap-policy.patch` restores the original
+`check_rest_ap` decision in the typed AP branch: current AP plus the remaining
+ten-minute regeneration periods today can skip the existing preserve check.
+The native threshold, caller flag, purchase policy and typed input boundaries
+remain unchanged. Both sides of the threshold and the original pixel branch
+are covered by `test_opsi_ap_rest_native_policy.py`. Clean pinned application,
+compile and configuration checks are under `ap-rest-policy-20261029`; these
+offline results do not establish strategic live qualification.
+
+Member `1568-research-inherited-queue-cancel.patch` lets the native Research
+entry cancel an inherited, unsubmitted queue confirmation before its existing
+detail-quit and task flow. The typed port admits only the exact queue-cancel
+dialog with no current selected-project transaction; it never confirms an
+unknown project. Patch and focused offline checks are separate from the
+continuing live qualification and do not promote support classifications.
+
 The following notes record successive G/H/I milestones and bounded live
 experiments. Statements such as "production stops at G18", "claim disabled by
 default", old resource counts and a second environment-variable opt-in
@@ -59,6 +94,60 @@ describe the respective experiment, not the current global runtime policy.
 They are retained to explain the linked historical receipts. Use the current
 ledger and runtime policy for present support and grants; do not replay this
 entire history as a gate after an ordinary development edit.
+
+Member `1564-native-common-cv-preservation-ports.patch` supplies the typed
+preconfirmation, scrollbar and scanner boundaries used by the original ALAS
+common-carrier policy. The old shortcut's compatibility guard remains closed;
+the new functional entry invokes original ALAS preservation before submission.
+Real-device preservation and scrollbar/cancel checks passed without resource
+consumption. A protected one-click transaction subsequently retired 12 ships
+after preserving one carrier and disassembled 20 equipment items. Its enclosing
+test helper failed while saving the following scanner observation; a separate
+resume proved the original abandoned-carrier keep-one boundary and return to
+Main. These processes are not an uninterrupted full-handler proof. Protected
+old retirement stopped at a level warning whose native popup condition matches
+the pinned upstream source; the additional warning and abandoned-carrier
+resource paths remain unqualified. The SDK244 full offline regression passed
+8457 tests with 254 skips. See the [scoped record](common-cv-ports-20261026/result.json);
+these checks do not promote the support ledger or establish unattended stability.
+
+Member `1565-native-os-back-loading-handoff.patch` lets the original OS search
+interruption and shared navigation loops take their next screenshot when
+`os/page/back` was refused before input by loading alone. Foreign or compound
+blockers and other targets still escape. Both native owners had failing
+regressions before the change; the final focused group passed 73 tests with
+5 skips, followed by patch/hash/tree and support checks. Original zero-resource
+interruption returned the running game to Main; a naturally scheduled repeat
+of the full task handoff remains under observation. The SDK244 full result
+above predates this narrow native change. The current245 integration plus
+diagnostic SDK then passed one coherent full Python regression: 8473 tests,
+254 skips, exit0, with 2950 repository and five actual native source hashes
+unchanged at completion. The prior R10 failed test receipt remains intact; its
+Windows CtrlBreak readiness fix changed only the test fixture. See the
+[current full result](diagnostic-full-regression-20261026/result.json), which
+also records a pytest exit-time global temporary-directory cleanup permission
+error. No global directory or permissions were changed. This is offline
+evidence; exact loading-race repetition and broader task stability remain
+separate live qualifications.
+
+The subsequent SDK strategic-search ownership repair records an accepted
+strategic ON until its native task ends, independently of local auto-search
+OFF. The original ALAS interruption/result handlers then keep using their
+existing typed ports. Eight focused cases and the subsequent coherent full
+regression passed: 8481 tests, 254 skips, exit0, with 2954 repository and five
+actual native file hashes unchanged at completion. See the
+[repair scope](strategic-search-combat-owner-20261026/result.json) and
+[ownership-fix full snapshot](strategic-owner-full-regression-20261026/result.json).
+The failed prior mixed case and its original restart remain recorded; natural
+post-fix interruption repetition is still a separate live qualification.
+
+A later single-file SDK repair lets a committed Operation Siren battle treat
+its exact covered statistics control as absent during a passive poll, using
+the same screenshot oracle. Original ALAS retains polling; all typed input
+checks remain unchanged. The related regression passed 97 tests with one skip, including
+nine new cases; see the [passive observation repair](opsi-statistics-passive-poll-20261026/result.json).
+The full snapshot above predates this repair. Its current full regression and
+live statistics-path repetition remain separate pending qualifications.
 
 The patch adds opt-in observation and action ports without changing default
 ALAS behavior:
@@ -737,3 +826,19 @@ I02 adds `scripts/python/qualify_g36_controlled_input.py`. It is plan-only by
 default and requires both `--execute` and `--allow-semantic-input` plus a new
 evidence directory before the I03 operational gate can be reached. Either
 switch alone and any pre-existing output directory fail before device access.
+
+
+2026-10-27 current batch: [TCP read recovery](tcp-read-recovery-20261026/result.json) is applied, focused 56 passed plus a controlled live zero-input recovery with same game PID. [Old level warning](old-level-warning-20261026/result.json) is root applied, focused 69 passed/1 skipped; its level-warning live branch remains unverified. These and the passive statistics change postdate R12. One R13 offline full batch is pending; no support promotion or uninterrupted soak claim. Original r4 ended without terminal receipt across a host reboot; exact exit cause/time are unknown. All changes remain local.
+
+
+2026-10-27 [current three-SDK batch full regression](current-batch-full-regression-20261027/result.json): 8527 passed, 254 skipped, 138 warnings, exit0; 2963 repository and 5 actual native files unchanged at end. This supersedes the pending full-batch status above. Pytest1051.66s, execution/end verification1066.407s exclude initial snapshot preparation. Host pytest-current cleanup PermissionError is retained; global paths/permissions unchanged. Live branch repeats and continuous-soak claims remain separate; no support promotion. Only post-run reports/documentation are updated afterward.
+
+
+Member `1566-storage-native-observation-ports.patch` replaces only native
+Storage stability sampling and equipment ItemGrid observation. The original
+wait timers, screenshot loop, whole-stack counting and confirmation decisions
+remain in ALAS. Native source and patch-tree checks passed; a separate original
+common-filter/restore/Main unit completed in 20.581 seconds with zero resource
+delta. Slot selection and final equipment disassembly remain unavailable. See
+[the scoped record](native-storage-seams-20261027/result.json). This is not a
+complete Research, warehouse-recovery or unattended-stability qualification.

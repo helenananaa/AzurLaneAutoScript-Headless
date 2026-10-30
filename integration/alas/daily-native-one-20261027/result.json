@@ -1,0 +1,158 @@
+{
+  "schema": "alas-headless.daily-one-native-qualification/v1",
+  "at": "2026-10-27T17:00:15.648138+08:00",
+  "passed": true,
+  "local_only": true,
+  "support_promoted": false,
+  "current_full": false,
+  "scope": "One original Daily.daily_run_one category with original native selection/remaining/skip/reward/exit flow, then original goto_main. Not complete Daily.run, natural scheduled wake or uninterrupted soak.",
+  "original_native": {
+    "members": 247,
+    "combined_sha256": "bee9db8c63e6f2a4cd271cca28cad57edd0158d878337295ebc3b35927935e53",
+    "daily_source_sha256": "dacb876d44e855b809c911fdfaa1f9806ccee249c447188c404255039f96916c",
+    "no_source_or_apk_changes": true
+  },
+  "config": {
+    "persistent_Daily_enabled": false,
+    "UseDailySkip": true,
+    "stage": "first",
+    "fleet": 1,
+    "source_and_persistent_bytes_unchanged": true,
+    "clock_or_NextRun_changed": false,
+    "daily_attempts_reset": false,
+    "temporary_profile_removed": true
+  },
+  "case": {
+    "prefix": "daily-native-one-20261027-r1",
+    "terminal": true,
+    "exit_code": 0,
+    "forced_stop": false,
+    "elapsed_seconds": 31.05,
+    "native_calls": [
+      {
+        "name": "daily_run_one",
+        "started_at": 1793091387.6765265,
+        "complete": true,
+        "finished_at": 1793091414.4114094
+      },
+      {
+        "name": "goto_main",
+        "started_at": 1793091414.900322,
+        "complete": true,
+        "finished_at": 1793091417.4184332
+      }
+    ],
+    "deadline": "2026-10-27T17:06:20.431146+08:00",
+    "case_closed": true,
+    "stop_file_requested": false,
+    "native_returned": true
+  },
+  "execution": {
+    "kind": "tactical_training",
+    "selected_by": "Original Daily.daily_run_one,first active category",
+    "remain_before": 3,
+    "remain_after": 0,
+    "actual_challenges_consumed": 3,
+    "quick_all_dispatches": 1,
+    "execution_receipts": [
+      {
+        "semantic_id": "daily/execute/tactical_training/stage/1/quick/all",
+        "generation": 40699,
+        "point": {
+          "x": 1078.352,
+          "y": 322.063
+        },
+        "bounds": {
+          "left": 987.411,
+          "top": 279.091,
+          "right": 1169.293,
+          "bottom": 365.035
+        },
+        "path": "OverlayCamera/Overlay/UIMain/selected/stagetpl/quickly/bg/mult",
+        "policy_sha256": "1129caaecba020cb02d987c413f9c3a263b517dd35dad569d58bc5d57162bbda",
+        "capability_id": "daily.execute"
+      }
+    ],
+    "original_reward_close_and_return": true,
+    "native_daily_checked": [
+      0,
+      1
+    ],
+    "category_native_returned": true,
+    "native_combat_executed": false
+  },
+  "budget": {
+    "initial_daily_execute_capability_units": 3,
+    "spent_capability_units": 1,
+    "actual_challenges_consumed": 3,
+    "unused_capability_units_sealed": 2,
+    "all_other_grants": 0,
+    "old_case_resources_carried": false,
+    "note": "A quick/all capability dispatch can consume all remaining attempts in its selected category. This harness calls original run_one once,not three categories. Unused grant2sealed at completion,not reissued."
+  },
+  "resources_before": {
+    "oil": 10010,
+    "gold": 101577,
+    "gem": 3505
+  },
+  "resources_after": {
+    "oil": 10010,
+    "gold": 102645,
+    "gem": 3505
+  },
+  "resource_delta": {
+    "oil": 0,
+    "gold": 1068,
+    "gem": 0
+  },
+  "resources_note": "Observed interval net wallet delta; reward item breakdown was not independently retained. Do not infer individual drops or combat rewards.",
+  "final_main": {
+    "pid": 35557,
+    "generation": 41014,
+    "ui_generation": 41014,
+    "input_owner_exited": true
+  },
+  "validation": {
+    "qualification_helpers_py_compile": true,
+    "production_changes": false,
+    "unchanged_expensive_regression_repeated": false,
+    "historical_full": "R14 8686PASS254SKIP138warnings predates native247 and later SDK fixes"
+  },
+  "unverified": [
+    "Remaining Daily categories",
+    "full Daily.run completion and scheduling",
+    "normal Daily combat fallback",
+    "natural next daily wake",
+    "uninterrupted long run and full60+5"
+  ],
+  "evidence": [
+    {
+      "path": "artifacts/full-feature-live-20261025/daily-native-one-20261027-r1.json",
+      "sha256": "df4800bfbda744f5bf25142084a89387ad3b00e462b22d396d76d45be4d1b4c8"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/daily-native-one-20261027-r1-process.json",
+      "sha256": "42dd39bebb90461add136b6d22d9101e40b88cb235b90da313d96b892dc57bae"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/daily-native-one-20261027-r1.stdout.log",
+      "sha256": "ecfc6c8430316c44e3b6a7743a1aac139da37a580d06ccba2b02892b16bec805"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/daily-native-one-20261027-r1.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/daily-native-one-declared-plan-r1.json",
+      "sha256": "b855e37465cec590a78c68764a00c169e35132504cad1bc9f670e1d1b8319f4b"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/qualify_daily_native_one_r1.py",
+      "sha256": "da022f3c426f7357c874bfa32f9df62076f79edf6847057dc6be6d22d042bb45"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/start_daily_native_one_r1.py",
+      "sha256": "5955d61a17f844a794f017e90dabab17d11bf25cfcd166315d41ba53f66165a2"
+    }
+  ]
+}

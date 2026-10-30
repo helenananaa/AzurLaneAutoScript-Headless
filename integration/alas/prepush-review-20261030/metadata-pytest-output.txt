@@ -1,0 +1,22 @@
+........                                                                 [100%]
+============================== warnings summary ===============================
+tests\conftest.py:6
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless\tests\conftest.py:6: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154
+D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154
+D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154
+D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154
+D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154
+  D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('sphinxcontrib')`.
+  Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+    declare_namespace(pkg)
+
+D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154
+  D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('zope')`.
+  Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+    declare_namespace(pkg)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+8 passed, 7 warnings in 41.44s

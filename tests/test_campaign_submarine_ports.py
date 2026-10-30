@@ -86,17 +86,33 @@ def test_campaign_notice_click_cannot_fall_through_to_generic_combat(drift, case
     session._live_combat_click.assert_not_called()
 
 
-def test_campaign_settlement_dispatch_precedes_generic_combat_probe():
-    import ast
-    from pathlib import Path
-    source=Path(__file__).resolve().parents[1]/'python/alas_headless/adapter/semantic/session_dispatch.py'
-    tree=ast.parse(source.read_text(encoding='utf-8'))
-    method=next(n for n in ast.walk(tree) if isinstance(n,ast.FunctionDef) and n.name=='appear')
-    source_lines=ast.unparse(method)
-    assert source_lines.index("('CAMPAIGN_CHECK', 'AUTO_SEARCH_MENU_EXIT')") < source_lines.index('ALAS_COMBAT_DEFENSIVE_RESOURCE_NAMES')
-    click=next(n for n in ast.walk(tree) if isinstance(n,ast.FunctionDef) and n.name=='click')
-    click_source=ast.unparse(click)
-    assert click_source.index("name == 'AUTO_SEARCH_MENU_EXIT'") < click_source.index('name in ALAS_COMBAT_RESOURCE_ACTION_TARGETS')
+def settlement_dispatch_session():
+    from unittest.mock import Mock
+    from tests.test_presence_driven_reward_refresh import session_for
+    session, adapter = session_for(make_oracle(FakeBackend([])))
+    adapter._minigame_context = None
+    adapter.begin_campaign_pre_sortie('12-4')
+    adapter.campaign_combat_committed = lambda: True
+    session._live_combat_visible = Mock(side_effect=AssertionError('generic probe stole settlement'))
+    session._live_combat_click = Mock(side_effect=AssertionError('generic input stole settlement'))
+    return session, adapter
+
+
+@pytest.mark.parametrize('alias', ['CAMPAIGN_CHECK', 'EVENT_CHECK', 'SP_CHECK', 'AUTO_SEARCH_MENU_EXIT'])
+@pytest.mark.parametrize('present', [False, True])
+def test_campaign_settlement_dispatch_precedes_generic_combat_probe(alias, present):
+    from unittest.mock import Mock
+    session, adapter = settlement_dispatch_session()
+    adapter.appear = Mock(return_value=present)
+    assert session.appear(alias) is present
+    adapter.appear.assert_called_once_with(alias)
+    session._live_combat_visible.assert_not_called()
+    if alias == 'AUTO_SEARCH_MENU_EXIT':
+        receipt = object()
+        adapter.click = Mock(return_value=receipt)
+        assert session.click(alias) is receipt
+        adapter.click.assert_called_once_with(alias)
+        session._live_combat_click.assert_not_called()
 
 
 def test_manual_settlement_exit_is_single_use_even_while_frame_still_shows_it():
@@ -104,7 +120,8 @@ def test_manual_settlement_exit_is_single_use_even_while_frame_still_shows_it():
     from unittest.mock import Mock
     from alas_headless.adapter.semantic.campaign import CampaignAdapterPorts
     receipt=object()
-    context=SimpleNamespace(manual_result_exit_receipt=None,auto_search_completion=None)
+    session, adapter = settlement_dispatch_session()
+    context=adapter._campaign_context
     oracle=SimpleNamespace(click=Mock(return_value=receipt))
     host=SimpleNamespace(_campaign_context=context,oracle=oracle,campaign_combat_committed=lambda:True,
                          campaign_auto_search_owned=lambda:False)
@@ -113,19 +130,12 @@ def test_manual_settlement_exit_is_single_use_even_while_frame_still_shows_it():
     with pytest.raises(SemanticGateClosed,match='already submitted'):
         CampaignAdapterPorts._click_campaign_strategy(host,'AUTO_SEARCH_MENU_EXIT')
     oracle.click.assert_called_once_with('reward/campaign-total/exit')
-    import ast
-    from pathlib import Path
-    source=Path(__file__).resolve().parents[1]/'python/alas_headless/adapter/semantic/session_dispatch.py'
-    tree=ast.parse(source.read_text(encoding='utf-8'))
-    branch=next(n for n in ast.walk(tree) if isinstance(n,ast.If)
-        and 'name in (\'CAMPAIGN_CHECK\', \'AUTO_SEARCH_MENU_EXIT\')' in ast.unparse(n.test))
-    fn=ast.FunctionDef(name='probe',args=ast.arguments(posonlyargs=[],args=[ast.arg(arg='adapter'),ast.arg(arg='name'),ast.arg(arg='button')],kwonlyargs=[],kw_defaults=[],defaults=[]),
-        body=[branch],decorator_list=[])
-    ns={}; exec(compile(ast.fix_missing_locations(ast.Module(body=[fn],type_ignores=[])),str(source),'exec'),ns)
-    adapter=SimpleNamespace(_campaign_context=context,campaign_combat_committed=lambda:True,appear=Mock(return_value=True))
-    assert ns['probe'](adapter,'AUTO_SEARCH_MENU_EXIT',object()) is False
+    adapter.appear=Mock(return_value=True)
+    assert session.appear('AUTO_SEARCH_MENU_EXIT') is False
     adapter.appear.assert_not_called()
-    assert ns['probe'](adapter,'CAMPAIGN_CHECK',object()) is True
+    for alias in ('CAMPAIGN_CHECK', 'EVENT_CHECK', 'SP_CHECK'):
+        assert session.appear(alias) is True
+    session._live_combat_visible.assert_not_called()
 
 
 def call_backend():
@@ -685,12 +695,31 @@ def test_chapter_probe_defers_only_proven_settlement(settlement):
     from alas_headless.oracle.campaign_state import CampaignStateOracle
     h = SimpleNamespace(campaign_menu_is_entry=lambda: False,
         exists=Mock(side_effect=settlement),
+        event_story_selector_visible=lambda: False,
         campaign_page_state=Mock(side_effect=SemanticGateClosed('campaign page identity is not proven')))
     if any(settlement):
         assert CampaignStateOracle.campaign_page_is_normal(h) is False
     else:
         with pytest.raises(SemanticGateClosed, match='identity'):
             CampaignStateOracle.campaign_page_is_normal(h)
+
+
+@pytest.mark.parametrize('error', ['campaign page identity is not proven', 'campaign stage is malformed'])
+def test_chapter_probe_only_defers_identity_race_when_settlement_appears(error):
+    from types import SimpleNamespace
+    from alas_headless.oracle.campaign_state import CampaignStateOracle
+    visible = {'exit': False}
+    def read_page():
+        visible['exit'] = True
+        raise SemanticGateClosed(error)
+    host = SimpleNamespace(campaign_menu_is_entry=lambda: False,
+        event_story_selector_visible=lambda: False, campaign_page_state=read_page,
+        exists=lambda key: visible['exit'] and key == 'reward/campaign-total/exit')
+    if error == 'campaign page identity is not proven':
+        assert CampaignStateOracle.campaign_page_is_normal(host) is False
+    else:
+        with pytest.raises(SemanticGateClosed, match='malformed'):
+            CampaignStateOracle.campaign_page_is_normal(host)
 
 
 # Boss settlement is covered through the original complete result loop in

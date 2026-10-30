@@ -32,7 +32,12 @@ def test_missing_entry_does_not_soften_unrelated_or_unproven_reads(case):
     error = SemanticTargetMissing('semantic target is absent: main/build')
     if case == 'no-receipt': adapter._build_context.entry_receipt = None
     elif case == 'expired': adapter._build_context.passive_transition_until = 0
-    elif case == 'coin-malformed': error = SemanticGateClosed('main coin counter is absent or malformed')
+    elif case == 'coin-malformed':
+        error = SemanticGateClosed('main coin counter is absent or malformed')
+        # Malformed source data alone is insufficient. No real destination
+        # arrives, so the accepted-entry transition still must fail closed.
+        oracle.exists = Mock(return_value=False)
+        adapter._build_context.passive_transition_until = 20
     elif case == 'other-missing': error = SemanticTargetMissing('semantic target is absent: unrelated')
     else:
         oracle.exists = Mock(return_value=False)

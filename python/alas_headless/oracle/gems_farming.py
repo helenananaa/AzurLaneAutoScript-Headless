@@ -20,6 +20,52 @@ from .errors import SemanticGateClosed
 class GemsFarmingOracle:
     """Gems farming operations sharing the oracle frame and input boundary."""
 
+    @staticmethod
+    def _gems_farming_one_ship_selected(ui_state: UiState) -> bool:
+        """Recognize the same selection count through its layout wrapper."""
+        count_paths = {
+            "OverlayCamera/Overlay/UIMain/blur_panel/" + panel
+            + "/bottom_info/bg_input/count"
+            for panel in ("select_panel", "select_panel_adapt/select_panel")
+        }
+        counts = tuple(
+            item for item in ui_state.texts
+            if item.path in count_paths
+            and item.active_in_hierarchy and item.active_and_enabled
+        )
+        return (
+            len(counts) == 1 and not counts[0].truncated
+            and re.fullmatch(r"<color=#[0-9A-Fa-f]{8}>1</color>/1", counts[0].text)
+            is not None
+        )
+
+    def gems_farming_formation_visible(self) -> bool:
+        """Identify the normal Formation owner for ALAS page discovery."""
+        state = self.read_state()
+        path = 'UICamera/Canvas/UIMain/FormationUI(Clone)/blur_panel/top/back_btn'
+        backs = [b for b in state.buttons if b.path == path and b.name == 'back_btn'
+                 and b.active_in_hierarchy and b.active_and_enabled and b.interactable
+                 and b.point is not None and b.bounds is not None and b.bounds.contains(b.point)]
+        if not backs:
+            return False
+        if len(backs) != 1:
+            raise SemanticGateClosed('GemsFarming Formation back owner is ambiguous')
+        if self._blocking_rules(state, 'gems-farming/formation/check'):
+            return False
+        self._gems_farming_formation_records()
+        return True
+
+    def click_gems_farming_formation_back(self) -> ActionReceipt:
+        """Leave the proved Formation page through its existing native back."""
+        if not self.gems_farming_formation_visible():
+            raise SemanticGateClosed('GemsFarming Formation page is absent or blocked')
+        state = self.read_state()
+        path = 'UICamera/Canvas/UIMain/FormationUI(Clone)/blur_panel/top/back_btn'
+        backs = [b for b in state.buttons if b.path == path and b.name == 'back_btn']
+        if len(backs) != 1:
+            raise SemanticGateClosed('GemsFarming Formation back owner changed')
+        return self._gems_equipment_click_button(state, backs[0], 'gems-farming/formation/back')
+
     def _gems_farming_formation_records(self) -> Tuple[OracleState, UiState, int]:
         """Read the exact normal Formation page and selected fleet index."""
 
@@ -27,6 +73,11 @@ class GemsFarmingOracle:
         number_path = (
             "UICamera/Canvas/UIMain/FormationUI(Clone)/blur_panel/"
             "fleet_info/fleet_number"
+        )
+        slot_root = "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/GridFrame/"
+        slot_names = tuple(
+            "{0}_{1}".format(role, index)
+            for role in ("main", "vanguard") for index in (1, 2, 3)
         )
         for attempt in range(8):
             try:
@@ -41,23 +92,23 @@ class GemsFarmingOracle:
                     and not item.truncated
                     and re.fullmatch(r"[1-6]", item.text)
                 )
-                slots = tuple(
-                    item
-                    for item in ui_state.images
-                    if item.path.startswith(
-                        "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/"
-                        "GridFrame/"
-                    )
-                    and item.path.endswith("/shadow")
-                    and item.sprite == "shadow"
-                    and item.active_in_hierarchy
-                    and item.active_and_enabled
-                    and item.bounds is not None
+                # Occupied slots expose a shadow; empty slots expose their
+                # native add icon. Page identity must not require a full fleet.
+                slots_complete = all(
+                    sum(
+                        item.path == slot_root + slot + "/" + kind
+                        and item.sprite == sprite
+                        and item.active_in_hierarchy and item.active_and_enabled
+                        and not item.truncated and item.bounds is not None
+                        for item in ui_state.images
+                        for kind, sprite in (("shadow", "shadow"), ("tip", "add_icon"))
+                    ) == 1
+                    for slot in slot_names
                 )
                 if (
                     state.generation <= ui_state.generation <= state.generation + 2
                     and len(numbers) == 1
-                    and len(slots) == 6
+                    and slots_complete
                 ):
                     return state, ui_state, int(numbers[0].text)
                 last_error = SemanticGateClosed(
@@ -882,6 +933,7 @@ class GemsFarmingOracle:
         self,
         *,
         ship_ids: Optional[FrozenSet[int]] = None,
+        require_emotion: bool = True,
     ) -> Tuple[GemsFarmingDockCandidate, ...]:
         """Read one candidate snapshot after a Dock filter or scroll update."""
 
@@ -956,7 +1008,7 @@ class GemsFarmingOracle:
             frame = images("front/frame")
             status = images("dockyard/status")
             if (
-                len(emotion) != 1
+                (len(emotion) > 1 or (require_emotion and len(emotion) != 1))
                 or len(ship_icon) != 1
                 or len(ship_type) != 1
                 or len(frame) != 1
@@ -995,7 +1047,7 @@ class GemsFarmingOracle:
                     ship_type=type_names[ship_type[0].sprite],
                     rarity=rarity_names[frame[0].sprite],
                     level=candidate.level,
-                    emotion=int(emotion[0].text),
+                    emotion=int(emotion[0].text) if emotion else None,
                     fleet_index=fleet_index,
                     status=availability,
                     button=candidate.button,
@@ -1006,10 +1058,12 @@ class GemsFarmingOracle:
         return tuple(result)
 
     def gems_farming_dock_candidates(
-        self, *, ship_ids: Optional[Iterable[int]] = None
+        self, *, ship_ids: Optional[Iterable[int]] = None, require_emotion: bool = True
     ) -> Tuple[GemsFarmingDockCandidate, ...]:
         """Return a stable typed Dock view without OCR or templates."""
 
+        if not isinstance(require_emotion, bool):
+            raise TypeError("Dock require_emotion must be boolean")
         exact_ship_ids: Optional[FrozenSet[int]] = None
         if ship_ids is not None:
             exact_ship_ids = frozenset(ship_ids)
@@ -1039,10 +1093,11 @@ class GemsFarmingOracle:
         for attempt in range(13):
             try:
                 if exact_ship_ids is None:
-                    last_result = self._gems_farming_dock_candidates_once()
+                    last_result = (self._gems_farming_dock_candidates_once() if require_emotion
+                                   else self._gems_farming_dock_candidates_once(require_emotion=False))
                 else:
                     last_result = self._gems_farming_dock_candidates_once(
-                        ship_ids=exact_ship_ids
+                        ship_ids=exact_ship_ids, **({} if require_emotion else {"require_emotion": False})
                     )
             except SemanticGateClosed as exc:
                 if str(exc) not in retryable:
@@ -1151,25 +1206,12 @@ class GemsFarmingOracle:
             bounds=target.bounds,
             path=target.path,
         )
-        count_path = (
-            "OverlayCamera/Overlay/UIMain/blur_panel/select_panel/"
-            "bottom_info/bg_input/count"
-        )
         for _ in range(40):
             self._sleep(0.05)
             # The selected-count postcondition owns only this exact Text.
             # Large Dock views may truncate unrelated Toggle records.
             ui_state = self.read_text_state()
-            selected = tuple(
-                item
-                for item in ui_state.texts
-                if item.path == count_path
-                and item.active_in_hierarchy
-                and item.active_and_enabled
-                and not item.truncated
-                and re.fullmatch(r"<color=#[0-9A-Fa-f]{8}>1</color>/1", item.text)
-            )
-            if len(selected) == 1:
+            if self._gems_farming_one_ship_selected(ui_state):
                 return receipt
         raise SemanticGateClosed("GemsFarming Dock candidate did not select")
 
@@ -1220,20 +1262,7 @@ class GemsFarmingOracle:
         # Confirmation owns only the exact 1/1 Text record; keep that slice
         # complete and fail closed without making Toggle completeness global.
         ui_state = self.read_text_state()
-        count_path = (
-            "OverlayCamera/Overlay/UIMain/blur_panel/select_panel/"
-            "bottom_info/bg_input/count"
-        )
-        selected = tuple(
-            item
-            for item in ui_state.texts
-            if item.path == count_path
-            and item.active_in_hierarchy
-            and item.active_and_enabled
-            and not item.truncated
-            and re.fullmatch(r"<color=#[0-9A-Fa-f]{8}>1</color>/1", item.text)
-        )
-        if len(selected) != 1:
+        if not self._gems_farming_one_ship_selected(ui_state):
             raise SemanticGateClosed("GemsFarming Dock selection count changed")
         hard_context = self._gems_farming_hard_open_slot_context
         if hard_context is not None:

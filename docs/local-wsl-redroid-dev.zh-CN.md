@@ -544,6 +544,26 @@ adb connect 127.0.0.1:5556
 
 不要把端口改成 `0.0.0.0` 作为排错手段。
 
+若 WSL 内该端口正在监听，但 Windows 连接仍被拒绝，检查 Windows 当前的
+TCP 排除端口范围：
+
+```powershell
+netsh interface ipv4 show excludedportrange protocol=tcp
+netsh interface ipv6 show excludedportrange protocol=tcp
+```
+
+Windows 重启后范围可能变化。2026-10-28 的 gameplay 恢复中，WSL 内
+`127.0.0.1:5558` 正常监听且 Android boot 完成，但 Windows 将 5533–5632
+列为排除范围；本机尝试绑定 5558 返回 `Permission denied`。manager 的
+`status=running` 只证明容器状态，不能证明 Windows ADB 端点可达。
+
+此次使用已认证的本机 WSL SSH，临时将一个已核实可绑定的 Windows loopback
+端口转发到 WSL 的原 ADB 端口，并只修改该轮私有 ALAS 配置的 serial。
+容器、userdata、Docker 绑定和全局排除范围保持原样。转发需独立记录进程身份，
+结束该轮后按原身份清理；不能把临时 alias 冒充 manager 原端点的资格证据。
+15558 是本次临时端口，不是后续默认值。新实例可在创建前选择当前可用端口；
+已有实例不要为换端口删除 userdata 或盲目重建。
+
 ### Project 候选目录或 OCI 缺失
 
 恢复经过哈希验证的本地候选包，或用 `-ProjectArtifactDirectory` 指向另一份完整候选；

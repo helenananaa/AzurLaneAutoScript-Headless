@@ -1,0 +1,90 @@
+{
+  "schema": "alas-headless.daily-precombat-underlay-return/v1",
+  "updated_at": "2026-10-27T19:33:35.924996+08:00",
+  "source_change": "oracle/combat.py _click_shared_precombat_back only: after exact PreCombat proof,ordinary nonMETA return excludes only exact DailyLevelUI daily-page underlay;all foreign blockers/unique target/fresh package PID/foreground/delegated geometry unchanged.",
+  "before": {
+    "passed": 6,
+    "failed": 1,
+    "log": "daily-precombat-underlay-before-r2.log"
+  },
+  "focused": {
+    "passed": 38,
+    "skipped": 1,
+    "warnings": 7,
+    "seconds": 13.17,
+    "log": "daily-precombat-underlay-after-r2.log"
+  },
+  "shared_meta_regression": {
+    "passed": 31,
+    "warnings": 7,
+    "seconds": 3.79,
+    "log": "daily-precombat-underlay-meta-after-r1.log",
+    "overlaps_previous": true
+  },
+  "failed_live": {
+    "schema": "alas-headless.daily-return-failure-closeout/v1",
+    "recorded_at": "2026-10-27T19:33:35.924996+08:00",
+    "raw": "daily-classic-postfix-return-r1.json",
+    "case_closed": true,
+    "original_passed": false,
+    "original_exit_code": 1,
+    "forced_stop": false,
+    "zero_input_rejection": "Original daily inherited return prefix rejected daily-page underlay before back target input.",
+    "native_calls_attempted": 1,
+    "native_calls_completed": 0,
+    "unused_call_sealed": 1,
+    "all_resource_grants": 0,
+    "child_pid": 39044,
+    "child_create_time": 1793100395.9076073,
+    "guard_pid": 41752,
+    "guard_create_time": 1793100395.6511357,
+    "identities_exited": true,
+    "last_frame": {
+      "generation": 209123,
+      "ui_generation": 209123,
+      "pid": 35557
+    },
+    "not_full_daily_task": true
+  },
+  "positive_live": {
+    "raw": "daily-underlay-return-postfix-20261027-r1.json",
+    "process": "daily-underlay-return-postfix-20261027-r1-process.json",
+    "passed": true,
+    "seconds": 16.24,
+    "native_calls": [
+      "original_daily_run_one_inherited_return_prefix",
+      "goto_main"
+    ],
+    "all_grants": 0,
+    "resources_after": {
+      "oil": 10965,
+      "gold": 98666,
+      "gem": 3505
+    },
+    "resource_delta": {
+      "oil": 0,
+      "gold": 0,
+      "gem": 0
+    },
+    "profile_bytes_unchanged": true,
+    "final_game_pid": 35557,
+    "advancing_main_generations": [
+      214143,
+      214151
+    ],
+    "child_pid": 28364,
+    "child_create_time": 1793100633.3749793,
+    "guard_pid": 48096,
+    "guard_create_time": 1793100633.141676,
+    "identities_exited": true
+  },
+  "production_sdk_sha256": "bd457027890c46103ad8afd008a49257daa662d7ddecddcca798bce38c1feef9",
+  "normal_combat_verified": false,
+  "original_daily_full_returned": false,
+  "previous_refresh_reclassification_isolated_live": false,
+  "native_changed": false,
+  "observer_changed": false,
+  "current_full": false,
+  "support_promoted": false,
+  "next_boundary": "Actual retained DailyLevelUI underlay also remains a blocker for original precombat START. Offline current test explicitly captures that still-closed branch. Before any new independent postfix ordinary-combat qualification,adapt only that proven ordinary ownership seam with focused safe/unsafe coverage,retain Daily grant and original whole combat/count loops. Do not knowingly start a guaranteed blocked runner or add a second engine."
+}

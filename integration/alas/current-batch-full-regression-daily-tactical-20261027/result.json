@@ -1,0 +1,51 @@
+{
+  "schema": "alas-headless.current-batch-full-regression/v1",
+  "at": "2026-10-27T20:56:18.494402+08:00",
+  "terminal": true,
+  "passed": true,
+  "exit_code": 0,
+  "pytest_passed": 8747,
+  "pytest_skipped": 254,
+  "pytest_warnings": 138,
+  "pytest_seconds": 873.12,
+  "execution_and_endhash_seconds": 882.891,
+  "initial_snapshot_preparation_excluded": true,
+  "native_members": 247,
+  "combined_sha256": "bee9db8c63e6f2a4cd271cca28cad57edd0158d878337295ebc3b35927935e53",
+  "repository_snapshot_files": 3029,
+  "actual_native_snapshot_files": 10,
+  "extra_qualification_helper_files": 2,
+  "source_snapshot_unchanged": true,
+  "native_source_unchanged": true,
+  "qualification_helper_source_unchanged": true,
+  "actual_native_scope": [
+    "module/ui/ui.py",
+    "module/os/map.py",
+    "module/retire/retirement.py",
+    "module/retire/scanner.py",
+    "module/ui/scroll.py",
+    "module/base/base.py",
+    "module/storage/storage.py",
+    "module/campaign/run.py",
+    "module/daily/daily.py",
+    "module/tactical/tactical_class.py"
+  ],
+  "qualification_helper_scope": {
+    "artifacts/full-feature-live-20261025/qualify_tactical_complete_native_r2.py": "fd895f1370de28474528c1f742bfc94992a193799b0afc80a61c1d667544e4a8",
+    "artifacts/full-feature-live-20261025/protected_handler_capture_r2.py": "8b04c1c192b1d29c42883eba83333dea71d1e118aad6aedad75d51c255c5441d"
+  },
+  "all_runtime_native_files_claimed": false,
+  "scope": "Current frozen production SDK/test/integration snapshot,including Daily PreCombat underlay start/back and existing Session refresh reclassification;two separately hashed local helper inputs forAST recordingtests. Evidence/docs updates afterterminal do notchange testedproductioncode.",
+  "global_pytest_cleanup_warning_retained": "Globalpytest-current atexit PermissionError WinError5 present inoriginal log,realexit0;no tmp permissions/cache changes.",
+  "support_promoted": false,
+  "skip_is_not_pass": true,
+  "live_all60_or_uninterrupted_soak_proven": false,
+  "local_only": true,
+  "no_repeat_unchanged_full": true,
+  "evidence": {
+    "raw": "artifacts/full-feature-live-20261025/full-regression-current-batch-r16.json",
+    "log": "artifacts/full-feature-live-20261025/full-regression-current-batch-r16.log",
+    "launch": "artifacts/full-feature-live-20261025/full-regression-current-batch-r16-launch.json",
+    "raw_sha256": "d70177bf840f91eb3e92f0d6fd1a8e13c344bffb2edeba5e99f031faa442f6fc"
+  }
+}

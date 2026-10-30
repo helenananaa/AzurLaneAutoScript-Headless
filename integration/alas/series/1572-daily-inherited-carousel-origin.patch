@@ -1,0 +1,16 @@
+diff --git a/module/daily/daily.py b/module/daily/daily.py
+--- a/module/daily/daily.py
++++ b/module/daily/daily.py
+@@ -368,6 +368,12 @@
+         ):
+             self.ui_click(BACK_ARROW, check_button=DAILY_CHECK)
+         self.ui_ensure(page_daily)
++        if semantic_adapter is not None and self.daily_checked == [0]:
++            # A recovered carousel may still center a later card. Native
++            # checked indices start at one, so reuse native page navigation
++            # to restore the initial position before assigning that index.
++            self.ui_goto(page_campaign_menu)
++            self.ui_ensure(page_daily)
+         self.device.sleep(0.2)
+         self.device.screenshot()
+         self.daily_current = 1

@@ -1,0 +1,38 @@
+{
+  "schema": "alas-headless.retirement-common-cv-policy-correction/v1",
+  "at": "2026-10-26T13:50:57.404640+08:00",
+  "dangerous_semantic_shortcut_corrected": true,
+  "full_cv_feature_implemented": false,
+  "scope": "Native one-click entry now checks original retire_keep_common_cv before its whole semantic transaction. Protected branch locally refuses until typed preconfirmation/deselection and abandoned-CV scanner ports exist. ExistingGemsFalse/keepLimitBreakmodes and unrelatedtasks remain usable; no screenshot fallback, no protectiondisable.",
+  "source_reproducer": "artifacts/full-feature-live-20261025/common-cv-protection-source-audit-r1.json",
+  "offline": {
+    "private_candidates_passed": 15,
+    "production_focused_passed": 69,
+    "production_skipped": 0,
+    "log": "artifacts/full-feature-live-20261025/cv-policy-production-focused-r2.log",
+    "native_patch_tree": "artifacts/full-feature-live-20261025/cv-policy-patch-tree-r1/result.json",
+    "native_config_replay": "artifacts/full-feature-live-20261025/cv-policy-native-config-replay-r1.json"
+  },
+  "source_sync": {
+    "schema": "alas-headless.common-cv-native-source-sync/v1",
+    "at": "2026-10-26T13:45:57.392798+08:00",
+    "runtime_path": "E:\\Runtime\\ALAS\\redroid-live-20261022\\module\\retire\\retirement.py",
+    "before_sha256": "98c0be1a46331951e38a6b8f5614c8a234cbd8ca791bfa728c17cb6638be27be",
+    "after_sha256": "043d2f2a54be7b74eb7fe718aade31763d5630d19ea07ccc009c4e98cafa9ae6",
+    "combined_patch_sha256": "82b08ecb38defcc34457340ae2c535c2452be6b72773f9ae148baa27ae04a804",
+    "member_count": 243,
+    "scope": "Only native Python retirement source synchronized after owner exit and focused/243patchtreecompile proof; root shared helper alreadylocal. No renderer/image/game restart, profile clock/count or in-game mutation.",
+    "baseline_backup": "common-cv-native-before-r1.py.txt",
+    "source_note": "SourceRuntimeCVfalse branches unchanged; CVtrue locally refused until typed preservation ports exist, not full CV support."
+  },
+  "effect_on_existing_evidence": "Prior live99-ship/old1-ship samples had GemsFalse; preserved as scoped evidence. Current controlled gate tests are not actual CV keep/deselect gameplay or complete protection support.",
+  "remaining": [
+    "Real selected-card preconfirmation model and reviewed deselection target/postcondition",
+    "Original CV scroll search observation/input ports",
+    "Original abandoned-CV Dock scanner/filter adaptation",
+    "Keep-only/batch-count accounting and real protected full-handler qualification"
+  ],
+  "stop_report_fix": "run_native_loop now reports ordinary return with stop_event set as native stop, in addition to existing SystemExit recognition. Existing error-code handling preserved; no original task scheduling/stop timing change.",
+  "full_regression_boundary": "8417-pass fullr8 qualified production before this narrow CV boundary/stop-report edit. This edit has focused paired allow/deny/config/243patchtree evidence; not claiming unchanged all-source fullr8 after it.",
+  "delivery": "LOCALONLY/noautomaticcommitpush"
+}

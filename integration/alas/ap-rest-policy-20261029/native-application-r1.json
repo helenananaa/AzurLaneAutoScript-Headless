@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-29T07:40:27.540752+08:00",
+  "native_applied": true,
+  "source": "E:\\Runtime\\ALAS\\redroid-live-20261022\\module\\os_handler\\action_point.py",
+  "native_source_sha256": "79d44d1d4b6cd68c679bd323f7ccdb5fe9f79e58d4626f487961e8ae65d97f1c",
+  "member_sha256": "8f97b4fa5f8510fd54a2aa9cd5b9fa0c618e532915b9699349e6f2f9277bc9c2",
+  "current_series": 249,
+  "focused": "56PASS;actualsource equals isolated six-case candidate",
+  "patch_tree": "160 compiled;clean pinned application",
+  "support_matrix": "verified249 metadata;classification unchanged",
+  "live_ap_rest_qualified": false,
+  "full_current": false,
+  "limitation": "No live AP consumption or support promotion;oldfullR6 remains prior248 snapshot"
+}

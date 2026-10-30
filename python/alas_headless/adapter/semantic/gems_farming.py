@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import time
 from typing import Tuple
+from ...ship_selector_identities import COMMON_CV_NAMES_CN
 from ...semantic_oracle import (
     ActionReceipt,
     GemsFarmingDockCandidate,
@@ -129,12 +130,7 @@ class GemsFarmingAdapterPorts:
         role: str, selector: str, ship_name: str
     ) -> bool:
         names = {
-            "flagship": {
-                "bogue": ("博格", "博格.改"),
-                "hermes": ("竞技神", "竞技神.改"),
-                "langley": ("兰利", "兰利.改"),
-                "ranger": ("突击者", "突击者.改"),
-            },
+            "flagship": COMMON_CV_NAMES_CN,
             "vanguard": {
                 "aulick_or_foote": ("奥利克", "富特"),
                 "cassin_or_downes": ("卡辛", "卡辛.改", "唐斯", "唐斯.改"),

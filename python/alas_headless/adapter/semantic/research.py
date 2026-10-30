@@ -260,7 +260,10 @@ class ResearchAdapterPorts:
         self.click_research_project_code(code, position=position, series=series)
         self.research_detail_stable()
         context = self._research_context
-        detail = self.oracle.research_detail_state()
+        # Stability does not make a later pair of live endpoint reads atomic.
+        # Reuse the existing immutable input-frame acquisition for this final
+        # identity/cost decision; keep the oracle's coherence checks unchanged.
+        detail = self._fresh_input_oracle().research_detail_state()
         if detail.code != context.selected_code:
             raise SemanticGateClosed("selected research project identity changed")
         self._require_selected_research_identity(detail=detail)
@@ -642,10 +645,13 @@ class ResearchAdapterPorts:
             raise SemanticGateClosed("research queue used outside ALAS research flow")
         if not self._action_ledger.allowed("research.start"):
             return 0
-        if self.oracle.enabled("research/queue/enter"):
+        source = self._frame_or_live_observation_oracle()
+        if source.enabled("research/queue/enter"):
             # ALAS calls get_queue_slot() from its card page. The queue modal
-            # is not open there, so use its current five typed status marks.
-            return self.oracle.research_queue_indicator_empty_slots()
+            # is not open there, so read its five status marks from the same
+            # screenshot as that page check. Starting/queueing still validates
+            # its own fresh input frame, rather than using this scan as proof.
+            return source.research_queue_indicator_empty_slots()
         return self.research_queue_empty_slots()
 
     def research_queue_remaining_seconds(self) -> int:
@@ -761,8 +767,21 @@ class ResearchAdapterPorts:
             raise SemanticGateClosed("multiple finished research projects are ambiguous")
         return finished[0] if finished else None
 
+    def _research_queue_recovery_is_unowned(self):
+        context = self._research_context
+        return (context is not None and context.selected_code is None
+                and all(receipt is None for receipt in (
+                    context.start_receipt, context.start_confirm_receipt,
+                    context.queue_add_receipt, context.queue_confirm_receipt,
+                    context.stop_receipt, context.stop_confirm_receipt)))
+
     def _appear_research(self, name):
+        if name == "RESEARCH_INHERITED_QUEUE_CANCEL" and self._research_context is None:
+            return False
         if name in RESEARCH_VIRTUAL_RESOURCES and self._research_context is not None:
+            if name == "RESEARCH_INHERITED_QUEUE_CANCEL":
+                return (self._research_queue_recovery_is_unowned()
+                        and self.oracle.enabled("research/queue/cancel"))
             if name == "RESET_AVAILABLE":
                 return self.oracle.research_reset_available()
             if name == "QUEUE_CHECK":
@@ -858,6 +877,10 @@ class ResearchAdapterPorts:
     def _click_research(self, name):
         if self._research_context is not None and name in RESEARCH_CLICK_RESOURCES:
             context = self._research_context
+            if name == "RESEARCH_INHERITED_QUEUE_CANCEL":
+                if not self._research_queue_recovery_is_unowned():
+                    raise SemanticGateClosed("research queue recovery requires an inherited unsubmitted prompt")
+                return self._fresh_input_oracle().click("research/queue/cancel")
             if name in ('POPUP_CONFIRM', 'POPUP_CANCEL'):
                 prompt_kind = self.oracle.observation_prompt_kind()
                 if ((prompt_kind == 'opsi-exit'
@@ -955,7 +978,6 @@ class ResearchAdapterPorts:
                 if context.queue_add_receipt is not None:
                     if context.queue_confirm_receipt is not None:
                         return context.queue_confirm_receipt
-                    self._require_selected_research_identity()
                     if context.queue_add_requires_start_grant:
                         receipt = self._dispatch_mutation(
                             "research.start",
@@ -998,7 +1020,6 @@ class ResearchAdapterPorts:
                     raise SemanticGateClosed(
                         "research queue add requires a confirmed start or one budgeted running project"
                     )
-                self._require_selected_research_identity()
                 if existing_running:
                     self._require_action_grant("research.start")
                 receipt = self._click_selected_research_target("research/detail/queue")

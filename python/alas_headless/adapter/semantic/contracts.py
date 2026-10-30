@@ -42,6 +42,23 @@ class AlasSemanticUnmapped(SemanticGateClosed):
 
 
 @dataclass(frozen=True)
+class StorageEquipmentCandidate:
+    """Native ItemGrid amount protocol, without pixels or selection authority."""
+    item: Any
+
+    @property
+    def amount(self):
+        return self.item.quantity
+
+    @property
+    def name(self):
+        return 'STORAGE_EQUIPMENT_' + self.item.slot
+
+    def __str__(self):
+        return self.name
+
+
+@dataclass(frozen=True)
 class StorageBoxCandidate:
     """An inspected list-cell identity, never an authorized box-use target."""
     slot: str
@@ -472,6 +489,7 @@ class _CampaignFlowContext:
     ambush_receipt: Optional[ActionReceipt] = None
     fleet_lock_receipt: Optional[ActionReceipt] = None
     sortie_receipt: Optional[ActionReceipt] = None
+    dock_full_recovery_receipt: Optional[ActionReceipt] = None
     archive_entry_confirm_receipt: Optional[ActionReceipt] = None
     map_entry_state: Optional[CampaignMapEntryState] = None
     sortie_proof: Optional[CampaignSortieProof] = None

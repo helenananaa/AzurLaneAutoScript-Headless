@@ -1,0 +1,1667 @@
+{
+  "schema": "alas-headless.gems-postfix-whole-native-case/v1",
+  "at": "2026-10-26T13:03:27.847485+08:00",
+  "passed": true,
+  "scope": "One distinct explicit original GemsFarming invocation: current12-4 normal/F1allF2standby/ship-only flagship+vanguard replacement, native LV32-triggered end, original TaskEnd handoff and separate original goto_main in SAME process. Not unlimited Gems, hard/equipment branches, natural emotion trigger or all-feature stability.",
+  "native": {
+    "elapsed_seconds": 366.828,
+    "return_value": true,
+    "task_outcome": {
+      "task": "gems_farming",
+      "outcome": "raised"
+    },
+    "native_signal": {
+      "type": "TaskEnd",
+      "message": ""
+    },
+    "main_return": {
+      "returned": true,
+      "before": {
+        "pid": 1615,
+        "generation": 287293,
+        "main_visible": false
+      }
+    },
+    "after": {
+      "pid": 1615,
+      "generation": 287334,
+      "main_visible": true,
+      "commission_back": false
+    },
+    "auto_search_combat_execute_count": 6,
+    "campaign_total_exit_count": 1,
+    "final_task_config": {
+      "Scheduler": {
+        "Enable": true,
+        "NextRun": "2026-10-24 23:00:31",
+        "Command": "GemsFarming",
+        "SuccessInterval": 0,
+        "FailureInterval": 120,
+        "ServerUpdate": "00:00"
+      },
+      "GemsFarming": {
+        "ChangeFlagship": "ship",
+        "CommonCV": "any",
+        "ChangeVanguard": "ship",
+        "CommonDD": "any",
+        "CommissionLimit": true
+      },
+      "EquipmentCode": {
+        "ExportToConfig": true,
+        "Config": "DD: null\nbogue: null\nhermes: null\nlangley: null\nranger: null"
+      },
+      "Campaign": {
+        "Name": "12-4",
+        "Event": "event_20261022_cn",
+        "Mode": "normal",
+        "UseClearMode": true,
+        "UseFleetLock": true,
+        "UseAutoSearch": true,
+        "Use2xBook": false,
+        "AmbushEvade": true
+      },
+      "StopCondition": {
+        "OilLimit": 1000,
+        "RunCount": 0,
+        "MapAchievement": "non_stop",
+        "StageIncrease": false,
+        "GetNewShip": false,
+        "ReachLevel": 0
+      },
+      "Fleet": {
+        "Fleet1": 1,
+        "Fleet1Formation": "double_line",
+        "Fleet1Mode": "combat_auto",
+        "Fleet1Step": 3,
+        "Fleet2": 2,
+        "Fleet2Formation": "double_line",
+        "Fleet2Mode": "combat_auto",
+        "Fleet2Step": 2,
+        "FleetOrder": "fleet1_all_fleet2_standby"
+      },
+      "Submarine": {
+        "Fleet": 0,
+        "Mode": "do_not_use",
+        "AutoSearchMode": "sub_standby",
+        "DistanceToBoss": "use_open_ocean_support"
+      },
+      "Emotion": {
+        "Mode": "calculate_ignore",
+        "Fleet1Value": 136,
+        "Fleet1Record": "2026-10-26 12:53:40",
+        "Fleet1Control": "prevent_red_face",
+        "Fleet1Recover": "not_in_dormitory",
+        "Fleet1Oath": false,
+        "Fleet2Value": 119,
+        "Fleet2Record": "2020-01-01 00:00:00",
+        "Fleet2Control": "prevent_red_face",
+        "Fleet2Recover": "not_in_dormitory",
+        "Fleet2Oath": false
+      },
+      "Storage": {
+        "Storage": {}
+      }
+    },
+    "replacement_calls": [
+      {
+        "method": "gems_farming_open_slot",
+        "arguments": [
+          "flagship"
+        ],
+        "options": {},
+        "returned": true,
+        "result": {
+          "semantic_id": "gems-farming/formation/flagship/open",
+          "generation": 286648,
+          "point": {
+            "x": 590.0,
+            "y": 236.66699999999997
+          },
+          "bounds": {
+            "left": 510.0,
+            "top": 156.667,
+            "right": 670.0,
+            "bottom": 316.667
+          },
+          "path": "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/HeroContainer/heroInfo(Clone)/dahuangfeng_alter_root/mouseChild",
+          "policy_sha256": null,
+          "capability_id": null
+        }
+      },
+      {
+        "method": "gems_farming_candidates",
+        "arguments": [],
+        "options": {
+          "role": "flagship",
+          "selector": "any",
+          "max_level": 31,
+          "min_emotion": 18,
+          "fleet_index": 1
+        },
+        "returned": true,
+        "result": [
+          {
+            "position": 0,
+            "ship_id": 106021,
+            "ship_name": "博格",
+            "ship_sprite": "boge",
+            "ship_type": "cv",
+            "rarity": "common",
+            "level": 1,
+            "emotion": 150,
+            "fleet_index": 0,
+            "status": "free",
+            "button": {
+              "name": "106021",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/106021",
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "point": {
+                "x": 326.8,
+                "y": 177.667
+              },
+              "bounds": {
+                "left": 249.467,
+                "top": 69.333,
+                "right": 404.133,
+                "bottom": 286.0
+              },
+              "raw": {
+                "name": "106021",
+                "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/106021",
+                "canvas": "Canvas",
+                "flags": 7679,
+                "active_in_hierarchy": true,
+                "active_and_enabled": true,
+                "interactable": true,
+                "raycast_top": true,
+                "canvas_render_mode": 1,
+                "instance_id": -898448,
+                "click_listener_count": -1,
+                "runtime_click_listener_count": -1,
+                "world_position": {
+                  "x": -6.96,
+                  "y": 4.052,
+                  "z": 10.0
+                },
+                "local_rect": {
+                  "x": -116.0,
+                  "y": -162.5,
+                  "width": 232.0,
+                  "height": 325.0
+                },
+                "screen_point": {
+                  "x": 326.8,
+                  "y": 542.333
+                },
+                "adb_point": {
+                  "x": 326.8,
+                  "y": 177.667
+                },
+                "screen_bounds": {
+                  "left": 249.467,
+                  "bottom": 434.0,
+                  "right": 404.133,
+                  "top": 650.667
+                },
+                "adb_bounds": {
+                  "left": 249.467,
+                  "top": 69.333,
+                  "right": 404.133,
+                  "bottom": 286.0
+                }
+              }
+            }
+          },
+          {
+            "position": 1,
+            "ship_id": 107041,
+            "ship_name": "突击者",
+            "ship_sprite": "tujizhe",
+            "ship_type": "cv",
+            "rarity": "common",
+            "level": 1,
+            "emotion": 150,
+            "fleet_index": 0,
+            "status": "free",
+            "button": {
+              "name": "107041",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/107041",
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "point": {
+                "x": 491.467,
+                "y": 177.667
+              },
+              "bounds": {
+                "left": 414.133,
+                "top": 69.333,
+                "right": 568.8,
+                "bottom": 286.0
+              },
+              "raw": {
+                "name": "107041",
+                "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/107041",
+                "canvas": "Canvas",
+                "flags": 7679,
+                "active_in_hierarchy": true,
+                "active_and_enabled": true,
+                "interactable": true,
+                "raycast_top": true,
+                "canvas_render_mode": 1,
+                "instance_id": -899186,
+                "click_listener_count": -1,
+                "runtime_click_listener_count": -1,
+                "world_position": {
+                  "x": -3.301,
+                  "y": 4.052,
+                  "z": 10.0
+                },
+                "local_rect": {
+                  "x": -116.0,
+                  "y": -162.5,
+                  "width": 232.0,
+                  "height": 325.0
+                },
+                "screen_point": {
+                  "x": 491.467,
+                  "y": 542.333
+                },
+                "adb_point": {
+                  "x": 491.467,
+                  "y": 177.667
+                },
+                "screen_bounds": {
+                  "left": 414.133,
+                  "bottom": 434.0,
+                  "right": 568.8,
+                  "top": 650.667
+                },
+                "adb_bounds": {
+                  "left": 414.133,
+                  "top": 69.333,
+                  "right": 568.8,
+                  "bottom": 286.0
+                }
+              }
+            }
+          },
+          {
+            "position": 2,
+            "ship_id": 107041,
+            "ship_name": "突击者",
+            "ship_sprite": "tujizhe",
+            "ship_type": "cv",
+            "rarity": "common",
+            "level": 1,
+            "emotion": 150,
+            "fleet_index": 0,
+            "status": "free",
+            "button": {
+              "name": "107041",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/107041",
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "point": {
+                "x": 656.133,
+                "y": 177.667
+              },
+              "bounds": {
+                "left": 578.8,
+                "top": 69.333,
+                "right": 733.467,
+                "bottom": 286.0
+              },
+              "raw": {
+                "name": "107041",
+                "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/107041",
+                "canvas": "Canvas",
+                "flags": 7679,
+                "active_in_hierarchy": true,
+                "active_and_enabled": true,
+                "interactable": true,
+                "raycast_top": true,
+                "canvas_render_mode": 1,
+                "instance_id": -899924,
+                "click_listener_count": -1,
+                "runtime_click_listener_count": -1,
+                "world_position": {
+                  "x": 0.359,
+                  "y": 4.052,
+                  "z": 10.0
+                },
+                "local_rect": {
+                  "x": -116.0,
+                  "y": -162.5,
+                  "width": 232.0,
+                  "height": 325.0
+                },
+                "screen_point": {
+                  "x": 656.133,
+                  "y": 542.333
+                },
+                "adb_point": {
+                  "x": 656.133,
+                  "y": 177.667
+                },
+                "screen_bounds": {
+                  "left": 578.8,
+                  "bottom": 434.0,
+                  "right": 733.467,
+                  "top": 650.667
+                },
+                "adb_bounds": {
+                  "left": 578.8,
+                  "top": 69.333,
+                  "right": 733.467,
+                  "bottom": 286.0
+                }
+              }
+            }
+          },
+          {
+            "position": 3,
+            "ship_id": 206011,
+            "ship_name": "竞技神",
+            "ship_sprite": "jingjishen",
+            "ship_type": "cv",
+            "rarity": "common",
+            "level": 1,
+            "emotion": 150,
+            "fleet_index": 0,
+            "status": "free",
+            "button": {
+              "name": "206011",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/206011",
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "point": {
+                "x": 820.8,
+                "y": 177.667
+              },
+              "bounds": {
+                "left": 743.467,
+                "top": 69.333,
+                "right": 898.133,
+                "bottom": 286.0
+              },
+              "raw": {
+                "name": "206011",
+                "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/206011",
+                "canvas": "Canvas",
+                "flags": 7679,
+                "active_in_hierarchy": true,
+                "active_and_enabled": true,
+                "interactable": true,
+                "raycast_top": true,
+                "canvas_render_mode": 1,
+                "instance_id": -900662,
+                "click_listener_count": -1,
+                "runtime_click_listener_count": -1,
+                "world_position": {
+                  "x": 4.018,
+                  "y": 4.052,
+                  "z": 10.0
+                },
+                "local_rect": {
+                  "x": -116.0,
+                  "y": -162.5,
+                  "width": 232.0,
+                  "height": 325.0
+                },
+                "screen_point": {
+                  "x": 820.8,
+                  "y": 542.333
+                },
+                "adb_point": {
+                  "x": 820.8,
+                  "y": 177.667
+                },
+                "screen_bounds": {
+                  "left": 743.467,
+                  "bottom": 434.0,
+                  "right": 898.133,
+                  "top": 650.667
+                },
+                "adb_bounds": {
+                  "left": 743.467,
+                  "top": 69.333,
+                  "right": 898.133,
+                  "bottom": 286.0
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "method": "gems_farming_select_candidate",
+        "arguments": [
+          {
+            "position": 0,
+            "ship_id": 106021,
+            "ship_name": "博格",
+            "ship_sprite": "boge",
+            "ship_type": "cv",
+            "rarity": "common",
+            "level": 1,
+            "emotion": 150,
+            "fleet_index": 0,
+            "status": "free",
+            "button": {
+              "name": "106021",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/106021",
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "point": {
+                "x": 326.8,
+                "y": 177.667
+              },
+              "bounds": {
+                "left": 249.467,
+                "top": 69.333,
+                "right": 404.133,
+                "bottom": 286.0
+              },
+              "raw": {
+                "name": "106021",
+                "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/106021",
+                "canvas": "Canvas",
+                "flags": 7679,
+                "active_in_hierarchy": true,
+                "active_and_enabled": true,
+                "interactable": true,
+                "raycast_top": true,
+                "canvas_render_mode": 1,
+                "instance_id": -898448,
+                "click_listener_count": -1,
+                "runtime_click_listener_count": -1,
+                "world_position": {
+                  "x": -6.96,
+                  "y": 4.052,
+                  "z": 10.0
+                },
+                "local_rect": {
+                  "x": -116.0,
+                  "y": -162.5,
+                  "width": 232.0,
+                  "height": 325.0
+                },
+                "screen_point": {
+                  "x": 326.8,
+                  "y": 542.333
+                },
+                "adb_point": {
+                  "x": 326.8,
+                  "y": 177.667
+                },
+                "screen_bounds": {
+                  "left": 249.467,
+                  "bottom": 434.0,
+                  "right": 404.133,
+                  "top": 650.667
+                },
+                "adb_bounds": {
+                  "left": 249.467,
+                  "top": 69.333,
+                  "right": 404.133,
+                  "bottom": 286.0
+                }
+              }
+            }
+          }
+        ],
+        "options": {},
+        "returned": true,
+        "result": {
+          "semantic_id": "gems-farming/dock/ship/106021",
+          "generation": 286822,
+          "point": {
+            "x": 326.8,
+            "y": 177.667
+          },
+          "bounds": {
+            "left": 249.467,
+            "top": 69.333,
+            "right": 404.133,
+            "bottom": 286.0
+          },
+          "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/106021",
+          "policy_sha256": null,
+          "capability_id": null
+        }
+      },
+      {
+        "method": "gems_farming_confirm_candidate_selection",
+        "arguments": [
+          {
+            "position": 0,
+            "ship_id": 106021,
+            "ship_name": "博格",
+            "ship_sprite": "boge",
+            "ship_type": "cv",
+            "rarity": "common",
+            "level": 1,
+            "emotion": 150,
+            "fleet_index": 0,
+            "status": "free",
+            "button": {
+              "name": "106021",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/106021",
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "point": {
+                "x": 326.8,
+                "y": 177.667
+              },
+              "bounds": {
+                "left": 249.467,
+                "top": 69.333,
+                "right": 404.133,
+                "bottom": 286.0
+              },
+              "raw": {
+                "name": "106021",
+                "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/106021",
+                "canvas": "Canvas",
+                "flags": 7679,
+                "active_in_hierarchy": true,
+                "active_and_enabled": true,
+                "interactable": true,
+                "raycast_top": true,
+                "canvas_render_mode": 1,
+                "instance_id": -898448,
+                "click_listener_count": -1,
+                "runtime_click_listener_count": -1,
+                "world_position": {
+                  "x": -6.96,
+                  "y": 4.052,
+                  "z": 10.0
+                },
+                "local_rect": {
+                  "x": -116.0,
+                  "y": -162.5,
+                  "width": 232.0,
+                  "height": 325.0
+                },
+                "screen_point": {
+                  "x": 326.8,
+                  "y": 542.333
+                },
+                "adb_point": {
+                  "x": 326.8,
+                  "y": 177.667
+                },
+                "screen_bounds": {
+                  "left": 249.467,
+                  "bottom": 434.0,
+                  "right": 404.133,
+                  "top": 650.667
+                },
+                "adb_bounds": {
+                  "left": 249.467,
+                  "top": 69.333,
+                  "right": 404.133,
+                  "bottom": 286.0
+                }
+              }
+            }
+          },
+          "flagship"
+        ],
+        "options": {},
+        "returned": true,
+        "result": {
+          "semantic_id": "tactical/dock/confirm",
+          "generation": 286839,
+          "point": {
+            "x": 1022.333,
+            "y": 673.333
+          },
+          "bounds": {
+            "left": 931.333,
+            "top": 639.667,
+            "right": 1113.333,
+            "bottom": 707.0
+          },
+          "path": "OverlayCamera/Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/confirm_button",
+          "policy_sha256": "0029b898840169fecff43ce982db9638205c29be48f77ca43fd5a1334fcc854d",
+          "capability_id": "campaign.fleet_mutation"
+        }
+      },
+      {
+        "method": "gems_farming_open_slot",
+        "arguments": [
+          "vanguard"
+        ],
+        "options": {},
+        "returned": true,
+        "result": {
+          "semantic_id": "gems-farming/formation/vanguard/open",
+          "generation": 286875,
+          "point": {
+            "x": 510.0,
+            "y": 423.333
+          },
+          "bounds": {
+            "left": 430.0,
+            "top": 343.333,
+            "right": 590.0,
+            "bottom": 503.333
+          },
+          "path": "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/HeroContainer/heroInfo(Clone)/fuxu_root/mouseChild",
+          "policy_sha256": null,
+          "capability_id": null
+        }
+      },
+      {
+        "method": "gems_farming_candidates",
+        "arguments": [],
+        "options": {
+          "role": "vanguard",
+          "selector": "any",
+          "max_level": 100,
+          "min_emotion": 18,
+          "fleet_index": 1
+        },
+        "returned": true,
+        "result": [
+          {
+            "position": 0,
+            "ship_id": 101153,
+            "ship_name": "斯彭斯",
+            "ship_sprite": "sipengsi",
+            "ship_type": "dd",
+            "rarity": "common",
+            "level": 100,
+            "emotion": 136,
+            "fleet_index": 0,
+            "status": "free",
+            "button": {
+              "name": "101153",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101153",
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "point": {
+                "x": 326.8,
+                "y": 177.667
+              },
+              "bounds": {
+                "left": 249.467,
+                "top": 69.333,
+                "right": 404.133,
+                "bottom": 286.0
+              },
+              "raw": {
+                "name": "101153",
+                "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101153",
+                "canvas": "Canvas",
+                "flags": 7679,
+                "active_in_hierarchy": true,
+                "active_and_enabled": true,
+                "interactable": true,
+                "raycast_top": true,
+                "canvas_render_mode": 1,
+                "instance_id": -898448,
+                "click_listener_count": -1,
+                "runtime_click_listener_count": -1,
+                "world_position": {
+                  "x": -6.96,
+                  "y": 4.052,
+                  "z": 10.0
+                },
+                "local_rect": {
+                  "x": -116.0,
+                  "y": -162.5,
+                  "width": 232.0,
+                  "height": 325.0
+                },
+                "screen_point": {
+                  "x": 326.8,
+                  "y": 542.333
+                },
+                "adb_point": {
+                  "x": 326.8,
+                  "y": 177.667
+                },
+                "screen_bounds": {
+                  "left": 249.467,
+                  "bottom": 434.0,
+                  "right": 404.133,
+                  "top": 650.667
+                },
+                "adb_bounds": {
+                  "left": 249.467,
+                  "top": 69.333,
+                  "right": 404.133,
+                  "bottom": 286.0
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "method": "gems_farming_select_candidate",
+        "arguments": [
+          {
+            "position": 0,
+            "ship_id": 101153,
+            "ship_name": "斯彭斯",
+            "ship_sprite": "sipengsi",
+            "ship_type": "dd",
+            "rarity": "common",
+            "level": 100,
+            "emotion": 136,
+            "fleet_index": 0,
+            "status": "free",
+            "button": {
+              "name": "101153",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101153",
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "point": {
+                "x": 326.8,
+                "y": 177.667
+              },
+              "bounds": {
+                "left": 249.467,
+                "top": 69.333,
+                "right": 404.133,
+                "bottom": 286.0
+              },
+              "raw": {
+                "name": "101153",
+                "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101153",
+                "canvas": "Canvas",
+                "flags": 7679,
+                "active_in_hierarchy": true,
+                "active_and_enabled": true,
+                "interactable": true,
+                "raycast_top": true,
+                "canvas_render_mode": 1,
+                "instance_id": -898448,
+                "click_listener_count": -1,
+                "runtime_click_listener_count": -1,
+                "world_position": {
+                  "x": -6.96,
+                  "y": 4.052,
+                  "z": 10.0
+                },
+                "local_rect": {
+                  "x": -116.0,
+                  "y": -162.5,
+                  "width": 232.0,
+                  "height": 325.0
+                },
+                "screen_point": {
+                  "x": 326.8,
+                  "y": 542.333
+                },
+                "adb_point": {
+                  "x": 326.8,
+                  "y": 177.667
+                },
+                "screen_bounds": {
+                  "left": 249.467,
+                  "bottom": 434.0,
+                  "right": 404.133,
+                  "top": 650.667
+                },
+                "adb_bounds": {
+                  "left": 249.467,
+                  "top": 69.333,
+                  "right": 404.133,
+                  "bottom": 286.0
+                }
+              }
+            }
+          }
+        ],
+        "options": {},
+        "returned": true,
+        "result": {
+          "semantic_id": "gems-farming/dock/ship/101153",
+          "generation": 287251,
+          "point": {
+            "x": 326.8,
+            "y": 177.667
+          },
+          "bounds": {
+            "left": 249.467,
+            "top": 69.333,
+            "right": 404.133,
+            "bottom": 286.0
+          },
+          "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101153",
+          "policy_sha256": null,
+          "capability_id": null
+        }
+      },
+      {
+        "method": "gems_farming_confirm_candidate_selection",
+        "arguments": [
+          {
+            "position": 0,
+            "ship_id": 101153,
+            "ship_name": "斯彭斯",
+            "ship_sprite": "sipengsi",
+            "ship_type": "dd",
+            "rarity": "common",
+            "level": 100,
+            "emotion": 136,
+            "fleet_index": 0,
+            "status": "free",
+            "button": {
+              "name": "101153",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101153",
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "point": {
+                "x": 326.8,
+                "y": 177.667
+              },
+              "bounds": {
+                "left": 249.467,
+                "top": 69.333,
+                "right": 404.133,
+                "bottom": 286.0
+              },
+              "raw": {
+                "name": "101153",
+                "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101153",
+                "canvas": "Canvas",
+                "flags": 7679,
+                "active_in_hierarchy": true,
+                "active_and_enabled": true,
+                "interactable": true,
+                "raycast_top": true,
+                "canvas_render_mode": 1,
+                "instance_id": -898448,
+                "click_listener_count": -1,
+                "runtime_click_listener_count": -1,
+                "world_position": {
+                  "x": -6.96,
+                  "y": 4.052,
+                  "z": 10.0
+                },
+                "local_rect": {
+                  "x": -116.0,
+                  "y": -162.5,
+                  "width": 232.0,
+                  "height": 325.0
+                },
+                "screen_point": {
+                  "x": 326.8,
+                  "y": 542.333
+                },
+                "adb_point": {
+                  "x": 326.8,
+                  "y": 177.667
+                },
+                "screen_bounds": {
+                  "left": 249.467,
+                  "bottom": 434.0,
+                  "right": 404.133,
+                  "top": 650.667
+                },
+                "adb_bounds": {
+                  "left": 249.467,
+                  "top": 69.333,
+                  "right": 404.133,
+                  "bottom": 286.0
+                }
+              }
+            }
+          },
+          "vanguard"
+        ],
+        "options": {},
+        "returned": true,
+        "result": {
+          "semantic_id": "tactical/dock/confirm",
+          "generation": 287269,
+          "point": {
+            "x": 1022.333,
+            "y": 673.333
+          },
+          "bounds": {
+            "left": 931.333,
+            "top": 639.667,
+            "right": 1113.333,
+            "bottom": 707.0
+          },
+          "path": "OverlayCamera/Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/confirm_button",
+          "policy_sha256": "0029b898840169fecff43ce982db9638205c29be48f77ca43fd5a1334fcc854d",
+          "capability_id": "campaign.fleet_mutation"
+        }
+      }
+    ],
+    "exit_code": 0,
+    "forced_stop": false
+  },
+  "scheduler_boundary": "Original TaskEnd is normal: native task_switched yielded to Restart in the isolated imported seed after both replacements. Final RunCount0 but Enabletrue retained; do not claim disabled scheduler or current persistent Core preemption.",
+  "configuration": {
+    "original_source_gems_enabled": false,
+    "explicit_qualification_enabled": true,
+    "qualification_limit": 1,
+    "original_oil_limit": 1000,
+    "change_flagship": "ship",
+    "change_vanguard": "ship",
+    "common_cv": "any",
+    "common_dd": "any",
+    "commission_limit": true,
+    "equipment_policy": "disassemble",
+    "source_general_mode": "enhance"
+  },
+  "before": {
+    "pid": 1615,
+    "generation": 281679,
+    "ui_generation": 281679,
+    "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "resources": {
+      "oil": 3810,
+      "gold": 103008,
+      "gem": 3505
+    }
+  },
+  "fresh_after": {
+    "pid": 1615,
+    "generation": 295792,
+    "ui_generation": 295792,
+    "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "main": true,
+    "resources": {
+      "oil": 3493,
+      "gold": 105187,
+      "gem": 3505
+    }
+  },
+  "net_resources": {
+    "oil": -317,
+    "gold": 2179,
+    "gem": 0
+  },
+  "net_resource_scope": "Net across one map, original replacement and separate cleanup; cleanup resources unchanged; no premium/purchase transactions. Not an inferred gross expense breakdown.",
+  "independent_cleanup": {
+    "raw": "artifacts/full-feature-live-20261025/gems-postfix-roster-restore-20261026-r3.json",
+    "elapsed_seconds": 55.965,
+    "same_original_case_deadline": "2026-10-26T13:07:36.345460+08:00",
+    "carried_fleet_grants": 6,
+    "additional_grants": 0,
+    "remaining_fleet_grants": 4,
+    "restorations": [
+      {
+        "role": "flagship",
+        "original_sprite": "dahuangfeng_alter",
+        "current_qualified_sprite": "boge",
+        "confirmed": true,
+        "open": {
+          "semantic_id": "gems-farming/formation/flagship/open",
+          "generation": 294987,
+          "point": {
+            "x": 590.0,
+            "y": 236.66699999999997
+          },
+          "bounds": {
+            "left": 510.0,
+            "top": 156.667,
+            "right": 670.0,
+            "bottom": 316.667
+          },
+          "path": "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/HeroContainer/heroInfo(Clone)/boge_root/mouseChild",
+          "policy_sha256": null,
+          "capability_id": null
+        },
+        "base_filter": [
+          {
+            "semantic_id": "enhancement/dock/filter/open",
+            "generation": 295011,
+            "point": {
+              "x": 1146.3025,
+              "y": 26.7085
+            },
+            "bounds": {
+              "left": 1098.318,
+              "top": 4.716,
+              "right": 1194.287,
+              "bottom": 48.701
+            },
+            "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/index_button",
+            "policy_sha256": null,
+            "capability_id": null
+          },
+          {
+            "semantic_id": "enhancement/dock/filter/index/tpl",
+            "generation": 295028,
+            "point": {
+              "x": 290.247,
+              "y": 133.2775
+            },
+            "bounds": {
+              "left": 214.895,
+              "top": 107.938,
+              "right": 365.599,
+              "bottom": 158.617
+            },
+            "path": "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/layout/container/indexsort_index/bg/tpl",
+            "policy_sha256": null,
+            "capability_id": null
+          },
+          {
+            "semantic_id": "enhancement/dock/filter/camp/tpl",
+            "generation": 295046,
+            "point": {
+              "x": 290.247,
+              "y": 263.3095
+            },
+            "bounds": {
+              "left": 214.895,
+              "top": 237.97,
+              "right": 365.599,
+              "bottom": 288.649
+            },
+            "path": "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/layout/container/indexsort_camp/bg/tpl",
+            "policy_sha256": null,
+            "capability_id": null
+          },
+          {
+            "semantic_id": "enhancement/dock/filter/rarity/tpl",
+            "generation": 295065,
+            "point": {
+              "x": 290.247,
+              "y": 450.68899999999996
+            },
+            "bounds": {
+              "left": 214.895,
+              "top": 425.349,
+              "right": 365.599,
+              "bottom": 476.029
+            },
+            "path": "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/layout/container/indexsort_rarity/bg/tpl",
+            "policy_sha256": null,
+            "capability_id": null
+          },
+          {
+            "semantic_id": "enhancement/dock/filter/index/7",
+            "generation": 295090,
+            "point": {
+              "x": 290.247,
+              "y": 190.6245
+            },
+            "bounds": {
+              "left": 214.895,
+              "top": 165.285,
+              "right": 365.599,
+              "bottom": 215.964
+            },
+            "path": "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/layout/container/indexsort_index/bg/7",
+            "policy_sha256": null,
+            "capability_id": null
+          },
+          {
+            "semantic_id": "enhancement/dock/filter/confirm",
+            "generation": 295107,
+            "point": {
+              "x": 800.0275,
+              "y": 675.4110000000001
+            },
+            "bounds": {
+              "left": 708.975,
+              "top": 641.725,
+              "right": 891.08,
+              "bottom": 709.097
+            },
+            "path": "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/layout/btns/ok",
+            "policy_sha256": null,
+            "capability_id": null
+          }
+        ],
+        "matching_base": [
+          {
+            "position": 8,
+            "ship_id": 9707064,
+            "ship_name": "大黄蜂·META",
+            "level": 115,
+            "button": {
+              "name": "9707064",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/9707064",
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "point": {
+                "x": 491.467,
+                "y": 404.333
+              },
+              "bounds": {
+                "left": 414.133,
+                "top": 296.0,
+                "right": 568.8,
+                "bottom": 512.667
+              },
+              "raw": {
+                "name": "9707064",
+                "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/9707064",
+                "canvas": "Canvas",
+                "flags": 7679,
+                "active_in_hierarchy": true,
+                "active_and_enabled": true,
+                "interactable": true,
+                "raycast_top": true,
+                "canvas_render_mode": 1,
+                "instance_id": -904352,
+                "click_listener_count": -1,
+                "runtime_click_listener_count": -1,
+                "world_position": {
+                  "x": -3.301,
+                  "y": -0.985,
+                  "z": 10.0
+                },
+                "local_rect": {
+                  "x": -116.0,
+                  "y": -162.5,
+                  "width": 232.0,
+                  "height": 325.0
+                },
+                "screen_point": {
+                  "x": 491.467,
+                  "y": 315.667
+                },
+                "adb_point": {
+                  "x": 491.467,
+                  "y": 404.333
+                },
+                "screen_bounds": {
+                  "left": 414.133,
+                  "bottom": 207.333,
+                  "right": 568.8,
+                  "top": 424.0
+                },
+                "adb_bounds": {
+                  "left": 414.133,
+                  "top": 296.0,
+                  "right": 568.8,
+                  "bottom": 512.667
+                }
+              }
+            }
+          }
+        ],
+        "candidate": {
+          "position": 8,
+          "ship_id": 9707064,
+          "ship_name": "大黄蜂·META",
+          "ship_sprite": "dahuangfeng_alter",
+          "ship_type": "cv",
+          "rarity": "special",
+          "level": 115,
+          "emotion": 144,
+          "fleet_index": 0,
+          "status": "free",
+          "button": {
+            "name": "9707064",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/9707064",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 491.467,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 414.133,
+              "top": 296.0,
+              "right": 568.8,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "9707064",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/9707064",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "instance_id": -904352,
+              "click_listener_count": -1,
+              "runtime_click_listener_count": -1,
+              "world_position": {
+                "x": -3.301,
+                "y": -0.985,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 491.467,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 491.467,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 414.133,
+                "bottom": 207.333,
+                "right": 568.8,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 414.133,
+                "top": 296.0,
+                "right": 568.8,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        "selection": {
+          "semantic_id": "gems-farming/dock/ship/9707064",
+          "generation": 295307,
+          "point": {
+            "x": 491.467,
+            "y": 404.333
+          },
+          "bounds": {
+            "left": 414.133,
+            "top": 296.0,
+            "right": 568.8,
+            "bottom": 512.667
+          },
+          "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/9707064",
+          "policy_sha256": null,
+          "capability_id": null
+        },
+        "confirmation": {
+          "semantic_id": "tactical/dock/confirm",
+          "generation": 295326,
+          "point": {
+            "x": 1022.333,
+            "y": 673.333
+          },
+          "bounds": {
+            "left": 931.333,
+            "top": 639.667,
+            "right": 1113.333,
+            "bottom": 707.0
+          },
+          "path": "OverlayCamera/Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/confirm_button",
+          "policy_sha256": "788e33b8d8f3fe5e8fbecb9be4721118cafee63fb8fe35238d4f43aefcc6b998",
+          "capability_id": "campaign.fleet_mutation"
+        }
+      },
+      {
+        "role": "vanguard",
+        "original_sprite": "fuxu",
+        "current_qualified_sprite": "sipengsi",
+        "confirmed": true,
+        "open": {
+          "semantic_id": "gems-farming/formation/vanguard/open",
+          "generation": 295355,
+          "point": {
+            "x": 510.0,
+            "y": 423.333
+          },
+          "bounds": {
+            "left": 430.0,
+            "top": 343.333,
+            "right": 590.0,
+            "bottom": 503.333
+          },
+          "path": "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/HeroContainer/heroInfo(Clone)/sipengsi_root/mouseChild",
+          "policy_sha256": null,
+          "capability_id": null
+        },
+        "base_filter": [
+          {
+            "semantic_id": "enhancement/dock/filter/open",
+            "generation": 295379,
+            "point": {
+              "x": 1146.3025,
+              "y": 26.7085
+            },
+            "bounds": {
+              "left": 1098.318,
+              "top": 4.716,
+              "right": 1194.287,
+              "bottom": 48.701
+            },
+            "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/index_button",
+            "policy_sha256": null,
+            "capability_id": null
+          },
+          {
+            "semantic_id": "enhancement/dock/filter/index/tpl",
+            "generation": 295400,
+            "point": {
+              "x": 290.247,
+              "y": 133.2775
+            },
+            "bounds": {
+              "left": 214.895,
+              "top": 107.938,
+              "right": 365.599,
+              "bottom": 158.617
+            },
+            "path": "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/layout/container/indexsort_index/bg/tpl",
+            "policy_sha256": null,
+            "capability_id": null
+          },
+          {
+            "semantic_id": "enhancement/dock/filter/camp/tpl",
+            "generation": 295422,
+            "point": {
+              "x": 290.247,
+              "y": 263.3095
+            },
+            "bounds": {
+              "left": 214.895,
+              "top": 237.97,
+              "right": 365.599,
+              "bottom": 288.649
+            },
+            "path": "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/layout/container/indexsort_camp/bg/tpl",
+            "policy_sha256": null,
+            "capability_id": null
+          },
+          {
+            "semantic_id": "enhancement/dock/filter/rarity/3",
+            "generation": 295455,
+            "point": {
+              "x": 732.356,
+              "y": 450.68899999999996
+            },
+            "bounds": {
+              "left": 657.004,
+              "top": 425.349,
+              "right": 807.708,
+              "bottom": 476.029
+            },
+            "path": "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/layout/container/indexsort_rarity/bg/3",
+            "policy_sha256": null,
+            "capability_id": null
+          },
+          {
+            "semantic_id": "enhancement/dock/filter/index/5",
+            "generation": 295477,
+            "point": {
+              "x": 1027.096,
+              "y": 133.2775
+            },
+            "bounds": {
+              "left": 951.744,
+              "top": 107.938,
+              "right": 1102.448,
+              "bottom": 158.617
+            },
+            "path": "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/layout/container/indexsort_index/bg/5",
+            "policy_sha256": null,
+            "capability_id": null
+          },
+          {
+            "semantic_id": "enhancement/dock/filter/confirm",
+            "generation": 295499,
+            "point": {
+              "x": 800.0275,
+              "y": 675.4110000000001
+            },
+            "bounds": {
+              "left": 708.975,
+              "top": 641.725,
+              "right": 891.08,
+              "bottom": 709.097
+            },
+            "path": "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/layout/btns/ok",
+            "policy_sha256": null,
+            "capability_id": null
+          }
+        ],
+        "matching_base": [
+          {
+            "position": 0,
+            "ship_id": 903014,
+            "ship_name": "福煦",
+            "level": 115,
+            "button": {
+              "name": "903014",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/903014",
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "point": {
+                "x": 326.8,
+                "y": 177.667
+              },
+              "bounds": {
+                "left": 249.467,
+                "top": 69.333,
+                "right": 404.133,
+                "bottom": 286.0
+              },
+              "raw": {
+                "name": "903014",
+                "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/903014",
+                "canvas": "Canvas",
+                "flags": 7679,
+                "active_in_hierarchy": true,
+                "active_and_enabled": true,
+                "interactable": true,
+                "raycast_top": true,
+                "canvas_render_mode": 1,
+                "instance_id": -898448,
+                "click_listener_count": -1,
+                "runtime_click_listener_count": -1,
+                "world_position": {
+                  "x": -6.96,
+                  "y": 4.052,
+                  "z": 10.0
+                },
+                "local_rect": {
+                  "x": -116.0,
+                  "y": -162.5,
+                  "width": 232.0,
+                  "height": 325.0
+                },
+                "screen_point": {
+                  "x": 326.8,
+                  "y": 542.333
+                },
+                "adb_point": {
+                  "x": 326.8,
+                  "y": 177.667
+                },
+                "screen_bounds": {
+                  "left": 249.467,
+                  "bottom": 434.0,
+                  "right": 404.133,
+                  "top": 650.667
+                },
+                "adb_bounds": {
+                  "left": 249.467,
+                  "top": 69.333,
+                  "right": 404.133,
+                  "bottom": 286.0
+                }
+              }
+            }
+          }
+        ],
+        "candidate": {
+          "position": 0,
+          "ship_id": 903014,
+          "ship_name": "福煦",
+          "ship_sprite": "fuxu",
+          "ship_type": "ca",
+          "rarity": "elite",
+          "level": 115,
+          "emotion": 144,
+          "fleet_index": 0,
+          "status": "free",
+          "button": {
+            "name": "903014",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/903014",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 326.8,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 249.467,
+              "top": 69.333,
+              "right": 404.133,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "903014",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/903014",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "instance_id": -898448,
+              "click_listener_count": -1,
+              "runtime_click_listener_count": -1,
+              "world_position": {
+                "x": -6.96,
+                "y": 4.052,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 326.8,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 326.8,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 249.467,
+                "bottom": 434.0,
+                "right": 404.133,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 249.467,
+                "top": 69.333,
+                "right": 404.133,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        "selection": {
+          "semantic_id": "gems-farming/dock/ship/903014",
+          "generation": 295704,
+          "point": {
+            "x": 326.8,
+            "y": 177.667
+          },
+          "bounds": {
+            "left": 249.467,
+            "top": 69.333,
+            "right": 404.133,
+            "bottom": 286.0
+          },
+          "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/903014",
+          "policy_sha256": null,
+          "capability_id": null
+        },
+        "confirmation": {
+          "semantic_id": "tactical/dock/confirm",
+          "generation": 295722,
+          "point": {
+            "x": 1022.333,
+            "y": 673.333
+          },
+          "bounds": {
+            "left": 931.333,
+            "top": 639.667,
+            "right": 1113.333,
+            "bottom": 707.0
+          },
+          "path": "OverlayCamera/Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/confirm_button",
+          "policy_sha256": "788e33b8d8f3fe5e8fbecb9be4721118cafee63fb8fe35238d4f43aefcc6b998",
+          "capability_id": "campaign.fleet_mutation"
+        }
+      }
+    ],
+    "after": {
+      "pid": 1615,
+      "generation": 295792,
+      "ui_generation": 295792,
+      "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+      "main": true,
+      "resources": {
+        "oil": 3493,
+        "gold": 105187,
+        "gem": 3505
+      }
+    },
+    "source_and_core_bytes_unchanged": true,
+    "failed_attempts": [
+      "gems-postfix-roster-restore-20261026-r1.json",
+      "gems-postfix-roster-restore-20261026-r2.json"
+    ],
+    "failure_reason": "Local cleanup helper incorrectly filtered original META carrier as Eagle/SSR. Both stopped before card selection/confirmation, remaining6fleetgrants. Fresh zero-input inspection plus retained original META identity diagnosed helper error; no adapter/game defect claim.",
+    "readonly_inspection": "artifacts/full-feature-live-20261025/gems-postfix-roster-missing-inspection-r2.json",
+    "serializer_helper_failure": "Separate read-only inspector r1 failed to serialize MappingProxy with dataclasses.asdict; r2 used existing recursive receipt encoder. Zero game input, not a gameplay defect."
+  },
+  "physical_emotion_carry_after_original_roster_restore": {
+    "Fleet1Value": 107,
+    "Fleet1Record": "2026-10-26 12:51:52",
+    "Fleet2Value": 117,
+    "Fleet2Record": "2026-10-26 09:48:41",
+    "authority": "F1 last original native attacking-fleet accounting before replacement from retained stdout; F2 last actual physical accounting with no participation. Preserve these timestamps and let native recovery run. Final Gems136 belongs to temporary replacement fleet and must not overwrite restored original-fleet accounting."
+  },
+  "raw": {
+    "path": "artifacts/full-feature-live-20261025/gems-postfix-full-20261026-r1.json",
+    "sha256": "22dfc9ba7283267dd1790995254dd14e9c98e0696c40f68922c12e057ff89689"
+  },
+  "prior_failed_case": "artifacts/full-feature-live-20261025/gems-current-r1.json; retained FALSE, not stitched with independent recovery",
+  "remaining_boundaries": [
+    "Unlimited Gems natural repeated scheduling and sleep/emotion-triggered replacements",
+    "All hard/five-slot/equipment-transfer combinations",
+    "Gems CommissionLimit independent behavior: native source only references value in semantic config validation; do not invent a second limit engine",
+    "All-feature/overnight stability"
+  ],
+  "delivery": "LOCALONLY/noautomaticcommitpush"
+}

@@ -88,7 +88,9 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
             "ALAS_SEMANTIC_REQUIRED_PRIMARY_ABI",
             "ALAS_SEMANTIC_RETIREMENT_BUDGET",
             "ALAS_SEMANTIC_SHOP_PURCHASE_BUDGET",
+            "ALAS_SEMANTIC_STORAGE_DISASSEMBLE_BUDGET",
             "ALAS_SEMANTIC_TACTICAL_ASSIGN_BUDGET",
+            "ALAS_SEMANTIC_TACTICAL_REWARD_BUDGET",
         }
         self.assertEqual(LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES, expected)
         classified = {

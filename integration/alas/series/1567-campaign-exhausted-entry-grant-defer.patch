@@ -1,0 +1,15 @@
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -606,8 +606,9 @@
+                     and not semantic_adapter.campaign_stage_entry_allowed()
+                     and not semantic_map_resume
+                 ):
+-                    raise ScriptEnd(
+-                        'Semantic campaign stage-entry budget is zero')
++                    from alas_headless.adapter.semantic.contracts import AlasSemanticActionDeferred
++                    raise AlasSemanticActionDeferred(
++                        'campaign.stage_entry: task action grant is exhausted')
+                 self.campaign.run()
+             except ScriptEnd as e:
+                 logger.hr('Script end')

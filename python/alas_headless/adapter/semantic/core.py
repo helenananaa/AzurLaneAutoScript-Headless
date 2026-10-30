@@ -30,6 +30,7 @@ from ...semantic_oracle import (
     EnhancementExecutionReceipt,
     EnhancementNoMaterialReceipt,
     EnhancementRejectedReceipt,
+    OldRetirementExecutionReceipt,
     RetirementExecutionReceipt,
     RetirementNoCandidateReceipt,
     SemanticGateClosed,
@@ -228,7 +229,7 @@ class CoreAdapterPorts:
         # after ALAS.run returns; task cleanup discards pending intents only.
         self._daily_execution_receipts: List[ActionReceipt] = []
         self._last_retirement_receipt: Optional[
-            Union[RetirementExecutionReceipt, RetirementNoCandidateReceipt]
+            Union[RetirementExecutionReceipt, RetirementNoCandidateReceipt, OldRetirementExecutionReceipt]
         ] = None
         self._awaken_receipts: List[AwakenExecutionReceipt] = []
         self._awaken_cost_observations: List[AwakenCostState] = []
@@ -326,6 +327,7 @@ class CoreAdapterPorts:
         self._operation_siren_adaptability_info_receipt: Optional[ActionReceipt] = None
         self._operation_siren_auto_search_transition_until = 0.0
         self._operation_siren_auto_search_active = False
+        self._operation_siren_strategic_search_owned = False
         self._operation_siren_startup_search_provisional = False
         self._operation_siren_auto_search_completed_empty = False
         self._operation_siren_combat_active = False
@@ -408,9 +410,12 @@ class CoreAdapterPorts:
         self._observer_stale_since: Optional[float] = None
         self._login_flow.end()
 
-    def _require_action_grant(self, capability: str) -> None:
+    def _require_action_grant(self, capability: str, *, units: int = 1) -> None:
         try:
-            self._action_ledger.require_available(capability)
+            if units == 1:
+                self._action_ledger.require_available(capability)
+            else:
+                self._action_ledger.require_available(capability, units=units)
         except ActionGrantExhausted as exc:
             raise AlasSemanticActionDeferred(
                 "{0}: task action grant is exhausted".format(capability)
@@ -420,10 +425,17 @@ class CoreAdapterPorts:
         self,
         capability: str,
         operation: Callable[[], Any],
+        *,
+        units: int = 1,
     ) -> Any:
         # Only a refusal before entering the backend is task-local. Do not
         # translate backend errors based on a grant already burned by input.
-        self._require_action_grant(capability)
+        if type(units) is not int or units <= 0:
+            raise ValueError('action grant units must be a positive integer')
+        if units == 1:
+            self._require_action_grant(capability)
+        else:
+            self._require_action_grant(capability, units=units)
         if isinstance(self.oracle, SemanticOracle):
             dispatch_count = self.oracle.input_dispatch_count
             backend_operation = operation
@@ -439,7 +451,8 @@ class CoreAdapterPorts:
                     raise
 
             operation = tracked_operation
-        dispatch = self._action_ledger.dispatch(capability, operation)
+        dispatch = (self._action_ledger.dispatch(capability, operation) if units == 1
+                    else self._action_ledger.dispatch(capability, operation, units=units))
         if isinstance(
             dispatch.value,
             (

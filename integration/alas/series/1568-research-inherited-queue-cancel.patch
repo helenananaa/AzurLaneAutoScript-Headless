@@ -1,0 +1,16 @@
+diff --git a/module/research/research.py b/module/research/research.py
+--- a/module/research/research.py
++++ b/module/research/research.py
+@@ -639,6 +639,12 @@
+         if semantic_adapter is not None:
+             semantic_adapter.begin_research()
+         try:
++            # A new task has no selection authority for an inherited queue
++            # confirmation. Cancel that unsubmitted dialog, then let the
++            # existing detail-quit and Research state machine recover.
++            if semantic_adapter is not None and semantic_adapter.appear('RESEARCH_INHERITED_QUEUE_CANCEL'):
++                semantic_adapter.click('RESEARCH_INHERITED_QUEUE_CANCEL')
++                self.device.screenshot()
+             if semantic_adapter is not None and self.appear(RESEARCH_DETAIL_QUIT):
+                 self.research_detail_quit()
+             # Recover a normal Research command that starts on its own queue

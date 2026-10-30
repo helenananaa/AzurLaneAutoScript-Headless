@@ -1,0 +1,47 @@
+........................................................................ [  5%]
+........................................................................ [ 11%]
+..........................................................ssss.......... [ 17%]
+........................................................................ [ 23%]
+......................................s................................. [ 29%]
+........................................................................ [ 34%]
+........................................................................ [ 40%]
+....s....ssssss.....s................................................... [ 46%]
+........................................................................ [ 52%]
+........................................................................ [ 58%]
+........................................................................ [ 64%]
+........................................................................ [ 69%]
+........................................................................ [ 75%]
+............................................s........................... [ 81%]
+..........................s............................................. [ 87%]
+........................................................................ [ 93%]
+........................................................................ [ 99%]
+............                                                             [100%]
+============================== warnings summary ===============================
+tests\conftest.py:6
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless\tests\conftest.py:6: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154
+D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154
+D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154
+D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154
+D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154
+  D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('sphinxcontrib')`.
+  Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+    declare_namespace(pkg)
+
+D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154
+  D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('zope')`.
+  Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+    declare_namespace(pkg)
+
+tests/test_alas_retirement_config.py::AlasRetirementConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\module\device\method\minitouch.py:467: DeprecationWarning: websockets.WebSocketClientProtocol is deprecated
+    _minitouch_ws: websockets.WebSocketClientProtocol
+
+tests/test_alas_retirement_config.py::AlasRetirementConfigTests::test_exact_live_tree_replay_when_available
+  D:\anaconda\Lib\site-packages\websockets\legacy\__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+    warnings.warn(  # deprecated in 14.0 - 2024-11-09
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1221 passed, 15 skipped, 9 warnings in 198.73s (0:03:18)

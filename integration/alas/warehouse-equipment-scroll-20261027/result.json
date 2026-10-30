@@ -1,0 +1,88 @@
+{
+  "schema": "alas-headless.equipment-scroll-ports/v1",
+  "at": "2026-10-27T11:34:29.566178+08:00",
+  "local_only": true,
+  "support_promoted": false,
+  "current_full_regression": false,
+  "offline_only": true,
+  "source_sha256": {
+    "python/alas_headless/oracle/storage.py": "777b4b2cf3cc8a357f6493193f377fd31ac6f2e3941b93ccfb59fd6396307816",
+    "python/alas_headless/oracle/linked_scrollbar_owner.py": "18ab43a492da6eae1c0a836aadb418d021c077fb55857c0c9ad0f10d86bd793c",
+    "python/alas_headless/adapter/semantic/session_tasks.py": "e23ec614af839548b52e7e3476e2926fc3e79a86c9e9b1af9741ecb0bf00fb18",
+    "overlays/angle-g3/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp": "a1197bdbcd4d7bb94492fe0c17fe2833cd7e2f8dc5e2213dac7994d8afc2b51b"
+  },
+  "changes": [
+    "Original METERIAL_SCROLL getter and drag route now choose typed material/equipment owner without changing native Scroll",
+    "Equipment owner reuses existing finite read-only query, actual nearest IDragHandler proof, single drag and progress/owner postcondition",
+    "Contradictory material-selected shared equipment footer rejected before drag",
+    "Pending observer recognizes active equipment ScrollRect and binds exact bar; absent standard ScrollRect uses actual active parent list, including auto-hidden bar"
+  ],
+  "validation": {
+    "initial": {
+      "failed": 8,
+      "passed": 1,
+      "log": "warehouse-equipment-scroll-before-r1.log"
+    },
+    "harness_correction": "Initial controlled model omitted swipe callback; fixed test setup and required query was actually issued in negative cases. Original logs preserved.",
+    "controlled_pre_input_regression": {
+      "log": "warehouse-equipment-scroll-after-r2.log",
+      "failed": 1,
+      "passed": 54,
+      "case": "tab changed after query; inconsistent old footer could allow simulated swipe. Fixed by requiring weapon selected in selection-mode proof; no live input occurred."
+    },
+    "sdk_related": {
+      "passed": 213,
+      "seconds": 10.3,
+      "log": "warehouse-equipment-scroll-related-final-r1.log",
+      "cpp_revision": "before final inactive custom-list parent fallback"
+    },
+    "latest_scroll_observer": {
+      "passed": 81,
+      "seconds": 3.33,
+      "log": "warehouse-equipment-scroll-after-r5.log",
+      "overlaps_related": true,
+      "scope": "Current CPP compiled helper selectors and shared equipment/material/retirement boundary suite"
+    }
+  },
+  "compatibility": [
+    "Actual material-page native getter retained",
+    "Current actual equipment fixture inactive material bar still fails instead of masquerading as equipment",
+    "Hidden bar with known active equipment list yields native Scroll.appear false",
+    "Unavailable telemetry is an error, not false absence",
+    "Active parent proof preserves custom ScrollRect clients with auto-hidden bars",
+    "Equipment no-adapt path is controlled compatible drift, not live qualification"
+  ],
+  "input_scope": "Controlled fixture only; original raw fixtures unchanged. No real swipes, taps, login/restart or resource use this batch.",
+  "native": {
+    "patch_members": 245,
+    "original_scroll_call_site_unchanged": true,
+    "five_r13_native_sources_unchanged": true
+  },
+  "observer": {
+    "pending_cpp_sha256": "a1197bdbcd4d7bb94492fe0c17fe2833cd7e2f8dc5e2213dac7994d8afc2b51b",
+    "build_run": false,
+    "deploy_run": false,
+    "last_proven_apk_sha256": "1507e8f28ac3a4accd93cad549db26b3fdaa3982edb3ae1453a2281eba480974"
+  },
+  "case": {
+    "closed": true,
+    "charged_calls": 9,
+    "cap": 24,
+    "unused_calls_sealed": 15,
+    "balances_not_reissued": true
+  },
+  "last_runtime_surface": {
+    "source": "warehouse-filter-passive-live-surface-closeout-r1.json",
+    "observed_at": "2026-10-27 11:05+08",
+    "pid": 10980,
+    "message": "登录数据失效",
+    "fresh_read_this_batch": false,
+    "login_recovery_attempted": false
+  },
+  "remaining": [
+    "Narrow native stability observation seam retaining original timers/screenshots",
+    "Native equipment ItemGrid.predict observation seam",
+    "Equipment cell action and final confirmation ownership/ordinary-resource accounting",
+    "Incremental observer build/deploy and independent bounded live qualification before any support claim"
+  ]
+}

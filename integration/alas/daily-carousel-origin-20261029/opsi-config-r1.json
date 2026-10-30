@@ -1,0 +1,3737 @@
+{
+  "schema": "alas-headless.opsi-task-config-replay/v1",
+  "passed": true,
+  "field_count": 31,
+  "accepted_case_count": 170,
+  "invalid_case_count": 246,
+  "runtime_consumers": {
+    "OpsiExplore_SpecialRadar": [
+      "_os_explore",
+      "AzurLaneConfig.opsi_task_delay"
+    ],
+    "OpsiExplore_LastZone": [
+      "_os_explore"
+    ],
+    "OpsiMonthBoss_Mode": [
+      "clear_month_boss",
+      "month_boss_delay"
+    ],
+    "OpsiMonthBoss_CheckAdaptability": [
+      "clear_month_boss",
+      "month_boss_delay"
+    ],
+    "OpsiObscure_ForceRun": [
+      "clear_obscure",
+      "os_obscure",
+      "AzurLaneConfig.opsi_task_delay"
+    ],
+    "OpsiDaily_DoMission": [
+      "os_daily"
+    ],
+    "OpsiDaily_UseTuningSample": [
+      "os_daily"
+    ],
+    "OpsiHazard1Leveling_TargetZone": [
+      "os_hazard1_leveling"
+    ],
+    "OpsiAshBeacon_EnsureFullyCollected": [
+      "os_hazard1_leveling",
+      "os_meowfficer_farming"
+    ],
+    "OpsiMeowfficerFarming_ActionPointPreserve": [
+      "os_meowfficer_farming"
+    ],
+    "OpsiMeowfficerFarming_HazardLevel": [
+      "os_meowfficer_farming"
+    ],
+    "OpsiMeowfficerFarming_TargetZone": [
+      "os_meowfficer_farming"
+    ],
+    "OpsiAshAssist_Tier": [
+      "_ensure_meta_level"
+    ],
+    "OpsiAshBeacon_AttackMode": [
+      "_begin_meta"
+    ],
+    "OpsiAshBeacon_OneHitMode": [
+      "_satisfy_attack_condition",
+      "_pre_attack"
+    ],
+    "OpsiAshBeacon_RequestAssist": [
+      "_pre_attack"
+    ],
+    "OpsiAshBeacon_DossierAutoAttackMode": [
+      "_pre_attack"
+    ],
+    "OpsiFleetFilter_Filter": [
+      "parse_fleet_filter",
+      "AzurLaneConfig.opsi_task_delay"
+    ],
+    "OpsiGeneral_UseLogger": [
+      "clear_obscure",
+      "clear_abyssal"
+    ],
+    "OpsiGeneral_BuyActionPointLimit": [
+      "action_point_buy",
+      "handle_action_point"
+    ],
+    "OpsiGeneral_OilLimit": [
+      "handle_action_point"
+    ],
+    "OpsiVoucher_Filter": [
+      "shop_filter"
+    ],
+    "OpsiGeneral_AkashiShopFilter": [
+      "items_filter_in_akashi_shop"
+    ],
+    "OpsiShop_PresetFilter": [
+      "items_filter_in_os_shop"
+    ],
+    "OpsiShop_CustomFilter": [
+      "items_filter_in_os_shop"
+    ],
+    "OpsiGeneral_RepairThreshold": [
+      "handle_fleet_repair"
+    ],
+    "OpsiGeneral_DoRandomMapEvent": [
+      "run_auto_search"
+    ],
+    "OpsiExplore_ForceRun": [
+      "AzurLaneConfig.opsi_task_delay"
+    ],
+    "OpsiAbyssal_ForceRun": [
+      "AzurLaneConfig.opsi_task_delay"
+    ],
+    "OpsiStronghold_ForceRun": [
+      "AzurLaneConfig.opsi_task_delay"
+    ],
+    "OpsiMonthBoss_ForceRun": [
+      "AzurLaneConfig.opsi_task_delay"
+    ]
+  },
+  "zero_runtime_consumers": {},
+  "patched_guards_present": true,
+  "validated_runtime_boundaries": {
+    "OpsiFleet.Fleet": "OSFleet.fleet_set",
+    "OpsiFleet.Submarine": "MapOrderHandler.os_order_execute",
+    "OpsiMeowfficerFarming.ActionPointPreserve": "OpsiMeowfficerFarming.os_meowfficer_farming",
+    "OpsiMeowfficerFarming.TargetZone": "ZoneManager.name_to_zone -> OpsiMeowfficerFarming.os_meowfficer_farming",
+    "OpsiGeneral.UseLogger": "StorageHandler.storage_get_next_item",
+    "OpsiGeneral.BuyActionPointLimit": "ActionPointHandler.action_point_buy",
+    "OpsiGeneral.OilLimit": "ActionPointHandler.action_point_buy",
+    "OpsiGeneral.RepairThreshold": "OSMap.handle_fleet_repair",
+    "OpsiGeneral.DoRandomMapEvent": "OSMap.run_auto_search",
+    "OpsiGeneral.AkashiShopFilter": "Selector.items_filter_in_akashi_shop",
+    "OpsiShop.PresetFilter": "Selector.items_filter_in_os_shop",
+    "OpsiShop.CustomFilter": "Selector.items_filter_in_os_shop",
+    "OpsiVoucher.Filter": "VoucherShop.shop_filter",
+    "OpsiExplore.LastZone": "OpsiExplore._os_explore",
+    "OpsiAshAssist.Tier": "AshBeaconAssist._ensure_meta_level",
+    "OpsiAshBeacon.AttackMode": "OpsiAshBeacon._begin_meta",
+    "OpsiAshBeacon.OneHitMode": "OpsiAshBeacon._satisfy_attack_condition + OpsiAshBeacon._pre_attack",
+    "OpsiAshBeacon.RequestAssist": "OpsiAshBeacon._pre_attack",
+    "OpsiAshBeacon.DossierAutoAttackMode": "OpsiAshBeacon._pre_attack",
+    "OpsiFleetFilter.Filter": "OSFleet.parse_fleet_filter + AzurLaneConfig.opsi_task_delay",
+    "OpsiAshBeacon.EnsureFullyCollected": "OpsiHazard1Leveling.os_hazard1_leveling + OpsiMeowfficerFarming.os_meowfficer_farming"
+  },
+  "fleet_selection": {
+    "cases": {
+      "1": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "ensure_to_be",
+            1
+          ],
+          "camera_stable"
+        ]
+      },
+      "2": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "ensure_to_be",
+            2
+          ],
+          "camera_stable"
+        ]
+      },
+      "3": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "ensure_to_be",
+            3
+          ],
+          "camera_stable"
+        ]
+      },
+      "4": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "ensure_to_be",
+            4
+          ],
+          "camera_stable"
+        ]
+      }
+    },
+    "semantic": {
+      "rejected": false,
+      "result": true,
+      "events": [
+        [
+          "ensure_to_be",
+          4
+        ],
+        "camera_stable"
+      ]
+    },
+    "invalid_entry": {
+      "rejected": true,
+      "result": null,
+      "events": []
+    }
+  },
+  "fleet_filter": {
+    "cases": {
+      "default": {
+        "rejected": false,
+        "loaded": true,
+        "items": [
+          "Fleet-4",
+          "callsubmarine",
+          "Fleet-2",
+          "Fleet-3",
+          "Fleet-1"
+        ],
+        "standby": [
+          [
+            "Fleet-4",
+            [
+              -1,
+              -1
+            ]
+          ],
+          [
+            "Fleet-2",
+            [
+              0,
+              -1
+            ]
+          ],
+          [
+            "Fleet-3",
+            [
+              1,
+              -1
+            ]
+          ],
+          [
+            "Fleet-1",
+            [
+              0,
+              0
+            ]
+          ]
+        ]
+      },
+      "compact": {
+        "rejected": false,
+        "loaded": true,
+        "items": [
+          "Fleet-4",
+          "Fleet-2"
+        ],
+        "standby": [
+          [
+            "Fleet-4",
+            [
+              -1,
+              -1
+            ]
+          ],
+          [
+            "Fleet-2",
+            [
+              0,
+              -1
+            ]
+          ]
+        ]
+      },
+      "unicode": {
+        "rejected": false,
+        "loaded": true,
+        "items": [
+          "Fleet-2",
+          "callsubmarine"
+        ],
+        "standby": [
+          [
+            "Fleet-2",
+            [
+              -1,
+              -1
+            ]
+          ]
+        ]
+      },
+      "duplicate": {
+        "rejected": false,
+        "loaded": true,
+        "items": [
+          "Fleet-1",
+          "Fleet-2"
+        ],
+        "standby": [
+          [
+            "Fleet-1",
+            [
+              -1,
+              -1
+            ]
+          ],
+          [
+            "Fleet-2",
+            [
+              0,
+              -1
+            ]
+          ]
+        ]
+      },
+      "unavailable": {
+        "rejected": false,
+        "loaded": true,
+        "items": [],
+        "standby": []
+      },
+      "submarine_only": {
+        "rejected": false,
+        "loaded": true,
+        "items": [
+          "callsubmarine"
+        ],
+        "standby": []
+      }
+    },
+    "invalid_entries": {
+      "''": {
+        "rejected": true,
+        "loaded": false,
+        "items": [],
+        "standby": []
+      },
+      "'Fleet-1 >'": {
+        "rejected": true,
+        "loaded": false,
+        "items": [],
+        "standby": []
+      },
+      "'unknown'": {
+        "rejected": true,
+        "loaded": false,
+        "items": [],
+        "standby": []
+      },
+      "None": {
+        "rejected": true,
+        "loaded": false,
+        "items": [],
+        "standby": []
+      },
+      "True": {
+        "rejected": true,
+        "loaded": false,
+        "items": [],
+        "standby": []
+      },
+      "1": {
+        "rejected": true,
+        "loaded": false,
+        "items": [],
+        "standby": []
+      },
+      "[]": {
+        "rejected": true,
+        "loaded": false,
+        "items": [],
+        "standby": []
+      },
+      "{}": {
+        "rejected": true,
+        "loaded": false,
+        "items": [],
+        "standby": []
+      }
+    }
+  },
+  "order": {
+    "cases": {
+      "0:0": {
+        "rejected": false,
+        "events": [
+          [
+            "opsi_task_delay",
+            {
+              "recon_scan": false,
+              "submarine_call": false
+            }
+          ]
+        ]
+      },
+      "0:1": {
+        "rejected": false,
+        "events": [
+          [
+            "order_execute",
+            "submarine"
+          ],
+          "order_finished",
+          [
+            "opsi_task_delay",
+            {
+              "recon_scan": false,
+              "submarine_call": true
+            }
+          ]
+        ]
+      },
+      "1:0": {
+        "rejected": false,
+        "events": [
+          [
+            "order_execute",
+            "scan"
+          ],
+          [
+            "opsi_task_delay",
+            {
+              "recon_scan": true,
+              "submarine_call": false
+            }
+          ]
+        ]
+      },
+      "1:1": {
+        "rejected": false,
+        "events": [
+          [
+            "order_execute",
+            "scan"
+          ],
+          [
+            "order_execute",
+            "submarine"
+          ],
+          "order_finished",
+          [
+            "opsi_task_delay",
+            {
+              "recon_scan": true,
+              "submarine_call": true
+            }
+          ]
+        ]
+      }
+    },
+    "invalid_entry": {
+      "rejected": true,
+      "events": []
+    }
+  },
+  "storage": {
+    "cases": {
+      "false": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          "storage_enter",
+          [
+            "storage_checkout_item",
+            "OBSCURE"
+          ]
+        ]
+      },
+      "true": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          "storage_enter",
+          "storage_logger_use_all",
+          [
+            "storage_checkout_item",
+            "OBSCURE"
+          ]
+        ]
+      }
+    },
+    "invalid_entry": {
+      "rejected": true,
+      "result": null,
+      "events": []
+    }
+  },
+  "action_point_purchase": {
+    "limit_cases": {
+      "reached:0": {
+        "rejected": false,
+        "result": false,
+        "events": [
+          [
+            "action_point_set_button",
+            0
+          ],
+          "action_point_get_buy_remain"
+        ]
+      },
+      "reached:1": {
+        "rejected": false,
+        "result": false,
+        "events": [
+          [
+            "action_point_set_button",
+            0
+          ],
+          "action_point_get_buy_remain"
+        ]
+      },
+      "allowed:1": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "action_point_set_button",
+            0
+          ],
+          "action_point_get_buy_remain",
+          "action_point_use"
+        ]
+      },
+      "reached:2": {
+        "rejected": false,
+        "result": false,
+        "events": [
+          [
+            "action_point_set_button",
+            0
+          ],
+          "action_point_get_buy_remain"
+        ]
+      },
+      "allowed:2": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "action_point_set_button",
+            0
+          ],
+          "action_point_get_buy_remain",
+          "action_point_use"
+        ]
+      },
+      "reached:3": {
+        "rejected": false,
+        "result": false,
+        "events": [
+          [
+            "action_point_set_button",
+            0
+          ],
+          "action_point_get_buy_remain"
+        ]
+      },
+      "allowed:3": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "action_point_set_button",
+            0
+          ],
+          "action_point_get_buy_remain",
+          "action_point_use"
+        ]
+      },
+      "reached:4": {
+        "rejected": false,
+        "result": false,
+        "events": [
+          [
+            "action_point_set_button",
+            0
+          ],
+          "action_point_get_buy_remain"
+        ]
+      },
+      "allowed:4": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "action_point_set_button",
+            0
+          ],
+          "action_point_get_buy_remain",
+          "action_point_use"
+        ]
+      },
+      "reached:5": {
+        "rejected": false,
+        "result": false,
+        "events": [
+          [
+            "action_point_set_button",
+            0
+          ],
+          "action_point_get_buy_remain"
+        ]
+      },
+      "allowed:5": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "action_point_set_button",
+            0
+          ],
+          "action_point_get_buy_remain",
+          "action_point_use"
+        ]
+      }
+    },
+    "oil_cases": {
+      "exact": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "action_point_set_button",
+            0
+          ],
+          "action_point_get_buy_remain",
+          "action_point_use"
+        ]
+      },
+      "below": {
+        "rejected": false,
+        "result": false,
+        "events": [
+          [
+            "action_point_set_button",
+            0
+          ],
+          "action_point_get_buy_remain"
+        ]
+      }
+    },
+    "invalid_limit": {
+      "rejected": true,
+      "result": null,
+      "events": []
+    },
+    "invalid_oil": {
+      "rejected": true,
+      "result": null,
+      "events": []
+    }
+  },
+  "fleet_repair": {
+    "cases": {
+      "disabled": {
+        "rejected": false,
+        "result": false,
+        "events": []
+      },
+      "zero": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          "special_zone",
+          "hp_get",
+          [
+            "fleet_repair",
+            {
+              "revert": true
+            }
+          ],
+          "hp_reset"
+        ]
+      },
+      "above": {
+        "rejected": false,
+        "result": false,
+        "events": [
+          "special_zone",
+          "hp_get",
+          "hp_reset"
+        ]
+      },
+      "boundary": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          "special_zone",
+          "hp_get",
+          [
+            "fleet_repair",
+            {
+              "revert": true
+            }
+          ],
+          "hp_reset"
+        ]
+      },
+      "one": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          "special_zone",
+          "hp_get",
+          [
+            "fleet_repair",
+            {
+              "revert": true
+            }
+          ],
+          "hp_reset"
+        ]
+      }
+    },
+    "invalid_entry": {
+      "rejected": true,
+      "result": null,
+      "events": []
+    }
+  },
+  "random_map_event": {
+    "cases": {
+      "false": {
+        "rejected": false,
+        "result": 0,
+        "events": [
+          "ash_beacon",
+          "auto_search",
+          "drop_add",
+          "hp_reset",
+          "hp_get",
+          "drop_clear"
+        ]
+      },
+      "true": {
+        "rejected": false,
+        "result": 0,
+        "events": [
+          "ash_beacon",
+          "auto_search",
+          "drop_add",
+          "hp_reset",
+          "hp_get",
+          [
+            "map_rescan",
+            {
+              "rescan_mode": "full",
+              "drop": "drop-recorder"
+            }
+          ],
+          "drop_clear"
+        ]
+      }
+    },
+    "invalid_entry": {
+      "rejected": true,
+      "result": null,
+      "events": []
+    },
+    "explicit_rescan": {
+      "rejected": false,
+      "result": 0,
+      "events": [
+        "ash_beacon",
+        "auto_search",
+        "drop_add",
+        "hp_reset",
+        "hp_get",
+        [
+          "map_rescan",
+          {
+            "rescan_mode": "current",
+            "drop": "drop-recorder"
+          }
+        ],
+        "drop_clear"
+      ]
+    }
+  },
+  "akashi_shop_filter": {
+    "cases": {
+      "default": {
+        "rejected": false,
+        "items": [
+          "ActionPoint",
+          "PurpleCoins"
+        ],
+        "events": [
+          "pretreatment"
+        ]
+      },
+      "fallback": {
+        "rejected": false,
+        "items": [
+          "ActionPoint",
+          "PurpleCoins"
+        ],
+        "events": [
+          "pretreatment"
+        ]
+      },
+      "unicode_separator": {
+        "rejected": false,
+        "items": [
+          "ActionPoint",
+          "PurpleCoins"
+        ],
+        "events": [
+          "pretreatment"
+        ]
+      },
+      "cl1": {
+        "rejected": false,
+        "items": [
+          "ActionPoint"
+        ],
+        "events": [
+          "pretreatment"
+        ]
+      },
+      "insufficient": {
+        "rejected": false,
+        "items": [],
+        "events": [
+          "pretreatment"
+        ]
+      },
+      "tiered": {
+        "rejected": false,
+        "items": [
+          "LoggerAbyssalT6"
+        ],
+        "events": [
+          "pretreatment"
+        ]
+      }
+    },
+    "invalid_entries": {
+      "'ActionPoint > invalid'": {
+        "rejected": true,
+        "items": [],
+        "events": []
+      },
+      "'ActionPoint >'": {
+        "rejected": true,
+        "items": [],
+        "events": []
+      },
+      "None": {
+        "rejected": true,
+        "items": [],
+        "events": []
+      },
+      "True": {
+        "rejected": true,
+        "items": [],
+        "events": []
+      },
+      "1": {
+        "rejected": true,
+        "items": [],
+        "events": []
+      },
+      "[]": {
+        "rejected": true,
+        "items": [],
+        "events": []
+      },
+      "{}": {
+        "rejected": true,
+        "items": [],
+        "events": []
+      }
+    }
+  },
+  "opsi_shop_filter": {
+    "presets": {
+      "max_benefit": {
+        "rejected": false,
+        "items": [
+          "LoggerAbyssalT6",
+          "ActionPoint",
+          "PurpleCoins"
+        ],
+        "events": [
+          "pretreatment"
+        ]
+      },
+      "max_benefit_meta": {
+        "rejected": false,
+        "items": [
+          "LoggerAbyssalT6",
+          "ActionPoint",
+          "PurpleCoins"
+        ],
+        "events": [
+          "pretreatment"
+        ]
+      },
+      "no_meta": {
+        "rejected": false,
+        "items": [
+          "LoggerAbyssalT6",
+          "ActionPoint",
+          "PurpleCoins"
+        ],
+        "events": [
+          "pretreatment"
+        ]
+      },
+      "all": {
+        "rejected": false,
+        "items": [
+          "LoggerAbyssalT6",
+          "ActionPoint",
+          "PurpleCoins"
+        ],
+        "events": [
+          "pretreatment"
+        ]
+      }
+    },
+    "custom": {
+      "rejected": false,
+      "items": [
+        "PurpleCoins",
+        "ActionPoint"
+      ],
+      "events": [
+        "pretreatment"
+      ]
+    },
+    "fallback": {
+      "rejected": false,
+      "items": [
+        "LoggerAbyssalT6",
+        "ActionPoint",
+        "PurpleCoins"
+      ],
+      "events": [
+        "pretreatment"
+      ]
+    },
+    "cl1": {
+      "rejected": false,
+      "items": [
+        "ActionPoint"
+      ],
+      "events": [
+        "pretreatment"
+      ]
+    },
+    "exhausted": {
+      "rejected": false,
+      "items": [
+        "ActionPoint",
+        "PurpleCoins"
+      ],
+      "events": [
+        "pretreatment"
+      ]
+    },
+    "invalid_entries": {
+      "'unknown':'ActionPoint'": {
+        "rejected": true,
+        "items": [],
+        "events": []
+      },
+      "None:'ActionPoint'": {
+        "rejected": true,
+        "items": [],
+        "events": []
+      },
+      "'custom':None": {
+        "rejected": true,
+        "items": [],
+        "events": []
+      },
+      "'custom':'ActionPoint > invalid'": {
+        "rejected": true,
+        "items": [],
+        "events": []
+      },
+      "'custom':'ActionPoint >'": {
+        "rejected": true,
+        "items": [],
+        "events": []
+      }
+    }
+  },
+  "opsi_voucher_filter": {
+    "cases": {
+      "default": {
+        "rejected": false,
+        "result": "LoggerAbyssal > LoggerObscure > Book > Coin > Fragment",
+        "events": []
+      },
+      "logger": {
+        "rejected": false,
+        "result": "LoggerAbyssal > LoggerObscure > Coin",
+        "events": []
+      },
+      "logger_t6": {
+        "rejected": false,
+        "result": "LoggerAbyssalT6 > LoggerObscureT6 > Coin",
+        "events": []
+      },
+      "archive_removed": {
+        "rejected": false,
+        "result": "",
+        "events": []
+      },
+      "unicode_separator": {
+        "rejected": false,
+        "result": "Coin ＞ Fragment",
+        "events": []
+      },
+      "empty_skip": {
+        "rejected": false,
+        "result": "",
+        "events": []
+      }
+    },
+    "invalid_entries": {
+      "'Coin > unknown'": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "'Coin >'": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "None": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "True": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "1": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "[]": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "{}": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      }
+    }
+  },
+  "opsi_ash_assist": {
+    "cases": {
+      "negative": {
+        "rejected": false,
+        "events": [
+          [
+            "tier_visible",
+            true
+          ],
+          [
+            "ocr",
+            0
+          ]
+        ]
+      },
+      "zero": {
+        "rejected": false,
+        "events": [
+          [
+            "tier_visible",
+            true
+          ],
+          [
+            "ocr",
+            0
+          ]
+        ]
+      },
+      "threshold": {
+        "rejected": false,
+        "events": [
+          [
+            "tier_visible",
+            true
+          ],
+          [
+            "ocr",
+            10
+          ],
+          [
+            "click",
+            "beacon-next"
+          ],
+          [
+            "sleep",
+            [
+              0.3,
+              0.5
+            ]
+          ],
+          "screenshot",
+          [
+            "ocr",
+            12
+          ],
+          [
+            "click",
+            "beacon-next"
+          ],
+          [
+            "sleep",
+            [
+              0.3,
+              0.5
+            ]
+          ],
+          "screenshot",
+          [
+            "ocr",
+            15
+          ]
+        ]
+      },
+      "fallback": {
+        "rejected": false,
+        "events": [
+          [
+            "tier_visible",
+            true
+          ],
+          [
+            "ocr",
+            1
+          ],
+          [
+            "click",
+            "beacon-next"
+          ],
+          [
+            "sleep",
+            [
+              0.3,
+              0.5
+            ]
+          ],
+          "screenshot",
+          [
+            "ocr",
+            2
+          ],
+          [
+            "click",
+            "beacon-next"
+          ],
+          [
+            "sleep",
+            [
+              0.3,
+              0.5
+            ]
+          ],
+          "screenshot",
+          [
+            "ocr",
+            3
+          ],
+          [
+            "click",
+            "beacon-next"
+          ],
+          [
+            "sleep",
+            [
+              0.3,
+              0.5
+            ]
+          ],
+          "screenshot",
+          [
+            "ocr",
+            4
+          ],
+          [
+            "click",
+            "beacon-next"
+          ],
+          [
+            "sleep",
+            [
+              0.3,
+              0.5
+            ]
+          ],
+          "screenshot",
+          [
+            "ocr",
+            5
+          ],
+          [
+            "click",
+            "beacon-next"
+          ],
+          [
+            "sleep",
+            [
+              0.3,
+              0.5
+            ]
+          ],
+          "screenshot"
+        ]
+      },
+      "above_current_max": {
+        "rejected": false,
+        "events": [
+          [
+            "tier_visible",
+            true
+          ],
+          [
+            "ocr",
+            15
+          ],
+          [
+            "click",
+            "beacon-next"
+          ],
+          [
+            "sleep",
+            [
+              0.3,
+              0.5
+            ]
+          ],
+          "screenshot",
+          [
+            "ocr",
+            15
+          ],
+          [
+            "click",
+            "beacon-next"
+          ],
+          [
+            "sleep",
+            [
+              0.3,
+              0.5
+            ]
+          ],
+          "screenshot",
+          [
+            "ocr",
+            15
+          ],
+          [
+            "click",
+            "beacon-next"
+          ],
+          [
+            "sleep",
+            [
+              0.3,
+              0.5
+            ]
+          ],
+          "screenshot",
+          [
+            "ocr",
+            15
+          ],
+          [
+            "click",
+            "beacon-next"
+          ],
+          [
+            "sleep",
+            [
+              0.3,
+              0.5
+            ]
+          ],
+          "screenshot",
+          [
+            "ocr",
+            15
+          ],
+          [
+            "click",
+            "beacon-next"
+          ],
+          [
+            "sleep",
+            [
+              0.3,
+              0.5
+            ]
+          ],
+          "screenshot"
+        ]
+      },
+      "wait_for_tier": {
+        "rejected": false,
+        "events": [
+          [
+            "tier_visible",
+            false
+          ],
+          "screenshot",
+          [
+            "tier_visible",
+            false
+          ],
+          "screenshot",
+          [
+            "tier_visible",
+            true
+          ],
+          [
+            "ocr",
+            15
+          ]
+        ]
+      }
+    },
+    "invalid_entries": {
+      "None": {
+        "rejected": true,
+        "events": []
+      },
+      "True": {
+        "rejected": true,
+        "events": []
+      },
+      "False": {
+        "rejected": true,
+        "events": []
+      },
+      "'15'": {
+        "rejected": true,
+        "events": []
+      },
+      "15.0": {
+        "rejected": true,
+        "events": []
+      },
+      "[]": {
+        "rejected": true,
+        "events": []
+      },
+      "{}": {
+        "rejected": true,
+        "events": []
+      }
+    }
+  },
+  "opsi_ash_beacon_attack_mode": {
+    "cases": {
+      "current_beacon": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "appear",
+            "ash-showdown"
+          ],
+          [
+            "check_beacon_point",
+            true
+          ],
+          [
+            "click",
+            "meta-main-beacon-entrance"
+          ]
+        ]
+      },
+      "current_skips_dossier": {
+        "rejected": false,
+        "result": false,
+        "events": [
+          [
+            "appear",
+            "ash-showdown"
+          ],
+          [
+            "check_beacon_point",
+            false
+          ]
+        ]
+      },
+      "current_dossier_selects": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "appear",
+            "ash-showdown"
+          ],
+          [
+            "check_beacon_point",
+            false
+          ],
+          [
+            "check_dossier_point",
+            true
+          ],
+          [
+            "appear_then_click",
+            "meta-main-dossier-entrance"
+          ]
+        ]
+      },
+      "dossier_current_quits": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "appear",
+            "ash-showdown"
+          ],
+          [
+            "appear",
+            "beacon-list"
+          ],
+          [
+            "appear",
+            "dossier-list"
+          ],
+          [
+            "appear_then_click",
+            "ash-quit"
+          ]
+        ]
+      },
+      "dossier_current_dossier": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "appear",
+            "ash-showdown"
+          ],
+          [
+            "appear",
+            "beacon-list"
+          ],
+          [
+            "appear",
+            "dossier-list"
+          ],
+          [
+            "check_dossier_point",
+            true
+          ],
+          [
+            "appear_then_click",
+            "meta-begin-entrance"
+          ]
+        ]
+      }
+    },
+    "invalid_entries": {
+      "''": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "'dossier'": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "None": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "True": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "0": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "[]": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "{}": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      }
+    }
+  },
+  "opsi_ash_beacon_one_hit": {
+    "cases": {
+      "disabled": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "appear",
+            "beacon-list"
+          ],
+          [
+            "appear",
+            "dossier-list"
+          ]
+        ]
+      },
+      "no_damage": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "appear",
+            "beacon-list"
+          ],
+          [
+            "get_meta_damage",
+            0
+          ],
+          [
+            "appear",
+            "dossier-list"
+          ]
+        ]
+      },
+      "damaged": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "appear",
+            "beacon-list"
+          ],
+          [
+            "get_meta_damage",
+            7
+          ],
+          [
+            "task_delay",
+            {
+              "minute": 30
+            }
+          ],
+          "task_stop",
+          [
+            "appear",
+            "dossier-list"
+          ]
+        ]
+      }
+    },
+    "invalid_entries": {
+      "'true'": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "None": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "0": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "1": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "[]": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "{}": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      }
+    }
+  },
+  "opsi_ash_beacon_pre_attack": {
+    "cases": {
+      "beacon_disabled": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "appear",
+            "beacon-list"
+          ]
+        ]
+      },
+      "beacon_one_hit": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "appear",
+            "beacon-list"
+          ],
+          "ask_for_help"
+        ]
+      },
+      "beacon_request_assist": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "appear",
+            "beacon-list"
+          ],
+          "ask_for_help"
+        ]
+      },
+      "dossier_disabled": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "appear",
+            "beacon-list"
+          ],
+          [
+            "appear",
+            "dossier-list"
+          ]
+        ]
+      },
+      "dossier_enabled": {
+        "rejected": false,
+        "result": true,
+        "events": [
+          [
+            "appear",
+            "beacon-list"
+          ],
+          [
+            "appear",
+            "dossier-list"
+          ],
+          [
+            "appear",
+            "meta-auto-attack-start"
+          ],
+          "dossier_auto_attack"
+        ]
+      }
+    },
+    "invalid_entries": {
+      "one_hit_mode:'true'": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "one_hit_mode:None": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "one_hit_mode:0": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "one_hit_mode:1": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "one_hit_mode:[]": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "one_hit_mode:{}": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "request_assist:'true'": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "request_assist:None": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "request_assist:0": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "request_assist:1": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "request_assist:[]": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "request_assist:{}": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "dossier_auto_attack:'true'": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "dossier_auto_attack:None": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "dossier_auto_attack:0": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "dossier_auto_attack:1": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "dossier_auto_attack:[]": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      },
+      "dossier_auto_attack:{}": {
+        "rejected": true,
+        "result": null,
+        "events": []
+      }
+    }
+  },
+  "explore": {
+    "cases": {
+      "false": {
+        "rejected": false,
+        "switched": true,
+        "stopped": false,
+        "events": [
+          [
+            "name_to_zone",
+            0
+          ],
+          [
+            "globe_goto",
+            22,
+            {
+              "stop_if_safe": true
+            }
+          ],
+          "tuning_sample_use",
+          [
+            "fleet_set",
+            1
+          ],
+          [
+            "os_order_execute",
+            {
+              "recon_scan": true,
+              "submarine_call": false
+            }
+          ],
+          "explore_task_delay",
+          "auto_search",
+          [
+            "name_to_zone",
+            22
+          ],
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      },
+      "true": {
+        "rejected": false,
+        "switched": true,
+        "stopped": false,
+        "events": [
+          [
+            "name_to_zone",
+            0
+          ],
+          [
+            "globe_goto",
+            22,
+            {
+              "stop_if_safe": true
+            }
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          [
+            "os_order_execute",
+            {
+              "recon_scan": false,
+              "submarine_call": false
+            }
+          ],
+          "explore_task_delay",
+          "auto_search",
+          [
+            "name_to_zone",
+            22
+          ],
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      }
+    },
+    "invalid_entry": {
+      "rejected": true,
+      "switched": false,
+      "stopped": false,
+      "events": []
+    },
+    "last_zone_resume": {
+      "rejected": false,
+      "switched": true,
+      "stopped": false,
+      "events": [
+        [
+          "name_to_zone",
+          22
+        ],
+        [
+          "name_to_zone",
+          22
+        ],
+        [
+          "globe_goto",
+          51,
+          {
+            "stop_if_safe": true
+          }
+        ],
+        "tuning_sample_use",
+        [
+          "fleet_set",
+          1
+        ],
+        [
+          "os_order_execute",
+          {
+            "recon_scan": true,
+            "submarine_call": false
+          }
+        ],
+        "explore_task_delay",
+        "auto_search",
+        [
+          "name_to_zone",
+          51
+        ],
+        "after_auto_search",
+        "check_task_switch"
+      ]
+    },
+    "last_zone_named_resume": {
+      "rejected": false,
+      "switched": true,
+      "stopped": false,
+      "events": [
+        [
+          "name_to_zone",
+          "NA Ocean SW Sector B"
+        ],
+        [
+          "name_to_zone",
+          22
+        ],
+        [
+          "globe_goto",
+          51,
+          {
+            "stop_if_safe": true
+          }
+        ],
+        "tuning_sample_use",
+        [
+          "fleet_set",
+          1
+        ],
+        [
+          "os_order_execute",
+          {
+            "recon_scan": true,
+            "submarine_call": false
+          }
+        ],
+        "explore_task_delay",
+        "auto_search",
+        [
+          "name_to_zone",
+          51
+        ],
+        "after_auto_search",
+        "check_task_switch"
+      ]
+    },
+    "invalid_last_zone": {
+      "None": {
+        "rejected": true,
+        "switched": false,
+        "stopped": false,
+        "events": []
+      },
+      "True": {
+        "rejected": true,
+        "switched": false,
+        "stopped": false,
+        "events": []
+      },
+      "'missing zone'": {
+        "rejected": true,
+        "switched": false,
+        "stopped": false,
+        "events": [
+          [
+            "name_to_zone",
+            "missing zone"
+          ]
+        ]
+      },
+      "44": {
+        "rejected": true,
+        "switched": false,
+        "stopped": false,
+        "events": [
+          [
+            "name_to_zone",
+            44
+          ]
+        ]
+      }
+    }
+  },
+  "task_delay": {
+    "cases": {
+      "recon_default": {
+        "rejected": false,
+        "modified": [
+          "OpsiExplore.Scheduler.NextRun",
+          "OpsiObscure.Scheduler.NextRun",
+          "OpsiStronghold.Scheduler.NextRun"
+        ],
+        "updates": [
+          "update"
+        ]
+      },
+      "OpsiExplore_force": {
+        "rejected": false,
+        "modified": [
+          "OpsiObscure.Scheduler.NextRun",
+          "OpsiStronghold.Scheduler.NextRun"
+        ],
+        "updates": [
+          "update"
+        ]
+      },
+      "OpsiObscure_force": {
+        "rejected": false,
+        "modified": [
+          "OpsiExplore.Scheduler.NextRun",
+          "OpsiStronghold.Scheduler.NextRun"
+        ],
+        "updates": [
+          "update"
+        ]
+      },
+      "OpsiStronghold_force": {
+        "rejected": false,
+        "modified": [
+          "OpsiExplore.Scheduler.NextRun",
+          "OpsiObscure.Scheduler.NextRun"
+        ],
+        "updates": [
+          "update"
+        ]
+      },
+      "explore_special_radar": {
+        "rejected": false,
+        "modified": [
+          "OpsiObscure.Scheduler.NextRun",
+          "OpsiStronghold.Scheduler.NextRun"
+        ],
+        "updates": [
+          "update"
+        ]
+      },
+      "abyssal_submarine": {
+        "rejected": false,
+        "modified": [
+          "OpsiAbyssal.Scheduler.NextRun"
+        ],
+        "updates": [
+          "update"
+        ]
+      },
+      "abyssal_filter_submarine": {
+        "rejected": false,
+        "modified": [
+          "OpsiAbyssal.Scheduler.NextRun"
+        ],
+        "updates": [
+          "update"
+        ]
+      },
+      "abyssal_force": {
+        "rejected": false,
+        "modified": [],
+        "updates": [
+          "update"
+        ]
+      },
+      "month_boss_submarine": {
+        "rejected": false,
+        "modified": [
+          "OpsiMonthBoss.Scheduler.NextRun"
+        ],
+        "updates": [
+          "update"
+        ]
+      },
+      "month_boss_force": {
+        "rejected": false,
+        "modified": [],
+        "updates": [
+          "update"
+        ]
+      }
+    },
+    "invalid_entries": {
+      "OpsiExplore.OpsiExplore.ForceRun": {
+        "rejected": true,
+        "modified": [],
+        "updates": []
+      },
+      "OpsiObscure.OpsiObscure.ForceRun": {
+        "rejected": true,
+        "modified": [],
+        "updates": []
+      },
+      "OpsiAbyssal.OpsiAbyssal.ForceRun": {
+        "rejected": true,
+        "modified": [],
+        "updates": []
+      },
+      "OpsiStronghold.OpsiStronghold.ForceRun": {
+        "rejected": true,
+        "modified": [],
+        "updates": []
+      },
+      "OpsiMonthBoss.OpsiMonthBoss.ForceRun": {
+        "rejected": true,
+        "modified": [],
+        "updates": []
+      },
+      "OpsiExplore.OpsiExplore.SpecialRadar": {
+        "rejected": true,
+        "modified": [],
+        "updates": []
+      },
+      "OpsiAbyssal.OpsiFleetFilter.Filter": {
+        "rejected": true,
+        "modified": [],
+        "updates": []
+      }
+    }
+  },
+  "month_boss": {
+    "clear_cases": {
+      "normal": {
+        "result": null,
+        "stopped": false,
+        "rejected": false,
+        "events": [
+          "explore_probe",
+          "mission_enter",
+          [
+            "appear",
+            "normal"
+          ],
+          "mission_quit",
+          [
+            "globe_goto",
+            154
+          ],
+          [
+            "appear",
+            "map-exit"
+          ],
+          [
+            "fleet_lock",
+            {
+              "enable": false
+            }
+          ],
+          [
+            "boss_room",
+            {
+              "is_normal": true
+            }
+          ],
+          [
+            "boss_clear",
+            {
+              "has_fleet_step": true,
+              "is_month": true
+            }
+          ],
+          [
+            "fleet_repair",
+            {
+              "revert": false
+            }
+          ],
+          [
+            "fleet_resolve",
+            {
+              "revert": false
+            }
+          ],
+          [
+            "month_boss_delay",
+            {
+              "is_normal": true,
+              "result": true
+            }
+          ]
+        ]
+      },
+      "normal_hard": {
+        "result": null,
+        "stopped": false,
+        "rejected": false,
+        "events": [
+          "explore_probe",
+          "mission_enter",
+          [
+            "appear",
+            "normal"
+          ],
+          "mission_quit",
+          [
+            "globe_goto",
+            154
+          ],
+          [
+            "appear",
+            "map-exit"
+          ],
+          [
+            "fleet_lock",
+            {
+              "enable": false
+            }
+          ],
+          [
+            "boss_room",
+            {
+              "is_normal": true
+            }
+          ],
+          [
+            "boss_clear",
+            {
+              "has_fleet_step": true,
+              "is_month": true
+            }
+          ],
+          [
+            "fleet_repair",
+            {
+              "revert": false
+            }
+          ],
+          [
+            "fleet_resolve",
+            {
+              "revert": false
+            }
+          ],
+          [
+            "month_boss_delay",
+            {
+              "is_normal": true,
+              "result": true
+            }
+          ]
+        ]
+      },
+      "hard_skipped": {
+        "result": null,
+        "stopped": true,
+        "rejected": false,
+        "events": [
+          "explore_probe",
+          "mission_enter",
+          [
+            "appear",
+            "normal"
+          ],
+          [
+            "appear",
+            "hard"
+          ],
+          "mission_quit",
+          [
+            "month_boss_delay",
+            {
+              "is_normal": false,
+              "result": true
+            }
+          ],
+          "task_stop"
+        ]
+      },
+      "adaptability_high": {
+        "result": null,
+        "stopped": false,
+        "rejected": false,
+        "events": [
+          "explore_probe",
+          "mission_enter",
+          [
+            "appear",
+            "normal"
+          ],
+          "mission_quit",
+          [
+            "goto_globe",
+            {
+              "unpin": false
+            }
+          ],
+          "adaptability",
+          [
+            "globe_goto",
+            154
+          ],
+          [
+            "appear",
+            "map-exit"
+          ],
+          [
+            "fleet_lock",
+            {
+              "enable": false
+            }
+          ],
+          [
+            "boss_room",
+            {
+              "is_normal": true
+            }
+          ],
+          [
+            "boss_clear",
+            {
+              "has_fleet_step": true,
+              "is_month": true
+            }
+          ],
+          [
+            "fleet_repair",
+            {
+              "revert": false
+            }
+          ],
+          [
+            "fleet_resolve",
+            {
+              "revert": false
+            }
+          ],
+          [
+            "month_boss_delay",
+            {
+              "is_normal": true,
+              "result": true
+            }
+          ]
+        ]
+      },
+      "adaptability_low": {
+        "result": null,
+        "stopped": true,
+        "rejected": false,
+        "events": [
+          "explore_probe",
+          "mission_enter",
+          [
+            "appear",
+            "normal"
+          ],
+          "mission_quit",
+          [
+            "goto_globe",
+            {
+              "unpin": false
+            }
+          ],
+          "adaptability",
+          [
+            "task_delay",
+            {
+              "server_update": true
+            }
+          ],
+          "task_stop"
+        ]
+      },
+      "force_run_low": {
+        "result": null,
+        "stopped": false,
+        "rejected": false,
+        "events": [
+          "explore_probe",
+          "mission_enter",
+          [
+            "appear",
+            "normal"
+          ],
+          "mission_quit",
+          [
+            "globe_goto",
+            154
+          ],
+          [
+            "appear",
+            "map-exit"
+          ],
+          [
+            "fleet_lock",
+            {
+              "enable": false
+            }
+          ],
+          [
+            "boss_room",
+            {
+              "is_normal": true
+            }
+          ],
+          [
+            "boss_clear",
+            {
+              "has_fleet_step": true,
+              "is_month": true
+            }
+          ],
+          [
+            "fleet_repair",
+            {
+              "revert": false
+            }
+          ],
+          [
+            "fleet_resolve",
+            {
+              "revert": false
+            }
+          ],
+          [
+            "month_boss_delay",
+            {
+              "is_normal": true,
+              "result": true
+            }
+          ]
+        ]
+      },
+      "retained_room": {
+        "result": null,
+        "stopped": false,
+        "rejected": false,
+        "events": [
+          "explore_probe",
+          "mission_enter",
+          [
+            "appear",
+            "normal"
+          ],
+          "mission_quit",
+          [
+            "globe_goto",
+            154
+          ],
+          [
+            "appear",
+            "map-exit"
+          ],
+          [
+            "boss_room",
+            {
+              "is_normal": true
+            }
+          ],
+          [
+            "boss_clear",
+            {
+              "has_fleet_step": true,
+              "is_month": true
+            }
+          ],
+          [
+            "fleet_repair",
+            {
+              "revert": false
+            }
+          ],
+          [
+            "fleet_resolve",
+            {
+              "revert": false
+            }
+          ],
+          [
+            "month_boss_delay",
+            {
+              "is_normal": true,
+              "result": true
+            }
+          ]
+        ]
+      },
+      "absent": {
+        "result": true,
+        "stopped": false,
+        "rejected": false,
+        "events": [
+          "explore_probe",
+          "mission_enter",
+          [
+            "appear",
+            "normal"
+          ],
+          [
+            "appear",
+            "hard"
+          ],
+          "mission_quit",
+          [
+            "month_boss_delay",
+            {
+              "is_normal": false,
+              "result": false
+            }
+          ]
+        ]
+      }
+    },
+    "delay_cases": {
+      "normal:1:1": [
+        [
+          "task_delay",
+          {
+            "target": "next-reset"
+          }
+        ],
+        "task_stop"
+      ],
+      "normal:1:0": [
+        [
+          "opsi_task_delay",
+          {
+            "recon_scan": false,
+            "submarine_call": true,
+            "ap_limit": false
+          }
+        ],
+        "task_stop"
+      ],
+      "normal:0:1": [
+        [
+          "task_delay",
+          {
+            "target": "next-reset"
+          }
+        ],
+        "task_stop"
+      ],
+      "normal:0:0": [
+        [
+          "task_delay",
+          {
+            "server_update": true
+          }
+        ],
+        "task_stop"
+      ],
+      "normal_hard:1:1": [
+        "task_stop"
+      ],
+      "normal_hard:1:0": [
+        [
+          "opsi_task_delay",
+          {
+            "recon_scan": false,
+            "submarine_call": true,
+            "ap_limit": false
+          }
+        ],
+        "task_stop"
+      ],
+      "normal_hard:0:1": [
+        [
+          "task_delay",
+          {
+            "target": "next-reset"
+          }
+        ],
+        "task_stop"
+      ],
+      "normal_hard:0:0": [
+        [
+          "task_delay",
+          {
+            "server_update": true
+          }
+        ],
+        "task_stop"
+      ]
+    }
+  },
+  "obscure": {
+    "cases": {
+      "false": {
+        "events": [
+          "clear_obscure"
+        ],
+        "switch_stop": false
+      },
+      "true": {
+        "events": [
+          "clear_obscure",
+          "check_task_switch"
+        ],
+        "switch_stop": true
+      }
+    },
+    "invalid_entry_events": []
+  },
+  "daily": {
+    "cases": {
+      "mission=False,tuning=False": {
+        "rejected": false,
+        "events": [
+          [
+            "task_delay",
+            {
+              "server_update": true
+            }
+          ]
+        ]
+      },
+      "mission=False,tuning=True": {
+        "rejected": false,
+        "events": [
+          "tuning_sample_use",
+          [
+            "task_delay",
+            {
+              "server_update": true
+            }
+          ]
+        ]
+      },
+      "mission=True,tuning=False": {
+        "rejected": false,
+        "events": [
+          "mission_accept",
+          "zone_init",
+          "finish_daily",
+          "explore_probe",
+          [
+            "task_delay",
+            {
+              "server_update": true
+            }
+          ]
+        ]
+      },
+      "mission=True,tuning=True": {
+        "rejected": false,
+        "events": [
+          "tuning_sample_use",
+          "mission_accept",
+          "zone_init",
+          "finish_daily",
+          "explore_probe",
+          [
+            "task_delay",
+            {
+              "server_update": true
+            }
+          ]
+        ]
+      }
+    },
+    "invalid_entry": {
+      "rejected": true,
+      "events": []
+    },
+    "invalid_do_mission_entry": {
+      "rejected": true,
+      "events": []
+    }
+  },
+  "hazard1_leveling": {
+    "cases": {
+      "0": {
+        "rejected": false,
+        "switched": true,
+        "effective_preserve": 200,
+        "events": [
+          [
+            "override",
+            {
+              "OpsiGeneral_DoRandomMapEvent": true,
+              "OpsiGeneral_AkashiShopFilter": "ActionPoint"
+            }
+          ],
+          [
+            "is_task_enabled",
+            "OpsiMeowfficerFarming"
+          ],
+          [
+            "cross_set",
+            {
+              "keys": "OpsiMeowfficerFarming.Scheduler.Enable",
+              "value": true
+            }
+          ],
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          "yellow_coins",
+          "current_zone",
+          [
+            "action_point_set",
+            {
+              "cost": 70,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "globe_goto",
+            22,
+            {
+              "types": "SAFE",
+              "refresh": true
+            }
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          "strategic_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      },
+      "44": {
+        "rejected": false,
+        "switched": true,
+        "effective_preserve": 200,
+        "events": [
+          [
+            "override",
+            {
+              "OpsiGeneral_DoRandomMapEvent": true,
+              "OpsiGeneral_AkashiShopFilter": "ActionPoint"
+            }
+          ],
+          [
+            "is_task_enabled",
+            "OpsiMeowfficerFarming"
+          ],
+          [
+            "cross_set",
+            {
+              "keys": "OpsiMeowfficerFarming.Scheduler.Enable",
+              "value": true
+            }
+          ],
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          "yellow_coins",
+          "current_zone",
+          [
+            "action_point_set",
+            {
+              "cost": 70,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "globe_goto",
+            44,
+            {
+              "types": "SAFE",
+              "refresh": true
+            }
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          "strategic_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      },
+      "22": {
+        "rejected": false,
+        "switched": true,
+        "effective_preserve": 200,
+        "events": [
+          [
+            "override",
+            {
+              "OpsiGeneral_DoRandomMapEvent": true,
+              "OpsiGeneral_AkashiShopFilter": "ActionPoint"
+            }
+          ],
+          [
+            "is_task_enabled",
+            "OpsiMeowfficerFarming"
+          ],
+          [
+            "cross_set",
+            {
+              "keys": "OpsiMeowfficerFarming.Scheduler.Enable",
+              "value": true
+            }
+          ],
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          "yellow_coins",
+          "current_zone",
+          [
+            "action_point_set",
+            {
+              "cost": 70,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "globe_goto",
+            22,
+            {
+              "types": "SAFE",
+              "refresh": true
+            }
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          "strategic_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      }
+    },
+    "invalid_entry": {
+      "rejected": true,
+      "switched": false,
+      "effective_preserve": null,
+      "events": []
+    },
+    "ensure_cases": {
+      "False": {
+        "rejected": false,
+        "switched": true,
+        "effective_preserve": 200,
+        "events": [
+          [
+            "override",
+            {
+              "OpsiGeneral_DoRandomMapEvent": true,
+              "OpsiGeneral_AkashiShopFilter": "ActionPoint"
+            }
+          ],
+          [
+            "is_task_enabled",
+            "OpsiMeowfficerFarming"
+          ],
+          [
+            "cross_set",
+            {
+              "keys": "OpsiMeowfficerFarming.Scheduler.Enable",
+              "value": true
+            }
+          ],
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          "yellow_coins",
+          "current_zone",
+          [
+            "action_point_set",
+            {
+              "cost": 70,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "globe_goto",
+            22,
+            {
+              "types": "SAFE",
+              "refresh": true
+            }
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          "strategic_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      },
+      "True": {
+        "rejected": false,
+        "switched": true,
+        "effective_preserve": 0,
+        "events": [
+          [
+            "override",
+            {
+              "OpsiGeneral_DoRandomMapEvent": true,
+              "OpsiGeneral_AkashiShopFilter": "ActionPoint"
+            }
+          ],
+          [
+            "is_task_enabled",
+            "OpsiMeowfficerFarming"
+          ],
+          [
+            "cross_set",
+            {
+              "keys": "OpsiMeowfficerFarming.Scheduler.Enable",
+              "value": true
+            }
+          ],
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          "yellow_coins",
+          "current_zone",
+          [
+            "action_point_set",
+            {
+              "cost": 70,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "globe_goto",
+            22,
+            {
+              "types": "SAFE",
+              "refresh": true
+            }
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          "strategic_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      }
+    },
+    "invalid_ensure_entry": {
+      "rejected": true,
+      "switched": false,
+      "effective_preserve": null,
+      "events": []
+    }
+  },
+  "meowfficer_farming": {
+    "cases": {
+      "3": {
+        "rejected": false,
+        "switched": true,
+        "takeover": false,
+        "effective_preserve": 1000,
+        "events": [
+          "ap_limit",
+          "explore_probe",
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          [
+            "action_point_set",
+            {
+              "cost": 0,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "zone_select",
+            {
+              "hazard_level": 3
+            }
+          ],
+          [
+            "globe_goto",
+            44,
+            {}
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          [
+            "os_order_execute",
+            {
+              "recon_scan": false,
+              "submarine_call": false
+            }
+          ],
+          "auto_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      },
+      "4": {
+        "rejected": false,
+        "switched": true,
+        "takeover": false,
+        "effective_preserve": 1000,
+        "events": [
+          "ap_limit",
+          "explore_probe",
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          [
+            "action_point_set",
+            {
+              "cost": 0,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "zone_select",
+            {
+              "hazard_level": 4
+            }
+          ],
+          [
+            "globe_goto",
+            44,
+            {}
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          [
+            "os_order_execute",
+            {
+              "recon_scan": false,
+              "submarine_call": false
+            }
+          ],
+          "auto_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      },
+      "5": {
+        "rejected": false,
+        "switched": true,
+        "takeover": false,
+        "effective_preserve": 1000,
+        "events": [
+          "ap_limit",
+          "explore_probe",
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          [
+            "action_point_set",
+            {
+              "cost": 0,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "zone_select",
+            {
+              "hazard_level": 5
+            }
+          ],
+          [
+            "globe_goto",
+            44,
+            {}
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          [
+            "os_order_execute",
+            {
+              "recon_scan": false,
+              "submarine_call": false
+            }
+          ],
+          "auto_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      },
+      "6": {
+        "rejected": false,
+        "switched": true,
+        "takeover": false,
+        "effective_preserve": 1000,
+        "events": [
+          "ap_limit",
+          "explore_probe",
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          [
+            "action_point_set",
+            {
+              "cost": 0,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "zone_select",
+            {
+              "hazard_level": 6
+            }
+          ],
+          [
+            "globe_goto",
+            44,
+            {}
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          [
+            "os_order_execute",
+            {
+              "recon_scan": false,
+              "submarine_call": false
+            }
+          ],
+          "auto_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      },
+      "10": {
+        "rejected": false,
+        "switched": true,
+        "takeover": false,
+        "effective_preserve": 1000,
+        "events": [
+          "ap_limit",
+          "explore_probe",
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          [
+            "action_point_set",
+            {
+              "cost": 0,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "zone_select",
+            {
+              "hazard_level": 10
+            }
+          ],
+          [
+            "globe_goto",
+            44,
+            {}
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          [
+            "os_order_execute",
+            {
+              "recon_scan": false,
+              "submarine_call": false
+            }
+          ],
+          "auto_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      }
+    },
+    "preserve_cases": {
+      "0": {
+        "rejected": false,
+        "switched": true,
+        "takeover": false,
+        "effective_preserve": 0,
+        "events": [
+          "ap_limit",
+          [
+            "override",
+            {
+              "OpsiFleet_Submarine": false
+            }
+          ],
+          "explore_probe",
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          [
+            "action_point_set",
+            {
+              "cost": 0,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "zone_select",
+            {
+              "hazard_level": 5
+            }
+          ],
+          [
+            "globe_goto",
+            44,
+            {}
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          [
+            "os_order_execute",
+            {
+              "recon_scan": false,
+              "submarine_call": false
+            }
+          ],
+          "auto_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      },
+      "1000": {
+        "rejected": false,
+        "switched": true,
+        "takeover": false,
+        "effective_preserve": 1000,
+        "events": [
+          "ap_limit",
+          "explore_probe",
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          [
+            "action_point_set",
+            {
+              "cost": 0,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "zone_select",
+            {
+              "hazard_level": 5
+            }
+          ],
+          [
+            "globe_goto",
+            44,
+            {}
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          [
+            "os_order_execute",
+            {
+              "recon_scan": false,
+              "submarine_call": false
+            }
+          ],
+          "auto_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      },
+      "2500": {
+        "rejected": false,
+        "switched": true,
+        "takeover": false,
+        "effective_preserve": 2000,
+        "events": [
+          "ap_limit",
+          "explore_probe",
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          [
+            "action_point_set",
+            {
+              "cost": 0,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "zone_select",
+            {
+              "hazard_level": 5
+            }
+          ],
+          [
+            "globe_goto",
+            44,
+            {}
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          [
+            "os_order_execute",
+            {
+              "recon_scan": false,
+              "submarine_call": false
+            }
+          ],
+          "auto_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      }
+    },
+    "target_cases": {
+      "int:51": {
+        "rejected": false,
+        "switched": true,
+        "takeover": false,
+        "effective_preserve": 1000,
+        "events": [
+          "ap_limit",
+          "explore_probe",
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          [
+            "action_point_set",
+            {
+              "cost": 0,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "globe_goto",
+            51,
+            {
+              "refresh": true
+            }
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          [
+            "os_order_execute",
+            {
+              "recon_scan": false,
+              "submarine_call": false
+            }
+          ],
+          "auto_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      },
+      "str:51": {
+        "rejected": false,
+        "switched": true,
+        "takeover": false,
+        "effective_preserve": 1000,
+        "events": [
+          "ap_limit",
+          "explore_probe",
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          [
+            "action_point_set",
+            {
+              "cost": 0,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "globe_goto",
+            51,
+            {
+              "refresh": true
+            }
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          [
+            "os_order_execute",
+            {
+              "recon_scan": false,
+              "submarine_call": false
+            }
+          ],
+          "auto_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      },
+      "cn": {
+        "rejected": false,
+        "switched": true,
+        "takeover": false,
+        "effective_preserve": 1000,
+        "events": [
+          "ap_limit",
+          "explore_probe",
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          [
+            "action_point_set",
+            {
+              "cost": 0,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "globe_goto",
+            51,
+            {
+              "refresh": true
+            }
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          [
+            "os_order_execute",
+            {
+              "recon_scan": false,
+              "submarine_call": false
+            }
+          ],
+          "auto_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      },
+      "en": {
+        "rejected": false,
+        "switched": true,
+        "takeover": false,
+        "effective_preserve": 1000,
+        "events": [
+          "ap_limit",
+          "explore_probe",
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          [
+            "action_point_set",
+            {
+              "cost": 0,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "globe_goto",
+            51,
+            {
+              "refresh": true
+            }
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          [
+            "os_order_execute",
+            {
+              "recon_scan": false,
+              "submarine_call": false
+            }
+          ],
+          "auto_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      },
+      "jp": {
+        "rejected": false,
+        "switched": true,
+        "takeover": false,
+        "effective_preserve": 1000,
+        "events": [
+          "ap_limit",
+          "explore_probe",
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          [
+            "action_point_set",
+            {
+              "cost": 0,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "globe_goto",
+            51,
+            {
+              "refresh": true
+            }
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          [
+            "os_order_execute",
+            {
+              "recon_scan": false,
+              "submarine_call": false
+            }
+          ],
+          "auto_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      },
+      "tw": {
+        "rejected": false,
+        "switched": true,
+        "takeover": false,
+        "effective_preserve": 1000,
+        "events": [
+          "ap_limit",
+          "explore_probe",
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          [
+            "action_point_set",
+            {
+              "cost": 0,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "globe_goto",
+            51,
+            {
+              "refresh": true
+            }
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          [
+            "os_order_execute",
+            {
+              "recon_scan": false,
+              "submarine_call": false
+            }
+          ],
+          "auto_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      }
+    },
+    "ensure_cases": {
+      "False": {
+        "rejected": false,
+        "switched": true,
+        "takeover": false,
+        "effective_preserve": 1000,
+        "events": [
+          "ap_limit",
+          "explore_probe",
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          [
+            "action_point_set",
+            {
+              "cost": 0,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "zone_select",
+            {
+              "hazard_level": 5
+            }
+          ],
+          [
+            "globe_goto",
+            44,
+            {}
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          [
+            "os_order_execute",
+            {
+              "recon_scan": false,
+              "submarine_call": false
+            }
+          ],
+          "auto_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      },
+      "True": {
+        "rejected": false,
+        "switched": true,
+        "takeover": false,
+        "effective_preserve": 0,
+        "events": [
+          "ap_limit",
+          "explore_probe",
+          [
+            "is_task_enabled",
+            "OpsiAshBeacon"
+          ],
+          [
+            "action_point_set",
+            {
+              "cost": 0,
+              "keep_current_ap": true,
+              "check_rest_ap": true
+            }
+          ],
+          [
+            "zone_select",
+            {
+              "hazard_level": 5
+            }
+          ],
+          [
+            "globe_goto",
+            44,
+            {}
+          ],
+          [
+            "fleet_set",
+            1
+          ],
+          [
+            "os_order_execute",
+            {
+              "recon_scan": false,
+              "submarine_call": false
+            }
+          ],
+          "auto_search",
+          "after_auto_search",
+          "check_task_switch"
+        ]
+      }
+    },
+    "invalid_entry": {
+      "rejected": true,
+      "switched": false,
+      "takeover": false,
+      "effective_preserve": null,
+      "events": []
+    },
+    "invalid_preserve_entry": {
+      "rejected": true,
+      "switched": false,
+      "takeover": false,
+      "effective_preserve": null,
+      "events": []
+    },
+    "invalid_target_type": {
+      "rejected": true,
+      "switched": false,
+      "takeover": false,
+      "effective_preserve": null,
+      "events": []
+    },
+    "invalid_ensure_entry": {
+      "rejected": true,
+      "switched": false,
+      "takeover": false,
+      "effective_preserve": null,
+      "events": []
+    },
+    "unknown_target": {
+      "rejected": false,
+      "switched": false,
+      "takeover": true,
+      "effective_preserve": null,
+      "events": []
+    }
+  },
+  "invalid_month_entry": {
+    "result": null,
+    "stopped": false,
+    "rejected": true,
+    "events": []
+  },
+  "mutation_budget": 0,
+  "real_combat_performed": false,
+  "real_storage_item_consumed": false,
+  "android_input_injected": false,
+  "source_sha256": {
+    "args": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+    "config": "f33b97dba1e3dad48f6789ee6d7b6aaba7e80cd91c416c0cf353b8139f4b5335",
+    "fleet": "9afd13cc878c92baca5d32a527c6d9dbf191a287673d0e26392d4d9b99df7e73",
+    "globe_zone": "2362e06fffcfbb647960d6bc7241ecc1a0075426832fc7054023761d8be2e1e1",
+    "map_data": "6c141fccdf4d6e46f0392cec221c6208854a55c4b353b0928c5aed1a18856d62",
+    "os_map": "ea5db98859c1e6424ceb1d80d18ab5b03791fc9252dd826d9ef6b37b516007b7",
+    "os_shop_selector": "6fabd2c58426d5eb9a568eb4d42a217c19d2a544b4c2c3a7abb4ebd2761e4d89",
+    "os_shop_preset": "903bf68f889bf6d130ccbd38aa6298299bd00c2bcf69016d20a174c2f3d6ee03",
+    "base_filter": "2879f33b23dbfe863ede4015cc8d5a96cbbd090fc0faf81cba6b1416acde3730",
+    "shop_base": "c05d3716abdbda1f30ced357f1b51593ba5c1787df8b00c3d6021c5e5fc3512b",
+    "shop_voucher": "8360bc39c51f55fd69fceb69c554ffaf29f33ad712468da0685ba5edd432c85d",
+    "shop_filter_redirect": "449e19b54581c295cf3172208d45d245531c2f8b60e7a1fdd796b47ed4d9a99a",
+    "action_point": "79d44d1d4b6cd68c679bd323f7ccdb5fe9f79e58d4626f487961e8ae65d97f1c",
+    "storage": "f24dd34c45c67986d06448322d12d6f718bcad219fc371ab1405f1c5b28d5158",
+    "explore": "7a3f826aba75fe9ce8a63ea96eb2c00c7bd265f17d35f805bf93ddacb46ed294",
+    "map_order": "14deb2a4aa0a4b4dd0b76ce61f5a855bcf3c768ca89b4d2e33c229f971350a7a",
+    "month_boss": "0c56c04f74b39084ab9ca454aa40f64361be72125ff714615f1c8702ca7376ee",
+    "obscure": "1933148e1d61fd95171bb23c03480e2516e6b3f43cdf1dd752bf79581776018f",
+    "daily": "a1a5f6516b142cfd7fc816873bc8227a2987ee7c34e9e5544e69568fa1627785",
+    "hazard1_leveling": "a8adc296d582044de76ef6931df4925ddba4674d08eb5e084c4d085d91013d5e",
+    "meowfficer_farming": "6924525b62bc85dcc086764970da9aa67984602e72e8e0b1bb863d14adec9dec",
+    "ash_assist": "ba9ea33201a97d8b949b7287383b9ac73fa3f28cd3c3fdac4e91983c99d80447"
+  }
+}

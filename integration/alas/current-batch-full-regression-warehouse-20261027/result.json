@@ -1,0 +1,35 @@
+{
+  "schema": "alas-headless.current-batch-full-regression/v1",
+  "at": "2026-10-27T14:17:09.106379+08:00",
+  "passed": true,
+  "offline_only": true,
+  "exit_code": 0,
+  "tests": {
+    "passed": 8686,
+    "skipped": 254,
+    "warnings": 138
+  },
+  "pytest_elapsed_seconds": 862.8,
+  "reported_execution_and_end_verification_seconds": 870.062,
+  "timing_scope": "Excludes startup snapshot preparation. No paired product performance claim.",
+  "finished_at": "2026-10-27T14:14:06.726484+08:00",
+  "repository_snapshot_files": 3001,
+  "native_snapshot_files": 7,
+  "all_snapshots_unchanged_at_end": true,
+  "integration_members": 246,
+  "combined_sha256": "996e0cf000f7fe69a61cb385abc6d2cf5198cc75c98ed830abae39b989884964",
+  "scope": "Accumulated Warehouse typed UI/filter/scroll/inventory/selection/summary/destroy/reward, quantity ledger, runner evidence and native246 observation seams. Offline full does not prove warehouse recovery, Research continuation or uninterrupted soak.",
+  "host_exit_cleanup_permission_error_retained": true,
+  "host_global_temp_or_permissions_changed": false,
+  "raw": {
+    "path": "artifacts/full-feature-live-20261025/full-regression-current-batch-r14.json",
+    "sha256": "e6efeb6e4e635d82c0768b0d357e2a2ec5749e7f6a693c8679e3a2793ed7b1e5"
+  },
+  "log": {
+    "path": "artifacts/full-feature-live-20261025/full-regression-current-batch-r14.log",
+    "sha256": "3621979d2ba5da4074cffab46ff0d2b46efa480e69a401b4b26bec5096e8c25c"
+  },
+  "historical_r13_receipt_preserved": "integration/alas/current-batch-full-regression-20261027/result.json",
+  "support_promotion": false,
+  "delivery": "LOCALONLY/noautomaticcommitpush"
+}

@@ -279,6 +279,9 @@ class EnhancementOracle:
         ship_type: Optional[str],
         *,
         enhanceable_only: bool = True,
+        native_rarities=None,
+        semantic_owner="enhancement",
+        native_extra="no_limit",
     ) -> Tuple[ActionReceipt, ...]:
         """Apply ALAS's Dock type filter, optionally retaining maxed ships."""
 
@@ -297,29 +300,48 @@ class EnhancementOracle:
             raise ValueError("enhancement ship type is unsupported")
         if not isinstance(enhanceable_only, bool):
             raise TypeError("enhancement Dock enhanceable_only must be boolean")
+        rarity_options = {"N": ("1", "普通"), "R": ("2", "稀有"),
+                          "SR": ("3", "精锐"), "SSR": ("4", "超稀有")}
+        if isinstance(native_rarities, (str, bytes)):
+            raise ValueError("native Dock rarity must be a collection")
+        requested_rarities = tuple(native_rarities or ())
+        if any(type(value) is not str or value not in rarity_options
+               for value in requested_rarities):
+            raise ValueError("native Dock rarity is unsupported")
+        if native_extra not in ("no_limit", "not_level_max") or (enhanceable_only and native_extra != "no_limit"):
+            raise ValueError("native Dock extra filter is unsupported or conflicting")
+        extra_option = "3" if enhanceable_only else ("5" if native_extra == "not_level_max" else "tpl")
         state, ui_state = self._enhancement_dock_records()
         filter_path = (
             "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/index_button"
         )
         opener = next(item for item in ui_state.images if item.path == filter_path)
         receipts = [
-            self._click_exact_image(state, opener, "enhancement/dock/filter/open")
+            self._click_exact_image(state, opener, semantic_owner + "/dock/filter/open")
         ]
         self._sleep(0.1)
-        choices = (
+        # Match native Setting.reset_first.  These groups are multi-select:
+        # seeing the desired option selected does not clear an old category
+        # or an old extra constraint left by another task.
+        choices = [
             ("sort", "1", "等级", "btn_index_yellow"),
-            ("index", index_options[ship_type][0], index_options[ship_type][1], "btn_index_blue"),
+            ("index", "tpl", "全部", "btn_index_blue"),
             ("camp", "tpl", "全阵营", "btn_index_blue"),
             ("rarity", "tpl", "全部", "btn_index_blue"),
-            (
-                "extraindex",
-                "3" if enhanceable_only else "tpl",
-                "可强化" if enhanceable_only else "无限制",
-                "btn_index_blue",
-            ),
-        )
+            ("extraindex", "tpl", "无限制", "btn_index_blue"),
+        ]
+        for rarity in dict.fromkeys(requested_rarities):
+            option, label = rarity_options[rarity]
+            choices.append(("rarity", option, label, "btn_index_blue"))
+        if ship_type is not None:
+            option, label = index_options[ship_type]
+            choices.append(("index", option, label, "btn_index_blue"))
+        if enhanceable_only:
+            choices.append(("extraindex", "3", "可强化", "btn_index_blue"))
+        elif native_extra == "not_level_max":
+            choices.append(("extraindex", "5", "未满级", "btn_index_blue"))
         for group, option, label, selected_sprite in choices:
-            semantic_id = "enhancement/dock/filter/{0}/{1}".format(
+            semantic_id = semantic_owner + "/dock/filter/{0}/{1}".format(
                 group, option
             )
             for click_attempt in range(3):
@@ -378,11 +400,43 @@ class EnhancementOracle:
                 )
         for _ in range(20):
             state, ui_state = self._retirement_records()
-            if not self._blocking_rules(state, "enhancement/dock/filter/confirm"):
+            if not self._blocking_rules(state, semantic_owner + "/dock/filter/confirm"):
                 break
             self._sleep(0.05)
         else:
             raise SemanticGateClosed("enhancement Dock filter confirm stayed blocked")
+        expected_selected = {
+            "sort": {"1"},
+            "index": {index_options[ship_type][0]},
+            "camp": {"tpl"},
+            "rarity": ({rarity_options[value][0] for value in requested_rarities}
+                       if requested_rarities else {"tpl"}),
+            "extraindex": {extra_option},
+        }
+        selected = {group: set() for group in expected_selected}
+        option_pattern = re.compile(
+            r"OverlayCamera/Overlay/UIMain/CustomIndexUI\(Clone\)/index_panel/"
+            r"layout/container/indexsort_(sort|index|camp|rarity|extraindex)/"
+            r"bg/([^/]+)"
+        )
+        for image in ui_state.images:
+            match = option_pattern.fullmatch(image.path)
+            if (
+                match is None
+                or not image.active_in_hierarchy
+                or not image.active_and_enabled
+                or image.sprite not in ("btn_index_blue", "btn_index_yellow")
+            ):
+                continue
+            if image.truncated or image.bounds is None:
+                raise SemanticGateClosed(
+                    "enhancement Dock filter selection is incomplete"
+                )
+            selected[match.group(1)].add(match.group(2))
+        if selected != expected_selected:
+            raise SemanticGateClosed(
+                "enhancement Dock filter selected set is incomplete"
+            )
         confirm_path = (
             "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/"
             "layout/btns/ok"
@@ -408,7 +462,7 @@ class EnhancementOracle:
         if len(confirm) != 1 or len(confirm_text) != 1:
             raise SemanticGateClosed("enhancement Dock filter confirm is incomplete")
         receipts.append(
-            self._click_exact_image(state, confirm[0], "enhancement/dock/filter/confirm")
+            self._click_exact_image(state, confirm[0], semantic_owner + "/dock/filter/confirm")
         )
         self._retry_transition_read(
             self._enhancement_dock_records,

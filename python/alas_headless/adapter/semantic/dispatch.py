@@ -146,6 +146,8 @@ class DispatchAdapterPorts:
                   'MAIN_GOTO_REWARD_WHITE': 'main/more',
                   'MAIN_GOTO_DORMMENU': 'main/live',
                   'MAIN_GOTO_DORMMENU_WHITE': 'main/live',
+                  'MAIN_GOTO_FLEET': 'main/formation',
+                  'MAIN_GOTO_FLEET_WHITE': 'main/formation',
                   'DORMMENU_GOTO_ACADEMY': 'dorm-menu/academy'}.get(name) if isinstance(name, str) else None
         prior = getattr(self, '_commission_navigation_handoff', None)
         if (target is not None and prior is not None
@@ -160,6 +162,7 @@ class DispatchAdapterPorts:
                            'reward/page/back': 'main/battle',
                            'main/more': 'reward/page/back',
                            'main/live': 'dorm-menu/dorm',
+                           'main/formation': None,
                            'dorm-menu/academy': 'academy/page/back'}[target]
             sources = reader._matches(state, target)
             source_pending = bool(not blockers and len(sources) == 1
@@ -169,7 +172,9 @@ class DispatchAdapterPorts:
                     and (source_pending
                          or (blockers and all(rule.blocker_id == 'loading' for rule in blockers))
                          or (not reader.observation_target_present(target)
-                             and reader.enabled(destination)))):
+                             and (reader.gems_farming_formation_visible()
+                                  if target == 'main/formation'
+                                  else reader.enabled(destination))))):
                 # Native ui_goto can repeat its departing screenshot edge.
                 # Main's two theme aliases can also repeat an accepted live
                 # menu entry while its source is still actionable (r602).

@@ -1,0 +1,369 @@
+{
+  "schema": "alas-headless.common-cv-ports-milestone/v1",
+  "at": "2026-10-26T17:56:05.171197+08:00",
+  "native_member_count": 244,
+  "combined_sha256": "cb47c744c7163f7ce869d98b794f911d782f6306b65af9aeb92ccb7f12119fcf",
+  "primary_sdk_and_actual_native_applied": true,
+  "original_native_policy_preserved": true,
+  "typed_pooled_instance_and_scroll_route_repairs": true,
+  "focused": {
+    "passed": 148,
+    "skipped": 1,
+    "seconds": 17.37
+  },
+  "full_regression": {
+    "passed": 8457,
+    "skipped": 254,
+    "warnings": 138,
+    "pytest_seconds": 732.84,
+    "wrapper_seconds": 740.64,
+    "exit_code": 0,
+    "source_snapshot_files": 2944,
+    "source_snapshot_unchanged_at_end": true,
+    "scope": "One complete offline pytest-q-tests invocation, PYTHONPATH=python. Skips are not passes or live qualification. Post-run documentation and this closeout do not alter SDK/native/test code."
+  },
+  "actual_native_config_replay": true,
+  "patch_series_hash_check": true,
+  "clean_pinned_patch_apply_and_compile": true,
+  "support_matrix": true,
+  "support_promoted": false,
+  "live": {
+    "one_click_resource_transaction_proven": true,
+    "capacity_before": 873,
+    "capacity_after": 861,
+    "capacity_total": 1010,
+    "physical_retired": 12,
+    "protected_template": 206011,
+    "equipment_disassembled": 20,
+    "resource_delta": {
+      "oil": 0,
+      "gold": 258,
+      "gem": 0
+    },
+    "receipt": {
+      "retired_count": 12,
+      "capacity_before": 873,
+      "capacity_after": 861,
+      "capacity_total": 1010,
+      "settings": {
+        "generation": 70957,
+        "unique_ship_protection": true,
+        "priority": [
+          "R",
+          "SR",
+          "N"
+        ],
+        "full_star_policy": "keep_none",
+        "no_full_star_policy": "keep_none"
+      },
+      "rewards": [
+        [
+          "物资",
+          208
+        ],
+        [
+          "荣誉勋章",
+          3
+        ]
+      ],
+      "rarity_warning_confirmed": false,
+      "equipment_preserved": false,
+      "actions": [
+        {
+          "semantic_id": "retirement/settings/open",
+          "generation": 70931,
+          "point": {
+            "x": 35.53,
+            "y": 519.948
+          },
+          "bounds": {
+            "left": 7.872,
+            "top": 488.958,
+            "right": 63.188,
+            "bottom": 550.938
+          },
+          "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/setting",
+          "policy_sha256": null,
+          "capability_id": null
+        },
+        {
+          "semantic_id": "retirement/settings/close",
+          "generation": 70962,
+          "point": {
+            "x": 1001.277,
+            "y": 110.867
+          },
+          "bounds": {
+            "left": 964.554,
+            "top": 85.2,
+            "right": 1038.0,
+            "bottom": 136.533
+          },
+          "path": "OverlayCamera/Overlay/UIMain/DockyardQuickSelectSettingUI(Clone)/window/top/btnBack",
+          "policy_sha256": null,
+          "capability_id": null
+        },
+        {
+          "semantic_id": "retirement/one-click",
+          "generation": 70973,
+          "point": {
+            "x": 725.0,
+            "y": 673.333
+          },
+          "bounds": {
+            "left": 634.03,
+            "top": 639.678,
+            "right": 815.97,
+            "bottom": 706.989
+          },
+          "path": "OverlayCamera/Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/quick_select",
+          "policy_sha256": null,
+          "capability_id": null
+        },
+        {
+          "semantic_id": "retirement/preconfirm/keep-common-cv",
+          "generation": 70985,
+          "point": {
+            "x": 1000.0,
+            "y": 228.733
+          },
+          "bounds": {
+            "left": 916.667,
+            "top": 113.733,
+            "right": 1083.333,
+            "bottom": 343.733
+          },
+          "path": "OverlayCamera/Overlay/UIMain/DestoryInfoUI(Clone)/frame/sliders/content/206011",
+          "policy_sha256": null,
+          "capability_id": null
+        },
+        {
+          "semantic_id": "retirement/ships/confirm",
+          "generation": 70996,
+          "point": {
+            "x": 1014.0,
+            "y": 649.067
+          },
+          "bounds": {
+            "left": 923.0,
+            "top": 615.4,
+            "right": 1105.0,
+            "bottom": 682.733
+          },
+          "path": "OverlayCamera/Overlay/UIMain/DestoryInfoUI(Clone)/frame/confirm_button",
+          "policy_sha256": null,
+          "capability_id": null
+        },
+        {
+          "semantic_id": "retirement/reward/close",
+          "generation": 71018,
+          "point": {
+            "x": 640.0,
+            "y": 482.067
+          },
+          "bounds": {
+            "left": 564.667,
+            "top": 465.4,
+            "right": 715.333,
+            "bottom": 498.733
+          },
+          "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close",
+          "policy_sha256": null,
+          "capability_id": null
+        },
+        {
+          "semantic_id": "retirement/equipment/confirm-selection",
+          "generation": 71034,
+          "point": {
+            "x": 1047.533,
+            "y": 605.867
+          },
+          "bounds": {
+            "left": 956.533,
+            "top": 572.2,
+            "right": 1138.533,
+            "bottom": 639.533
+          },
+          "path": "OverlayCamera/Overlay/UIMain/ResolveEquipmentUI(Clone)/main/ok_btn",
+          "policy_sha256": null,
+          "capability_id": null
+        },
+        {
+          "semantic_id": "retirement/equipment/disassemble/confirm",
+          "generation": 71044,
+          "point": {
+            "x": 806.667,
+            "y": 573.333
+          },
+          "bounds": {
+            "left": 715.667,
+            "top": 539.667,
+            "right": 897.667,
+            "bottom": 607.0
+          },
+          "path": "OverlayCamera/Overlay/UIMain/ResolveEquipmentUI(Clone)/destroy_confirm/actions/destroy_button",
+          "policy_sha256": null,
+          "capability_id": null
+        },
+        {
+          "semantic_id": "retirement/equipment/reward/close",
+          "generation": 71059,
+          "point": {
+            "x": 640.0,
+            "y": 482.067
+          },
+          "bounds": {
+            "left": 564.667,
+            "top": 465.4,
+            "right": 715.333,
+            "bottom": 498.733
+          },
+          "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close",
+          "policy_sha256": null,
+          "capability_id": null
+        }
+      ],
+      "policy_sha256": "470b010ad911e5a05464e9078a852b253879664706bdb6e5ad1a520489d6aea0",
+      "capability_id": "retirement.execute",
+      "equipment_policy": "disassemble",
+      "equipment_disassembled": true,
+      "equipment_quantities": [
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          5,
+          1
+        ],
+        [
+          6,
+          1
+        ],
+        [
+          7,
+          3
+        ],
+        [
+          8,
+          1
+        ],
+        [
+          9,
+          3
+        ],
+        [
+          10,
+          3
+        ]
+      ],
+      "equipment_rewards": [
+        [
+          "物资",
+          50
+        ]
+      ],
+      "common_cv_preservation": [
+        {
+          "action": {
+            "semantic_id": "retirement/preconfirm/keep-common-cv",
+            "generation": 70985,
+            "point": {
+              "x": 1000.0,
+              "y": 228.733
+            },
+            "bounds": {
+              "left": 916.667,
+              "top": 113.733,
+              "right": 1083.333,
+              "bottom": 343.733
+            },
+            "path": "OverlayCamera/Overlay/UIMain/DestoryInfoUI(Clone)/frame/sliders/content/206011",
+            "policy_sha256": null,
+            "capability_id": null
+          },
+          "pid": 6318,
+          "modal_instance_id": -203760,
+          "template_id": 206011,
+          "name": "竞技神",
+          "level": 1,
+          "selected_before": 13,
+          "selected_after": 12,
+          "capacity_used": 873,
+          "capacity_total": 1010,
+          "observed_generation": 70991,
+          "post_instance_reused_by_template": 201111
+        }
+      ]
+    },
+    "uninterrupted_full_handler_proven": false,
+    "abandoned_scanner_keep_one_noop_proven": true,
+    "abandoned_resource_transaction_proven": false,
+    "protected_old_resource_transaction_proven": false,
+    "old_failure": "Exact level-not-one confirmation warning; native popup condition AST equals baseline, false under current explicit N/R method configuration. No adapter-only cause inferred; ordinary rendered ALAS not run for differential reproduction.",
+    "old_zero_resource_recovery": true,
+    "old_post_recovery_capacity": 861,
+    "current_pid_after_recovery": 10867
+  },
+  "evidence_limits": [
+    "Original protected-one-click helper rawterminalFalse/passedFalse retained after frozenset serialization failure; completed resource receipt is independently retained, later successful resume is a separate process.",
+    "Exact helper failure frame could not be saved; no fabricated reconstruction. Old protected-method failure has exact immutable generation77777 and owned pending journal.",
+    "Earlier scroll R4 helper overwrote R3 stdout/stderr paths; R3 raw JSON/full traceback survives, original log bytes do not.",
+    "This is bounded live and offline qualification, not all feature combinations, overnight stability, or support-level promotion."
+  ],
+  "delivery": "LOCALONLY/noautomaticcommitpush",
+  "evidence": {
+    "cv-coherent-source-apply-r1.json": {
+      "path": "artifacts/full-feature-live-20261025/cv-coherent-source-apply-r1.json",
+      "sha256": "a83fae723c878947b72f716bdf12a7b3be0cf6a5e96feff186589f8e4f31a9e5"
+    },
+    "cv-production-milestone-m4-r1.json": {
+      "path": "artifacts/full-feature-live-20261025/cv-production-milestone-m4-r1.json",
+      "sha256": "802c4f0e43de292d9b09f010280340512badc48f3adbaacc77b1a60193ca2956"
+    },
+    "cv-protected-full-case-closeout-r1.json": {
+      "path": "artifacts/full-feature-live-20261025/cv-protected-full-case-closeout-r1.json",
+      "sha256": "16dace1642a42f15a5383566a263ec046eb5b60bef952b73dffd0623e477fb6e"
+    },
+    "cv-old-level-warning-assessment-r1.json": {
+      "path": "artifacts/full-feature-live-20261025/cv-old-level-warning-assessment-r1.json",
+      "sha256": "528ce729f707fbb9ef1a9a779b6a99c71ac818aebc78b01c21c20365f1ff40d3"
+    },
+    "full-regression-common-cv-r9.json": {
+      "path": "artifacts/full-feature-live-20261025/full-regression-common-cv-r9.json",
+      "sha256": "9e98a0ddd1978b2841bcdbfc1c5df31e0cbd634acdb0c8ba781c82b2cd3dac16"
+    },
+    "full-regression-common-cv-r9.log": {
+      "path": "artifacts/full-feature-live-20261025/full-regression-common-cv-r9.log",
+      "sha256": "457f7bd47ba2fa1fd7c84c93d045ef9172e8cae9bf565dc3c1978cdfe2dcc8b3"
+    },
+    "cv-production-patch-tree-r1/result.json": {
+      "path": "artifacts/full-feature-live-20261025/cv-production-patch-tree-r1/result.json",
+      "sha256": "a609f1ad8ffae8d9e5239b677e4fafe2486c71d72b2bd7e7e1668efa752ac79b"
+    },
+    "cv-production-retirement-config-r1.json": {
+      "path": "artifacts/full-feature-live-20261025/cv-production-retirement-config-r1.json",
+      "sha256": "f1b762466aa51e5eab85e30fef964f55db18c35e68371a0f6b69cfca00d591e9"
+    },
+    "cv-production-support-matrix-r2.log": {
+      "path": "artifacts/full-feature-live-20261025/cv-production-support-matrix-r2.log",
+      "sha256": "c0bfacfec2b9adf309d0690c86fcb0776bc6704990d09790bc1d270f1b08c93a"
+    }
+  }
+}

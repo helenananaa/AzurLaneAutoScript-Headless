@@ -1,0 +1,12 @@
+diff --git a/module/daily/daily.py b/module/daily/daily.py
+--- a/module/daily/daily.py
++++ b/module/daily/daily.py
+@@ -358,6 +358,8 @@
+             semantic_adapter is not None
+             and semantic_adapter.daily_precombat_visible()
+         ):
++            if self.handle_combat_automation_confirm():
++                self.device.screenshot()
+             semantic_adapter.click_daily_precombat_back()
+             self.device.sleep((1, 1.2))
+         if (

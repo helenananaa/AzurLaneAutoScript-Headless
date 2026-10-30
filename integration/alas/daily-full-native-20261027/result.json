@@ -1,0 +1,205 @@
+{
+  "schema": "alas-headless.daily-full-native-qualification/v1",
+  "updated_at": "2026-10-27T20:07:18.064134+08:00",
+  "closed_case": {
+    "schema": "alas-headless.daily-full-case-closeout/v1",
+    "recorded_at": "2026-10-27T20:07:18.064134+08:00",
+    "case_closed": true,
+    "full_original_Daily_run_returned": true,
+    "all_attempts_passed": false,
+    "original_r1_passed": false,
+    "r1_failure": "Local qualification harness assumed all category remain<=3;typedSupplyLine4/4 validSDK/native. Refused before SupplyLine category entry;source raw staysfalse.",
+    "r1_elapsed_seconds": 60.89,
+    "r2_passed": true,
+    "r2_elapsed_seconds": 47.979,
+    "original_deadline": "2026-10-27T20:07:24.183223+08:00",
+    "deadline_extended": false,
+    "total_original_calls_attempted": 2,
+    "original_case_call_cap": 2,
+    "r1_original_call_did_not_return": true,
+    "r2_original_full_task_returned": true,
+    "execution_grants_initial": 3,
+    "execution_grants_consumed": 2,
+    "unused_execution_grants_sealed": 1,
+    "physical_challenges_original_max": 9,
+    "physical_challenges_completed": 6,
+    "unused_physical_capacity_sealed": 3,
+    "actual_categories": [
+      {
+        "part": "r1",
+        "kind": "module_development",
+        "remain_before": 2,
+        "remain_after": 0,
+        "capability_units": 1
+      },
+      {
+        "part": "r2",
+        "kind": "supply_line_disruption",
+        "remain_before": 4,
+        "remain_after": 0,
+        "capability_units": 1
+      }
+    ],
+    "all_other_grants": 0,
+    "native_checked": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "private_native_task_delay": [
+      {
+        "args": [],
+        "kwargs": {
+          "server_update": true
+        },
+        "returned": true,
+        "next_run": "2026-10-28 00:00:00"
+      }
+    ],
+    "source_Daily_persistently_disabled": true,
+    "source_policy_skipTrue_unchanged": true,
+    "source_profiles_unchanged_in_r2": true,
+    "final_separate_zero_resource_inspection": {
+      "raw": "daily-full-final-main-20261027-r1.json",
+      "passed": true,
+      "seconds": 5.893,
+      "native_calls": [
+        "goto_main"
+      ],
+      "resource_grants": 0,
+      "resource_delta": {
+        "oil": 0,
+        "gold": 0,
+        "gem": 0
+      },
+      "source_profiles_bytes_unchanged": true,
+      "final": {
+        "pid": 35557,
+        "generation": 248929,
+        "ui_generation": 248929,
+        "main": true,
+        "precombat": false,
+        "resources": {
+          "oil": 10743,
+          "gold": 104459,
+          "gem": 3505
+        }
+      }
+    },
+    "initial_resources": {
+      "oil": 10743,
+      "gold": 102354,
+      "gem": 3505
+    },
+    "final_resources": {
+      "oil": 10743,
+      "gold": 104459,
+      "gem": 3505
+    },
+    "net_case_resource_delta": {
+      "oil": 0,
+      "gold": 2105,
+      "gem": 0
+    },
+    "identities_exited": true,
+    "processes": {
+      "r1": {
+        "terminal": true,
+        "guard_pid": 43712,
+        "guard_create_time": 1793101943.883745,
+        "started_at": "2026-10-27T19:52:24.183223+08:00",
+        "deadline": "2026-10-27T20:07:24.183223+08:00",
+        "stop_file": "E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless\\artifacts\\full-feature-live-20261025\\daily-full-native-20261027-r1.stop",
+        "purpose": "Independent complete original Daily.run with source UseDailySkipTrue/first/fleet1;original weekday/remaining/card reset/serverUpdate delay,new3executiongrants batchmayconsume<=3attempts,max9physical;other0;nooldcase/grantcontinuation.",
+        "action_grants": {
+          "daily.execute": 3
+        },
+        "other_resource_grants": 0,
+        "native_call_cap": 2,
+        "max_categories": 7,
+        "max_physical_challenges": 9,
+        "pid": 41752,
+        "child_create_time": 1793101944.1864057,
+        "exit_code": 1,
+        "forced_stop": false,
+        "finished_at": "2026-10-27T19:53:54.433852+08:00"
+      },
+      "r2": {
+        "terminal": true,
+        "guard_pid": 37588,
+        "guard_create_time": 1793102311.484167,
+        "started_at": "2026-10-27T19:58:31.726120+08:00",
+        "deadline": "2026-10-27T20:07:24.183223+08:00",
+        "stop_file": "E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless\\artifacts\\full-feature-live-20261025\\daily-full-native-20261027-r2.stop",
+        "purpose": "SAME fullDailycase remainder only: r1used1call/1grant/2realattempts. r2max1originalDaily.run/2remaininggrants/7remainingphysical of original9 and SAME20:07deadline;only localqualification percategory3 assumption corrected for realSupplyLine4/4,noSDK/native/configpolicy change,no Main appended.",
+        "action_grants": {
+          "daily.execute": 2
+        },
+        "other_resource_grants": 0,
+        "native_call_cap": 1,
+        "max_categories": 7,
+        "max_physical_challenges": 7,
+        "pid": 11256,
+        "child_create_time": 1793102311.7297685,
+        "exit_code": 0,
+        "forced_stop": false,
+        "finished_at": "2026-10-27T19:59:28.375649+08:00"
+      },
+      "post_main": {
+        "terminal": true,
+        "guard_pid": 41252,
+        "started_at": "2026-10-27T20:00:56.584122+08:00",
+        "deadline": "2026-10-27T20:03:56.584122+08:00",
+        "resource_grants": 0,
+        "scope": "Independent postfix passive observation/original inherited Daily return prefix and goto_main,max1original goto_main call,allgrants0,no sortie or oldcase continuation",
+        "pid": 4852,
+        "child_create_time": 1793102456.586902,
+        "guard_create_time": 1793102456.3190153,
+        "exit_code": 0,
+        "forced_stop": false,
+        "finished_at": "2026-10-27T20:01:08.696488+08:00"
+      }
+    },
+    "no_new_gameplay_case_or_grants_for_r2": true,
+    "not_uninterrupted_soak": true,
+    "no_drop_or_grade_itemization": true,
+    "local_only": true
+  },
+  "raws": {
+    "daily-full-native-20261027-r1.json": "a503155bbeca1b33552d1156284b633c2e7dad876d086e3d33d76e0de96db878",
+    "daily-full-native-20261027-r2.json": "b468756e9fd2ecc9d41e44d9d3fd9302ee395ceae6a04040ccce1457f2c8c93d",
+    "daily-full-final-main-20261027-r1.json": "946d165976a9c797408e545bc8454c4317194c06a0531e0b1605d50f999491af"
+  },
+  "source_review": "Original Daily.run->_validate_daily_config->daily_run;native7card checking,filtering/re-entry/count/reset/task_delay(server_update=True) retained. r2 reran originalcompleteentry against actualremainingstate after failedlocalharness;didnotreplay completedmodule.",
+  "controlled_native_r2_full_return": true,
+  "source_skipTrue_policy_live": true,
+  "module_development_live": {
+    "part": "r1 beforelaterharnessfailure",
+    "actual_remain": "2->0",
+    "capability_units": 1
+  },
+  "supply_line_live": {
+    "part": "r2",
+    "actual_remain": "4->0",
+    "capability_units": 1
+  },
+  "quota4_observation_fixture": "tests/fixtures/daily-full-weekly-quota-20261027.json",
+  "quota4_is_not_a_production_defect": true,
+  "sdk_changed_this_batch": false,
+  "native_changed": false,
+  "observer_changed": false,
+  "current_full": false,
+  "formal_support_promoted": false,
+  "limits": [
+    "Original failed r1 not rewritten;entirecasehasattemptfailure.",
+    "r2 completeDaily.run verified on currentremainingstate;not onecallperforming both module and SupplyLine.",
+    "Only currentweekday/account/available categories,not all dates/options or overnight scheduler.",
+    "NativeprivateNextRun was updated;sourcepersistentDaily remainsdisabled/skipTrue/oldNextRununchanged.",
+    "Resource numbersnetobserved,no fabricateditemdropaudit."
+  ]
+}

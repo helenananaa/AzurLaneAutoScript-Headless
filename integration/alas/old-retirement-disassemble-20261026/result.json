@@ -1,0 +1,286 @@
+{
+  "schema": "alas-headless.old-retirement-disassemble-live/v1",
+  "recorded_at": "2026-10-26T12:44:07.554254+08:00",
+  "passed": true,
+  "scope": "One original retire_ships_old(amount=1), original quit and goto_main in one process. Current native N/R filter; General stays enhance. Not retire_all/retire_10, a rare-ship transaction, CV protection, or natural mid-map full-dock chain.",
+  "configuration": {
+    "general_mode": "enhance",
+    "native_rarities": [
+      "N",
+      "R"
+    ],
+    "original_native_amount": 3000,
+    "qualification_amount_argument": 1,
+    "gems_enabled": false,
+    "equipment": "disassemble"
+  },
+  "elapsed_seconds": 40.442,
+  "before": {
+    "pid": 1615,
+    "generation": 273762,
+    "ui_generation": 273762,
+    "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "main": true,
+    "resources": {
+      "oil": 3810,
+      "gold": 102977,
+      "gem": 3505
+    }
+  },
+  "after": {
+    "pid": 1615,
+    "generation": 274262,
+    "ui_generation": 274262,
+    "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "main": true,
+    "resources": {
+      "oil": 3810,
+      "gold": 103008,
+      "gem": 3505
+    }
+  },
+  "dock_before": {
+    "generation": 273817,
+    "capacity_used": 866,
+    "capacity_total": 1010,
+    "selected_count": 0
+  },
+  "receipt": {
+    "retired_count": 1,
+    "capacity_before": 866,
+    "capacity_after": 865,
+    "capacity_total": 1010,
+    "returned_generation": 274099,
+    "native_rarities": [
+      "N",
+      "R"
+    ],
+    "selected_templates": [
+      303011
+    ],
+    "selected_ui_instances": [
+      -897710
+    ],
+    "ship_rewards": [
+      [
+        "物资",
+        18
+      ]
+    ],
+    "equipment_policy": "disassemble",
+    "equipment_preserved": false,
+    "equipment_disassembled": true,
+    "equipment_quantities": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        1
+      ]
+    ],
+    "equipment_rewards": [
+      [
+        "物资",
+        13
+      ],
+      [
+        "鱼雷部件T1",
+        1
+      ]
+    ],
+    "actions": [
+      {
+        "semantic_id": "retirement/preconfirm/open",
+        "generation": 273953,
+        "point": {
+          "x": 1155.667,
+          "y": 673.333
+        },
+        "bounds": {
+          "left": 1064.667,
+          "top": 639.667,
+          "right": 1246.667,
+          "bottom": 707.0
+        },
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/select_panel_adapt/select_panel/confirm_button",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/ships/confirm",
+        "generation": 273978,
+        "point": {
+          "x": 1014.0,
+          "y": 649.067
+        },
+        "bounds": {
+          "left": 923.0,
+          "top": 615.4,
+          "right": 1105.0,
+          "bottom": 682.733
+        },
+        "path": "OverlayCamera/Overlay/UIMain/DestoryInfoUI(Clone)/frame/confirm_button",
+        "policy_sha256": "b7f5797c46477d435880012aaefde4a16ab2a8ebc1dd6d17d3e4e5db998ff6b3",
+        "capability_id": "retirement.execute"
+      },
+      {
+        "semantic_id": "retirement/reward/close",
+        "generation": 274002,
+        "point": {
+          "x": 640.0,
+          "y": 482.067
+        },
+        "bounds": {
+          "left": 564.667,
+          "top": 465.4,
+          "right": 715.333,
+          "bottom": 498.733
+        },
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/equipment/confirm-selection",
+        "generation": 274024,
+        "point": {
+          "x": 1047.533,
+          "y": 605.867
+        },
+        "bounds": {
+          "left": 956.533,
+          "top": 572.2,
+          "right": 1138.533,
+          "bottom": 639.533
+        },
+        "path": "OverlayCamera/Overlay/UIMain/ResolveEquipmentUI(Clone)/main/ok_btn",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/equipment/disassemble/confirm",
+        "generation": 274046,
+        "point": {
+          "x": 806.667,
+          "y": 573.333
+        },
+        "bounds": {
+          "left": 715.667,
+          "top": 539.667,
+          "right": 897.667,
+          "bottom": 607.0
+        },
+        "path": "OverlayCamera/Overlay/UIMain/ResolveEquipmentUI(Clone)/destroy_confirm/actions/destroy_button",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      {
+        "semantic_id": "retirement/equipment/reward/close",
+        "generation": 274075,
+        "point": {
+          "x": 640.0,
+          "y": 482.067
+        },
+        "bounds": {
+          "left": 564.667,
+          "top": 465.4,
+          "right": 715.333,
+          "bottom": 498.733
+        },
+        "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close",
+        "policy_sha256": null,
+        "capability_id": null
+      }
+    ],
+    "selection_receipts": [
+      {
+        "action": {
+          "semantic_id": "retirement/card/select/-897710",
+          "generation": 273910,
+          "point": {
+            "x": 162.133,
+            "y": 177.667
+          },
+          "bounds": {
+            "left": 84.8,
+            "top": 69.333,
+            "right": 239.467,
+            "bottom": 286.0
+          },
+          "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/303011",
+          "policy_sha256": null,
+          "capability_id": null
+        },
+        "pid": 1615,
+        "template_id": 303011,
+        "instance_id": -897710,
+        "count_before": 0,
+        "count_after": 1,
+        "capacity_used": 866,
+        "observed_generation": 273928
+      }
+    ],
+    "policy_sha256": "b7f5797c46477d435880012aaefde4a16ab2a8ebc1dd6d17d3e4e5db998ff6b3",
+    "capability_id": "retirement.execute",
+    "mode": "old_retire"
+  },
+  "per_batch_receipt_count": 1,
+  "net_resources": {
+    "oil": 0,
+    "gold": 31,
+    "gem": 0
+  },
+  "original_quit_returned": true,
+  "native_guard_exit_code": 0,
+  "forced_stop": false,
+  "carried_unspent_retirement_grants": 1,
+  "additional_retirement_allocation": 0,
+  "final_retirement_grants": 0,
+  "source_and_persistent_bytes_unchanged": true,
+  "raw": {
+    "path": "artifacts/full-feature-live-20261025/old-retirement-postfix-r1.json",
+    "sha256": "87e0e30aa9e6c24f79992b31ffc6d7b86496a4f124b106da169ab61513e5d63b"
+  },
+  "prior_failure": {
+    "path": "artifacts/full-feature-live-20261025/old-retirement-live-r1.json",
+    "passed": false,
+    "cause": "Selected phase legitimately hides empty instruction tip. Typed parser and page-kind detector required that disappearing tip; failed after one selection and before ship confirmation. Original failed receipt retained."
+  },
+  "recovery": {
+    "path": "artifacts/full-feature-live-20261025/old-retire-selection-recovery-r1.json",
+    "scope": "Separate known accepted selection cancellation; zero resource grants; original native cleanup/Main; capacity unchanged. Not stitched into original failed run."
+  },
+  "repair": {
+    "files": [
+      "python/alas_headless/oracle/retirement.py",
+      "python/alas_headless/oracle/old_retirement_dialog.py"
+    ],
+    "selected_phase_fixture": "tests/fixtures/retirement-manual-selected-phase-20261026.json",
+    "focused": "artifacts/full-feature-live-20261025/old-retire-selected-phase-focused-r3.log",
+    "focused_passed": 51,
+    "integration_focused": "artifacts/full-feature-live-20261025/old-retire-primary-focused-r1.log",
+    "integration_passed": 129,
+    "integration_skipped": 2
+  },
+  "patch_series": {
+    "members": 242,
+    "combined_sha256": "fc18dd0b9e33574a3060d59f57062cda933ec31b424c84638f22b1e44e9eb62e",
+    "manifest_sha256": "ec5c25df60c613f227fc6b3e7fe692ea0c0005485ceb208157e567d8317248b3",
+    "runtime_retirement_sha256": "98c0be1a46331951e38a6b8f5614c8a234cbd8ca791bfa728c17cb6638be27be"
+  },
+  "current_code_sha256": {
+    "python/alas_headless/oracle/retirement.py": "413085564893cb2b3e571ed28b81debfc9fee8e9db8920c98ee1951cad2b769a",
+    "python/alas_headless/oracle/old_retirement_dialog.py": "de61faf10fc29537ef76cd9ef95b34939141b184150c912ed0741dd73ce246ef",
+    "python/alas_headless/adapter/semantic/session_retirement.py": "3c5dca296f1de6645ced50a1dbd823597efdce4ea64ac6a0a8020c20912657c9"
+  },
+  "remaining_boundaries": [
+    "Full General old_retire dispatch / retire_all / retire_10 live execution",
+    "Separate R/SR/SSR ship-selection and confirmation gameplay",
+    "Native common-CV scanner when Gems protection is enabled",
+    "Equipment preservation branch; current user authority is disassembly",
+    "Same-process natural full-dock retirement -> same-map resume -> settlement"
+  ],
+  "delivery": "LOCAL ONLY; no automatic commit or push"
+}

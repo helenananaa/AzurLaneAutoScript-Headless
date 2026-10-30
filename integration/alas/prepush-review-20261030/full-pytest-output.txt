@@ -1,0 +1,321 @@
+........................................................................ [  0%]
+........................................................................ [  1%]
+........................................................................ [  2%]
+........................................................................ [  3%]
+........................................................................ [  3%]
+........................................................................ [  4%]
+........................................................................ [  5%]
+........................................................................ [  6%]
+........................................................................ [  7%]
+........................................................................ [  7%]
+........................................................................ [  8%]
+........................................................................ [  9%]
+........................................................................ [ 10%]
+........................................................................ [ 10%]
+........................................................................ [ 11%]
+........................................................................ [ 12%]
+........................................................................ [ 13%]
+..............s......................................................... [ 14%]
+........................................................................ [ 14%]
+........................................................................ [ 15%]
+........................................................................ [ 16%]
+........................................................................ [ 17%]
+........................................................................ [ 18%]
+........................................................................ [ 18%]
+........................................................................ [ 19%]
+........................................................................ [ 20%]
+......s................................................................. [ 21%]
+.............................................................s.......... [ 21%]
+...................sssssssssss.....................sssss................ [ 22%]
+...........ssssss....sss.s.................................sss.....sssss [ 23%]
+ssss.................................................................sss [ 24%]
+sss..................................ssssssss........................... [ 25%]
+.............................................................sss........ [ 25%]
+......ssss.............................................................. [ 26%]
+........................................................................ [ 27%]
+..........................................ssssss......................s. [ 28%]
+........................................................................ [ 28%]
+........................................................................ [ 29%]
+........................................................................ [ 30%]
+........................................................................ [ 31%]
+....................................s...........................s....... [ 32%]
+........................................................................ [ 32%]
+...................................................ss................... [ 33%]
+.......................................s................................ [ 34%]
+........................................................................ [ 35%]
+........................................................................ [ 36%]
+..........................................sss........................... [ 36%]
+........................................................................ [ 37%]
+ssss......ssssssssssssssss...........s.................................. [ 38%]
+........................................................................ [ 39%]
+........................................................................ [ 39%]
+........................................................................ [ 40%]
+........................................................................ [ 41%]
+........................................................................ [ 42%]
+........................................................................ [ 43%]
+.............................ssss...............................s....... [ 43%]
+.....................................ssssss............................. [ 44%]
+................sssss..................................................s [ 45%]
+....ssssss.....s........................................................ [ 46%]
+.................................s..............................s....... [ 46%]
+........ss......................ss...................................... [ 47%]
+...........................s............................................ [ 48%]
+........................................................................ [ 49%]
+.....................s.sss...s...............sss........................ [ 50%]
+........................................................................ [ 50%]
+........................................................................ [ 51%]
+........................................................................ [ 52%]
+........................................................................ [ 53%]
+........................................................................ [ 54%]
+........................................................................ [ 54%]
+......s................................................................. [ 55%]
+........................................................................ [ 56%]
+................................s....................................... [ 57%]
+...............................s.........................s.............. [ 57%]
+......................................................................ss [ 58%]
+ssssss.sssss............................................................ [ 59%]
+...................................................ssssss............... [ 60%]
+........................................................................ [ 61%]
+................................................s....................... [ 61%]
+........................................................................ [ 62%]
+....................s................................................... [ 63%]
+........................................s............................... [ 64%]
+............................................s..........s................ [ 64%]
+sssss..................................................................s [ 65%]
+.....................s................s.................ss.sssssss...... [ 66%]
+........................................................................ [ 67%]
+......................................................s........s..s..... [ 68%]
+........................................................................ [ 68%]
+........................................................................ [ 69%]
+....s............................................................ss..... [ 70%]
+............................................s........................... [ 71%]
+.ssssssss...s........................................................... [ 72%]
+........................................................................ [ 72%]
+..........................................................s.s........... [ 73%]
+.....................................................................s.. [ 74%]
+........................................................................ [ 75%]
+.........s..........................ssss.............................sss [ 75%]
+.s..........................................................s..........s [ 76%]
+ssss.................................................................... [ 77%]
+........................................................................ [ 78%]
+..s.................................s.........s......................... [ 79%]
+........................................................................ [ 79%]
+..............................................s......................... [ 80%]
+....................................................ss.................. [ 81%]
+............................................ssssssssss..sssssssss....... [ 82%]
+........................................................................ [ 82%]
+........................................................................ [ 83%]
+........................................................................ [ 84%]
+........................................................................ [ 85%]
+........................................................................ [ 86%]
+..........s............................................................. [ 86%]
+........................................................................ [ 87%]
+.....................s.................................................. [ 88%]
+........................................................................ [ 89%]
+.............................................sssssssss.................. [ 90%]
+........................................................................ [ 90%]
+........................................................................ [ 91%]
+........................................................................ [ 92%]
+........................................................................ [ 93%]
+........................................................................ [ 93%]
+........................................................................ [ 94%]
+........................................................................ [ 95%]
+........................................................................ [ 96%]
+........................................................................ [ 97%]
+............s........................................................... [ 97%]
+........................................................................ [ 98%]
+.....................................................s.................. [ 99%]
+......................................................                   [100%]
+============================== warnings summary ===============================
+tests\conftest.py:6
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless\tests\conftest.py:6: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+    import pkg_resources
+
+D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154
+D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154
+D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154
+D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154
+D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154
+  D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('sphinxcontrib')`.
+  Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+    declare_namespace(pkg)
+
+D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154
+  D:\anaconda\Lib\site-packages\pkg_resources\__init__.py:3154: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('zope')`.
+  Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages
+    declare_namespace(pkg)
+
+tests/test_alas_battle_pass_config.py: 1 warning
+tests/test_alas_benchmark_config.py: 1 warning
+tests/test_alas_buy_furniture_config.py: 1 warning
+tests/test_alas_campaign_clear_mode_config.py: 1 warning
+tests/test_alas_campaign_switch_config.py: 1 warning
+tests/test_alas_commission_config.py: 1 warning
+tests/test_alas_daemon_config.py: 1 warning
+tests/test_alas_data_key_config.py: 1 warning
+tests/test_alas_dorm_config.py: 1 warning
+tests/test_alas_enemy_priority_config.py: 1 warning
+tests/test_alas_exercise_config.py: 1 warning
+tests/test_alas_gacha_config.py: 1 warning
+tests/test_alas_game_manager_config.py: 1 warning
+tests/test_alas_main_campaign_routes.py: 1 warning
+tests/test_alas_retirement_config.py: 1 warning
+tests/test_alas_shipyard_config.py: 1 warning
+tests/test_alas_tactical_config.py: 1 warning
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\module\device\method\minitouch.py:467: DeprecationWarning: websockets.WebSocketClientProtocol is deprecated
+    _minitouch_ws: websockets.WebSocketClientProtocol
+
+tests/test_alas_battle_pass_config.py::AlasBattlePassConfigTests::test_exact_live_tree_replay_when_available
+  D:\anaconda\Lib\site-packages\websockets\legacy\__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+    warnings.warn(  # deprecated in 14.0 - 2024-11-09
+
+tests/test_alas_config_branch_compatibility.py::test_research_strategy_extension_requires_its_own_installed_declaration
+tests/test_research_unknown_metadata.py::test_pinned_native_metadata_keeps_unknown_invalid_and_selects_known_cards
+tests/test_research_unknown_metadata.py::test_pinned_native_metadata_keeps_unknown_invalid_and_selects_known_cards
+tests/test_research_unknown_metadata.py::test_pinned_native_metadata_keeps_unknown_invalid_and_selects_known_cards
+tests/test_research_unknown_metadata.py::test_pinned_native_metadata_keeps_unknown_invalid_and_selects_known_cards
+tests/test_research_unknown_metadata.py::test_pinned_native_metadata_keeps_unknown_invalid_and_selects_known_cards
+tests/test_research_unknown_metadata.py::test_updated_native_metadata_can_recognize_new_card_without_adapter_allowlist
+  <unknown>:29: SyntaxWarning: invalid escape sequence '\d'
+
+tests/test_alas_config_branch_compatibility.py::test_research_strategy_extension_requires_its_own_installed_declaration
+tests/test_research_unknown_metadata.py::test_pinned_native_metadata_keeps_unknown_invalid_and_selects_known_cards
+tests/test_research_unknown_metadata.py::test_pinned_native_metadata_keeps_unknown_invalid_and_selects_known_cards
+tests/test_research_unknown_metadata.py::test_pinned_native_metadata_keeps_unknown_invalid_and_selects_known_cards
+tests/test_research_unknown_metadata.py::test_pinned_native_metadata_keeps_unknown_invalid_and_selects_known_cards
+tests/test_research_unknown_metadata.py::test_pinned_native_metadata_keeps_unknown_invalid_and_selects_known_cards
+tests/test_research_unknown_metadata.py::test_updated_native_metadata_can_recognize_new_card_without_adapter_allowlist
+  <unknown>:30: SyntaxWarning: invalid escape sequence '\d'
+
+tests/test_alas_decision_replay_isolation.py::test_original_decisions_run_without_device_imports[event-patched]
+  E:\CacheVault\Temp\alas-native-test-1_0vjy23\source\module\config\config_updater.py:826: SyntaxWarning: invalid escape sequence '\|'
+    """
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\dev_tools\research_optimizer.py:642: SyntaxWarning: invalid escape sequence '\!'
+    FILTER_REGEX = re.compile('([s\!][1234])?'
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\dev_tools\research_optimizer.py:651: SyntaxWarning: invalid escape sequence '\d'
+    '(\d.\d|\d\d?)?')
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\dev_tools\slpp.py:55: SyntaxWarning: invalid escape sequence '\s'
+    self.space = re.compile('\s', re.M)
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\dev_tools\slpp.py:56: SyntaxWarning: invalid escape sequence '\w'
+    self.alnum = re.compile('\w', re.M)
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\dev_tools\word_template_extractor.py:42: SyntaxWarning: invalid escape sequence '\.'
+    for result in re.findall('uv0\.{0,1}(.*?)end', text, re.DOTALL):
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\module\commission\project.py:17: SyntaxWarning: invalid escape sequence '\d'
+    '(\d\d?:\d\d)?'
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\module\commission\project.py:18: SyntaxWarning: invalid escape sequence '\d'
+    '(\d\d?.\d\d?|\d\d?)?'
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\module\commission\project.py:471: SyntaxWarning: invalid escape sequence '\d'
+    result = re.search('(\d+):(\d+):(\d+)', string)
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\module\config\config_updater.py:821: SyntaxWarning: invalid escape sequence '\|'
+    """
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\module\device\connection_attr.py:288: SyntaxWarning: invalid escape sequence '\S'
+    logger.error('Unable to find registry HKEY_LOCAL_MACHINE\SOFTWARE\BlueStacks_nxt '
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\module\device\connection_attr.py:289: SyntaxWarning: invalid escape sequence '\S'
+    'or HKEY_LOCAL_MACHINE\SOFTWARE\BlueStacks_nxt_cn')
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\module\handler\sensitive_info.py:39: SyntaxWarning: invalid escape sequence '\['
+    text = re.sub('\[Adb_binary\] (.*?)AzurLaneAutoScript', '[Adb_binary] C:\\\\fakepath\\\\AzurLaneAutoScript', text)
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\module\raid\daily.py:19: SyntaxWarning: invalid escape sequence '\w'
+    STAGE_FILTER = Filter(regex=re.compile('(\w+)'), attr=['name'])
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\module\research\project.py:24: SyntaxWarning: invalid escape sequence '\ '
+    """
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\module\research\project.py:179: SyntaxWarning: invalid escape sequence '\d'
+    result = re.search('(\d+):(\d+):(\d+)', string)
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+tests/test_alas_research_config_replay.py::ResearchConfigReplayTests::test_exact_live_patched_tree_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\module\research\selector.py:29: SyntaxWarning: invalid escape sequence '\d'
+    '(\d{3})?'
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+tests/test_alas_research_config_replay.py::ResearchConfigReplayTests::test_exact_live_patched_tree_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\module\research\selector.py:30: SyntaxWarning: invalid escape sequence '\d'
+    '(\d.\d|\d\d?)?')
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\module\config\redirect_utils\shop_filter.py:74: SyntaxWarning: invalid escape sequence '\>'
+    value = re.sub('\>\s*\>', '>', value)
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\module\config\redirect_utils\shop_filter.py:75: SyntaxWarning: invalid escape sequence '\>'
+    value = re.sub('\>\s*$', '', value)
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\module\device\method\uiautomator_2.py:191: SyntaxWarning: invalid escape sequence '\/'
+    """Drag and shake, like:
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\submodule\AlasFpyBridge\module\config\config_updater.py:108: SyntaxWarning: invalid escape sequence '\|'
+    """
+
+tests/test_alas_opsi_task_config.py::AlasOpsiTaskConfigTests::test_exact_live_tree_replay_when_available
+  E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live\submodule\AlasMaaBridge\module\config\config_updater.py:111: SyntaxWarning: invalid escape sequence '\|'
+    """
+
+tests/test_commission_finished_row.py: 6 warnings
+tests/test_commission_incomplete_row_isolation.py: 12 warnings
+  <unknown>:17: SyntaxWarning: invalid escape sequence '\d'
+
+tests/test_commission_finished_row.py: 6 warnings
+tests/test_commission_incomplete_row_isolation.py: 12 warnings
+  <unknown>:18: SyntaxWarning: invalid escape sequence '\d'
+
+tests/test_commission_finished_row.py: 6 warnings
+tests/test_commission_incomplete_row_isolation.py: 12 warnings
+  <unknown>:474: SyntaxWarning: invalid escape sequence '\d'
+
+tests/test_research_series_identity.py::test_real_native_s9_project_flows_through_original_start_and_queue
+tests/test_research_series_identity.py::test_real_native_project_keeps_integer_series_at_actual_oracle_card_input[False-9]
+tests/test_research_series_identity.py::test_real_native_project_keeps_integer_series_at_actual_oracle_card_input[False-10]
+tests/test_research_series_identity.py::test_real_native_project_keeps_integer_series_at_actual_oracle_card_input[True-9]
+tests/test_research_series_identity.py::test_real_native_project_keeps_integer_series_at_actual_oracle_card_input[True-10]
+tests/test_research_unknown_metadata.py::test_pinned_native_metadata_keeps_unknown_invalid_and_selects_known_cards
+tests/test_research_unknown_metadata.py::test_updated_native_metadata_can_recognize_new_card_without_adapter_allowlist
+tests/test_research_unknown_metadata.py::test_unclassified_factory_output_and_malformed_snapshot_remain_closed
+  <unknown>:24: SyntaxWarning: invalid escape sequence '\ '
+
+tests/test_research_series_identity.py::test_real_native_s9_project_flows_through_original_start_and_queue
+tests/test_research_series_identity.py::test_real_native_project_keeps_integer_series_at_actual_oracle_card_input[False-9]
+tests/test_research_series_identity.py::test_real_native_project_keeps_integer_series_at_actual_oracle_card_input[False-10]
+tests/test_research_series_identity.py::test_real_native_project_keeps_integer_series_at_actual_oracle_card_input[True-9]
+tests/test_research_series_identity.py::test_real_native_project_keeps_integer_series_at_actual_oracle_card_input[True-10]
+tests/test_research_unknown_metadata.py::test_pinned_native_metadata_keeps_unknown_invalid_and_selects_known_cards
+tests/test_research_unknown_metadata.py::test_updated_native_metadata_can_recognize_new_card_without_adapter_allowlist
+tests/test_research_unknown_metadata.py::test_unclassified_factory_output_and_malformed_snapshot_remain_closed
+  <unknown>:179: SyntaxWarning: invalid escape sequence '\d'
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+8944 passed, 254 skipped, 138 warnings in 1122.93s (0:18:42)

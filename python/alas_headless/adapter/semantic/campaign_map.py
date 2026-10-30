@@ -585,17 +585,28 @@ class CampaignMapAdapterPorts:
     def _campaign_swipe_endpoint_area(
         intent: CampaignMapViewportSwipeIntent,
     ) -> Tuple[float, float, float, float]:
-        """Reproduce ALAS's padded end-point domain before random selection."""
+        """Reproduce ALAS's sampled, box-clamped end-point domain."""
 
-        half = tuple(int(round(value / 2.0)) for value in intent.pixel_vector)
+        vector = tuple(int(round(value)) for value in intent.pixel_vector)
+        half = tuple(int(round(value / 2.0)) for value in vector)
         left, top, right, bottom = intent.box
         pad_x = abs(half[0]) + intent.padding
         pad_y = abs(half[1]) + intent.padding
-        return (
+        area = (
             left + pad_x + half[0],
             top + pad_y + half[1],
             right - pad_x + half[0],
             bottom - pad_y + half[1],
+        )
+        # random_normal_distribution_int(a, b) returns b when a >= b.
+        # Long native camera gestures can fit the box while consuming more
+        # than its padded height/width.  An inverted padded axis is therefore
+        # a single native endpoint, not an empty selection domain.
+        return (
+            min(right, max(left, min(area[0], area[2]))),
+            min(bottom, max(top, min(area[1], area[3]))),
+            min(right, max(left, area[2])),
+            min(bottom, max(top, area[3])),
         )
 
     def campaign_map_viewport_swipe_committed(self) -> bool:

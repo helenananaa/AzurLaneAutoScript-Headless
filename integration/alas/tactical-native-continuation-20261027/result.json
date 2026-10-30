@@ -1,0 +1,268 @@
+{
+  "schema": "alas-headless.tactical-native-continuation-qualification/v1",
+  "at": "2026-10-27T17:15:19.166808+08:00",
+  "local_only": true,
+  "support_promoted": false,
+  "current_full": false,
+  "qualification_status": "PARTIAL_LIVE_REWARD_AND_THREE_COURSES_PROVEN_EXPECTED_BUDGET_DEFER",
+  "original_task_passed": false,
+  "original_task_returned": false,
+  "raw_passed": false,
+  "preflight": {
+    "passed": true,
+    "elapsed_seconds": 5.748,
+    "all_resource_grants": 0,
+    "finish_sidebar_present": true,
+    "native_navigation_calls": 2
+  },
+  "original_task": {
+    "elapsed_seconds": 59.905,
+    "exit_code": 1,
+    "forced_stop": false,
+    "native_calls_attempted": 1,
+    "native_call_cap": 2,
+    "unused_native_calls_sealed": 1,
+    "error": "TaskCapabilityUnavailable('semantic action deferred for tactical: tactical.assign: task action grant is exhausted')",
+    "diagnosis": "Original ADD_NEW_STUDENT after three confirmed courses requested the fourth empty classroom. The declared tactical.assign3 budget was exhausted before that entry input. This is a deliberate ordinary action boundary,not evidence of an adapter defect. No grant refill, fourth slot click or native state machine change.",
+    "immutable_error_boundary_generation": 53665
+  },
+  "resources": {
+    "tactical_reward_capability_spent": 1,
+    "tactical_assignment_capability_spent": 3,
+    "remaining_capabilities": 0,
+    "other_capabilities_spent": 0,
+    "reward_capability_counts_not_experience_or_finished_ship_count": true,
+    "assignment_receipts": [
+      {
+        "kind": "tactical.reward",
+        "units": 1,
+        "result": {
+          "semantic_id": "reward/tactical/finish",
+          "generation": 52544,
+          "point": {
+            "x": 465.206,
+            "y": 417.154
+          },
+          "bounds": {
+            "left": 400.739,
+            "top": 395.13,
+            "right": 529.674,
+            "bottom": 439.178
+          },
+          "path": "OverlayCamera/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)/frame/main/content/class/frame/finish_btn",
+          "policy_sha256": "cecc6f5832f845cda1cbcf0293b518c62b257f8b786d9efb060ab21f44defdbe",
+          "capability_id": "tactical.reward"
+        }
+      },
+      {
+        "kind": "tactical.assign",
+        "units": 1,
+        "result": {
+          "semantic_id": "tactical/course/confirm",
+          "generation": 53018,
+          "point": {
+            "x": 790.0,
+            "y": 515.0
+          },
+          "bounds": {
+            "left": 699.0,
+            "top": 481.333,
+            "right": 881.0,
+            "bottom": 548.667
+          },
+          "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+          "policy_sha256": "cecc6f5832f845cda1cbcf0293b518c62b257f8b786d9efb060ab21f44defdbe",
+          "capability_id": "tactical.assign"
+        }
+      },
+      {
+        "kind": "tactical.assign",
+        "units": 1,
+        "result": {
+          "semantic_id": "tactical/course/confirm",
+          "generation": 53310,
+          "point": {
+            "x": 790.0,
+            "y": 515.0
+          },
+          "bounds": {
+            "left": 699.0,
+            "top": 481.333,
+            "right": 881.0,
+            "bottom": 548.667
+          },
+          "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+          "policy_sha256": "cecc6f5832f845cda1cbcf0293b518c62b257f8b786d9efb060ab21f44defdbe",
+          "capability_id": "tactical.assign"
+        }
+      },
+      {
+        "kind": "tactical.assign",
+        "units": 1,
+        "result": {
+          "semantic_id": "tactical/course/confirm",
+          "generation": 53601,
+          "point": {
+            "x": 790.0,
+            "y": 515.0
+          },
+          "bounds": {
+            "left": 699.0,
+            "top": 481.333,
+            "right": 881.0,
+            "bottom": 548.667
+          },
+          "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+          "policy_sha256": "cecc6f5832f845cda1cbcf0293b518c62b257f8b786d9efb060ab21f44defdbe",
+          "capability_id": "tactical.assign"
+        }
+      }
+    ],
+    "books_observation_count": 6,
+    "original_book_and_ship_filters_unchanged": true,
+    "book_choices_from_native_log": [
+      "Blue_T4_Exp",
+      "Red_T3_Exp",
+      "Red_T2_Exp"
+    ],
+    "book_physical_inventory_final_not_checked": true,
+    "notes": "No experience totals or exact final item stock are inferred solely from capability counts."
+  },
+  "later_independent_zero_resource_closeout": {
+    "passed": true,
+    "elapsed_seconds": 4.508,
+    "native_navigation_calls": 2,
+    "original_task_not_resumed": true,
+    "original_raw_not_rewritten": true,
+    "running_slots": [
+      {
+        "slot": 1,
+        "ship_id": 1299012,
+        "ship_name": "瓦尔帕莱索",
+        "ship_level": 123,
+        "skill_name": "宝石治愈之歌",
+        "skill_level": 8,
+        "exp_current": 3700,
+        "exp_total": 4400,
+        "status": "running",
+        "remaining_seconds": 42971
+      },
+      {
+        "slot": 2,
+        "ship_id": 304094,
+        "ship_name": "安土",
+        "ship_level": 118,
+        "skill_name": "厉火烧烬",
+        "skill_level": 8,
+        "exp_current": 2500,
+        "exp_total": 4400,
+        "status": "running",
+        "remaining_seconds": 28586
+      },
+      {
+        "slot": 3,
+        "ship_id": 901144,
+        "ship_name": "果敢",
+        "ship_level": 115,
+        "skill_name": "强袭突击",
+        "skill_level": 1,
+        "exp_current": 0,
+        "exp_total": 100,
+        "status": "running",
+        "remaining_seconds": 14200
+      }
+    ],
+    "remaining_seconds": [
+      42971,
+      28586,
+      14200
+    ],
+    "empty_slot_present": true,
+    "relative_to_source_start": {
+      "oil": 0,
+      "gold": 0,
+      "gem": 0
+    },
+    "wallet": {
+      "oil": 10010,
+      "gold": 102645,
+      "gem": 3505
+    },
+    "final_main_pid": 35557,
+    "final_main_generation": 57889,
+    "final_main_ui_generation": 57889
+  },
+  "config": {
+    "persistent_byte_unchanged": true,
+    "original_source_byte_unchanged": true,
+    "persistent_NextRun_unchanged": "2026-10-27 17:30:45",
+    "TacticalFilter": "SameT4 > SameT3 > SameT2 > SameT1\n> BlueT2 > YellowT2 > RedT2\n> BlueT3 > YellowT3 > RedT3\n> BlueT4 > YellowT4 > RedT4\n> BlueT1 > YellowT1 > RedT1\n> first",
+    "AddNewStudent": {
+      "Enable": true,
+      "Favorite": true,
+      "MinLevel": 50
+    },
+    "RapidTrainingSlot": "slot_1",
+    "standalone_not_natural_wake": true
+  },
+  "code": {
+    "native_members": 247,
+    "combined_sha256": "bee9db8c63e6f2a4cd271cca28cad57edd0158d878337295ebc3b35927935e53",
+    "no_production_source_or_native_or_apk_changes": true,
+    "qualification_helpers_py_compile": true,
+    "unchanged_production_tests_not_repeated": true
+  },
+  "unverified": [
+    "Full original Tactical task completion including fourth classroom",
+    "Exact reward experience totals",
+    "Final book inventory after third course",
+    "Natural completion and subsequent scheduled renewal",
+    "Uninterrupted long soak"
+  ],
+  "evidence": [
+    {
+      "path": "artifacts/full-feature-live-20261025/tactical-native-one-20261027-r1.json",
+      "sha256": "cb3471f9f06e644fb7b5e27644a2636f1f1fb65e0b7a104300d5a8e86d2fd3db"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/tactical-native-one-20261027-r1-process.json",
+      "sha256": "506b5f5427ebe4118267af5a414dd49d0bf0621d5566359db88d2886d268eebf"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/tactical-native-one-20261027-r1.stdout.log",
+      "sha256": "09e6c0a0bf12ec06eea3d27161774dee8dd2446411695b2dcf7aa0af3f19661c"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/tactical-native-one-20261027-r1.stderr.log",
+      "sha256": "6ddbda3126750cd297b717f011706206163c166ad6f47fb0af1b72c06cc68471"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/tactical-native-preflight-20261027-r1.json",
+      "sha256": "0e8f210c0e5d5a1bdc9032fa119d00a31dcbaa0308e0c261cb335ce5b618ba09"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/tactical-native-preflight-20261027-r1-process.json",
+      "sha256": "2990271ec3978a4c5c5905abc6509d394b703b4c5bfed72647aa32db40d21772"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/tactical-native-closeout-20261027-r1.json",
+      "sha256": "eebebad43133f8e98ae35b9d378212701a823f98128efb523b5fe06f8301da26"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/tactical-native-closeout-20261027-r1-process.json",
+      "sha256": "92169fc5fe37a94a456860a150d340a4de8c442c8373ab92b2ed23e8d2e721e9"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/tactical-native-one-declared-plan-r1.json",
+      "sha256": "dfed8633065191abc163033205a0369617a77190467b8ee8d914ff773686e863"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/qualify_tactical_native_one_r1.py",
+      "sha256": "6390582f1d1a4d4785348f8d69e37afd25ec71fb10e960a8f48349dfc48d5ec1"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/qualify_tactical_native_closeout_r1.py",
+      "sha256": "a6d83bc601e2a80128966ecce91ca74c12cc653bf23b8736bcf9cee81847e715"
+    }
+  ]
+}

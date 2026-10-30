@@ -1,0 +1,42 @@
+{
+  "schema": "alas-headless.equipment-warehouse-full-ports/v1",
+  "at": "2026-10-27T08:16:18.562171+08:00",
+  "applied": true,
+  "changed_source_sha256": {
+    "overlays/angle-g3/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp": "a9ad18758f002e948bdb0dcf0b721b7a6b693ae15daf6befd9aed0e55e273cea",
+    "python/alas_headless/oracle/storage.py": "4ec9e0f389b49b456ef3cbab5cd4115804f7f26eb2c17de5a287ec5c5a6dd82d",
+    "python/alas_headless/oracle/blockers.py": "a1dc0272b7a6968e134dfae1dc3c7d8bb8c9f6455641908ec08b603d744898bb",
+    "python/alas_headless/adapter/semantic/dispatch_observation.py": "31f2ae4abb0df35a372aa0eb199fd409d4b3dca117690cb2e605447b2f2ed286",
+    "python/alas_headless/adapter/semantic/dispatch_actions.py": "a07ccf344ccbfb737a6dee08cad2d208cb76272d27d0f89bc0a01b8d6a351473"
+  },
+  "observer_scope": "Only exact Msgbox/window/top/btnBack top-raycast export added. Actual full modal close and original disassembly branch still pending fresh native repeat.",
+  "cpp_focused": "16PASS12.46s (includes network alias cases)",
+  "ports_focused": "37PASS5.93s",
+  "related_focused": "137PASS4.33s",
+  "warm_build": {
+    "seconds": 18.6,
+    "steps": 15,
+    "remote_actions": 0,
+    "owner": "alas-redroid-build",
+    "distro": "ALAS-Android-Build",
+    "preflight": "artifacts/full-feature-live-20261025/warehouse-close-warm-preflight-r1.json",
+    "full_aosp": false
+  },
+  "candidate_apk_sha256": "6f281437b36f50a849d3c2467e7680509f308ecb4e77fa896827931bc62987ae",
+  "deployment": {
+    "original_helper_passed": false,
+    "original_guard_exit_code": 1,
+    "forced_stop": false,
+    "serialization_failure": "mappingproxy in unused retirement_preconfirm_scroll report; installed observer and native login completed before finally serialization failed. Original nonterminal receipt retained; no replay.",
+    "original_receipt": "artifacts/full-feature-live-20261025/warehouse-close-observer-deployment-r1.json",
+    "independent_read": "artifacts/full-feature-live-20261025/warehouse-close-observer-post-deploy-read-r2.json",
+    "read_passed": true,
+    "read_input_count": 0,
+    "current_game_pid": 6353,
+    "watchdog_scope_text_inherited": true
+  },
+  "warehouse_full_native_workflow_live_verified": false,
+  "full_current_source": false,
+  "support_promotion": false,
+  "delivery": "LOCALONLY"
+}

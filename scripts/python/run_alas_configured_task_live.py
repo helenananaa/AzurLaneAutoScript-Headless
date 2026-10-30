@@ -46,9 +46,78 @@ def parse_action_budgets(items):
     return values
 
 
+def storage_disassembly_evidence(session, receipt_offset=0):
+    """Copy accepted/result evidence without IO, including tasks that failed after input."""
+    result = {}
+    reader = getattr(session, 'storage_equipment_disassembly_receipts', None)
+    if callable(reader):
+        try:
+            result['storage_equipment_disassembly_receipts'] = (
+                encode_receipt_value(reader()[receipt_offset:]) if receipt_offset is not None else None)
+        except Exception as exc:
+            result['storage_equipment_disassembly_receipts_error'] = str(exc)
+    pending = getattr(session, 'storage_equipment_disassembly_pending', None)
+    if callable(pending):
+        try:
+            result['storage_equipment_disassembly_pending'] = encode_receipt_value(pending())
+        except Exception as exc:
+            result['storage_equipment_disassembly_pending_error'] = str(exc)
+    if (result.get('storage_equipment_disassembly_receipts')
+            or result.get('storage_equipment_disassembly_pending')):
+        result['storage_equipment_disassembly_observation_scope'] = (
+            'session accepted input/result evidence; cached last observation is not necessarily the task error frame')
+        result['storage_equipment_disassembly_last_observation'] = encode_receipt_value(
+            getattr(session, '_storage_equipment_destroy_last_observation', None))
+    return result
+
+
 def encode_navigation_intent(values):
     """Retain typed observation arguments without losing their structure."""
     return [dataclasses.asdict(value) if dataclasses.is_dataclass(value) else value for value in values]
+
+
+def return_main_after_native_task(app, session, outcome, result):
+    """Keep the task's own ending separate from optional native navigation."""
+    if outcome is not True:
+        return
+    oracle = session.open().oracle
+    state = oracle.read_state()
+    result['main_return'] = {'returned': False, 'before': {
+        'pid': state.snapshot['pid'], 'generation': state.generation,
+        'main_visible': oracle.main_page_visible(),
+    }}
+    app.goto_main()
+    result['main_return']['returned'] = True
+
+
+def trace_gems_replacements(session, result):
+    """Observe the original replacement ports without changing their decisions."""
+    calls = result.setdefault('gems_replacement_calls', [])
+    def value(item):
+        encoded = encode_receipt_value(item)
+        try:
+            json.dumps(encoded)
+        except (TypeError, ValueError):
+            return {'unserialized_type': type(item).__name__}
+        return encoded
+    for name in ('gems_farming_open_slot', 'gems_farming_candidates',
+                 'gems_farming_select_candidate', 'gems_farming_confirm_candidate_selection',
+                 'gems_farming_cancel_candidate_selection'):
+        original = getattr(session, name, None)
+        if not callable(original):
+            continue
+        def observed(*args, _original=original, _name=name, **kwargs):
+            entry = {'method': _name, 'arguments': value(args), 'options': value(kwargs),
+                     'returned': False}
+            calls.append(entry)
+            try:
+                returned = _original(*args, **kwargs)
+                entry.update(returned=True, result=value(returned))
+                return returned
+            except BaseException as exc:
+                entry['error'] = {'type': type(exc).__name__, 'message': str(exc)}
+                raise
+        setattr(session, name, observed)
 
 
 def prepare_config(seed, task, run_limit):
@@ -82,6 +151,8 @@ def main() -> int:
     parser.add_argument('--budget', action='append', default=[], metavar='ENV=COUNT')
     parser.add_argument('--run-limit', type=int,
                         help='Bound original campaign runs in this temporary qualification config')
+    parser.add_argument('--return-main', action='store_true',
+                        help='After native task success, use original goto_main; retain both outcomes')
     args = parser.parse_args()
     sys.path.insert(0, str(ROOT / 'python'))
     try:
@@ -348,6 +419,8 @@ def main() -> int:
             return ui, record
         if callable(original_projection):
             oracle._operation_siren_globe_map_projection_record = record_projection
+        if args.task == 'GemsFarming':
+            trace_gems_replacements(session, result)
         command = re.sub(r'(?<!^)(?=[A-Z])', '_', args.task).lower()
         if not hasattr(app, command):
             raise RuntimeError(f'original ALAS task command is absent: {command}')
@@ -363,6 +436,9 @@ def main() -> int:
             completion = completion_reader()
             if completion is not None:
                 result['campaign_completion'] = dataclasses.asdict(completion)
+        if args.return_main:
+            return_main_after_native_task(app, session, outcome, result)
+            oracle = session.open().oracle
         after = oracle.read_state()
         result['after'] = {'pid': after.snapshot['pid'], 'generation': after.generation,
                            'main_visible': oracle.main_page_visible(),
@@ -517,6 +593,10 @@ def main() -> int:
                                        else dataclasses.asdict(value) if value is not None else None)
                     except Exception as receipt_error:
                         result[key + '_error'] = str(receipt_error)
+            try:
+                result.update(storage_disassembly_evidence(session))
+            except Exception as receipt_error:
+                result['storage_equipment_disassembly_recording_error'] = str(receipt_error)
             try:
                 session.close()
             except Exception as cleanup_error:

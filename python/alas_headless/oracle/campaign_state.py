@@ -12,7 +12,7 @@ from .contracts import (
     Point,
     TextState,
 )
-from .errors import SemanticGateClosed, SemanticTargetMissing
+from .errors import SemanticGateClosed, SemanticNavigationPending, SemanticTargetMissing
 from .campaign_health import CampaignHealthOracle
 
 
@@ -1191,6 +1191,12 @@ class CampaignStateOracle(CampaignHealthOracle):
             )
         return int(matches[0].text.strip())
 
+    def campaign_battle_fail_tip_visible(self) -> bool:
+        """Observe the shared defeat recommendation; this grants no input."""
+        path = 'OverlayCamera/Overlay/UIMain/BattleFailTipUI(Clone)/Main/CloseBtn'
+        return any(button.path == path and button.active_in_hierarchy
+                   and button.active_and_enabled for button in self.read_state().buttons)
+
     def close_campaign_battle_fail_tip_if_present(self) -> bool:
         """Close the exact post-defeat recommendation panel, if visible."""
 
@@ -1220,6 +1226,7 @@ class CampaignStateOracle(CampaignHealthOracle):
         )
         if (
             len(defeat) != 1
+            or not button_state.generation <= ui_state.generation <= button_state.generation + 2
             or not button.active_in_hierarchy
             or not button.active_and_enabled
             or not button.interactable
@@ -1227,14 +1234,22 @@ class CampaignStateOracle(CampaignHealthOracle):
             or button.bounds is None
         ):
             raise SemanticGateClosed("campaign defeat tip identity is incomplete")
-        point = Point(
-            x=(button.bounds.left + button.bounds.right) / 2.0,
-            y=(button.bounds.top + button.bounds.bottom) / 2.0,
+        receipt = self._gems_equipment_click_button(
+            button_state, button, "campaign/defeat-tip/close"
         )
-        if self._foreground_component() != self.fingerprint.component:
-            raise SemanticGateClosed("foreground changed immediately before input")
-        self._tap(int(round(point.x)), int(round(point.y)))
-        return True
+        for _ in range(40):
+            self._sleep(0.05)
+            after = self.read_state()
+            if after.generation > button_state.generation and not any(
+                item.path == path and item.active_in_hierarchy
+                and item.active_and_enabled for item in after.buttons
+            ):
+                return True
+        # The accepted close is never replayed if its outcome remains pending.
+        raise SemanticNavigationPending(
+            receipt.semantic_id, receipt, after.generation,
+            "Defeat tip did not close after its accepted input",
+        )
 
     def close_campaign_fleet_invalid_tip_if_present(self) -> bool:
         """Acknowledge the exact post-defeat fleet auto-switch notice."""

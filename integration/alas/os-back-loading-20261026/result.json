@@ -1,0 +1,244 @@
+{
+  "schema": "alas-headless.native-os-loading-handoff-milestone/v1",
+  "at": "2026-10-26T18:12:37.150216+08:00",
+  "native_member_count": 245,
+  "combined_sha256": "6136d92e2067a2ef33f11cc7021084ee0b8ff3079b93027f365259412b306d9e",
+  "scope": "Native pre-input exception handling at original OSMap.interrupt_auto_search and UI.ui_goto; each original screenshot/recovery loop retains ownership, no adapter task engine or action retry.",
+  "raw_initial_tasks": [
+    {
+      "command": "commission",
+      "return": true,
+      "native_error": null,
+      "task_outcome": {
+        "task": "commission",
+        "outcome": "returned"
+      },
+      "elapsed_seconds": 52.187
+    },
+    {
+      "command": "research",
+      "return": true,
+      "native_error": null,
+      "task_outcome": {
+        "task": "research",
+        "outcome": "returned"
+      },
+      "elapsed_seconds": 36.766
+    },
+    {
+      "command": "reward",
+      "return": true,
+      "native_error": null,
+      "task_outcome": {
+        "task": "reward",
+        "outcome": "returned"
+      },
+      "elapsed_seconds": 58.156
+    },
+    {
+      "command": "opsi_hazard1_leveling",
+      "return": null,
+      "native_error": {
+        "type": "SemanticInputBlocked",
+        "message": "semantic input is blocked by: loading",
+        "semantic_id": "os/page/back",
+        "generation": 7606,
+        "blockers": [
+          "loading"
+        ]
+      },
+      "task_outcome": {
+        "task": "opsi_hazard1_leveling",
+        "outcome": "input-unavailable"
+      },
+      "elapsed_seconds": 52.187
+    },
+    {
+      "command": "dorm",
+      "return": null,
+      "native_error": {
+        "type": "SemanticInputBlocked",
+        "message": "semantic input is blocked by: loading",
+        "semantic_id": "os/page/back",
+        "generation": 7996,
+        "blockers": [
+          "loading"
+        ]
+      },
+      "task_outcome": {
+        "task": "dorm",
+        "outcome": "input-unavailable"
+      },
+      "elapsed_seconds": 21.672
+    },
+    {
+      "command": "goto_main",
+      "return": null,
+      "native_error": {
+        "type": "AlasSemanticUnmapped",
+        "message": "ALAS resource is not semantically mapped: FLEET_CHECK"
+      },
+      "task_outcome": {
+        "task": "goto_main",
+        "outcome": "capability-unavailable"
+      },
+      "elapsed_seconds": 2.859
+    }
+  ],
+  "before": {
+    "ui_goto": {
+      "failed": 1,
+      "passed": 4
+    },
+    "interrupt": {
+      "failed": 1,
+      "passed": 5
+    }
+  },
+  "final_focused": {
+    "passed": 73,
+    "skipped": 5,
+    "seconds": 8.95
+  },
+  "patch_series_and_tree": true,
+  "support_matrix": true,
+  "support_promoted": false,
+  "live_recovery": {
+    "passed": true,
+    "seconds": 14.214,
+    "native_task_end": true,
+    "resource_grants": 0,
+    "after": {
+      "pid": 10867,
+      "generation": 21867,
+      "ui_generation": 21867,
+      "main": true,
+      "resources": {
+        "oil": 5656,
+        "gold": 105439,
+        "gem": 3505
+      },
+      "foreground": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+    },
+    "source_and_persistent_profiles_unchanged": true
+  },
+  "full_regression_scope": "8457passed254skipped138warnings is the prior SDK244 snapshot, before these two native catches and new focused cases. No current245 full-regression claim; focused native branch/isolation checks and patch application/compile cover the narrow change.",
+  "helper_failure": "First cleanup helper imported TaskEnd from module.exception, failing before device binding/input. Raw stderr/process retained; no raw JSON was created. R2 corrected import from module.config.config, kept SAME18:10:54 deadline, zero grants. Failed r1 temporary config retained for diagnosis.",
+  "actual_native_branch_race_repeated_live": false,
+  "limitations": "Zero-resource original interruption succeeded; exact loading race is before/after tested offline. Same-process natural handoff repeat remains pending. Original R1 false retained; separate recovery/resume are not stitched into uninterrupted soak. Shared FLEET_CHECK failure was observed on an unowned combat transition; no broad false-presence or input bypass added.",
+  "resume": {
+    "pid": 16024,
+    "guard_pid": 30768,
+    "remaining_original_calls": 14,
+    "original_calls": 20,
+    "prior_calls": 6,
+    "deadline": "2026-10-26T19:30:00+08:00",
+    "early_stop_at": "2026-10-26T19:15:00+08:00",
+    "new_resource_grants": 0,
+    "remaining_grants": {
+      "mission.claim": 1,
+      "mail.mutation": 0,
+      "tactical.reward": 1,
+      "awaken.execute": 0,
+      "minigame.play": 0,
+      "meta.assist": 0,
+      "operation_siren.coordinate_checkout": 1,
+      "operation_siren.action_point_use": 0,
+      "operation_siren.daemon_move": 16,
+      "operation_siren.port_repair": 1,
+      "tactical.assign": 6,
+      "commission.reward": 11,
+      "commission.start": 11,
+      "daily.execute": 0,
+      "exercise.execute": 0,
+      "exercise.refresh": 0,
+      "research.reward": 7,
+      "research.start": 4,
+      "dorm.collect": 3,
+      "dorm.feed": 20,
+      "enhancement.execute": 0,
+      "guild.claim": 0,
+      "guild.dispatch": 0,
+      "guild.exchange": 0,
+      "build.submit": 0,
+      "retirement.execute": 0,
+      "shop.purchase": 0,
+      "campaign.stage_entry": 0,
+      "campaign.fleet_mutation": 0,
+      "campaign.sortie": 0,
+      "campaign.grid_click": 0,
+      "campaign.viewport_swipe": 0
+    },
+    "configuration_changes": 0
+  },
+  "delivery": "LOCALONLY/noautomaticcommitpush",
+  "evidence": {
+    "post-cv-native-watch-20261026-r1.json": {
+      "path": "artifacts/full-feature-live-20261025/post-cv-native-watch-20261026-r1.json",
+      "sha256": "1b1876df40d3fdd701643150651e0c9164386e1f0c431a5de3ee9c0d1f0df475"
+    },
+    "post-cv-native-watch-20261026-r1-process.json": {
+      "path": "artifacts/full-feature-live-20261025/post-cv-native-watch-20261026-r1-process.json",
+      "sha256": "a7cff84793ced6a0b0395e05016e129788e6dfcf29b54266c0362a4e8b6855ea"
+    },
+    "post-cv-handoff-readonly-r1.json": {
+      "path": "artifacts/full-feature-live-20261025/post-cv-handoff-readonly-r1.json",
+      "sha256": "023446520cc7512eb2c3b06c5b90453e01b3bb5a8ab09844677dde6726ad7480"
+    },
+    "os-back-loading-native-apply-r3.json": {
+      "path": "artifacts/full-feature-live-20261025/os-back-loading-native-apply-r3.json",
+      "sha256": "a652847ee7849bbb9944e98c9d63fc6b89d2f21e65323f4093f88d0d459f3164"
+    },
+    "os-back-loading-before-r1.log": {
+      "path": "artifacts/full-feature-live-20261025/os-back-loading-before-r1.log",
+      "sha256": "50911120fdd596eec12a58259fe3c6eb9a6058dc2052812749c887ed373c2251"
+    },
+    "os-interrupt-loading-before-r1.log": {
+      "path": "artifacts/full-feature-live-20261025/os-interrupt-loading-before-r1.log",
+      "sha256": "2a3411007252142e475d31d9ff19d788ec3516211bb5ed0d16c2098be429c7c9"
+    },
+    "os-back-loading-final-focused-r2.log": {
+      "path": "artifacts/full-feature-live-20261025/os-back-loading-final-focused-r2.log",
+      "sha256": "4a8a668cd8e93846bfa2af1590aec6a2f85d67194c249033e01d668109984de5"
+    },
+    "os-back-loading-final-patch-series-r2.log": {
+      "path": "artifacts/full-feature-live-20261025/os-back-loading-final-patch-series-r2.log",
+      "sha256": "923ac9088bbb1e7440708c240948f5779e88c53da78033df189a4112b4136ce5"
+    },
+    "os-back-loading-final-patch-tree-r2/result.json": {
+      "path": "artifacts/full-feature-live-20261025/os-back-loading-final-patch-tree-r2/result.json",
+      "sha256": "ebc561f2615c454f7f74d51117fae9bf2236f7519110cccfbc6435d82f4b28c6"
+    },
+    "os-back-loading-final-support-matrix-r2.log": {
+      "path": "artifacts/full-feature-live-20261025/os-back-loading-final-support-matrix-r2.log",
+      "sha256": "b16c07445fe518f28748570d6d85e885065955c20c429a5a8b90c18bb7d8f1c0"
+    },
+    "post-cv-native-interrupt-recovery-r2.json": {
+      "path": "artifacts/full-feature-live-20261025/post-cv-native-interrupt-recovery-r2.json",
+      "sha256": "2cde7bc6d4e791dcf689828d516855634d0ea1da0593b16cd844fc20feb5d224"
+    },
+    "post-cv-native-interrupt-recovery-r2-process.json": {
+      "path": "artifacts/full-feature-live-20261025/post-cv-native-interrupt-recovery-r2-process.json",
+      "sha256": "e842bd5962d9c53c70bb74f279636ebf39a750b16ad2439a59d689e05206d95a"
+    }
+  },
+  "causal_frame_evidence_correction": {
+    "assessment": "integration/alas/validation-readiness-20261026/result.json",
+    "frames": [
+      {
+        "command": "opsi_hazard1_leveling",
+        "error_generation": 7606,
+        "cached_post_error_generation": 7620,
+        "later_read_generation": 7623
+      },
+      {
+        "command": "dorm",
+        "error_generation": 7996,
+        "cached_post_error_generation": 8010,
+        "later_read_generation": 8013
+      }
+    ],
+    "old_full_causal_frames_recovered": false
+  },
+  "later_full_regression_attempt": "integration/alas/validation-readiness-20261026/result.json"
+}

@@ -141,6 +141,15 @@ class DailyAdapterPorts:
                     return tuple(receipts)
             elif self.oracle.daily_page_visible():
                 return tuple(receipts)
+            if getattr(self.oracle, 'campaign_battle_fail_tip_visible', lambda: False)():
+                try:
+                    self._refresh_tactical_input_frame()
+                except StaleFrameError:
+                    time.sleep(0.25)
+                    continue
+                if self.oracle.close_campaign_battle_fail_tip_if_present():
+                    time.sleep(0.25)
+                    continue
             if self.oracle.daily_battle_result_visible():
                 try:
                     self._refresh_tactical_input_frame()

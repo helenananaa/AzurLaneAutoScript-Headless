@@ -1,5 +1,6 @@
 """Shared confirmation classification does not consume the final input lease."""
 import pytest
+from unittest.mock import Mock
 from alas_headless import AlasSemanticAdapter, SemanticGateClosed
 from alas_headless.adapter.errors import StaleFrameError
 from alas_headless.adapter.frame import _FrameBoundSemanticOracle
@@ -68,3 +69,29 @@ def test_expired_final_input_frame_is_still_rejected():
     adapter._fresh_input_oracle=lambda:fixed
     with pytest.raises(StaleFrameError): adapter.click('POPUP_CONFIRM')
     assert not backend.taps
+
+
+@pytest.mark.parametrize('choice',['POPUP_CONFIRM','POPUP_CANCEL'])
+@pytest.mark.parametrize('drift',[False,True])
+def test_native_goto_main_exit_uses_screenshot_classification(choice,drift):
+    from tests.test_combat_screenshot_observation import host
+    from tests.semantic_support.observer_fixtures import make_snapshot,make_buttons
+    backend,session,_=host('combat',False)
+    root='OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/'
+    backend.snapshot=make_snapshot(generation=11)
+    backend.buttons=make_buttons([make_button('custom_button_'+str(i)+'(Clone)',
+        root+'button_container/custom_button_'+str(i)+'(Clone)') for i in (1,2)],generation=11)
+    backend.ui=make_ui([make_text(MESSAGES['exit'],root+'msg_panel/content')],generation=11)
+    if drift:
+        backend.buttons['buttons'].reverse()
+        backend.ui['optional_metadata']='additive'
+    session.refresh_frame()
+    live=session.open().oracle
+    live.observation_prompt_kind=Mock(return_value='opsi-exit')
+    # A separate live pair can miss the coherent exit that the native UI
+    # handler and fresh input screenshot both prove. It must not route this
+    # custom Msgbox button into the unrelated network-confirm mapping.
+    live.operation_siren_exit_prompt_visible=Mock(return_value=False)
+    receipt=session.click(choice)
+    assert receipt.semantic_id==('os/exit/confirm' if choice=='POPUP_CONFIRM' else 'os/exit/cancel')
+    assert len(backend.taps)==1

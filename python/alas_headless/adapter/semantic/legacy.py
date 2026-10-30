@@ -64,6 +64,7 @@ def _legacy_action_grants(
             "build.submit": build_submit_budget,
             "retirement.execute": retirement_budget,
             "shop.purchase": shop_purchase_budget,
+            "storage.disassemble": 0,
             "campaign.stage_entry": campaign_stage_entry_budget,
             "campaign.fleet_mutation": campaign_fleet_mutation_budget,
             "campaign.sortie": campaign_sortie_budget,

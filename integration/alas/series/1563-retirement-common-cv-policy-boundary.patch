@@ -1,0 +1,19 @@
+diff --git a/module/retire/retirement.py b/module/retire/retirement.py
+--- a/module/retire/retirement.py
++++ b/module/retire/retirement.py
+@@ -220,9 +220,14 @@
+                 return True
+ 
+     def retire_ships_one_click(self):
+-        from alas_headless import current_semantic_session
++        from alas_headless import current_semantic_session, SemanticGateClosed
+         semantic_session = current_semantic_session()
+         if semantic_session is not None:
++            if self.retire_keep_common_cv:
++                cv_policy = getattr(semantic_session, 'require_common_cv_retirement_protection', None)
++                if not callable(cv_policy):
++                    raise SemanticGateClosed('retirement common-CV preservation port is unavailable')
++                cv_policy()
+             # ALAS still owns retirement timing and retry policy.  The semantic
+             # port owns the official one-click transaction so its real selected
+             # count, protection settings, confirmations, and equipment outcome

@@ -1,0 +1,90 @@
+{
+  "schema": "alas-headless.warehouse-filter-ports/v1",
+  "at": "2026-10-27T10:41:40.157599+08:00",
+  "local_only": true,
+  "offline_only": true,
+  "support_promoted": false,
+  "current_full_regression": false,
+  "source_sha256": {
+    "python/alas_headless/oracle/storage.py": "1f5d75b04349d7ce3fb568f56c7452d30c89aa94ef91220a9e303f7cb19448a5",
+    "python/alas_headless/adapter/semantic/observation.py": "8305feeb2ba02d3df65ea61bcdc284eec878173a6349283a1d186697f6523bb9",
+    "python/alas_headless/adapter/semantic/dispatch_observation.py": "1d8cd87399b14ab547c7cc676bb415ea3fdc6c81641d97d8f96999d4a85bd561",
+    "python/alas_headless/adapter/semantic/dispatch_actions.py": "507cce6e072584ffaf268e3231193e555ab0d649ea9982eafd6f417a54874a5e",
+    "python/alas_headless/adapter/semantic/session_dispatch.py": "707d82b49276a29983cefc10514b617858154a2368606e85ecda4c62095b1d79",
+    "overlays/angle-g3/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp": "5e64b2b52a341b31b6f77141196692adb3134c1a9eda6e9a3a84e72fc5813d10"
+  },
+  "fixture": {
+    "path": "tests/fixtures/storage-equipment-filter-20261027.json",
+    "generation": 942,
+    "immutable_source": "warehouse-native-storage-filter-entry-r6.json"
+  },
+  "native_setting_fixture": {
+    "path": "tests\\fixtures\\storage-native-setting-20261027.py",
+    "sha256": "df5f1d97653d5a1564400282fe32fb5e8a17a4e5af9f242e6ec00e3109b8460b",
+    "actual_native_source_unchanged": true
+  },
+  "sdk_ports": [
+    "equipment-owned CustomIndex observation",
+    "legacy native Setting image_color_count using existing shared yellow/blue/grey sprite contracts",
+    "FILTER_RARITY_0_0 through5_0 typed input",
+    "filter confirm/cancel typed input",
+    "original Session admission only for observed equipment owner"
+  ],
+  "safety": [
+    "typed-only; no pixels or legacy rectangles",
+    "unknown sprites, missing ownership, wrong labels, duplicate controls, incoherence and foreign foreground rejected",
+    "real unexported raycasts still reject input",
+    "final inventory disassembly and item selection remain unavailable"
+  ],
+  "validation": {
+    "before": {
+      "failed": 4,
+      "passed": 6,
+      "log": "warehouse-filter-before-r1.log"
+    },
+    "intermediate": {
+      "failed": 1,
+      "passed": 9,
+      "error": "test AST namespace omitted ModuleBase annotation; corrected harness only",
+      "log": "warehouse-filter-after-r1.log"
+    },
+    "related": {
+      "passed": 116,
+      "seconds": 8.19,
+      "log": "warehouse-filter-after-r3.log"
+    },
+    "latest_focused": {
+      "passed": 13,
+      "seconds": 2.75,
+      "log": "warehouse-filter-focused-final-r1.log",
+      "overlaps_related_suite": true
+    },
+    "native_setting": "actual original Setting class loaded from retained source fixture, controlled widget state only; original reset/set/screenshot loop performed2 ordinary filter taps",
+    "selector": "actual C++ helper compiled against exact8 observed controls plus wrong owner/path/name negatives",
+    "support_matrix": "PASS245 members and unchanged combined6136d92e...",
+    "known_atexit": "Global pytest-current PermissionError retained; no global temp/permission changes"
+  },
+  "observer": {
+    "source_pending": true,
+    "controls": "six rarity buttons and exact ok/cancel; visible center and rounded real raycast",
+    "build_run": false,
+    "apk_deployed_this_batch": false,
+    "last_proven_deployed_apk_sha256": "1507e8f28ac3a4accd93cad549db26b3fdaa3982edb3ae1453a2281eba480974"
+  },
+  "case": {
+    "closed": true,
+    "used": 9,
+    "cap": 24,
+    "unused_calls_sealed": 15,
+    "live_actions_this_batch": 0,
+    "closed_case_not_resumed": true
+  },
+  "unverified": [
+    "new observer build/deployment and filter live actions",
+    "original ItemGrid and inventory count/selection",
+    "equipment disassembly final confirmation and whole warehouse recovery",
+    "Research continuation",
+    "final resources and ship dock"
+  ],
+  "reentry": "Keep original closed case sealed. First continue offline exact ItemGrid/count boundary. Build/deploy at a meaningful separate bounded qualification only after fresh sole-owner/PID checks. Current installed APK still lacks these8 raycasts; never force raycastTrue. Do not reopen boxes or force common rarity destruction to manufacture success."
+}

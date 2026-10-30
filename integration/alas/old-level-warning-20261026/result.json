@@ -1,0 +1,18 @@
+{
+  "schema": "alas-headless.old-level-warning-root/v1",
+  "at": "2026-10-26T22:51:41.120125+08:00",
+  "applied": true,
+  "sdk_files": 1,
+  "path": "python/alas_headless/oracle/old_retirement_dialog.py",
+  "before_sha256": "bd346afbe3aaef95c9ded6cb1f3291cd635a89cdc4cfc8bf247c37e9543848b2",
+  "after_sha256": "7fdaf6c4eb95b4a79291590974ed7ff5ac31f4187f489802e4569c00e13dd113",
+  "root_focused": "69PASS1SKIP26.57s, including22new portable cases",
+  "private_milestone": "artifacts/full-feature-live-20261025/old-level-warning-stage-r1/milestone-r1.json",
+  "apply": "artifacts/full-feature-live-20261025/old-level-warning-production-apply-r2.json",
+  "scope": "Only existing original SR_SSR_CONFIRM requests recognize exact owned level-not1 warning, after submitted selection and original commonCV deselection. Native guard, choice, loops, timing and keep policy unchanged. No forced warning confirmation when the actual original enhance/N-R-only condition is false.",
+  "live_verified": false,
+  "full_current_source": false,
+  "support_promotion": false,
+  "observer_native_changes": false,
+  "delivery": "LOCALONLY"
+}

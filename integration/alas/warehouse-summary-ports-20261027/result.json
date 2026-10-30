@@ -1,0 +1,133 @@
+{
+  "schema": "alas-headless.storage-equipment-summary/v1",
+  "at": "2026-10-27T13:03:57.541334+08:00",
+  "local_only": true,
+  "support_promoted": false,
+  "current_full_regression": false,
+  "failure": {
+    "raw": "warehouse-native-summary-unit-r1.json",
+    "passed": false,
+    "seconds": 70.586,
+    "error": "GameStuckError Wait too long",
+    "exact_error_frame": null,
+    "closeout": "warehouse-summary-r1-closeout.json",
+    "later_zero_input_read": "warehouse-summary-predicate-read-r1.json",
+    "later_generation": 56385,
+    "diagnosis": "Source entry did occur; actual new StoreHouseDestroyConfirmView was not recognized by legacy-only summary parser and false wait concealed missing capability. All three actual controls lacked raycast export. Later independent read is not precise native error frame. R1 original failed raw stays false;unused6of10 sealed"
+  },
+  "fixes": [
+    "Exact new StoreHouseDestroyConfirmView title/actions/material rewards typed reader, retained legacy ResolveEquipment behavior",
+    "Unknown summary after accepted entry fails at local observation seam instead of false-waiting until native GameStuck",
+    "Summary entry bound to all previously proven selected stack identities and exact counts; entry receipt recorded before backend; no replay",
+    "Original InfoHandler POPUP_CANCEL_DISASSEMBLE maps only to owned exact material summary cancellation, final destroy aliases remain closed",
+    "Original DISASSEMBLE_CANCEL receipt retained until actual newer equipment mode/zero selection proves cancellation; only then release pending state across next task",
+    "C++ raycast export for exact confirm_btn/cancel_btn/top btnBack; actual visible integer-point raycast, no guessed coordinates"
+  ],
+  "validation": {
+    "before_failed": 11,
+    "before_passed": 0,
+    "before_log": "warehouse-summary-before-r1.log",
+    "pre_first_live_passed": 179,
+    "pre_observer_deploy_passed": 185,
+    "latest_related_passed": 188,
+    "latest_seconds": 15.65,
+    "latest_log": "warehouse-summary-after-r6.log",
+    "groups_overlap": true,
+    "retained_expected_contract_test_failure": "after-r2 2FAIL59PASS because previous test still expected now-supported summary entry to reject; updated to final-destruction alias, no input gate weakened",
+    "global_pytest_cleanup_permission_error_retained": true
+  },
+  "observer": {
+    "cpp_sha256": "2bae234603a354b0fda1443338955f2f4c7d1be6e6e038f7d3506d114acf9b7a",
+    "apk": "warehouse-summary-observer-candidate-r6.apk",
+    "apk_sha256": "9df76cd542e95ed98043283af89af3f3551db3c5216361ea1f869a3799bf8ae0",
+    "build_seconds": 6.12,
+    "steps": 15,
+    "remote_actions": 0,
+    "static_analysis_probe": "No server running; likely finished; output retained in warehouse-summary-static-idle-r6.log; no independent static-analysis success claim",
+    "deployment": "warehouse-summary-observer-deployment-r6.json",
+    "deployment_seconds": 37.927,
+    "rollback": {
+      "apk": "warehouse-native-observer-candidate-r5.apk",
+      "sha256": "94e51df4af4c9eef3e426ec83453a36fd33e1a9b31030c535072f1c9eef4bd89"
+    },
+    "cold_start": {
+      "pid": 16185,
+      "contract": "-force-gfx-st via shared AdbObserverBridge.restart_game"
+    },
+    "domain": "ALAS-Android-Build / alas-redroid-build",
+    "redroid_uuid": "fd5ab68a-32b8-4fd7-987c-3b1c0575a12f",
+    "kvm_uuid": "7febc493-864e-4e35-a01c-3090515de95e",
+    "source_locks_inventories_sync_verified": true,
+    "no_full_aosp_build": true
+  },
+  "live": {
+    "raw": "warehouse-native-summary-unit-r2.json",
+    "process": {
+      "terminal": true,
+      "guard_pid": 7836,
+      "started_at": "2026-10-27T12:58:44.288655+08:00",
+      "deadline": "2026-10-27T13:01:44.288655+08:00",
+      "resource_grants": 0,
+      "scope": "Independent bounded original first-stack summary-open/cancel unit; ordinary gear at-risk cap23,final destroy cap0;10 UIcalls,all resources0,no old case balance",
+      "pid": 1340,
+      "child_create_time": 1793077124.2912524,
+      "guard_create_time": 1793077124.1420069,
+      "exit_code": 0,
+      "forced_stop": false,
+      "finished_at": "2026-10-27T12:59:13.679244+08:00"
+    },
+    "passed": true,
+    "seconds": 24.976,
+    "native_ui_calls": 10,
+    "native_execute_once_complete": false,
+    "final_destruction_attempts": 0,
+    "ordinary_gear_at_risk_cap": 23,
+    "actual_disassembled": 0,
+    "summary_generation": 1225,
+    "rewards": [
+      [
+        "物资",
+        23
+      ]
+    ],
+    "stack_after_cancel_quantity": 23,
+    "zero_selection_generation": 1323,
+    "selection_lifecycle_released": true,
+    "profile_unchanged": true,
+    "resources_before": {
+      "oil": 7443,
+      "gold": 105685,
+      "gem": 3505
+    },
+    "resources_after": {
+      "oil": 7443,
+      "gold": 105685,
+      "gem": 3505
+    },
+    "resource_delta": {
+      "oil": 0,
+      "gold": 0,
+      "gem": 0
+    },
+    "all_ledger_grants_zero": true,
+    "final": {
+      "pid": 16185,
+      "generation": 1496,
+      "ui_generation": 1496,
+      "main": true
+    }
+  },
+  "native": {
+    "members": 246,
+    "combined_sha256": "996e0cf000f7fe69a61cb385abc6d2cf5198cc75c98ed830abae39b989884964",
+    "changed": false
+  },
+  "limits": [
+    "Native execute_once deliberately stopped before final destroy input; not a disassembly transaction/Research task success",
+    "Equipment warehouse capacity remains above limit; complete recovery not proven",
+    "Final DISASSEMBLE_POPUP_CONFIRM and handle_popup_confirm destruction remain closed; final typed input/postcondition and finite ordinary budget next",
+    "Multiple selected cells only offline; natural shipdock retirement chain/statistics-to-daily handoff/oldlevel exact live still outstanding",
+    "R13 8527PASS254SKIP predates Warehouse/native246 changes; no current full/long-run stability claim",
+    "Old post-R13 9of24 unused15/resources sealed, failed summary-r1 unused6of10 sealed; r2 new independent changed-code/APK qualification10calls closed, no balance transfer"
+  ]
+}

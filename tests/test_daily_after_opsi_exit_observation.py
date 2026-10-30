@@ -29,6 +29,8 @@ def make_case(change=None):
 
 def test_exact_daily_details_end_the_previous_opsi_observation_lease():
     backend,adapter = make_case()
+    assert adapter.oracle.daily_navigation_visible()
+    assert not adapter.oracle.daily_entry_visible()
     assert adapter.appear(SimpleNamespace(name='DAILY_ENTER_CHECK')) is True
     assert adapter._operation_siren_entry_transition_until == 0
     assert backend.taps == []

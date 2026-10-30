@@ -52,6 +52,7 @@ ACTION_CAPABILITIES = frozenset(
         "research.start",
         "retirement.execute",
         "shop.purchase",
+        "storage.disassemble",
         "tactical.assign",
         "tactical.reward",
     }

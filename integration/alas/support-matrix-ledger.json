@@ -3491,7 +3491,8 @@
         "integration/alas/gems-farming-task-live-validation-receipt-20260825-r3.json",
         "integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r25.json",
         "integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r26.json",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/gems-postfix-full-20261026/result.json"
       ],
       "group_code": "P",
       "metadata": "type=select; display=default",
@@ -3521,7 +3522,8 @@
         "integration/alas/gems-farming-vanguard-ship-equip-live-validation-receipt-20260825-r1.json",
         "integration/alas/gems-farming-vanguard-ship-equip-live-validation-receipt-20260825-r2.json",
         "integration/alas/gems-farming-task-live-validation-receipt-20260825-r3.json",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/gems-postfix-full-20261026/result.json"
       ],
       "group_code": "P",
       "metadata": "type=select; display=default",
@@ -3546,7 +3548,8 @@
         "python/alas_headless/alas_gems_farming_config_replay.py",
         "integration/alas/series/0195-gems-farming-config-contract.patch",
         "integration/alas/gems-farming-task-live-validation-receipt-20260825-r3.json",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/gems-postfix-full-20261026/result.json"
       ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
@@ -3554,7 +3557,7 @@
         "GemsFarming"
       ],
       "path": "GemsFarming.CommissionLimit",
-      "status_label": "◐ false 实机；true 未通过",
+      "status_label": "◐ true随一图/换舰原任务通过；独立限制效果未验证",
       "support": "supported",
       "values": "input/default: true"
     },
@@ -3577,7 +3580,8 @@
         "integration/alas/gems-farming-task-live-validation-receipt-20260825-r3.json",
         "integration/alas/gems-farming-common-cv-filter-preflight-20260825-r1.json",
         "integration/alas/gems-farming-filter-recovery-live-validation-receipt-20260825-r1.json",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/gems-postfix-full-20261026/result.json"
       ],
       "group_code": "P",
       "metadata": "type=select; display=default",
@@ -3605,7 +3609,8 @@
         "tests/test_semantic_oracle.py",
         "integration/alas/gems-farming-normal-ship-live-validation-receipt-20260824-r1.json",
         "integration/alas/gems-farming-common-dd-filter-preflight-20260825-r1.json",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/gems-postfix-full-20261026/result.json"
       ],
       "group_code": "P",
       "metadata": "type=select; display=default",
@@ -5438,97 +5443,142 @@
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "partial",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_old_retirement_native_flow.py",
+        "tests/test_old_retirement_native_scan_domain.py",
+        "tests/test_old_retirement_input_ownership.py",
+        "tests/test_retirement_manual_selected_phase.py",
+        "tests/test_alas_retirement_config.py",
+        "python/alas_headless/adapter/semantic/session_retirement.py",
+        "integration/alas/series/1562-native-old-retirement-typed-ports.patch",
+        "integration/alas/old-retirement-disassemble-20261026/result.json"
+      ],
       "group_code": "M",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "General"
       ],
       "path": "OldRetire.N",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "◐ 原N/R筛选及一舰旧退役拆解实测；非全部数量/稀有度资格",
+      "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "partial",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_old_retirement_native_flow.py",
+        "tests/test_old_retirement_native_scan_domain.py",
+        "tests/test_old_retirement_input_ownership.py",
+        "tests/test_retirement_manual_selected_phase.py",
+        "tests/test_alas_retirement_config.py",
+        "python/alas_headless/adapter/semantic/session_retirement.py",
+        "integration/alas/series/1562-native-old-retirement-typed-ports.patch",
+        "integration/alas/old-retirement-disassemble-20261026/result.json"
+      ],
       "group_code": "M",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "General"
       ],
       "path": "OldRetire.R",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "◐ 原N/R筛选实测；R舰独立退役事务未验证",
+      "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "partial",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "partial",
+        "offline": "partial"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_old_retirement_native_flow.py",
+        "tests/test_old_retirement_native_scan_domain.py",
+        "tests/test_old_retirement_input_ownership.py",
+        "tests/test_retirement_manual_selected_phase.py",
+        "tests/test_alas_retirement_config.py",
+        "python/alas_headless/adapter/semantic/session_retirement.py",
+        "integration/alas/series/1562-native-old-retirement-typed-ports.patch",
+        "integration/alas/old-retirement-disassemble-20261026/result.json"
+      ],
       "group_code": "M",
       "metadata": "type=select; display=default",
       "panels": [
         "General"
       ],
       "path": "OldRetire.RetireAmount",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "◐ 原数量映射离线验证；实机仅显式amount=1，未验retire_all/10",
+      "support": "supported",
       "values": "options: \"retire_10\", \"retire_all\"; default: \"retire_all\""
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "partial",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "partial",
+        "offline": "partial"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_old_retirement_native_flow.py",
+        "tests/test_old_retirement_native_scan_domain.py",
+        "tests/test_old_retirement_input_ownership.py",
+        "tests/test_retirement_manual_selected_phase.py",
+        "tests/test_alas_retirement_config.py",
+        "python/alas_headless/adapter/semantic/session_retirement.py",
+        "integration/alas/series/1562-native-old-retirement-typed-ports.patch",
+        "integration/alas/old-retirement-disassemble-20261026/result.json"
+      ],
       "group_code": "M",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "General"
       ],
       "path": "OldRetire.SR",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "◐ 原稀有度策略及typed边界离线覆盖；SR实机未验证",
+      "support": "supported",
       "values": "input/default: false"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "partial",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "partial",
+        "offline": "partial"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_old_retirement_native_flow.py",
+        "tests/test_old_retirement_native_scan_domain.py",
+        "tests/test_old_retirement_input_ownership.py",
+        "tests/test_retirement_manual_selected_phase.py",
+        "tests/test_alas_retirement_config.py",
+        "python/alas_headless/adapter/semantic/session_retirement.py",
+        "integration/alas/series/1562-native-old-retirement-typed-ports.patch",
+        "integration/alas/old-retirement-disassemble-20261026/result.json"
+      ],
       "group_code": "M",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "General"
       ],
       "path": "OldRetire.SSR",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "◐ 原稀有度策略及typed边界离线覆盖；SSR实机未验证",
+      "support": "supported",
       "values": "input/default: false"
     },
     {
@@ -5550,7 +5600,8 @@
         "docs/campaign-natural-hp-dock-20260909.zh-CN.md",
         "docs/campaign-midmap-recovery-20260911.zh-CN.md",
         "integration/alas/campaign-midmap-continuous-20260911/assessment.json",
-        "tests/test_retirement_equipment_transition.py"
+        "tests/test_retirement_equipment_transition.py",
+        "integration/alas/retirement-disassemble-20261026/result.json"
       ],
       "group_code": "P",
       "metadata": "type=select; display=default",
@@ -5558,7 +5609,7 @@
         "General"
       ],
       "path": "OneClickRetire.KeepLimitBreak",
-      "status_label": "◐ 两设置 typed；keep_limit_break 已实机",
+      "status_label": "◐ 两值各有受控实机事务；连续满仓退役链待验",
       "support": "supported",
       "values": "options: \"do_not_keep\", \"keep_limit_break\"; default: \"keep_limit_break\""
     },
@@ -7110,7 +7161,22 @@
         "docs/campaign-natural-hp-dock-20260909.zh-CN.md",
         "docs/campaign-midmap-recovery-20260911.zh-CN.md",
         "integration/alas/campaign-midmap-continuous-20260911/assessment.json",
-        "tests/test_retirement_equipment_transition.py"
+        "tests/test_retirement_equipment_transition.py",
+        "tests/test_old_retirement_native_flow.py",
+        "tests/test_old_retirement_input_ownership.py",
+        "tests/test_old_retirement_native_scan_domain.py",
+        "python/alas_headless/adapter/semantic/session_retirement.py",
+        "python/alas_headless/oracle/old_retirement.py",
+        "python/alas_headless/oracle/old_retirement_dialog.py",
+        "integration/alas/series/1562-native-old-retirement-typed-ports.patch",
+        "tests/test_retirement_manual_selected_phase.py",
+        "integration/alas/old-retirement-disassemble-20261026/result.json",
+        "tests/test_retirement_common_cv_admission.py",
+        "integration/alas/series/1563-retirement-common-cv-policy-boundary.patch",
+        "integration/alas/retirement-cv-policy-20261026/result.json",
+        "integration/alas/series/1564-native-common-cv-preservation-ports.patch",
+        "integration/alas/common-cv-ports-20261026/result.json",
+        "tests/test_retirement_common_cv_native_flow.py"
       ],
       "group_code": "P",
       "metadata": "type=select; display=default",
@@ -7118,7 +7184,7 @@
         "General"
       ],
       "path": "Retirement.RetireMode",
-      "status_label": "◐ 一键与强化已接入；旧退役未适配",
+      "status_label": "◐ 三模式有局部实测；航母保护端口已接入，完整分支未验证",
       "support": "supported",
       "values": "options: \"enhance\", \"old_retire\", \"one_click_retire\"; default: \"one_click_retire\""
     },
@@ -8810,7 +8876,7 @@
         "Emotion"
       ],
       "name": "GemsFarming",
-      "note": "六项专属设置及原 run 收尾/调度已离线回放；normal + ship 的 Fleet 索引、白皮航母/驱逐候选和旗舰/前排唯一确认已实机闭环并恢复原编队；normal + ship_equip 已按 pinned ALAS 的五项 equipment code 接入逐槽 typed 卸装/替换，特殊兵装保持随原舰；当前槽位舰卡不再误入 free 候选，Fleet 6 突击者的生产筛选返回两张真实空闲突击者，并完成现有 18100 +0、19000 +0 双槽 take_off -> replace -> take_on 及目标读回；同舰五槽卸装恢复、空 code 控制流、两类舰装不兼容 fail-closed 亦已覆盖；normal 1-1 已完成 Fleet 6 单舰队完整原任务闭环，凭证见 integration/alas/gems-farming-task-live-validation-receipt-20260825-r3.json；hard 11-4 的第一主力槽为 type 7 正航而不兼容 type 6 轻航突击者，正确返回无候选；改用兼容轻航的 hard 12-1 后，原 HardNotSatisfied -> hard_fleet_prepare 从三张空闲突击者中选择等级/心情最高的 Lv9 突击者并确认旗舰，随后原任务完成既有 Boss 进度、结算、RunCount 归零、Scheduler 关闭和章节页返回，全程无 raw fallback，组件凭证见 integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r25.json 与 integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r26.json；两张历史收据的顶层 passed=false 分别来自零出击替换探针与旧 runner 错把换船重复发生绑定到完整任务，底层 replacement/task completion 后置条件已分别通过且 runner 已修正；仍缺五槽跨舰兼容及 Lv32/emotion 自然触发分支，因此为 L 而非 F；enhanceable 仅为候选过滤而非换船后强化动作",
+      "note": "六项专属设置及原 run 收尾/调度已离线回放；normal + ship 的 Fleet 索引、白皮航母/驱逐候选和旗舰/前排唯一确认已实机闭环并恢复原编队；normal + ship_equip 已按 pinned ALAS 的五项 equipment code 接入逐槽 typed 卸装/替换，特殊兵装保持随原舰；当前槽位舰卡不再误入 free 候选，Fleet 6 突击者的生产筛选返回两张真实空闲突击者，并完成现有 18100 +0、19000 +0 双槽 take_off -> replace -> take_on 及目标读回；同舰五槽卸装恢复、空 code 控制流、两类舰装不兼容 fail-closed 亦已覆盖；normal 1-1 已完成 Fleet 6 单舰队完整原任务闭环，凭证见 integration/alas/gems-farming-task-live-validation-receipt-20260825-r3.json；hard 11-4 的第一主力槽为 type 7 正航而不兼容 type 6 轻航突击者，正确返回无候选；改用兼容轻航的 hard 12-1 后，原 HardNotSatisfied -> hard_fleet_prepare 从三张空闲突击者中选择等级/心情最高的 Lv9 突击者并确认旗舰，随后原任务完成既有 Boss 进度、结算、RunCount 归零、Scheduler 关闭和章节页返回，全程无 raw fallback，组件凭证见 integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r25.json 与 integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r26.json；两张历史收据的顶层 passed=false 分别来自零出击替换探针与旧 runner 错把换船重复发生绑定到完整任务，底层 replacement/task completion 后置条件已分别通过且 runner 已修正；仍缺五槽跨舰兼容及 Lv32/emotion 自然触发分支，因此为 L 而非 F；enhanceable 仅为候选过滤而非换船后强化动作；2026-10-26当前12-4原任务一轮同进程6战/总奖励退出/原换旗舰与先锋/正常TaskEnd让位/原回主页通过366.828秒；原大黄蜂·META与福煦另在独立清理恢复，见 integration/alas/gems-postfix-full-20261026/result.json。此次舰船原本已超等级阈值，不冒充自然练到32级跨越或心情触发；原无限循环、全部换装/困难组合仍未验证，等级维持L。",
       "status": "L"
     },
     {
@@ -8821,7 +8887,7 @@
         "OldRetire"
       ],
       "name": "General",
-      "note": "三种 `RetireMode` 已离线分类，旧退役在 Headless 页面事件前拒绝；官方一键退役和 `keep_limit_break` 已实机闭环；强化三项详细配置、ALAS 正式任务入口、语义筛选/选舰导航、官方推荐、真实强化、容量差及装备入仓已闭环；完整 `favourite` 破坏性任务和自然无素材分支未额外消耗舰船复测，`do_not_keep` 仅设置级验证，旧退役仍缺任务级语义事务；2026-09-11 晚间929/930自然战中满仓后，修复新弹窗旧帧分类和装备取消全选过早检查；实际退役72艘、115件装备保留、原Main同图续战一场并撤退通过。触发、退役和续战分属不同进程，完整连续链仍未资格化。见 docs/campaign-midmap-recovery-20260911.zh-CN.md。；2026-09-13：929/930自然战中满仓后，通用结果探针因船坞Toggle截断停止，已修复该无关探测及缺席登录确认探测。原退役处理器独立退役79艘、装备保留；原Main同图续战一场并撤退通过。共三战242石油，完整连续链与退役页自动启动仍未资格化。见 docs/campaign-midmap-recovery-20260913.zh-CN.md。；2026-09-13离线补充：原Combat满仓到同图返回、装备取消选择延迟、原Main遗留退役页恢复三场景通过；当前114成员补丁树、配置和缺席探针已验证。该结果包含契约夹具，不提升为实机连续资格。见 docs/campaign-midmap-offline-20260913.zh-CN.md。",
+      "note": "三种 `RetireMode` 已离线分类，此前旧退役在页面事件前拒绝（26日已补下述拆解分支）；官方一键退役和 `keep_limit_break` 已实机闭环；强化三项详细配置、ALAS 正式任务入口、语义筛选/选舰导航、官方推荐、真实强化、容量差及装备入仓已闭环；完整 `favourite` 破坏性任务和自然无素材分支未额外消耗舰船复测，`do_not_keep` 现有下述独立原一键事务，旧退役现有独立原方法一舰事务，完整General旧退役分派仍未实测；2026-09-11 晚间929/930自然战中满仓后，修复新弹窗旧帧分类和装备取消全选过早检查；实际退役72艘、115件装备保留、原Main同图续战一场并撤退通过。触发、退役和续战分属不同进程，完整连续链仍未资格化。见 docs/campaign-midmap-recovery-20260911.zh-CN.md。；2026-09-13：929/930自然战中满仓后，通用结果探针因船坞Toggle截断停止，已修复该无关探测及缺席登录确认探测。原退役处理器独立退役79艘、装备保留；原Main同图续战一场并撤退通过。共三战242石油，完整连续链与退役页自动启动仍未资格化。见 docs/campaign-midmap-recovery-20260913.zh-CN.md。；2026-09-13离线补充：原Combat满仓到同图返回、装备取消选择延迟、原Main遗留退役页恢复三场景通过；当前114成员补丁树、配置和缺席探针已验证。该结果包含契约夹具，不提升为实机连续资格。见 docs/campaign-midmap-offline-20260913.zh-CN.md。；2026-10-26：当前 do_not_keep 原一键退役独立事务99舰、957→858/1010、拆解184装备、唯一舰船保护开启并原生退出回主通过；原General模式enhance未改。独立事务不提升为自然战中退役连续链，字段live仍partial。见 integration/alas/retirement-disassemble-20261026/result.json。；2026-10-26当前：原retire_ships_old(amount=1)+原退出和回主页在同进程通过40.442秒，866→865/1010，2装备拆解；General仍enhance、原N/R和retire_all未改。显式amount1不代表retire_all/retire10或各稀有度、CV保留扫描、自然满仓退役连续链。见 integration/alas/old-retirement-disassemble-20261026/result.json。；同日后续审计确认一键语义快捷入口也曾跳过Gems开启时的原保留白皮航母策略，当时已在该受保护入口局部拒绝并保留其他任务，见 integration/alas/retirement-cv-policy-20261026/result.json。随后1564已接入原航母保护/弃用航母typed端口；受控原一键事务选13艘、保留1艘、退役12艘并拆解20件装备已有独立实证，旧退役保护与弃用航母完整资源路径仍未资格化，分类保持partial。见 integration/alas/common-cv-ports-20261026/result.json。",
       "status": "P"
     },
     {
@@ -9972,10 +10038,11 @@
         "integration/alas/series/0630-campaign-inherited-dock-full.patch",
         "integration/alas/campaign-natural-hp-dock-20260909/result-r3.json",
         "integration/alas/campaign-natural-hp-dock-20260909/assessment.json",
-        "docs/campaign-natural-hp-dock-20260909.zh-CN.md"
+        "docs/campaign-natural-hp-dock-20260909.zh-CN.md",
+        "integration/alas/retirement-disassemble-20261026/result.json"
       ],
       "field": "OneClickRetire.KeepLimitBreak",
-      "note": "Both settings share an exact typed toggle contract; only keep_limit_break has destructive live evidence. The latest original handler passed an 8-ship transaction with unique protection, keep_needed, equipment preservation and return. Earlier overflow and premature-completion failures remain retained separately; see docs/campaign-reentry-retirement-20260907.zh-CN.md."
+      "note": "Both settings have controlled destructive live evidence: earlier keep_limit_break/keep_needed preservation transactions retained; 2026-10-26 current do_not_keep kept unique protection, retired99ships with exact957->858 delta, disassembled184equipment and returned through originalquit/Main in28.689s. This independent transaction is not a natural midmap chain; live dimension remains partial. Older failures remain retained."
     },
     {
       "dimensions": {
@@ -9996,10 +10063,25 @@
         "integration/alas/series/0630-campaign-inherited-dock-full.patch",
         "integration/alas/campaign-natural-hp-dock-20260909/result-r3.json",
         "integration/alas/campaign-natural-hp-dock-20260909/assessment.json",
-        "docs/campaign-natural-hp-dock-20260909.zh-CN.md"
+        "docs/campaign-natural-hp-dock-20260909.zh-CN.md",
+        "tests/test_old_retirement_native_flow.py",
+        "tests/test_old_retirement_input_ownership.py",
+        "tests/test_old_retirement_native_scan_domain.py",
+        "python/alas_headless/adapter/semantic/session_retirement.py",
+        "python/alas_headless/oracle/old_retirement.py",
+        "python/alas_headless/oracle/old_retirement_dialog.py",
+        "integration/alas/series/1562-native-old-retirement-typed-ports.patch",
+        "tests/test_retirement_manual_selected_phase.py",
+        "integration/alas/old-retirement-disassemble-20261026/result.json",
+        "tests/test_retirement_common_cv_admission.py",
+        "integration/alas/series/1563-retirement-common-cv-policy-boundary.patch",
+        "integration/alas/retirement-cv-policy-20261026/result.json",
+        "integration/alas/series/1564-native-common-cv-preservation-ports.patch",
+        "integration/alas/common-cv-ports-20261026/result.json",
+        "tests/test_retirement_common_cv_native_flow.py"
       ],
       "field": "Retirement.RetireMode",
-      "note": "Pinned modes preserve original amount and dispatch offline; semantic old_retire remains unsupported. The original one-click retirement handler passed a full 8-ship transaction, delayed award/equipment preservation and return to the build predecessor in integration/alas/campaign-retirement-full-handler-20260907-r3.json. Overflow counts keep exact deltas; natural Campaign dock-full trigger plus map resume is not claimed from that sample. See docs/campaign-reentry-retirement-20260907.zh-CN.md."
+      "note": "Original ALAS owns mode dispatch, amount, rarity, grid domain, loops, confirmations and cleanup. 2026-10-26: actual original retire_ships_old(amount=1) plus original quit/Main passed in one process, 40.442s, capacity866->865/1010, two equipment items disassembled, gold+31/oil0/gem0. General stayed enhance; native N/R filter used; qualifier explicitly amount1 rather than configured retire_all3000. First selected-page failure and separate zero-budget cancellation retained; repaired selected-phase identity has exact observed fixture and 51 focused passes. Controlled actual native-method/frame/ledger tests and canonical242-patch application/compile/config replay also passed. Live remains partial: no full General old_retire/retire_all/retire10 or R/SR/SSR individual transactions, CV scanner, equipment preservation, or same-process natural mid-map full-dock retirement chain claim. 2026-10-26 later safety correction: semantic official-oneclick shortcut also skipped native Gems commonCV policy. That intermediate conditional guard refused the protected branch before transaction. Member1564 subsequently connected the original preservation callback and abandoned-CV scanner to typed ports. The scoped common-cv-ports milestone records one protected one-click resource transaction (13 selected, one CV protected, 12 retired, 20 equipment disassembled); protected old-retire and abandoned-carrier resource paths remain unqualified. GemsFalse legacy positives remain unchanged. Support dimensions are not promoted."
     },
     {
       "dimensions": {
@@ -12446,9 +12528,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "121d5d9e5ef95e8eb767e9bb6cdfe3e95d244b31fc2b2a1e2631eb1cfeffc0a5",
-      "manifest_sha256": "3ee1ef9e4ccdfd656a87b900346e525b2c741891acd8e40a95e154130fad572d",
-      "member_count": 238
+      "combined_sha256": "75eb6911b0d01328192b28a307ee326dd0820319ebb5638d5af7720d5af620b5",
+      "manifest_sha256": "03088ecbb8b514e2d51f2e5f9d215de3b6a45f7624fb9d350a466114f231f738",
+      "member_count": 253
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

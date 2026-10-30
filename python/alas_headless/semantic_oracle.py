@@ -117,6 +117,7 @@ from .oracle.contracts import ResearchQueueEntryState as ResearchQueueEntryState
 from .oracle.contracts import ResearchQueueState as ResearchQueueState
 from .oracle.contracts import ResearchResourceCostState as ResearchResourceCostState
 from .oracle.contracts import RetirementEquipmentState as RetirementEquipmentState
+from .oracle.old_retirement_contracts import OldRetirementExecutionReceipt as OldRetirementExecutionReceipt
 from .oracle.contracts import RetirementExecutionReceipt as RetirementExecutionReceipt
 from .oracle.contracts import RetirementNoCandidateReceipt as RetirementNoCandidateReceipt
 from .oracle.contracts import RetirementRewardState as RetirementRewardState

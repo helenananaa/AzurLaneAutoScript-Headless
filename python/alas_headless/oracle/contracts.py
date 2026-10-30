@@ -619,6 +619,7 @@ class RetirementExecutionReceipt:
     equipment_disassembled: bool = False
     equipment_quantities: Tuple[Tuple[int, int], ...] = ()
     equipment_rewards: Tuple[Tuple[str, int], ...] = ()
+    common_cv_preservation: Tuple["RetirementCvDeselectionReceipt", ...] = ()
 
     def __post_init__(self) -> None:
         if self.equipment_policy not in ('preserve', 'disassemble'):
@@ -627,6 +628,13 @@ class RetirementExecutionReceipt:
             raise ValueError('retirement equipment outcome conflicts with policy')
         if self.retired_count <= 0:
             raise ValueError("retirement receipt count must be positive")
+        if len(self.common_cv_preservation) > 1 or any(
+            proof.selected_before - proof.selected_after != 1
+            or proof.selected_after != self.retired_count
+            or (proof.capacity_used, proof.capacity_total) != (self.capacity_before, self.capacity_total)
+            for proof in self.common_cv_preservation
+        ):
+            raise ValueError('retirement protection and physical count disagree')
         if self.capacity_before - self.capacity_after != self.retired_count:
             raise ValueError("retirement receipt capacity delta is inconsistent")
         if not (0 <= self.capacity_after < self.capacity_before and self.capacity_total > 0):
@@ -823,7 +831,7 @@ class GemsFarmingDockCandidate:
     ship_type: str
     rarity: str
     level: int
-    emotion: int
+    emotion: Optional[int]
     fleet_index: int
     status: str
     button: ButtonState

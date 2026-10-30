@@ -1,0 +1,65 @@
+{
+  "schema": "alas-headless.current-batch-full-regression/v1",
+  "at": "2026-10-27T17:35:38.186258+08:00",
+  "terminal": true,
+  "passed": true,
+  "exit_code": 0,
+  "pytest_passed": 8720,
+  "pytest_skipped": 254,
+  "pytest_warnings": 138,
+  "pytest_seconds": 633.3,
+  "execution_and_endhash_seconds": 639.703,
+  "initial_snapshot_preparation_excluded": true,
+  "native_members": 247,
+  "combined_sha256": "bee9db8c63e6f2a4cd271cca28cad57edd0158d878337295ebc3b35927935e53",
+  "repository_snapshot_files": 3016,
+  "actual_native_snapshot_files": 10,
+  "source_snapshot_unchanged": true,
+  "native_source_unchanged": true,
+  "actual_native_scope": [
+    "module/ui/ui.py",
+    "module/os/map.py",
+    "module/retire/retirement.py",
+    "module/retire/scanner.py",
+    "module/ui/scroll.py",
+    "module/base/base.py",
+    "module/storage/storage.py",
+    "module/campaign/run.py",
+    "module/daily/daily.py",
+    "module/tactical/tactical_class.py"
+  ],
+  "all_runtime_native_files_claimed": false,
+  "scope": "Current native247 zero-stage defer,SDK combat information opening/Build accepted-entry counter/CV cleared-slot postcondition,plus accumulated Warehouse quantity/typedports and other repository tests. Offline only;separate live handler/Daily/Tactical receipts retain their own result scopes.",
+  "global_pytest_cleanup_warning_retained": "Ignored atexit PermissionError against E:/CacheVault/Temp/pytest-of-MECHREVO/pytest-current is present after actual8720/254summary;process exit0. No globaltemp/permission changes.",
+  "support_promoted": false,
+  "skip_is_not_pass": true,
+  "live_all60_or_uninterrupted_soak_proven": false,
+  "local_only": true,
+  "no_repeat_unchanged_full": true,
+  "evidence": [
+    {
+      "path": "artifacts/full-feature-live-20261025/full-regression-current-batch-r15.json",
+      "sha256": "07d73399990b31a3715321df9c5860a4b3bd6fab855c322e6ceb4545725e3904"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/full-regression-current-batch-r15.log",
+      "sha256": "0da2d7702c594abbaffc729a76a9747fdf685d64e1eec7c9dd9163741748880a"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/full-regression-current-batch-r15-wrapper.stdout.log",
+      "sha256": "b05e470a347eb2a590e15939909cf34bd725f122ee407accb22588bd2801de1e"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/full-regression-current-batch-r15-wrapper.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/run_full_regression_current_batch_r15.py",
+      "sha256": "91b070cc065aab56e087bdf5fefdb6e33e7af44a93908387df2560f5710fc0be"
+    },
+    {
+      "path": "artifacts/full-feature-live-20261025/full-regression-current-batch-r15-launch.json",
+      "sha256": "236bf9bd7aa2b7554a66660d324b9b35edc6c3c1b2dafe39a1af94edff1e6352"
+    }
+  ]
+}

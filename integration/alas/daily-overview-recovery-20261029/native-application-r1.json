@@ -1,0 +1,12 @@
+{
+  "at": "2026-10-29T08:30:48.772424+08:00",
+  "native_applied": true,
+  "native_series": 251,
+  "source": "E:\\Runtime\\ALAS\\redroid-live-20261022\\module\\daily\\daily.py",
+  "native_sha256": "c3570ce32d0274f90f19ed3974ddda27026d3c021e27818645640e1f1e0642cc",
+  "member_sha256": "2be37c561d7e5276ea82919cda605bb38b8648abdaa2da3150dace371083659b",
+  "focused": "104PASS;overview/detail phase distinction and original native ui_click arrival loop",
+  "support_promotion": false,
+  "live_recovery_qualified": false,
+  "current_full": false
+}

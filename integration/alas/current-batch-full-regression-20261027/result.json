@@ -1,0 +1,38 @@
+{
+  "schema": "alas-headless.current-batch-full-regression/v1",
+  "at": "2026-10-27T07:46:32.322890+08:00",
+  "passed": true,
+  "offline_only": true,
+  "exit_code": 0,
+  "tests": {
+    "passed": 8527,
+    "skipped": 254,
+    "warnings": 138
+  },
+  "pytest_elapsed_seconds": 1051.66,
+  "reported_execution_and_end_verification_seconds": 1066.407,
+  "timing_scope": "Pytest summary and wrapper execution/end verification; initial source snapshot preparation excluded. Not a product performance comparison.",
+  "repository_snapshot_files": 2963,
+  "native_snapshot_files": 5,
+  "all_snapshots_unchanged_at_end": true,
+  "integration_members": 245,
+  "combined_sha256": "6136d92e2067a2ef33f11cc7021084ee0b8ff3079b93027f365259412b306d9e",
+  "fixes": [
+    "integration/alas/opsi-statistics-passive-poll-20261026/result.json",
+    "integration/alas/tcp-read-recovery-20261026/result.json",
+    "integration/alas/old-level-warning-20261026/result.json"
+  ],
+  "scope": "One coherent full Python milestone after three SDK edits; source/native/tests/integration frozen through terminal. Runtime/passive statistics repeat, precise level warning live repeat and uninterrupted soak remain separate and unqualified.",
+  "host_exit_cleanup_permission_error_retained": true,
+  "host_global_temp_or_permissions_changed": false,
+  "raw": {
+    "path": "artifacts/full-feature-live-20261025/full-regression-current-batch-r13.json",
+    "sha256": "b1782323a61dbfc9782581a60f7f89f63b8db581bf61622dd0e5100fa982ea6f"
+  },
+  "log": {
+    "path": "artifacts/full-feature-live-20261025/full-regression-current-batch-r13.log",
+    "sha256": "1d20b202975917381d3d379744fff40efd5b8f9566a2013da0345678a938026f"
+  },
+  "support_promotion": false,
+  "delivery": "LOCALONLY/noautomaticcommitpush"
+}

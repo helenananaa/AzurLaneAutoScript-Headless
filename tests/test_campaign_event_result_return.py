@@ -57,15 +57,31 @@ def test_event_return_never_promotes_an_obscured_or_unproven_selector(damage):
     assert not backend.taps
 
 
-def test_native_stage_detection_closes_after_event_result_return():
+@pytest.mark.parametrize('device_kind', ['semantic', 'rendered', 'without-semantic-port'])
+def test_native_stage_detection_closes_after_event_result_return(device_kind):
     backend, adapter, session = host()
     method = native('EnemySearchingHandler', 'is_in_stage_page', 'module/handler/enemy_searching.py',
                     CAMPAIGN_CHECK='CAMPAIGN_CHECK', EVENT_CHECK='EVENT_CHECK', SP_CHECK='SP_CHECK')
-    handler = SimpleNamespace(appear=lambda button, **kwargs: session.appear(button),
+    # Native handlers inherit a device from ModuleBase. Keep that real host
+    # contract when executing its current optional Archives observation hook.
+    device = SimpleNamespace()
+    archives_probe = Mock(wraps=adapter.war_archives_campaign_visible)
+    if device_kind != 'without-semantic-port':
+        # This observation-unit fixture has no runtime/frame clock. Exercise
+        # the real typed adapter probe through its native callback surface;
+        # frame acquisition belongs to session/runtime tests and live cases.
+        device.semantic_adapter = (SimpleNamespace(war_archives_campaign_visible=archives_probe)
+                                   if device_kind == 'semantic' else None)
+    handler = SimpleNamespace(device=device,
+        appear=lambda button, **kwargs: session.appear(button),
         is_stage_page_has_entrance=adapter.oracle.event_campaign_stage_selector_visible)
     handler.is_in_stage_page = lambda: method(handler)
     is_in_stage = native('EnemySearchingHandler', 'is_in_stage', 'module/handler/enemy_searching.py')
     assert is_in_stage(handler)
+    if device_kind == 'semantic':
+        archives_probe.assert_called_once_with()
+    else:
+        archives_probe.assert_not_called()
     assert not backend.taps
 
 

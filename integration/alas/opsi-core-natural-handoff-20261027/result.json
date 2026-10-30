@@ -1,0 +1,22 @@
+{
+  "schema": "alas-headless.opsi-core-natural-handoff/v1",
+  "updated_at": "2026-10-27T22:39:06.179301+08:00",
+  "native_strategic_to_true_future_commission_handoff_verified": true,
+  "case_closed": true,
+  "case_passed": false,
+  "r1_false_preserved": true,
+  "r2_false_normal_budget_deferred_preserved": true,
+  "final_main_dock_inspection_passed": true,
+  "support_promoted": false,
+  "statistics_complete_preinput_pair_verified": false,
+  "source_full_current": false,
+  "authority_closeout": "artifacts\\full-feature-live-20261025\\opsi-core-handoff-case-closeout-r1.json",
+  "wave": "artifacts\\full-feature-live-20261025\\opsi-core-handoff-natural-wave-r1.json",
+  "r2_terminal_raw_sha256": "f39b2fa0be68ccbf0b2ebdde02a0870f97de9a72634c4bd29b7288e88449ef4b",
+  "postcheck_sha256": "bd75051174c55aa054822bfa240677d9bf8329f60fb7abd47cda7af111907511",
+  "SDK_fix_authority": "integration/alas/opsi-ap-return-session-map-20261027/result.json",
+  "native_members": 247,
+  "combined_sha256": "bee9db8c63e6f2a4cd271cca28cad57edd0158d878337295ebc3b35927935e53",
+  "observer_or_native_changes": false,
+  "local_only": true
+}

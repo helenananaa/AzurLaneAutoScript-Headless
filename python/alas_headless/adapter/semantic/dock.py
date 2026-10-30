@@ -11,6 +11,7 @@ from ...semantic_oracle import (
     EnhancementExecutionReceipt,
     EnhancementNoMaterialReceipt,
     EnhancementRejectedReceipt,
+    OldRetirementExecutionReceipt,
     RetirementExecutionReceipt,
     RetirementNoCandidateReceipt,
     SemanticGateClosed,
@@ -236,7 +237,7 @@ class DockAdapterPorts:
     ) -> Tuple[Union[EnhancementExecutionReceipt, EnhancementNoMaterialReceipt, EnhancementRejectedReceipt], ...]:
         return tuple(self._enhancement_receipts)
 
-    def retire_ships_one_click(self, keep_limit_break: bool) -> int:
+    def retire_ships_one_click(self, keep_limit_break: bool, *, before_ship_confirmation=None) -> int:
         """Run one official retirement transaction and return its real count."""
 
         if not isinstance(keep_limit_break, bool):
@@ -246,7 +247,9 @@ class DockAdapterPorts:
         receipt = self._dispatch_mutation(
             "retirement.execute",
             lambda: self.oracle.retire_ships_one_click(
-                keep_limit_break, **self._dock_equipment_options()),
+                keep_limit_break, **self._dock_equipment_options(),
+                **({'before_ship_confirmation': before_ship_confirmation}
+                   if before_ship_confirmation is not None else {})),
         )
         self._last_retirement_receipt = receipt
         if isinstance(receipt, RetirementNoCandidateReceipt):
@@ -255,5 +258,5 @@ class DockAdapterPorts:
 
     def retirement_receipt(
         self,
-    ) -> Optional[Union[RetirementExecutionReceipt, RetirementNoCandidateReceipt]]:
+    ) -> Optional[Union[RetirementExecutionReceipt, RetirementNoCandidateReceipt, OldRetirementExecutionReceipt]]:
         return self._last_retirement_receipt

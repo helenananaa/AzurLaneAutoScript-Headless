@@ -116,6 +116,15 @@ class CampaignPreparationAdapterPorts:
             if context.entry_receipt is None or not self.oracle.campaign_page_is_normal():
                 return
         elif not completed:
+            recovery = context.dock_full_recovery_receipt
+            if (recovery is not None
+                    and recovery.generation > context.sortie_receipt.generation):
+                # Original ALAS calls this port after dock recovery, too. Its
+                # screenshot may still show the returning dock rather than
+                # the accepted sortie's map. Keep that transaction intact;
+                # the native entry loop must observe/confirm its continuation.
+                # This neither completes a run nor admits another sortie.
+                return
             raise SemanticGateClosed("campaign next run requires proven completion")
         if (context.auto_search_completion is not None
                 and context.auto_search_completion.result_exit_receipt is None

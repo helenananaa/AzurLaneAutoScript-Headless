@@ -54,10 +54,14 @@ class SemanticGuildFormationUnavailable(SemanticTargetMissing):
 class SemanticInputBlocked(SemanticGateClosed):
     """No input was sent: typed blockers cover an otherwise reviewed target."""
 
-    def __init__(self, semantic_id: str, generation: int, blockers):
+    def __init__(self, semantic_id: str, generation: int, blockers, *, observed_state=None):
         self.semantic_id = semantic_id
         self.generation = generation
         self.blockers = tuple(blockers)
+        # Retain an already-read immutable state only; no query or action.
+        # Terminal task diagnostics encode it after cleanup. Native waits can
+        # discard the exception without copying a large frame on every poll.
+        self.observed_state = observed_state
         super().__init__('semantic input is blocked by: ' + ', '.join(self.blockers))
 
 
